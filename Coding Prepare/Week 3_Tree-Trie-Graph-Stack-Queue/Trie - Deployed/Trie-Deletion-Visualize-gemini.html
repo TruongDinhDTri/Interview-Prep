@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌳 Trie Deletion - Infinite Cosmic Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Segoe+UI:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #1e1e1e;
+            --bg-darker: #181818;
+            --bg-light: #252526;
+            --text-main: #cccccc;
+            --accent-blue: #007acc;
+            --node-active: #ffd700;
+            --border-color: #3e3e3e;
+            
+            /* VS Code Dark+ Accurate Palette */
+            --kwd: #569cd6; 
+            --ctl: #c586c0; 
+            --fn: #dcdcaa; 
+            --var: #9cdcfe; 
+            --num: #b5cea8; 
+            --cmt: #6a9955; 
+            --str: #ce9178; 
+            --cls: #4ec9b0; 
+            --op: #d4d4d4; 
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #1e1e1e;
+            height: 100vh;
+            overflow: hidden;
+            color: #ccc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Header --- */
+        .header {
+            background: #333333;
+            padding: 8px 15px;
+            color: #ccc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            border-bottom: 1px solid #111;
+            flex-shrink: 0;
+        }
+
+        /* --- Layout --- */
+        .main-layout { display: flex; flex: 1; overflow: hidden; }
+        
+        .activity-bar {
+            width: 55px;
+            background: #333333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 15px;
+            border-right: 1px solid #252526;
+        }
+        .activity-icon { font-size: 24px; opacity: 0.5; margin-bottom: 30px; cursor: pointer; transition: 0.2s; }
+        .activity-icon:hover { opacity: 1; color: white; }
+        .activity-icon.active { opacity: 1; color: white; border-left: 3px solid white; padding-left: 10px; margin-left: -13px; }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 340px;
+            background: #252526;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            font-size: 13px;
+        }
+        .sidebar-header { padding: 12px 15px; font-weight: bold; text-transform: uppercase; display: flex; justify-content: space-between; align-items: center; background: #252526; font-size: 11px; letter-spacing: 0.5px; color: #aaa; }
+        .sidebar-content { padding: 0; flex: 1; overflow-y: auto; }
+        
+        .debug-section { border-bottom: 1px solid #3e3e3e; }
+        .debug-section-header {
+            background: #2d2d2d; padding: 6px 15px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #ddd;
+            font-size: 11px;
+        }
+        .debug-section-header:hover { color: white; background: #353535; }
+        .debug-section-content { padding: 10px 0; } 
+
+        /* Input Controls */
+        .input-group { display: flex; gap: 5px; padding: 0 15px 10px 15px; }
+        .sidebar-input {
+            background: #3c3c3c; border: 1px solid #3e3e3e; color: white; padding: 6px; font-family: 'Fira Code', monospace; font-size: 12px; flex: 1; outline: none;
+        }
+        .sidebar-input:focus { border-color: #007acc; }
+
+        .sidebar-btn {
+            padding: 6px 12px; border: 1px solid #3e3e3e; cursor: pointer; font-size: 11px; font-weight: bold; color: white;
+        }
+        .btn-add { background: #0e639c; } 
+        .btn-add:hover { background: #1177bb; }
+        
+        /* Debug Controls */
+        .debug-controls { padding: 10px 15px; border-bottom: 1px solid #3e3e3e; }
+        .debug-btn-main {
+            background: #383838; border: 1px solid #454545; color: #ccc;
+            width: 100%; padding: 6px; margin-bottom: 5px; cursor: pointer;
+            text-align: center; border-radius: 3px;
+            font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 500;
+        }
+        .debug-btn-main:hover { background: #4a4a4a; color: white; }
+        .debug-btn-main.primary { background: #1f6b38; border-color: #1f6b38; color: white; }
+        .debug-btn-main.primary:hover { background: #288f4b; }
+
+        /* Variables Panel Styling */
+        .var-row { display: flex; font-family: 'Fira Code', monospace; margin-bottom: 6px; font-size: 13px; padding: 2px 15px; align-items: center; border-bottom: 1px solid #2d2d2d; padding-bottom: 4px; }
+        .var-name { color: var(--var); margin-right: 10px; min-width: 50px; font-weight: 500; }
+        .var-val { color: var(--str); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .var-val.num { color: var(--num); }
+        .var-val.bool { color: var(--kwd); }
+        .var-val.obj { color: var(--fn); }
+
+        /* Call Stack Block Style */
+        .stack-container { padding: 10px 15px; display: flex; flex-direction: column; gap: 8px; }
+        .stack-frame-block {
+            background: #2a2d2e; border: 1px solid #3e3e3e; border-radius: 4px; padding: 8px 12px;
+            font-family: 'Segoe UI', sans-serif; transition: all 0.3s ease; position: relative; box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .stack-frame-block.active { background: #37373d; border-left: 4px solid #e7c055; box-shadow: 0 0 10px rgba(231, 192, 85, 0.1); }
+        .stack-frame-block::before {
+            content: ''; position: absolute; left: 20px; top: 100%; height: 10px; width: 2px; background: #3e3e3e; z-index: 0;
+        }
+        .stack-frame-block:last-child::before { display: none; }
+        
+        .sf-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .sf-name { font-weight: 600; color: #dcdcaa; font-family: 'Fira Code', monospace; font-size: 13px; }
+        .sf-line { font-size: 11px; color: #888; }
+        .sf-args-box {
+            background: rgba(0,0,0,0.2); padding: 4px 6px; border-radius: 3px; font-family: 'Fira Code', monospace;
+            font-size: 11px; color: #9cdcfe; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .sf-label { color: #888; font-size: 10px; text-transform: uppercase; margin-right: 5px; }
+
+        /* --- Editor Area --- */
+        .editor-area { flex: 1; display: flex; flex-direction: column; background: #1e1e1e; }
+        .tab-bar { background: #252526; display: flex; height: 35px; border-bottom: 1px solid var(--border-color); }
+        .editor-tab {
+            padding: 0 20px; display: flex; align-items: center; gap: 8px;
+            background: #1e1e1e; color: #fff; border-top: 1px solid #007acc; border-right: 1px solid var(--border-color);
+            font-size: 13px; cursor: pointer;
+        }
+        .editor-tab.inactive { background: #2d2d2d; color: #888; border-top: 1px solid transparent; }
+        .split-container { display: flex; flex: 1; overflow: hidden; }
+
+        /* --- Code Pane --- */
+        .code-pane { flex: 1; display: flex; overflow: hidden; border-right: 1px solid var(--border-color); }
+        .line-numbers {
+            width: 45px; background: #1e1e1e; color: #858585; 
+            text-align: right; padding-right: 10px; font-family: 'Fira Code', monospace;
+            font-size: 13px; line-height: 20px; padding-top: 10px; user-select: none;
+        }
+        .code-content {
+            flex: 1; font-family: 'Fira Code', monospace; font-size: 13px; line-height: 20px;
+            padding-top: 10px; overflow: auto; color: #d4d4d4; white-space: pre;
+        }
+        .cl { display: block; height: 20px; padding-left: 5px; } 
+        .cl:hover { background: #2a2d2e; }
+        .cl.active { background: #37373d; border: 1px solid #37373d; }
+
+        /* --- Viz & Console Pane --- */
+        .right-pane { flex: 1.3; display: flex; flex-direction: column; background: #1e1e1e; border-left: 1px solid var(--border-color); }
+        
+        .viz-container { 
+            flex: 1.5; 
+            position: relative; 
+            border-bottom: 1px solid var(--border-color); 
+            background: radial-gradient(circle at center, #1b2735 0%, #090a0f 100%);
+            overflow: auto; /* ALLOW SCROLLING */
+            cursor: grab;
+        }
+        
+        /* The infinite canvas wrapper */
+        .viz-canvas-wrapper {
+            position: absolute;
+            top: 0; left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            transform-origin: top left;
+        }
+        
+        /* Stars (Nodes) */
+        .star-node {
+            position: absolute; width: 44px; height: 44px; border-radius: 50%;
+            background: #ffffff; box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.4);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-family: 'Fira Code', monospace; font-size: 16px;
+            color: #090a0f; z-index: 10; transition: all 0.5s ease-out;
+        }
+        .star-node.root { background: #61dafb; box-shadow: 0 0 25px 5px rgba(97, 218, 251, 0.4); }
+        .star-node.active { 
+            transform: scale(1.3); background: #ffd700; box-shadow: 0 0 40px 15px rgba(255, 215, 0, 0.6); z-index: 100;
+        }
+        .star-node.end { border: 3px solid #4ec9b0; }
+        
+        /* DELETED / PRUNED STYLE */
+        .star-node.pruned {
+            border: 2px dashed #f48771;
+            background: rgba(244, 135, 113, 0.1);
+            color: #f48771;
+            box-shadow: 0 0 10px rgba(244, 135, 113, 0.2);
+            opacity: 0.8;
+            transform: scale(0.9);
+        }
+        .star-node.pruned::after {
+            content: '🗑️';
+            position: absolute;
+            top: -15px;
+            font-size: 14px;
+        }
+
+        .star-badge {
+            position: absolute; top: -5px; right: -5px; width: 14px; height: 14px;
+            background: #4ec9b0; border-radius: 50%; box-shadow: 0 0 5px #4ec9b0;
+        }
+        .star-unmark {
+            position: absolute; top: -14px; right: -14px; color: #f48771; font-weight: bold; font-size: 20px;
+            text-shadow: 0 0 5px rgba(244, 135, 113, 0.8);
+        }
+
+        .constellation-line {
+            stroke: rgba(255, 255, 255, 0.2); stroke-width: 1.5; transition: all 0.5s;
+        }
+        .constellation-line.active {
+            stroke: #ffd700; stroke-width: 3; filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+        }
+
+        /* Console */
+        .console-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #1e1e1e; }
+        .panel-header {
+            padding: 8px 15px; font-size: 11px; font-weight: bold; color: #ccc;
+            border-bottom: 1px solid var(--border-color); display: flex; gap: 15px; text-transform: uppercase;
+        }
+        .console-logs { flex: 1; padding: 15px; overflow-y: auto; font-family: 'Fira Code', monospace; font-size: 13px; }
+        
+        /* Detail rich logs */
+        .log-entry { margin-bottom: 12px; line-height: 1.6; border-left: 4px solid transparent; padding: 6px 10px; animation: fadeIn 0.3s; background: rgba(255,255,255,0.03); border-radius: 0 4px 4px 0; }
+        .log-entry.info { border-color: #569cd6; }
+        .log-entry.success { border-color: #4ec9b0; background: rgba(78, 201, 176, 0.1); }
+        .log-entry.warn { border-color: #ffd700; background: rgba(255, 215, 0, 0.1); }
+        .log-entry.error { border-color: #f48771; background: rgba(244, 135, 113, 0.1); }
+        
+        .log-title { font-weight: bold; margin-bottom: 4px; display:block; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .log-detail { color: #ccc; font-size: 12px; display: block; }
+        .log-hl { color: #ce9178; } /* Highlight value */
+        .log-kw { color: #569cd6; } /* Keyword */
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateX(-5px); } to { opacity: 1; transform: translateX(0); } }
+
+        /* Syntax Highlighting Classes */
+        .kwd { color: var(--kwd); } 
+        .fn { color: var(--fn); } 
+        .var { color: var(--var); } 
+        .num { color: var(--num); } 
+        .cmt { color: var(--cmt); font-style: italic; } 
+        .cls { color: var(--cls); } 
+        .op { color: var(--op); }
+        .str { color: var(--str); }
+        .ctl { color: var(--ctl); }
+
+        .status-bar {
+            height: 24px; background: #007acc; color: white; display: flex; align-items: center;
+            justify-content: space-between; padding: 0 10px; font-size: 12px; flex-shrink: 0;
+        }
+        .hidden { display: none !important; }
+        .bg-star {
+            position: absolute; background: white; border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+        }
+        @keyframes twinkle { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="display:flex; gap:15px;">
+        <span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Run</span><span>...</span>
+    </div>
+    <div style="opacity: 0.6;">Trie Deletion - Infinite Cosmic Edition</div>
+</div>
+
+<div class="main-layout">
+    <div class="activity-bar">
+        <div class="activity-icon">📄</div>
+        <div class="activity-icon">🔍</div>
+        <div class="activity-icon active">🐞</div>
+        <div class="activity-icon">🧩</div>
+    </div>
+
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <span>RUN AND DEBUG</span>
+            <span style="cursor:pointer;">⋯</span>
+        </div>
+        
+        <div class="sidebar-content">
+            <!-- Action Section -->
+            <div class="debug-section-header">▼ EDIT TRIE</div>
+            <div class="input-group">
+                <input type="text" id="wordInput" class="sidebar-input" placeholder="Enter word..." value="CARPETER" oninput="this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '')">
+                <button class="sidebar-btn btn-add" onclick="addWord()">+ Add</button>
+            </div>
+            <div style="padding: 0 15px 10px 15px;">
+                 <button class="debug-btn-main primary" onclick="startDebug()">🐞 Debug Delete</button>
+            </div>
+
+            <!-- Debug Controls -->
+            <div class="debug-controls hidden" id="debugControls">
+                <div style="display:flex; gap:5px;">
+                    <button class="debug-btn-main" onclick="debugStepPrev()">⏮</button>
+                    <button class="debug-btn-main" id="playPauseBtn" onclick="togglePlayPause()">⏸</button>
+                    <button class="debug-btn-main" onclick="debugStepNext()">⏭</button>
+                    <button class="debug-btn-main" onclick="stopDebug()">⏹</button>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <div class="debug-section-header">▼ VARIABLES</div>
+                <div class="debug-section-content" id="var-list">
+                    <div style="color:#888; padding:0 15px;">Not running</div>
+                </div>
+            </div>
+
+            <div class="debug-section">
+                <div class="debug-section-header">▼ WATCH</div>
+                <div class="debug-section-content">
+                    <div class="var-row" style="border:none;">
+                        <span class="var-name">target</span>
+                        <span class="var-val" id="watch-word" style="color:#ce9178">"..."</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="debug-section" style="flex: 1; display:flex; flex-direction:column; overflow:hidden;">
+                <div class="debug-section-header">▼ CALL STACK</div>
+                <div class="sidebar-content" id="call-stack" style="background:#202020;">
+                    <div style="padding:15px; color:#888;">Main Thread</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="editor-area">
+        <div class="tab-bar">
+            <div class="editor-tab">
+                <span style="color:#e37933">🐍</span> trie_deletion.py <span style="margin-left:8px; font-size:10px;">✕</span>
+            </div>
+            <div class="editor-tab inactive">test_trie.py</div>
+        </div>
+
+        <div class="split-container">
+            <div class="code-pane">
+                <div class="line-numbers" id="line-nums"></div>
+                <div class="code-content" id="code-lines"></div>
+            </div>
+
+            <div class="right-pane">
+                <div class="viz-container" id="trie-canvas">
+                    <div class="viz-canvas-wrapper" id="viz-wrapper">
+                         <!-- SVG and Stars go here -->
+                    </div>
+                </div>
+                <div class="console-container">
+                    <div class="panel-header">
+                        <span class="panel-item">PROBLEMS</span>
+                        <span class="panel-item active">DEBUG CONSOLE</span>
+                        <span class="panel-item">TERMINAL</span>
+                    </div>
+                    <div class="console-logs" id="console-logs">
+                        <div class="log-entry info">
+                            <span class="log-title" style="color:#569cd6">// System Ready</span>
+                            <span class="log-detail">Cosmic Engine Online. Add words to build your galaxy.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="status-bar">
+    <div style="display:flex; gap:15px;">
+        <span>⚡ master*</span>
+        <span>0 errors</span>
+    </div>
+    <div style="display:flex; gap:15px;">
+        <span>Ln <span id="status-line">1</span>, Col 1</span>
+        <span>Spaces: 4</span>
+        <span>UTF-8</span>
+        <span>Python</span>
+    </div>
+</div>
+
+<script>
+    // --- 1. THE CODE (Colorful VS Code Style) ---
+    const rawCode = [
+        { l:1, h:`<span class="kwd">class</span> <span class="cls">Trie</span>:` },
+        { l:2, h:`    <span class="kwd">def</span> <span class="fn">delete</span>(<span class="var">self</span>, <span class="var">word</span>):` },
+        { l:3, h:`        <span class="ctl">return</span> <span class="var">self</span>.<span class="fn">_delete</span>(<span class="var">self</span>.root, <span class="var">word</span>, <span class="num">0</span>)` },
+        { l:4, h:`    <span class="kwd">def</span> <span class="fn">_delete</span>(<span class="var">self</span>, <span class="var">node</span>, <span class="var">word</span>, <span class="var">idx</span>):` },
+        { l:5, h:`        <span class="cmt"># 1. Base Case</span>` },
+        { l:6, h:`        <span class="ctl">if</span> <span class="var">idx</span> <span class="op">==</span> <span class="fn">len</span>(<span class="var">word</span>):` },
+        { l:7, h:`            <span class="ctl">if not</span> <span class="var">node</span>.is_end: <span class="ctl">return</span> <span class="kwd">False</span>` },
+        { l:8, h:`            <span class="var">node</span>.is_end <span class="op">=</span> <span class="kwd">False</span>  <span class="cmt"># Unmark!</span>` },
+        { l:9, h:`            <span class="ctl">return</span> <span class="fn">len</span>(<span class="var">node</span>.children) <span class="op">==</span> <span class="num">0</span>` },
+        { l:10, h:`        <span class="cmt"># 2. Recursive Step</span>` },
+        { l:11, h:`        <span class="var">char</span> <span class="op">=</span> <span class="var">word</span>[<span class="var">idx</span>]` },
+        { l:12, h:`        <span class="ctl">if</span> <span class="var">char</span> <span class="ctl">not in</span> <span class="var">node</span>.children: <span class="ctl">return</span> <span class="kwd">False</span>` },
+        { l:13, h:`        <span class="var">child</span> <span class="op">=</span> <span class="var">node</span>.children[<span class="var">char</span>]` },
+        { l:14, h:`        <span class="var">should_del</span> <span class="op">=</span> <span class="var">self</span>.<span class="fn">_delete</span>(<span class="var">child</span>, <span class="var">word</span>, <span class="var">idx</span> <span class="op">+</span> <span class="num">1</span>)` },
+        { l:15, h:`        <span class="cmt"># 3. Cleanup</span>` },
+        { l:16, h:`        <span class="ctl">if</span> <span class="var">should_del</span>:` },
+        { l:17, h:`            <span class="ctl">del</span> <span class="var">node</span>.children[<span class="var">char</span>]` },
+        { l:18, h:`            <span class="ctl">return</span> <span class="fn">len</span>(<span class="var">node</span>.children) <span class="op">==</span> <span class="num">0</span> <span class="ctl">and not</span> <span class="var">node</span>.is_end` },
+        { l:19, h:`        <span class="ctl">return</span> <span class="kwd">False</span>` }
+    ];
+
+    // --- 2. TRIE DATA STRUCTURE ---
+    class TrieNode {
+        constructor(char = '') {
+            this.char = char;
+            this.children = {};
+            this.isEnd = false;
+            this.id = Math.random().toString(36).substr(2, 9);
+        }
+    }
+
+    class Trie {
+        constructor() {
+            this.root = new TrieNode('ROOT');
+            this.root.id = 'root'; 
+        }
+
+        insert(word) {
+            let node = this.root;
+            for (let char of word) {
+                if (!node.children[char]) {
+                    node.children[char] = new TrieNode(char);
+                }
+                node = node.children[char];
+            }
+            node.isEnd = true;
+        }
+
+        getVisualData() {
+            const nodes = [];
+            const edges = [];
+            
+            const traverse = (node, x, y, level, parentId) => {
+                nodes.push({ 
+                    id: node.id, 
+                    lbl: node.char, 
+                    x: x, 
+                    y: y, 
+                    end: node.isEnd,
+                    root: node.id === 'root'
+                });
+
+                if (parentId) {
+                    edges.push({ f: parentId, t: node.id });
+                }
+
+                const keys = Object.keys(node.children).sort();
+                const count = keys.length;
+                if (count === 0) return;
+
+                let spread = 80; 
+                if (count > 1) spread = 120 + (100 / level); 
+                
+                let startX = x - (spread * (count - 1)) / 2;
+
+                keys.forEach((key, index) => {
+                    traverse(node.children[key], startX + (index * spread), y + 100, level + 1, node.id);
+                });
+            };
+
+            traverse(this.root, 400, 50, 1, null);
+
+            let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+            nodes.forEach(n => {
+                if (n.x < minX) minX = n.x;
+                if (n.x > maxX) maxX = n.x;
+                if (n.y > maxY) maxY = n.y;
+            });
+            
+            let shiftX = 0;
+            if (minX < 50) shiftX = 50 - minX;
+            
+            nodes.forEach(n => n.x += shiftX);
+
+            const totalWidth = Math.max(800, maxX + shiftX + 100);
+            const totalHeight = Math.max(600, maxY + 100);
+
+            return { nodes, edges, w: totalWidth, h: totalHeight };
+        }
+    }
+
+    // --- 3. DYNAMIC TRACE GENERATOR ---
+    function generateTrace(trie, word) {
+        const steps = [];
+        const stackFrames = [];
+        let currentPruned = new Set(); // Track deleted nodes
+        
+        const pushFrame = (name, args, line) => stackFrames.unshift({ name, args, line });
+        const popFrame = () => stackFrames.shift();
+        
+        // Init
+        pushFrame('delete', `"${word}"`, 'main.py:10');
+        steps.push({
+            line: 3, type: 'info', title: "🚀 START OPERATION", detail: `Calling <span class='log-kw'>delete</span>("<span class='log-hl'>${word}</span>"). Entering Root.`,
+            vars: { self: '<Trie>', node: 'ROOT', word: `"${word}"` }, aNode: 'root',
+            stack: JSON.parse(JSON.stringify(stackFrames)),
+            pruned: Array.from(currentPruned)
+        });
+
+        const recursiveDelete = (node, idx, parentId) => {
+            const char = idx < word.length ? word[idx] : null;
+            const currentFrameArgs = `Node(${node.char}), ${idx}`;
+            
+            pushFrame('_delete', currentFrameArgs, 'trie.py:3');
+            
+            // Base Case
+            steps.push({
+                line: 6, type: 'info', title: "🔍 CHECK BASE CASE",
+                detail: `Index is <span class='log-hl'>${idx}</span>. Word length is <span class='log-hl'>${word.length}</span>. <br>Match? <b>${idx === word.length ? 'YES' : 'NO'}</b>`,
+                vars: { idx, len: word.length }, aNode: node.id,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+
+            if (idx === word.length) {
+                if (!node.isEnd) {
+                    steps.push({
+                        line: 7, type: 'error', title: "❌ NOT A WORD",
+                        detail: "We reached the end, but this node is NOT marked as a word end. <br>Returning <span class='log-kw'>False</span>.",
+                        vars: { is_end: false }, aNode: node.id,
+                        stack: JSON.parse(JSON.stringify(stackFrames)),
+                        pruned: Array.from(currentPruned)
+                    });
+                    popFrame();
+                    return false;
+                }
+                
+                steps.push({
+                    line: 8, type: 'warn', title: "🔥 UNMARK NODE",
+                    detail: "Found the target! Setting <span class='log-hl'>is_end = False</span>. <br>This node is no longer a word.",
+                    vars: { is_end: false }, aNode: node.id, markDel: node.id,
+                    stack: JSON.parse(JSON.stringify(stackFrames)),
+                    pruned: Array.from(currentPruned)
+                });
+                
+                const hasChildren = Object.keys(node.children).length > 0;
+                steps.push({
+                    line: 9, type: 'info', title: "❓ CHECK CHILDREN",
+                    detail: `Does this node have children? <b>${hasChildren ? 'YES' : 'NO'}</b>. <br>Return <span class='log-kw'>${!hasChildren}</span> (Delete me?)`,
+                    vars: { children: hasChildren ? "{...}" : "{}", return: !hasChildren }, aNode: node.id,
+                    stack: JSON.parse(JSON.stringify(stackFrames)),
+                    pruned: Array.from(currentPruned)
+                });
+                
+                popFrame();
+                return !hasChildren;
+            }
+
+            // Recursive Step
+            steps.push({
+                line: 11, type: 'info', title: "🔡 GET CHARACTER",
+                detail: `Character at index <span class='log-hl'>${idx}</span> is '<span class='log-hl'>${char}</span>'.`,
+                vars: { char: `'${char}'` }, aNode: node.id,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+
+            if (!node.children[char]) {
+                steps.push({
+                    line: 12, type: 'error', title: "🚫 PATH BROKEN",
+                    detail: `Child '<span class='log-hl'>${char}</span>' does not exist. Word not found.`,
+                    vars: { return: false }, aNode: node.id,
+                    stack: JSON.parse(JSON.stringify(stackFrames)),
+                    pruned: Array.from(currentPruned)
+                });
+                popFrame();
+                return false;
+            }
+
+            const childNode = node.children[char];
+            steps.push({
+                line: 13, type: 'info', title: "👉 DESCEND",
+                detail: `Found child '<span class='log-hl'>${char}</span>'. Moving down.`,
+                vars: { child: `Node(${char})` }, aNode: node.id, aEdge: `${node.id}-${childNode.id}`,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+            
+            steps.push({
+                line: 14, type: 'warn', title: "🔄 RECURSION",
+                detail: `Calling <b>_delete(Node(${char}), ${idx + 1})</b>.`,
+                vars: { idx: idx+1 }, aNode: childNode.id,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+
+            const shouldDel = recursiveDelete(childNode, idx + 1, node.id);
+
+            // Back from recursion
+            pushFrame('_delete', currentFrameArgs, 'trie.py:14'); 
+            steps.push({
+                line: 16, type: 'info', title: "🔙 RETURNED",
+                detail: `Back at Node(<span class='log-hl'>${node.char}</span>). Child said: <span class='log-kw'>${shouldDel}</span> (Delete child?)`,
+                vars: { should_del: shouldDel }, aNode: node.id,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+
+            if (shouldDel) {
+                // ADD TO PRUNED SET
+                currentPruned.add(childNode.id);
+                
+                steps.push({
+                    line: 17, type: 'error', title: "✂️ PRUNING",
+                    detail: `Deleting child link '<span class='log-hl'>${char}</span>' from memory.`,
+                    vars: { del: char }, aNode: node.id,
+                    stack: JSON.parse(JSON.stringify(stackFrames)),
+                    pruned: Array.from(currentPruned) // Snapshotted AFTER addition
+                });
+                
+                const childCount = Object.keys(node.children).length - 1; 
+                const myselfUseless = childCount === 0 && !node.isEnd;
+                
+                steps.push({
+                    line: 18, type: 'info', title: "❓ AM I USELESS?",
+                    detail: `Children left: <span class='log-hl'>${childCount}</span>. Is End? <b>${node.isEnd}</b>. <br>Return <span class='log-kw'>${myselfUseless}</span>`,
+                    vars: { return: myselfUseless }, aNode: node.id,
+                    stack: JSON.parse(JSON.stringify(stackFrames)),
+                    pruned: Array.from(currentPruned)
+                });
+                popFrame();
+                return myselfUseless;
+            }
+
+            steps.push({
+                line: 19, type: 'info', title: "🛑 KEEP NODE",
+                detail: "Child was kept (or path incomplete). Keeping this node.",
+                vars: { return: false }, aNode: node.id,
+                stack: JSON.parse(JSON.stringify(stackFrames)),
+                pruned: Array.from(currentPruned)
+            });
+            popFrame();
+            return false;
+        };
+
+        recursiveDelete(trie.root, 0, null);
+        
+        steps.push({
+            line: 19, type: 'success', title: "🎉 COMPLETE",
+            detail: "Deletion operation finished successfully.",
+            vars: { res: "Done" }, aNode: trie.root.id,
+            stack: [],
+            pruned: Array.from(currentPruned)
+        });
+
+        return steps;
+    }
+
+
+    // --- 4. APP STATE & LOGIC ---
+    const myTrie = new Trie();
+    let currentSteps = [];
+    let stepIdx = -1;
+    let timer = null;
+
+    function init() {
+        const numEl = document.getElementById('line-nums');
+        const codeEl = document.getElementById('code-lines');
+        numEl.innerHTML = rawCode.map(l => `<div>${l.l}</div>`).join('');
+        codeEl.innerHTML = rawCode.map(l => `<div class="cl" id="l-${l.l}">${l.h}</div>`).join('');
+        
+        const wrapper = document.getElementById('viz-wrapper');
+        for(let i=0; i<100; i++) {
+            let s = document.createElement('div');
+            s.className = 'bg-star';
+            s.style.left = Math.random()*100 + '%';
+            s.style.top = Math.random()*100 + '%';
+            s.style.width = Math.random()*2 + 'px';
+            s.style.height = s.style.width;
+            s.style.animationDelay = Math.random()*5 + 's';
+            wrapper.appendChild(s);
+        }
+
+        myTrie.insert("CAR");
+        myTrie.insert("CAT");
+        myTrie.insert("TER");  // Add TER so it can be deleted!
+        renderViz();
+    }
+
+    function addWord() {
+        const input = document.getElementById('wordInput');
+        const word = input.value;
+        if (!word) return;
+        myTrie.insert(word);
+        renderViz();
+        
+        const logs = document.getElementById('console-logs');
+        logs.innerHTML += `<div class="log-entry success"><span class="log-title" style="color:#4ec9b0">> Added "${word}"</span></div>`;
+        logs.scrollTop = logs.scrollHeight;
+    }
+
+    function startDebug() {
+        const input = document.getElementById('wordInput');
+        const word = input.value;
+        if (!word) { alert("Enter a word to delete!"); return; }
+
+        document.getElementById('watch-word').innerText = `"${word}"`;
+        document.getElementById('debugControls').classList.remove('hidden');
+        
+        currentSteps = generateTrace(myTrie, word);
+        debugReset();
+        debugPlay();
+    }
+
+    function renderViz(actId, actEdge, markDelId, prunedIds = []) {
+        document.querySelectorAll('.viz-layer').forEach(e => e.remove());
+        const wrapper = document.getElementById('viz-wrapper');
+        const { nodes, edges, w, h } = myTrie.getVisualData();
+
+        // RESIZE CANVAS FOR SCROLLING
+        wrapper.style.width = w + 'px';
+        wrapper.style.height = h + 'px';
+
+        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("class", "viz-layer");
+        svg.style.position = "absolute";
+        svg.style.width = "100%"; svg.style.height = "100%";
+        
+        edges.forEach(e => {
+            const n1 = nodes.find(n=>n.id===e.f);
+            const n2 = nodes.find(n=>n.id===e.t);
+            const active = `${e.f}-${e.t}` === actEdge;
+            let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", n1.x+22); line.setAttribute("y1", n1.y+22);
+            line.setAttribute("x2", n2.x+22); line.setAttribute("y2", n2.y+22);
+            line.setAttribute("class", "constellation-line" + (active ? " active" : ""));
+            svg.appendChild(line);
+        });
+        wrapper.appendChild(svg);
+
+        nodes.forEach(n => {
+            let div = document.createElement('div');
+            div.className = 'viz-layer star-node';
+            if (n.root) div.classList.add('root');
+            if (n.id === actId) {
+                div.classList.add('active');
+                div.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+            }
+            if (n.end) div.classList.add('end');
+            
+            // Handle Ghost/Pruned Nodes
+            if (prunedIds.includes(n.id)) {
+                div.classList.add('pruned');
+                div.classList.remove('active'); // Deleted nodes shouldn't be active
+            }
+
+            if (n.id === markDelId) {
+                div.classList.remove('end');
+                let cross = document.createElement('div');
+                cross.className = 'star-unmark';
+                cross.innerText = '✕';
+                div.appendChild(cross);
+            } else if (n.end) {
+                let badge = document.createElement('div');
+                badge.className = 'star-badge';
+                div.appendChild(badge);
+            }
+
+            div.style.left = n.x + 'px';
+            div.style.top = n.y + 'px';
+            div.innerText = n.lbl;
+            wrapper.appendChild(div);
+        });
+    }
+
+    // --- DEBUG ENGINE ---
+    function log(s) {
+        const logs = document.getElementById('console-logs');
+        const col = s.type === 'error' ? '#f48771' : s.type === 'success' ? '#4ec9b0' : s.type === 'warn' ? '#ffd700' : '#569cd6';
+        
+        logs.innerHTML += `
+            <div class="log-entry ${s.type}">
+                <span class="log-title" style="color:${col}">> ${s.title}</span>
+                <span class="log-detail">${s.detail}</span>
+            </div>
+        `;
+        logs.scrollTop = logs.scrollHeight;
+    }
+
+    function renderVars(v, stack) {
+        const list = document.getElementById('var-list');
+        const stackCont = document.getElementById('call-stack');
+        
+        let html = '';
+        if (v) {
+            for(let [k,val] of Object.entries(v)) {
+                let cls = typeof val === 'number' ? 'num' : typeof val === 'boolean' ? 'bool' : val.toString().startsWith('Node') ? 'obj' : 'str';
+                html += `<div class="var-row"><span class="var-name">${k}</span><span class="var-val ${cls}">${val}</span></div>`;
+            }
+        }
+        list.innerHTML = html || '<div style="color:#888; padding:0 15px;">No locals</div>';
+
+        let sHtml = '<div class="stack-container">';
+        if (stack && stack.length) {
+            stack.forEach((f, i) => {
+                sHtml += `<div class="stack-frame-block ${i===0?'active':''}"><div class="sf-header"><span class="sf-name">${f.name}</span><span class="sf-line">${f.line}</span></div><div class="sf-args-box"><span class="sf-label">ARGS:</span> ${f.args}</div></div>`;
+            });
+        } else { sHtml += '<div style="padding:10px; color:#888;">Main Thread</div>'; }
+        stackCont.innerHTML = sHtml + '</div>';
+    }
+
+    function hl(l) {
+        document.querySelectorAll('.cl').forEach(e => e.classList.remove('active'));
+        if(l) {
+            const el = document.getElementById('l-'+l);
+            if(el) { el.classList.add('active'); el.scrollIntoView({block:'center', behavior:'smooth'}); }
+            document.getElementById('status-line').innerText = l;
+        }
+    }
+
+    function debugStepNext() {
+        if (stepIdx < currentSteps.length - 1) {
+            stepIdx++;
+            const s = currentSteps[stepIdx];
+            hl(s.line);
+            renderViz(s.aNode, s.aEdge, s.markDel, s.pruned);
+            log(s);
+            renderVars(s.vars, s.stack);
+        } else {
+            debugPause();
+        }
+    }
+
+    function debugStepPrev() {
+        if (stepIdx > 0) {
+            stepIdx--;
+            const s = currentSteps[stepIdx];
+            hl(s.line);
+            renderViz(s.aNode, s.aEdge, null, s.pruned);
+            renderVars(s.vars, s.stack);
+        }
+    }
+
+    function togglePlayPause() {
+        if (timer) debugPause();
+        else debugPlay();
+    }
+
+    function debugPlay() {
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        if (playBtn) playBtn.classList.add('hidden');
+        if (pauseBtn) pauseBtn.classList.remove('hidden');
+
+        const ppBtn = document.getElementById('playPauseBtn');
+        if (ppBtn) ppBtn.innerText = "⏸";
+
+        timer = setInterval(debugStepNext, 1200);
+    }
+    
+    function debugPause() {
+        const playBtn = document.getElementById('playBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        if (playBtn) playBtn.classList.remove('hidden');
+        if (pauseBtn) pauseBtn.classList.add('hidden');
+        
+        const ppBtn = document.getElementById('playPauseBtn');
+        if (ppBtn) ppBtn.innerText = "▶";
+
+        clearInterval(timer);
+        timer = null;
+    }
+
+    function stopDebug() {
+        debugPause();
+        document.getElementById('debugControls').classList.add('hidden');
+        stepIdx = -1;
+        hl(null);
+        renderViz();
+    }
+
+    function debugReset() {
+        debugPause();
+        stepIdx = -1;
+        document.getElementById('console-logs').innerHTML = '<div class="log-entry info"><span class="log-title" style="color:#569cd6">// Debug Started.</span></div>';
+        hl(null);
+        renderViz();
+    }
+
+    window.onload = init;
+</script>
+</body>
+</html>

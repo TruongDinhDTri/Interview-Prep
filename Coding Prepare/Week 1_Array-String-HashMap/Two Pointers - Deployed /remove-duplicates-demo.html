@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Duplicates - Complete Guide</title>
+    <style>
+        :root {
+            --background: #f5f7fa;
+            --surface: #ffffff;
+            --primary: #5b7ff9;
+            --secondary: #00d4aa;
+            --accent: #ff6b9d;
+            --text-main: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --success: #48bb78;
+            --warning: #ed8936;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 3rem;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(91, 127, 249, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .section {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section h3 {
+            color: var(--text-main);
+            font-size: 1.3rem;
+            margin: 1.5rem 0 0.75rem 0;
+        }
+
+        .core-concept {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .core-concept h2 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .core-concept strong {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .key-points {
+            background: #fff7ed;
+            border-left: 4px solid var(--warning);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .key-points h3 {
+            color: var(--warning);
+            margin-top: 0;
+        }
+
+        .key-points ul {
+            margin: 1rem 0 0 1.5rem;
+        }
+
+        .key-points li {
+            margin: 0.5rem 0;
+            line-height: 1.8;
+        }
+
+        .remember-box {
+            background: #f0fdf4;
+            border: 2px dashed var(--success);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .remember-box h3 {
+            color: var(--success);
+            margin-top: 0;
+        }
+
+        .mistake-box {
+            background: #fef2f2;
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+        }
+
+        .mistake-box h3 {
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .column {
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .column.wrong {
+            background: #fee;
+            border: 2px solid #faa;
+        }
+
+        .column.correct {
+            background: #efe;
+            border: 2px solid #afa;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 3rem 0 4rem 0;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid var(--border);
+            border-radius: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            position: relative;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .array-cell .index {
+            position: absolute;
+            top: -25px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            font-weight: normal;
+        }
+
+        .array-cell .pointer {
+            position: absolute;
+            bottom: -40px;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .array-cell.scanner {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .array-cell.next-position {
+            border-color: var(--secondary);
+            background: var(--secondary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .array-cell.comparing {
+            border-color: var(--warning);
+            background: #fff7ed;
+        }
+
+        .array-cell.unique {
+            background: #f0fdf4;
+            border-color: var(--success);
+        }
+
+        .array-cell.duplicate {
+            background: #fef2f2;
+            opacity: 0.5;
+        }
+
+        .pointer.scanner-label {
+            background: var(--primary);
+        }
+
+        .pointer.next-label {
+            background: var(--secondary);
+        }
+
+        .pointer.compare-label {
+            background: var(--warning);
+        }
+
+        .explanation-box {
+            background: #f8fafc;
+            border: 2px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            min-height: 120px;
+        }
+
+        .explanation-box h3 {
+            color: var(--primary);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .explanation-box .step-action {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            border-left: 3px solid var(--primary);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        button {
+            padding: 0.875rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(91, 127, 249, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e0;
+        }
+
+        .btn-auto {
+            background: var(--secondary);
+            color: white;
+        }
+
+        .btn-auto:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 212, 170, 0.4);
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+
+        .code-block .comment {
+            color: #94a3b8;
+        }
+
+        .code-block .keyword {
+            color: #c792ea;
+        }
+
+        .code-block .variable {
+            color: #82aaff;
+        }
+
+        .code-block .number {
+            color: #f78c6c;
+        }
+
+        .final-result {
+            background: linear-gradient(135deg, #48bb78, #38a169);
+            color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .final-result h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .pointer-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        code {
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: var(--accent);
+        }
+
+        .step-counter {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--primary);
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        ol, ul {
+            line-height: 1.8;
+        }
+
+        li {
+            margin: 0.5rem 0;
+        }
+
+        strong {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>🎯 Remove Duplicates from Sorted Array</h1>
+            <p>A Complete Visual Guide with Core Concepts</p>
+        </div>
+
+        <div class="core-concept">
+            <h2>💡 The Core Idea (READ THIS FIRST!)</h2>
+            <p style="font-size: 1.15rem; line-height: 1.8;">
+                We use <strong>TWO POINTERS</strong>:
+            </p>
+            <ul style="margin: 1rem 0; line-height: 2;">
+                <li><strong>🔵 Scanner (i)</strong> = Reads through EVERY element in the array</li>
+                <li><strong>🟢 Next Position (nextNonDuplicate)</strong> = Marks WHERE to put the next unique number</li>
+            </ul>
+            <p style="font-size: 1.15rem; line-height: 1.8; margin-top: 1rem;">
+                <strong>The Strategy:</strong> Scanner looks for NEW numbers. When it finds one, we copy it to the "next position" and move that position forward.
+            </p>
+        </div>
+
+        <div class="section">
+            <h2>📚 What You MUST Remember</h2>
+
+            <div class="remember-box">
+                <h3>✅ Key Points to Remember</h3>
+                <ul>
+                    <li><strong>Array is SORTED</strong> - All duplicates are next to each other: [2, 3, 3, 3, 6]</li>
+                    <li><strong>nextNonDuplicate starts at 1</strong> - Because arr[0] is always unique (it's the first!)</li>
+                    <li><strong>We compare with arr[nextNonDuplicate - 1]</strong> - This is the LAST unique number we found</li>
+                    <li><strong>Scanner (i) ALWAYS moves forward</strong> - It checks every element</li>
+                    <li><strong>nextNonDuplicate only moves when we find NEW number</strong> - It stays still for duplicates</li>
+                </ul>
+            </div>
+
+            <div class="key-points">
+                <h3>🎯 What Needs to be Done (The Algorithm)</h3>
+                <ol>
+                    <li><strong>Start:</strong> Set nextNonDuplicate = 1 (position for next unique)</li>
+                    <li><strong>Loop:</strong> Use i to scan from index 1 to end</li>
+                    <li><strong>Compare:</strong> Is arr[i] different from arr[nextNonDuplicate - 1]?</li>
+                    <li><strong>If YES (new number):</strong> Copy arr[i] to arr[nextNonDuplicate], then nextNonDuplicate++</li>
+                    <li><strong>If NO (duplicate):</strong> Do nothing, just move i forward</li>
+                    <li><strong>Return:</strong> nextNonDuplicate is the count of unique elements</li>
+                </ol>
+            </div>
+
+            <div class="mistake-box">
+                <h3>❌ Common Mistakes to Avoid</h3>
+                <div class="two-column">
+                    <div class="column wrong">
+                        <strong>❌ WRONG:</strong>
+                        <div class="code-block" style="margin-top: 0.5rem;">for i in arr[1:]:
+    # i is a VALUE (3, 3, 6...)
+    # Can't use arr[i]!</div>
+                    </div>
+                    <div class="column correct">
+                        <strong>✅ CORRECT:</strong>
+                        <div class="code-block" style="margin-top: 0.5rem;">for i in range(1, len(arr)):
+    # i is an INDEX (1, 2, 3...)
+    # Can use arr[i]!</div>
+                    </div>
+                </div>
+                <ul style="margin-top: 1rem;">
+                    <li><strong>Don't</strong> compare arr[i] with arr[nextNonDuplicate] - Compare with arr[nextNonDuplicate - 1]</li>
+                    <li><strong>Don't</strong> start nextNonDuplicate at 0 - Start at 1 (arr[0] is already unique)</li>
+                    <li><strong>Don't</strong> forget to increment nextNonDuplicate after copying</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Live Demonstration</h2>
+
+            <div class="pointer-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--primary);"></div>
+                    <span><strong>🔵 Scanner (i)</strong> - Reads every element</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--secondary);"></div>
+                    <span><strong>🟢 Next Position</strong> - Where to put next unique</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: var(--warning);"></div>
+                    <span><strong>🟡 Comparing</strong> - Last unique number</span>
+                </div>
+            </div>
+
+            <div class="step-counter" id="stepCounter">Step 0: Initialization</div>
+
+            <div class="array-container" id="arrayContainer"></div>
+
+            <div class="explanation-box" id="explanationBox">
+                <h3>Current Step</h3>
+                <p>Click "Next Step" to start the algorithm!</p>
+            </div>
+
+            <div class="controls">
+                <button class="btn-secondary" onclick="reset()">🔄 Reset</button>
+                <button class="btn-primary" onclick="nextStep()">▶️ Next Step</button>
+                <button class="btn-auto" onclick="autoPlay()">⚡ Auto Play</button>
+            </div>
+
+            <div id="finalResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>💻 The Code (Python)</h2>
+            <div class="code-block">
+<pre>def removeDuplicates(arr):
+    <span class="comment"># Step 1: Handle edge case</span>
+    <span class="keyword">if</span> len(arr) == <span class="number">0</span>:
+        <span class="keyword">return</span> <span class="number">0</span>
+
+    <span class="comment"># Step 2: Initialize nextNonDuplicate</span>
+    <span class="comment"># arr[0] is always unique, so start at 1</span>
+    <span class="variable">nextNonDuplicate</span> = <span class="number">1</span>
+
+    <span class="comment"># Step 3: Loop through array with scanner (i)</span>
+    <span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> range(<span class="number">1</span>, len(arr)):
+
+        <span class="comment"># Step 4: Compare current with last unique</span>
+        <span class="comment"># arr[nextNonDuplicate - 1] = last unique number</span>
+        <span class="keyword">if</span> arr[<span class="variable">i</span>] != arr[<span class="variable">nextNonDuplicate</span> - <span class="number">1</span>]:
+
+            <span class="comment"># Step 5: Found NEW number! Copy it</span>
+            arr[<span class="variable">nextNonDuplicate</span>] = arr[<span class="variable">i</span>]
+
+            <span class="comment"># Step 6: Move nextNonDuplicate forward</span>
+            <span class="variable">nextNonDuplicate</span> += <span class="number">1</span>
+
+    <span class="comment"># Step 7: Return count of unique elements</span>
+    <span class="keyword">return</span> <span class="variable">nextNonDuplicate</span>
+
+
+<span class="comment"># Example usage:</span>
+arr = [<span class="number">2</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>, <span class="number">6</span>, <span class="number">9</span>, <span class="number">9</span>]
+length = removeDuplicates(arr)
+<span class="keyword">print</span>(f<span class="string">"Unique count: {length}"</span>)  <span class="comment"># Output: 4</span>
+<span class="keyword">print</span>(f<span class="string">"Unique array: {arr[:length]}"</span>)  <span class="comment"># Output: [2, 3, 6, 9]</span></pre>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🧠 Why This Works</h2>
+            <h3>The Logic Behind It</h3>
+            <p>Since the array is <strong>sorted</strong>, all duplicates are grouped together:</p>
+            <div class="code-block">[2, 3, 3, 3, 6, 9, 9]
+ ^  ^-----^  ^  ^--^
+first  dups  first dups</div>
+
+            <p style="margin-top: 1rem;">We only need to check if the current number is different from the <strong>previous unique</strong> number:</p>
+            <ul>
+                <li>If <strong>different</strong> → It's a NEW unique number, copy it!</li>
+                <li>If <strong>same</strong> → It's a duplicate, skip it!</li>
+            </ul>
+
+            <h3>Time & Space Complexity</h3>
+            <ul>
+                <li><strong>Time:</strong> O(n) - We scan through the array once</li>
+                <li><strong>Space:</strong> O(1) - We only use two pointers, no extra arrays</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📝 Practice Tips</h2>
+            <ol>
+                <li><strong>Trace by hand first:</strong> Write out the array and manually track i and nextNonDuplicate</li>
+                <li><strong>Remember the pattern:</strong> Scanner (fast) + Next Position (slow) = Two Pointer Pattern</li>
+                <li><strong>Ask yourself:</strong> "Is this number different from the last unique?" That's the key question!</li>
+                <li><strong>Don't overthink:</strong> The sorted property makes this simple - duplicates are always neighbors</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let arr = [2, 3, 3, 3, 6, 9, 9];
+        const originalArr = [...arr];
+        let nextNonDuplicate = 1;
+        let i = 1;
+        let step = 0;
+        let isDone = false;
+        let autoPlayInterval = null;
+
+        function render() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+
+            arr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'index';
+                indexLabel.textContent = `[${idx}]`;
+                cell.appendChild(indexLabel);
+
+                const valueLabel = document.createElement('div');
+                valueLabel.textContent = val;
+                cell.appendChild(valueLabel);
+
+                // Color coding
+                if (isDone) {
+                    if (idx < nextNonDuplicate) {
+                        cell.classList.add('unique');
+                    } else {
+                        cell.classList.add('duplicate');
+                    }
+                } else {
+                    if (idx === i && step > 0) {
+                        cell.classList.add('scanner');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer scanner-label';
+                        pointer.textContent = '🔵 i (scanner)';
+                        cell.appendChild(pointer);
+                    }
+                    if (idx === nextNonDuplicate && step > 0) {
+                        cell.classList.add('next-position');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer next-label';
+                        pointer.textContent = '🟢 next position';
+                        cell.appendChild(pointer);
+                    }
+                    if (idx === nextNonDuplicate - 1 && step > 0) {
+                        cell.classList.add('comparing');
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer compare-label';
+                        pointer.textContent = '🟡 last unique';
+                        cell.appendChild(pointer);
+                    }
+                    if (idx < nextNonDuplicate && idx !== nextNonDuplicate - 1 && step > 0) {
+                        cell.classList.add('unique');
+                    }
+                }
+
+                container.appendChild(cell);
+            });
+        }
+
+        function updateExplanation() {
+            const box = document.getElementById('explanationBox');
+
+            if (step === 0) {
+                box.innerHTML = `
+                    <h3>Step 0: Initialization</h3>
+                    <div class="step-action">
+                        <strong>Setup:</strong><br>
+                        • Array: [${originalArr.join(', ')}]<br>
+                        • nextNonDuplicate = 1 (arr[0] is already unique)<br>
+                        • i will start at 1 (second element)
+                    </div>
+                    <p><strong>Why start at 1?</strong> Because the first element (arr[0] = ${originalArr[0]}) is always unique - there's nothing before it to compare with!</p>
+                `;
+            } else if (isDone) {
+                box.innerHTML = `
+                    <h3>✅ Algorithm Complete!</h3>
+                    <div class="step-action">
+                        <strong>Final State:</strong><br>
+                        • Scanner (i) has checked all elements<br>
+                        • Found ${nextNonDuplicate} unique elements<br>
+                        • Unique array: [${arr.slice(0, nextNonDuplicate).join(', ')}]
+                    </div>
+                    <p><strong>Result:</strong> The first ${nextNonDuplicate} positions contain all unique elements. The rest of the array doesn't matter!</p>
+                `;
+            } else {
+                const currentVal = arr[i];
+                const lastUnique = arr[nextNonDuplicate - 1];
+                const isDifferent = currentVal !== lastUnique;
+
+                box.innerHTML = `
+                    <h3>Step ${step}: Checking Index ${i}</h3>
+                    <div class="step-action">
+                        <strong>Current State:</strong><br>
+                        • 🔵 Scanner (i = ${i}): arr[${i}] = <strong>${currentVal}</strong><br>
+                        • 🟡 Last Unique: arr[${nextNonDuplicate - 1}] = <strong>${lastUnique}</strong><br>
+                        • 🟢 Next Position: nextNonDuplicate = ${nextNonDuplicate}
+                    </div>
+                    <div class="step-action" style="margin-top: 1rem;">
+                        <strong>Comparison:</strong><br>
+                        Is arr[${i}] (${currentVal}) != arr[${nextNonDuplicate - 1}] (${lastUnique})?<br>
+                        Answer: <strong style="color: ${isDifferent ? 'green' : 'red'}">${isDifferent ? 'YES' : 'NO'}</strong>
+                    </div>
+                    <div class="step-action" style="margin-top: 1rem;">
+                        <strong>${isDifferent ? '✅ Action: Found NEW number!' : '❌ Action: Duplicate, skip it'}</strong><br>
+                        ${isDifferent ?
+                            `• Copy ${currentVal} to arr[${nextNonDuplicate}]<br>• Increment nextNonDuplicate to ${nextNonDuplicate + 1}` :
+                            `• Do nothing, just move scanner forward`
+                        }
+                    </div>
+                `;
+            }
+        }
+
+        function nextStep() {
+            if (isDone) return;
+
+            if (step > 0) {
+                const currentVal = arr[i];
+                const lastUnique = arr[nextNonDuplicate - 1];
+
+                if (currentVal !== lastUnique) {
+                    arr[nextNonDuplicate] = currentVal;
+                    nextNonDuplicate++;
+                }
+
+                i++;
+
+                if (i >= arr.length) {
+                    isDone = true;
+                    showFinalResult();
+                }
+            }
+
+            step++;
+            document.getElementById('stepCounter').textContent =
+                isDone ? `Completed!` : `Step ${step}: ${step === 1 ? 'Start Scanning' : 'Checking Index ' + i}`;
+
+            render();
+            updateExplanation();
+        }
+
+        function showFinalResult() {
+            document.getElementById('finalResult').innerHTML = `
+                <div class="final-result">
+                    <h3>🎉 Success!</h3>
+                    <p style="font-size: 1.2rem; margin: 1rem 0;">
+                        <strong>Number of unique elements:</strong> ${nextNonDuplicate}
+                    </p>
+                    <p style="font-size: 1.2rem;">
+                        <strong>Unique array:</strong> [${arr.slice(0, nextNonDuplicate).join(', ')}]
+                    </p>
+                    <p style="margin-top: 1rem; opacity: 0.9;">
+                        The algorithm scanned ${arr.length} elements and found ${nextNonDuplicate} unique values!
+                    </p>
+                </div>
+            `;
+        }
+
+        function reset() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+            }
+
+            arr = [...originalArr];
+            nextNonDuplicate = 1;
+            i = 1;
+            step = 0;
+            isDone = false;
+
+            document.getElementById('stepCounter').textContent = 'Step 0: Initialization';
+            document.getElementById('finalResult').innerHTML = '';
+
+            render();
+            updateExplanation();
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                return;
+            }
+
+            autoPlayInterval = setInterval(() => {
+                if (isDone) {
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = null;
+                    return;
+                }
+                nextStep();
+            }, 1500);
+        }
+
+        // Initialize
+        render();
+        updateExplanation();
+    </script>
+</body>
+</html>

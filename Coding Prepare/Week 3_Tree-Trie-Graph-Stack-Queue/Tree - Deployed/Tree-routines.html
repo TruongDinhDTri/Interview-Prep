@@ -1,0 +1,2908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🌳 Binary Tree Routines Explorer</title>
+  <style>
+    /* Reset and Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #f9fafb 0%, #eff6ff 100%);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 1900px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(90deg, #2563eb, #4f46e5, #7c3aed);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .header-icon {
+      width: 3rem;
+      height: 3rem;
+      margin-right: 1rem;
+    }
+
+    .header h1 {
+      font-size: 2.25rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .header p {
+      font-size: 1.125rem;
+      opacity: 0.9;
+    }
+
+    /* Routine Selection Grid */
+    .routine-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .routine-grid {
+        grid-template-columns: repeat(8, 1fr);
+      }
+    }
+
+    .routine-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      height: 5rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .routine-btn:hover {
+      background: #eff6ff;
+      border-color: #3b82f6;
+    }
+
+    .routine-btn.active {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transform: scale(1.05);
+    }
+
+    .routine-btn .icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .routine-btn .title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* Tabs */
+    .tabs-list {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      background: white;
+      border: 2px solid #bfdbfe;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      height: 3.5rem;
+      overflow: hidden;
+    }
+
+    .tab-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.125rem;
+      font-weight: bold;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+      color: #374151;
+    }
+
+    .tab-trigger:hover {
+      background: #f3f4f6;
+    }
+
+    .tab-trigger.active[data-tab="core"] {
+      background: #2563eb;
+      color: white;
+    }
+
+    .tab-trigger.active[data-tab="debug"] {
+      background: #4f46e5;
+      color: white;
+    }
+
+    .tab-trigger.active[data-tab="edges"] {
+      background: #d97706;
+      color: white;
+    }
+
+    .tab-trigger.active[data-tab="complexity"] {
+      background: #059669;
+      color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Cards */
+    .card {
+      border: 4px solid;
+      border-radius: 0.75rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+      background: white;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      color: white;
+    }
+
+    .card-header h2 {
+      font-size: 1.875rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .card-content {
+      padding: 2rem;
+    }
+
+    /* Core Idea Tab Styles */
+    .card.core-idea {
+      border-color: #93c5fd;
+    }
+
+    .card.core-idea .card-header {
+      background: linear-gradient(90deg, #3b82f6, #4f46e5);
+    }
+
+    .aha-box {
+      background: linear-gradient(90deg, #fef9c3, #fde68a);
+      border: 4px solid #facc15;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .aha-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #78350f;
+      margin-bottom: 0.75rem;
+    }
+
+    .aha-box p {
+      font-size: 1.25rem;
+      color: #1f2937;
+      font-style: italic;
+      font-weight: 500;
+    }
+
+    .mental-model-box {
+      background: linear-gradient(90deg, #f3e8ff, #fce7f3);
+      border: 4px solid #a855f7;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .mental-model-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #581c87;
+      margin-bottom: 0.75rem;
+    }
+
+    .mental-model-box p {
+      font-size: 1.125rem;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+
+    .development-box {
+      background: white;
+      border: 4px solid #93c5fd;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .development-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-bottom: 1rem;
+    }
+
+    .step-item {
+      background: linear-gradient(90deg, #eff6ff, #eef2ff);
+      border-left: 4px solid #3b82f6;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1rem;
+    }
+
+    .step-item h4 {
+      font-weight: bold;
+      font-size: 1.125rem;
+      color: #1e3a8a;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-item p {
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .misconceptions-box {
+      background: linear-gradient(90deg, #fee2e2, #ffedd5);
+      border: 4px solid #ef4444;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .misconceptions-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #7f1d1d;
+      margin-bottom: 1rem;
+    }
+
+    .misconception-item {
+      background: white;
+      border-left: 4px solid #ef4444;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 0.5rem;
+    }
+
+    .misconception-item p {
+      color: #1f2937;
+      font-weight: 500;
+    }
+
+    /* Debug Mode Tab Styles */
+    .card.debug-mode {
+      border-color: #a5b4fc;
+    }
+
+    .card.debug-mode .card-header {
+      background: linear-gradient(90deg, #4f46e5, #7c3aed);
+      padding: 1rem 1.5rem;
+    }
+
+    .card.debug-mode .card-header h2 {
+      font-size: 1.5rem;
+    }
+
+    .playback-controls {
+      background: white;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      border: 2px solid #c7d2fe;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .control-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      padding: 0.5rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      background: white;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2.5rem;
+      height: 2.5rem;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .control-btn.playing {
+      background: #059669;
+      color: white;
+      border-color: #059669;
+    }
+
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .speed-control span {
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .speed-slider {
+      width: 6rem;
+      cursor: pointer;
+    }
+
+    .frame-badge {
+      background: #4f46e5;
+      color: white;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .debug-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      min-height: 500px;
+    }
+
+    @media (min-width: 1024px) {
+      .debug-layout {
+        grid-template-columns: 2fr 2fr 1fr;
+      }
+    }
+
+    .debug-section h3 {
+      font-size: 1.125rem;
+      font-weight: bold;
+      color: #312e81;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tree-container {
+      background: linear-gradient(135deg, #eff6ff, #eef2ff);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      border: 2px solid #bfdbfe;
+      height: 100%;
+      min-height: 300px;
+    }
+
+    .tree-svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .code-container {
+      background: #1a1b26;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+      border: 2px solid #414868;
+      height: 100%;
+      overflow: auto;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .code-lang {
+      font-size: 0.875rem;
+      color: #7aa2f7;
+      font-family: monospace;
+      font-weight: 600;
+    }
+
+    .line-badge {
+      background: #7dcfff;
+      color: #1a1b26;
+      font-weight: bold;
+      font-size: 0.875rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .code-lines {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 0.875rem;
+      color: #a9b1d6;
+      line-height: 1.8;
+    }
+
+    /* Tokyo Night Syntax Highlighting via content matching */
+    .code-line code {
+      white-space: pre;
+    }
+
+    /* VSCode-inspired syntax colors */
+    .py-keyword { color: #C586C0; font-weight: 600; }
+    .py-function { color: #DCDCAA; }
+    .py-string { color: #CE9178; }
+    .py-comment { color: #6A9955; font-style: italic; }
+    .py-number { color: #B5CEA8; }
+    .py-builtin { color: #4EC9B0; }
+    .py-param { color: #9CDCFE; }
+    .py-operator { color: #D4D4D4; }
+
+    .code-line {
+      display: flex;
+      padding: 0.375rem 0;
+      transition: background 0.2s;
+      padding-left: 1rem;
+    }
+
+    .code-line.active {
+      background: rgba(255, 237, 145, 0.25);
+      border-left: 4px solid #f7cc47;
+      margin-left: -1rem;
+      padding-left: calc(1rem - 4px);
+    }
+
+    .code-line.active .line-number {
+      color: #f7cc47;
+      font-weight: bold;
+    }
+
+    .code-line.active code {
+      color: #c0caf5;
+      font-weight: 500;
+    }
+
+    .line-number {
+      display: inline-block;
+      width: 2.5rem;
+      text-align: right;
+      margin-right: 1rem;
+      color: #565f89;
+      user-select: none;
+    }
+
+    .state-section {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .variables-panel {
+      border: 2px solid #c084fc;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #faf5ff, #fdf2f8);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .variables-panel h4 {
+      font-size: 1.125rem;
+      font-weight: bold;
+      color: #581c87;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .variable-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: white;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 2px solid #e9d5ff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 0.5rem;
+    }
+
+    .variable-item .key {
+      font-weight: 600;
+      color: #374151;
+      text-transform: capitalize;
+    }
+
+    .variable-item .value {
+      font-weight: bold;
+      color: #581c87;
+      font-size: 1.125rem;
+    }
+
+    .callstack-panel {
+      border: 2px solid #9ca3af;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .callstack-panel h4 {
+      font-size: 1.125rem;
+      font-weight: bold;
+      color: #111827;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .callstack-items {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .callstack-item {
+      background: white;
+      padding: 0.625rem;
+      border-radius: 0.5rem;
+      border: 2px solid #e5e7eb;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      margin-bottom: 0.375rem;
+    }
+
+    .callstack-item.current {
+      border-color: #3b82f6;
+      border-left-width: 4px;
+    }
+
+    .callstack-item span {
+      font-family: monospace;
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
+    .callstack-item.current span {
+      font-weight: bold;
+      color: #1e40af;
+    }
+
+    .callstack-empty {
+      font-size: 0.875rem;
+      color: #6b7280;
+      font-style: italic;
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .execution-message {
+      background: linear-gradient(90deg, #dbeafe, #e0e7ff);
+      border: 2px solid #818cf8;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+    }
+
+    .message-icon {
+      flex-shrink: 0;
+      margin-right: 0.75rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      background: #4f46e5;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      font-size: 1.25rem;
+    }
+
+    .message-content h4 {
+      font-weight: bold;
+      color: #312e81;
+      font-size: 1rem;
+    }
+
+    .message-content p {
+      color: #3730a3;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    /* Edge Cases Tab Styles */
+    .card.edge-cases {
+      border-color: #fcd34d;
+    }
+
+    .card.edge-cases .card-header {
+      background: linear-gradient(90deg, #f59e0b, #ea580c);
+    }
+
+    .edge-cases-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .edge-cases-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .edge-case-item {
+      background: linear-gradient(135deg, #fffbeb, #fff7ed);
+      border: 4px solid #fbbf24;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.2s;
+    }
+
+    .edge-case-item:hover {
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
+    }
+
+    .edge-case-header {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+
+    .edge-case-header .icon {
+      font-size: 1.5rem;
+      margin-right: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .edge-case-header h4 {
+      font-weight: bold;
+      font-size: 1.25rem;
+      color: #78350f;
+    }
+
+    .edge-case-solution {
+      margin-left: 2.5rem;
+      background: white;
+      border-left: 4px solid #f59e0b;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .edge-case-solution p {
+      color: #374151;
+      font-weight: 500;
+      font-size: 1.125rem;
+    }
+
+    .edge-case-solution .label {
+      font-weight: bold;
+      color: #15803d;
+    }
+
+    /* Complexity Tab Styles */
+    .card.complexity {
+      border-color: #86efac;
+    }
+
+    .card.complexity .card-header {
+      background: linear-gradient(90deg, #059669, #10b981);
+    }
+
+    .complexity-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .complexity-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .time-box {
+      background: linear-gradient(135deg, #dbeafe, #e0e7ff);
+      border: 4px solid #60a5fa;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .time-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #1e3a8a;
+      margin-bottom: 1rem;
+    }
+
+    .time-box .value {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #1e40af;
+      margin-bottom: 1rem;
+    }
+
+    .time-box p {
+      font-size: 1.125rem;
+      color: #1d4ed8;
+    }
+
+    .space-box {
+      background: linear-gradient(135deg, #f3e8ff, #fce7f3);
+      border: 4px solid #a855f7;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+
+    .space-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #581c87;
+      margin-bottom: 1rem;
+    }
+
+    .space-box .value {
+      font-size: 3rem;
+      font-weight: bold;
+      color: #7c3aed;
+      margin-bottom: 1rem;
+    }
+
+    .space-box p {
+      font-size: 1.125rem;
+      color: #7c3aed;
+    }
+
+    .reasoning-box {
+      background: linear-gradient(90deg, #dcfce7, #d1fae5);
+      border: 4px solid #22c55e;
+      border-radius: 0.75rem;
+      padding: 2rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      margin-bottom: 1.5rem;
+    }
+
+    .reasoning-box h3 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #14532d;
+      margin-bottom: 1rem;
+    }
+
+    .reasoning-box p {
+      font-size: 1.25rem;
+      color: #1f2937;
+      line-height: 1.6;
+    }
+
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 1rem;
+    }
+
+    .nav-btn {
+      font-size: 1.125rem;
+      padding: 0.75rem 1.5rem;
+      border: 2px solid #d1d5db;
+      border-radius: 0.5rem;
+      background: white;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+
+    .nav-btn.primary {
+      background: linear-gradient(90deg, #059669, #10b981);
+      color: white;
+      border-color: transparent;
+    }
+
+    .nav-btn.primary:hover:not(:disabled) {
+      opacity: 0.9;
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: white;
+      border-radius: 0.75rem;
+      border: 2px solid #bfdbfe;
+      text-align: center;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .footer .icon {
+      font-size: 2rem;
+      color: #2563eb;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer .title {
+      font-weight: bold;
+      font-size: 1.125rem;
+      color: #1f2937;
+    }
+
+    .footer .subtitle {
+      font-size: 0.875rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+    }
+
+    .footer .copyright {
+      font-size: 0.75rem;
+      color: #6b7280;
+      margin-top: 0.5rem;
+    }
+
+    /* Node styles for SVG */
+    .node-circle {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .node-text {
+      transition: all 0.3s ease-in-out;
+    }
+
+    .edge-line {
+      transition: all 0.3s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-icon">🌳</div>
+      <div>
+        <h1>🌳 Binary Tree Routines Explorer</h1>
+        <p>Master Core Concepts → Debug Step-by-Step → Understand Complexity</p>
+      </div>
+    </div>
+
+    <!-- Routine Selection -->
+    <div class="routine-grid" id="routine-grid"></div>
+
+    <!-- Tabs -->
+    <div class="tabs-list">
+      <button class="tab-trigger active" data-tab="core" onclick="switchTab('core')">🎯 Core Idea</button>
+      <button class="tab-trigger" data-tab="debug" onclick="switchTab('debug')">🛠️ Debug Mode</button>
+      <button class="tab-trigger" data-tab="edges" onclick="switchTab('edges')">⚠️ Edge Cases</button>
+      <button class="tab-trigger" data-tab="complexity" onclick="switchTab('complexity')">⏱️ Complexity</button>
+    </div>
+
+    <!-- Tab Contents -->
+    <div id="tab-core" class="tab-content active"></div>
+    <div id="tab-debug" class="tab-content"></div>
+    <div id="tab-edges" class="tab-content"></div>
+    <div id="tab-complexity" class="tab-content"></div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="icon">🌳</div>
+      <div class="title">Binary Tree Algorithms Mastery</div>
+      <div class="subtitle">Interactive Educational Tool - Python3 Edition</div>
+      <div class="copyright">© 2024 Algorithm Visualizations</div>
+    </div>
+  </div>
+
+  <script>
+    // ========================================================================
+    // TREE NODE DEFINITION
+    // ========================================================================
+    class TreeNode {
+      constructor(val) {
+        this.val = val;
+        this.left = null;
+        this.right = null;
+        this.x = 0;
+        this.y = 0;
+        this.highlighted = false;
+        this.visited = false;
+        this.isDeleting = false;
+      }
+    }
+
+    // ========================================================================
+    // TREE UTILITIES
+    // ========================================================================
+    function createSampleBST() {
+      const root = new TreeNode(50);
+      root.left = new TreeNode(30);
+      root.right = new TreeNode(70);
+      root.left.left = new TreeNode(20);
+      root.left.right = new TreeNode(40);
+      root.right.left = new TreeNode(60);
+      root.right.right = new TreeNode(80);
+
+      const positions = {
+        50: [225, 50],
+        30: [125, 120], 70: [325, 120],
+        20: [75, 190], 40: [175, 190],
+        60: [275, 190], 80: [375, 190],
+      };
+
+      function assignPos(node) {
+        if (!node) return;
+        const pos = positions[node.val] || [0, 0];
+        node.x = pos[0];
+        node.y = pos[1];
+        assignPos(node.left);
+        assignPos(node.right);
+      }
+
+      assignPos(root);
+      return root;
+    }
+
+    function cloneTree(root) {
+      if (!root) return null;
+      const newNode = new TreeNode(root.val);
+      newNode.x = root.x;
+      newNode.y = root.y;
+      newNode.highlighted = root.highlighted;
+      newNode.visited = root.visited;
+      newNode.isDeleting = root.isDeleting;
+      newNode.left = cloneTree(root.left);
+      newNode.right = cloneTree(root.right);
+      return newNode;
+    }
+
+    function unhighlightAll(node) {
+      if (!node) return;
+      node.highlighted = false;
+      node.visited = false;
+      node.isDeleting = false;
+      unhighlightAll(node.left);
+      unhighlightAll(node.right);
+      return node;
+    }
+
+    function highlightNode(root, val) {
+      if (!root) return null;
+      unhighlightAll(root);
+
+      function findAndHighlight(node, targetVal) {
+        if (!node) return;
+        node.highlighted = (node.val === targetVal);
+        findAndHighlight(node.left, targetVal);
+        findAndHighlight(node.right, targetVal);
+      }
+
+      findAndHighlight(root, val);
+      return root;
+    }
+
+    function markNodeVisited(root, val) {
+      if (!root) return null;
+      if (root.val === val) {
+        root.visited = true;
+        root.highlighted = true;
+      } else {
+        markNodeVisited(root.left, val);
+        markNodeVisited(root.right, val);
+      }
+      return root;
+    }
+
+    function markNodeForDeletion(root, val) {
+      if (!root) return null;
+      if (root.val === val) {
+        root.isDeleting = true;
+        root.highlighted = true;
+      } else {
+        markNodeForDeletion(root.left, val);
+        markNodeForDeletion(root.right, val);
+      }
+      return root;
+    }
+
+    function getMinNode(node) {
+      let current = node;
+      while (current.left) {
+        current = current.left;
+      }
+      return current;
+    }
+
+    // ========================================================================
+    // FRAME GENERATORS
+    // ========================================================================
+    function generateInsertFrames(root, value) {
+      const frames = [];
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { value: value, current: 'root', action: 'start' },
+        message: `Starting insert operation for value ${value}`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      let current = root;
+
+      frames.push({
+        tree: highlightNode(cloneTree(root), current.val),
+        variables: { value: value, current: current.val, action: 'compare' },
+        message: `Start at root node (${current.val}). Compare ${value} with ${current.val}`,
+        activeLine: 4,
+        callStack: [],
+      });
+
+      while (current) {
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { value: value, current: current.val, action: 'compare' },
+          message: `At node ${current.val}: Is ${value} < ${current.val}? ${value < current.val ? 'YES → go left' : 'NO → go right'}`,
+          activeLine: 6,
+          callStack: [],
+        });
+
+        if (value < current.val) {
+          if (!current.left) {
+            frames.push({
+              tree: highlightNode(cloneTree(root), current.val),
+              variables: { value: value, current: current.val, action: 'insert-left' },
+              message: `Empty left spot found! Insert ${value} as left child of ${current.val}`,
+              activeLine: 8,
+              callStack: [],
+            });
+            break;
+          }
+          current = current.left;
+          frames.push({
+            tree: highlightNode(cloneTree(root), current.val),
+            variables: { value: value, current: current.val, action: 'move-left' },
+            message: `Move to left child (${current.val})`,
+            activeLine: 10,
+            callStack: [],
+          });
+        } else if (value > current.val) {
+          if (!current.right) {
+            frames.push({
+              tree: highlightNode(cloneTree(root), current.val),
+              variables: { value: value, current: current.val, action: 'insert-right' },
+              message: `Empty right spot found! Insert ${value} as right child of ${current.val}`,
+              activeLine: 12,
+              callStack: [],
+            });
+            break;
+          }
+          current = current.right;
+          frames.push({
+            tree: highlightNode(cloneTree(root), current.val),
+            variables: { value: value, current: current.val, action: 'move-right' },
+            message: `Move to right child (${current.val})`,
+            activeLine: 15,
+            callStack: [],
+          });
+        } else {
+          frames.push({
+            tree: highlightNode(cloneTree(root), current.val),
+            variables: { value: value, current: current.val, action: 'duplicate' },
+            message: `Value ${value} already exists at node ${current.val}. No insertion needed.`,
+            activeLine: 17,
+            callStack: [],
+          });
+          break;
+        }
+      }
+
+      frames.push({
+        tree: unhighlightAll(cloneTree(root)),
+        variables: { value: value, current: 'none', action: 'complete' },
+        message: `Insert operation complete!`,
+        activeLine: 19,
+        callStack: [],
+      });
+
+      return frames;
+    }
+
+    function generateSearchFrames(root, value) {
+      const frames = [];
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { target: value, current: 'root', found: '?' },
+        message: `Searching for value ${value} in the BST`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      let current = root;
+
+      while (current) {
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { target: value, current: current.val, found: '?' },
+          message: `Checking node ${current.val}: Is ${value} == ${current.val}?`,
+          activeLine: 4,
+          callStack: [],
+        });
+
+        if (value === current.val) {
+          frames.push({
+            tree: markNodeVisited(cloneTree(root), current.val),
+            variables: { target: value, current: current.val, found: true },
+            message: `✓ Found! Value ${value} exists at node ${current.val}`,
+            activeLine: 5,
+            callStack: [],
+          });
+          return frames;
+        } else if (value < current.val) {
+          frames.push({
+            tree: highlightNode(cloneTree(root), current.val),
+            variables: { target: value, current: current.val, found: '?' },
+            message: `${value} < ${current.val}. Target must be in LEFT subtree (if exists)`,
+            activeLine: 7,
+            callStack: [],
+          });
+          if (!current.left) {
+            frames.push({
+              tree: unhighlightAll(cloneTree(root)),
+              variables: { target: value, current: 'null', found: false },
+              message: `✗ Reached null. Value ${value} does NOT exist in tree`,
+              activeLine: 11,
+              callStack: [],
+            });
+            return frames;
+          }
+          current = current.left;
+        } else {
+          frames.push({
+            tree: highlightNode(cloneTree(root), current.val),
+            variables: { target: value, current: current.val, found: '?' },
+            message: `${value} > ${current.val}. Target must be in RIGHT subtree (if exists)`,
+            activeLine: 9,
+            callStack: [],
+          });
+          if (!current.right) {
+            frames.push({
+              tree: unhighlightAll(cloneTree(root)),
+              variables: { target: value, current: 'null', found: false },
+              message: `✗ Reached null. Value ${value} does NOT exist in tree`,
+              activeLine: 11,
+              callStack: [],
+            });
+            return frames;
+          }
+          current = current.right;
+        }
+      }
+
+      return frames;
+    }
+
+    function generateCountFrames(root) {
+      const frames = [];
+      let count = 0;
+
+      function countNodes(node, depth, callStack) {
+        const callName = `count(${node ? node.val : 'null'})`;
+        const newStack = [...callStack, callName];
+
+        if (!node) {
+          frames.push({
+            tree: cloneTree(root),
+            variables: { count: count, current: 'null', depth: depth },
+            message: `Null node at depth ${depth}. Return 0.`,
+            activeLine: 3,
+            callStack: newStack,
+          });
+          return 0;
+        }
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { count: count, current: node.val, depth: depth },
+          message: `At node ${node.val} (depth ${depth}). Will return 1 + left + right`,
+          activeLine: 5,
+          callStack: newStack,
+        });
+
+        count++;
+
+        frames.push({
+          tree: markNodeVisited(cloneTree(root), node.val),
+          variables: { count: count, current: node.val, depth: depth },
+          message: `Counted node ${node.val}. Exploring LEFT subtree...`,
+          activeLine: 5,
+          callStack: newStack,
+        });
+
+        const leftCount = countNodes(node.left, depth + 1, newStack);
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { count: count, current: node.val, depth: depth },
+          message: `Left subtree returned ${leftCount}. Exploring RIGHT subtree...`,
+          activeLine: 5,
+          callStack: newStack,
+        });
+
+        const rightCount = countNodes(node.right, depth + 1, newStack);
+
+        const total = 1 + leftCount + rightCount;
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { count: count, current: node.val, depth: depth },
+          message: `Right subtree returned ${rightCount}. Returning ${total} from ${callName}.`,
+          activeLine: 5,
+          callStack: newStack,
+        });
+
+        return total;
+      }
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { count: 0, current: 'start', depth: 0 },
+        message: `Starting recursive node counting from root`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      countNodes(root, 0, []);
+
+      frames.push({
+        tree: unhighlightAll(cloneTree(root)),
+        variables: { count: count, current: 'done', depth: 0 },
+        message: `✓ Counting complete! Total nodes: ${count}`,
+        activeLine: 5,
+        callStack: [],
+      });
+
+      return frames;
+    }
+
+    function generateHeightFrames(root) {
+      const frames = [];
+
+      function calculateHeight(node, depth, callStack) {
+        const callName = `height(${node ? node.val : 'null'})`;
+        const newStack = [...callStack, callName];
+
+        if (!node) {
+          frames.push({
+            tree: cloneTree(root),
+            variables: { current: 'null', depth: depth, leftH: '-', rightH: '-', height: 0 },
+            message: `Null node → height = 0`,
+            activeLine: 3,
+            callStack: newStack,
+          });
+          return 0;
+        }
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, depth: depth, leftH: '?', rightH: '?', height: '?' },
+          message: `At node ${node.val}. Need to find height of left and right subtrees`,
+          activeLine: 5,
+          callStack: newStack,
+        });
+
+        const leftHeight = calculateHeight(node.left, depth + 1, newStack);
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, depth: depth, leftH: leftHeight, rightH: '?', height: '?' },
+          message: `Left subtree of ${node.val} has height ${leftHeight}`,
+          activeLine: 6,
+          callStack: newStack,
+        });
+
+        const rightHeight = calculateHeight(node.right, depth + 1, newStack);
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, depth: depth, leftH: leftHeight, rightH: rightHeight, height: '?' },
+          message: `Right subtree of ${node.val} has height ${rightHeight}`,
+          activeLine: 7,
+          callStack: newStack,
+        });
+
+        const height = 1 + Math.max(leftHeight, rightHeight);
+
+        frames.push({
+          tree: markNodeVisited(cloneTree(root), node.val),
+          variables: { current: node.val, depth: depth, leftH: leftHeight, rightH: rightHeight, height: height },
+          message: `Height of ${node.val} = 1 + max(${leftHeight}, ${rightHeight}) = ${height}`,
+          activeLine: 9,
+          callStack: newStack,
+        });
+
+        return height;
+      }
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { current: 'start', depth: 0, leftH: '-', rightH: '-', height: '-' },
+        message: `Starting height calculation from root`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      const totalHeight = calculateHeight(root, 0, []);
+
+      frames.push({
+        tree: unhighlightAll(cloneTree(root)),
+        variables: { current: 'root', depth: 0, leftH: '-', rightH: '-', height: totalHeight },
+        message: `✓ Tree height = ${totalHeight}`,
+        activeLine: 9,
+        callStack: [],
+      });
+
+      return frames;
+    }
+
+    function generateIsBSTFrames(root) {
+      const frames = [];
+
+      function checkBST(node, minVal, maxVal, depth, callStack) {
+        const callName = `check(${node ? node.val : 'null'}, ${minVal}, ${maxVal})`;
+        const newStack = [...callStack, callName];
+
+        if (!node) {
+          frames.push({
+            tree: cloneTree(root),
+            variables: { current: 'null', min: '...', max: '...', valid: '✓', depth: depth },
+            message: `Null node is always valid`,
+            activeLine: 4,
+            callStack: newStack,
+          });
+          return true;
+        }
+
+        const minStr = minVal === -Infinity ? '-∞' : minVal;
+        const maxStr = maxVal === Infinity ? '+∞' : maxVal;
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, min: minStr, max: maxStr, valid: '?', depth: depth },
+          message: `Check: Is ${minStr} < ${node.val} < ${maxStr}?`,
+          activeLine: 6,
+          callStack: newStack,
+        });
+
+        if (node.val <= minVal || node.val >= maxVal) {
+          frames.push({
+            tree: markNodeForDeletion(cloneTree(root), node.val),
+            variables: { current: node.val, min: minStr, max: maxStr, valid: '✗', depth: depth },
+            message: `✗ INVALID! ${node.val} violates range (${minStr}, ${maxStr})`,
+            activeLine: 7,
+            callStack: newStack,
+          });
+          return false;
+        }
+
+        frames.push({
+          tree: markNodeVisited(cloneTree(root), node.val),
+          variables: { current: node.val, min: minStr, max: maxStr, valid: '✓', depth: depth },
+          message: `✓ Node ${node.val} is valid. Now check subtrees with NEW ranges`,
+          activeLine: 8,
+          callStack: newStack,
+        });
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, min: minStr, max: maxStr, valid: '?', depth: depth },
+          message: `Left subtree: all values must be in range (${minStr}, ${node.val})`,
+          activeLine: 9,
+          callStack: newStack,
+        });
+
+        const leftValid = checkBST(node.left, minVal, node.val, depth + 1, newStack);
+
+        if (!leftValid) return false;
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node.val),
+          variables: { current: node.val, min: minStr, max: maxStr, valid: '?', depth: depth },
+          message: `Right subtree: all values must be in range (${node.val}, ${maxStr})`,
+          activeLine: 9,
+          callStack: newStack,
+        });
+
+        const rightValid = checkBST(node.right, node.val, maxVal, depth + 1, newStack);
+
+        return rightValid;
+      }
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { current: 'start', min: '-∞', max: '+∞', valid: '?', depth: 0 },
+        message: `Start validation. Root can be any value: (-∞, +∞)`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      const isBST = checkBST(root, -Infinity, Infinity, 0, []);
+
+      frames.push({
+        tree: unhighlightAll(cloneTree(root)),
+        variables: { current: 'done', min: '-', max: '-', valid: isBST ? '✓' : '✗', depth: 0 },
+        message: isBST ? `✓ This IS a valid BST!` : `✗ This is NOT a valid BST`,
+        activeLine: 10,
+        callStack: [],
+      });
+
+      return frames;
+    }
+
+    function generateGetMaxFrames(root) {
+      const frames = [];
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { current: 'root', max: '?' },
+        message: `Finding MAX value. In BST, max is the RIGHTMOST node`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      let current = root;
+
+      while (current) {
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { current: current.val, max: current.val },
+          message: `At node ${current.val}. Does it have a right child?`,
+          activeLine: 5,
+          callStack: [],
+        });
+
+        if (!current.right) {
+          frames.push({
+            tree: markNodeVisited(cloneTree(root), current.val),
+            variables: { current: current.val, max: current.val },
+            message: `✓ No right child! ${current.val} is the MAXIMUM value`,
+            activeLine: 7,
+            callStack: [],
+          });
+          break;
+        }
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { current: current.val, max: '?' },
+          message: `Right child exists. Move right to find larger values`,
+          activeLine: 6,
+          callStack: [],
+        });
+
+        current = current.right;
+      }
+
+      return frames;
+    }
+
+    function generateGetMinFrames(root) {
+      const frames = [];
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { current: 'root', min: '?' },
+        message: `Finding MIN value. In BST, min is the LEFTMOST node`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      let current = root;
+
+      while (current) {
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { current: current.val, min: current.val },
+          message: `At node ${current.val}. Does it have a left child?`,
+          activeLine: 5,
+          callStack: [],
+        });
+
+        if (!current.left) {
+          frames.push({
+            tree: markNodeVisited(cloneTree(root), current.val),
+            variables: { current: current.val, min: current.val },
+            message: `✓ No left child! ${current.val} is the MINIMUM value`,
+            activeLine: 7,
+            callStack: [],
+          });
+          break;
+        }
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), current.val),
+          variables: { current: current.val, min: '?' },
+          message: `Left child exists. Move left to find smaller values`,
+          activeLine: 6,
+          callStack: [],
+        });
+
+        current = current.left;
+      }
+
+      return frames;
+    }
+
+    function generateDeleteFrames(rootNode, value) {
+      let root = cloneTree(rootNode);
+      const frames = [];
+
+      function deleteNodeRecursive(node, val, callStack) {
+        const callName = `delete(${node ? node.val : 'null'}, ${val})`;
+        const newStack = [...callStack, callName];
+
+        frames.push({
+          tree: highlightNode(cloneTree(root), node ? node.val : -1),
+          variables: { target: val, current: node ? node.val : 'null' },
+          message: `Calling delete on ${node ? `node ${node.val}` : 'null'} for target ${val}`,
+          activeLine: 4,
+          callStack: newStack,
+        });
+
+        if (!node) {
+          frames.push({
+            tree: cloneTree(root),
+            variables: { target: val, current: 'null' },
+            message: `Node is null. Target ${val} not found in this path. Returning null.`,
+            activeLine: 5,
+            callStack: newStack,
+          });
+          return null;
+        }
+
+        if (val < node.val) {
+          frames.push({
+            tree: highlightNode(cloneTree(root), node.val),
+            variables: { target: val, current: node.val },
+            message: `${val} < ${node.val}. Go to LEFT subtree.`,
+            activeLine: 8,
+            callStack: newStack,
+          });
+          node.left = deleteNodeRecursive(node.left, val, newStack);
+        } else if (val > node.val) {
+          frames.push({
+            tree: highlightNode(cloneTree(root), node.val),
+            variables: { target: val, current: node.val },
+            message: `${val} > ${node.val}. Go to RIGHT subtree.`,
+            activeLine: 10,
+            callStack: newStack,
+          });
+          node.right = deleteNodeRecursive(node.right, val, newStack);
+        } else {
+          frames.push({
+            tree: markNodeForDeletion(cloneTree(root), node.val),
+            variables: { target: val, current: node.val, case: '?' },
+            message: `Found node ${node.val} to delete. Checking cases...`,
+            activeLine: 12,
+            callStack: newStack,
+          });
+
+          if (!node.left) {
+            frames.push({
+              tree: markNodeForDeletion(cloneTree(root), node.val),
+              variables: { target: val, current: node.val, case: '1 (no left child)' },
+              message: `Case 1: No left child. Replace ${node.val} with its right child (${node.right ? node.right.val : 'null'}).`,
+              activeLine: 14,
+              callStack: newStack,
+            });
+            return node.right;
+          }
+          if (!node.right) {
+            frames.push({
+              tree: markNodeForDeletion(cloneTree(root), node.val),
+              variables: { target: val, current: node.val, case: '1 (no right child)' },
+              message: `Case 1: No right child. Replace ${node.val} with its left child (${node.left.val}).`,
+              activeLine: 16,
+              callStack: newStack,
+            });
+            return node.left;
+          }
+
+          frames.push({
+            tree: markNodeForDeletion(cloneTree(root), node.val),
+            variables: { target: val, current: node.val, case: '3 (two children)' },
+            message: `Case 3: Two children. Find inorder successor (min value in right subtree).`,
+            activeLine: 19,
+            callStack: newStack,
+          });
+
+          // Show the get_min traversal
+          let minCurrent = node.right;
+          frames.push({
+            tree: highlightNode(cloneTree(root), minCurrent.val),
+            variables: { target: val, current: node.val, searching_min: minCurrent.val },
+            message: `Calling get_min(${node.right.val}). Start at right child, then go LEFT to find minimum.`,
+            activeLine: 20,
+            callStack: [...newStack, `get_min(${minCurrent.val})`],
+          });
+
+          while (minCurrent.left) {
+            minCurrent = minCurrent.left;
+            frames.push({
+              tree: highlightNode(cloneTree(root), minCurrent.val),
+              variables: { target: val, current: node.val, searching_min: minCurrent.val },
+              message: `Keep going LEFT... Now at ${minCurrent.val}`,
+              activeLine: 20,
+              callStack: [...newStack, `get_min(${node.right.val})`],
+            });
+          }
+
+          const successor = getMinNode(node.right);
+
+          frames.push({
+            tree: highlightNode(cloneTree(root), successor.val),
+            variables: { target: val, current: node.val, successor: successor.val },
+            message: `✓ Found minimum! ${successor.val} is the leftmost (smallest) node in right subtree. This is our successor!`,
+            activeLine: 20,
+            callStack: newStack,
+          });
+
+          frames.push({
+            tree: markNodeVisited(cloneTree(root), successor.val),
+            variables: { target: val, current: node.val, successor: successor.val },
+            message: `WHY ${successor.val}? Because it's BIGGER than all left subtree nodes (it's in right subtree) AND SMALLER than all other right subtree nodes (it's the min). Perfect replacement!`,
+            activeLine: 21,
+            callStack: newStack,
+          });
+
+          node.val = successor.val;
+
+          frames.push({
+            tree: markNodeVisited(cloneTree(root), node.val),
+            variables: { target: val, current: node.val, copied_value: successor.val },
+            message: `Copied ${successor.val} into the node we wanted to delete. The node now has value ${successor.val}!`,
+            activeLine: 22,
+            callStack: newStack,
+          });
+
+          frames.push({
+            tree: cloneTree(root),
+            variables: { target: val, current: node.val, successor: successor.val },
+            message: `Now we have a DUPLICATE ${successor.val} in the tree! Delete the original successor node from right subtree. This will be an easy case (0 or 1 child).`,
+            activeLine: 23,
+            callStack: newStack,
+          });
+
+          node.right = deleteNodeRecursive(node.right, successor.val, newStack);
+        }
+
+        frames.push({
+          tree: cloneTree(root),
+          variables: { target: val, current: node ? node.val : 'null' },
+          message: `Returning from ${callName}. Attaching ${node ? node.val : 'null'} to parent.`,
+          activeLine: 24,
+          callStack: newStack,
+        });
+        return node;
+      }
+
+      frames.push({
+        tree: cloneTree(root),
+        variables: { target: value },
+        message: `Starting delete operation for value ${value}`,
+        activeLine: 1,
+        callStack: [],
+      });
+
+      root = deleteNodeRecursive(root, value, []);
+
+      frames.push({
+        tree: unhighlightAll(cloneTree(root)),
+        variables: { target: value },
+        message: `Delete operation complete. Root is now ${root ? root.val : 'null'}.`,
+        activeLine: 24,
+        callStack: [],
+      });
+
+      return frames;
+    }
+
+    // ========================================================================
+    // ROUTINES DATA
+    // ========================================================================
+    const routines = [
+      {
+        title: "Insert Value",
+        icon: "⚡",
+        frameGenerator: (tree) => generateInsertFrames(tree, 45),
+        coreIdea: {
+          aha: "BST insertion is like playing a guessing game where the tree tells you 'higher' or 'lower' until you find an empty spot!",
+          mentalModel: "Think of it as following a path down the tree. At each node, ask: 'Am I smaller or bigger?' Then go left or right accordingly. When you hit an empty spot (null), that's where the new value belongs!",
+          development: [
+            { step: "Start at the root", explanation: "Every journey in a BST begins at the root. This is your starting point for comparison." },
+            { step: "Compare and decide direction", explanation: "If your value is LESS than current node → go LEFT. If GREATER → go RIGHT. This is the BST property in action!" },
+            { step: "Repeat until you find an empty spot", explanation: "Keep comparing and moving. Eventually, you'll reach a null pointer (empty spot). That's where you insert!" },
+            { step: "Handle duplicates", explanation: "What if the value already exists? Common strategies: 1) Don't insert (ignore), 2) Keep a count, or 3) Allow duplicates in subtree" }
+          ],
+          misconceptions: [
+            "❌ 'I can insert anywhere' → NO! BST property must be maintained",
+            "❌ 'I should balance while inserting' → Not in basic insertion (that's AVL/Red-Black trees)",
+            "❌ 'Insertion is O(log n) always' → Only if tree is balanced! Worst case is O(n) for skewed tree"
+          ]
+        },
+        code: `def insert(root, value):
+  if root is None:
+    return TreeNode(value)
+  current = root
+  while True:
+    if value < current.val:
+      if current.left is None:
+        current.left = TreeNode(value)
+        break
+      current = current.left
+    elif value > current.val:
+      if current.right is None:
+        current.right = TreeNode(value)
+        break
+      current = current.right
+    else: # Duplicate
+      break
+  return root`,
+        edgeCases: [
+          { case: "Empty tree (root is None)", solution: "Create and return new node as root" },
+          { case: "Duplicate value already exists", solution: "Skip insertion or increment counter (depends on requirement)" },
+          { case: "Inserting into single-node tree", solution: "Simply add as left or right child based on comparison" }
+        ],
+        complexity: {
+          time: "O(h) where h = height",
+          space: "O(1) iterative, O(h) recursive",
+          reasoning: "We traverse one path from root to leaf, visiting at most h nodes. No extra space for iterative."
+        }
+      },
+      {
+        title: "Search Value",
+        icon: "✓",
+        frameGenerator: (tree) => generateSearchFrames(tree, 40),
+        coreIdea: {
+          aha: "BST search is like binary search on a sorted array, but on a tree! Each comparison eliminates an entire subtree.",
+          mentalModel: "Imagine you're looking for a book in a library. At each shelf (node), you ask: 'Is this my book? No? Is my number smaller or bigger?' Then you go left or right. You NEVER need to check both sides!",
+          development: [
+            { step: "The power of elimination", explanation: "This is the KEY insight! When you compare with a node: if target < node, you KNOW target can't be in right subtree. You just eliminated half the tree!" },
+            { step: "Compare, decide, move", explanation: "Three possible outcomes: 1) Found it! (target == node), 2) Go left (target < node), 3) Go right (target > node). That's it!" },
+            { step: "When to stop", explanation: "Two exit conditions: 1) Found the value → return True, 2) Reached null (empty) → return False. Value doesn't exist!" }
+          ],
+          misconceptions: [
+            "❌ 'I need to check both left and right subtrees' → NO! BST property lets you eliminate one side",
+            "❌ 'Search is always O(log n)' → Only if balanced! Skewed tree = O(n)",
+            "❌ 'If not found, keep searching' → NO! When you hit null, stop immediately"
+          ]
+        },
+        code: `def search(root, value):
+  current = root
+  while current is not None:
+    if value == current.val:
+      return True
+    elif value < current.val:
+      current = current.left
+    else:
+      current = current.right
+  return False`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return False immediately" },
+          { case: "Value not in tree", solution: "Will reach null and return False" },
+          { case: "Value is at root", solution: "Found immediately, return True" }
+        ],
+        complexity: {
+          time: "O(h) where h = height",
+          space: "O(1) iterative, O(h) recursive",
+          reasoning: "BST property allows elimination of one subtree at each step. We follow ONE path only."
+        }
+      },
+      {
+        title: "Count Nodes",
+        icon: "📊",
+        frameGenerator: (tree) => generateCountFrames(tree),
+        coreIdea: {
+          aha: "Counting nodes is about breaking a big problem into tiny pieces: count yourself (1), count left, count right, then ADD them up!",
+          mentalModel: "Think recursively: 'How many nodes am I responsible for?' Answer: ME (1) + however many my left child reports + however many my right child reports. Pass this down until you hit null (which reports 0).",
+          development: [
+            { step: "Base case: null returns 0", explanation: "When you reach an empty spot (null), there are 0 nodes. This is the foundation that stops recursion." },
+            { step: "Recursive case: 1 + left + right", explanation: "Every node says: 'I count as 1, plus whatever my left subtree has, plus whatever my right subtree has.' This formula works for ANY node!" },
+            { step: "Bottom-up calculation", explanation: "The magic happens from leaves upward. Leaves report 1 (because their children are null = 0). Their parents add these up. Eventually root gets the total!" }
+          ],
+          misconceptions: [
+            "❌ 'I need a global counter variable' → NO! Recursion handles this naturally with return values",
+            "❌ 'This is inefficient' → It's O(n) which is optimal - you MUST visit every node to count"
+          ]
+        },
+        code: `def count_nodes(root):
+  if root is None:
+    return 0
+  # 1 (self) + left subtree + right subtree
+  return 1 + count_nodes(root.left) + count_nodes(root.right)`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return 0" },
+          { case: "Single node", solution: "Return 1 (1 + 0 + 0)" },
+          { case: "Completely unbalanced tree", solution: "Still works! Visits all nodes regardless of shape" }
+        ],
+        complexity: {
+          time: "O(n) - must visit every node",
+          space: "O(h) for recursion call stack",
+          reasoning: "Every node is visited exactly once. No way to be faster than O(n)!"
+        }
+      },
+      {
+        title: "Calculate Height",
+        icon: "📈",
+        frameGenerator: (tree) => generateHeightFrames(tree),
+        coreIdea: {
+          aha: "Height is NOT about counting nodes - it's about finding the LONGEST path! Think 'how far is my furthest descendant?'",
+          mentalModel: "Imagine you're at a node asking: 'What's the longest path I can take to reach a leaf?' You check both directions (left and right), pick the MAXIMUM, then add 1 for yourself. Height builds from bottom-up!",
+          development: [
+            { step: "Leaf nodes have height 1", explanation: "A leaf has no children (both null). Its height = 1 + max(0, 0) = 1. This is the starting point." },
+            { step: "Internal nodes: 1 + max(left, right)", explanation: "Every parent asks both children: 'How tall are you?' Takes the taller one and adds 1 (for itself). Why max? Because height measures the LONGEST path." },
+            { step: "Null nodes have height 0", explanation: "Empty spots contribute nothing to height. This is the base case that stops recursion." }
+          ],
+          misconceptions: [
+            "❌ 'Height = number of nodes' → NO! Height is about levels/depth, not count",
+            "❌ 'Single node has height 0' → Depends on definition! We define it as 1. Be consistent!",
+            "❌ 'I should count all paths' → NO! Only need the LONGEST path (hence 'max')"
+          ]
+        },
+        code: `def height(root):
+  if root is None:
+    return 0
+
+  left_height = height(root.left)
+  right_height = height(root.right)
+
+  # 1 (self) + max of two subtrees
+  return 1 + max(left_height, right_height)`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return 0" },
+          { case: "Single node", solution: "Return 1 (1 + max(0,0))" },
+          { case: "Completely skewed tree (linked list)", solution: "Height = number of nodes" }
+        ],
+        complexity: {
+          time: "O(n) - must visit every node",
+          space: "O(h) recursion stack",
+          reasoning: "Need to explore both subtrees of every node to determine max height. No shortcuts!"
+        }
+      },
+      {
+        title: "Is Valid BST",
+        icon: "✓",
+        frameGenerator: (tree) => generateIsBSTFrames(tree),
+        coreIdea: {
+          aha: "Validating BST isn't just about parent-child! You must ensure ALL left descendants < node < ALL right descendants. This requires tracking valid RANGES!",
+          mentalModel: "Think of each node having a 'valid range' [min, max] it must fall within. As you go down, this range NARROWS. Left child inherits [min, parent], right child inherits [parent, max]. If any node violates its range → NOT a BST!",
+          development: [
+            { step: "The trap: local vs global validity", explanation: "TRAP: Just checking node.left < node < node.right is NOT enough! You need GLOBAL validation." },
+            { step: "The solution: range narrowing", explanation: "Start with root range (-∞, +∞). When you go left, the max becomes parent's value. When you go right, the min becomes parent's value." },
+            { step: "How ranges propagate", explanation: "Root: [-∞, +∞] → Left child: [-∞, root.val] → Right child: [root.val, +∞]. Each node passes a tighter constraint!" },
+            { step: "When to return False", explanation: "If ANY node's value is outside its valid range, immediately return False. The tree is invalid!" }
+          ],
+          misconceptions: [
+            "❌ 'Just check node.left < node < node.right' → WRONG! This misses global violations",
+            "❌ 'Inorder traversal gives sorted array = BST' → TRUE, but this is a different approach"
+          ]
+        },
+        code: `def is_bst(root):
+  # Helper uses [min, max] range
+  def check(node, min_val, max_val):
+    if node is None:
+      return True
+    if not (min_val < node.val < max_val):
+      return False
+    # Left: range narrows to (min_val, node.val)
+    # Right: range narrows to (node.val, max_val)
+    return (check(node.left, min_val, node.val) and
+            check(node.right, node.val, max_val))
+  return check(root, float('-inf'), float('inf'))`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return True (vacuously valid)" },
+          { case: "Single node", solution: "Return True (always valid)" },
+          { case: "Valid locally but invalid globally", solution: "Range checking catches this!" }
+        ],
+        complexity: {
+          time: "O(n) - must validate every node",
+          space: "O(h) recursion stack",
+          reasoning: "Each node checked once against its range. Can't be faster than O(n)!"
+        }
+      },
+      {
+        title: "Get Maximum",
+        icon: "📈",
+        frameGenerator: (tree) => generateGetMaxFrames(tree),
+        coreIdea: {
+          aha: "In BST, finding max is trivial: just keep going RIGHT until you can't anymore! The rightmost node IS the maximum.",
+          mentalModel: "BST = sorted array in tree form. The rightmost element is like the last element in a sorted array - it's the biggest! No comparison needed, just follow the right pointers.",
+          development: [
+            { step: "Why rightmost = maximum", explanation: "BST property: right children are ALWAYS greater. Keep going right, you keep finding larger values. When you can't go right, you've found the max!" },
+            { step: "Simple iterative approach", explanation: "Start at root. While right child exists, move to right child. When right is null, current node is the max. That's it!" }
+          ],
+          misconceptions: [
+            "❌ 'I need to check all nodes' → NO! Only need the rightmost path",
+            "❌ 'Max could be anywhere in the tree' → NO! BST guarantees max is rightmost",
+            "❌ 'This is O(n)' → It's O(h). Only traverse one path!"
+          ]
+        },
+        code: `def get_max(root):
+  if root is None:
+    return None
+  current = root
+  while current.right is not None:
+    current = current.right
+  return current.val`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return None" },
+          { case: "No right children", solution: "Root is the maximum" },
+          { case: "Skewed right tree", solution: "Traverse entire right path" }
+        ],
+        complexity: {
+          time: "O(h) - follow one path",
+          space: "O(1) - no extra space needed",
+          reasoning: "Only traverse right spine of tree. No recursion, no additional data structures needed!"
+        }
+      },
+      {
+        title: "Get Minimum",
+        icon: "📉",
+        frameGenerator: (tree) => generateGetMinFrames(tree),
+        coreIdea: {
+          aha: "Mirror of get_max: in BST, finding min means going LEFT until you can't! The leftmost node IS the minimum.",
+          mentalModel: "BST = sorted array in tree form. Leftmost element is like the first element in sorted array - smallest value. Just follow left pointers to the end!",
+          development: [
+            { step: "Why leftmost = minimum", explanation: "BST property: left children are ALWAYS smaller. Keep going left → keep finding smaller values. Can't go left anymore? You've found the min!" },
+            { step: "Symmetric to get_max", explanation: "This is exactly the same algorithm as get_max, but going LEFT instead of RIGHT. Beautiful symmetry!" }
+          ],
+          misconceptions: [
+            "❌ 'Need to check all nodes for minimum' → NO! Leftmost is guaranteed min",
+            "❌ 'This requires comparing values' → NO! Just follow left pointers"
+          ]
+        },
+        code: `def get_min(root):
+  if root is None:
+    return None
+  current = root
+  while current.left is not None:
+    current = current.left
+  return current.val`,
+        edgeCases: [
+          { case: "Empty tree", solution: "Return None" },
+          { case: "No left children", solution: "Root is the minimum" },
+          { case: "Skewed left tree", solution: "Traverse entire left path" }
+        ],
+        complexity: {
+          time: "O(h) - follow one path",
+          space: "O(1) - no extra space needed",
+          reasoning: "Only traverse left spine. Mirror of get_max complexity!"
+        }
+      },
+      {
+        title: "Delete Node",
+        icon: "🗑️",
+        frameGenerator: (tree) => generateDeleteFrames(tree, 30),
+        coreIdea: {
+          aha: "Deleting from a BST has 3 cases! Case 3 (two children) is the tricky one: you replace the node with its 'inorder successor' (smallest node in its right subtree) and then delete that successor!",
+          mentalModel: "1. Find the node. 2. Check children: 0 children? Just delete. 1 child? Replace node with its child. 2 children? Find the 'next in line' value (successor), copy its value up, then recursively delete the successor node (which is now an easy case 0 or 1).",
+          development: [
+            { step: "Find the node to delete", explanation: "Use the same logic as BST Search to find the target node." },
+            { step: "Case 1: No children (Leaf)", explanation: "Easiest case. Just remove the node (return null to parent)." },
+            { step: "Case 2: One child", explanation: "Almost as easy. 'Promote' the single child by returning it to the parent, skipping over the deleted node." },
+            { step: "Case 3: Two children - WHY find the minimum of right subtree?", explanation: `
+              <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 3px solid #f59e0b; border-radius: 12px; padding: 20px; margin: 15px 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="font-size: 1.3rem; font-weight: bold; color: #92400e; margin-bottom: 15px; display: flex; align-items: center;">
+                  🎯 <span style="margin-left: 10px;">THIS IS THE KEY INSIGHT!</span>
+                </div>
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                  <p style="color: #1f2937; font-size: 1.05rem; line-height: 1.7; margin-bottom: 10px;">
+                    <strong style="color: #dc2626;">The Problem:</strong> When you have TWO children, you can't just delete the node - you need a <strong style="color: #7c3aed;">REPLACEMENT</strong> that maintains BST property.
+                  </p>
+                </div>
+
+                <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border-left: 4px solid #2563eb; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+                  <p style="color: #1e3a8a; font-size: 1.05rem; font-weight: 600; margin-bottom: 10px;">
+                    💡 The Solution: Use the Inorder Successor (minimum of RIGHT subtree)
+                  </p>
+                  <p style="color: #1e40af; font-size: 0.95rem;">
+                    This is the "next in line" value when traversing the tree in sorted order!
+                  </p>
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 15px;">
+                  <p style="color: #059669; font-size: 1.1rem; font-weight: bold; margin-bottom: 12px;">
+                    ✓ Why the minimum of RIGHT subtree is PERFECT:
+                  </p>
+                  <div style="display: grid; gap: 10px;">
+                    <div style="background: #ecfdf5; border-left: 3px solid #10b981; padding: 10px; border-radius: 5px;">
+                      <strong style="color: #065f46;">Reason 1:</strong>
+                      <span style="color: #047857;"> It's <u>LARGER</u> than all nodes in the left subtree</span>
+                      <div style="font-size: 0.85rem; color: #059669; margin-top: 5px; font-style: italic;">
+                        (because it's in the right subtree)
+                      </div>
+                    </div>
+                    <div style="background: #ecfdf5; border-left: 3px solid #10b981; padding: 10px; border-radius: 5px;">
+                      <strong style="color: #065f46;">Reason 2:</strong>
+                      <span style="color: #047857;"> It's <u>SMALLER</u> than all other nodes in the right subtree</span>
+                      <div style="font-size: 0.85rem; color: #059669; margin-top: 5px; font-style: italic;">
+                        (because it's the minimum - leftmost node)
+                      </div>
+                    </div>
+                    <div style="background: #ecfdf5; border-left: 3px solid #10b981; padding: 10px; border-radius: 5px;">
+                      <strong style="color: #065f46;">Reason 3:</strong>
+                      <span style="color: #047857;"> This means it can <u>LEGALLY REPLACE</u> the deleted node!</span>
+                      <div style="font-size: 0.85rem; color: #059669; margin-top: 5px; font-style: italic;">
+                        (without violating BST property)
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: linear-gradient(90deg, #a855f7, #7c3aed); color: white; border-radius: 8px; padding: 12px; margin-top: 15px; text-align: center;">
+                  <strong style="font-size: 1.1rem;">🧠 Mental Model:</strong> Finding the "next in line" value in sorted order
+                </div>
+              </div>
+            ` },
+            { step: "Case 3: Visualization", explanation: `<div style="margin: 15px 0;">
+              <svg width="100%" height="400" viewBox="0 0 800 400" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 10px; border: 3px solid #dee2e6;">
+                <!-- Before Deletion -->
+                <text x="150" y="30" font-size="20" font-weight="bold" fill="#1e40af" text-anchor="middle">BEFORE: Delete 50</text>
+
+                <!-- Tree structure - Before -->
+                <line x1="150" y1="80" x2="80" y2="140" stroke="#64748b" stroke-width="3"/>
+                <line x1="150" y1="80" x2="220" y2="140" stroke="#64748b" stroke-width="3"/>
+                <line x1="80" y1="140" x2="50" y2="200" stroke="#64748b" stroke-width="2"/>
+                <line x1="80" y1="140" x2="110" y2="200" stroke="#64748b" stroke-width="2"/>
+                <line x1="220" y1="140" x2="190" y2="200" stroke="#64748b" stroke-width="2"/>
+                <line x1="220" y1="140" x2="250" y2="200" stroke="#64748b" stroke-width="2"/>
+
+                <!-- Node 50 (to delete) -->
+                <circle cx="150" cy="80" r="28" fill="#fecaca" stroke="#ef4444" stroke-width="4"/>
+                <text x="150" y="88" font-size="18" font-weight="bold" fill="#1f2937" text-anchor="middle">50</text>
+                <text x="150" y="50" font-size="14" fill="#dc2626" font-weight="bold" text-anchor="middle">DELETE</text>
+
+                <!-- Node 30 (left child) -->
+                <circle cx="80" cy="140" r="25" fill="#fff" stroke="#3b82f6" stroke-width="3"/>
+                <text x="80" y="147" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">30</text>
+
+                <!-- Node 70 (right child) -->
+                <circle cx="220" cy="140" r="25" fill="#fff" stroke="#3b82f6" stroke-width="3"/>
+                <text x="220" y="147" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">70</text>
+
+                <!-- Leaf nodes -->
+                <circle cx="50" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="50" y="206" font-size="14" fill="#475569" text-anchor="middle">20</text>
+
+                <circle cx="110" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="110" y="206" font-size="14" fill="#475569" text-anchor="middle">40</text>
+
+                <!-- Node 60 - THE SUCCESSOR -->
+                <circle cx="190" cy="200" r="20" fill="#fef3c7" stroke="#f59e0b" stroke-width="3"/>
+                <text x="190" y="206" font-size="14" font-weight="bold" fill="#92400e" text-anchor="middle">60</text>
+                <text x="190" y="225" font-size="11" fill="#b45309" font-weight="bold" text-anchor="middle">MIN of right</text>
+
+                <circle cx="250" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="250" y="206" font-size="14" fill="#475569" text-anchor="middle">80</text>
+
+                <!-- Arrow pointing to successor -->
+                <path d="M 150 110 Q 150 150 180 180" fill="none" stroke="#f59e0b" stroke-width="3" stroke-dasharray="5,5"/>
+                <polygon points="180,180 185,175 175,175" fill="#f59e0b"/>
+
+                <!-- Explanation box -->
+                <rect x="10" y="250" width="280" height="140" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                <text x="150" y="275" font-size="14" font-weight="bold" fill="#1e40af" text-anchor="middle">Why 60 is the successor?</text>
+                <text x="20" y="295" font-size="11" fill="#1e3a8a">✓ 60 > all left subtree (20,30,40)</text>
+                <text x="20" y="315" font-size="11" fill="#1e3a8a">✓ 60 < all other right nodes (70,80)</text>
+                <text x="20" y="335" font-size="11" fill="#1e3a8a">✓ 60 = smallest in right subtree</text>
+                <text x="20" y="355" font-size="11" font-weight="bold" fill="#dc2626">→ Perfect replacement for 50!</text>
+                <text x="20" y="375" font-size="10" fill="#059669">Get it by: get_min(50.right)</text>
+
+                <!-- AFTER Deletion -->
+                <text x="550" y="30" font-size="20" font-weight="bold" fill="#059669" text-anchor="middle">AFTER: Replaced with 60</text>
+
+                <!-- Tree structure - After -->
+                <line x1="550" y1="80" x2="480" y2="140" stroke="#64748b" stroke-width="3"/>
+                <line x1="550" y1="80" x2="620" y2="140" stroke="#64748b" stroke-width="3"/>
+                <line x1="480" y1="140" x2="450" y2="200" stroke="#64748b" stroke-width="2"/>
+                <line x1="480" y1="140" x2="510" y2="200" stroke="#64748b" stroke-width="2"/>
+                <line x1="620" y1="140" x2="650" y2="200" stroke="#64748b" stroke-width="2"/>
+
+                <!-- Node 60 (NEW ROOT - was successor) -->
+                <circle cx="550" cy="80" r="28" fill="#d1fae5" stroke="#10b981" stroke-width="4"/>
+                <text x="550" y="88" font-size="18" font-weight="bold" fill="#065f46" text-anchor="middle">60</text>
+                <text x="550" y="50" font-size="14" fill="#059669" font-weight="bold" text-anchor="middle">NEW!</text>
+
+                <!-- Node 30 (left child - unchanged) -->
+                <circle cx="480" cy="140" r="25" fill="#fff" stroke="#3b82f6" stroke-width="3"/>
+                <text x="480" y="147" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">30</text>
+
+                <!-- Node 70 (right child - unchanged) -->
+                <circle cx="620" cy="140" r="25" fill="#fff" stroke="#3b82f6" stroke-width="3"/>
+                <text x="620" y="147" font-size="16" font-weight="bold" fill="#1f2937" text-anchor="middle">70</text>
+
+                <!-- Leaf nodes -->
+                <circle cx="450" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="450" y="206" font-size="14" fill="#475569" text-anchor="middle">20</text>
+
+                <circle cx="510" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="510" y="206" font-size="14" fill="#475569" text-anchor="middle">40</text>
+
+                <!-- 60 is gone from here, so just 80 -->
+                <circle cx="650" cy="200" r="20" fill="#fff" stroke="#94a3b8" stroke-width="2"/>
+                <text x="650" y="206" font-size="14" fill="#475569" text-anchor="middle">80</text>
+
+                <!-- Success box -->
+                <rect x="410" y="250" width="280" height="140" rx="8" fill="#dcfce7" stroke="#10b981" stroke-width="2"/>
+                <text x="550" y="275" font-size="14" font-weight="bold" fill="#065f46" text-anchor="middle">✓ BST Property Maintained!</text>
+                <text x="420" y="295" font-size="11" fill="#14532d">1. Copy 60's value to node 50</text>
+                <text x="420" y="315" font-size="11" fill="#14532d">2. Delete original 60 (easy!)</text>
+                <text x="420" y="335" font-size="11" fill="#14532d">3. Tree is still valid BST</text>
+                <text x="420" y="355" font-size="11" font-weight="bold" fill="#059669">All values: 20 < 30 < 40 < 60 < 70 < 80</text>
+                <text x="420" y="375" font-size="10" fill="#6366f1">Alternative: Use max of left (40)</text>
+              </svg>
+            </div>
+            <div style="background: white; border-radius: 8px; padding: 20px; margin-top: 15px; border: 2px solid #e5e7eb;">
+              <div style="margin-bottom: 15px;">
+                <h4 style="color: #1f2937; font-size: 1.1rem; margin-bottom: 10px;">📝 Example Walkthrough:</h4>
+                <p style="color: #4b5563; line-height: 1.6;">Imagine deleting node <strong style="color: #dc2626;">50</strong> with children <strong>30</strong> and <strong>70</strong>.</p>
+              </div>
+
+              <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin-bottom: 12px; border-radius: 4px;">
+                <strong style="color: #92400e;">🔍 Finding the successor:</strong>
+                <p style="color: #78350f; margin-top: 5px;">The right subtree's minimum (<strong>60</strong>) is the SMALLEST value that's still BIGGER than everything in the left subtree.</p>
+              </div>
+
+              <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 12px; margin-bottom: 12px; border-radius: 4px;">
+                <strong style="color: #1e40af;">✏️ Replacement process:</strong>
+                <ul style="color: #1e3a8a; margin-top: 5px; margin-left: 20px;">
+                  <li>Copy <strong>60</strong> to replace <strong>50</strong></li>
+                  <li>Delete the original <strong>60</strong> (which is now an easy case 1 or 2)</li>
+                </ul>
+              </div>
+
+              <div style="background: #d1fae5; border-left: 4px solid #10b981; padding: 12px; border-radius: 4px;">
+                <strong style="color: #065f46;">✓ Result:</strong>
+                <p style="color: #047857; margin-top: 5px;">The BST property is preserved!</p>
+              </div>
+
+              <div style="background: #f3f4f6; padding: 12px; margin-top: 12px; border-radius: 4px; border: 1px dashed #9ca3af;">
+                <p style="color: #6b7280; font-size: 0.9rem;">
+                  <strong>💡 Alternative approach:</strong> You could use the maximum of the LEFT subtree (inorder predecessor) - same idea, just mirrored!
+                </p>
+              </div>
+            </div>` },
+            { step: "Case 3: The algorithm", explanation: `
+              <div style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border: 3px solid #a855f7; border-radius: 12px; padding: 20px; margin: 15px 0;">
+                <div style="font-size: 1.2rem; font-weight: bold; color: #6b21a8; margin-bottom: 15px; text-align: center;">
+                  ⚙️ The Three-Step Algorithm
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 5px solid #7c3aed;">
+                  <div style="display: flex; align-items: start;">
+                    <div style="background: #7c3aed; color: white; font-weight: bold; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">1</div>
+                    <div>
+                      <strong style="color: #7c3aed; font-size: 1.05rem;">Find the minimum node</strong>
+                      <p style="color: #4b5563; margin-top: 5px; line-height: 1.6;">
+                        Call <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; color: #dc2626;">get_min(node.right)</code> to locate the smallest value in the RIGHT subtree. This is your inorder successor.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 15px; margin-bottom: 12px; border-left: 5px solid #7c3aed;">
+                  <div style="display: flex; align-items: start;">
+                    <div style="background: #7c3aed; color: white; font-weight: bold; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">2</div>
+                    <div>
+                      <strong style="color: #7c3aed; font-size: 1.05rem;">Copy the successor's value</strong>
+                      <p style="color: #4b5563; margin-top: 5px; line-height: 1.6;">
+                        <strong style="color: #059669;">OVERWRITE</strong> the value of the node you want to delete with the successor's value. Now that node has a new value!
+                      </p>
+                      <div style="background: #fef3c7; padding: 8px; margin-top: 8px; border-radius: 4px; font-size: 0.9rem;">
+                        <code style="color: #92400e;">node.val = successor.val</code>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 15px; border-left: 5px solid #7c3aed;">
+                  <div style="display: flex; align-items: start;">
+                    <div style="background: #7c3aed; color: white; font-weight: bold; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 12px;">3</div>
+                    <div>
+                      <strong style="color: #7c3aed; font-size: 1.05rem;">Recursively delete the successor</strong>
+                      <p style="color: #4b5563; margin-top: 5px; line-height: 1.6;">
+                        Call <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px; color: #dc2626;">delete_node(node.right, successor.val)</code> to remove the original successor from the right subtree.
+                      </p>
+                      <div style="background: #dbeafe; padding: 8px; margin-top: 8px; border-radius: 4px;">
+                        <strong style="color: #1e40af; font-size: 0.9rem;">💡 Why this works:</strong>
+                        <p style="color: #1e3a8a; font-size: 0.85rem; margin-top: 4px;">
+                          The successor (minimum of right subtree) has <strong>NO left child</strong>, so deleting it becomes an easy case (0 or 1 child)!
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style="background: linear-gradient(90deg, #10b981, #059669); color: white; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: center;">
+                  <strong style="font-size: 1.1rem;">🎯 The Elegance:</strong>
+                  <p style="margin-top: 5px; font-size: 0.95rem;">This elegant recursion converts the hard case (2 children) into an easy one (0 or 1 child)!</p>
+                </div>
+              </div>
+            ` }
+          ],
+          misconceptions: [
+            "❌ 'Just remove the node and connect its children' → Fails for 2 children!",
+            "❌ 'I can replace with left or right child' → Violates BST property if two children",
+            "❌ 'Deleting is O(1)' → NO! You must first find the node, which is O(h)."
+          ]
+        },
+        code: `# Helper function to find minimum node
+def get_min(node):
+  """Returns the node with minimum value
+  in the subtree rooted at node.
+  In BST, this is the LEFTMOST node."""
+  current = node
+  while current.left is not None:
+    current = current.left
+  return current
+
+
+def delete_node(root, value):
+  if root is None:
+    return None
+
+  if value < root.val:
+    root.left = delete_node(root.left, value)
+  elif value > root.val:
+    root.right = delete_node(root.right, value)
+  else:
+    # Node found!
+    if root.left is None:
+      return root.right
+    elif root.right is None:
+      return root.left
+
+    # Case 3: Two children
+    successor = get_min(root.right)
+    root.val = successor.val
+    root.right = delete_node(root.right, successor.val)
+
+  return root`,
+        edgeCases: [
+          { case: "Delete non-existent node", solution: "Nothing happens, tree remains unchanged." },
+          { case: "Delete leaf node", solution: "Parent's pointer is set to null." },
+          { case: "Delete node with one child", solution: "Parent's pointer connects to the node's single child." },
+          { case: "Delete node with two children", solution: "Node's value is replaced by successor, and successor is deleted." },
+          { case: "Delete root node", solution: "Handled by all cases. If root has 2 children, its value changes but it remains the root." }
+        ],
+        complexity: {
+          time: "O(h) - O(h) to find, O(h) to find successor",
+          space: "O(h) - for recursion call stack",
+          reasoning: "Finding the node takes O(h). In worst case (two children), we find successor which also takes O(h). Total is O(h)."
+        }
+      }
+    ];
+
+    // ========================================================================
+    // STATE MANAGEMENT
+    // ========================================================================
+    let currentRoutine = 0;
+    let currentTab = 'core';
+    let currentFrame = 0;
+    let isPlaying = false;
+    let playbackSpeed = 1;
+    let playTimer = null;
+    let currentFrames = [];
+    const sampleTree = createSampleBST();
+
+    // ========================================================================
+    // RENDERING FUNCTIONS
+    // ========================================================================
+    function renderRoutineGrid() {
+      const grid = document.getElementById('routine-grid');
+      grid.innerHTML = routines.map((routine, index) => `
+        <button class="routine-btn ${index === currentRoutine ? 'active' : ''}" onclick="selectRoutine(${index})">
+          <span class="icon">${routine.icon}</span>
+          <span class="title">${routine.title}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderTreeSVG(tree) {
+      if (!tree) return '';
+
+      let svg = '';
+
+      function renderEdges(node) {
+        if (!node) return '';
+        let edges = '';
+        if (node.left) {
+          edges += `<line x1="${node.x}" y1="${node.y}" x2="${node.left.x}" y2="${node.left.y}" stroke="#64748B" stroke-width="3" class="edge-line"/>`;
+          edges += renderEdges(node.left);
+        }
+        if (node.right) {
+          edges += `<line x1="${node.x}" y1="${node.y}" x2="${node.right.x}" y2="${node.right.y}" stroke="#64748B" stroke-width="3" class="edge-line"/>`;
+          edges += renderEdges(node.right);
+        }
+        return edges;
+      }
+
+      function renderNodes(node) {
+        if (!node) return '';
+
+        let nodeColor = "#FFFFFF";
+        let nodeStroke = "#3B82F6";
+        let strokeWidth = "3";
+        let opacity = "1";
+
+        if (node.isDeleting) {
+          nodeColor = "#FEE2E2";
+          nodeStroke = "#EF4444";
+          strokeWidth = "4";
+          opacity = "0.5";
+        } else if (node.visited) {
+          nodeColor = "#D1FAE5";
+          nodeStroke = "#10B981";
+          strokeWidth = "4";
+        } else if (node.highlighted) {
+          nodeColor = "#FEF9C3";
+          nodeStroke = "#F59E0B";
+          strokeWidth = "4";
+        }
+
+        let nodes = `
+          <g style="opacity: ${opacity}">
+            <circle cx="${node.x}" cy="${node.y}" r="22" fill="${nodeColor}" stroke="${nodeStroke}" stroke-width="${strokeWidth}" class="node-circle"/>
+            <text x="${node.x}" y="${node.y + 5}" text-anchor="middle" fill="#1F2937" font-weight="bold" font-size="16" class="node-text">${node.val}</text>
+          </g>
+        `;
+
+        nodes += renderNodes(node.left);
+        nodes += renderNodes(node.right);
+        return nodes;
+      }
+
+      return renderEdges(tree) + renderNodes(tree);
+    }
+
+    function renderCoreIdeaTab() {
+      const routine = routines[currentRoutine];
+      const content = `
+        <div class="card core-idea">
+          <div class="card-header">
+            <h2>🎯 Core Idea: ${routine.title}</h2>
+          </div>
+          <div class="card-content">
+            <div class="aha-box">
+              <h3>💡 The "Aha!" Moment</h3>
+              <p>"${routine.coreIdea.aha}"</p>
+            </div>
+
+            <div class="mental-model-box">
+              <h3>🧠 Mental Model</h3>
+              <p>${routine.coreIdea.mentalModel}</p>
+            </div>
+
+            <div class="development-box">
+              <h3>🔄 How This Develops (Step-by-Step)</h3>
+              ${routine.coreIdea.development.map((step, idx) => `
+                <div class="step-item">
+                  <h4>Step ${idx + 1}: ${step.step}</h4>
+                  <p>${step.explanation}</p>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="misconceptions-box">
+              <h3>⚠️ Common Misconceptions</h3>
+              ${routine.coreIdea.misconceptions.map(misc => `
+                <div class="misconception-item">
+                  <p>${misc}</p>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('tab-core').innerHTML = content;
+    }
+
+    function renderDebugModeTab() {
+      const routine = routines[currentRoutine];
+      const frameData = currentFrames[currentFrame] || {
+        tree: createSampleBST(),
+        variables: {},
+        message: "No animation data",
+        activeLine: null,
+        callStack: [],
+      };
+
+      const codeLines = routine.code.split('\n');
+
+      const content = `
+        <div class="card debug-mode">
+          <div class="card-header">
+            <h2>🛠️ Debug Mode: ${routine.title}</h2>
+          </div>
+          <div class="card-content">
+            ${currentFrames.length > 0 ? `
+              <div class="playback-controls">
+                <div class="control-buttons">
+                  <button class="control-btn" onclick="resetPlayback()" ${currentFrame === 0 ? 'disabled' : ''}>⏮</button>
+                  <button class="control-btn" onclick="previousFrame()" ${currentFrame === 0 ? 'disabled' : ''}>◀</button>
+                  <button class="control-btn ${isPlaying ? 'playing' : ''}" onclick="togglePlayback()">${isPlaying ? '⏸' : '▶'}</button>
+                  <button class="control-btn" onclick="nextFrame()" ${currentFrame === currentFrames.length - 1 ? 'disabled' : ''}>▶</button>
+                  <button class="control-btn" onclick="endPlayback()" ${currentFrame === currentFrames.length - 1 ? 'disabled' : ''}>⏭</button>
+                </div>
+
+                <div class="speed-control">
+                  <span>Speed:</span>
+                  <input type="range" class="speed-slider" min="0.5" max="2" step="0.5" value="${playbackSpeed}" onchange="changeSpeed(this.value)">
+                  <span>${playbackSpeed}x</span>
+                </div>
+
+                <span class="frame-badge">${currentFrame + 1}/${currentFrames.length}</span>
+              </div>
+            ` : ''}
+
+            <div class="debug-layout">
+              <div class="debug-section">
+                <h3>🌳 Binary Search Tree</h3>
+                <div class="tree-container">
+                  <svg class="tree-svg" viewBox="0 0 450 300">
+                    ${renderTreeSVG(frameData.tree)}
+                  </svg>
+                </div>
+              </div>
+
+              <div class="debug-section">
+                <h3>🐍 Python3 Code</h3>
+                <div class="code-container">
+                  <div class="code-header">
+                    <span class="code-lang">🐍 Python3</span>
+                    ${frameData.activeLine ? `<span class="line-badge">Line ${frameData.activeLine}</span>` : ''}
+                  </div>
+                  <div class="code-lines">
+                    ${codeLines.map((line, index) => {
+                      const lineNumber = index + 1;
+                      const isActive = lineNumber === frameData.activeLine;
+                      return `<div class="code-line ${isActive ? 'active' : ''}">
+                        <span class="line-number">${lineNumber}</span>
+                        <code>${highlightPythonCode(line)}</code>
+                      </div>`;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>
+
+              <div class="debug-section state-section">
+                <h3>💾 State</h3>
+                <div class="variables-panel">
+                  <h4>📊 Variables</h4>
+                  ${Object.entries(frameData.variables).map(([key, value]) => `
+                    <div class="variable-item">
+                      <span class="key">${key}:</span>
+                      <span class="value">${String(value)}</span>
+                    </div>
+                  `).join('')}
+                </div>
+
+                ${frameData.callStack && frameData.callStack.length > 0 ? `
+                  <div class="callstack-panel">
+                    <h4>📚 Call Stack</h4>
+                    <div class="callstack-items">
+                      ${frameData.callStack.length === 0 ?
+                        '<p class="callstack-empty">Stack is empty.</p>' :
+                        frameData.callStack.map((call, index) => `
+                          <div class="callstack-item ${index === frameData.callStack.length - 1 ? 'current' : ''}">
+                            <span>${escapeHtml(call)}</span>
+                          </div>
+                        `).join('')
+                      }
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="execution-message">
+              <div class="message-icon">💡</div>
+              <div class="message-content">
+                <h4>${frameData.activeLine ? `⚡ Line ${frameData.activeLine}` : '📍 Status'}</h4>
+                <p>${frameData.message}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('tab-debug').innerHTML = content;
+    }
+
+    function renderEdgeCasesTab() {
+      const routine = routines[currentRoutine];
+      const content = `
+        <div class="card edge-cases">
+          <div class="card-header">
+            <h2>⚠️ Edge Cases & Policy</h2>
+          </div>
+          <div class="card-content">
+            <div class="edge-cases-grid">
+              ${routine.edgeCases.map(edge => `
+                <div class="edge-case-item">
+                  <div class="edge-case-header">
+                    <span class="icon">⚠️</span>
+                    <h4>${edge.case}</h4>
+                  </div>
+                  <div class="edge-case-solution">
+                    <p><span class="label">Solution:</span> ${edge.solution}</p>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('tab-edges').innerHTML = content;
+    }
+
+    function renderComplexityTab() {
+      const routine = routines[currentRoutine];
+      const timeParts = routine.complexity.time.split(' ');
+      const spaceParts = routine.complexity.space.split(' ');
+
+      const content = `
+        <div class="card complexity">
+          <div class="card-header">
+            <h2>⏱️ Time & Space Complexity Analysis</h2>
+          </div>
+          <div class="card-content">
+            <div class="complexity-grid">
+              <div class="time-box">
+                <h3>⏱️ Time Complexity</h3>
+                <div class="value">${timeParts[0]}</div>
+                <p>${routine.complexity.time}</p>
+              </div>
+
+              <div class="space-box">
+                <h3>💾 Space Complexity</h3>
+                <div class="value">${spaceParts[0]}</div>
+                <p>${routine.complexity.space}</p>
+              </div>
+            </div>
+
+            <div class="reasoning-box">
+              <h3>🤔 Why This Complexity?</h3>
+              <p>${routine.complexity.reasoning}</p>
+            </div>
+
+            <div class="nav-buttons">
+              <button class="nav-btn" onclick="switchTab('core')">
+                ◀ Back to Core Idea
+              </button>
+
+              <button class="nav-btn primary" onclick="nextRoutine()" ${currentRoutine === routines.length - 1 ? 'disabled' : ''}>
+                Next Routine ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('tab-complexity').innerHTML = content;
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function highlightPythonCode(line) {
+      // Preserve leading spaces
+      const leadingSpaces = (line.match(/^( +)/) || [''])[0].length;
+      const indent = '&nbsp;'.repeat(leadingSpaces);
+      const trimmed = line.trim();
+
+      if (!trimmed) return indent;
+
+      // Handle comments
+      if (trimmed.startsWith('#')) {
+        return indent + `<span class="py-comment">${escapeHtml(trimmed)}</span>`;
+      }
+
+      // Tokenize the line safely
+      let result = '';
+      let i = 0;
+      const len = trimmed.length;
+
+      while (i < len) {
+        // Skip whitespace
+        if (trimmed[i] === ' ') {
+          result += ' ';
+          i++;
+          continue;
+        }
+
+        // String literals
+        if (trimmed[i] === '"' || trimmed[i] === "'") {
+          const quote = trimmed[i];
+          let str = quote;
+          i++;
+          while (i < len && trimmed[i] !== quote) {
+            if (trimmed[i] === '\\') {
+              str += trimmed[i] + (trimmed[i + 1] || '');
+              i += 2;
+            } else {
+              str += trimmed[i];
+              i++;
+            }
+          }
+          if (i < len) str += trimmed[i++];
+          result += `<span class="py-string">${escapeHtml(str)}</span>`;
+          continue;
+        }
+
+        // Numbers
+        if (/\d/.test(trimmed[i])) {
+          let num = '';
+          while (i < len && /[\d.]/.test(trimmed[i])) {
+            num += trimmed[i++];
+          }
+          result += `<span class="py-number">${num}</span>`;
+          continue;
+        }
+
+        // Identifiers and keywords
+        if (/[a-zA-Z_]/.test(trimmed[i])) {
+          let word = '';
+          while (i < len && /[a-zA-Z0-9_]/.test(trimmed[i])) {
+            word += trimmed[i++];
+          }
+
+          const keywords = ['def', 'return', 'if', 'elif', 'else', 'while', 'for', 'in', 'is', 'and', 'or', 'not', 'class', 'import', 'from'];
+          const builtins = ['None', 'True', 'False', 'self'];
+
+          if (keywords.includes(word)) {
+            result += `<span class="py-keyword">${word}</span>`;
+          } else if (builtins.includes(word)) {
+            result += `<span class="py-builtin">${word}</span>`;
+          } else if (i < len && trimmed[i] === '(') {
+            result += `<span class="py-function">${word}</span>`;
+          } else {
+            result += word;
+          }
+          continue;
+        }
+
+        // Everything else
+        result += escapeHtml(trimmed[i]);
+        i++;
+      }
+
+      return indent + result;
+    }
+
+    // ========================================================================
+    // EVENT HANDLERS
+    // ========================================================================
+    function selectRoutine(index) {
+      currentRoutine = index;
+      currentTab = 'core';
+      currentFrame = 0;
+      isPlaying = false;
+      currentFrames = [];
+      if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+      renderAll();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      currentFrame = 0;
+      isPlaying = false;
+      if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+
+      // Generate frames only when switching to debug tab
+      if (tab === 'debug' && currentFrames.length === 0) {
+        const generator = routines[currentRoutine].frameGenerator;
+        currentFrames = generator ? generator(cloneTree(sampleTree)) : [];
+      }
+
+      // Update tab buttons
+      document.querySelectorAll('.tab-trigger').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+
+      // Update tab content visibility
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `tab-${tab}`);
+      });
+
+      renderCurrentTab();
+    }
+
+    function togglePlayback() {
+      isPlaying = !isPlaying;
+      if (isPlaying) {
+        runPlayback();
+      } else if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+      renderDebugModeTab();
+    }
+
+    function runPlayback() {
+      if (!isPlaying) return;
+
+      playTimer = setTimeout(() => {
+        if (currentFrame < currentFrames.length - 1) {
+          currentFrame++;
+          renderDebugModeTab();
+          runPlayback();
+        } else {
+          isPlaying = false;
+          renderDebugModeTab();
+        }
+      }, 1500 / playbackSpeed);
+    }
+
+    function nextFrame() {
+      if (currentFrame < currentFrames.length - 1) {
+        currentFrame++;
+        renderDebugModeTab();
+      }
+    }
+
+    function previousFrame() {
+      if (currentFrame > 0) {
+        currentFrame--;
+        renderDebugModeTab();
+      }
+    }
+
+    function resetPlayback() {
+      currentFrame = 0;
+      isPlaying = false;
+      if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+      renderDebugModeTab();
+    }
+
+    function endPlayback() {
+      currentFrame = currentFrames.length - 1;
+      isPlaying = false;
+      if (playTimer) {
+        clearTimeout(playTimer);
+        playTimer = null;
+      }
+      renderDebugModeTab();
+    }
+
+    function changeSpeed(value) {
+      playbackSpeed = parseFloat(value);
+      renderDebugModeTab();
+    }
+
+    function nextRoutine() {
+      if (currentRoutine < routines.length - 1) {
+        selectRoutine(currentRoutine + 1);
+      }
+    }
+
+    function renderCurrentTab() {
+      switch (currentTab) {
+        case 'core':
+          renderCoreIdeaTab();
+          break;
+        case 'debug':
+          renderDebugModeTab();
+          break;
+        case 'edges':
+          renderEdgeCasesTab();
+          break;
+        case 'complexity':
+          renderComplexityTab();
+          break;
+      }
+    }
+
+    function renderAll() {
+      renderRoutineGrid();
+
+      // Reset tab state
+      document.querySelectorAll('.tab-trigger').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === currentTab);
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `tab-${currentTab}`);
+      });
+
+      renderCurrentTab();
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', renderAll);
+  </script>
+</body>
+</html>

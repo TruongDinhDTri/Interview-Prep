@@ -1,0 +1,2284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Group Anagrams - A Dreamy Learning Journey ☁️</title>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Dreamy Pastel Palette */
+            --lavender: #B8A4E8;
+            --lavender-light: #D4C7F0;
+            --lavender-soft: #E8E0F5;
+
+            --mint: #9FE2BF;
+            --mint-light: #C4F0DB;
+            --mint-soft: #E0F7EC;
+
+            --peach: #FFB5A7;
+            --peach-light: #FFD7CD;
+            --peach-soft: #FFEEE8;
+
+            --sky-blue: #A8D8EA;
+            --sky-blue-light: #C9E7F2;
+            --sky-blue-soft: #E4F4F9;
+
+            --rose-pink: #F4B4D3;
+            --rose-pink-light: #F9D7E5;
+            --rose-pink-soft: #FCF0F5;
+
+            --cloud-white: #FEFEFE;
+            --cloud-cream: #FFF9F5;
+
+            --text-soft: #6B5B8C;
+            --text-gentle: #8A7A9E;
+
+            --shadow-dreamy: 0 8px 32px rgba(184, 164, 232, 0.15);
+            --shadow-soft: 0 4px 16px rgba(184, 164, 232, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, #FFF9F5 0%, #E8E0F5 50%, #E0F7EC 100%);
+            background-attachment: fixed;
+            color: var(--text-soft);
+            line-height: 1.7;
+            font-size: 16px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Dreamy Floating Particles Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                radial-gradient(circle at 20% 30%, rgba(184, 164, 232, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(159, 226, 191, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(255, 181, 167, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 90% 20%, rgba(168, 216, 234, 0.08) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Sidebar */
+        .container {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(184, 164, 232, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            box-shadow: 4px 0 24px rgba(184, 164, 232, 0.1);
+        }
+
+        .sidebar-header {
+            padding: 35px 25px;
+            background: linear-gradient(135deg, var(--lavender-soft), var(--mint-soft));
+            text-align: center;
+            position: relative;
+        }
+
+        .sidebar-header::before {
+            content: '☁️';
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            opacity: 0.8;
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-header p {
+            color: var(--text-gentle);
+            font-size: 0.9rem;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .nav-menu {
+            flex: 1;
+            padding: 20px 15px;
+        }
+
+        .nav-item {
+            padding: 12px 18px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+            color: var(--text-soft);
+            background: transparent;
+            font-size: 0.95rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(184, 164, 232, 0.12);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--lavender-soft), var(--mint-soft));
+            color: var(--lavender);
+            font-weight: 600;
+        }
+
+        .nav-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 50px 60px;
+            position: relative;
+        }
+
+        .section {
+            display: none;
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 35px 0;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, var(--lavender), var(--mint), var(--peach));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-gentle);
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 35px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(184, 164, 232, 0.2);
+            box-shadow: var(--shadow-dreamy);
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--lavender-soft);
+        }
+
+        .card-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-soft);
+            font-weight: 600;
+            margin: 30px 0 20px 0;
+            padding-left: 18px;
+            border-left: 4px solid var(--mint);
+            border-radius: 4px;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 25px 28px;
+            border-radius: 18px;
+            margin: 25px 0;
+            border-left: 4px solid;
+            backdrop-filter: blur(10px);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        .alert strong {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, rgba(168, 216, 234, 0.15), rgba(184, 164, 232, 0.1));
+            border-color: var(--sky-blue);
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, rgba(159, 226, 191, 0.15), rgba(184, 164, 232, 0.1));
+            border-color: var(--mint);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, rgba(255, 181, 167, 0.15), rgba(244, 180, 211, 0.1));
+            border-color: var(--peach);
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, rgba(244, 180, 211, 0.15), rgba(255, 181, 167, 0.1));
+            border-color: var(--rose-pink);
+        }
+
+        /* Timeline */
+        .timeline {
+            position: relative;
+            padding-left: 50px;
+            margin: 40px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 18px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: linear-gradient(180deg, var(--lavender-light), var(--mint-light));
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 35px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 18px;
+            border: 1px solid rgba(184, 164, 232, 0.2);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .timeline-item::before {
+            content: '✦';
+            position: absolute;
+            left: -40px;
+            top: 28px;
+            color: var(--lavender);
+            font-size: 1.2rem;
+            background: var(--cloud-white);
+            width: 18px;
+            text-align: center;
+            border-radius: 50%;
+        }
+
+        .timeline-item.aha::before {
+            content: '★';
+            color: var(--mint);
+            font-size: 1.4rem;
+            animation: gentleGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes gentleGlow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .timeline-item h4 {
+            font-size: 1.4rem;
+            color: var(--lavender);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .timeline-item p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .quote-box {
+            background: linear-gradient(135deg, rgba(184, 164, 232, 0.1), rgba(159, 226, 191, 0.1));
+            border-left: 4px solid var(--lavender);
+            padding: 22px 28px;
+            border-radius: 15px;
+            margin: 20px 0;
+            font-style: italic;
+            color: var(--text-soft);
+            position: relative;
+            box-shadow: var(--shadow-soft);
+            font-size: 0.95rem;
+        }
+
+        .quote-box::before {
+            content: '"';
+            font-size: 3.5rem;
+            color: var(--lavender-light);
+            opacity: 0.4;
+            position: absolute;
+            left: 10px;
+            top: -8px;
+        }
+
+        /* Struggle & Fix Boxes */
+        .struggle-box {
+            background: linear-gradient(135deg, rgba(255, 181, 167, 0.15), rgba(244, 180, 211, 0.1));
+            border: 2px solid var(--peach);
+            border-radius: 18px;
+            padding: 28px;
+            margin: 25px 0;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .struggle-box h5 {
+            color: var(--peach);
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .fix-box {
+            background: linear-gradient(135deg, rgba(159, 226, 191, 0.15), rgba(184, 164, 232, 0.1));
+            border: 2px solid var(--mint);
+            border-radius: 18px;
+            padding: 28px;
+            margin: 25px 0;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .fix-box h5 {
+            color: var(--mint);
+            font-size: 1.3rem;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Code Blocks */
+        .code-container {
+            background: #2A2438;
+            border-radius: 18px;
+            overflow: hidden;
+            margin: 28px 0;
+            border: 2px solid var(--lavender);
+            box-shadow: var(--shadow-dreamy);
+        }
+
+        .code-header {
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+            padding: 14px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-label {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .code-block {
+            padding: 28px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            color: #E8E0F5;
+        }
+
+        .code-block pre {
+            margin: 0;
+        }
+
+        /* Syntax Highlighting - Dreamy */
+        .kw { color: #B8A4E8; font-weight: 600; }
+        .fn { color: #9FE2BF; font-weight: 600; }
+        .str { color: #A8D8EA; }
+        .com { color: #9B8BAF; font-style: italic; }
+        .num { color: #FFB5A7; }
+
+        /* Visualization */
+        .viz-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(232, 224, 245, 0.6));
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--lavender-light);
+            border-radius: 25px;
+            padding: 40px;
+            margin: 35px 0;
+            box-shadow: var(--shadow-dreamy);
+        }
+
+        .viz-controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+
+        .viz-btn {
+            padding: 12px 32px;
+            border: 2px solid var(--lavender);
+            background: white;
+            color: var(--lavender);
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.25s ease;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .viz-btn:hover:not(:disabled) {
+            background: var(--lavender);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(184, 164, 232, 0.3);
+        }
+
+        .viz-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .viz-btn.primary {
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+            color: white;
+            border-color: transparent;
+        }
+
+        /* String Display */
+        .string-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 35px 0;
+            flex-wrap: wrap;
+        }
+
+        .string-char {
+            width: 75px;
+            height: 75px;
+            background: white;
+            border: 2px solid var(--lavender-light);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--lavender);
+            position: relative;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(184, 164, 232, 0.1);
+        }
+
+        .string-char .char-index {
+            position: absolute;
+            top: -28px;
+            font-size: 0.75rem;
+            color: var(--text-gentle);
+            font-weight: 500;
+            background: var(--lavender-soft);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-family: 'Quicksand', sans-serif;
+        }
+
+        .string-char.current {
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+            border-color: var(--mint);
+            color: white;
+            box-shadow: 0 6px 20px rgba(184, 164, 232, 0.4);
+        }
+
+        .string-char.processed {
+            background: var(--lavender-soft);
+            border-color: var(--lavender-light);
+            color: var(--lavender);
+        }
+
+        /* Hashmap Display */
+        .hashmap-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .hashmap-entry {
+            background: white;
+            border: 2px solid var(--mint-light);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(159, 226, 191, 0.15);
+        }
+
+        .hashmap-entry.new {
+            border-color: var(--lavender);
+            box-shadow: 0 6px 20px rgba(184, 164, 232, 0.3);
+        }
+
+        .hashmap-key {
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            color: var(--lavender);
+            font-weight: 600;
+            margin-bottom: 18px;
+            padding: 10px;
+            background: var(--lavender-soft);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .hashmap-value {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .hashmap-string {
+            background: linear-gradient(135deg, var(--mint), var(--sky-blue));
+            color: white;
+            padding: 8px 18px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            box-shadow: 0 3px 8px rgba(159, 226, 191, 0.3);
+        }
+
+        /* Quiz */
+        .quiz-question {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            border: 2px solid var(--lavender);
+            border-radius: 20px;
+            padding: 32px;
+            margin: 30px 0;
+            box-shadow: var(--shadow-dreamy);
+        }
+
+        .quiz-question h4 {
+            color: var(--lavender);
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .quiz-option {
+            padding: 16px 24px;
+            background: white;
+            border-radius: 15px;
+            margin: 14px 0;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: 2px solid transparent;
+            border-left: 4px solid var(--lavender);
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--mint);
+            border-left-color: var(--mint);
+            background: var(--mint-soft);
+            transform: translateX(4px);
+        }
+
+        .quiz-option.correct {
+            background: linear-gradient(135deg, var(--mint), var(--sky-blue));
+            border-color: var(--mint);
+            color: white;
+        }
+
+        .quiz-option.incorrect {
+            background: linear-gradient(135deg, var(--peach), var(--rose-pink));
+            border-color: var(--peach);
+            color: white;
+        }
+
+        .quiz-feedback {
+            margin-top: 20px;
+            padding: 20px 25px;
+            border-radius: 15px;
+            display: none;
+            font-size: 0.95rem;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        /* Complexity Table */
+        .complexity-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin: 30px 0;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-dreamy);
+            border: 2px solid var(--lavender);
+        }
+
+        .complexity-table thead {
+            background: linear-gradient(135deg, var(--lavender), var(--mint));
+        }
+
+        .complexity-table th {
+            padding: 18px 25px;
+            text-align: left;
+            font-weight: 600;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .complexity-table td {
+            padding: 16px 25px;
+            border-bottom: 1px solid var(--lavender-soft);
+            background: white;
+            font-size: 0.95rem;
+        }
+
+        .complexity-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-left: 12px;
+        }
+
+        .badge-success {
+            background: var(--mint);
+            color: white;
+        }
+
+        .badge-danger {
+            background: var(--peach);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--lavender);
+            color: white;
+        }
+
+        /* Highlight */
+        .highlight {
+            background: linear-gradient(135deg, rgba(184, 164, 232, 0.2), rgba(159, 226, 191, 0.2));
+            padding: 3px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-soft);
+        }
+
+        /* Lists */
+        ul, ol {
+            margin-left: 28px;
+            margin-top: 18px;
+            line-height: 1.9;
+        }
+
+        ul li, ol li {
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        /* Divider */
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--lavender-light), transparent);
+            margin: 40px 0;
+            border-radius: 2px;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--cloud-cream);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, var(--lavender), var(--mint));
+            border-radius: 10px;
+            border: 2px solid var(--cloud-cream);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, var(--mint), var(--lavender));
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+            }
+
+            .main-content {
+                padding: 35px 20px;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .string-char {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>Group Anagrams</h1>
+                <p>A Dreamy Learning Journey</p>
+            </div>
+            <div class="nav-menu">
+                <div class="nav-item active" onclick="showSection('journey')">
+                    <span class="nav-icon">🚀</span> Learning Journey
+                </div>
+                <div class="nav-item" onclick="showSection('pattern')">
+                    <span class="nav-icon">🎯</span> Pattern Recognition
+                </div>
+                <div class="nav-item" onclick="showSection('insight')">
+                    <span class="nav-icon">💡</span> The Key Insight
+                </div>
+                <div class="nav-item" onclick="showSection('complexity')">
+                    <span class="nav-icon">📊</span> Complexity Analysis
+                </div>
+                <div class="nav-item" onclick="showSection('struggles')">
+                    <span class="nav-icon">🐛</span> Struggles & Fixes
+                </div>
+                <div class="nav-item" onclick="showSection('visualizer')">
+                    <span class="nav-icon">🎨</span> Interactive Demo
+                </div>
+                <div class="nav-item" onclick="showSection('solution')">
+                    <span class="nav-icon">✅</span> Final Solution
+                </div>
+                <div class="nav-item" onclick="showSection('quiz')">
+                    <span class="nav-icon">🧠</span> Test Yourself
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+
+            <!-- LEARNING JOURNEY -->
+            <div id="journey" class="section active">
+                <div class="section-header">
+                    <h2>Our Learning Journey</h2>
+                    <p>From confusion to clarity - Every step matters</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📖 The Problem Statement</div>
+
+                    <div class="alert alert-info">
+                        <strong>🎯 The Challenge:</strong>
+                        Given an array of strings, group the anagrams together.
+                        <br><br>
+                        <strong>📝 What are Anagrams?</strong><br>
+                        Words that contain the same characters with the same frequencies, just rearranged!<br>
+                        • "eat", "tea", "ate" → All anagrams (same letters: e, a, t)<br>
+                        • "bat" → Not an anagram of the above (different letters)
+                        <br><br>
+                        <strong>💻 Example:</strong><br>
+                        Input: <code>["eat", "tea", "tan", "ate", "nat", "bat"]</code><br>
+                        Output: <code>[["eat", "tea", "ate"], ["tan", "nat"], ["bat"]]</code>
+                        <br><br>
+                        <strong>🎨 Notice:</strong> Each group contains strings that are anagrams of each other!
+                    </div>
+
+                    <div class="card-subtitle">🤔 Initial Thoughts</div>
+                    <p>When first encountering this problem, the natural question is: <strong>"How do I identify which strings are anagrams?"</strong></p>
+                    <p>We need some way to compare strings and know instantly if they're anagrams without checking every possible pair (which would be too slow!).</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🗺️ The Complete Journey</div>
+
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4>Step 1: The First Intuition</h4>
+                            <p>The journey began with a solid instinct - use a hashmap! But the question was: <strong>how exactly?</strong></p>
+
+                            <div class="quote-box">
+                                "How about using a hashmap and than i check if those 2 hashmap are the same?"
+                            </div>
+
+                            <p><strong>💭 The Thought Process:</strong></p>
+                            <p>This was thinking about comparing character frequency maps of each string. While the intuition was good, comparing every pair of strings would be O(n²) - too slow!</p>
+
+                            <div class="alert alert-warning">
+                                <strong>⚠️ The Challenge:</strong>
+                                How do we avoid comparing EVERY pair of strings? We need a smarter approach!
+                            </div>
+                        </div>
+
+                        <div class="timeline-item aha">
+                            <h4>Step 2: The Breakthrough Moment!</h4>
+                            <p>Instead of comparing pairs, what if we could create a <strong>unique signature</strong> that ALL anagrams share?</p>
+
+                            <div class="alert alert-success">
+                                <strong>💡 The Aha Moment:</strong>
+                                All anagrams produce the SAME sorted string!
+                                <br><br>
+                                <strong>🎯 Let's see it in action:</strong><br>
+                                • <code>"eat"</code> → sort characters → <code>"aet"</code><br>
+                                • <code>"tea"</code> → sort characters → <code>"aet"</code> ← Identical!<br>
+                                • <code>"ate"</code> → sort characters → <code>"aet"</code> ← Identical!<br>
+                                • <code>"bat"</code> → sort characters → <code>"abt"</code> ← Different!
+                                <br><br>
+                                <strong>✨ The Magic:</strong> Strings with the same sorted version are automatically anagrams!
+                            </div>
+
+                            <p><strong>🏗️ Building the Solution:</strong></p>
+                            <p>Now we can use a hashmap where:</p>
+                            <ul>
+                                <li><strong>Key:</strong> The sorted string (e.g., "aet")</li>
+                                <li><strong>Value:</strong> List of original strings that sort to this key</li>
+                            </ul>
+
+                            <div class="code-container">
+                                <div class="code-header">
+                                    <span class="code-label">The Hashmap Structure</span>
+                                </div>
+                                <div class="code-block">
+<pre>hashmap = {
+    <span class="str">"aet"</span>: [<span class="str">"eat"</span>, <span class="str">"tea"</span>, <span class="str">"ate"</span>],  <span class="com"># All anagrams!</span>
+    <span class="str">"ant"</span>: [<span class="str">"tan"</span>, <span class="str">"nat"</span>],         <span class="com"># All anagrams!</span>
+    <span class="str">"abt"</span>: [<span class="str">"bat"</span>]                  <span class="com"># Only one string</span>
+}</pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeline-item aha">
+                            <h4>Step 3: The Complexity Discussion</h4>
+                            <p>A fascinating deep dive into WHY sorting has the complexity it has!</p>
+
+                            <div class="quote-box">
+                                "Wait a minute. The fastest sorting algorithm is nlogn right? let's say for heapsort. Each time we travel the heap is logn time. We delete the root and place it at the end of the array right? => n time we do that that's nlogn. => So let's say if the string is k characters => build a heap so it k height. => sort it it would k klogk. => n string would be n * klogk?"
+                            </div>
+
+                            <div class="alert alert-success">
+                                <strong>🌟 Brilliant Reasoning!</strong>
+                                <br><br>
+                                You didn't just accept "sorting is O(n log n)" as a fact - you <strong>derived it from first principles</strong> by thinking through heapsort's mechanics:
+                                <br><br>
+                                <strong>For a heap with k elements:</strong><br>
+                                • Height of heap = log k<br>
+                                • Deleting root (heapify down) = O(log k)<br>
+                                • Delete k times = k × log k = <strong>O(k log k)</strong>
+                                <br><br>
+                                <strong>For n strings:</strong><br>
+                                • Each string: O(k log k)<br>
+                                • n strings total: <strong>O(n × k log k)</strong>
+                            </div>
+
+                            <p><strong>📚 The Learning:</strong></p>
+                            <p>Understanding <em>why</em> algorithms have certain complexities (not just memorizing) lets you:</p>
+                            <ul>
+                                <li>Apply the concept correctly when the problem changes</li>
+                                <li>Make informed decisions about trade-offs</li>
+                                <li>Build genuine intuition about performance</li>
+                            </ul>
+                        </div>
+
+                        <div class="timeline-item">
+                            <h4>Step 4: Sorting vs Counting - The Trade-off</h4>
+                            <p>An interesting alternative emerged: Instead of sorting, could we COUNT character frequencies?</p>
+
+                            <div class="alert alert-info">
+                                <strong>🎯 Two Approaches:</strong>
+                                <br><br>
+                                <strong>Approach A: Sorting (Chosen)</strong><br>
+                                • Sort the characters: O(k log k)<br>
+                                • Simple to implement<br>
+                                • Clear and readable
+                                <br><br>
+                                <strong>Approach B: Counting</strong><br>
+                                • Count character frequencies: O(k)<br>
+                                • Sort 26 letters: O(1)<br>
+                                • Faster, but more complex code
+                            </div>
+
+                            <p><strong>🎨 The Decision:</strong></p>
+                            <p>We chose <strong>sorting</strong> because for typical string lengths, the performance difference is minimal, and the code is much cleaner!</p>
+
+                            <div class="alert alert-warning">
+                                <strong>💭 Wisdom:</strong>
+                                <em>"Premature optimization is the root of all evil"</em> - Donald Knuth
+                                <br><br>
+                                Start simple, optimize later if needed!
+                            </div>
+                        </div>
+
+                        <div class="timeline-item">
+                            <h4>Step 5: Implementation Time!</h4>
+                            <p>With the strategy clear, it was time to write code... and that's when the <strong>real</strong> learning began with bugs!</p>
+                            <p>Each bug taught an important lesson about Python, hashmaps, and careful implementation.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎓 What Made This Journey Special</div>
+
+                    <div class="alert alert-success">
+                        <strong>✨ You didn't just solve a problem - you:</strong>
+                        <br><br>
+                        • Started with good intuition (hashmaps!)<br>
+                        • Discovered the signature technique through reasoning<br>
+                        • Derived time complexity from first principles<br>
+                        • Evaluated trade-offs between approaches<br>
+                        • Learned from every bug and mistake<br>
+                        • Built deep understanding, not surface knowledge
+                    </div>
+                </div>
+            </div>
+
+            <!-- PATTERN RECOGNITION -->
+            <div id="pattern" class="section">
+                <div class="section-header">
+                    <h2>Pattern Recognition</h2>
+                    <p>How we identified the right approach</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔍 The Detective Work</div>
+
+                    <p>Before jumping to hashmaps, let's understand WHY the patterns you already know (Two Pointers and Sliding Window) don't work here.</p>
+
+                    <div class="card-subtitle">❌ Why NOT Two Pointers?</div>
+
+                    <div class="alert alert-danger">
+                        <strong>🚫 Two Pointers Pattern is for:</strong>
+                        <br><br>
+                        <strong>1. Finding Pairs/Triplets in Sorted Arrays</strong><br>
+                        • Example: Two Sum in sorted array<br>
+                        • Use left and right pointers to find target sum<br>
+                        • This problem: NOT about finding pairs!
+                        <br><br>
+                        <strong>2. In-Place Array Modification</strong><br>
+                        • Example: Remove duplicates from sorted array<br>
+                        • Use slow/fast pointers to filter in-place<br>
+                        • This problem: NOT modifying in-place!
+                        <br><br>
+                        <strong>3. Linked List Operations</strong><br>
+                        • Example: Detect cycle, find middle<br>
+                        • Use fast/slow pointers<br>
+                        • This problem: NOT working with linked lists!
+                        <br><br>
+                        <strong>❌ Conclusion:</strong> No pairs, no in-place modification, no linked lists → NOT Two Pointers!
+                    </div>
+
+                    <div class="card-subtitle">❌ Why NOT Sliding Window?</div>
+
+                    <div class="alert alert-danger">
+                        <strong>🚫 Sliding Window Pattern is for:</strong>
+                        <br><br>
+                        <strong>1. Contiguous Subarrays/Substrings</strong><br>
+                        • Example: Longest substring with K distinct characters<br>
+                        • Expand window right, shrink when invalid<br>
+                        • This problem: NOT looking for subarrays!
+                        <br><br>
+                        <strong>2. Window Validity Conditions</strong><br>
+                        • Example: Maximum sum of subarray with size K<br>
+                        • Maintain window that satisfies constraints<br>
+                        • This problem: NO window validity concept!
+                        <br><br>
+                        <strong>3. Longest/Shortest Subsequence</strong><br>
+                        • Example: Minimum window substring<br>
+                        • Find optimal window length<br>
+                        • This problem: NOT about subsequence length!
+                        <br><br>
+                        <strong>❌ Conclusion:</strong> No contiguous subarray, no window validity, no length optimization → NOT Sliding Window!
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="card-subtitle">✅ It's a GROUPING Problem!</div>
+
+                    <div class="alert alert-success">
+                        <strong>🎯 Key Indicators This is Hash Map / Grouping:</strong>
+                        <br><br>
+                        <strong>1. The Problem Asks to "Group" Items</strong><br>
+                        • "Group anagrams together"<br>
+                        • Need to categorize strings by shared property<br>
+                        • Classic grouping scenario!
+                        <br><br>
+                        <strong>2. Need O(1) Lookup</strong><br>
+                        • Must quickly check if a group exists<br>
+                        • Hashmaps provide O(1) average lookup<br>
+                        • Perfect for this use case!
+                        <br><br>
+                        <strong>3. Multiple Items Per Category</strong><br>
+                        • Each group can have many strings<br>
+                        • Hashmap values can be lists<br>
+                        • Natural fit for this structure!
+                        <br><br>
+                        <strong>4. Shared Property Identification</strong><br>
+                        • All anagrams share same sorted string<br>
+                        • Use this as the hashmap key<br>
+                        • Automatic grouping!
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎯 The Pattern Recognition Framework</div>
+
+                    <div class="alert alert-info">
+                        <strong>📚 When You See These Keywords → Think Hash Map:</strong>
+                        <br><br>
+                        • <strong>"Group"</strong> items by property<br>
+                        • <strong>"Categorize"</strong> elements<br>
+                        • <strong>"Organize"</strong> by shared characteristic<br>
+                        • <strong>"Count frequency"</strong> of items<br>
+                        • <strong>"Find duplicates"</strong> or unique items<br>
+                        • <strong>"Map"</strong> one thing to another
+                        <br><br>
+                        <strong>🎨 Other Examples:</strong><br>
+                        • Group strings by length → Hash map: length → [strings]<br>
+                        • Group numbers by sum of digits → Hash map: sum → [numbers]<br>
+                        • Count character frequencies → Hash map: char → count
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZER -->
+            <div id="visualizer" class="section">
+                <div class="section-header">
+                    <h2>Interactive Visualization</h2>
+                    <p>Watch the magic happen step by step</p>
+                </div>
+
+                <div class="viz-container">
+                    <div class="viz-controls">
+                        <button class="viz-btn" onclick="vizReset()">⏮️ Reset</button>
+                        <button class="viz-btn" onclick="vizPrev()" id="prevBtn">◀️ Previous</button>
+                        <button class="viz-btn primary" onclick="vizNext()" id="nextBtn">Next Step ▶️</button>
+                    </div>
+
+                    <div class="alert alert-info" id="stepInfo" style="text-align: center; font-size: 1.05rem; font-weight: 600;">
+                        ☁️ Click "Next Step" to begin the dreamy journey ☁️
+                    </div>
+
+                    <div class="string-display" id="stringDisplay"></div>
+
+                    <div class="hashmap-display" id="hashmapDisplay"></div>
+                </div>
+            </div>
+
+            <!-- KEY INSIGHT -->
+            <div id="insight" class="section">
+                <div class="section-header">
+                    <h2>The Key Insight</h2>
+                    <p>Understanding the signature technique</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💡 The Signature Technique</div>
+
+                    <p>This is a <strong>grouping problem</strong>, not a search or subarray problem. When you need to group items by shared properties → think <strong>hashmap</strong>!</p>
+
+                    <div class="card-subtitle">🤔 What Makes Anagrams the Same?</div>
+
+                    <p>Understanding what makes anagrams identical is the first step:</p>
+
+                    <div class="alert alert-info">
+                        <strong>Anagrams have:</strong><br><br>
+                        • Same characters<br>
+                        • Same count of each character<br>
+                        • Just rearranged!
+                        <br><br>
+                        <strong>Examples:</strong><br>
+                        • "eat" has: e(1), a(1), t(1)<br>
+                        • "tea" has: e(1), a(1), t(1) ← Identical!<br>
+                        • "bat" has: b(1), a(1), t(1) ← Different!
+                    </div>
+
+                    <div class="card-subtitle">✨ The Magic: Creating a Signature</div>
+
+                    <p>Instead of comparing every pair of strings (O(n²)), we create a unique <strong>signature</strong> that all anagrams share!</p>
+
+                    <div class="alert alert-success">
+                        <strong>💡 The Breakthrough:</strong><br><br>
+                        <strong>All anagrams produce the SAME sorted string!</strong>
+                        <br><br>
+                        • <code>"eat"</code> → sorted → <code>"aet"</code><br>
+                        • <code>"tea"</code> → sorted → <code>"aet"</code> ← Same!<br>
+                        • <code>"ate"</code> → sorted → <code>"aet"</code> ← Same!<br>
+                        • <code>"bat"</code> → sorted → <code>"abt"</code> ← Different!
+                        <br><br>
+                        <strong>✨ The Magic:</strong> Strings with the same sorted version are automatically anagrams!
+                    </div>
+
+                    <div class="card-subtitle">🏗️ The Hashmap Structure</div>
+
+                    <p>Now we can use a hashmap where:</p>
+
+                    <ul>
+                        <li><strong>Key:</strong> The sorted string (e.g., "aet")</li>
+                        <li><strong>Value:</strong> List of original strings that sort to this key</li>
+                    </ul>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">The Hashmap Structure</span>
+                        </div>
+                        <div class="code-block">
+<pre>hashmap = {
+    <span class="str">"aet"</span>: [<span class="str">"eat"</span>, <span class="str">"tea"</span>, <span class="str">"ate"</span>],  <span class="com"># All anagrams!</span>
+    <span class="str">"ant"</span>: [<span class="str">"tan"</span>, <span class="str">"nat"</span>],         <span class="com"># All anagrams!</span>
+    <span class="str">"abt"</span>: [<span class="str">"bat"</span>]                  <span class="com"># Only one string</span>
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="card-subtitle">🎯 Alternative Approach: Character Counting</div>
+
+                    <p>There's another way to create signatures - count character frequencies!</p>
+
+                    <div class="grid-2" style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin: 25px 0;">
+                        <div>
+                            <div class="alert alert-info">
+                                <strong>Approach A: Sorting (Chosen)</strong><br><br>
+                                • Sort the characters: O(k log k)<br>
+                                • Simple to implement<br>
+                                • Clear and readable<br>
+                                • Perfect for interviews!
+                            </div>
+                        </div>
+                        <div>
+                            <div class="alert alert-warning">
+                                <strong>Approach B: Counting</strong><br><br>
+                                • Count character frequencies: O(k)<br>
+                                • Sort 26 letters: O(1)<br>
+                                • Faster, but more complex code<br>
+                                • Premature optimization!
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <strong>🎨 The Decision:</strong><br><br>
+                        We chose <strong>sorting</strong> because for typical string lengths, the performance difference is minimal, and the code is much cleaner!
+                        <br><br>
+                        <em>"Premature optimization is the root of all evil"</em> - Donald Knuth
+                        <br><br>
+                        Start simple, optimize later if needed!
+                    </div>
+
+                    <div class="card-subtitle">🎓 The Pattern: Signature Technique</div>
+
+                    <div class="alert alert-info">
+                        <strong>When to Use This Pattern:</strong><br><br>
+                        Find a property that's:
+                        <br><br>
+                        • <strong>Identical</strong> for items in the same group<br>
+                        • <strong>Different</strong> for items in different groups<br>
+                        • <strong>Immutable</strong> (can be a hashmap key)
+                        <br><br>
+                        <strong>🎨 Other Examples:</strong><br>
+                        • Group strings by length → Hash map: length → [strings]<br>
+                        • Group numbers by sum of digits → Hash map: sum → [numbers]<br>
+                        • Count character frequencies → Hash map: char → count
+                    </div>
+                </div>
+            </div>
+
+            <div id="complexity" class="section">
+                <div class="section-header">
+                    <h2>Complexity Analysis</h2>
+                    <p>Deep dive into time and space complexity</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📊 Understanding the Complexity</div>
+
+                    <div class="card-subtitle">⏱️ Time Complexity: O(n × k log k)</div>
+
+                    <p>Let's break down where this comes from:</p>
+
+                    <div class="alert alert-info">
+                        <strong>Variables:</strong><br><br>
+                        • <code>n</code> = number of strings in the input array<br>
+                        • <code>k</code> = maximum length of a string
+                    </div>
+
+                    <div class="card-subtitle">🧮 Derivation: The Heap Sort Method</div>
+
+                    <p>You derived this complexity from first principles by thinking through heapsort! Here's how:</p>
+
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4>For ONE String of Length k:</h4>
+                            <p><strong>Building a heap:</strong></p>
+                            <ul>
+                                <li>Height of heap with k elements = <code>log k</code></li>
+                                <li>Each heapify operation = <code>O(log k)</code></li>
+                                <li>Delete root and reheapify = <code>O(log k)</code></li>
+                                <li>Do this k times (for k elements) = <code>k × log k</code></li>
+                            </ul>
+                            <p><strong>Result:</strong> Sorting one string = <strong>O(k log k)</strong></p>
+                        </div>
+
+                        <div class="timeline-item aha">
+                            <h4>For ALL n Strings:</h4>
+                            <p>If we sort <strong>n</strong> strings, and each sort costs <code>k log k</code>:</p>
+                            <p><strong>Total Time:</strong> <code>n × (k log k)</code> = <strong>O(n × k log k)</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <strong>💡 Why This Is Brilliant:</strong><br><br>
+                        You didn't just memorize "sorting is O(n log n)" - you understood <strong>WHY</strong> by thinking through the heap structure. This deeper understanding helps you apply it correctly when the "n" changes (here it's k characters, not n strings). Many people miss this distinction!
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="card-subtitle">🎯 Alternative: Counting Approach</div>
+
+                    <p>We discussed an alternative using character frequency counting:</p>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">Counting Approach</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="kw">def</span> <span class="fn">createKey</span>(s):
+    freq = [<span class="num">0</span>] * <span class="num">26</span>  <span class="com"># For a-z</span>
+
+    <span class="kw">for</span> char <span class="kw">in</span> s:  <span class="com"># O(k) - loop through string</span>
+        freq[<span class="fn">ord</span>(char) - <span class="fn">ord</span>(<span class="str">'a'</span>)] += <span class="num">1</span>
+
+    <span class="com"># Convert to tuple (immutable) to use as key</span>
+    <span class="kw">return</span> <span class="fn">tuple</span>(freq)  <span class="com"># O(1) - only 26 elements</span></pre>
+                        </div>
+                    </div>
+
+                    <p><strong>Time Complexity Breakdown:</strong></p>
+                    <ul>
+                        <li>Count characters: <code>O(k)</code> - visit each character once</li>
+                        <li>Create tuple from 26-element array: <code>O(1)</code> - constant size</li>
+                        <li>For n strings: <code>O(n × k)</code></li>
+                    </ul>
+
+                    <table class="complexity-table">
+                        <thead>
+                            <tr>
+                                <th>Approach</th>
+                                <th>Time Complexity</th>
+                                <th>Code Simplicity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Sorting</strong></td>
+                                <td><code>O(n × k log k)</code></td>
+                                <td>✅ Very Simple</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Counting</strong></td>
+                                <td><code>O(n × k)</code></td>
+                                <td>⚠️ More Complex</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-warning">
+                        <strong>📚 The Learning:</strong><br><br>
+                        Understanding <em>why</em> algorithms have certain complexities (not just memorizing) lets you:
+                        <br><br>
+                        • Apply the concept correctly when the problem changes<br>
+                        • Make informed decisions about trade-offs<br>
+                        • Build genuine intuition about performance
+                    </div>
+
+                    <div class="card-subtitle">💾 Space Complexity: O(n × k)</div>
+
+                    <p><strong>What we're storing:</strong></p>
+
+                    <ul>
+                        <li><strong>Hashmap:</strong> Stores all n strings</li>
+                        <li><strong>Keys:</strong> Sorted versions (up to n distinct keys)</li>
+                        <li><strong>Values:</strong> Lists containing original strings</li>
+                    </ul>
+
+                    <p><strong>Worst case:</strong> All strings are unique (no anagrams), so we have n keys, each with one string of length k.</p>
+                    <p><strong>Total space:</strong> O(n × k)</p>
+
+                    <div class="alert alert-info">
+                        <strong>Note:</strong> The space to store the output is not counted in space complexity analysis, since it's required by the problem.
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📈 Complexity Summary</div>
+
+                    <table class="complexity-table">
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Complexity</th>
+                                <th>Explanation</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Time</strong></td>
+                                <td><code>O(n × k log k)</code></td>
+                                <td>Sort k characters for each of n strings</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Space</strong></td>
+                                <td><code>O(n × k)</code></td>
+                                <td>Store all n strings in hashmap</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="alert alert-success">
+                        <strong>🎯 Optimization Decision:</strong><br><br>
+                        We chose <strong>sorting (k log k)</strong> over <strong>counting (k)</strong> because:
+                        <br><br>
+                        • For typical interview problems, k is small (k ≤ 100)<br>
+                        • The difference between k log k and k is negligible<br>
+                        • Sorting produces much cleaner, more readable code<br>
+                        • "Premature optimization is the root of all evil!"
+                    </div>
+                </div>
+            </div>
+
+            <div id="struggles" class="section">
+                <div class="section-header">
+                    <h2>Struggles & Fixes</h2>
+                    <p>Learning from every mistake</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🐛 Implementation Struggles & Fixes</div>
+
+                    <p>Every bug is a learning opportunity! Here are all the implementation challenges encountered and how they were resolved:</p>
+
+                    <div class="struggle-box">
+                        <h5>🔴 Struggle #1: In-Place Sorting Confusion</h5>
+
+                        <p><strong>Initial thought:</strong> "If I use <code>sort()</code> it will sort in-place and replace the actual value, right?"</p>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">❌ Attempted Code</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(strs)):
+    strs[i].sort()  <span class="com"># Thinking this modifies the string in-place</span>
+    key_hashmap[strs[i]] = []</pre>
+                            </div>
+                        </div>
+
+                        <p><strong>The problem:</strong> Strings in Python are <strong>immutable</strong> - they don't have a <code>.sort()</code> method at all!</p>
+
+                        <p><strong>The realization:</strong> Need to use <code>sorted()</code> which returns a NEW sorted list, then join it back into a string.</p>
+                    </div>
+
+                    <div class="fix-box">
+                        <h5>✅ Fix #1: Understanding sorted() vs sort()</h5>
+
+                        <div class="alert alert-success">
+                            <strong>Python Sorting Methods:</strong><br><br>
+                            <strong><code>.sort()</code> (method):</strong><br>
+                            • Only works on lists<br>
+                            • Modifies list in-place<br>
+                            • Returns None<br><br>
+                            <strong><code>sorted()</code> (function):</strong><br>
+                            • Works on any iterable (list, string, tuple, etc.)<br>
+                            • Returns a NEW sorted list<br>
+                            • Doesn't modify the original
+                        </div>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">✅ Correct Approach</span>
+                            </div>
+                            <div class="code-block">
+<pre>s = <span class="str">"eat"</span>
+sorted_list = <span class="fn">sorted</span>(s)  <span class="com"># Returns ['a', 'e', 't']</span>
+<span class="com"># Still need to convert list back to string!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="struggle-box">
+                        <h5>🔴 Struggle #2: Join Syntax Mystery</h5>
+
+                        <p><strong>The confusion:</strong> "I don't know the syntax for <code>join()</code> sorry :)))"</p>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">❌ Wrong</span>
+                            </div>
+                            <div class="code-block">
+<pre>sorted_key = <span class="fn">sorted</span>(strs[i]).join(<span class="str">''</span>)  <span class="com"># ❌ Lists don't have join()!</span></pre>
+                            </div>
+                        </div>
+
+                        <p><strong>The learning:</strong> Python's <code>join()</code> is backwards from intuition!</p>
+
+                        <ul>
+                            <li>NOT: <code>list.join(separator)</code> ❌</li>
+                            <li>YES: <code>separator.join(list)</code> ✅</li>
+                        </ul>
+
+                        <p>The <strong>separator</strong> (a string) calls <code>.join()</code> on the iterable!</p>
+                    </div>
+
+                    <div class="fix-box">
+                        <h5>✅ Fix #2: Mastering join()</h5>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">✅ Correct Syntax</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="com"># The separator STRING calls join() on the list!</span>
+sorted_key = <span class="str">''</span>.join(<span class="fn">sorted</span>(strs[i]))  <span class="com"># ✅ "aet"</span>
+
+<span class="com"># Examples of different separators:</span>
+<span class="str">'-'</span>.join([<span class="str">'a'</span>, <span class="str">'e'</span>, <span class="str">'t'</span>])  <span class="com"># "a-e-t"</span>
+<span class="str">' '</span>.join([<span class="str">'a'</span>, <span class="str">'e'</span>, <span class="str">'t'</span>])  <span class="com"># "a e t"</span>
+<span class="str">''</span>.join([<span class="str">'a'</span>, <span class="str">'e'</span>, <span class="str">'t'</span>])   <span class="com"># "aet"</span></pre>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Why:</strong> <code>''</code> is the separator (empty string), and it joins the list <code>['a','e','t']</code> → <code>"aet"</code>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="struggle-box">
+                        <h5>🔴 Struggle #3: When to Add the Original String?</h5>
+
+                        <p><strong>Initial thought:</strong> "The value is <code>[]</code> because we're just creating a hashmap here. Is it right?"</p>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">❌ Initial Approach</span>
+                            </div>
+                            <div class="code-block">
+<pre>key_hashmap[<span class="str">"aet"</span>] = []  <span class="com"># Create empty list first?</span>
+<span class="com"># Then add "eat" later somehow?</span></pre>
+                            </div>
+                        </div>
+
+                        <p><strong>The confusion:</strong> Thinking in two phases - first create structure, then populate it.</p>
+
+                        <p><strong>The question that helped:</strong> "You have the original word 'eat' right here in your hand - should you put it in the list now, or later?"</p>
+
+                        <p><strong>The realization:</strong> We should add the string <strong>immediately</strong> when we encounter it!</p>
+                    </div>
+
+                    <div class="fix-box">
+                        <h5>✅ Fix #3: Add Immediately</h5>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">✅ Correct</span>
+                            </div>
+                            <div class="code-block">
+<pre>sorted_key = <span class="str">"aet"</span>
+key_hashmap[sorted_key] = [strs[i]]  <span class="com"># Add "eat" right away!</span></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="struggle-box">
+                        <h5>🔴 Struggle #4: Extra List Nesting</h5>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">❌ Wrong</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="kw">if</span> sorted_key <span class="kw">in</span> key_hashmap:
+    key_hashmap[sorted_key].append([strs[i]])   <span class="com"># Wrapping in extra []</span>
+<span class="kw">else</span>:
+    key_hashmap[sorted_key] = [[strs[i]]]       <span class="com"># Double wrapping!</span></pre>
+                            </div>
+                        </div>
+
+                        <p><strong>The problem:</strong> This creates <code>[["eat"]]</code> instead of <code>["eat"]</code>, and <code>[[["eat"]]]</code> instead of <code>[["eat"]]</code>!</p>
+
+                        <p><strong>The question:</strong> "What do you actually want? A list of strings or a list of lists?"</p>
+
+                        <p><strong>The answer:</strong> "Well, a list of strings right?"</p>
+                    </div>
+
+                    <div class="fix-box">
+                        <h5>✅ Fix #4: Correct List Structure</h5>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">✅ Correct</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="kw">if</span> sorted_key <span class="kw">in</span> key_hashmap:
+    key_hashmap[sorted_key].append(strs[i])   <span class="com"># Just the string</span>
+<span class="kw">else</span>:
+    key_hashmap[sorted_key] = [strs[i]]       <span class="com"># List with one string</span></pre>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info">
+                            <strong>Remember:</strong><br>
+                            • <code>[strs[i]]</code> creates a list with one string<br>
+                            • <code>[[strs[i]]]</code> creates a list with one list with one string<br>
+                            • We want a list of strings!
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="struggle-box">
+                        <h5>🔴 Struggle #5: Handling Duplicate Keys</h5>
+
+                        <p><strong>The scenario:</strong> What happens when we see another anagram?</p>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">❌ The Bug</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="com"># First time: "eat" → "aet"</span>
+key_hashmap[<span class="str">"aet"</span>] = [<span class="str">"eat"</span>]
+
+<span class="com"># Second time: "tea" → "aet" (same key!)</span>
+key_hashmap[<span class="str">"aet"</span>] = [<span class="str">"tea"</span>]  <span class="com"># This overwrites! Lost "eat"!</span></pre>
+                            </div>
+                        </div>
+
+                        <p><strong>The realization:</strong> Need to <strong>check if key exists</strong> before assigning!</p>
+                    </div>
+
+                    <div class="fix-box">
+                        <h5>✅ Fix #5: Check Before Adding</h5>
+
+                        <div class="code-container">
+                            <div class="code-header">
+                                <span class="code-label">✅ Correct</span>
+                            </div>
+                            <div class="code-block">
+<pre><span class="kw">if</span> sorted_key <span class="kw">in</span> key_hashmap:
+    key_hashmap[sorted_key].append(strs[i])  <span class="com"># Add to existing</span>
+<span class="kw">else</span>:
+    key_hashmap[sorted_key] = [strs[i]]      <span class="com"># Create new</span></pre>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-success">
+                            <strong>Alternative using defaultdict:</strong><br><br>
+                            <code>from collections import defaultdict</code><br>
+                            <code>key_hashmap = defaultdict(list)</code><br>
+                            <code>key_hashmap[sorted_key].append(strs[i])</code>
+                            <br><br>
+                            Automatically creates empty list if key doesn't exist!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎓 Key Takeaways from Debugging</div>
+
+                    <div class="alert alert-info">
+                        <strong>✨ What You Learned:</strong><br><br>
+                        <strong>Python Specifics:</strong><br>
+                        • <code>sorted()</code> (function) vs <code>.sort()</code> (method)<br>
+                        • Join syntax: <code>separator.join(iterable)</code><br>
+                        • Hashable keys: strings, numbers, tuples (NOT lists/dicts)<br><br>
+                        <strong>Algorithmic Thinking:</strong><br>
+                        • Add data immediately when you have it<br>
+                        • Check if keys exist before overwriting<br>
+                        • Understand your data structures (list vs list of lists)<br><br>
+                        <strong>The Most Important:</strong><br>
+                        Every bug taught a valuable lesson. Debugging is learning! 🚀
+                    </div>
+                </div>
+            </div>
+
+            <div id="solution" class="section">
+                <div class="section-header">
+                    <h2>Final Solution</h2>
+                    <p>The complete, polished code</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">✅ Complete Production-Ready Solution</div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">🎯 Final Solution</span>
+                            <span class="badge badge-success">Production Ready</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">groupAnagrams</span>(self, strs: List[<span class="fn">str</span>]) -> List[List[<span class="fn">str</span>]]:
+        <span class="str">"""
+        Group anagrams together from an array of strings.
+
+        Args:
+            strs: List of strings to group
+
+        Returns:
+            List of lists, where each inner list contains anagrams
+
+        Time Complexity: O(n × k log k)
+            - n = number of strings
+            - k = maximum length of a string
+            - Sorting each string takes O(k log k)
+
+        Space Complexity: O(n × k)
+            - Storing all n strings in the hashmap
+
+        Example:
+            >>> Solution().groupAnagrams(["eat","tea","tan","ate","nat","bat"])
+            [["eat","tea","ate"], ["tan","nat"], ["bat"]]
+        """</span>
+        <span class="com"># Edge case: empty input</span>
+        <span class="kw">if</span> <span class="kw">not</span> strs:
+            <span class="kw">return</span> [[]]
+
+        <span class="com"># Create hashmap to group anagrams</span>
+        key_hashmap = {}
+
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(strs)):
+            <span class="com"># Create signature: sort characters alphabetically</span>
+            sorted_key = <span class="str">''</span>.join(<span class="fn">sorted</span>(strs[i]))
+
+            <span class="com"># Add original string to the group</span>
+            <span class="kw">if</span> sorted_key <span class="kw">in</span> key_hashmap:
+                key_hashmap[sorted_key].append(strs[i])
+            <span class="kw">else</span>:
+                key_hashmap[sorted_key] = [strs[i]]
+
+        <span class="com"># Return all grouped anagrams</span>
+        <span class="kw">return</span> <span class="fn">list</span>(key_hashmap.values())</pre>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="card-subtitle">🚀 Cleaner Version with defaultdict</div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">✨ Using defaultdict (Recommended)</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+<span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">groupAnagrams</span>(self, strs: List[<span class="fn">str</span>]) -> List[List[<span class="fn">str</span>]]:
+        <span class="com"># defaultdict automatically creates empty list for new keys</span>
+        key_hashmap = defaultdict(<span class="fn">list</span>)
+
+        <span class="kw">for</span> s <span class="kw">in</span> strs:
+            <span class="com"># Create signature</span>
+            sorted_key = <span class="str">''</span>.join(<span class="fn">sorted</span>(s))
+
+            <span class="com"># Add to group (no need to check if key exists!)</span>
+            key_hashmap[sorted_key].append(s)
+
+        <span class="kw">return</span> <span class="fn">list</span>(key_hashmap.values())</pre>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <strong>Benefits of defaultdict:</strong><br><br>
+                        • No need for <code>if key in dict</code> checks<br>
+                        • Automatically creates empty list for new keys<br>
+                        • Cleaner, more Pythonic code<br>
+                        • Fewer lines, less room for bugs
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="card-subtitle">⚡ Alternative: Counting Approach (Advanced)</div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">🎯 O(n × k) Solution</span>
+                            <span class="badge badge-warning">More Complex</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+<span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">groupAnagrams</span>(self, strs: List[<span class="fn">str</span>]) -> List[List[<span class="fn">str</span>]]:
+        key_hashmap = defaultdict(<span class="fn">list</span>)
+
+        <span class="kw">for</span> s <span class="kw">in</span> strs:
+            <span class="com"># Count character frequencies</span>
+            count = [<span class="num">0</span>] * <span class="num">26</span>  <span class="com"># For 'a' to 'z'</span>
+
+            <span class="kw">for</span> char <span class="kw">in</span> s:
+                count[<span class="fn">ord</span>(char) - <span class="fn">ord</span>(<span class="str">'a'</span>)] += <span class="num">1</span>
+
+            <span class="com"># Use tuple as key (lists aren't hashable)</span>
+            key = <span class="fn">tuple</span>(count)
+            key_hashmap[key].append(s)
+
+        <span class="kw">return</span> <span class="fn">list</span>(key_hashmap.values())</pre>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <strong>Trade-offs:</strong><br><br>
+                        <strong>Counting Approach (O(n × k)):</strong><br>
+                        ✅ Faster time complexity<br>
+                        ✅ No sorting overhead<br>
+                        ❌ More complex code<br>
+                        ❌ Harder to understand<br><br>
+                        <strong>Sorting Approach (O(n × k log k)):</strong><br>
+                        ✅ Simpler, cleaner code<br>
+                        ✅ Easier to debug<br>
+                        ✅ More interview-friendly<br>
+                        ❌ Slightly slower (negligible for k ≤ 100)
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🧪 Test Cases</div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">Test Suite</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="com"># Test 1: Basic Example</span>
+strs = [<span class="str">"eat"</span>, <span class="str">"tea"</span>, <span class="str">"tan"</span>, <span class="str">"ate"</span>, <span class="str">"nat"</span>, <span class="str">"bat"</span>]
+<span class="com"># Expected: [["eat","tea","ate"], ["tan","nat"], ["bat"]]</span>
+
+<span class="com"># Test 2: Empty String</span>
+strs = [<span class="str">""</span>]
+<span class="com"># Expected: [[""]]</span>
+
+<span class="com"># Test 3: Single String</span>
+strs = [<span class="str">"a"</span>]
+<span class="com"># Expected: [["a"]]</span>
+
+<span class="com"># Test 4: All Same Anagrams</span>
+strs = [<span class="str">"abc"</span>, <span class="str">"bca"</span>, <span class="str">"cab"</span>]
+<span class="com"># Expected: [["abc","bca","cab"]]</span>
+
+<span class="com"># Test 5: No Anagrams</span>
+strs = [<span class="str">"a"</span>, <span class="str">"b"</span>, <span class="str">"c"</span>]
+<span class="com"># Expected: [["a"], ["b"], ["c"]]</span>
+
+<span class="com"># Test 6: Empty Strings</span>
+strs = [<span class="str">""</span>, <span class="str">""</span>]
+<span class="com"># Expected: [["", ""]]</span></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎓 Summary</div>
+
+                    <div class="alert alert-success">
+                        <strong>✨ You Just Mastered:</strong><br><br>
+                        • Recognizing grouping problems → Hash Map pattern<br>
+                        • Creating unique signatures for categorization<br>
+                        • Deriving time complexity from first principles<br>
+                        • Trading off simplicity vs performance<br>
+                        • Debugging Python-specific gotchas<br>
+                        • Writing clean, production-ready code
+                        <br><br>
+                        <strong>🎯 Pattern Recognition:</strong><br>
+                        "Group/categorize items" → Find shared property → Use as hashmap key
+                        <br><br>
+                        <strong>💡 Key Insight:</strong><br>
+                        The signature technique: Find a property that's identical for items in the same group, different for items in different groups, and immutable (hashable).
+                    </div>
+
+                    <table class="complexity-table">
+                        <thead>
+                            <tr>
+                                <th>Aspect</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>LeetCode #</strong></td>
+                                <td>49</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Difficulty</strong></td>
+                                <td>Medium</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Pattern</strong></td>
+                                <td>Hash Map / Grouping</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Time</strong></td>
+                                <td>O(n × k log k)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Space</strong></td>
+                                <td>O(n × k)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tags</strong></td>
+                                <td>#hashmap #string #sorting #anagram</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="quiz" class="section">
+                <div class="section-header">
+                    <h2>Test Yourself</h2>
+                    <p>Verify your understanding</p>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🧠 Knowledge Check</div>
+
+                    <div class="quiz-question">
+                        <h4>Question 1: Pattern Recognition</h4>
+                        <p>A problem asks you to "categorize numbers by the sum of their digits." Which pattern should you use?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) Two Pointers - use left and right pointers to find pairs
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            B) Sliding Window - maintain a window of valid sums
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            C) Hash Map - use sum of digits as key, group numbers as values
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) Binary Search - search for the correct category
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> "Categorize" is a grouping problem → Hash Map pattern. Use sum of digits as the key!
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h4>Question 2: Time Complexity</h4>
+                        <p>If you have 100 strings, each with 50 characters, and you sort each string, what's the time complexity?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) O(100 log 100) - sorting 100 items
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            B) O(100 × 50 log 50) - sorting 50 chars for each of 100 strings
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            C) O(100 × 50) - visiting each character once
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) O(50 log 50) - sorting just one string
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> n = 100 strings, k = 50 characters. Sorting one string = O(k log k). For all strings = O(n × k log k) = O(100 × 50 log 50)
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h4>Question 3: Python Syntax</h4>
+                        <p>How do you convert <code>['a', 'e', 't']</code> to the string <code>"aet"</code>?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) <code>['a', 'e', 't'].join('')</code>
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            B) <code>''.join(['a', 'e', 't'])</code>
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            C) <code>str(['a', 'e', 't'])</code>
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) <code>join(['a', 'e', 't'], '')</code>
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> The separator (empty string '') calls join() on the list. Syntax: <code>separator.join(iterable)</code>
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h4>Question 4: Hashable Keys</h4>
+                        <p>Which of these can be used as a hashmap key in Python?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) <code>[1, 2, 3]</code> - a list
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            B) <code>{'a': 1, 'b': 2}</code> - a dictionary
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            C) <code>(1, 2, 3)</code> - a tuple
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) <code>{1, 2, 3}</code> - a set
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> Tuples are immutable and hashable. Lists, dicts, and sets are mutable and NOT hashable!
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h4>Question 5: Bug Detection</h4>
+                        <p>What's wrong with this code?</p>
+                        <div class="code-container" style="margin: 15px 0;">
+                            <div class="code-block">
+<pre>hashmap = {}
+<span class="kw">for</span> s <span class="kw">in</span> strs:
+    key = <span class="str">''</span>.join(<span class="fn">sorted</span>(s))
+    hashmap[key] = [s]  <span class="com"># ← Bug here!</span></pre>
+                            </div>
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) sorted() should be sort()
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            B) This overwrites previous values instead of appending
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            C) Should use <code>[[s]]</code> instead of <code>[s]</code>
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) join() syntax is wrong
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> If two strings have the same key, the second one overwrites the first! Need to check if key exists and append, OR use defaultdict.
+                        </div>
+                    </div>
+
+                    <div class="quiz-question">
+                        <h4>Question 6: Design Decision</h4>
+                        <p>Why did we choose sorting (O(k log k)) over counting (O(k)) for this problem?</p>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            A) Sorting is faster
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, true)">
+                            B) Simpler code, and k is usually small so difference is negligible
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            C) Counting doesn't work for anagrams
+                        </div>
+                        <div class="quiz-option" onclick="checkAnswer(this, false)">
+                            D) Python doesn't support character counting
+                        </div>
+                        <div class="quiz-feedback">
+                            <strong>✅ Correct!</strong> For typical k (≤ 100), the difference between k log k and k is tiny. Simpler code is better! "Premature optimization is the root of all evil."
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎯 Bonus Challenge</div>
+
+                    <div class="alert alert-info">
+                        <strong>Challenge Problem:</strong><br><br>
+                        Modify the solution to also print how many anagram groups exist and the size of the largest group.
+                        <br><br>
+                        <strong>Example:</strong><br>
+                        Input: <code>["eat","tea","tan","ate","nat","bat"]</code><br>
+                        Output: <code>3 groups, largest group has 3 strings</code>
+                        <br><br>
+                        <strong>Hint:</strong> After building the hashmap, what information can you extract from <code>hashmap.values()</code>?
+                    </div>
+
+                    <div class="code-container">
+                        <div class="code-header">
+                            <span class="code-label">💡 Solution (Click to Reveal)</span>
+                        </div>
+                        <div class="code-block">
+<pre><span class="kw">def</span> <span class="fn">groupAnagramsStats</span>(strs):
+    <span class="kw">from</span> collections <span class="kw">import</span> defaultdict
+
+    hashmap = defaultdict(<span class="fn">list</span>)
+
+    <span class="kw">for</span> s <span class="kw">in</span> strs:
+        key = <span class="str">''</span>.join(<span class="fn">sorted</span>(s))
+        hashmap[key].append(s)
+
+    groups = <span class="fn">list</span>(hashmap.values())
+
+    <span class="com"># Number of groups</span>
+    num_groups = <span class="fn">len</span>(groups)
+
+    <span class="com"># Largest group size</span>
+    largest = <span class="fn">max</span>(<span class="fn">len</span>(group) <span class="kw">for</span> group <span class="kw">in</span> groups)
+
+    <span class="fn">print</span>(<span class="str">f"</span>{num_groups}<span class="str"> groups, largest group has </span>{largest}<span class="str"> strings"</span>)
+
+    <span class="kw">return</span> groups</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🎓 Final Thoughts</div>
+
+                    <div class="alert alert-success">
+                        <strong>🌟 Congratulations!</strong><br><br>
+                        If you understood all these concepts, you've truly mastered the Group Anagrams problem!
+                        <br><br>
+                        <strong>What You Achieved:</strong><br>
+                        ✅ Pattern recognition (grouping → hashmap)<br>
+                        ✅ Signature technique mastery<br>
+                        ✅ Complexity analysis from first principles<br>
+                        ✅ Python-specific knowledge (sorted, join, hashable types)<br>
+                        ✅ Debugging and problem-solving skills<br>
+                        ✅ Clean code practices
+                        <br><br>
+                        <strong>Keep practicing and building on this foundation! 🚀</strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Navigation
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            event.target.closest('.nav-item').classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Visualization
+        const testStrings = ["eat", "tea", "tan", "ate", "nat", "bat"];
+        let currentStep = 0;
+        const steps = [];
+
+        function generateSteps() {
+            const hashmap = {};
+            steps.push({
+                index: -1,
+                string: "",
+                sortedKey: "",
+                hashmap: {},
+                action: "☁️ Initial state - Let's begin our dreamy journey!"
+            });
+
+            testStrings.forEach((str, idx) => {
+                const sortedKey = str.split('').sort().join('');
+                if (!hashmap[sortedKey]) {
+                    hashmap[sortedKey] = [];
+                }
+                hashmap[sortedKey].push(str);
+
+                steps.push({
+                    index: idx,
+                    string: str,
+                    sortedKey: sortedKey,
+                    hashmap: JSON.parse(JSON.stringify(hashmap)),
+                    action: `✨ Processing "${str}" → Sorted: "${sortedKey}" → ${!steps[steps.length-1].hashmap[sortedKey] || steps[steps.length-1].hashmap[sortedKey].length < hashmap[sortedKey].length ? 'Added to group!' : 'Group found!'}`
+                });
+            });
+
+            steps.push({
+                index: -1,
+                string: "",
+                sortedKey: "",
+                hashmap: hashmap,
+                action: "🎉 Complete! All anagrams grouped successfully!"
+            });
+        }
+
+        function renderVisualization() {
+            const step = steps[currentStep];
+
+            document.getElementById('stepInfo').innerHTML = `
+                <strong>Step ${currentStep}/${steps.length - 1}:</strong> ${step.action}
+            `;
+
+            const stringHtml = testStrings.map((str, idx) => {
+                let classes = 'string-char';
+                if (idx === step.index) {
+                    classes += ' current';
+                } else if (idx < step.index) {
+                    classes += ' processed';
+                }
+                return `
+                    <div class="${classes}">
+                        <span class="char-index">index ${idx}</span>
+                        ${str}
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('stringDisplay').innerHTML = stringHtml;
+
+            const hashmapHtml = Object.entries(step.hashmap).map(([key, values]) => {
+                const isNew = currentStep > 0 &&
+                    (!steps[currentStep - 1].hashmap[key] ||
+                     steps[currentStep - 1].hashmap[key].length < values.length);
+
+                return `
+                    <div class="hashmap-entry ${isNew ? 'new' : ''}">
+                        <div class="hashmap-key">"${key}"</div>
+                        <div class="hashmap-value">
+                            ${values.map(v => `<span class="hashmap-string">${v}</span>`).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('hashmapDisplay').innerHTML = hashmapHtml ||
+                '<div style="text-align: center; color: var(--text-gentle); grid-column: 1/-1; padding: 40px; font-size: 1.1rem;">☁️ Hashmap is empty - floating in the clouds ☁️</div>';
+
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function vizNext() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderVisualization();
+            }
+        }
+
+        function vizPrev() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderVisualization();
+            }
+        }
+
+        function vizReset() {
+            currentStep = 0;
+            renderVisualization();
+        }
+
+        // Initialize
+        generateSteps();
+        renderVisualization();
+
+        // Quiz functionality
+        function checkAnswer(element, isCorrect) {
+            const question = element.closest('.quiz-question');
+            const options = question.querySelectorAll('.quiz-option');
+            const feedback = question.querySelector('.quiz-feedback');
+
+            // Disable all options
+            options.forEach(opt => {
+                opt.style.pointerEvents = 'none';
+            });
+
+            // Mark the selected answer
+            if (isCorrect) {
+                element.classList.add('correct');
+                feedback.style.background = 'linear-gradient(135deg, rgba(159, 226, 191, 0.15), rgba(184, 164, 232, 0.1))';
+                feedback.style.borderLeft = '4px solid var(--mint)';
+            } else {
+                element.classList.add('incorrect');
+                // Also show the correct answer
+                options.forEach(opt => {
+                    if (opt.onclick && opt.onclick.toString().includes('true')) {
+                        opt.classList.add('correct');
+                    }
+                });
+                feedback.style.background = 'linear-gradient(135deg, rgba(255, 181, 167, 0.15), rgba(244, 180, 211, 0.1))';
+                feedback.style.borderLeft = '4px solid var(--peach)';
+                feedback.innerHTML = '<strong>❌ Incorrect.</strong> ' + feedback.innerHTML.replace('<strong>✅ Correct!</strong>', '<strong>The correct answer is:</strong>');
+            }
+
+            feedback.classList.add('show');
+        }
+    </script>
+</body>
+</html>

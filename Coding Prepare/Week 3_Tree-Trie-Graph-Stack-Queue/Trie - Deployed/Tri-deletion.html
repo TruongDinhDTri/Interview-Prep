@@ -1,0 +1,2138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌳 Trie Deletion - Ghibli Learning Experience</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 50%, #ffd3b6 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Ghibli-style background decorations */
+        .character-float {
+            position: fixed;
+            font-size: 4em;
+            z-index: 1000;
+            pointer-events: none;
+            animation: characterFloat 20s infinite ease-in-out;
+        }
+
+        @keyframes characterFloat {
+            0% { transform: translate(-100px, 0) rotate(0deg); opacity: 0.8; }
+            25% { transform: translate(300px, -80px) rotate(10deg); opacity: 1; }
+            50% { transform: translate(600px, -40px) rotate(-10deg); opacity: 0.9; }
+            75% { transform: translate(300px, 60px) rotate(5deg); opacity: 1; }
+            100% { transform: translate(-100px, 0) rotate(0deg); opacity: 0.8; }
+        }
+
+        .cloud {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 100px;
+            animation: cloudFloat 30s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes cloudFloat {
+            0% { transform: translateX(-200px); }
+            100% { transform: translateX(calc(100vw + 200px)); }
+        }
+
+        .leaf {
+            position: fixed;
+            font-size: 2em;
+            animation: leafFall 10s infinite;
+            opacity: 0;
+            z-index: 999;
+        }
+
+        @keyframes leafFall {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.7; }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            margin: 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '🌸';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            left: 50px;
+            top: -20px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .header::after {
+            content: '🍃';
+            position: absolute;
+            font-size: 80px;
+            opacity: 0.1;
+            right: 80px;
+            top: 20px;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            background: linear-gradient(to right, #ffeaa7, #fab1a0);
+            padding: 0;
+            border-bottom: 3px solid #fdcb6e;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #2d3436;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background: white;
+            color: #6c5ce7;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 30px 20px;
+            animation: fadeIn 0.5s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Core Ideas Styles */
+        .idea-section {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .sparkle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #ffd700;
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            animation: sparkleAnim 2s infinite;
+        }
+
+        @keyframes sparkleAnim {
+            0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+            50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+
+        .idea-section h2 {
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .thought-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 5px solid #fdcb6e;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .thought-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .thought-box h3 {
+            color: #e17055;
+            margin-bottom: 10px;
+        }
+
+        .unmark-explanation {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        /* Process Steps */
+        .process-step {
+            background: white;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 15px;
+            border: 3px solid #a29bfe;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .process-step:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* VS Code Layout */
+        .vscode-layout {
+            display: grid;
+            grid-template-columns: 35% 35% 30%;
+            gap: 0;
+            background: #0d1117;
+            border: 1px solid #161b22;
+            height: 800px;
+        }
+
+        .vscode-left-panel,
+        .vscode-middle-panel,
+        .vscode-right-panel {
+            display: flex;
+            flex-direction: column;
+            background: #0d1117;
+            border-right: 1px solid #161b22;
+            overflow: hidden;
+        }
+
+        .vscode-right-panel {
+            border-right: none;
+        }
+
+        .vscode-header {
+            background: #161b22;
+            color: #8b949e;
+            padding: 8px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            border-bottom: 1px solid #21262d;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Debug Mode Styles */
+        .debug-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        .code-and-trie {
+            display: grid;
+            grid-template-columns: 50% 50%;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .controls {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn {
+            background: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 5px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            font-weight: 600;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        }
+
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .code-viewer {
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 0;
+            border-radius: 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            height: 100%;
+            overflow-y: auto;
+            overflow-x: auto;
+            box-shadow: none;
+            border: none;
+            font-size: 13px;
+            line-height: 19px;
+            flex: 1;
+        }
+
+        .code-line {
+            padding: 0 10px;
+            margin: 0;
+            transition: background 0.05s;
+            display: flex;
+            align-items: center;
+            height: 19px;
+            border-radius: 0;
+        }
+
+        .code-line:hover {
+            background: #161b22;
+        }
+
+        .code-line.active {
+            background: #0c2d6b;
+            color: #c9d1d9;
+            font-weight: normal;
+            border-left: 2px solid #58a6ff;
+            padding-left: 8px;
+            box-shadow: none;
+        }
+
+        .line-number {
+            color: #6e7681;
+            min-width: 35px;
+            text-align: right;
+            margin-right: 15px;
+            user-select: none;
+            font-size: 13px;
+        }
+
+        .code-line.active .line-number {
+            color: #c9d1d9;
+            font-weight: normal;
+        }
+
+        .code-content {
+            flex: 1;
+            white-space: pre;
+            color: #c9d1d9;
+        }
+
+        .code-line.active .code-content {
+            color: #c9d1d9;
+        }
+
+        .code-comment {
+            color: #8b949e;
+            font-style: italic;
+            margin-left: 15px;
+        }
+
+        .code-line.active .code-comment {
+            color: #8b949e;
+            opacity: 1;
+        }
+
+        .trie-canvas {
+            background: #0d1117;
+            border-radius: 0;
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: none;
+            border: none;
+            flex: 1;
+            padding: 10px;
+        }
+
+        .trie-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #161b22;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #c9d1d9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid #30363d;
+        }
+
+        .trie-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+        }
+
+        .trie-node.word-end {
+            background: #238636;
+            color: #ffffff;
+            border: 2px solid #2ea043;
+            box-shadow: 0 2px 6px rgba(35, 134, 54, 0.5);
+        }
+
+        .trie-node.deleted {
+            background: #21262d;
+            opacity: 0.4;
+            border: 2px solid #30363d;
+        }
+
+        .trie-node.active {
+            background: #0c2d6b;
+            color: #ffffff;
+            border: 3px solid #58a6ff;
+            box-shadow: 0 0 12px rgba(88, 166, 255, 0.8);
+            transform: scale(1.15);
+            z-index: 10;
+        }
+
+        .trie-edge {
+            position: absolute;
+            height: 2px;
+            background: #30363d;
+            transform-origin: left center;
+            transition: all 0.3s;
+        }
+
+        .trie-edge.active {
+            background: #58a6ff;
+            height: 3px;
+            box-shadow: 0 0 8px rgba(88, 166, 255, 0.6);
+        }
+
+        .edge-label {
+            position: absolute;
+            background: #161b22;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #8b949e;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            border: 1px solid #30363d;
+        }
+
+        .trie-edge {
+            position: absolute;
+            height: 2px;
+            background: #4a4a4a;
+            transform-origin: left center;
+            transition: all 0.3s;
+        }
+
+        .trie-edge.active {
+            background: #0984e3;
+            height: 3px;
+            box-shadow: 0 0 10px rgba(9, 132, 227, 0.6);
+        }
+
+        .edge-label {
+            position: absolute;
+            background: #2d3436;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            font-weight: bold;
+            color: #dfe6e9;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            border: 1px solid #4a4a4a;
+        }
+
+        .console {
+            background: #0d1117;
+            color: #c9d1d9;
+            padding: 8px;
+            border-radius: 0;
+            font-family: 'Consolas', 'Courier New', monospace;
+            height: 100%;
+            overflow-y: auto;
+            margin-top: 0;
+            box-shadow: none;
+            border: none;
+            font-size: 12px;
+            line-height: 18px;
+            flex: 1;
+        }
+
+        .console-line {
+            margin: 2px 0;
+            opacity: 0;
+            animation: fadeInConsole 0.2s forwards;
+            padding: 2px 4px;
+            border-radius: 0;
+        }
+
+        @keyframes fadeInConsole {
+            to { opacity: 1; }
+        }
+
+        /* Custom scrollbar for VS Code */
+        .code-viewer::-webkit-scrollbar,
+        .console::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .code-viewer::-webkit-scrollbar-track,
+        .console::-webkit-scrollbar-track {
+            background: #0d1117;
+        }
+
+        .code-viewer::-webkit-scrollbar-thumb,
+        .console::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 0;
+        }
+
+        .code-viewer::-webkit-scrollbar-thumb:hover,
+        .console::-webkit-scrollbar-thumb:hover {
+            background: #484f58;
+        }
+
+        /* Quiz Styles */
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .question-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .question-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .question-card h3 {
+            color: #6c5ce7;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .option {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .option:hover {
+            border-color: #a29bfe;
+            transform: translateX(10px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .option.correct {
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            color: white;
+            border-color: #00b894;
+            animation: correctPulse 0.5s;
+        }
+
+        .option.wrong {
+            background: linear-gradient(135deg, #d63031 0%, #ff7675 100%);
+            color: white;
+            border-color: #d63031;
+            animation: shake 0.5s;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 2em;
+            color: #6c5ce7;
+            margin: 20px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .totoro {
+            font-size: 3em;
+            display: inline-block;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .speed-control {
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .speed-control label {
+            color: white;
+            margin-right: 10px;
+        }
+
+        .speed-control select {
+            padding: 8px 15px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Celebration effects */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: confettiFall 3s linear;
+            z-index: 9999;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .debug-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .tab {
+                font-size: 0.9em;
+                padding: 15px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌳 Magical Trie Deletion Journey 🌳</h1>
+            <p style="font-size: 1.2em; margin-top: 10px;">A Ghibli-Inspired Learning Adventure ✨</p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">💡 Core Ideas</button>
+            <button class="tab" onclick="switchTab(1)">🏊 Deletion Process</button>
+            <button class="tab" onclick="switchTab(2)">🐛 Debug Mode</button>
+            <button class="tab" onclick="switchTab(3)">🎓 Quiz Time</button>
+        </div>
+
+        <!-- Tab 1: Core Ideas -->
+        <div class="tab-content active" id="tab-0">
+            <div class="idea-section">
+                <div class="sparkle" style="top: 10px; right: 20px;"></div>
+                <div class="sparkle" style="top: 30px; right: 60px; animation-delay: 0.5s;"></div>
+                <h2>🎯 The Big Picture: What is Deletion Really Doing?</h2>
+                
+                <div class="thought-box">
+                    <h3>🤔 Step 1: Understanding the Challenge</h3>
+                    <p><strong>The Question:</strong> "If I want to delete 'CAT' from my Trie, what should I actually do?"</p>
+                    <p style="margin-top: 10px;"><strong>The Insight:</strong> Deletion isn't just about removing letters! It's about <em>safely cleaning up</em> while respecting other words that might share the same path.</p>
+                    <p style="margin-top: 10px; color: #e17055;"><strong>💭 Think of it like this:</strong> Imagine a tree branch. If you want to remove one leaf, you can't just cut the whole branch if other leaves need it!</p>
+                </div>
+
+                <div class="thought-box">
+                    <h3>🌊 Step 2: The Recursive Journey</h3>
+                    <p><strong>How do we navigate?</strong> We dive deep first, character by character, until we reach the end of our word.</p>
+                    <p style="margin-top: 10px;"><strong>Why recursive?</strong> Because we need to make decisions <em>on the way back up</em>!</p>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>🏊 <strong>Dive down:</strong> Follow the path C → A → T</li>
+                        <li>🎯 <strong>Reach the end:</strong> We're at the 'T' node</li>
+                        <li>⬆️ <strong>Come back up:</strong> Now we make smart decisions at each level</li>
+                    </ul>
+                </div>
+
+                <div class="thought-box">
+                    <h3>🎯 Step 3: The Critical Decisions (On the Way Back!)</h3>
+                    <p style="margin-bottom: 15px;"><strong>At each node, we ask 3 questions:</strong></p>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                        <p><strong>❓ Question 1:</strong> "Am I at the word's last character?"</p>
+                        <p style="margin-top: 5px;">→ If YES: Unmark it as a word ending!</p>
+                    </div>
+                    
+                    <div style="background: #d1ecf1; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                        <p><strong>❓ Question 2:</strong> "Do I have any children?"</p>
+                        <p style="margin-top: 5px;">→ If YES: Keep me! Other paths need me!</p>
+                        <p style="margin-top: 5px;">→ If NO: I can be deleted (return true to parent)</p>
+                    </div>
+                    
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 10px; margin: 10px 0;">
+                        <p><strong>❓ Question 3:</strong> "Am I marked as another word's ending?"</p>
+                        <p style="margin-top: 5px;">→ If YES: Keep me! I'm still useful for another word!</p>
+                        <p style="margin-top: 5px;">→ If NO: Check if I can be deleted based on Question 2</p>
+                    </div>
+                </div>
+
+                <div class="unmark-explanation">
+                    <div class="sparkle" style="top: 15px; left: 25px;"></div>
+                    <div class="sparkle" style="top: 25px; right: 35px; animation-delay: 1s;"></div>
+                    <h3 style="color: #d63031; margin-bottom: 15px; text-align: center; font-size: 1.8em;">🔥 THE UNMARK MYSTERY SOLVED! 🔥</h3>
+                    
+                    <p style="font-size: 1.2em; margin-bottom: 20px; text-align: center;"><strong>Your brilliant question: "Why do I need to unmark? Won't an unmarked node be the same as other nodes?"</strong></p>
+                    
+                    <!-- Core Concept -->
+                    <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <h4 style="color: #6c5ce7; text-align: center; margin-bottom: 20px; font-size: 1.3em;">🎯 The Core Truth</h4>
+                        
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 1.15em; line-height: 1.8;">
+                            <p><strong>Nodes exist in a Trie for TWO DIFFERENT REASONS:</strong></p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                                    <div style="font-size: 2.5em; margin-bottom: 10px;">🏁</div>
+                                    <p style="font-weight: bold;">Reason #1</p>
+                                    <p style="margin-top: 8px; font-size: 0.95em;">They MARK a word ending</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">(isEndOfWord = true)</p>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px;">
+                                    <div style="font-size: 2.5em; margin-bottom: 10px;">🛤️</div>
+                                    <p style="font-weight: bold;">Reason #2</p>
+                                    <p style="margin-top: 8px; font-size: 0.95em;">They're PART of a path</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; opacity: 0.9;">(has children)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Scenario Setup -->
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 15px; margin: 20px 0;">
+                        <h4 style="color: #e17055; margin-bottom: 20px; text-align: center; font-size: 1.3em;">📚 Let's Build a Scenario</h4>
+                        
+                        <p style="text-align: center; font-size: 1.1em; margin-bottom: 20px;">
+                            <strong>Our Trie contains these words:</strong>
+                        </p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px;">
+                            <div style="background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                                <p style="font-size: 1.5em; font-weight: bold; color: #6c5ce7; margin-bottom: 10px;">CAR</p>
+                                <p style="font-size: 0.9em; color: #636e72;">C → A → R 🏁</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                                <p style="font-size: 1.5em; font-weight: bold; color: #e17055; margin-bottom: 10px;">CARD</p>
+                                <p style="font-size: 0.9em; color: #636e72;">C → A → R → D 🏁</p>
+                            </div>
+                            <div style="background: white; padding: 15px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1);">
+                                <p style="font-size: 1.5em; font-weight: bold; color: #00b894; margin-bottom: 10px;">CAT</p>
+                                <p style="font-size: 0.9em; color: #636e72;">C → A → T 🏁</p>
+                            </div>
+                        </div>
+                        
+                        <div style="background: white; padding: 20px; border-radius: 10px;">
+                            <p style="text-align: center; font-weight: bold; color: #2d3436; margin-bottom: 15px;">Initial Trie Structure:</p>
+                            <svg width="100%" height="350" viewBox="0 0 400 350">
+                                <!-- ROOT -->
+                                <circle cx="200" cy="30" r="28" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                                <text x="200" y="38" text-anchor="middle" fill="white" font-weight="bold" font-size="16">ROOT</text>
+                                
+                                <!-- C -->
+                                <path d="M 200 58 L 200 88" stroke="#636e72" stroke-width="3"/>
+                                <text x="215" y="78" fill="#636e72" font-weight="bold">C</text>
+                                <circle cx="200" cy="103" r="25" fill="#fab1a0"/>
+                                <text x="200" y="110" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">C</text>
+                                
+                                <!-- A -->
+                                <path d="M 200 128 L 200 158" stroke="#636e72" stroke-width="3"/>
+                                <text x="215" y="148" fill="#636e72" font-weight="bold">A</text>
+                                <circle cx="200" cy="173" r="25" fill="#fab1a0"/>
+                                <text x="200" y="180" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">A</text>
+                                
+                                <!-- R branch -->
+                                <path d="M 185 195 L 125 225" stroke="#636e72" stroke-width="3"/>
+                                <text x="148" y="215" fill="#636e72" font-weight="bold">R</text>
+                                <circle cx="110" cy="240" r="25" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                <text x="110" y="247" text-anchor="middle" fill="white" font-weight="bold" font-size="16">R</text>
+                                <text x="110" y="225" text-anchor="middle" fill="#fdcb6e" font-weight="bold" font-size="20">✓</text>
+                                <text x="110" y="275" text-anchor="middle" fill="#6c5ce7" font-weight="bold" font-size="12">CAR ends</text>
+                                
+                                <!-- D from R -->
+                                <path d="M 110 265 L 110 295" stroke="#636e72" stroke-width="3"/>
+                                <text x="125" y="285" fill="#636e72" font-weight="bold">D</text>
+                                <circle cx="110" cy="310" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                <text x="110" y="317" text-anchor="middle" fill="white" font-weight="bold" font-size="14">D</text>
+                                <text x="110" y="298" text-anchor="middle" fill="#fdcb6e" font-weight="bold" font-size="18">✓</text>
+                                <text x="110" y="340" text-anchor="middle" fill="#e17055" font-weight="bold" font-size="11">CARD ends</text>
+                                
+                                <!-- T branch -->
+                                <path d="M 215 195 L 275 225" stroke="#636e72" stroke-width="3"/>
+                                <text x="252" y="215" fill="#636e72" font-weight="bold">T</text>
+                                <circle cx="290" cy="240" r="25" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                <text x="290" y="247" text-anchor="middle" fill="white" font-weight="bold" font-size="16">T</text>
+                                <text x="290" y="225" text-anchor="middle" fill="#fdcb6e" font-weight="bold" font-size="20">✓</text>
+                                <text x="290" y="275" text-anchor="middle" fill="#00b894" font-weight="bold" font-size="12">CAT ends</text>
+                            </svg>
+                        </div>
+                        
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #fdcb6e;">
+                            <p style="font-weight: bold; color: #856404; margin-bottom: 8px;">🔍 Notice about R node:</p>
+                            <ul style="margin-left: 20px; line-height: 1.8; color: #856404;">
+                                <li>R has <strong>BOTH reasons</strong> to exist!</li>
+                                <li>✓ It marks "CAR" as ending (Reason #1)</li>
+                                <li>✓ It's part of path to "CARD" (Reason #2)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- The Wrong Way -->
+                    <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border: 3px solid #d63031;">
+                        <h4 style="color: #d63031; margin-bottom: 20px; text-align: center; font-size: 1.3em;">❌ WRONG: Delete WITHOUT Unmarking</h4>
+                        
+                        <div style="background: #fff5f5; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="font-weight: bold; color: #d63031; margin-bottom: 10px; font-size: 1.1em;">What if we just try to delete R node?</p>
+                            <p style="color: #2d3436; margin-bottom: 15px;">Remember: R has a child (D), so we CAN'T actually delete it!</p>
+                            
+                            <div style="background: white; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.95em; border-left: 4px solid #d63031;">
+                                <p style="color: #00b894;">// At R node</p>
+                                <p>if (shouldDeleteChild) {</p>
+                                <p style="margin-left: 20px; color: #d63031;">// Child says we CAN delete</p>
+                                <p style="margin-left: 20px;">delete node.children['D'];</p>
+                                <p>}</p>
+                                <p style="color: #d63031;">// But wait! shouldDeleteChild = FALSE (D is word ending)</p>
+                                <p style="color: #d63031;">// So R stays EXACTLY as it was!</p>
+                                <p style="color: #d63031; font-weight: bold;">// isEndOfWord is STILL TRUE! ⚠️</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #dfe6e9;">
+                                <p style="text-align: center; font-weight: bold; color: #2d3436; margin-bottom: 10px;">Structure After "Deletion":</p>
+                                <svg width="100%" height="200" viewBox="0 0 200 200">
+                                    <circle cx="100" cy="50" r="25" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                    <text x="100" y="57" text-anchor="middle" fill="white" font-weight="bold" font-size="16">R</text>
+                                    <text x="100" y="35" text-anchor="middle" fill="#fdcb6e" font-weight="bold" font-size="22">✓</text>
+                                    <text x="100" y="25" text-anchor="middle" fill="#d63031" font-weight="bold" font-size="14">STILL MARKED!</text>
+                                    
+                                    <path d="M 100 75 L 100 115" stroke="#636e72" stroke-width="3"/>
+                                    <text x="115" y="100" fill="#636e72" font-weight="bold">D</text>
+                                    
+                                    <circle cx="100" cy="130" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                    <text x="100" y="137" text-anchor="middle" fill="white" font-weight="bold">D</text>
+                                    
+                                    <text x="100" y="165" text-anchor="middle" fill="#2d3436" font-size="11">isEndOfWord = true</text>
+                                    <text x="100" y="180" text-anchor="middle" fill="#d63031" font-size="11" font-weight="bold">R still says "I'm a word!"</text>
+                                </svg>
+                            </div>
+                            
+                            <div style="background: #fff5f5; padding: 15px; border-radius: 10px;">
+                                <p style="font-weight: bold; color: #d63031; margin-bottom: 12px; text-align: center;">💥 THE PROBLEM:</p>
+                                <div style="background: white; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #d63031;">
+                                    <p style="font-family: monospace; font-size: 0.9em; color: #2d3436;">search("CAR")</p>
+                                    <p style="margin-top: 8px; color: #d63031; font-weight: bold;">→ Returns TRUE ❌</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; color: #636e72;">R is still marked!</p>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #00b894;">
+                                    <p style="font-family: monospace; font-size: 0.9em; color: #2d3436;">search("CARD")</p>
+                                    <p style="margin-top: 8px; color: #00b894; font-weight: bold;">→ Returns TRUE ✓</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; color: #636e72;">This works</p>
+                                </div>
+                                <div style="background: #ffeaa7; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                                    <p style="font-weight: bold; color: #856404;">We DIDN'T delete "CAR"!</p>
+                                    <p style="margin-top: 5px; font-size: 0.9em;">The word still exists! 😱</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- The Right Way -->
+                    <div style="background: white; padding: 25px; border-radius: 15px; margin: 20px 0; border: 3px solid #00b894;">
+                        <h4 style="color: #00b894; margin-bottom: 20px; text-align: center; font-size: 1.3em;">✅ CORRECT: Delete WITH Unmarking</h4>
+                        
+                        <div style="background: #f0fff4; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                            <p style="font-weight: bold; color: #00b894; margin-bottom: 10px; font-size: 1.1em;">The smart approach: Unmark first!</p>
+                            
+                            <div style="background: white; padding: 15px; border-radius: 8px; font-family: monospace; font-size: 0.95em; border-left: 4px solid #00b894;">
+                                <p style="color: #636e72;">// At R node - we've reached word end</p>
+                                <p style="color: #00b894; font-weight: bold;">node.isEndOfWord = false;  // ← UNMARK IT!</p>
+                                <p style="margin-top: 10px; color: #636e72;">// Now check if we can delete the node itself</p>
+                                <p>if (node.children.length === 0) {</p>
+                                <p style="margin-left: 20px; color: #636e72;">// No children? Safe to delete!</p>
+                                <p style="margin-left: 20px;">return true;</p>
+                                <p>} else {</p>
+                                <p style="margin-left: 20px; color: #00b894;">// Has children? Keep node, just unmarked!</p>
+                                <p style="margin-left: 20px;">return false;</p>
+                                <p>}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="background: white; padding: 15px; border-radius: 10px; border: 2px solid #00b894;">
+                                <p style="text-align: center; font-weight: bold; color: #2d3436; margin-bottom: 10px;">Structure After Unmarking:</p>
+                                <svg width="100%" height="200" viewBox="0 0 200 200">
+                                    <circle cx="100" cy="50" r="25" fill="#fab1a0" stroke="#636e72" stroke-width="2"/>
+                                    <text x="100" y="57" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">R</text>
+                                    <text x="100" y="35" text-anchor="middle" fill="#d63031" font-weight="bold" font-size="22">✗</text>
+                                    <text x="100" y="25" text-anchor="middle" fill="#00b894" font-weight="bold" font-size="14">UNMARKED!</text>
+                                    
+                                    <path d="M 100 75 L 100 115" stroke="#636e72" stroke-width="3"/>
+                                    <text x="115" y="100" fill="#636e72" font-weight="bold">D</text>
+                                    
+                                    <circle cx="100" cy="130" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                                    <text x="100" y="137" text-anchor="middle" fill="white" font-weight="bold">D</text>
+                                    
+                                    <text x="100" y="165" text-anchor="middle" fill="#2d3436" font-size="11">isEndOfWord = false</text>
+                                    <text x="100" y="180" text-anchor="middle" fill="#00b894" font-size="11" font-weight="bold">R is just a path now!</text>
+                                </svg>
+                            </div>
+                            
+                            <div style="background: #f0fff4; padding: 15px; border-radius: 10px;">
+                                <p style="font-weight: bold; color: #00b894; margin-bottom: 12px; text-align: center;">✨ IT WORKS!</p>
+                                <div style="background: white; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #00b894;">
+                                    <p style="font-family: monospace; font-size: 0.9em; color: #2d3436;">search("CAR")</p>
+                                    <p style="margin-top: 8px; color: #00b894; font-weight: bold;">→ Returns FALSE ✅</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; color: #636e72;">R is NOT marked!</p>
+                                </div>
+                                <div style="background: white; padding: 12px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #00b894;">
+                                    <p style="font-family: monospace; font-size: 0.9em; color: #2d3436;">search("CARD")</p>
+                                    <p style="margin-top: 8px; color: #00b894; font-weight: bold;">→ Returns TRUE ✅</p>
+                                    <p style="margin-top: 5px; font-size: 0.85em; color: #636e72;">D is marked!</p>
+                                </div>
+                                <div style="background: #ffeaa7; padding: 12px; border-radius: 8px; margin-top: 15px; text-align: center;">
+                                    <p style="font-weight: bold; color: #856404;">Perfect! 🎉</p>
+                                    <p style="margin-top: 5px; font-size: 0.9em;">CAR deleted, CARD preserved!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- The Big Reveal -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; margin-top: 25px;">
+                        <h4 style="text-align: center; font-size: 1.5em; margin-bottom: 20px;">🎯 THE BIG REVEAL</h4>
+                        
+                        <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 10px; font-size: 1.1em; line-height: 2;">
+                            <p style="margin-bottom: 15px;"><strong>Q: "Won't an unmarked node be the same as other nodes?"</strong></p>
+                            
+                            <p style="margin-bottom: 15px;"><strong>A: YES! That's EXACTLY the point! 🎯</strong></p>
+                            
+                            <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                                <p style="margin-bottom: 10px;">After unmarking, R becomes a "normal" transit node:</p>
+                                <ul style="margin-left: 25px; line-height: 2;">
+                                    <li>✓ Not a word ending anymore (like C, A)</li>
+                                    <li>✓ Just part of a path to other words</li>
+                                    <li>✓ search("CAR") passes through R but doesn't stop</li>
+                                    <li>✓ search("CARD") continues to D and finds the word!</li>
+                                </ul>
+                            </div>
+                            
+                            <div style="background: rgba(253, 203, 110, 0.3); padding: 15px; border-radius: 8px; margin-top: 20px; text-align: center;">
+                                <p style="font-size: 1.2em; font-weight: bold;">Unmarking transforms a node from:</p>
+                                <p style="margin-top: 10px; font-size: 1.15em;">"I'm a destination! 🏁" → "I'm just a road! 🛤️"</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div style="background: #e17055; color: white; padding: 25px; border-radius: 15px; margin-top: 25px; text-align: center;">
+                        <p style="font-size: 1.3em; font-weight: bold; margin-bottom: 15px;">🌟 THE GOLDEN RULE 🌟</p>
+                        <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 10px; font-size: 1.1em; line-height: 1.9;">
+                            <p><strong>When deleting a word:</strong></p>
+                            <p style="margin-top: 12px;">1️⃣ Always UNMARK the final node first</p>
+                            <p style="margin-top: 8px;">2️⃣ Then check if node can be DELETED</p>
+                            <p style="margin-top: 8px;">3️⃣ Node survives if it has children OR is another word's ending</p>
+                            <p style="margin-top: 15px; font-size: 1.15em; background: rgba(255,255,255,0.2); padding: 12px; border-radius: 8px;">
+                                <strong>Unmarking ≠ Deleting<br>It's changing a node's PURPOSE! 🎯</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="thought-box">
+                    <h3>🎬 Step 4: The Beautiful Chain Reaction</h3>
+                    <p>Each node, starting from the bottom, returns TRUE or FALSE to its parent:</p>
+                    <ul style="margin-top: 10px; margin-left: 20px; line-height: 1.8;">
+                        <li>✅ <strong>TRUE means:</strong> "I can be deleted! Remove me!"</li>
+                        <li>❌ <strong>FALSE means:</strong> "Keep me! I'm still needed!"</li>
+                    </ul>
+                    <p style="margin-top: 15px; color: #e17055;"><strong>This is the magic! ✨</strong> Each parent automatically knows if they should delete their child!</p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <div class="totoro">🌳</div>
+                <p style="font-size: 1.3em; color: #6c5ce7; margin-top: 10px;">
+                    <strong>Now you understand the WHY behind each step! 🎉</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Tab 2: Deletion Process -->
+        <div class="tab-content" id="tab-1">
+            <h2 style="color: #6c5ce7; text-align: center; margin-bottom: 30px;">🏊 Step-by-Step Deletion Journey</h2>
+            <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">Let's delete "CAR" from a Trie containing: CAR, CAT, CARD</p>
+
+            <div class="process-step">
+                <div class="step-number">1</div>
+                <h3 style="color: #6c5ce7; margin-bottom: 15px;">🎯 Starting Point: At Root</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div>
+                        <h4 style="color: #e17055; margin-bottom: 10px;">📝 What's Happening:</h4>
+                        <p><strong>Current Position:</strong> ROOT node</p>
+                        <p style="margin-top: 10px;"><strong>Looking for:</strong> Character 'C' (index 0)</p>
+                        <p style="margin-top: 10px;"><strong>Decision:</strong> Does root have a child 'C'? ✅ YES!</p>
+                        <p style="margin-top: 10px;"><strong>Next Action:</strong> Dive into 'C' node with remaining word "AR"</p>
+                        <div style="background: #dfe6e9; padding: 15px; border-radius: 10px; margin-top: 15px; font-family: monospace; font-size: 0.9em;">
+                            <p>delete(root, "CAR", 0)</p>
+                            <p style="color: #e17055;">   ↓</p>
+                            <p>delete(node_C, "CAR", 1)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%); padding: 20px; border-radius: 15px; position: relative; min-height: 300px;">
+                        <h4 style="color: #2d3436; margin-bottom: 15px; text-align: center;">🌳 Trie State</h4>
+                        <svg width="100%" height="280" viewBox="0 0 300 280">
+                            <!-- ROOT -->
+                            <circle cx="150" cy="30" r="25" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                            <text x="150" y="38" text-anchor="middle" fill="white" font-weight="bold" font-size="16">ROOT</text>
+                            
+                            <!-- Arrow to C -->
+                            <path d="M 150 55 L 150 85" stroke="#e17055" stroke-width="4" marker-end="url(#arrowhead)"/>
+                            <text x="165" y="75" fill="#e17055" font-weight="bold" font-size="14">C</text>
+                            
+                            <!-- C Node -->
+                            <circle cx="150" cy="100" r="22" fill="#ffeaa7"/>
+                            <text x="150" y="107" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">C</text>
+                            
+                            <!-- Arrow to A -->
+                            <path d="M 150 122 L 150 148" stroke="#636e72" stroke-width="3"/>
+                            <text x="165" y="140" fill="#636e72" font-weight="bold" font-size="14">A</text>
+                            
+                            <!-- A Node -->
+                            <circle cx="150" cy="163" r="22" fill="#fab1a0"/>
+                            <text x="150" y="170" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">A</text>
+                            
+                            <!-- Arrows from A -->
+                            <path d="M 135 183 L 90 213" stroke="#636e72" stroke-width="3"/>
+                            <text x="105" y="203" fill="#636e72" font-weight="bold" font-size="14">R</text>
+                            
+                            <path d="M 165 183 L 210 213" stroke="#636e72" stroke-width="3"/>
+                            <text x="195" y="203" fill="#636e72" font-weight="bold" font-size="14">T</text>
+                            
+                            <!-- R Node (word end) -->
+                            <circle cx="80" cy="228" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="80" y="235" text-anchor="middle" fill="white" font-weight="bold" font-size="16">R</text>
+                            
+                            <!-- T Node (word end) -->
+                            <circle cx="220" cy="228" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="220" y="235" text-anchor="middle" fill="white" font-weight="bold" font-size="16">T</text>
+                            
+                            <!-- Arrow from R to D -->
+                            <path d="M 80 250 L 80 270" stroke="#636e72" stroke-width="3"/>
+                            <text x="95" y="265" fill="#636e72" font-weight="bold" font-size="14">D</text>
+                            
+                            <!-- D Node (word end) -->
+                            <circle cx="80" cy="270" r="18" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="80" y="276" text-anchor="middle" fill="white" font-weight="bold" font-size="14">D</text>
+                            
+                            <!-- Arrow marker definition -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#e17055"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <p style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #636e72;">
+                            🟣 = Word Ending | ⚠️ Currently at ROOT, looking at 'C'
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">2</div>
+                <h3 style="color: #6c5ce7; margin-bottom: 15px;">🏊 Diving Deeper: At 'C' Node</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div>
+                        <h4 style="color: #e17055; margin-bottom: 10px;">📝 What's Happening:</h4>
+                        <p><strong>Current Position:</strong> 'C' node</p>
+                        <p style="margin-top: 10px;"><strong>Looking for:</strong> Character 'A' (index 1)</p>
+                        <p style="margin-top: 10px;"><strong>Decision:</strong> Does 'C' have a child 'A'? ✅ YES!</p>
+                        <p style="margin-top: 10px;"><strong>Next Action:</strong> Dive into 'A' node with remaining word "R"</p>
+                        <div style="background: #dfe6e9; padding: 15px; border-radius: 10px; margin-top: 15px; font-family: monospace; font-size: 0.9em;">
+                            <p>delete(node_C, "CAR", 1)</p>
+                            <p style="color: #e17055;">   ↓</p>
+                            <p>delete(node_A, "CAR", 2)</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%); padding: 20px; border-radius: 15px; position: relative; min-height: 300px;">
+                        <h4 style="color: #2d3436; margin-bottom: 15px; text-align: center;">🌳 Trie State</h4>
+                        <svg width="100%" height="280" viewBox="0 0 300 280">
+                            <circle cx="150" cy="30" r="25" fill="#b2bec3"/>
+                            <text x="150" y="38" text-anchor="middle" fill="white" font-weight="bold" font-size="16">ROOT</text>
+                            
+                            <path d="M 150 55 L 150 85" stroke="#636e72" stroke-width="3"/>
+                            <text x="165" y="75" fill="#636e72" font-weight="bold" font-size="14">C</text>
+                            
+                            <!-- C Node - ACTIVE -->
+                            <circle cx="150" cy="100" r="25" fill="#667eea" stroke="#fdcb6e" stroke-width="4"/>
+                            <text x="150" y="107" text-anchor="middle" fill="white" font-weight="bold" font-size="16">C</text>
+                            <text x="150" y="90" text-anchor="middle" fill="#e17055" font-weight="bold" font-size="12">← HERE</text>
+                            
+                            <path d="M 150 125 L 150 148" stroke="#e17055" stroke-width="4" marker-end="url(#arrowhead2)"/>
+                            <text x="165" y="140" fill="#e17055" font-weight="bold" font-size="14">A</text>
+                            
+                            <circle cx="150" cy="163" r="22" fill="#fab1a0"/>
+                            <text x="150" y="170" text-anchor="middle" fill="#2d3436" font-weight="bold" font-size="16">A</text>
+                            
+                            <path d="M 135 183 L 90 213" stroke="#636e72" stroke-width="3"/>
+                            <text x="105" y="203" fill="#636e72" font-weight="bold" font-size="14">R</text>
+                            
+                            <path d="M 165 183 L 210 213" stroke="#636e72" stroke-width="3"/>
+                            <text x="195" y="203" fill="#636e72" font-weight="bold" font-size="14">T</text>
+                            
+                            <circle cx="80" cy="228" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="80" y="235" text-anchor="middle" fill="white" font-weight="bold" font-size="16">R</text>
+                            
+                            <circle cx="220" cy="228" r="22" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="220" y="235" text-anchor="middle" fill="white" font-weight="bold" font-size="16">T</text>
+                            
+                            <path d="M 80 250 L 80 270" stroke="#636e72" stroke-width="3"/>
+                            <text x="95" y="265" fill="#636e72" font-weight="bold" font-size="14">D</text>
+                            
+                            <circle cx="80" cy="270" r="18" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                            <text x="80" y="276" text-anchor="middle" fill="white" font-weight="bold" font-size="14">D</text>
+                            
+                            <defs>
+                                <marker id="arrowhead2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                                    <polygon points="0 0, 10 3, 0 6" fill="#e17055"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                        <p style="text-align: center; margin-top: 10px; font-size: 0.9em; color: #636e72;">
+                            🟣 = Word Ending | 🔵 = Current Position
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">3</div>
+                <h3 style="color: #d63031; margin-bottom: 15px;">🔥 THE CRITICAL MOMENT: Unmarking 'R'</h3>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                    <div>
+                        <h4 style="color: #e17055; margin-bottom: 10px;">📝 What's Happening:</h4>
+                        <p><strong>Current Position:</strong> 'R' node (after recursive calls)</p>
+                        <p style="margin-top: 10px;"><strong>Reached end:</strong> index === word.length ✅</p>
+                        <p style="margin-top: 10px;"><strong>Critical Action:</strong> <span style="color: #d63031; font-weight: bold;">UNMARK THIS NODE!</span></p>
+                        
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-top: 15px; border-left: 5px solid #fdcb6e;">
+                            <p style="font-weight: bold; color: #856404;">🤔 Why not delete 'R'?</p>
+                            <p style="margin-top: 8px;">Because 'R' has a child 'D' (for "CARD")</p>
+                            <p style="margin-top: 8px;">We must KEEP the node but REMOVE the word marker!</p>
+                        </div>
+                        
+                        <div style="background: #dfe6e9; padding: 15px; border-radius: 10px; margin-top: 15px; font-family: monospace; font-size: 0.9em;">
+                            <p style="color: #00b894;">// At base case</p>
+                            <p>node.isEndOfWord = false; <span style="color: #d63031;">← UNMARK!</span></p>
+                            <p style="color: #00b894;">// Check if can delete</p>
+                            <p>hasChildren? YES (has 'D')</p>
+                            <p style="color: #e17055;">return FALSE;</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: linear-gradient(135deg, #a8e6cf 0%, #dcedc1 100%); padding: 20px; border-radius: 15px;">
+                        <h4 style="color: #2d3436; margin-bottom: 15px; text-align: center;">🌳 Before vs After Unmark</h4>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <div style="background: white; padding: 10px; border-radius: 10px;">
+                                <p style="text-align: center; font-weight: bold; color: #d63031; margin-bottom: 10px;">BEFORE</p>
+                                <svg width="100%" height="180" viewBox="0 0 140 180">
+                                    <circle cx="70" cy="40" r="20" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                                    <text x="70" y="47" text-anchor="middle" fill="white" font-weight="bold">R</text>
+                                    <text x="70" y="30" text-anchor="middle" fill="#00b894" font-size="20">✓</text>
+                                    
+                                    <path d="M 70 60 L 70 100" stroke="#636e72" stroke-width="3"/>
+                                    <text x="85" y="85" fill="#636e72" font-weight="bold">D</text>
+                                    
+                                    <circle cx="70" cy="120" r="18" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                                    <text x="70" y="126" text-anchor="middle" fill="white" font-weight="bold">D</text>
+                                    
+                                    <text x="70" y="155" text-anchor="middle" fill="#2d3436" font-size="11">isEndOfWord = true</text>
+                                    <text x="70" y="170" text-anchor="middle" fill="#00b894" font-size="11" font-weight="bold">"CAR" found! ✓</text>
+                                </svg>
+                            </div>
+                            
+                            <div style="background: white; padding: 10px; border-radius: 10px;">
+                                <p style="text-align: center; font-weight: bold; color: #00b894; margin-bottom: 10px;">AFTER</p>
+                                <svg width="100%" height="180" viewBox="0 0 140 180">
+                                    <circle cx="70" cy="40" r="20" fill="#fab1a0" stroke="#636e72" stroke-width="2"/>
+                                    <text x="70" y="47" text-anchor="middle" fill="#2d3436" font-weight="bold">R</text>
+                                    <text x="70" y="30" text-anchor="middle" fill="#d63031" font-size="20">✗</text>
+                                    
+                                    <path d="M 70 60 L 70 100" stroke="#636e72" stroke-width="3"/>
+                                    <text x="85" y="85" fill="#636e72" font-weight="bold">D</text>
+                                    
+                                    <circle cx="70" cy="120" r="18" fill="#667eea" stroke="#fdcb6e" stroke-width="3"/>
+                                    <text x="70" y="126" text-anchor="middle" fill="white" font-weight="bold">D</text>
+                                    
+                                    <text x="70" y="155" text-anchor="middle" fill="#2d3436" font-size="11">isEndOfWord = false</text>
+                                    <text x="70" y="170" text-anchor="middle" fill="#d63031" font-size="11" font-weight="bold">"CAR" NOT found! ✗</text>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <div style="background: #00b894; color: white; padding: 12px; border-radius: 10px; margin-top: 15px; text-align: center;">
+                            <p style="font-weight: bold;">🎯 Key Insight</p>
+                            <p style="margin-top: 5px; font-size: 0.95em;">Node stays (for "CARD") but word marker removed!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">4</div>
+                <h3 style="color: #6c5ce7; margin-bottom: 15px;">⬆️ Bubbling Up: Return Values</h3>
+                
+                <div style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); padding: 20px; border-radius: 15px; margin: 20px 0;">
+                    <h4 style="color: #2d3436; margin-bottom: 15px; text-align: center;">🔄 The Return Chain</h4>
+                    
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                        <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
+                            <p style="font-weight: bold; color: #6c5ce7;">At 'R'</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;">Has child 'D'</p>
+                            <div style="background: #dfe6e9; padding: 8px; border-radius: 5px; margin-top: 10px; font-family: monospace; font-size: 0.85em;">
+                                return FALSE
+                            </div>
+                            <p style="margin-top: 8px; color: #636e72; font-size: 0.85em;">↑ Don't delete me!</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
+                            <p style="font-weight: bold; color: #6c5ce7;">At 'A'</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;">Has children 'R' & 'T'</p>
+                            <div style="background: #dfe6e9; padding: 8px; border-radius: 5px; margin-top: 10px; font-family: monospace; font-size: 0.85em;">
+                                return FALSE
+                            </div>
+                            <p style="margin-top: 8px; color: #636e72; font-size: 0.85em;">↑ Keep me too!</p>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 2em; margin-bottom: 10px;">🟢</div>
+                            <p style="font-weight: bold; color: #6c5ce7;">At 'C'</p>
+                            <p style="margin-top: 8px; font-size: 0.9em;">Has child 'A'</p>
+                            <div style="background: #dfe6e9; padding: 8px; border-radius: 5px; margin-top: 10px; font-family: monospace; font-size: 0.85em;">
+                                return FALSE
+                            </div>
+                            <p style="margin-top: 8px; color: #636e72; font-size: 0.85em;">↑ Structure intact!</p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; margin-top: 20px; border-left: 5px solid #fdcb6e;">
+                        <p style="font-weight: bold; color: #856404;">💡 What "FALSE" means:</p>
+                        <p style="margin-top: 8px;">"Don't delete me! I'm still needed!" - Either because:</p>
+                        <ul style="margin-top: 8px; margin-left: 20px; line-height: 1.8;">
+                            <li>I have children (other words need me as a path)</li>
+                            <li>I'm marked as another word's ending</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="process-step">
+                <div class="step-number">✅</div>
+                <h3 style="color: #00b894; margin-bottom: 15px;">🎉 Mission Complete!</h3>
+                <div style="background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); color: white; padding: 20px; border-radius: 10px;">
+                    <p style="font-size: 1.2em;"><strong>Final Result:</strong></p>
+                    <ul style="margin-top: 15px; margin-left: 20px; line-height: 2;">
+                        <li>✓ "CAR" is no longer searchable (R was unmarked)</li>
+                        <li>✓ "CAT" still works perfectly (separate branch)</li>
+                        <li>✓ "CARD" still works perfectly (uses the same R node!)</li>
+                        <li>✓ Structure preserved - no nodes deleted!</li>
+                    </ul>
+                    <p style="margin-top: 20px; text-align: center; font-size: 1.3em;">
+                        <strong>🌟 Smart deletion = Preserve structure, remove word! 🌟</strong>
+                    </p>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <div class="totoro">😊</div>
+                <p style="font-size: 1.2em; color: #6c5ce7; margin-top: 10px;">
+                    Beautiful recursion in action!
+                </p>
+            </div>
+        </div>
+
+        <!-- Tab 3: Debug Mode -->
+        <div class="tab-content" id="tab-2">
+            <h2 style="color: #6c5ce7; text-align: center; margin-bottom: 20px;">🐛 Interactive Debug Mode</h2>
+            
+            <div class="controls">
+                <button class="control-btn" onclick="debugPrevious()">⏮️ Previous</button>
+                <button class="control-btn" onclick="debugPlay()" id="playBtn">▶️ Play</button>
+                <button class="control-btn" onclick="debugPause()" id="pauseBtn" style="display: none;">⏸️ Pause</button>
+                <button class="control-btn" onclick="debugNext()">⏭️ Next</button>
+                <button class="control-btn" onclick="debugReset()">🔄 Reset</button>
+                
+                <div class="speed-control">
+                    <label>Speed:</label>
+                    <select id="speedSelect" onchange="updateSpeed()">
+                        <option value="2000">🐌 Slow (2s)</option>
+                        <option value="1000" selected>🚶 Normal (1s)</option>
+                        <option value="500">🏃 Fast (0.5s)</option>
+                        <option value="200">⚡ Very Fast (0.2s)</option>
+                    </select>
+                </div>
+                
+                <div style="color: white; margin-top: 15px; font-size: 1.1em;">
+                    Step <span id="stepCounter" style="font-weight: bold;">0</span> of <span id="totalSteps" style="font-weight: bold;">0</span>
+                </div>
+            </div>
+
+            <div class="vscode-layout">
+                <div class="vscode-left-panel">
+                    <div class="vscode-header">📝 Python Code Execution</div>
+                    <div class="code-viewer" id="codeViewer"></div>
+                </div>
+                <div class="vscode-middle-panel">
+                    <div class="vscode-header">🌳 Trie Structure</div>
+                    <div class="trie-canvas" id="trieCanvas"></div>
+                </div>
+                <div class="vscode-right-panel">
+                    <div class="vscode-header">💬 Debug Console</div>
+                    <div class="console" id="debugConsole"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 4: Quiz -->
+        <div class="tab-content" id="tab-3">
+            <h2 style="color: #6c5ce7; text-align: center; margin-bottom: 30px;">🎓 Test Your Understanding!</h2>
+            
+            <div class="quiz-container" id="quizContainer"></div>
+            
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="control-btn" onclick="checkAnswers()" id="submitBtn" style="font-size: 1.2em; padding: 15px 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    Submit Answers 📝
+                </button>
+                <button class="control-btn" onclick="resetQuiz()" id="retryBtn" style="display: none; font-size: 1.2em; padding: 15px 40px; background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); color: white;">
+                    Try Again 🔄
+                </button>
+            </div>
+            
+            <div id="scoreSection" style="display: none;">
+                <div class="score-display">
+                    <div class="totoro">🎉</div>
+                    <div id="scoreText"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Management
+        function switchTab(index) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach((tab, i) => {
+                tab.classList.toggle('active', i === index);
+            });
+            
+            contents.forEach((content, i) => {
+                content.classList.toggle('active', i === index);
+            });
+
+            if (index === 2) {
+                initDebugMode();
+            } else if (index === 3) {
+                initQuiz();
+            }
+        }
+
+        // Initialize first tab on page load
+        window.addEventListener('DOMContentLoaded', function() {
+            switchTab(0);
+        });
+
+        // Debug Mode
+        let debugStep = 0;
+        let debugPlaying = false;
+        let debugInterval = null;
+        let debugSpeed = 1000;
+
+        const codeSteps = [
+            { line: 1, code: "def delete(self, word):", comment: "# Main delete method" },
+            { line: 2, code: "    \"\"\"Delete a word from the Trie\"\"\"", comment: "" },
+            { line: 3, code: "    return self._delete_helper(self.root, word, 0)", comment: "" },
+            { line: 4, code: "", comment: "" },
+            { line: 5, code: "def _delete_helper(self, node, word, index):", comment: "" },
+            { line: 6, code: "    # BASE CASE: Reached end of word", comment: "" },
+            { line: 7, code: "    if index == len(word):", comment: "" },
+            { line: 8, code: "        # Word doesn't exist", comment: "" },
+            { line: 9, code: "        if not node.is_end_of_word:", comment: "" },
+            { line: 10, code: "            return False", comment: "" },
+            { line: 11, code: "        ", comment: "" },
+            { line: 12, code: "        # UNMARK the node", comment: "" },
+            { line: 13, code: "        node.is_end_of_word = False", comment: "" },
+            { line: 14, code: "        ", comment: "" },
+            { line: 15, code: "        # Return True if node can be deleted", comment: "" },
+            { line: 16, code: "        return len(node.children) == 0", comment: "" },
+            { line: 17, code: "    ", comment: "" },
+            { line: 18, code: "    # RECURSIVE CASE", comment: "" },
+            { line: 19, code: "    char = word[index]", comment: "" },
+            { line: 20, code: "    ", comment: "" },
+            { line: 21, code: "    # Character doesn't exist", comment: "" },
+            { line: 22, code: "    if char not in node.children:", comment: "" },
+            { line: 23, code: "        return False", comment: "" },
+            { line: 24, code: "    ", comment: "" },
+            { line: 25, code: "    # Recurse to child", comment: "" },
+            { line: 26, code: "    child_node = node.children[char]", comment: "" },
+            { line: 27, code: "    should_delete = self._delete_helper(", comment: "" },
+            { line: 28, code: "        child_node, word, index + 1", comment: "" },
+            { line: 29, code: "    )", comment: "" },
+            { line: 30, code: "    ", comment: "" },
+            { line: 31, code: "    # Delete child if needed", comment: "" },
+            { line: 32, code: "    if should_delete:", comment: "" },
+            { line: 33, code: "        del node.children[char]", comment: "" },
+            { line: 34, code: "        ", comment: "" },
+            { line: 35, code: "        # Can we delete current node?", comment: "" },
+            { line: 36, code: "        return (not node.is_end_of_word and", comment: "" },
+            { line: 37, code: "                len(node.children) == 0)", comment: "" },
+            { line: 38, code: "    ", comment: "" },
+            { line: 39, code: "    return False", comment: "" }
+        ];
+
+        const debugSteps = [
+            {
+                stepNum: 0,
+                activeLine: 1,
+                activeNode: "root",
+                message: "🎬 STARTING: delete('CAR')",
+                detail: "Beginning deletion process for word 'CAR'",
+                consoleType: "info"
+            },
+            {
+                stepNum: 1,
+                activeLine: 7,
+                activeNode: "root",
+                message: "🔍 CHECK: index == len(word)? → 0 == 3? FALSE",
+                detail: "Not at word end yet, continue to recursive case",
+                consoleType: "check"
+            },
+            {
+                stepNum: 2,
+                activeLine: 19,
+                activeNode: "root",
+                message: "📍 GET CHAR: char = word[0] = 'C'",
+                detail: "Extracting character at index 0",
+                consoleType: "action"
+            },
+            {
+                stepNum: 3,
+                activeLine: 22,
+                activeNode: "root",
+                message: "🔍 CHECK: 'C' in root.children? YES ✓",
+                detail: "Found 'C' child, proceeding with recursion",
+                consoleType: "check"
+            },
+            {
+                stepNum: 4,
+                activeLine: 27,
+                activeNode: "C",
+                message: "🏊 RECURSE: _delete_helper(node_C, 'CAR', 1)",
+                detail: "Diving into 'C' node, moving to index 1",
+                consoleType: "recurse"
+            },
+            {
+                stepNum: 5,
+                activeLine: 7,
+                activeNode: "C",
+                message: "🔍 CHECK: index == len(word)? → 1 == 3? FALSE",
+                detail: "Still not at word end, continue",
+                consoleType: "check"
+            },
+            {
+                stepNum: 6,
+                activeLine: 19,
+                activeNode: "C",
+                message: "📍 GET CHAR: char = word[1] = 'A'",
+                detail: "Extracting character at index 1",
+                consoleType: "action"
+            },
+            {
+                stepNum: 7,
+                activeLine: 27,
+                activeNode: "A",
+                message: "🏊 RECURSE: _delete_helper(node_A, 'CAR', 2)",
+                detail: "Diving into 'A' node, moving to index 2",
+                consoleType: "recurse"
+            },
+            {
+                stepNum: 8,
+                activeLine: 19,
+                activeNode: "A",
+                message: "📍 GET CHAR: char = word[2] = 'R'",
+                detail: "Extracting character at index 2 (last character!)",
+                consoleType: "action"
+            },
+            {
+                stepNum: 9,
+                activeLine: 27,
+                activeNode: "R",
+                message: "🏊 RECURSE: _delete_helper(node_R, 'CAR', 3)",
+                detail: "Diving into 'R' node, moving to index 3",
+                consoleType: "recurse"
+            },
+            {
+                stepNum: 10,
+                activeLine: 7,
+                activeNode: "R",
+                message: "✅ BASE CASE: index == len(word)? → 3 == 3? TRUE!",
+                detail: "We've processed all characters, now at the critical point!",
+                consoleType: "success"
+            },
+            {
+                stepNum: 11,
+                activeLine: 9,
+                activeNode: "R",
+                message: "🔍 CHECK: node.is_end_of_word? YES ✓",
+                detail: "'CAR' exists in the Trie (R is marked as word ending)",
+                consoleType: "check"
+            },
+            {
+                stepNum: 12,
+                activeLine: 13,
+                activeNode: "R",
+                message: "🔥 UNMARK: node.is_end_of_word = False",
+                detail: "CRITICAL! Removing word marker from R node",
+                consoleType: "critical"
+            },
+            {
+                stepNum: 13,
+                activeLine: 16,
+                activeNode: "R",
+                message: "🤔 CHECK: len(node.children) == 0? NO (has 'D')",
+                detail: "R has child 'D', cannot delete this node",
+                consoleType: "check"
+            },
+            {
+                stepNum: 14,
+                activeLine: 16,
+                activeNode: "R",
+                message: "⬆️ RETURN FALSE to parent (Keep R node)",
+                detail: "R must stay for 'CARD', but now unmarked",
+                consoleType: "return"
+            },
+            {
+                stepNum: 15,
+                activeLine: 32,
+                activeNode: "A",
+                message: "⬆️ BACK AT A: should_delete = False",
+                detail: "Child R says 'keep me', so we skip deletion block",
+                consoleType: "return"
+            },
+            {
+                stepNum: 16,
+                activeLine: 39,
+                activeNode: "A",
+                message: "⬆️ RETURN False to parent (Keep A node)",
+                detail: "A has children (R, T), must be preserved",
+                consoleType: "return"
+            },
+            {
+                stepNum: 17,
+                activeLine: 32,
+                activeNode: "C",
+                message: "⬆️ BACK AT C: should_delete = False",
+                detail: "Child A says 'keep me'",
+                consoleType: "return"
+            },
+            {
+                stepNum: 18,
+                activeLine: 39,
+                activeNode: "C",
+                message: "⬆️ RETURN False to parent (Keep C node)",
+                detail: "C has child A, must be preserved",
+                consoleType: "return"
+            },
+            {
+                stepNum: 19,
+                activeLine: 3,
+                activeNode: "root",
+                message: "🎉 COMPLETE: Returned to root",
+                detail: "Deletion finished! All nodes preserved, R unmarked",
+                consoleType: "success"
+            },
+            {
+                stepNum: 20,
+                activeLine: 3,
+                activeNode: "root",
+                message: "✅ RESULT: 'CAR' deleted, structure intact",
+                detail: "search('CAR')→FALSE | search('CAT')→TRUE | search('CARD')→TRUE",
+                consoleType: "success"
+            }
+        ];
+
+        function initDebugMode() {
+            debugStep = 0;
+            renderCode();
+            renderTrie();
+            renderConsole();
+            updateStepCounter();
+        }
+
+        function renderCode() {
+            const viewer = document.getElementById('codeViewer');
+            const currentStep = debugSteps[debugStep];
+            
+            viewer.innerHTML = codeSteps.map((line, idx) => {
+                const isActive = line.line === currentStep.activeLine;
+                
+                return `<div class="code-line ${isActive ? 'active' : ''}" id="code-line-${line.line}">
+                    <span class="line-number">${line.line}</span>
+                    <span class="code-content">${line.code}</span>
+                    <span class="code-comment">${line.comment}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function renderTrie() {
+            const canvas = document.getElementById('trieCanvas');
+            const currentStep = debugSteps[debugStep];
+            
+            // Better positioned nodes for middle panel
+            const nodes = {
+                root: { x: 150, y: 40, label: 'ROOT', isEnd: false, size: 30 },
+                C: { x: 150, y: 130, label: 'C', isEnd: false, size: 30 },
+                A: { x: 150, y: 220, label: 'A', isEnd: false, size: 30 },
+                R: { x: 80, y: 320, label: 'R', isEnd: debugStep <= 13, size: 30, unmarked: debugStep > 13 },
+                T: { x: 220, y: 320, label: 'T', isEnd: true, size: 30 },
+                D: { x: 80, y: 420, label: 'D', isEnd: true, size: 28 }
+            };
+
+            let html = '';
+            
+            // Draw edges
+            const edges = [
+                { from: 'root', to: 'C', label: 'C' },
+                { from: 'C', to: 'A', label: 'A' },
+                { from: 'A', to: 'R', label: 'R' },
+                { from: 'A', to: 'T', label: 'T' },
+                { from: 'R', to: 'D', label: 'D' }
+            ];
+
+            let svgContent = '';
+            edges.forEach(edge => {
+                const from = nodes[edge.from];
+                const to = nodes[edge.to];
+                
+                const isActive = (currentStep.activeNode === edge.to || currentStep.activeNode === edge.from);
+                const color = isActive ? '#58a6ff' : '#30363d';
+                const width = isActive ? 3 : 2;
+                
+                const x1 = from.x + from.size;
+                const y1 = from.y + from.size;
+                const x2 = to.x + to.size;
+                const y2 = to.y + to.size;
+                
+                svgContent += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
+                    stroke="${color}" stroke-width="${width}" opacity="0.9"/>`;
+                
+                // Edge label
+                const midX = (x1 + x2) / 2;
+                const midY = (y1 + y2) / 2;
+                html += `<div class="edge-label" style="left: ${midX - 12}px; top: ${midY - 10}px;">${edge.label}</div>`;
+            });
+            
+            html = `<svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
+                ${svgContent}
+            </svg>` + html;
+
+            // Draw nodes
+            Object.keys(nodes).forEach(key => {
+                const node = nodes[key];
+                const isActive = currentStep.activeNode === key;
+                
+                let classes = 'trie-node';
+                if (isActive) classes += ' active';
+                else if (node.isEnd && !node.unmarked) classes += ' word-end';
+                else if (node.unmarked) classes += ' deleted';
+                
+                html += `<div class="${classes}" 
+                    style="left: ${node.x}px; top: ${node.y}px; width: ${node.size * 2}px; height: ${node.size * 2}px; font-size: ${node.size * 0.55}px;">
+                    ${node.label}
+                </div>`;
+                
+                // Status indicator
+                if (node.isEnd && !node.unmarked) {
+                    html += `<div style="position: absolute; left: ${node.x + node.size * 2 - 12}px; top: ${node.y - 8}px;
+                        font-size: 18px; color: #2ea043;">✓</div>`;
+                }
+                
+                if (node.unmarked) {
+                    html += `<div style="position: absolute; left: ${node.x + node.size * 2 - 12}px; top: ${node.y - 8}px;
+                        font-size: 18px; color: #f85149;">✗</div>`;
+                }
+            });
+
+            canvas.innerHTML = html;
+        }
+
+        function renderConsole() {
+            const console = document.getElementById('debugConsole');
+            
+            const lines = debugSteps.slice(0, debugStep + 1).map((step, idx) => {
+                let icon, color, bgColor;
+                
+                switch(step.consoleType) {
+                    case 'info':
+                        icon = '📘';
+                        color = '#58a6ff';
+                        bgColor = 'rgba(88, 166, 255, 0.1)';
+                        break;
+                    case 'check':
+                        icon = '🔍';
+                        color = '#f2cc60';
+                        bgColor = 'rgba(242, 204, 96, 0.1)';
+                        break;
+                    case 'action':
+                        icon = '⚙️';
+                        color = '#79c0ff';
+                        bgColor = 'rgba(121, 192, 255, 0.1)';
+                        break;
+                    case 'recurse':
+                        icon = '🏊';
+                        color = '#d2a8ff';
+                        bgColor = 'rgba(210, 168, 255, 0.1)';
+                        break;
+                    case 'critical':
+                        icon = '🔥';
+                        color = '#ff7b72';
+                        bgColor = 'rgba(255, 123, 114, 0.1)';
+                        break;
+                    case 'success':
+                        icon = '✅';
+                        color = '#3fb950';
+                        bgColor = 'rgba(63, 185, 80, 0.1)';
+                        break;
+                    case 'return':
+                        icon = '⬆️';
+                        color = '#a5d6ff';
+                        bgColor = 'rgba(165, 214, 255, 0.1)';
+                        break;
+                    default:
+                        icon = '💬';
+                        color = '#8b949e';
+                        bgColor = 'rgba(139, 148, 158, 0.1)';
+                }
+                
+                return `<div class="console-line" style="animation-delay: ${idx * 0.03}s;">
+                    <span style="color: ${color}; font-weight: bold; margin-right: 8px; font-size: 14px;">${icon}</span>
+                    <span style="color: #cccccc; font-size: 12px;">${step.message}</span><br>
+                    <span style="color: #858585; margin-left: 22px; font-size: 11px;">${step.detail}</span>
+                </div>`;
+            }).join('');
+            
+            console.innerHTML = lines;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        function updateStepCounter() {
+            document.getElementById('stepCounter').textContent = debugStep + 1;
+            document.getElementById('totalSteps').textContent = debugSteps.length;
+        }
+
+        function debugNext() {
+            if (debugStep < debugSteps.length - 1) {
+                debugStep++;
+                renderCode();
+                renderTrie();
+                renderConsole();
+                updateStepCounter();
+            }
+        }
+
+        function debugPrevious() {
+            if (debugStep > 0) {
+                debugStep--;
+                renderCode();
+                renderTrie();
+                renderConsole();
+                updateStepCounter();
+            }
+        }
+
+        function debugPlay() {
+            if (!debugPlaying) {
+                debugPlaying = true;
+                document.getElementById('playBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                
+                debugInterval = setInterval(() => {
+                    debugNext();
+                    if (debugStep >= debugSteps.length - 1) {
+                        debugPause();
+                    }
+                }, debugSpeed);
+            }
+        }
+
+        function debugPause() {
+            debugPlaying = false;
+            document.getElementById('playBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            clearInterval(debugInterval);
+        }
+
+        function debugReset() {
+            debugPause();
+            debugStep = 0;
+            renderCode();
+            renderTrie();
+            document.getElementById('debugConsole').innerHTML = '';
+            updateStepCounter();
+        }
+
+        function updateSpeed() {
+            debugSpeed = parseInt(document.getElementById('speedSelect').value);
+            if (debugPlaying) {
+                debugPause();
+                debugPlay();
+            }
+        }
+
+        // Quiz
+        const quizQuestions = [
+            {
+                question: "Q1: What is the PRIMARY purpose of the 'isEndOfWord' flag in a Trie node?",
+                options: [
+                    "To mark that this node should be deleted",
+                    "To mark that a complete word ends at this node",
+                    "To count how many words pass through this node",
+                    "To prevent the node from being modified"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q2: When deleting 'CAR' from a Trie that also contains 'CARD', what happens to the 'R' node?",
+                options: [
+                    "It gets completely deleted",
+                    "It stays but is unmarked (isEndOfWord = false)",
+                    "It stays marked as a word ending",
+                    "It gets replaced with a new node"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q3: Why do we use recursion in Trie deletion?",
+                options: [
+                    "Because it's faster than iteration",
+                    "To make decisions on the way back up after reaching the word's end",
+                    "Because Tries can only be modified recursively",
+                    "To count the number of nodes"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q4: A node returns TRUE to its parent during deletion. What does this mean?",
+                options: [
+                    "The node wants to be kept",
+                    "The node found the word",
+                    "The node can be safely deleted",
+                    "The node has children"
+                ],
+                correct: 2
+            },
+            {
+                question: "Q5: When is a node NOT deleted even after unmarking it?",
+                options: [
+                    "When it has no children",
+                    "When it has at least one child",
+                    "When it's the root node",
+                    "Never - all unmarked nodes are deleted"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q6: What happens if you try to delete a word that doesn't exist in the Trie?",
+                options: [
+                    "The Trie crashes",
+                    "Random nodes get deleted",
+                    "The function returns false and nothing is changed",
+                    "The function creates the word first"
+                ],
+                correct: 2
+            },
+            {
+                question: "Q7: Given CAT and CATS in a Trie, after deleting CAT, what's true about the 'T' node?",
+                options: [
+                    "It's completely removed",
+                    "It stays with isEndOfWord = false, and keeps its 'S' child",
+                    "It stays marked as word ending",
+                    "It becomes the new root"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q8: Why must we check 'index === word.length' as our base case?",
+                options: [
+                    "To prevent infinite recursion",
+                    "To know when we've processed all characters and reached the word's end",
+                    "To count the word length",
+                    "To start the deletion process"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q9: What's the correct order of operations when deleting?",
+                options: [
+                    "Delete nodes, then unmark the word ending",
+                    "Unmark first, then check if nodes can be deleted bottom-up",
+                    "Delete all nodes at once",
+                    "Unmark all nodes in the tree first"
+                ],
+                correct: 1
+            },
+            {
+                question: "Q10: If a Trie has only the word 'CAT' and you delete it, what happens to the entire structure?",
+                options: [
+                    "Only the 'T' node is deleted",
+                    "All nodes (C, A, T) are deleted because none have other children",
+                    "The root is deleted",
+                    "Nothing is deleted, only unmarked"
+                ],
+                correct: 1
+            }
+        ];
+
+        let selectedAnswers = {};
+
+        function initQuiz() {
+            const container = document.getElementById('quizContainer');
+            selectedAnswers = {};
+            
+            container.innerHTML = quizQuestions.map((q, qIndex) => `
+                <div class="question-card" id="question-${qIndex}">
+                    <h3>${q.question}</h3>
+                    ${q.options.map((opt, oIndex) => `
+                        <div class="option" onclick="selectOption(${qIndex}, ${oIndex})" id="option-${qIndex}-${oIndex}">
+                            ${String.fromCharCode(65 + oIndex)}. ${opt}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('retryBtn').style.display = 'none';
+            document.getElementById('scoreSection').style.display = 'none';
+        }
+
+        function selectOption(questionIndex, optionIndex) {
+            if (document.getElementById('submitBtn').style.display === 'none') return;
+
+            // Clear previous selection
+            for (let i = 0; i < 4; i++) {
+                const opt = document.getElementById(`option-${questionIndex}-${i}`);
+                if (opt) {
+                    opt.style.border = '2px solid transparent';
+                    opt.style.background = 'white';
+                }
+            }
+
+            // Mark new selection
+            const selected = document.getElementById(`option-${questionIndex}-${optionIndex}`);
+            selected.style.border = '2px solid #6c5ce7';
+            selected.style.background = 'linear-gradient(135deg, #e3e0ff 0%, #f5f3ff 100%)';
+            
+            selectedAnswers[questionIndex] = optionIndex;
+        }
+
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.background = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24'][Math.floor(Math.random() * 5)];
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 30);
+            }
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            
+            quizQuestions.forEach((q, qIndex) => {
+                const userAnswer = selectedAnswers[qIndex];
+                const correctAnswer = q.correct;
+                
+                for (let i = 0; i < 4; i++) {
+                    const opt = document.getElementById(`option-${qIndex}-${i}`);
+                    opt.style.pointerEvents = 'none';
+                    
+                    if (i === correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (i === userAnswer && i !== correctAnswer) {
+                        opt.classList.add('wrong');
+                    }
+                }
+                
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('retryBtn').style.display = 'inline-block';
+            
+            const scoreSection = document.getElementById('scoreSection');
+            const scoreText = document.getElementById('scoreText');
+            
+            let message = '';
+            let emoji = '';
+            
+            if (score === 10) {
+                message = "PERFECT SCORE! 🏆";
+                emoji = "🌟🎉🌟";
+                createConfetti();
+            } else if (score >= 8) {
+                message = "Excellent Work! 🎊";
+                emoji = "😊👏";
+            } else if (score >= 6) {
+                message = "Good Job! 💪";
+                emoji = "😊";
+            } else {
+                message = "Keep Learning! 📚";
+                emoji = "💪";
+            }
+            
+            scoreText.innerHTML = `
+                <div style="font-size: 2em; margin-bottom: 10px;">${emoji}</div>
+                <div style="font-size: 1.5em;">${message}</div>
+                <div style="font-size: 2em; margin-top: 10px;">Score: ${score}/10</div>
+                <div style="margin-top: 15px; font-size: 1.1em;">
+                    ${score === 10 ? "You're a Trie deletion master! 🌳✨" : 
+                      score >= 8 ? "You understand the core concepts very well! 🎯" :
+                      score >= 6 ? "Good progress! Review the concepts to master them! 📖" :
+                      "Take your time with the material - you'll get there! 🌱"}
+                </div>
+            `;
+            
+            scoreSection.style.display = 'block';
+            scoreSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            initQuiz();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

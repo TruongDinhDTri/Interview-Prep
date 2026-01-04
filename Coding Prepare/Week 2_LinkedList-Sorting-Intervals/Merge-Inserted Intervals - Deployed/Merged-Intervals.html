@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merge Intervals - VS Code Theme</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: #252526;
+            border-bottom: 1px solid #333;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .traffic-lights {
+            display: flex;
+            gap: 8px;
+        }
+
+        .traffic-light {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .title {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+
+        .btn-header {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-header:hover {
+            background: #3c3c3c;
+        }
+
+        .btn-header:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #0e639c;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #1177bb;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            width: 600px;
+            background: #252526;
+            border-right: 1px solid #333;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            padding: 16px;
+            border-bottom: 1px solid #333;
+        }
+
+        .input-section h3 {
+            color: #6b7280;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .input-field {
+            background: #3c3c3c;
+            border: 1px solid transparent;
+            color: white;
+            padding: 6px 10px;
+            border-radius: 4px;
+            outline: none;
+            width: 80px;
+        }
+
+        .input-field:focus {
+            border-color: #0e639c;
+        }
+
+        .btn-add {
+            background: #3c3c3c;
+            border: none;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-add:hover {
+            background: #0e639c;
+        }
+
+        .interval-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 160px;
+            overflow-y: auto;
+        }
+
+        .interval-item {
+            background: #1e1e1e;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .interval-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            font-size: 0.8rem;
+        }
+
+        .remove-btn:hover {
+            color: #ef4444;
+        }
+
+        .code-editor {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-y: auto;
+        }
+
+        .code-tab {
+            background: #252526;
+            color: #9ca3af;
+            font-size: 0.75rem;
+            border-bottom: 1px solid #1e1e1e;
+        }
+
+        .code-tab-active {
+            background: #1e1e1e;
+            border-top: 2px solid #0e639c;
+            color: #e8e8e8;
+            padding: 8px 16px;
+            display: inline-block;
+        }
+
+        .code-content {
+            padding: 20px;
+            background: #1e1e1e;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 2px 0;
+            line-height: 1.6;
+            transition: background 0.2s;
+        }
+
+        .code-line.active {
+            background: #264f78;
+        }
+
+        .line-num {
+            width: 40px;
+            text-align: right;
+            padding-right: 15px;
+            color: #858585;
+            user-select: none;
+            font-size: 0.65rem;
+            padding-top: 2px;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 32px;
+            background: #1e1e1e;
+            overflow-y: auto;
+        }
+
+        .status-panel {
+            background: #2d2d2d;
+            border-left: 4px solid #0e639c;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .status-title {
+            color: #9cdcfe;
+            font-family: monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .status-message {
+            color: #d4d4d4;
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .viz-section {
+            margin-bottom: 30px;
+        }
+
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin-bottom: 12px;
+        }
+
+        .viz-title {
+            color: #6b7280;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .viz-value {
+            color: #4ec9b0;
+            font-family: monospace;
+            font-size: 0.8rem;
+        }
+
+        .viz-canvas {
+            background: #252526;
+            border: 1px solid #333;
+            border-radius: 6px;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .grid-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-left: 1px solid #333;
+            color: #6b7280;
+            font-size: 0.65rem;
+            padding: 4px 0 0 4px;
+        }
+
+        .interval-bar {
+            position: absolute;
+            height: 64px;
+            top: 48px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-size: 0.7rem;
+            font-weight: bold;
+            transition: all 0.7s;
+            cursor: pointer;
+            border: 2px solid transparent;
+            mix-blend-mode: screen;
+        }
+
+        .interval-bar:hover {
+            transform: translateY(-8px);
+            filter: brightness(1.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .interval-bar.current {
+            transform: scale(1.05);
+            border-color: white;
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
+            z-index: 30;
+        }
+
+        .interval-bar span {
+            background: rgba(255,255,255,0.4);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: black;
+            backdrop-filter: blur(2px);
+            pointer-events: none;
+        }
+
+        .merged-bar {
+            background: #569cd6;
+            border: 1px solid #1e40af;
+        }
+
+        .merged-bar.merging {
+            animation: pulse 0.7s infinite;
+            border-color: white;
+        }
+
+        .watch-panel {
+            background: #252526;
+            border: 1px solid #333;
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .watch-title {
+            color: #6b7280;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #3e3e3e;
+        }
+
+        .watch-content {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .watch-var {
+            color: #569cd6;
+        }
+
+        .watch-value {
+            color: #ce9178;
+        }
+
+        .footer {
+            background: #007acc;
+            color: white;
+            font-size: 0.7rem;
+            padding: 4px 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .left-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #333;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="traffic-lights">
+                <div class="traffic-light" style="background: #ef4444;"></div>
+                <div class="traffic-light" style="background: #f59e0b;"></div>
+                <div class="traffic-light" style="background: #10b981;"></div>
+            </div>
+            <span class="title">solution.py - Merge Intervals</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-header" onclick="resetSteps()" title="Reset">🔄</button>
+            <button class="btn-header" onclick="prevStep()" id="prevBtn">◀</button>
+            <button class="btn-primary" onclick="nextStep()" id="nextBtn">
+                <span id="nextBtnText">▶ Start Debugging</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h3>Config Intervals</h3>
+                <div class="input-row">
+                    <input type="number" class="input-field" placeholder="Start" id="addStart">
+                    <input type="number" class="input-field" placeholder="End" id="addEnd">
+                    <button class="btn-add" onclick="addInterval()">➕</button>
+                </div>
+                <div class="interval-list" id="intervalList"></div>
+            </div>
+
+            <!-- Code Editor -->
+            <div class="code-editor">
+                <div class="code-tab">
+                    <div class="code-tab-active">solution.py</div>
+                </div>
+                <div class="code-content" id="codeContent"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <!-- Status -->
+            <div class="status-panel">
+                <div class="status-title">Debug Console</div>
+                <div class="status-message" id="statusMessage">Ready to debug</div>
+            </div>
+
+            <!-- Input Visualization -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <span class="viz-title">📦 Input Array (Sorted)</span>
+                    <span class="viz-value" id="inputValue">[]</span>
+                </div>
+                <div class="viz-canvas" id="inputCanvas"></div>
+            </div>
+
+            <!-- Merged Visualization -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <span class="viz-title">📊 Merged Result</span>
+                    <span class="viz-value" style="color: #569cd6;" id="mergedValue">[]</span>
+                </div>
+                <div class="viz-canvas" id="mergedCanvas" style="height: 130px;"></div>
+            </div>
+
+            <!-- Watch Window -->
+            <div class="watch-panel">
+                <div class="watch-title">Watch Window</div>
+                <div class="watch-content">
+                    <div>
+                        <span class="watch-var">current</span>: <span class="watch-value" id="watchCurrent">null</span>
+                    </div>
+                    <div>
+                        <span class="watch-var">merged[-1]</span>: <span style="color: #b5cea8;" id="watchLast">null</span>
+                    </div>
+                    <div style="grid-column: span 2;">
+                        <span style="color: #c586c0;">Overlap Condition</span>:
+                        <span style="color: #dcdcaa; margin-left: 8px;">current[0] <= merged[-1][1]</span>
+                        <div style="margin-left: 16px; color: #9ca3af; font-size: 0.8rem; margin-top: 4px;" id="watchCondition">...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div style="display: flex; gap: 20px;">
+            <span>main*</span>
+            <span>Python 3.10</span>
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <span>Ln <span id="footerLine">1</span>, Col 1</span>
+            <span>Spaces: 4</span>
+            <span>UTF-8</span>
+        </div>
+    </div>
+
+    <script>
+        let intervals = [[1, 3], [2, 6], [8, 10], [15, 18]];
+        let currentStep = 0;
+        let steps = [];
+
+        const COLORS = ['#FF5252', '#448AFF', '#69F0AE', '#E040FB', '#FFAB40', '#18FFFF', '#FFD740', '#FF4081'];
+
+        const codeLines = [
+            "def merge(intervals):",
+            "    intervals.sort(key=lambda x: x[0])",
+            "",
+            "    merged = [intervals[0]]",
+            "",
+            "    for current in intervals[1:]:",
+            "        last_merged = merged[-1]",
+            "",
+            "        if current[0] <= last_merged[1]:",
+            "            # Overlap! Extend end",
+            "            last_merged[1] = max(last_merged[1], current[1])",
+            "        else:",
+            "            # No overlap. New block",
+            "            merged.append(current)",
+            "",
+            "    return merged"
+        ];
+
+        function generateSteps() {
+            const steps = [];
+            const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
+            if (sorted.length === 0) return steps;
+
+            const merged = [];
+
+            steps.push({ line: 1, desc: "1. Start: The night shift begins. Sorted intervals.", merged: [], current: null, sorted });
+            steps.push({ line: 2, desc: "2. Sort the intervals by start time. Now we can see the flow.", merged: [], current: null, sorted });
+            steps.push({ line: 4, desc: `3. Initialize 'merged' list with the first interval: [${sorted[0]}]`, merged: [[...sorted[0]]], current: null, sorted });
+
+            merged.push([...sorted[0]]);
+
+            for (let i = 1; i < sorted.length; i++) {
+                const current = sorted[i];
+
+                steps.push({ line: 6, desc: `4. Loop: Pick up next interval [${current}].`, merged: JSON.parse(JSON.stringify(merged)), current, sorted });
+
+                const lastMerged = merged[merged.length - 1];
+                const isOverlap = current[0] <= lastMerged[1];
+
+                steps.push({ line: 9, desc: `5. Check: Does current start (${current[0]}) <= last merged end (${lastMerged[1]})?`, merged: JSON.parse(JSON.stringify(merged)), current, sorted });
+
+                if (isOverlap) {
+                    merged[merged.length - 1][1] = Math.max(lastMerged[1], current[1]);
+                    steps.push({ line: 11, desc: `6. MERGE! Overlap found. Update merged[-1][1] to max(${lastMerged[1]}, ${current[1]}) -> ${merged[merged.length - 1][1]}`, merged: JSON.parse(JSON.stringify(merged)), current, sorted, isMerging: true });
+                } else {
+                    merged.push([...current]);
+                    steps.push({ line: 14, desc: "7. No Overlap. The gap is real. Append current interval to merged list.", merged: JSON.parse(JSON.stringify(merged)), current, sorted });
+                }
+            }
+
+            steps.push({ line: 16, desc: "8. Return the merged list.", merged: JSON.parse(JSON.stringify(merged)), current: null, sorted });
+
+            return steps;
+        }
+
+        function renderCode() {
+            const step = steps[currentStep];
+            document.getElementById('codeContent').innerHTML = codeLines.map((line, idx) => {
+                const lineNum = idx + 1;
+                const isActive = lineNum === step.line;
+                const isComment = line.trim().startsWith('#');
+                return `<div class="code-line ${isActive ? 'active' : ''}">
+                    <div class="line-num">${lineNum}</div>
+                    <div style="color: ${isComment ? '#6a9955' : '#d4d4d4'}; ${isComment ? 'font-style: italic;' : ''}">${line}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderUI() {
+            const step = steps[currentStep];
+
+            // Status
+            document.getElementById('statusMessage').textContent = step.desc;
+
+            // Input value
+            document.getElementById('inputValue').textContent = `[${step.sorted.map(i => `[${i[0]},${i[1]}]`).join(', ')}]`;
+
+            // Merged value
+            document.getElementById('mergedValue').textContent = step.merged.length > 0 ? `[${step.merged.map(i => `[${i[0]},${i[1]}]`).join(', ')}]` : '[]';
+
+            // Watch window
+            document.getElementById('watchCurrent').textContent = step.current ? `[${step.current.join(', ')}]` : 'null';
+            document.getElementById('watchLast').textContent = step.merged.length > 0 ? `[${step.merged[step.merged.length - 1].join(', ')}]` : 'null';
+            if (step.current && step.merged.length > 0) {
+                const last = step.merged[step.merged.length - 1];
+                const isOverlap = step.current[0] <= last[1];
+                document.getElementById('watchCondition').textContent = `${step.current[0]} <= ${last[1]} is ${isOverlap}`;
+            } else {
+                document.getElementById('watchCondition').textContent = '...';
+            }
+
+            // Render canvases
+            renderIntervals();
+
+            // Render code
+            renderCode();
+
+            // Footer
+            document.getElementById('footerLine').textContent = step.line;
+
+            // Buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep >= steps.length - 1;
+            document.getElementById('nextBtnText').textContent = currentStep === 0 ? '▶ Start Debugging' : '▶▶ Next Step';
+        }
+
+        function renderIntervals() {
+            const step = steps[currentStep];
+            const allVals = [...step.sorted.flat(), ...step.merged.flat()];
+            const maxVal = Math.max(...allVals, 10) * 1.1;
+
+            // Input canvas
+            const inputCanvas = document.getElementById('inputCanvas');
+            inputCanvas.innerHTML = '';
+
+            // Grid lines
+            [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.left = `${pct * 95}%`;
+                line.textContent = Math.round(maxVal * pct);
+                inputCanvas.appendChild(line);
+            });
+
+            // Interval bars
+            step.sorted.forEach((interval, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'interval-bar';
+                const isCurrent = step.current && step.current[0] === interval[0] && step.current[1] === interval[1];
+                bar.style.left = `${(interval[0] / maxVal) * 95}%`;
+                bar.style.width = `${Math.max(((interval[1] - interval[0]) / maxVal) * 95, 2)}%`;
+                bar.style.backgroundColor = COLORS[idx % COLORS.length];
+                bar.style.opacity = isCurrent ? '1' : '0.8';
+                if (isCurrent) {
+                    bar.classList.add('current');
+                }
+                bar.innerHTML = `<span>[${interval[0]}, ${interval[1]}]</span>`;
+                inputCanvas.appendChild(bar);
+            });
+
+            // Merged canvas
+            const mergedCanvas = document.getElementById('mergedCanvas');
+            mergedCanvas.innerHTML = '';
+
+            [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.left = `${pct * 95}%`;
+                line.textContent = Math.round(maxVal * pct);
+                mergedCanvas.appendChild(line);
+            });
+
+            step.merged.forEach((interval, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'interval-bar merged-bar';
+                const isLast = idx === step.merged.length - 1;
+                const isMerging = step.isMerging && isLast;
+                bar.style.left = `${(interval[0] / maxVal) * 95}%`;
+                bar.style.width = `${Math.max(((interval[1] - interval[0]) / maxVal) * 95, 2)}%`;
+                if (isMerging) {
+                    bar.classList.add('merging');
+                }
+                bar.innerHTML = `<span style="color: white;">[${interval[0]}, ${interval[1]}]</span>`;
+                mergedCanvas.appendChild(bar);
+            });
+        }
+
+        function renderIntervalList() {
+            const list = document.getElementById('intervalList');
+            list.innerHTML = intervals.map((interval, idx) => {
+                const color = COLORS[idx % COLORS.length];
+                return `<div class="interval-item" style="border-left-color: ${color};">
+                    <span>[${interval[0]}, ${interval[1]}]</span>
+                    <button class="remove-btn" onclick="removeInterval(${idx})">✕</button>
+                </div>`;
+            }).join('');
+        }
+
+        function addInterval() {
+            const start = parseInt(document.getElementById('addStart').value);
+            const end = parseInt(document.getElementById('addEnd').value);
+            if (!isNaN(start) && !isNaN(end) && start < end) {
+                intervals.push([start, end]);
+                intervals.sort((a, b) => a[0] - b[0]);
+                document.getElementById('addStart').value = '';
+                document.getElementById('addEnd').value = '';
+                init();
+            }
+        }
+
+        function removeInterval(idx) {
+            intervals.splice(idx, 1);
+            init();
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderUI();
+            }
+        }
+
+        function resetSteps() {
+            currentStep = 0;
+            renderUI();
+        }
+
+        function init() {
+            currentStep = 0;
+            steps = generateSteps();
+            renderIntervalList();
+            renderUI();
+        }
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐛 BFS Debug Mode - Matrix Distance</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: #a0a0a0;
+            font-size: 1rem;
+        }
+
+        .controls {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: #374151;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: #4b5563;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .step-counter {
+            background: #374151;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            background: #374151;
+            color: #9ca3af;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px 12px 0 0;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #4b5563;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .action-banner {
+            padding: 20px;
+            border-radius: 12px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .matrices-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .matrix-panel {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .matrix-panel h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+
+        .matrix {
+            display: inline-block;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .matrix-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .cell {
+            width: 64px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .legend {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .legend h3 {
+            margin-bottom: 15px;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-panel {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .info-panel h3 {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .info-value {
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .queue-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .queue-item {
+            background: #7c3aed;
+            padding: 12px;
+            border-radius: 8px;
+            font-family: monospace;
+            text-align: center;
+        }
+
+        .code-snippet {
+            background: #1f2937;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .code-snippet pre {
+            color: #10b981;
+            font-family: monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+        }
+
+        .ideas-section {
+            background: #1f2937;
+            border-radius: 12px;
+            padding: 40px;
+        }
+
+        .idea-box {
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 25px;
+            border-left: 4px solid;
+        }
+
+        .idea-box h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .idea-box p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .highlight-box {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .three-col {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .three-col {
+                grid-template-columns: 1fr;
+            }
+            .matrices-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🐛 BFS Debug Mode</h1>
+            <p>Step-by-step execution trace</p>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="generateRandomMatrix()">🎲 Generate Random Matrix</button>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('debug')">🔍 Debug View</button>
+            <button class="tab" onclick="switchTab('ideas')">💡 Core Ideas</button>
+        </div>
+
+        <!-- Debug Tab -->
+        <div id="debug-tab" class="tab-content active">
+            <!-- Controls -->
+            <div class="controls">
+                <div class="btn-group">
+                    <button class="btn" onclick="resetSteps()">🔄</button>
+                    <button class="btn" onclick="prevStep()" id="prevBtn">◀</button>
+                    <button class="btn btn-primary" onclick="togglePlay()" id="playBtn">▶ Play</button>
+                    <button class="btn" onclick="nextStep()" id="nextBtn">▶▶</button>
+                </div>
+                <div class="step-counter" id="stepCounter">Step 1/1</div>
+            </div>
+
+            <!-- Action Banner -->
+            <div id="actionBanner" class="action-banner"></div>
+
+            <!-- Main Content -->
+            <div class="three-col">
+                <!-- Left: Matrices -->
+                <div style="grid-column: span 2;">
+                    <div class="matrices-container">
+                        <div class="matrix-panel">
+                            <h3>Original Matrix</h3>
+                            <div style="display: flex; justify-content: center;">
+                                <div id="originalMatrix" class="matrix"></div>
+                            </div>
+                        </div>
+                        <div class="matrix-panel">
+                            <h3>Distance Matrix</h3>
+                            <div style="display: flex; justify-content: center;">
+                                <div id="distanceMatrix" class="matrix"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Legend -->
+                    <div class="legend">
+                        <h3>Legend:</h3>
+                        <div class="legend-grid">
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #fbbf24; border: 3px solid #f59e0b;"></div>
+                                <span>Current cell being processed</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #4ade80; border: 3px solid #22c55e;"></div>
+                                <span>Neighbor being updated</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #fca5a5; border: 3px solid #ef4444;"></div>
+                                <span>Neighbor already visited (skip)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color" style="background: #93c5fd;"></div>
+                                <span>Already has distance value</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Sidebar -->
+                <div class="sidebar">
+                    <div class="info-panel">
+                        <h3>🎯 Current Cell</h3>
+                        <div id="currentCell"></div>
+                    </div>
+
+                    <div class="info-panel">
+                        <h3>🔍 Checking Neighbor</h3>
+                        <div id="checkingNeighbor"></div>
+                    </div>
+
+                    <div class="info-panel">
+                        <h3>📋 Queue (<span id="queueCount">0</span>)</h3>
+                        <div id="queueContent" class="queue-items"></div>
+                    </div>
+
+                    <div class="info-panel">
+                        <h3 style="font-size: 0.9rem;">💻 Code Context</h3>
+                        <div class="code-snippet">
+                            <pre>if dist[nr][nc] == -1:
+  dist[nr][nc] = dist[r][c] + 1
+  queue.append((nr, nc))</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ideas Tab -->
+        <div id="ideas-tab" class="tab-content">
+            <div class="ideas-section">
+                <h2 style="text-align: center; color: #a78bfa; font-size: 2rem; margin-bottom: 30px;">🧠 Core Ideas from Your Teacher</h2>
+
+                <div class="idea-box" style="background: rgba(147, 51, 234, 0.2); border-color: #a78bfa;">
+                    <h3 style="color: #c4b5fd;">🎯 The Real Problem</h3>
+                    <p>You have a map. Some spots are <span style="color: #60a5fa; font-weight: bold;">wells (0)</span>. Some spots are <span style="color: #fbbf24; font-weight: bold;">houses (1)</span>.</p>
+                    <p style="color: #fde047; font-weight: bold; font-size: 1.3rem;">👉 For each house, how far is the nearest well?</p>
+                </div>
+
+                <div class="idea-box" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444;">
+                    <h3 style="color: #fca5a5;">❌ The Wrong Instinct</h3>
+                    <p>You're thinking: <span style="font-style: italic;">"To find the nearest well for a house... shouldn't I start from the house and search outward?"</span></p>
+                    <p style="color: #fca5a5; font-weight: bold; font-size: 1.2rem;">That's what any normal human would think. That's why you're confused.</p>
+                </div>
+
+                <div class="idea-box" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981;">
+                    <h3 style="color: #6ee7b7;">✅ The Trick - Flip Your Thinking!</h3>
+                    <div class="highlight-box" style="font-size: 1.3rem; font-weight: bold; color: #fde047;">
+                        🏠 Houses should NOT search for wells.<br/>
+                        💧 Wells should search for houses.
+                    </div>
+                    <p><span style="color: #ef4444; font-weight: bold;">❌ Don't:</span> Start from each house looking for the closest well</p>
+                    <p><span style="color: #10b981; font-weight: bold;">✅ Do:</span> Start from all wells spreading outward to the houses</p>
+                </div>
+
+                <div class="idea-box" style="background: rgba(59, 130, 246, 0.2); border-color: #3b82f6;">
+                    <h3 style="color: #93c5fd;">☕ The Coffee Shop Analogy</h3>
+                    <p>Your neighborhood has <span style="font-weight: bold; color: #60a5fa;">10 wells</span> but <span style="font-weight: bold; color: #fbbf24;">300 houses</span>.</p>
+                    <div style="margin-top: 15px;">
+                        <div style="background: rgba(239, 68, 68, 0.2); padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+                            <p style="font-weight: bold; color: #fca5a5;">❌ The Slow Way:</p>
+                            <p>300 different houses all walking around searching for wells → takes forever</p>
+                        </div>
+                        <div style="background: rgba(16, 185, 129, 0.2); padding: 20px; border-radius: 8px;">
+                            <p style="font-weight: bold; color: #6ee7b7;">✅ The Fast Way:</p>
+                            <p>10 wells send messengers outward at the same time. First messenger to reach a house tells it the distance.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="idea-box" style="background: rgba(245, 158, 11, 0.2); border-color: #f59e0b;">
+                    <h3 style="color: #fde047;">🌈 The Key Realization</h3>
+                    <div class="highlight-box" style="font-size: 1.2rem; font-weight: bold; color: white;">
+                        It is easier and faster to let FEW sources reach MANY targets<br/>
+                        than to let MANY targets search for FEW sources.
+                    </div>
+                    <p style="text-align: center; font-style: italic; color: #fde047; font-size: 1.1rem; margin-top: 20px;">
+                        You flipped the direction. That's the entire issue.
+                    </p>
+                </div>
+
+                <div class="idea-box" style="background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%); border: none;">
+                    <h3 style="text-align: center; font-size: 2rem; color: white;">🧨 The Simplest Statement</h3>
+                    <div class="highlight-box" style="font-size: 1.2rem; line-height: 1.8;">
+                        <p>Instead of asking every house:</p>
+                        <p style="color: #fde047; font-weight: bold; font-size: 1.3rem;">"Where's the closest well?"</p>
+                        <p>You ask the wells:</p>
+                        <p style="color: #6ee7b7; font-weight: bold; font-size: 1.4rem;">"Go touch every house and tell them how long it took."</p>
+                    </div>
+                    <p style="text-align: center; font-size: 1.3rem; font-weight: bold; margin-top: 20px;">
+                        That's BFS from all 0s. Nothing more. 🎯
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let matrix = [[0, 0, 0], [0, 1, 0], [1, 1, 1]];
+        let allSteps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let activeTab = 'debug';
+
+        function generateSteps() {
+            const steps = [];
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const dist = Array(rows).fill(null).map(() => Array(cols).fill(-1));
+            const queue = [];
+
+            // Initialize wells
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (matrix[i][j] === 0) {
+                        dist[i][j] = 0;
+                        queue.push([i, j]);
+                    }
+                }
+            }
+
+            steps.push({
+                dist: JSON.parse(JSON.stringify(dist)),
+                queue: [...queue],
+                current: null,
+                neighbors: [],
+                action: "INIT",
+                msg: "All wells marked as 0, added to queue"
+            });
+
+            const dirs = [[0,1], [1,0], [0,-1], [-1,0]];
+            const dirNames = ['RIGHT', 'DOWN', 'LEFT', 'UP'];
+
+            while (queue.length > 0) {
+                const [r, c] = queue.shift();
+
+                steps.push({
+                    dist: JSON.parse(JSON.stringify(dist)),
+                    queue: [...queue],
+                    current: [r, c],
+                    neighbors: [],
+                    action: "POP",
+                    msg: `Popped [${r},${c}] from queue (dist=${dist[r][c]})`
+                });
+
+                for (let d = 0; d < 4; d++) {
+                    const [dr, dc] = dirs[d];
+                    const nr = r + dr;
+                    const nc = c + dc;
+
+                    if (nr >= 0 && nr < rows && nc >= 0 && nc < cols) {
+                        const checking = [[nr, nc, dirNames[d]]];
+
+                        if (dist[nr][nc] === -1) {
+                            dist[nr][nc] = dist[r][c] + 1;
+                            queue.push([nr, nc]);
+
+                            steps.push({
+                                dist: JSON.parse(JSON.stringify(dist)),
+                                queue: [...queue],
+                                current: [r, c],
+                                neighbors: checking,
+                                action: "UPDATE",
+                                msg: `[${nr},${nc}] is unvisited! Set dist=${dist[nr][nc]}, add to queue`
+                            });
+                        } else {
+                            steps.push({
+                                dist: JSON.parse(JSON.stringify(dist)),
+                                queue: [...queue],
+                                current: [r, c],
+                                neighbors: checking,
+                                action: "SKIP",
+                                msg: `[${nr},${nc}] already visited (dist=${dist[nr][nc]}), skip`
+                            });
+                        }
+                    }
+                }
+            }
+
+            steps.push({
+                dist: JSON.parse(JSON.stringify(dist)),
+                queue: [],
+                current: null,
+                neighbors: [],
+                action: "DONE",
+                msg: "Queue empty - BFS complete!"
+            });
+
+            return steps;
+        }
+
+        function renderMatrices() {
+            const step = allSteps[currentStep];
+
+            // Render original matrix
+            const originalHtml = matrix.map((row, i) => {
+                return '<div class="matrix-row">' +
+                    row.map((cell, j) => {
+                        const color = getCellColor(i, j, step);
+                        const emoji = cell === 0 ? '💧' : '🏠';
+                        return `<div class="cell" style="${color}">${emoji}</div>`;
+                    }).join('') +
+                    '</div>';
+            }).join('');
+            document.getElementById('originalMatrix').innerHTML = originalHtml;
+
+            // Render distance matrix
+            const distHtml = step.dist.map((row, i) => {
+                return '<div class="matrix-row">' +
+                    row.map((val, j) => {
+                        const color = getDistColor(val);
+                        const display = val === -1 ? '?' : val;
+                        return `<div class="cell" style="${color}">${display}</div>`;
+                    }).join('') +
+                    '</div>';
+            }).join('');
+            document.getElementById('distanceMatrix').innerHTML = distHtml;
+
+            // Render action banner
+            const bannerColors = {
+                'INIT': 'background: #3b82f6;',
+                'POP': 'background: #7c3aed;',
+                'UPDATE': 'background: #10b981;',
+                'SKIP': 'background: #ef4444;',
+                'DONE': 'background: #6b7280;'
+            };
+            document.getElementById('actionBanner').style = bannerColors[step.action] || '';
+            document.getElementById('actionBanner').textContent = `${step.action}: ${step.msg}`;
+
+            // Render current cell
+            const currentCellHtml = step.current
+                ? `<div class="info-value" style="background: #fbbf24; color: #1f2937;">[${step.current[0]}, ${step.current[1]}]</div>
+                   <div style="color: #9ca3af; font-size: 0.9rem;">Distance: <span style="color: #fbbf24; font-weight: bold;">${step.dist[step.current[0]][step.current[1]]}</span></div>`
+                : '<p style="color: #9ca3af; font-style: italic;">None</p>';
+            document.getElementById('currentCell').innerHTML = currentCellHtml;
+
+            // Render checking neighbor
+            const neighborHtml = step.neighbors.length > 0
+                ? `<div class="info-value" style="background: ${step.action === 'UPDATE' ? '#10b981' : '#ef4444'};">[${step.neighbors[0][0]}, ${step.neighbors[0][1]}] (${step.neighbors[0][2]})</div>
+                   <div style="font-size: 0.9rem;">${step.action === 'UPDATE'
+                       ? `<p style="color: #6ee7b7;">✅ Unvisited! Updated to dist=${step.dist[step.neighbors[0][0]][step.neighbors[0][1]]}</p>`
+                       : '<p style="color: #fca5a5;">❌ Already visited, skip</p>'}</div>`
+                : '<p style="color: #9ca3af; font-style: italic;">None</p>';
+            document.getElementById('checkingNeighbor').innerHTML = neighborHtml;
+
+            // Render queue
+            document.getElementById('queueCount').textContent = step.queue.length;
+            const queueHtml = step.queue.length > 0
+                ? step.queue.map(cell => `<div class="queue-item">[${cell[0]}, ${cell[1]}]</div>`).join('')
+                : '<p style="color: #9ca3af; font-style: italic; text-align: center;">Empty</p>';
+            document.getElementById('queueContent').innerHTML = queueHtml;
+
+            // Update step counter
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1}/${allSteps.length}`;
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep >= allSteps.length - 1;
+        }
+
+        function getCellColor(i, j, step) {
+            if (step.current && step.current[0] === i && step.current[1] === j) {
+                return 'background: #fbbf24; border: 4px solid #f59e0b;';
+            }
+            if (step.neighbors.some(([nr, nc]) => nr === i && nc === j)) {
+                return step.action === 'UPDATE'
+                    ? 'background: #4ade80; border: 4px solid #22c55e;'
+                    : 'background: #fca5a5; border: 4px solid #ef4444;';
+            }
+            if (matrix[i][j] === 0) return 'background: #3b82f6; color: white;';
+            if (step.dist[i] && step.dist[i][j] !== -1) return 'background: #93c5fd;';
+            return 'background: #e5e7eb; color: #6b7280;';
+        }
+
+        function getDistColor(val) {
+            if (val === -1) return 'background: #d1d5db; color: #6b7280;';
+            if (val === 0) return 'background: #2563eb; color: white;';
+            if (val === 1) return 'background: #10b981; color: white;';
+            if (val === 2) return 'background: #f59e0b; color: white;';
+            return 'background: #f97316; color: white;';
+        }
+
+        function nextStep() {
+            if (currentStep < allSteps.length - 1) {
+                currentStep++;
+                renderMatrices();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderMatrices();
+            }
+        }
+
+        function resetSteps() {
+            currentStep = 0;
+            if (isPlaying) togglePlay();
+            renderMatrices();
+        }
+
+        function togglePlay() {
+            isPlaying = !isPlaying;
+            const playBtn = document.getElementById('playBtn');
+
+            if (isPlaying) {
+                playBtn.textContent = '⏸ Pause';
+                playInterval = setInterval(() => {
+                    if (currentStep >= allSteps.length - 1) {
+                        togglePlay();
+                    } else {
+                        nextStep();
+                    }
+                }, 1200);
+            } else {
+                playBtn.textContent = '▶ Play';
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                }
+            }
+        }
+
+        function generateRandomMatrix() {
+            const rows = Math.floor(Math.random() * 3) + 3;
+            const cols = Math.floor(Math.random() * 3) + 3;
+            const newMatrix = [];
+
+            for (let i = 0; i < rows; i++) {
+                const row = [];
+                for (let j = 0; j < cols; j++) {
+                    row.push(Math.random() < 0.3 ? 0 : 1);
+                }
+                newMatrix.push(row);
+            }
+
+            const hasWell = newMatrix.some(row => row.includes(0));
+            if (!hasWell) {
+                const randRow = Math.floor(Math.random() * rows);
+                const randCol = Math.floor(Math.random() * cols);
+                newMatrix[randRow][randCol] = 0;
+            }
+
+            matrix = newMatrix;
+            currentStep = 0;
+            if (isPlaying) togglePlay();
+            allSteps = generateSteps();
+            renderMatrices();
+        }
+
+        function switchTab(tab) {
+            activeTab = tab;
+
+            // Update tab buttons
+            document.querySelectorAll('.tab').forEach((btn, idx) => {
+                if ((idx === 0 && tab === 'debug') || (idx === 1 && tab === 'ideas')) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update tab content
+            document.getElementById('debug-tab').classList.toggle('active', tab === 'debug');
+            document.getElementById('ideas-tab').classList.toggle('active', tab === 'ideas');
+        }
+
+        // Initialize
+        allSteps = generateSteps();
+        renderMatrices();
+    </script>
+</body>
+</html>

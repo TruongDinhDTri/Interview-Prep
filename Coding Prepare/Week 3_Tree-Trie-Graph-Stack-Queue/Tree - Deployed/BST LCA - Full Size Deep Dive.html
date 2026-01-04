@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BST LCA - The Split Point Explained</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 min-h-screen">
+    <div class="max-w-screen-2xl mx-auto px-8 py-12">
+        
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-bold text-gray-900 mb-4">Lowest Common Ancestor in BST</h1>
+            <p class="text-2xl text-gray-600">Deep Understanding of the "Split Point"</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            
+            <!-- Left Column: Theory -->
+            <div class="space-y-8">
+                
+                <!-- The Split Point Logic - EXPANDED -->
+                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl shadow-2xl p-8 border-2 border-yellow-400">
+                    <h2 class="text-3xl font-bold mb-6 text-gray-900">⚡ The Split Point - Deep Dive</h2>
+                    
+                    <div class="bg-white rounded-lg p-6 mb-6 border-l-4 border-yellow-500">
+                        <p class="text-xl text-gray-800 font-semibold mb-3">Core Question at Every Node:</p>
+                        <p class="text-lg text-gray-700 italic">"Are p and q in the SAME subtree or DIFFERENT subtrees?"</p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- Scenario 1 -->
+                        <div class="bg-red-50 border-2 border-red-400 p-6 rounded-xl">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-4xl">⬅️⬅️</span>
+                                <div class="font-bold text-red-900 text-2xl">Scenario 1: Both Go LEFT</div>
+                            </div>
+                            <div class="text-base space-y-3">
+                                <p class="text-gray-700"><strong>Condition:</strong> <code class="bg-red-200 px-2 py-1 rounded text-base">p < current</code> AND <code class="bg-red-200 px-2 py-1 rounded text-base">q < current</code></p>
+                                <p class="text-gray-700"><strong>Meaning:</strong> Both p and q exist in the LEFT subtree</p>
+                                <div class="bg-white p-5 rounded-lg mt-3 border border-red-300">
+                                    <p class="font-semibold text-red-800 mb-2 text-lg">Why NOT the LCA?</p>
+                                    <p class="text-gray-700 leading-relaxed">
+                                        If both are in the left subtree, then there's a node DEEPER in that left subtree that also contains both. 
+                                        Current node is a common ancestor, but NOT the <em>lowest</em> one. We need to go down into the left subtree to find a more specific (lower) ancestor.
+                                    </p>
+                                </div>
+                                <p class="text-red-700 font-bold mt-3 text-lg">→ Move to <code class="bg-red-200 px-2 py-1 rounded">current.left</code></p>
+                            </div>
+                        </div>
+
+                        <!-- Scenario 2 -->
+                        <div class="bg-green-50 border-2 border-green-400 p-6 rounded-xl">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-4xl">➡️➡️</span>
+                                <div class="font-bold text-green-900 text-2xl">Scenario 2: Both Go RIGHT</div>
+                            </div>
+                            <div class="text-base space-y-3">
+                                <p class="text-gray-700"><strong>Condition:</strong> <code class="bg-green-200 px-2 py-1 rounded text-base">p > current</code> AND <code class="bg-green-200 px-2 py-1 rounded text-base">q > current</code></p>
+                                <p class="text-gray-700"><strong>Meaning:</strong> Both p and q exist in the RIGHT subtree</p>
+                                <div class="bg-white p-5 rounded-lg mt-3 border border-green-300">
+                                    <p class="font-semibold text-green-800 mb-2 text-lg">Why NOT the LCA?</p>
+                                    <p class="text-gray-700 leading-relaxed">
+                                        Same logic as above. If both are in the right subtree, then there's a node DEEPER in that right subtree that also contains both. 
+                                        Current node is too high - we can find a more specific (lower) common ancestor by going deeper.
+                                    </p>
+                                </div>
+                                <p class="text-green-700 font-bold mt-3 text-lg">→ Move to <code class="bg-green-200 px-2 py-1 rounded">current.right</code></p>
+                            </div>
+                        </div>
+
+                        <!-- Scenario 3 - THE SPLIT -->
+                        <div class="bg-yellow-50 border-4 border-yellow-600 p-6 rounded-xl shadow-xl">
+                            <div class="flex items-center gap-3 mb-4">
+                                <span class="text-4xl">⬅️➡️</span>
+                                <div class="font-bold text-yellow-900 text-2xl">Scenario 3: THE SPLIT ⚡</div>
+                            </div>
+                            <div class="text-base space-y-3">
+                                <p class="text-gray-700"><strong>Condition:</strong> One of these is true:</p>
+                                <ul class="ml-6 space-y-2 text-gray-700">
+                                    <li>• <code class="bg-yellow-200 px-2 py-1 rounded text-base">p < current</code> AND <code class="bg-yellow-200 px-2 py-1 rounded text-base">q > current</code></li>
+                                    <li>• <code class="bg-yellow-200 px-2 py-1 rounded text-base">p > current</code> AND <code class="bg-yellow-200 px-2 py-1 rounded text-base">q < current</code></li>
+                                    <li>• <code class="bg-yellow-200 px-2 py-1 rounded text-base">current == p</code> OR <code class="bg-yellow-200 px-2 py-1 rounded text-base">current == q</code></li>
+                                </ul>
+                                <p class="text-gray-700 mt-3"><strong>Meaning:</strong> p and q are in DIFFERENT subtrees (or current IS one of them)</p>
+                                
+                                <div class="bg-white p-5 rounded-lg mt-4 border-2 border-yellow-500">
+                                    <p class="font-bold text-yellow-900 mb-3 text-xl">Why IS this the LCA? 🎯</p>
+                                    <div class="space-y-4 text-gray-800">
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <p class="font-semibold text-yellow-900 text-lg mb-2">1. This is the LAST common point</p>
+                                            <p class="text-gray-700 leading-relaxed">Before this node, we were coming down a single path. At this node, p and q now diverge into separate branches. This is the fork in the road.</p>
+                                        </div>
+                                        
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <p class="font-semibold text-yellow-900 text-lg mb-2">2. No lower node can contain both</p>
+                                            <p class="text-gray-700 leading-relaxed">If we go left, we only have access to the left subtree (can't reach right subtree). If we go right, we only have access to the right subtree (can't reach left subtree). Since p and q are now separated, NO descendant can be ancestor of both.</p>
+                                        </div>
+                                        
+                                        <div class="bg-yellow-50 p-4 rounded-lg">
+                                            <p class="font-semibold text-yellow-900 text-lg mb-2">3. Tree structure guarantees this</p>
+                                            <p class="text-gray-700 leading-relaxed">In a tree, a node in the left subtree has NO path to a node in the right subtree without going through their common parent. The split point IS that parent.</p>
+                                        </div>
+
+                                        <div class="bg-gradient-to-r from-yellow-100 to-orange-100 p-4 rounded-lg border border-yellow-600">
+                                            <p class="font-bold text-yellow-900 text-lg">✓ Current node contains both in its tree</p>
+                                            <p class="font-bold text-yellow-900 text-lg">✓ No child of current contains both</p>
+                                            <p class="font-bold text-yellow-900 mt-2 text-lg">= LOWEST Common Ancestor</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-yellow-700 font-bold text-xl mt-4">→ RETURN current (This is the LCA!)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visual Metaphor -->
+                <div class="bg-blue-50 rounded-xl shadow-2xl p-8 border-l-4 border-blue-500">
+                    <h3 class="text-2xl font-bold mb-5 text-blue-900">🌊 Think of it like a River</h3>
+                    <div class="space-y-4 text-base text-gray-700">
+                        <p><strong>Upstream (root):</strong> Water flows together in one stream</p>
+                        <p><strong>The split point:</strong> River forks into two separate branches</p>
+                        <p><strong>Downstream:</strong> Two separate streams that never meet again</p>
+                        <p class="bg-white p-5 rounded-lg border border-blue-300 mt-4 font-semibold text-blue-900 text-lg">
+                            The fork is the LAST point where both streams share the same water. That's the LCA.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Code -->
+                <div class="bg-gray-900 text-gray-100 rounded-xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-5 text-white">Algorithm</h3>
+                    <pre class="text-sm overflow-x-auto leading-relaxed"><code>def lowestCommonAncestor(root, p, q):
+    current = root
+    
+    while current:
+        # Both in right subtree - go deeper right
+        if p.val > current.val and q.val > current.val:
+            current = current.right
+        
+        # Both in left subtree - go deeper left
+        elif p.val < current.val and q.val < current.val:
+            current = current.left
+        
+        # They split OR current is one of them
+        # = This IS the LCA
+        else:
+            return current</code></pre>
+                    <div class="grid grid-cols-2 gap-5 mt-5">
+                        <div class="bg-blue-900 p-4 rounded-lg">
+                            <div class="font-bold text-lg">Time: O(log N)</div>
+                            <div class="text-gray-300">One node per level</div>
+                        </div>
+                        <div class="bg-green-900 p-4 rounded-lg">
+                            <div class="font-bold text-lg">Space: O(1)</div>
+                            <div class="text-gray-300">No extra memory</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Examples -->
+            <div class="space-y-8">
+                
+                <!-- Example 1 -->
+                <div class="bg-white rounded-xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-5 text-gray-900">Example 1: p=2, q=8</h3>
+                    
+                    <svg width="100%" height="280" viewBox="0 0 320 280">
+                        <line x1="160" y1="50" x2="100" y2="120" stroke="#666" stroke-width="3"/>
+                        <line x1="160" y1="50" x2="220" y2="120" stroke="#666" stroke-width="3"/>
+                        <line x1="100" y1="120" x2="65" y2="190" stroke="#ccc" stroke-width="2"/>
+                        <line x1="100" y1="120" x2="135" y2="190" stroke="#ccc" stroke-width="2"/>
+                        <line x1="220" y1="120" x2="185" y2="190" stroke="#ccc" stroke-width="2"/>
+                        <line x1="220" y1="120" x2="255" y2="190" stroke="#ccc" stroke-width="2"/>
+                        
+                        <!-- Arrows -->
+                        <path d="M 145 70 L 110 105" stroke="#3b82f6" stroke-width="4" fill="none" marker-end="url(#blue)"/>
+                        <path d="M 175 70 L 210 105" stroke="#10b981" stroke-width="4" fill="none" marker-end="url(#green)"/>
+                        
+                        <circle cx="160" cy="50" r="32" fill="#fbbf24" stroke="#f59e0b" stroke-width="4"/>
+                        <text x="160" y="60" text-anchor="middle" font-size="24" font-weight="bold">6</text>
+                        
+                        <circle cx="100" cy="120" r="28" fill="#60a5fa" stroke="#3b82f6" stroke-width="4"/>
+                        <text x="100" y="130" text-anchor="middle" font-size="22" font-weight="bold" fill="white">2</text>
+                        
+                        <circle cx="220" cy="120" r="28" fill="#34d399" stroke="#10b981" stroke-width="4"/>
+                        <text x="220" y="130" text-anchor="middle" font-size="22" font-weight="bold">8</text>
+                        
+                        <circle cx="65" cy="190" r="24" fill="white" stroke="#999" stroke-width="2"/>
+                        <text x="65" y="199" text-anchor="middle" font-size="18">0</text>
+                        
+                        <circle cx="135" cy="190" r="24" fill="white" stroke="#999" stroke-width="2"/>
+                        <text x="135" y="199" text-anchor="middle" font-size="18">4</text>
+                        
+                        <circle cx="185" cy="190" r="24" fill="white" stroke="#999" stroke-width="2"/>
+                        <text x="185" y="199" text-anchor="middle" font-size="18">7</text>
+                        
+                        <circle cx="255" cy="190" r="24" fill="white" stroke="#999" stroke-width="2"/>
+                        <text x="255" y="199" text-anchor="middle" font-size="18">9</text>
+                        
+                        <defs>
+                            <marker id="blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/>
+                            </marker>
+                            <marker id="green" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#10b981"/>
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <div class="mt-6 space-y-4 text-base">
+                        <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-gray-400">
+                            <strong class="text-lg">At node 6:</strong>
+                            <p class="text-gray-700 mt-2">Check p: <code class="bg-blue-200 px-2 py-1 rounded">2 < 6</code> → p is in LEFT subtree</p>
+                            <p class="text-gray-700">Check q: <code class="bg-green-200 px-2 py-1 rounded">8 > 6</code> → q is in RIGHT subtree</p>
+                        </div>
+                        <div class="bg-yellow-50 p-5 rounded-lg border-2 border-yellow-500">
+                            <p class="font-bold text-yellow-900 mb-2 text-lg">⚡ THE SPLIT HAPPENS HERE!</p>
+                            <p class="text-gray-700 leading-relaxed">One goes left, one goes right. They're now in DIFFERENT subtrees. This is the last common point before they separate.</p>
+                            <p class="text-yellow-700 font-bold mt-3 text-lg">✓ LCA = 6</p>
+                        </div>
+                        <div class="bg-blue-50 p-5 rounded-lg">
+                            <p class="font-semibold text-blue-900 mb-2 text-lg">Why can't we go lower?</p>
+                            <p class="text-gray-700 leading-relaxed">If we go to node 2 (left), we lose access to node 8 (right). If we go to node 8 (right), we lose access to node 2 (left). No child contains both.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 2 -->
+                <div class="bg-white rounded-xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-5 text-gray-900">Example 2: p=7, q=9</h3>
+                    
+                    <svg width="100%" height="280" viewBox="0 0 320 280">
+                        <line x1="160" y1="50" x2="100" y2="120" stroke="#ddd" stroke-width="2" stroke-dasharray="5,5"/>
+                        <line x1="160" y1="50" x2="220" y2="120" stroke="#666" stroke-width="3"/>
+                        <line x1="220" y1="120" x2="185" y2="190" stroke="#666" stroke-width="3"/>
+                        <line x1="220" y1="120" x2="255" y2="190" stroke="#666" stroke-width="3"/>
+                        
+                        <path d="M 205 140 L 190 175" stroke="#3b82f6" stroke-width="4" fill="none" marker-end="url(#blue2)"/>
+                        <path d="M 235 140 L 250 175" stroke="#10b981" stroke-width="4" fill="none" marker-end="url(#green2)"/>
+                        
+                        <circle cx="160" cy="50" r="28" fill="#f3f4f6" stroke="#d1d5db" stroke-width="3"/>
+                        <text x="160" y="60" text-anchor="middle" font-size="22" fill="#9ca3af">6</text>
+                        
+                        <circle cx="100" cy="120" r="26" fill="#f9fafb" stroke="#e5e7eb" stroke-width="2" opacity="0.5"/>
+                        <text x="100" y="129" text-anchor="middle" font-size="20" fill="#d1d5db">2</text>
+                        
+                        <circle cx="220" cy="120" r="32" fill="#fbbf24" stroke="#f59e0b" stroke-width="4"/>
+                        <text x="220" y="131" text-anchor="middle" font-size="24" font-weight="bold">8</text>
+                        
+                        <circle cx="185" cy="190" r="28" fill="#60a5fa" stroke="#3b82f6" stroke-width="4"/>
+                        <text x="185" y="199" text-anchor="middle" font-size="22" font-weight="bold" fill="white">7</text>
+                        
+                        <circle cx="255" cy="190" r="28" fill="#34d399" stroke="#10b981" stroke-width="4"/>
+                        <text x="255" y="199" text-anchor="middle" font-size="22" font-weight="bold">9</text>
+                        
+                        <defs>
+                            <marker id="blue2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#3b82f6"/>
+                            </marker>
+                            <marker id="green2" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#10b981"/>
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <div class="mt-6 space-y-4 text-base">
+                        <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-gray-400">
+                            <strong class="text-lg">Step 1 - At node 6:</strong>
+                            <p class="text-gray-700 mt-2">Check p: <code class="bg-blue-200 px-2 py-1 rounded">7 > 6</code> → p is in RIGHT</p>
+                            <p class="text-gray-700">Check q: <code class="bg-green-200 px-2 py-1 rounded">9 > 6</code> → q is in RIGHT</p>
+                            <p class="text-gray-600 font-semibold mt-3 text-lg">Both go RIGHT → Same subtree, NOT split yet</p>
+                        </div>
+                        <div class="bg-blue-50 p-5 rounded-lg border-l-4 border-blue-400">
+                            <p class="font-semibold text-blue-900 text-lg mb-2">Why not the LCA yet?</p>
+                            <p class="text-gray-700 leading-relaxed">Both 7 and 9 exist in the right subtree of 6. This means there's a lower node (inside that right subtree) that also contains both. Node 6 is too high up.</p>
+                        </div>
+                        <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-gray-400">
+                            <strong class="text-lg">Step 2 - At node 8:</strong>
+                            <p class="text-gray-700 mt-2">Check p: <code class="bg-blue-200 px-2 py-1 rounded">7 < 8</code> → p is in LEFT</p>
+                            <p class="text-gray-700">Check q: <code class="bg-green-200 px-2 py-1 rounded">9 > 8</code> → q is in RIGHT</p>
+                        </div>
+                        <div class="bg-yellow-50 p-5 rounded-lg border-2 border-yellow-500">
+                            <p class="font-bold text-yellow-900 mb-2 text-lg">⚡ NOW THEY SPLIT!</p>
+                            <p class="text-gray-700 leading-relaxed">At node 8, p and q diverge into different subtrees. This is where their paths separate. No node below 8 contains both.</p>
+                            <p class="text-yellow-700 font-bold mt-3 text-lg">✓ LCA = 8</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Example 3 -->
+                <div class="bg-white rounded-xl shadow-2xl p-8">
+                    <h3 class="text-2xl font-bold mb-5 text-gray-900">Example 3: p=7, q=6</h3>
+                    
+                    <svg width="100%" height="250" viewBox="0 0 320 250">
+                        <line x1="160" y1="50" x2="100" y2="120" stroke="#ccc" stroke-width="2"/>
+                        <line x1="160" y1="50" x2="220" y2="120" stroke="#666" stroke-width="3"/>
+                        <line x1="220" y1="120" x2="185" y2="190" stroke="#3b82f6" stroke-width="3"/>
+                        
+                        <circle cx="160" cy="50" r="32" fill="#fbbf24" stroke="#f59e0b" stroke-width="4"/>
+                        <text x="160" y="60" text-anchor="middle" font-size="24" font-weight="bold">6</text>
+                        <text x="225" y="55" text-anchor="start" font-size="18" fill="#10b981" font-weight="bold">← q</text>
+                        
+                        <circle cx="100" cy="120" r="26" fill="white" stroke="#ddd" stroke-width="2"/>
+                        <text x="100" y="129" text-anchor="middle" font-size="20" fill="#999">2</text>
+                        
+                        <circle cx="220" cy="120" r="26" fill="white" stroke="#999" stroke-width="3"/>
+                        <text x="220" y="129" text-anchor="middle" font-size="20">8</text>
+                        
+                        <circle cx="185" cy="190" r="28" fill="#60a5fa" stroke="#3b82f6" stroke-width="4"/>
+                        <text x="185" y="199" text-anchor="middle" font-size="22" font-weight="bold" fill="white">7</text>
+                        <text x="185" y="220" text-anchor="middle" font-size="16" fill="#3b82f6" font-weight="bold">p</text>
+                    </svg>
+
+                    <div class="mt-6 space-y-4 text-base">
+                        <div class="bg-gray-50 p-5 rounded-lg border-l-4 border-gray-400">
+                            <strong class="text-lg">At node 6:</strong>
+                            <p class="text-gray-700 mt-2">Current node = 6</p>
+                            <p class="text-gray-700">Target q = 6</p>
+                            <p class="text-purple-700 font-semibold mt-3 text-lg">Current IS one of the targets!</p>
+                        </div>
+                        <div class="bg-purple-50 p-5 rounded-lg border-2 border-purple-500">
+                            <p class="font-bold text-purple-900 mb-2 text-lg">⚡ Special Split Case</p>
+                            <p class="text-gray-700 leading-relaxed">When current node equals p or q, it's automatically the LCA. Why? Because one target IS this node, and the other target is somewhere in its subtree. No descendant of node 6 can be an ancestor of node 6 itself.</p>
+                            <p class="text-purple-700 font-bold mt-3 text-lg">✓ LCA = 6</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Footer Summary -->
+        <div class="mt-12 bg-gradient-to-r from-indigo-100 to-purple-100 rounded-xl shadow-2xl p-10">
+            <h3 class="text-3xl font-bold mb-6 text-gray-900">🎯 The Essential Truth About Split Points</h3>
+            <div class="space-y-5 text-gray-800 text-lg leading-relaxed">
+                <p>
+                    <strong>Before the split:</strong> Both nodes are traveling together in the same direction (same subtree). We can go lower and still find a node that contains both.
+                </p>
+                <p>
+                    <strong>At the split:</strong> The paths diverge. One goes left, one goes right. This is the LAST node where both paths are together. This is the fork. This is the LOWEST point where both are contained.
+                </p>
+                <p>
+                    <strong>After the split:</strong> They're in separate subtrees. No single node below can contain both because tree structure prevents a left subtree node from reaching a right subtree node without going back up through the split point.
+                </p>
+                <div class="bg-white p-6 rounded-xl border-2 border-indigo-400 mt-6">
+                    <p class="font-bold text-indigo-900 text-2xl">The split = The lowest common point = The LCA ✨</p>
+                </div>
+            </div>
+        </div>
+    </div>
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script></body>
+</html>

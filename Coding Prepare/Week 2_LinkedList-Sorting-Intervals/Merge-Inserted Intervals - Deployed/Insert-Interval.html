@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦉 Night Owl Studio: Insert Interval</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #011627;
+            color: #d6deeb;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: #01111d;
+            padding: 15px 20px;
+            border-bottom: 1px solid #1e2d3d;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .moon-icon {
+            color: #c792ea;
+            font-size: 1.2rem;
+        }
+
+        .title {
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .btn-header {
+            background: none;
+            border: none;
+            color: #d6deeb;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .btn-header:hover {
+            background: rgba(199, 146, 234, 0.1);
+        }
+
+        .btn-primary-header {
+            background: #c792ea;
+            color: #011627;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(199, 146, 234, 0.3);
+        }
+
+        .btn-primary-header:hover {
+            background: #b07bd4;
+        }
+
+        .btn-header:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .main-content {
+            display: flex;
+            height: calc(100vh - 100px);
+        }
+
+        .left-panel {
+            width: 600px;
+            background: #011627;
+            border-right: 1px solid #1e2d3d;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            padding: 20px;
+            border-bottom: 1px solid #1e2d3d;
+        }
+
+        .input-section h3 {
+            color: #637777;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .input-field {
+            background: #0b2942;
+            border: 1px solid #234d70;
+            color: #d6deeb;
+            padding: 8px 12px;
+            border-radius: 4px;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #c792ea;
+        }
+
+        .btn-add {
+            background: #234d70;
+            border: 1px solid #234d70;
+            color: #d6deeb;
+            padding: 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-add:hover {
+            background: #c792ea;
+            color: #011627;
+        }
+
+        .interval-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .chip {
+            background: #0b2942;
+            border-left: 4px solid;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            border-right: 1px solid #1e2d3d;
+            border-top: 1px solid #1e2d3d;
+            border-bottom: 1px solid #1e2d3d;
+        }
+
+        .chip-remove {
+            background: none;
+            border: none;
+            color: #637777;
+            cursor: pointer;
+            padding: 0;
+            font-size: 0.8rem;
+        }
+
+        .chip-remove:hover {
+            color: #ef5350;
+        }
+
+        .code-editor {
+            flex: 1;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-y: auto;
+        }
+
+        .code-tab {
+            background: #01111d;
+            border-bottom: 1px solid #1e2d3d;
+            padding: 8px 16px;
+            border-top: 2px solid #c792ea;
+            color: #d6deeb;
+            font-size: 0.75rem;
+            display: inline-block;
+        }
+
+        .code-content {
+            padding: 20px;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 2px 0;
+            border-left: 4px solid transparent;
+            transition: background 0.2s;
+        }
+
+        .code-line.active {
+            background: rgba(126, 87, 194, 0.25);
+            border-left-color: #c792ea;
+        }
+
+        .line-num {
+            width: 40px;
+            text-align: right;
+            padding-right: 15px;
+            color: #637777;
+            user-select: none;
+            font-size: 0.65rem;
+            padding-top: 2px;
+        }
+
+        .code-line.active .line-num {
+            color: #c792ea;
+            font-weight: bold;
+        }
+
+        .right-panel {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .bg-pattern {
+            position: absolute;
+            inset: 0;
+            opacity: 0.05;
+            background-image: radial-gradient(circle, #c792ea 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+        }
+
+        .status-panel {
+            background: #0b2942;
+            border-left: 4px solid;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-title {
+            font-family: monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .status-message {
+            font-family: monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .viz-section {
+            margin-bottom: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .viz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin-bottom: 15px;
+        }
+
+        .viz-title {
+            color: #637777;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
+        .viz-value {
+            font-family: monospace;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .viz-canvas {
+            background: #000c1d;
+            border: 1px solid #1e2d3d;
+            border-radius: 8px;
+            height: 120px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .grid-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-left: 1px solid #1e2d3d;
+            color: #637777;
+            font-size: 0.65rem;
+            padding: 4px 0 0 4px;
+        }
+
+        .interval-bar {
+            position: absolute;
+            height: 40px;
+            top: 40px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: monospace;
+            font-size: 0.7rem;
+            font-weight: bold;
+            transition: all 0.5s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .interval-bar span {
+            background: rgba(255,255,255,0.2);
+            padding: 4px 8px;
+            border-radius: 4px;
+            backdrop-filter: blur(2px);
+        }
+
+        .footer {
+            background: #01111d;
+            border-top: 1px solid #1e2d3d;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            color: #637777;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                flex-direction: column;
+                height: auto;
+            }
+            .left-panel {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #1e2d3d;
+            }
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #01111d;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #234d70;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2a5980;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="moon-icon">🦉</div>
+            <span class="title">Night Owl Studio: Insert Interval</span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-header" onclick="resetSteps()" title="Reset">🔄</button>
+            <button class="btn-header" onclick="prevStep()" id="prevBtn">◀</button>
+            <button class="btn-primary-header" onclick="nextStep()" id="nextBtn">
+                <span id="nextBtnText">▶ Start</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Left Panel -->
+        <div class="left-panel">
+            <!-- Input Section 1: Intervals -->
+            <div class="input-section" style="background: #011627;">
+                <h3>📦 1. Intervals</h3>
+                <div class="input-row">
+                    <input type="number" class="input-field" placeholder="Start" id="addStart" style="width: 100px;">
+                    <input type="number" class="input-field" placeholder="End" id="addEnd" style="width: 100px;">
+                    <button class="btn-add" onclick="addInterval()">➕</button>
+                </div>
+                <div class="interval-chips" id="intervalList"></div>
+            </div>
+
+            <!-- Input Section 2: New Interval -->
+            <div class="input-section" style="background: #01111d;">
+                <h3 style="color: #ecc48d;">⚡ 2. New Interval</h3>
+                <div class="input-row" style="align-items: center;">
+                    <input type="number" class="input-field" value="2" id="newStart" style="width: 100px; text-align: center; font-weight: bold;">
+                    <span style="color: #637777;">-</span>
+                    <input type="number" class="input-field" value="5" id="newEnd" style="width: 100px; text-align: center; font-weight: bold;">
+                    <button class="btn-add" onclick="updateNewInterval()" style="background: #ecc48d; color: #011627; font-weight: bold;">Set</button>
+                </div>
+            </div>
+
+            <!-- Code Editor -->
+            <div class="code-editor">
+                <div class="code-tab">readable_solution.py</div>
+                <div class="code-content" id="codeContent"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="right-panel">
+            <div class="bg-pattern"></div>
+
+            <!-- Status -->
+            <div class="status-panel" id="statusPanel">
+                <div class="status-title" id="statusTitle">
+                    <span>Debug Console</span>
+                    <span id="phaseLabel">INIT PHASE</span>
+                </div>
+                <div class="status-message" id="statusMessage">Initializing...</div>
+            </div>
+
+            <!-- Intervals Visualization -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <span class="viz-title">📦 1. Intervals</span>
+                </div>
+                <div class="viz-canvas" id="intervalsCanvas"></div>
+            </div>
+
+            <!-- New Interval Visualization -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <span class="viz-title" style="color: #ecc48d;">⚡ 2. New Interval</span>
+                    <span class="viz-value" style="color: #ecc48d;" id="newIntervalValue">[ ]</span>
+                </div>
+                <div class="viz-canvas" id="newIntervalCanvas"></div>
+            </div>
+
+            <!-- Result Visualization -->
+            <div class="viz-section">
+                <div class="viz-header">
+                    <span class="viz-title" style="color: #addb67;">⬇ 3. Final Result</span>
+                    <span class="viz-value" style="color: #addb67;" id="resultValue">[]</span>
+                </div>
+                <div class="viz-canvas" id="resultCanvas"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <div style="display: flex; gap: 20px;">
+            <span>main*</span>
+            <span>Python 3.10</span>
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <span>Ln <span id="footerLine">1</span>, Col 1</span>
+            <span>Spaces: 4</span>
+            <span>UTF-8</span>
+        </div>
+    </div>
+
+    <script>
+        let intervals = [[1, 3], [6, 9]];
+        let newInterval = [2, 5];
+        let currentStep = 0;
+        let steps = [];
+
+        const COLORS = ['#ef5350', '#ab47bc', '#42a5f5', '#26c6da', '#ffa726', '#66bb6a', '#ec407a', '#ffca28'];
+
+        const codeLines = [
+            "def insert(intervals, newInterval):",
+            "    result = []",
+            "    i = 0",
+            "    n = len(intervals)",
+            "",
+            "    # 1. Left (No overlap)",
+            "    while i < n and intervals[i][1] < newInterval[0]:",
+            "        result.append(intervals[i])",
+            "        i += 1",
+            "",
+            "    # 2. Merge (Overlaps)",
+            "    while i < n and intervals[i][0] <= newInterval[1]:",
+            "        newInterval[0] = min(newInterval[0], intervals[i][0])",
+            "        newInterval[1] = max(newInterval[1], intervals[i][1])",
+            "        i += 1",
+            "    result.append(newInterval)",
+            "",
+            "    # 3. Right (Remaining)",
+            "    while i < n:",
+            "        result.append(intervals[i])",
+            "        i += 1",
+            "",
+            "    return result"
+        ];
+
+        function generateSteps() {
+            const steps = [];
+            const sorted = [...intervals].sort((a, b) => a[0] - b[0]);
+            let newInt = [...newInterval];
+            const result = [];
+            let i = 0;
+            const n = sorted.length;
+
+            steps.push({ line: 1, desc: "1. Start: The night shift begins.", result: [], newInt: [...newInt], i, phase: 'init', intervals: sorted });
+            steps.push({ line: 2, desc: "2. Prepare the empty container 'result'.", result: [], newInt: [...newInt], i, phase: 'init', intervals: sorted });
+            steps.push({ line: 7, desc: "3. Check left phase: intervals before new interval", result: [], newInt: [...newInt], i, phase: 'left', intervals: sorted });
+
+            // Left phase
+            while (i < n && sorted[i][1] < newInt[0]) {
+                result.push([...sorted[i]]);
+                steps.push({ line: 8, desc: `Added [${sorted[i]}] to result (no overlap)`, result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'left', intervals: sorted });
+                i++;
+                steps.push({ line: 9, desc: "Move to next interval", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'left', intervals: sorted });
+            }
+
+            steps.push({ line: 12, desc: "4. Check merge phase: overlapping intervals", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'merge', intervals: sorted });
+
+            // Merge phase
+            while (i < n && sorted[i][0] <= newInt[1]) {
+                newInt[0] = Math.min(newInt[0], sorted[i][0]);
+                steps.push({ line: 13, desc: `Absorb: new start = min(${newInt[0]}, ${sorted[i][0]})`, result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'merge', intervals: sorted });
+                newInt[1] = Math.max(newInt[1], sorted[i][1]);
+                steps.push({ line: 14, desc: `Absorb: new end = max(${newInt[1]}, ${sorted[i][1]}) → [${newInt}]`, result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'merge', intervals: sorted });
+                i++;
+                steps.push({ line: 15, desc: "Check next interval", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'merge', intervals: sorted });
+            }
+
+            result.push([...newInt]);
+            steps.push({ line: 16, desc: `5. Insert: The merged interval [${newInt}] is locked in.`, result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'merge', intervals: sorted });
+
+            steps.push({ line: 19, desc: "6. Check right phase: remaining intervals", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'right', intervals: sorted });
+
+            // Right phase
+            while (i < n) {
+                result.push([...sorted[i]]);
+                steps.push({ line: 20, desc: `Collect remaining [${sorted[i]}]`, result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'right', intervals: sorted });
+                i++;
+                steps.push({ line: 21, desc: "Next interval", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'right', intervals: sorted });
+            }
+
+            steps.push({ line: 23, desc: "7. Done. Return result.", result: JSON.parse(JSON.stringify(result)), newInt: [...newInt], i, phase: 'done', intervals: sorted });
+
+            return steps;
+        }
+
+        function renderCode() {
+            const step = steps[currentStep];
+            document.getElementById('codeContent').innerHTML = codeLines.map((line, idx) => {
+                const lineNum = idx + 1;
+                const isActive = lineNum === step.line;
+                return `<div class="code-line ${isActive ? 'active' : ''}">
+                    <div class="line-num">${lineNum}</div>
+                    <div>${line}</div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderUI() {
+            const step = steps[currentStep];
+
+            // Status panel
+            const phaseColors = {
+                'init': '#d6deeb',
+                'left': '#42a5f5',
+                'merge': '#ffa726',
+                'right': '#66bb6a',
+                'done': '#c792ea'
+            };
+            document.getElementById('statusPanel').style.borderLeftColor = phaseColors[step.phase];
+            document.getElementById('statusTitle').style.color = phaseColors[step.phase];
+            document.getElementById('phaseLabel').textContent = step.phase.toUpperCase() + ' PHASE';
+            document.getElementById('statusMessage').textContent = step.desc;
+
+            // Render intervals
+            renderIntervals();
+
+            // Render new interval value
+            document.getElementById('newIntervalValue').textContent = `[${step.newInt[0]}, ${step.newInt[1]}]`;
+
+            // Render result value
+            document.getElementById('resultValue').textContent = step.result.length > 0 ? `[${step.result.map(i => `[${i[0]},${i[1]}]`).join(', ')}]` : '[]';
+
+            // Render code
+            renderCode();
+
+            // Update footer
+            document.getElementById('footerLine').textContent = step.line;
+
+            // Update buttons
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep >= steps.length - 1;
+            document.getElementById('nextBtnText').textContent = currentStep === 0 ? '▶ Start' : '▶▶ Next';
+        }
+
+        function renderIntervals() {
+            const step = steps[currentStep];
+            const allVals = [...step.intervals.flat(), ...step.newInt, ...step.result.flat()];
+            const maxVal = Math.max(...allVals, 10) * 1.15;
+
+            // Intervals canvas
+            const intervalsCanvas = document.getElementById('intervalsCanvas');
+            intervalsCanvas.innerHTML = '';
+
+            // Grid lines
+            [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.left = `${pct * 95}%`;
+                line.textContent = Math.round(maxVal * pct);
+                intervalsCanvas.appendChild(line);
+            });
+
+            // Interval bars
+            step.intervals.forEach((interval, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'interval-bar';
+                const isCurrent = idx === step.i;
+                bar.style.left = `${(interval[0] / maxVal) * 95}%`;
+                bar.style.width = `${Math.max(((interval[1] - interval[0]) / maxVal) * 95, 2)}%`;
+                bar.style.backgroundColor = COLORS[idx % COLORS.length];
+                bar.style.color = '#011627';
+                bar.style.opacity = idx < step.i ? '0.3' : '0.9';
+                bar.style.filter = idx < step.i ? 'grayscale(100%)' : 'none';
+                if (isCurrent) {
+                    bar.style.transform = 'scale(1.05)';
+                    bar.style.border = '2px solid white';
+                    bar.style.boxShadow = '0 0 20px rgba(199,146,234,0.5)';
+                }
+                bar.innerHTML = `<span>[${interval[0]}, ${interval[1]}]</span>`;
+                intervalsCanvas.appendChild(bar);
+            });
+
+            // New interval canvas
+            const newCanvas = document.getElementById('newIntervalCanvas');
+            newCanvas.innerHTML = '';
+            [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.left = `${pct * 95}%`;
+                line.textContent = Math.round(maxVal * pct);
+                newCanvas.appendChild(line);
+            });
+
+            const newBar = document.createElement('div');
+            newBar.className = 'interval-bar';
+            newBar.style.left = `${(step.newInt[0] / maxVal) * 95}%`;
+            newBar.style.width = `${Math.max(((step.newInt[1] - step.newInt[0]) / maxVal) * 95, 2)}%`;
+            newBar.style.backgroundColor = '#ecc48d';
+            newBar.style.color = '#011627';
+            newBar.style.border = '2px solid white';
+            if (step.phase === 'merge') {
+                newBar.style.animation = 'pulse 1s infinite';
+                newBar.style.boxShadow = '0 0 25px rgba(236,196,141,0.6)';
+            }
+            newBar.innerHTML = `<span>[${step.newInt[0]}, ${step.newInt[1]}]</span>`;
+            newCanvas.appendChild(newBar);
+
+            // Result canvas
+            const resultCanvas = document.getElementById('resultCanvas');
+            resultCanvas.innerHTML = '';
+            [0, 0.25, 0.5, 0.75, 1].forEach(pct => {
+                const line = document.createElement('div');
+                line.className = 'grid-line';
+                line.style.left = `${pct * 95}%`;
+                line.textContent = Math.round(maxVal * pct);
+                resultCanvas.appendChild(line);
+            });
+
+            step.result.forEach((interval, idx) => {
+                const bar = document.createElement('div');
+                bar.className = 'interval-bar';
+                bar.style.left = `${(interval[0] / maxVal) * 95}%`;
+                bar.style.width = `${Math.max(((interval[1] - interval[0]) / maxVal) * 95, 2)}%`;
+                bar.style.backgroundColor = '#addb67';
+                bar.style.color = '#011627';
+                bar.style.border = '1px solid #addb67';
+                bar.innerHTML = `<span>[${interval[0]}, ${interval[1]}]</span>`;
+                resultCanvas.appendChild(bar);
+            });
+        }
+
+        function renderIntervalList() {
+            const list = document.getElementById('intervalList');
+            list.innerHTML = intervals.map((interval, idx) => {
+                const color = COLORS[idx % COLORS.length];
+                return `<div class="chip" style="border-left-color: ${color};">
+                    <span>[${interval[0]}, ${interval[1]}]</span>
+                    <button class="chip-remove" onclick="removeInterval(${idx})">✕</button>
+                </div>`;
+            }).join('');
+        }
+
+        function addInterval() {
+            const start = parseInt(document.getElementById('addStart').value);
+            const end = parseInt(document.getElementById('addEnd').value);
+            if (!isNaN(start) && !isNaN(end) && start < end) {
+                intervals.push([start, end]);
+                intervals.sort((a, b) => a[0] - b[0]);
+                document.getElementById('addStart').value = '';
+                document.getElementById('addEnd').value = '';
+                init();
+            }
+        }
+
+        function removeInterval(idx) {
+            intervals.splice(idx, 1);
+            init();
+        }
+
+        function updateNewInterval() {
+            const start = parseInt(document.getElementById('newStart').value);
+            const end = parseInt(document.getElementById('newEnd').value);
+            if (!isNaN(start) && !isNaN(end) && start < end) {
+                newInterval = [start, end];
+                init();
+            }
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderUI();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderUI();
+            }
+        }
+
+        function resetSteps() {
+            currentStep = 0;
+            renderUI();
+        }
+
+        function init() {
+            currentStep = 0;
+            steps = generateSteps();
+            renderIntervalList();
+            renderUI();
+        }
+
+        // Animation for pulse
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); }
+                50% { transform: scale(1.05); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

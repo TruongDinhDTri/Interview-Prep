@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Triplet Sum to Zero (3Sum) - Master Guide</title>
+    <style>
+        :root {
+            --background: #f4f4f5;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --text-main: #1f2937;
+            --text-light: #4b5563;
+            --border: #e5e7eb;
+            --ptr-i: #f59e0b; /* Amber */
+            --ptr-left: #8b5cf6; /* Violet */
+            --ptr-right: #ec4899; /* Pink */
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: var(--surface);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: var(--primary-dark);
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        p, li {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Callouts for "Click Moments" */
+        .click-moment {
+            background: #fffbeb; /* Amber-50 */
+            border-left: 5px solid var(--ptr-i);
+            padding: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            margin: 1.5rem 0;
+        }
+
+        .click-moment strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .mental-model {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .mental-model { grid-template-columns: 1fr; }
+        }
+
+        .concept-card {
+            background: #f8fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        /* Array Visualization */
+        .array-display {
+            margin: 3rem 0;
+            text-align: center;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            min-height: 100px;
+            padding-top: 40px; 
+            padding-bottom: 60px;
+        }
+
+        .array-cell {
+            width: 65px;
+            height: 65px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            position: relative;
+            background: #fafafa;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .array-cell.active-i { border-color: var(--ptr-i); background: #fff7ed; transform: translateY(-8px); box-shadow: 0 10px 15px -3px rgba(245, 158, 11, 0.2); }
+        .array-cell.active-left { border-color: var(--ptr-left); background: #f5f3ff; }
+        .array-cell.active-right { border-color: var(--ptr-right); background: #fdf2f8; }
+        .array-cell.match { 
+            background: #d1fae5; 
+            border-color: var(--secondary); 
+            transform: scale(1.1);
+            z-index: 10;
+        }
+
+        .array-cell .index {
+            position: absolute;
+            top: -25px;
+            font-size: 0.85rem;
+            color: #9ca3af;
+            font-weight: normal;
+        }
+
+        /* Pointer Labels */
+        .pointer-label {
+            position: absolute;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: white;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .pointer-label.p-i { background-color: var(--ptr-i); top: -35px; }
+        .pointer-label.p-left { background-color: var(--ptr-left); bottom: -35px; }
+        .pointer-label.p-right { background-color: var(--ptr-right); bottom: -35px; }
+
+        /* Calculation Box */
+        .calc-box {
+            background: #1e293b;
+            color: #f8fafc;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 1.4rem;
+            margin: 2rem auto;
+            max-width: 600px;
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.25);
+        }
+        
+        .math-part { font-family: 'Courier New', monospace; font-weight: bold; }
+        .val-i { color: #fbbf24; }
+        .val-left { color: #a78bfa; }
+        .val-right { color: #f472b6; }
+        
+        .result-found { color: #34d399; font-weight: bold; }
+        .result-miss { color: #f87171; }
+
+        /* Results List */
+        .found-triplets {
+            margin-top: 2rem;
+            border-top: 1px solid var(--border);
+            padding-top: 1rem;
+            text-align: center;
+        }
+        
+        .triplet-tag {
+            display: inline-block;
+            background: #ecfdf5;
+            color: #047857;
+            padding: 0.75rem 1.25rem;
+            border-radius: 25px;
+            margin: 0.5rem;
+            font-weight: bold;
+            font-family: monospace;
+            border: 1px solid #a7f3d0;
+        }
+
+        /* Controls */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary { background-color: var(--primary); color: white; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5); }
+        .btn-primary:hover { background-color: var(--primary-dark); transform: translateY(-2px); }
+        .btn-primary:active { transform: translateY(0); }
+        
+        .btn-secondary { background-color: #f1f5f9; color: var(--text-main); border: 1px solid var(--border); }
+        .btn-secondary:hover { background-color: #e2e8f0; }
+
+        code {
+            background-color: #f3f4f6;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #db2777;
+            font-size: 0.9em;
+        }
+        
+        .pitfall {
+            border-left: 5px solid var(--danger);
+            background: #fef2f2;
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Triplet Sum to Zero (3Sum)</h1>
+        <p class="subtitle">From Unsorted Chaos to Sorted Harmony: The "Fix One, Solve Two" Strategy</p>
+
+        <!-- MENTAL MODEL SECTION -->
+        <div class="section">
+            <h2>🧠 The Mental Model</h2>
+            
+            <div class="click-moment">
+                <strong>💡 Click Moment 1: The "Unsorted Trap"</strong>
+                <p>The problem gives you an <strong>unsorted</strong> array. If you try to find triplets blindly, it's chaos ($O(N^3)$). <br>
+                <strong>Insight:</strong> If we <strong>sort the array</strong> first ($O(N \log N)$), we gain the power of "Decision Making". Since the numbers are in order, we know exactly which way to move to make our sum bigger or smaller.</p>
+            </div>
+
+            <div class="mental-model">
+                <div class="concept-card">
+                    <h3>1. Fix One, Solve Two</h3>
+                    <p>It's hard to juggle 3 balls (A, B, C). So we stop one.</p>
+                    <p>We <strong>Fix 'A'</strong> (using a loop). Now we just need to find two numbers <code>B + C</code> that equal <code>-A</code>.</p>
+                    <p>This transforms a complex "3Sum" problem into a simple <strong>"Two Sum"</strong> problem!</p>
+                </div>
+                
+                <div class="concept-card">
+                    <h3>2. Only Look Forward</h3>
+                    <p>When our iterator <code>i</code> is at index 2, should we look back at index 0 or 1?</p>
+                    <p><strong>NO.</strong> Any triplet involving index 0 would have <em>already been found</em> when <code>i</code> was at 0.</p>
+                    <p>Always set <code>left = i + 1</code>. This prevents duplicate work.</p>
+                </div>
+            </div>
+
+            <div class="click-moment">
+                <strong>💡 Click Moment 2: "Move Both Pointers"</strong>
+                <p>You found a match! (e.g., -2, 0, 2). What now?</p>
+                <p>You must move <strong>BOTH</strong> pointers. Why? Because you have "used up" that specific combination. Moving just one would result in a sum that is definitely unbalanced (since the array has unique numbers mostly). To find a <em>new</em> combination, both need to shift.</p>
+            </div>
+        </div>
+
+        <!-- VISUALIZATION SECTION -->
+        <div class="section">
+            <h2>🔄 Live Laboratory</h2>
+            <p style="text-align: center; margin-bottom: 2rem;">Watch how we lock <strong style="color:var(--ptr-i)">A (Orange)</strong>, then use <strong style="color:var(--ptr-left)">Left</strong> & <strong style="color:var(--ptr-right)">Right</strong> to pinch the target.</p>
+            
+            <div class="array-display">
+                <div class="array-container" id="arrayContainer"></div>
+            </div>
+
+            <div class="calc-box" id="calcBox">
+                Press "Start" to begin...
+            </div>
+
+            <div id="explanation" style="min-height: 60px; text-align: center; margin-bottom: 1.5rem; color: var(--text-main); font-weight: 500;"></div>
+
+            <div class="found-triplets">
+                <strong>Collected Triplets:</strong>
+                <div id="tripletsList"></div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-secondary" onclick="reset()">Reset</button>
+                <button class="btn-secondary" onclick="prevStep()">Previous</button>
+                <button class="btn-primary" onclick="nextStep()">Next Step</button>
+            </div>
+        </div>
+
+        <!-- GUIDANCE & PITFALLS SECTION -->
+        <div class="section">
+            <h2>🛑 Common Pitfalls (Don't fall for these!)</h2>
+            
+            <div class="pitfall">
+                <strong>1. The "Logic Reversal" Bug</strong>
+                <p><code>if (sum > 0) left++</code> ❌ <strong>WRONG!</strong></p>
+                <p>If the sum is too big (Positive), moving <code>left</code> (to a bigger number) makes it WORSE. </p>
+                <p><strong>Correct:</strong> If sum > 0 (Too Big), move <code>right--</code> (to a smaller number).</p>
+            </div>
+
+            <div class="pitfall" style="margin-top: 1rem;">
+                <strong>2. The "Duplicate Ghost"</strong>
+                <p>If your input is <code>[-1, -1, 0, 1]</code>, and you don't skip the second <code>-1</code>, you will print the triplet <code>[-1, 0, 1]</code> twice!</p>
+                <p><strong>Fix:</strong> <code>while (arr[i] == arr[i-1]) continue;</code></p>
+            </div>
+
+            <div style="margin-top: 2rem;">
+                <h3>📜 The Perfect Template Code</h3>
+                <pre style="background: #1e1e1e; color: #d4d4d4; padding: 1rem; border-radius: 8px; overflow-x: auto;"><code>
+arr.sort()
+for i in range(len(arr)):
+    # 1. Skip Duplicates for A
+    if i > 0 and arr[i] == arr[i-1]: continue
+
+    left, right = i + 1, len(arr) - 1
+    
+    while left < right:
+        current_sum = arr[i] + arr[left] + arr[right]
+        
+        if current_sum == 0:
+            res.append([arr[i], arr[left], arr[right]])
+            left += 1; right -= 1
+            # 2. Skip Duplicates for Left & Right
+            while left < right and arr[left] == arr[left-1]: left += 1
+            while left < right and arr[right] == arr[right+1]: right -= 1
+            
+        elif current_sum < 0:
+            left += 1  # Need bigger
+        else:
+            right -= 1 # Need smaller
+                </code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial Data (Sorted)
+        const arr = [-3, -1, -1, 0, 1, 2, 4]; 
+        
+        let i = 0;
+        let left = 1;
+        let right = arr.length - 1;
+        let state = 'init'; // init, check, move
+        let triplets = [];
+        let message = "";
+        let isDone = false;
+        
+        // History Stack for "Previous" functionality
+        let historyStack = [];
+
+        function saveState() {
+            historyStack.push({
+                i, left, right, state, 
+                triplets: JSON.parse(JSON.stringify(triplets)), // Deep copy
+                message, isDone
+            });
+        }
+
+        function render() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+
+            arr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                
+                if (idx === i) cell.classList.add('active-i');
+                if (idx === left && state !== 'done') cell.classList.add('active-left');
+                if (idx === right && state !== 'done') cell.classList.add('active-right');
+                
+                // Highlight match
+                if (state === 'check' || state === 'found') {
+                    if (arr[i] + arr[left] + arr[right] === 0) {
+                        if (idx === i || idx === left || idx === right) {
+                            cell.classList.add('match');
+                        }
+                    }
+                }
+
+                // Show pointers
+                let pointersHtml = `<div class="index">${idx}</div>${val}`;
+                
+                if (idx === i) pointersHtml += `<div class="pointer-label p-i">i (A)</div>`;
+                if (idx === left && state !== 'done') pointersHtml += `<div class="pointer-label p-left">L (B)</div>`;
+                if (idx === right && state !== 'done') pointersHtml += `<div class="pointer-label p-right">R (C)</div>`;
+
+                cell.innerHTML = pointersHtml;
+                container.appendChild(cell);
+            });
+
+            // Update Calculation Box
+            const box = document.getElementById('calcBox');
+            if (state === 'check' || state === 'found') {
+                const A = arr[i];
+                const B = arr[left];
+                const C = arr[right];
+                const sum = A + B + C;
+                
+                let resultClass = sum === 0 ? 'result-found' : 'result-miss';
+                let symbol = sum === 0 ? '✅ MATCH!' : (sum < 0 ? 'Sum < 0' : 'Sum > 0');
+                let action = sum === 0 ? 'Found it!' : (sum < 0 ? 'Need Bigger (+)' : 'Need Smaller (-)');
+
+                box.innerHTML = `
+                    <span class="math-part"><span class="val-i">${A}</span> + <span class="val-left">${B}</span> + <span class="val-right">${C}</span> = ${sum}</span>
+                    <br>
+                    <span class="${resultClass}">${symbol}</span> <span style="font-size: 1rem; color: #94a3b8">(${action})</span>
+                `;
+            } else if (state === 'done') {
+                box.innerHTML = "🎉 Algorithm Complete!";
+            } else {
+                box.innerHTML = "Click 'Next Step' to start";
+            }
+
+            // Update Explanation
+            document.getElementById('explanation').innerText = message;
+
+            // Update Triplets List
+            const list = document.getElementById('tripletsList');
+            list.innerHTML = triplets.length > 0 
+                ? triplets.map(t => `<span class="triplet-tag">[${t.join(', ')}]</span>`).join('')
+                : '<span style="color:#9ca3af; font-style:italic;">None yet...</span>';
+        }
+
+        function reset() {
+            i = 0;
+            left = 1;
+            right = arr.length - 1;
+            state = 'init';
+            triplets = [];
+            message = "Initial State. Array is sorted [-3, -1, -1, 0, 1, 2, 4]";
+            isDone = false;
+            historyStack = []; // Clear history
+            render();
+        }
+
+        function prevStep() {
+            if (historyStack.length === 0) return;
+            const previousState = historyStack.pop();
+            i = previousState.i;
+            left = previousState.left;
+            right = previousState.right;
+            state = previousState.state;
+            triplets = previousState.triplets;
+            message = previousState.message;
+            isDone = previousState.isDone;
+            render();
+        }
+
+        function nextStep() {
+            if (isDone) return;
+            
+            saveState(); // Save current state before moving
+
+            // SETUP PHASE (Moving i)
+            if (state === 'init' || state === 'next_i') {
+                if (state === 'next_i') {
+                    i++;
+                }
+                
+                // Check bounds
+                if (i >= arr.length - 2) {
+                    message = "Finished iterating through all possible 'A' values.";
+                    state = 'done';
+                    isDone = true;
+                    render();
+                    return;
+                }
+
+                // Skip duplicates for 'i'
+                if (i > 0 && arr[i] === arr[i-1]) {
+                    message = `Skipping duplicate 'A' value (${arr[i]}) at index ${i}.`;
+                    while (i < arr.length - 2 && i > 0 && arr[i] === arr[i-1]) {
+                        i++;
+                    }
+                    if (i >= arr.length - 2) {
+                        state = 'done'; isDone = true; render(); return;
+                    }
+                }
+
+                left = i + 1;
+                right = arr.length - 1;
+                message = `Fixing A = ${arr[i]}. Resetting Left to ${left} and Right to ${right}.`;
+                state = 'check';
+                render();
+                return;
+            }
+
+            // SEARCH PHASE (Moving Left/Right)
+            if (state === 'check') {
+                if (left >= right) {
+                    state = 'next_i';
+                    message = "Pointers crossed. Time to pick a new 'A'.";
+                    // Note: Recursive call to nextStep() for auto-transition means 
+                    // we need to be careful with history. Ideally, we just stop here 
+                    // and let user click again, OR we save state again.
+                    // For simplicity, let's stop here so user sees "Pointers crossed".
+                    // The next click will handle 'next_i' logic.
+                    // Actually, the original code called nextStep(). Let's remove recursion
+                    // to make "Previous" work cleaner (1 click = 1 atomic state change).
+                    // We will just return, and next click will hit 'next_i' block.
+                    render();
+                    return;
+                }
+
+                const sum = arr[i] + arr[left] + arr[right];
+
+                if (sum === 0) {
+                    triplets.push([arr[i], arr[left], arr[right]]);
+                    message = `✅ Match Found! [-${arr[i]}, ${arr[left]}, ${arr[right]}]. Now moving BOTH pointers inward...`;
+                    
+                    // Move
+                    left++;
+                    right--;
+                    
+                    // Skip internal duplicates
+                    let skipped = false;
+                    while (left < right && arr[left] === arr[left-1]) { left++; skipped = true; }
+                    while (left < right && arr[right] === arr[right+1]) { right--; skipped = true; }
+                    
+                    if(skipped) message += " (Skipped some internal duplicates)";
+                    
+                    state = 'check'; 
+                } else if (sum < 0) {
+                    message = `Sum ${sum} is too low. Moving Left pointer rightward to increase sum.`;
+                    left++;
+                } else {
+                    message = `Sum ${sum} is too high. Moving Right pointer leftward to decrease sum.`;
+                    right--;
+                }
+                
+                render();
+            }
+        }
+
+        // Initialize
+        reset();
+    </script>
+</body>
+</html>

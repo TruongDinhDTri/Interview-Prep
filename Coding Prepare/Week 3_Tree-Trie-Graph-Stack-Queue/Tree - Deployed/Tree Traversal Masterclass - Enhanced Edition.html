@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🎓 Tree Traversal Masterclass</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e8ba3 100%);
+      height: 100vh;
+      overflow: hidden;
+      color: #2c3e50;
+    }
+    
+    .lecture-hall {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #f8f9fa;
+    }
+    
+    /* Compact Header */
+    .header {
+      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      color: white;
+      padding: 20px 40px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      border-bottom: 4px solid #e74c3c;
+      flex-shrink: 0;
+    }
+    
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .badge-icon {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 2px 10px rgba(231, 76, 60, 0.4);
+    }
+    
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8em;
+      margin-bottom: 2px;
+    }
+    
+    .subtitle {
+      font-size: 0.95em;
+      opacity: 0.9;
+    }
+    
+    .reset-btn {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      color: white;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1em;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 10px rgba(231, 76, 60, 0.3);
+    }
+    
+    .reset-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+    }
+    
+    /* Main content - 3 columns, no scroll */
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 280px 1fr 340px;
+      gap: 0;
+      flex: 1;
+      overflow: hidden;
+    }
+    
+    /* Left sidebar - Compact lessons */
+    .sidebar-left {
+      background: white;
+      border-right: 2px solid #ecf0f1;
+      padding: 20px;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.3em;
+      color: #2c3e50;
+      margin-bottom: 15px;
+      padding-bottom: 8px;
+      border-bottom: 3px solid #e74c3c;
+    }
+    
+    .lesson-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .lesson-card:hover {
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    
+    .lesson-card.active {
+      border-color: #f39c12;
+      box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
+    }
+    
+    .lesson-card.inorder {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .lesson-card.preorder {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .lesson-card.postorder {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .lesson-number {
+      font-size: 0.8em;
+      opacity: 0.9;
+      margin-bottom: 3px;
+    }
+    
+    .lesson-title {
+      font-size: 1.15em;
+      font-weight: 700;
+      margin-bottom: 5px;
+    }
+    
+    .lesson-desc {
+      font-size: 0.85em;
+      opacity: 0.95;
+      line-height: 1.4;
+    }
+    
+    /* Center - Main stage, compact */
+    .main-stage {
+      background: white;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    
+    .stage-header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
+    
+    .stage-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6em;
+      color: #2c3e50;
+      margin-bottom: 3px;
+    }
+    
+    .stage-subtitle {
+      font-size: 0.95em;
+      color: #7f8c8d;
+    }
+    
+    /* Compact control panel */
+    .control-panel {
+      background: linear-gradient(135deg, #ecf0f1, #bdc3c7);
+      padding: 15px;
+      border-radius: 15px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .controls-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    
+    .control-btn {
+      background: white;
+      border: 2px solid #34495e;
+      color: #2c3e50;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.95em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .control-btn:hover:not(:disabled) {
+      background: #34495e;
+      color: white;
+      transform: translateY(-2px);
+    }
+    
+    .control-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    
+    .control-btn.play {
+      background: linear-gradient(135deg, #27ae60, #229954);
+      color: white;
+      border: none;
+    }
+    
+    .control-btn.pause {
+      background: linear-gradient(135deg, #f39c12, #e67e22);
+      color: white;
+      border: none;
+    }
+    
+    .jump-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: white;
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 2px solid #3498db;
+    }
+    
+    .jump-label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9em;
+    }
+    
+    .step-input {
+      width: 70px;
+      padding: 6px;
+      border: 2px solid #bdc3c7;
+      border-radius: 6px;
+      font-size: 0.9em;
+      text-align: center;
+      font-weight: 600;
+    }
+    
+    .jump-btn {
+      background: linear-gradient(135deg, #3498db, #2980b9);
+      color: white;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+    }
+    
+    .jump-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 2px 10px rgba(52, 152, 219, 0.4);
+    }
+    
+    .speed-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      padding: 10px;
+      background: white;
+      border-radius: 10px;
+    }
+    
+    .speed-label {
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9em;
+    }
+    
+    .speed-slider {
+      width: 150px;
+      height: 6px;
+    }
+    
+    .speed-value {
+      font-weight: 700;
+      color: #e74c3c;
+      font-size: 0.95em;
+      min-width: 60px;
+    }
+    
+    /* Compact progress */
+    .progress-section {
+      background: white;
+      padding: 12px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #2c3e50;
+      font-size: 0.9em;
+    }
+    
+    .progress-bar-container {
+      height: 10px;
+      background: #ecf0f1;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #27ae60, #2ecc71);
+      transition: width 0.3s ease;
+    }
+    
+    /* Blackboard - optimized size */
+    .blackboard {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    #treeCanvas {
+      display: block;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.3);
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 12px;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: white;
+      font-weight: 500;
+      font-size: 0.85em;
+    }
+    
+    .legend-dot {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+    
+    /* Right sidebar - compact notes */
+    .sidebar-right {
+      background: #fdfefe;
+      border-left: 2px solid #ecf0f1;
+      padding: 20px;
+      box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      overflow-y: auto;
+    }
+    
+    .notes-card {
+      background: white;
+      border-left: 4px solid #3498db;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      flex-shrink: 0;
+    }
+    
+    .notes-card.highlight {
+      border-left-color: #e74c3c;
+      background: linear-gradient(135deg, #fff5f5, #ffffff);
+    }
+    
+    .notes-header {
+      font-weight: 700;
+      font-size: 1em;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .notes-content {
+      color: #34495e;
+      line-height: 1.6;
+      font-size: 0.9em;
+    }
+    
+    .action-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 15px;
+      font-weight: 700;
+      font-size: 0.8em;
+      margin: 6px 0;
+    }
+    
+    .badge-exploring {
+      background: linear-gradient(135deg, #ff9800, #f57c00);
+      color: white;
+    }
+    
+    .badge-processing {
+      background: linear-gradient(135deg, #4caf50, #388e3c);
+      color: white;
+    }
+    
+    .badge-returning {
+      background: linear-gradient(135deg, #2196f3, #1976d2);
+      color: white;
+    }
+    
+    .badge-null {
+      background: linear-gradient(135deg, #9e9e9e, #757575);
+      color: white;
+    }
+    
+    .explanation-box {
+      background: rgba(52, 152, 219, 0.1);
+      border-left: 3px solid #3498db;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      font-style: italic;
+    }
+    
+    .why-box {
+      background: rgba(230, 126, 34, 0.1);
+      border-left: 3px solid #e67e22;
+      padding: 10px;
+      margin-top: 8px;
+      border-radius: 5px;
+    }
+    
+    .call-stack-visual {
+      background: #2c3e50;
+      color: #ecf0f1;
+      padding: 10px;
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8em;
+      margin-top: 8px;
+      max-height: 120px;
+      overflow-y: auto;
+    }
+    
+    .stack-frame {
+      padding: 5px 8px;
+      margin: 3px 0;
+      background: rgba(255,255,255,0.1);
+      border-left: 3px solid #f39c12;
+      border-radius: 3px;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .stat-box {
+      background: linear-gradient(135deg, #ecf0f1, #d5dbdb);
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 1.6em;
+      font-weight: 700;
+      color: #e74c3c;
+      display: block;
+    }
+    
+    .stat-label {
+      font-size: 0.75em;
+      color: #7f8c8d;
+      margin-top: 3px;
+    }
+    
+    .result-display {
+      background: linear-gradient(135deg, #2c3e50, #34495e);
+      color: white;
+      padding: 12px;
+      border-radius: 8px;
+      margin-top: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 1em;
+      text-align: center;
+      font-weight: 700;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      word-break: break-all;
+    }
+    
+    /* Custom scrollbar for right sidebar only */
+    .sidebar-right::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .sidebar-right::-webkit-scrollbar-track {
+      background: #ecf0f1;
+    }
+    
+    .sidebar-right::-webkit-scrollbar-thumb {
+      background: #95a5a6;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <div class="lecture-hall">
+    <!-- Compact Header -->
+    <div class="header">
+      <div class="header-content">
+        <div class="header-left">
+          <div class="badge-icon">🎓</div>
+          <div>
+            <h1>Tree Traversal Masterclass</h1>
+            <p class="subtitle">Interactive Binary Tree Algorithms</p>
+          </div>
+        </div>
+        <button class="reset-btn" id="resetBtn">🔄 Reset</button>
+      </div>
+    </div>
+    
+    <!-- Main Content - No Scroll -->
+    <div class="content-wrapper">
+      <!-- Left Sidebar -->
+      <div class="sidebar-left">
+        <h2 class="section-title">📚 Lessons</h2>
+        
+        <div class="lesson-card inorder" data-type="inorder">
+          <div class="lesson-number">LESSON 01</div>
+          <div class="lesson-title">🔵 In-Order</div>
+          <div class="lesson-desc">L → Root → R<br>Sorted output!</div>
+        </div>
+        
+        <div class="lesson-card preorder" data-type="preorder">
+          <div class="lesson-number">LESSON 02</div>
+          <div class="lesson-title">🟢 Pre-Order</div>
+          <div class="lesson-desc">Root → L → R<br>Parent first!</div>
+        </div>
+        
+        <div class="lesson-card postorder" data-type="postorder">
+          <div class="lesson-number">LESSON 03</div>
+          <div class="lesson-title">🟡 Post-Order</div>
+          <div class="lesson-desc">L → R → Root<br>Children first!</div>
+        </div>
+      </div>
+      
+      <!-- Center Stage -->
+      <div class="main-stage">
+        <div class="stage-header">
+          <h2 class="stage-title" id="stageTitle">Welcome!</h2>
+          <p class="stage-subtitle" id="stageSubtitle">Select a lesson to begin</p>
+        </div>
+        
+        <!-- Controls -->
+        <div class="control-panel">
+          <div class="controls-row">
+            <button class="control-btn play" id="playBtn">▶️ Play</button>
+            <button class="control-btn pause" id="pauseBtn">⏸️ Pause</button>
+            <button class="control-btn" id="prevBtn">⏮️ Prev</button>
+            <button class="control-btn" id="nextBtn">⏭️ Next</button>
+            
+            <div class="jump-control">
+              <span class="jump-label">🎯 Jump:</span>
+              <input type="number" class="step-input" id="stepInput" min="0" value="0" placeholder="Step">
+              <button class="jump-btn" id="jumpBtn">Go!</button>
+            </div>
+          </div>
+          
+          <div class="speed-section">
+            <span class="speed-label">⚡ Speed:</span>
+            <input type="range" class="speed-slider" id="speedSlider" min="300" max="2000" value="1000" step="100">
+            <span class="speed-value" id="speedValue">1.0s</span>
+          </div>
+        </div>
+        
+        <!-- Progress -->
+        <div class="progress-section">
+          <div class="progress-label">
+            <span>📍 Progress</span>
+            <span id="progressText">Step 0 of 0</span>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+        
+        <!-- Blackboard -->
+        <div class="blackboard">
+          <canvas id="treeCanvas" width="700" height="360"></canvas>
+          <div class="legend">
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #e0e0e0;"></div>
+              <span>Not Visited</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #ff9800;"></div>
+              <span>🔍 Exploring</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot" style="background: #4caf50;"></div>
+              <span>✅ Processed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right Sidebar -->
+      <div class="sidebar-right">
+        <div class="notes-card highlight">
+          <div class="notes-header">🎯 Current Action</div>
+          <div class="notes-content" id="currentAction">
+            <p>👋 Welcome! Select a lesson to start!</p>
+          </div>
+        </div>
+        
+        <div class="notes-card">
+          <div class="notes-header">📚 Call Stack</div>
+          <div class="call-stack-visual" id="callStack">
+            <div style="text-align: center; opacity: 0.6;">No active calls</div>
+          </div>
+        </div>
+        
+        <div class="notes-card">
+          <div class="notes-header">📊 Stats</div>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <span class="stat-value" id="currentStepStat">0</span>
+              <span class="stat-label">Step</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="totalStepsStat">0</span>
+              <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="processedStat">0</span>
+              <span class="stat-label">Processed</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value" id="depthStat">0</span>
+              <span class="stat-label">Depth</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="notes-card">
+          <div class="notes-header">🎯 Result</div>
+          <div class="result-display" id="resultDisplay">-</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById('treeCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    const playBtn = document.getElementById('playBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const jumpBtn = document.getElementById('jumpBtn');
+    const stepInput = document.getElementById('stepInput');
+    
+    const stageTitle = document.getElementById('stageTitle');
+    const stageSubtitle = document.getElementById('stageSubtitle');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const currentAction = document.getElementById('currentAction');
+    const callStack = document.getElementById('callStack');
+    const resultDisplay = document.getElementById('resultDisplay');
+    
+    const currentStepStat = document.getElementById('currentStepStat');
+    const totalStepsStat = document.getElementById('totalStepsStat');
+    const processedStat = document.getElementById('processedStat');
+    const depthStat = document.getElementById('depthStat');
+    
+    const lessonCards = document.querySelectorAll('.lesson-card');
+    
+    class TreeNode {
+      constructor(value, x, y) {
+        this.value = value;
+        this.x = x;
+        this.y = y;
+        this.left = null;
+        this.right = null;
+        this.state = 'unvisited';
+      }
+    }
+    
+    // Smaller tree for compact view
+    let root = new TreeNode(1, 350, 40);
+    root.left = new TreeNode(7, 200, 120);
+    root.right = new TreeNode(9, 500, 120);
+    root.left.left = new TreeNode(2, 120, 200);
+    root.left.right = new TreeNode(6, 280, 200);
+    root.left.right.left = new TreeNode(5, 230, 280);
+    root.left.right.right = new TreeNode(11, 330, 280);
+    root.right.left = new TreeNode(9, 450, 200);
+    root.right.right = new TreeNode(5, 550, 200);
+    
+    let animationSpeed = 1000;
+    let isPlaying = false;
+    let currentStep = 0;
+    let traversalSteps = [];
+    let currentTraversalType = null;
+    
+    speedSlider.addEventListener('input', function() {
+      animationSpeed = parseInt(this.value);
+      speedValue.textContent = (animationSpeed / 1000).toFixed(1) + 's';
+    });
+    
+    lessonCards.forEach(card => {
+      card.addEventListener('click', function() {
+        const type = this.dataset.type;
+        initTraversal(type);
+        lessonCards.forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+    
+    playBtn.addEventListener('click', playResume);
+    pauseBtn.addEventListener('click', pause);
+    nextBtn.addEventListener('click', nextStep);
+    prevBtn.addEventListener('click', previousStep);
+    resetBtn.addEventListener('click', reset);
+    jumpBtn.addEventListener('click', jumpToStep);
+    
+    function drawTree() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawConnections(root);
+      drawNodes(root);
+    }
+    
+    function drawConnections(node) {
+      if (!node) return;
+      ctx.strokeStyle = '#95a5a6';
+      ctx.lineWidth = 2;
+      
+      if (node.left) {
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(node.left.x, node.left.y);
+        ctx.stroke();
+        drawConnections(node.left);
+      }
+      
+      if (node.right) {
+        ctx.beginPath();
+        ctx.moveTo(node.x, node.y);
+        ctx.lineTo(node.right.x, node.right.y);
+        ctx.stroke();
+        drawConnections(node.right);
+      }
+    }
+    
+    function drawNodes(node) {
+      if (!node) return;
+      
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 26, 0, Math.PI * 2);
+      
+      if (node.state === 'exploring') {
+        ctx.fillStyle = '#ff9800';
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = '#ff9800';
+      } else if (node.state === 'processed') {
+        ctx.fillStyle = '#4caf50';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#4caf50';
+      } else {
+        ctx.fillStyle = '#e0e0e0';
+        ctx.shadowBlur = 0;
+      }
+      
+      ctx.fill();
+      ctx.strokeStyle = '#2c3e50';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      
+      ctx.fillStyle = node.state === 'unvisited' ? '#2c3e50' : '#fff';
+      ctx.font = 'bold 20px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.value, node.x, node.y);
+      
+      drawNodes(node.left);
+      drawNodes(node.right);
+    }
+    
+    function resetTree(node) {
+      if (!node) return;
+      node.state = 'unvisited';
+      resetTree(node.left);
+      resetTree(node.right);
+    }
+    
+    function generateTraversalSteps(type) {
+      traversalSteps = [];
+      const stack = [];
+      
+      function inorder(node, depth = 0) {
+        if (!node) {
+          traversalSteps.push({
+            action: 'null',
+            node: null,
+            description: '🚫 Reached a <strong>null node</strong> - this is a dead end!',
+            explanation: 'When we hit null, it means there\'s no more nodes in this direction. This is the base case of our recursion.',
+            why: 'We need to check for null to know when to stop going deeper. Without this check, we\'d crash trying to access non-existent nodes!',
+            stack: [...stack],
+            depth: depth
+          });
+          return;
+        }
+        
+        stack.push(`inorder(${node.value})`);
+        traversalSteps.push({
+          action: 'explore',
+          node: node,
+          description: `🔍 <strong>Arrived at node ${node.value}</strong> - Following In-Order rules: explore LEFT first!`,
+          explanation: 'In-Order traversal follows the pattern: Left → Root → Right. So we must visit the left subtree before processing this node.',
+          why: 'Why LEFT first? Because In-Order produces sorted output in a Binary Search Tree! Smaller values are always on the left.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        inorder(node.left, depth + 1);
+        
+        traversalSteps.push({
+          action: 'process',
+          node: node,
+          description: `✅ <strong>PROCESSING NODE ${node.value}</strong> - This is our "valid travel point"! Adding to result.`,
+          explanation: 'We process AFTER visiting the left subtree but BEFORE the right. This is the "in-order" moment - between left and right children.',
+          why: 'This timing ensures we visit nodes in ascending order (for BST). All smaller values (left) are processed first, then this node, then larger values (right).',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        traversalSteps.push({
+          action: 'explore_right',
+          node: node,
+          description: `➡️ Left side complete. Now exploring the RIGHT subtree of ${node.value}!`,
+          explanation: 'After processing the current node, we visit the right subtree to complete the In-Order pattern.',
+          why: 'The right subtree contains larger values (in BST). By visiting it last, we maintain the sorted order in our result.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        inorder(node.right, depth + 1);
+        
+        stack.pop();
+        traversalSteps.push({
+          action: 'return',
+          node: node,
+          description: `↩️ <strong>Finished with node ${node.value}</strong> - Returning to parent call.`,
+          explanation: 'All work for this node is done (left visited, node processed, right visited). We return to continue the parent\'s execution.',
+          why: 'Returning unwinds the recursion stack. The parent function can now continue with its next steps.',
+          stack: [...stack],
+          depth: depth
+        });
+      }
+      
+      function preorder(node, depth = 0) {
+        if (!node) {
+          traversalSteps.push({
+            action: 'null',
+            node: null,
+            description: '🚫 Reached a <strong>null node</strong> - this is a dead end!',
+            explanation: 'When we hit null, it means there\'s no more nodes in this direction. This is the base case of our recursion.',
+            why: 'We need to check for null to know when to stop going deeper. Without this check, we\'d crash trying to access non-existent nodes!',
+            stack: [...stack],
+            depth: depth
+          });
+          return;
+        }
+        
+        stack.push(`preorder(${node.value})`);
+        traversalSteps.push({
+          action: 'explore',
+          node: node,
+          description: `🔍 <strong>Arrived at node ${node.value}</strong> - In Pre-Order, we process immediately!`,
+          explanation: 'Pre-Order follows: Root → Left → Right. The moment we arrive at a node, we process it first!',
+          why: 'Why process first? Pre-Order is perfect for copying trees or creating prefix expressions. We need the parent before children.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        traversalSteps.push({
+          action: 'process',
+          node: node,
+          description: `✅ <strong>PROCESSING NODE ${node.value}</strong> RIGHT AWAY! This is the "valid travel point"!`,
+          explanation: 'We process BEFORE visiting any children. This is "pre-order" - the root comes first in the order.',
+          why: 'Processing first means parent nodes appear before their children in the result. Useful for tree serialization or expression evaluation!',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        traversalSteps.push({
+          action: 'explore_left',
+          node: node,
+          description: `⬅️ Node ${node.value} processed. Now diving into the LEFT subtree!`,
+          explanation: 'After processing the root, we visit the left child next, following the Pre-Order pattern.',
+          why: 'We go left before right to maintain consistent ordering. This ensures we explore the tree systematically from left to right.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        preorder(node.left, depth + 1);
+        
+        traversalSteps.push({
+          action: 'explore_right',
+          node: node,
+          description: `➡️ Left side complete. Now exploring the RIGHT subtree of ${node.value}!`,
+          explanation: 'After the left subtree is fully processed, we visit the right subtree to complete the Pre-Order traversal.',
+          why: 'Visiting right last ensures all left descendants are processed before any right descendants, maintaining tree structure.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        preorder(node.right, depth + 1);
+        
+        stack.pop();
+        traversalSteps.push({
+          action: 'return',
+          node: node,
+          description: `↩️ <strong>Finished with node ${node.value}</strong> - Returning to parent call.`,
+          explanation: 'All work for this node is done (node processed, left visited, right visited). We return to continue the parent\'s execution.',
+          why: 'Returning unwinds the recursion stack. The parent function can now continue with its next steps.',
+          stack: [...stack],
+          depth: depth
+        });
+      }
+      
+      function postorder(node, depth = 0) {
+        if (!node) {
+          traversalSteps.push({
+            action: 'null',
+            node: null,
+            description: '🚫 Reached a <strong>null node</strong> - this is a dead end!',
+            explanation: 'When we hit null, it means there\'s no more nodes in this direction. This is the base case of our recursion.',
+            why: 'We need to check for null to know when to stop going deeper. Without this check, we\'d crash trying to access non-existent nodes!',
+            stack: [...stack],
+            depth: depth
+          });
+          return;
+        }
+        
+        stack.push(`postorder(${node.value})`);
+        traversalSteps.push({
+          action: 'explore',
+          node: node,
+          description: `🔍 <strong>Arrived at node ${node.value}</strong> - Post-Order means children BEFORE parent!`,
+          explanation: 'Post-Order follows: Left → Right → Root. We must visit ALL children before processing this node.',
+          why: 'Why children first? Post-Order is perfect for deleting trees or evaluating postfix expressions. We need children\'s results first!',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        traversalSteps.push({
+          action: 'explore_left',
+          node: node,
+          description: `⬅️ Starting with the LEFT subtree of node ${node.value}!`,
+          explanation: 'We visit the left child first, deferring the processing of the current node until later.',
+          why: 'Going left first ensures we process the entire left subtree before moving to the right. This maintains consistent ordering.',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        postorder(node.left, depth + 1);
+        
+        traversalSteps.push({
+          action: 'explore_right',
+          node: node,
+          description: `➡️ Left side done. Now exploring the RIGHT subtree of node ${node.value}!`,
+          explanation: 'After the left subtree, we visit the right subtree, still deferring the current node\'s processing.',
+          why: 'We need both children processed before we can process the parent. This is crucial for operations like calculating tree height!',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        postorder(node.right, depth + 1);
+        
+        traversalSteps.push({
+          action: 'process',
+          node: node,
+          description: `✅ <strong>PROCESSING NODE ${node.value}</strong> AFTER all children! This is the "valid travel point"!`,
+          explanation: 'We process AFTER visiting both children. This is "post-order" - the root comes after its descendants.',
+          why: 'Processing last means children appear before parents in the result. Perfect for deletion (delete children before parent) or dependency resolution!',
+          stack: [...stack],
+          depth: depth
+        });
+        
+        stack.pop();
+        traversalSteps.push({
+          action: 'return',
+          node: node,
+          description: `↩️ <strong>Finished with node ${node.value}</strong> - Returning to parent call.`,
+          explanation: 'All work for this node is done (left visited, right visited, node processed). We return to continue the parent\'s execution.',
+          why: 'Returning unwinds the recursion stack. The parent function can now continue with its next steps.',
+          stack: [...stack],
+          depth: depth
+        });
+      }
+      
+      if (type === 'inorder') inorder(root);
+      else if (type === 'preorder') preorder(root);
+      else if (type === 'postorder') postorder(root);
+      
+      stepInput.max = traversalSteps.length - 1;
+    }
+    
+    function updateVisualization() {
+      if (traversalSteps.length === 0) return;
+      
+      resetTree(root);
+      const step = traversalSteps[currentStep];
+      const processedNodes = [];
+      
+      for (let i = 0; i <= currentStep; i++) {
+        if (traversalSteps[i].action === 'process' && traversalSteps[i].node) {
+          processedNodes.push(traversalSteps[i].node.value);
+          traversalSteps[i].node.state = 'processed';
+        }
+      }
+      
+      if (step.node && (step.action === 'explore' || step.action === 'process' || 
+          step.action === 'explore_left' || step.action === 'explore_right')) {
+        step.node.state = 'exploring';
+      }
+      
+      drawTree();
+      updateUI(step, processedNodes);
+    }
+    
+    function updateUI(step, processedNodes) {
+      const actionClass = step.action === 'process' ? 'badge-processing' :
+                         step.action === 'null' ? 'badge-null' :
+                         step.action === 'return' ? 'badge-returning' : 'badge-exploring';
+      
+      currentAction.innerHTML = `
+        <span class="action-badge ${actionClass}">${step.action.toUpperCase().replace('_', ' ')}</span>
+        <p style="margin-top: 8px; font-weight: 600;">${step.description}</p>
+        <div class="explanation-box">
+          <strong>📖 What's happening:</strong><br>
+          ${step.explanation}
+        </div>
+        <div class="why-box">
+          <strong>💡 Why we do this:</strong><br>
+          ${step.why}
+        </div>
+      `;
+      
+      if (step.stack.length > 0) {
+        callStack.innerHTML = step.stack.map((call, idx) => 
+          `<div class="stack-frame" style="margin-left: ${idx * 8}px;">
+            ${idx === step.stack.length - 1 ? '👉 ' : '   '}${call}
+          </div>`
+        ).reverse().join('');
+      } else {
+        callStack.innerHTML = '<div style="text-align: center; opacity: 0.6;">Empty</div>';
+      }
+      
+      currentStepStat.textContent = currentStep + 1;
+      totalStepsStat.textContent = traversalSteps.length;
+      processedStat.textContent = processedNodes.length;
+      depthStat.textContent = step.depth;
+      
+      resultDisplay.textContent = processedNodes.join(' → ') || 'Building...';
+      
+      const percent = Math.round(((currentStep + 1) / traversalSteps.length) * 100);
+      progressBar.style.width = percent + '%';
+      progressText.textContent = `Step ${currentStep + 1} of ${traversalSteps.length}`;
+      
+      stepInput.value = currentStep;
+    }
+    
+    function initTraversal(type) {
+      reset();
+      currentTraversalType = type;
+      generateTraversalSteps(type);
+      currentStep = 0;
+      
+      const titles = {
+        inorder: { title: '🔵 In-Order Traversal', sub: 'Left → Root → Right' },
+        preorder: { title: '🟢 Pre-Order Traversal', sub: 'Root → Left → Right' },
+        postorder: { title: '🟡 Post-Order Traversal', sub: 'Left → Right → Root' }
+      };
+      
+      stageTitle.textContent = titles[type].title;
+      stageSubtitle.textContent = titles[type].sub;
+      
+      updateVisualization();
+      enableControls();
+    }
+    
+    async function playResume() {
+      if (!currentTraversalType || traversalSteps.length === 0) return;
+      
+      if (currentStep >= traversalSteps.length - 1) {
+        currentStep = 0;
+      }
+      
+      isPlaying = true;
+      updateButtonStates();
+      
+      while (isPlaying && currentStep < traversalSteps.length - 1) {
+        currentStep++;
+        updateVisualization();
+        await new Promise(resolve => setTimeout(resolve, animationSpeed));
+      }
+      
+      isPlaying = false;
+      updateButtonStates();
+    }
+    
+    function pause() {
+      isPlaying = false;
+      updateButtonStates();
+    }
+    
+    function nextStep() {
+      if (!currentTraversalType || traversalSteps.length === 0) return;
+      pause();
+      if (currentStep < traversalSteps.length - 1) {
+        currentStep++;
+        updateVisualization();
+      }
+    }
+    
+    function previousStep() {
+      if (!currentTraversalType || traversalSteps.length === 0) return;
+      pause();
+      if (currentStep > 0) {
+        currentStep--;
+        updateVisualization();
+      }
+    }
+    
+    function jumpToStep() {
+      if (!currentTraversalType || traversalSteps.length === 0) return;
+      pause();
+      const targetStep = parseInt(stepInput.value);
+      if (targetStep >= 0 && targetStep < traversalSteps.length) {
+        currentStep = targetStep;
+        updateVisualization();
+      }
+    }
+    
+    function reset() {
+      isPlaying = false;
+      currentStep = 0;
+      traversalSteps = [];
+      currentTraversalType = null;
+      resetTree(root);
+      drawTree();
+      
+      stageTitle.textContent = 'Welcome!';
+      stageSubtitle.textContent = 'Select a lesson to begin';
+      
+      currentAction.innerHTML = '<p>👋 Welcome! Select a lesson to start!</p>';
+      callStack.innerHTML = '<div style="text-align: center; opacity: 0.6;">No active calls</div>';
+      resultDisplay.textContent = '-';
+      
+      currentStepStat.textContent = '0';
+      totalStepsStat.textContent = '0';
+      processedStat.textContent = '0';
+      depthStat.textContent = '0';
+      
+      progressBar.style.width = '0%';
+      progressText.textContent = 'Step 0 of 0';
+      stepInput.value = 0;
+      
+      lessonCards.forEach(c => c.classList.remove('active'));
+      disableControls();
+      updateButtonStates();
+    }
+    
+    function enableControls() {
+      playBtn.disabled = false;
+      pauseBtn.disabled = false;
+      nextBtn.disabled = false;
+      prevBtn.disabled = false;
+      jumpBtn.disabled = false;
+      stepInput.disabled = false;
+    }
+    
+    function disableControls() {
+      playBtn.disabled = true;
+      pauseBtn.disabled = true;
+      nextBtn.disabled = true;
+      prevBtn.disabled = true;
+      jumpBtn.disabled = true;
+      stepInput.disabled = true;
+    }
+    
+    function updateButtonStates() {
+      if (isPlaying) {
+        playBtn.disabled = true;
+        lessonCards.forEach(card => card.style.pointerEvents = 'none');
+      } else {
+        playBtn.disabled = false;
+        lessonCards.forEach(card => card.style.pointerEvents = 'auto');
+      }
+    }
+    
+    drawTree();
+    disableControls();
+  </script>
+</body>
+</html>

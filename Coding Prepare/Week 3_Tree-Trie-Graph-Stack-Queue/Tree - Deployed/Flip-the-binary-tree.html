@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Inverter - Step by Step</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #4c1d95 0%, #7e22ce 50%, #db2777 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            padding: 40px;
+            max-width: 1100px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #1e293b;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        .tree-container {
+            background: linear-gradient(135deg, #f1f5f9 0%, #dbeafe 100%);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 4px solid #cbd5e1;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .message-box {
+            background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+            border: 4px solid #60a5fa;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .message-box p {
+            color: #1e3a8a;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .code-box {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .code-box code {
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .btn-prev {
+            background: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #94a3b8;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-play:hover:not(:disabled) {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%);
+        }
+
+        .step-counter {
+            font-weight: bold;
+            color: #475569;
+            font-size: 1rem;
+        }
+
+        .insight-box {
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            border: 4px solid #ec4899;
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .insight-box h3 {
+            color: #831843;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .insight-box p {
+            color: #9f1239;
+            font-weight: 500;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .insight-box ol {
+            color: #9f1239;
+            margin-left: 25px;
+            line-height: 2;
+        }
+
+        .insight-box strong {
+            color: #831843;
+        }
+
+        circle, line {
+            transition: all 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌳 Binary Tree Inverter</h1>
+        <p class="subtitle">Every recursive call shown step-by-step!</p>
+
+        <div class="tree-container">
+            <svg id="treeSvg" width="600" height="320" viewBox="0 0 600 320"></svg>
+        </div>
+
+        <div class="message-box">
+            <p id="messageText"></p>
+        </div>
+
+        <div class="code-box">
+            <code id="codeText"></code>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-prev" onclick="prevStep()" id="prevBtn">← Previous</button>
+            <button class="btn btn-play" onclick="autoPlay()" id="playBtn">
+                <span>▶</span>
+                <span>Auto Play</span>
+            </button>
+            <button class="btn btn-next" onclick="nextStep()" id="nextBtn">Next →</button>
+            <button class="btn btn-reset" onclick="reset()">
+                <span>🔄</span>
+                <span>Reset</span>
+            </button>
+        </div>
+
+        <div class="step-counter" style="text-align: center; margin-bottom: 20px;">
+            <span id="stepCounter">Step 1 of 27</span>
+        </div>
+
+        <div class="insight-box">
+            <h3>🔑 Key Insight:</h3>
+            <p><strong>EVERY node gets swapped, even leaf nodes!</strong> When we reach a leaf (like node 1, 3, 6, or 9), we still:</p>
+            <ol>
+                <li>Call invertTree(left) → returns because left is null</li>
+                <li>Call invertTree(right) → returns because right is null</li>
+                <li><strong>SWAP null ↔ null</strong> (nothing visible happens, but the swap still executes!)</li>
+                <li>Return to the parent node</li>
+            </ol>
+            <p style="margin-top: 15px;"><strong>💡 The algorithm visits EVERY node and swaps at EVERY node, including leaves. The recursion goes down, swapping happens on the way back up!</strong></p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 0;
+        let isAnimating = false;
+
+        const steps = [
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: null, message: "Original tree - Let's start inverting from the root!", code: "invertTree(root)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [4], message: "Call invertTree(4) - Now call invertTree(left child)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [2], message: "Call invertTree(2) - Now call invertTree(left child)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [1], message: "Call invertTree(1) - Now call invertTree(left child)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [1], message: "invertTree(null) - Left child is null, return immediately", code: "if root is None: return" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [1], message: "Back to node 1 - Now call invertTree(right child)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [1], message: "invertTree(null) - Right child is null, return immediately", code: "if root is None: return" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [1], message: "At node 1 - SWAP! (null ↔ null) Nothing visible changes", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [2], message: "Back to node 2 - Now call invertTree(right child)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [3], message: "Call invertTree(3) - Call invertTree(left child)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [3], message: "invertTree(null) - Left is null, return", code: "if root is None: return" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [3], message: "At node 3 - Call invertTree(right child)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [3], message: "invertTree(null) - Right is null, return", code: "if root is None: return" },
+            { tree: {val: 4, left: {val: 2, left: {val: 1}, right: {val: 3}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [3], message: "At node 3 - SWAP! (null ↔ null) Nothing visible changes", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [2], message: "Back to node 2 - SWAP! (1 ↔ 3) Now we see the change!", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [4], message: "Back to root 4 - Now call invertTree(right child)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [7], message: "Call invertTree(7) - Call invertTree(left child)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [6], message: "Call invertTree(6) - Call invertTree(left = null)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [6], message: "At node 6 - Call invertTree(right = null)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [6], message: "At node 6 - SWAP! (null ↔ null)", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [7], message: "Back to node 7 - Call invertTree(right child)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [9], message: "Call invertTree(9) - Call invertTree(left = null)", code: "invertTree(root.left)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [9], message: "At node 9 - Call invertTree(right = null)", code: "invertTree(root.right)" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 6}, right: {val: 9}}}, highlight: [9], message: "At node 9 - SWAP! (null ↔ null)", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 2, left: {val: 3}, right: {val: 1}}, right: {val: 7, left: {val: 9}, right: {val: 6}}}, highlight: [7], message: "Back to node 7 - SWAP! (6 ↔ 9)", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 7, left: {val: 9}, right: {val: 6}}, right: {val: 2, left: {val: 3}, right: {val: 1}}}, highlight: [4], message: "Back to root 4 - Final SWAP! (2 ↔ 7)", code: "root.left, root.right = root.right, root.left" },
+            { tree: {val: 4, left: {val: 7, left: {val: 9}, right: {val: 6}}, right: {val: 2, left: {val: 3}, right: {val: 1}}}, highlight: null, message: "Done! Tree is completely inverted! 🎉", code: "return root" }
+        ];
+
+        function renderTree() {
+            const step = steps[currentStep];
+            const svg = document.getElementById('treeSvg');
+            svg.innerHTML = '';
+
+            // Render tree
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.setAttribute('transform', 'translate(300, 50)');
+
+            drawNode(g, step.tree, 0, 0, 0, step.highlight);
+
+            svg.appendChild(g);
+
+            // Update UI
+            document.getElementById('messageText').textContent = step.message;
+            document.getElementById('codeText').textContent = step.code;
+            document.getElementById('stepCounter').textContent = `Step ${currentStep + 1} of ${steps.length}`;
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+            document.getElementById('playBtn').disabled = isAnimating || currentStep === steps.length - 1;
+        }
+
+        function drawNode(parent, node, x, y, level, highlight) {
+            if (!node) return;
+
+            const horizontalGap = 140 / Math.pow(2, level);
+            const isHighlighted = highlight && highlight.includes(node.val);
+
+            // Draw edges to children
+            if (node.left) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', x - horizontalGap);
+                line.setAttribute('y2', y + 80);
+                line.setAttribute('stroke', '#64748b');
+                line.setAttribute('stroke-width', '3');
+                parent.appendChild(line);
+                drawNode(parent, node.left, x - horizontalGap, y + 80, level + 1, highlight);
+            }
+
+            if (node.right) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x);
+                line.setAttribute('y1', y);
+                line.setAttribute('x2', x + horizontalGap);
+                line.setAttribute('y2', y + 80);
+                line.setAttribute('stroke', '#64748b');
+                line.setAttribute('stroke-width', '3');
+                parent.appendChild(line);
+                drawNode(parent, node.right, x + horizontalGap, y + 80, level + 1, highlight);
+            }
+
+            // Draw node circle
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', x);
+            circle.setAttribute('cy', y);
+            circle.setAttribute('r', '28');
+            circle.setAttribute('fill', isHighlighted ? '#fbbf24' : '#3b82f6');
+            circle.setAttribute('stroke', isHighlighted ? '#f59e0b' : '#1e40af');
+            circle.setAttribute('stroke-width', '4');
+            parent.appendChild(circle);
+
+            // Draw node text
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', y);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('dy', '7');
+            text.setAttribute('fill', 'white');
+            text.setAttribute('font-size', '22');
+            text.setAttribute('font-weight', 'bold');
+            text.textContent = node.val;
+            parent.appendChild(text);
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderTree();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderTree();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            renderTree();
+        }
+
+        async function autoPlay() {
+            if (isAnimating || currentStep >= steps.length - 1) return;
+
+            isAnimating = true;
+            document.getElementById('playBtn').disabled = true;
+
+            for (let i = currentStep; i < steps.length - 1; i++) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                currentStep = i + 1;
+                renderTree();
+            }
+
+            isAnimating = false;
+            document.getElementById('playBtn').disabled = false;
+        }
+
+        // Initialize
+        renderTree();
+    </script>
+</body>
+</html>

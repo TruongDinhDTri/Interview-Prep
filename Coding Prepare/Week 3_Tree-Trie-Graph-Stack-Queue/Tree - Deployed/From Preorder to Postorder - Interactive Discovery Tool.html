@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Preorder to Postorder - Interactive Discovery Tool</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      min-height: 100vh;
+      background: #f3f4f6;
+      padding: 1rem;
+    }
+
+    .container {
+      max-width: 72rem;
+      margin: 0 auto;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(90deg, #2563eb 0%, #4338ca 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem 0.5rem 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .shield {
+      margin-right: 1rem;
+    }
+
+    .header h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      font-size: 1.125rem;
+    }
+
+    .header-right {
+      text-align: right;
+      font-size: 0.875rem;
+      opacity: 0.75;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      margin-bottom: 2rem;
+    }
+
+    .progress-bar {
+      height: 0.5rem;
+      background: #e5e7eb;
+      border-radius: 9999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #2563eb;
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+
+    .progress-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.5rem;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      text-align: center;
+      width: 20%;
+      color: #6b7280;
+    }
+
+    .progress-label.active {
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    /* Stage Buttons */
+    .stage-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .stage-buttons {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .stage-btn {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      border: 2px solid;
+    }
+
+    .stage-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .stage-btn.active {
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .stage-btn.blue { border-color: #93c5fd; color: #1d4ed8; }
+    .stage-btn.blue.active { background: #2563eb; border-color: #2563eb; }
+    .stage-btn.purple { border-color: #c4b5fd; color: #6d28d9; }
+    .stage-btn.purple.active { background: #7c3aed; border-color: #7c3aed; }
+    .stage-btn.amber { border-color: #fcd34d; color: #92400e; }
+    .stage-btn.amber.active { background: #d97706; border-color: #d97706; }
+    .stage-btn.indigo { border-color: #a5b4fc; color: #4338ca; }
+    .stage-btn.indigo.active { background: #4f46e5; border-color: #4f46e5; }
+    .stage-btn.green { border-color: #86efac; color: #166534; }
+    .stage-btn.green.active { background: #16a34a; border-color: #16a34a; }
+
+    /* Playback Controls */
+    .playback-controls {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #bfdbfe;
+      margin-bottom: 1.5rem;
+    }
+
+    .controls-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .control-btns {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .control-btn {
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      border: 1px solid #bfdbfe;
+      background: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      background: #dbeafe;
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .control-btn.playing {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+
+    .speed-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .speed-label {
+      font-size: 0.875rem;
+      color: #374151;
+    }
+
+    .speed-slider {
+      width: 8rem;
+    }
+
+    .frame-badge {
+      background: #2563eb;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+
+    /* Card Styles */
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 2px solid;
+      overflow: hidden;
+    }
+
+    .card.blue { border-color: #93c5fd; }
+    .card.purple { border-color: #c4b5fd; }
+    .card.amber { border-color: #fcd34d; }
+    .card.indigo { border-color: #a5b4fc; }
+    .card.green { border-color: #86efac; }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid;
+    }
+
+    .card.blue .card-header { background: #dbeafe; border-color: #93c5fd; }
+    .card.purple .card-header { background: #ede9fe; border-color: #c4b5fd; }
+    .card.amber .card-header { background: #fef3c7; border-color: #fcd34d; }
+    .card.indigo .card-header { background: #e0e7ff; border-color: #a5b4fc; }
+    .card.green .card-header { background: #dcfce7; border-color: #86efac; }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .card.blue .card-title { color: #1e3a8a; }
+    .card.purple .card-title { color: #581c87; }
+    .card.amber .card-title { color: #78350f; }
+    .card.indigo .card-title { color: #312e81; }
+    .card.green .card-title { color: #14532d; }
+
+    .card-description {
+      font-size: 0.875rem;
+      color: #4b5563;
+      margin-top: 0.25rem;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2, .grid-3 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tree Visualization */
+    .tree-container {
+      border: 1px solid #e5e7eb;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      background: white;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tree-title {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .tree-svg {
+      width: 100%;
+      max-width: 300px;
+      height: 250px;
+      margin: 0 auto;
+      display: block;
+    }
+
+    /* Stack Visualization */
+    .stack-container {
+      border: 1px solid #bfdbfe;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      background: #dbeafe;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      height: 100%;
+    }
+
+    .stack-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .stack-items {
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .stack-item {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem;
+      margin-bottom: 0.25rem;
+      text-align: center;
+      font-weight: 700;
+      background: white;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .stack-item.highlighted {
+      background: #dbeafe;
+      border-color: #93c5fd;
+    }
+
+    .stack-empty {
+      color: #6b7280;
+      font-style: italic;
+      font-size: 0.875rem;
+      padding: 1rem;
+      text-align: center;
+      border: 1px dashed #d1d5db;
+      border-radius: 0.25rem;
+      background: white;
+    }
+
+    /* Result Visualization */
+    .result-container {
+      border: 1px solid #86efac;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+      background: #dcfce7;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: #166534;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .result-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .result-item {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem;
+      text-align: center;
+      font-weight: 700;
+      background: white;
+      min-width: 40px;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .result-empty {
+      color: #6b7280;
+      font-style: italic;
+      font-size: 0.875rem;
+      padding: 1rem;
+      text-align: center;
+      border: 1px dashed #d1d5db;
+      border-radius: 0.25rem;
+      background: white;
+      width: 100%;
+    }
+
+    /* Message Box */
+    .message-box {
+      padding: 1rem;
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .message-box.blue { background: #dbeafe; border: 1px solid #bfdbfe; }
+    .message-box.amber { background: #fef3c7; border: 1px solid #fcd34d; }
+    .message-box.green { background: #dcfce7; border: 1px solid #86efac; }
+
+    .message-icon {
+      flex-shrink: 0;
+      margin-top: 0.125rem;
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn.blue { background: #2563eb; color: white; }
+    .btn.blue:hover { background: #1d4ed8; }
+    .btn.purple { background: #7c3aed; color: white; }
+    .btn.purple:hover { background: #6d28d9; }
+    .btn.amber { background: #d97706; color: white; }
+    .btn.amber:hover { background: #b45309; }
+    .btn.indigo { background: #4f46e5; color: white; }
+    .btn.indigo:hover { background: #4338ca; }
+    .btn.green { background: #16a34a; color: white; }
+    .btn.green:hover { background: #15803d; }
+    .btn.outline { background: white; border: 2px solid; }
+    .btn.outline.green { color: #166534; border-color: #86efac; }
+    .btn.outline.green:hover { background: #dcfce7; }
+
+    .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+    }
+
+    .btn-row.space-between {
+      justify-content: space-between;
+    }
+
+    /* Comparison Boxes */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comparison-box {
+      border: 1px solid;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .comparison-box.blue { background: #dbeafe; border-color: #bfdbfe; }
+    .comparison-box.purple { background: #ede9fe; border-color: #c4b5fd; }
+    .comparison-box.green { background: #dcfce7; border-color: #86efac; }
+
+    .comparison-title {
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+    }
+
+    .comparison-box.blue .comparison-title { color: #1e40af; }
+    .comparison-box.purple .comparison-title { color: #6d28d9; }
+    .comparison-box.green .comparison-title { color: #166534; }
+
+    .comparison-order {
+      font-size: 0.875rem;
+      color: #4b5563;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .comparison-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+
+    .comparison-item {
+      border: 1px solid #e5e7eb;
+      padding: 0.5rem 0.75rem;
+      text-align: center;
+      font-weight: 700;
+      background: white;
+      border-radius: 0.25rem;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Insight Box */
+    .insight-box {
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .insight-box.amber { background: #fef3c7; border: 1px solid #fcd34d; }
+    .insight-box.green { background: #dcfce7; border: 1px solid #86efac; }
+    .insight-box.blue { background: #dbeafe; border: 1px solid #bfdbfe; }
+    .insight-box.purple { background: #ede9fe; border: 1px solid #c4b5fd; }
+
+    .insight-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .insight-box.amber .insight-title { color: #92400e; }
+    .insight-box.green .insight-title { color: #166534; }
+    .insight-box.blue .insight-title { color: #1e40af; }
+    .insight-box.purple .insight-title { color: #581c87; }
+
+    .insight-content {
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .insight-list {
+      list-style: disc;
+      list-style-position: inside;
+      padding-left: 1rem;
+    }
+
+    .insight-list li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Eureka Box */
+    .eureka-box {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      margin-top: 1rem;
+    }
+
+    .eureka-formula {
+      font-size: 1.25rem;
+      font-weight: 900;
+      text-align: center;
+      color: #92400e;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: linear-gradient(90deg, #dbeafe 0%, #e0e7ff 100%);
+      border-radius: 0.5rem;
+      border: 1px solid #bfdbfe;
+      text-align: center;
+      font-size: 0.875rem;
+      color: #1e40af;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .footer p {
+      margin-bottom: 0.25rem;
+    }
+
+    .footer .small {
+      font-size: 0.75rem;
+      margin-top: 0.5rem;
+    }
+
+    /* Utilities */
+    .hidden { display: none; }
+    .text-center { text-align: center; }
+    .mb-4 { margin-bottom: 1rem; }
+    .mb-6 { margin-bottom: 1.5rem; }
+    .mt-4 { margin-top: 1rem; }
+    .font-bold { font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="container" id="app"></div>
+
+  <script>
+    // ===== STATE =====
+    let state = {
+      currentStage: 0,
+      currentFrame: 0,
+      isPlaying: false,
+      playbackSpeed: 1,
+      showReversal: false,
+      showInsight: false,
+      playInterval: null
+    };
+
+    // ===== TREE DATA =====
+    const sampleTree = {
+      val: 'A', x: 150, y: 50, highlighted: false, visited: false,
+      left: {
+        val: 'B', x: 75, y: 120, highlighted: false, visited: false,
+        left: { val: 'D', x: 40, y: 190, highlighted: false, visited: false, left: null, right: null },
+        right: { val: 'E', x: 110, y: 190, highlighted: false, visited: false, left: null, right: null }
+      },
+      right: {
+        val: 'C', x: 225, y: 120, highlighted: false, visited: false,
+        left: { val: 'F', x: 190, y: 190, highlighted: false, visited: false, left: null, right: null },
+        right: null
+      }
+    };
+
+    // ===== SAMPLE RESULTS =====
+    const preorderResult = ["A", "B", "D", "E", "C", "F"];
+    const modifiedPreorderResult = ["A", "C", "F", "B", "E", "D"];
+    const postorderResult = ["D", "E", "B", "F", "C", "A"];
+
+    // ===== STAGES =====
+    const stages = [
+      { title: "Recall Preorder", color: "blue", icon: "📖" },
+      { title: "Observe Postorder", color: "purple", icon: "📚" },
+      { title: "Modified Preorder", color: "amber", icon: "💡" },
+      { title: "Two-Stack Solution", color: "indigo", icon: "📚" },
+      { title: "Summary", color: "green", icon: "🏆" }
+    ];
+
+    // ===== FRAME GENERATION =====
+    function cloneTree(root) {
+      if (!root) return null;
+      return {
+        val: root.val, x: root.x, y: root.y,
+        highlighted: root.highlighted, visited: root.visited,
+        left: cloneTree(root.left), right: cloneTree(root.right)
+      };
+    }
+
+    function highlightNode(root, val) {
+      if (!root) return null;
+      root.highlighted = root.val === val;
+      highlightNode(root.left, val);
+      highlightNode(root.right, val);
+      return root;
+    }
+
+    function markNodeVisited(root, val) {
+      if (!root) return;
+      if (root.val === val) { root.visited = true; root.highlighted = true; }
+      markNodeVisited(root.left, val);
+      markNodeVisited(root.right, val);
+    }
+
+    function generatePreorderFrames() {
+      const frames = [];
+      const visited = [];
+      const stack = [];
+
+      const snapshot = (message) => {
+        frames.push({ tree: cloneTree(sampleTree), stack: [...stack], result: [...visited], message });
+      };
+
+      snapshot("Starting with an empty stack");
+
+      function traverse(node) {
+        if (!node) return;
+        stack.push(node.val);
+        highlightNode(sampleTree, node.val);
+        snapshot(`Push ${node.val} onto stack`);
+
+        visited.push(node.val);
+        markNodeVisited(sampleTree, node.val);
+        snapshot(`Visit ${node.val} (pre-order)`);
+
+        if (node.left) traverse(node.left);
+        if (node.right) traverse(node.right);
+
+        stack.pop();
+        snapshot(`Return from ${node.val}`);
+      }
+
+      traverse(sampleTree);
+      snapshot(`Final preorder: ${visited.join(', ')}`);
+      return frames;
+    }
+
+    function generateModifiedPreorderFrames() {
+      const frames = [];
+      const visited = [];
+      const stack = [];
+
+      // Reset tree
+      function resetTree(node) {
+        if (!node) return;
+        node.highlighted = false;
+        node.visited = false;
+        resetTree(node.left);
+        resetTree(node.right);
+      }
+      resetTree(sampleTree);
+
+      const snapshot = (message) => {
+        frames.push({ tree: cloneTree(sampleTree), stack: [...stack], result: [...visited], message });
+      };
+
+      snapshot("Starting with an empty stack");
+
+      function traverse(node) {
+        if (!node) return;
+        stack.push(node.val);
+        highlightNode(sampleTree, node.val);
+        snapshot(`Push ${node.val} onto stack`);
+
+        visited.push(node.val);
+        markNodeVisited(sampleTree, node.val);
+        snapshot(`Visit ${node.val} (Root → Right → Left)`);
+
+        if (node.right) traverse(node.right);
+        if (node.left) traverse(node.left);
+
+        stack.pop();
+        snapshot(`Return from ${node.val}`);
+      }
+
+      traverse(sampleTree);
+      snapshot(`Final modified preorder: ${visited.join(', ')}`);
+      return frames;
+    }
+
+    function generateTwoStackFrames() {
+      const frames = [];
+      const result = [];
+      const stack1 = [];
+      const stack2 = [];
+
+      // Reset tree
+      function resetTree(node) {
+        if (!node) return;
+        node.highlighted = false;
+        node.visited = false;
+        resetTree(node.left);
+        resetTree(node.right);
+      }
+      resetTree(sampleTree);
+
+      const snapshot = (message) => {
+        frames.push({ tree: cloneTree(sampleTree), stack1: [...stack1], stack2: [...stack2], result: [...result], message });
+      };
+
+      snapshot("Starting with two empty stacks");
+
+      // Push root
+      stack1.push('A');
+      highlightNode(sampleTree, 'A');
+      snapshot("Push A onto stack1");
+
+      // Traverse
+      while (stack1.length > 0) {
+        const val = stack1.pop();
+        stack2.push(val);
+        markNodeVisited(sampleTree, val);
+        snapshot(`Pop ${val} from stack1, push to stack2`);
+
+        // Find node
+        function findNode(root, v) {
+          if (!root) return null;
+          if (root.val === v) return root;
+          return findNode(root.left, v) || findNode(root.right, v);
+        }
+        const node = findNode(sampleTree, val);
+
+        if (node.left) {
+          stack1.push(node.left.val);
+          highlightNode(sampleTree, node.left.val);
+          snapshot(`Push left child ${node.left.val} onto stack1`);
+        }
+        if (node.right) {
+          stack1.push(node.right.val);
+          highlightNode(sampleTree, node.right.val);
+          snapshot(`Push right child ${node.right.val} onto stack1`);
+        }
+      }
+
+      snapshot("Stack1 empty. Stack2 has modified preorder");
+
+      // Pop from stack2
+      while (stack2.length > 0) {
+        const val = stack2.pop();
+        result.push(val);
+        snapshot(`Pop ${val} from stack2 to result`);
+      }
+
+      snapshot(`Final postorder: ${result.join(', ')}`);
+      return frames;
+    }
+
+    // Cache frames
+    let preorderFrames = generatePreorderFrames();
+    let modifiedPreorderFrames = [];
+    let twoStackFrames = [];
+
+    // ===== RENDER TREE SVG =====
+    function renderTreeSVG(tree) {
+      let svg = '';
+
+      function renderNode(node) {
+        if (!node) return '';
+
+        let result = '';
+
+        // Edges
+        if (node.left) {
+          result += `<line x1="${node.x}" y1="${node.y}" x2="${node.left.x}" y2="${node.left.y}" stroke="#457B9D" stroke-width="2"/>`;
+          result += renderNode(node.left);
+        }
+        if (node.right) {
+          result += `<line x1="${node.x}" y1="${node.y}" x2="${node.right.x}" y2="${node.right.y}" stroke="#457B9D" stroke-width="2"/>`;
+          result += renderNode(node.right);
+        }
+
+        // Node
+        const fill = node.visited ? "#E63946" : node.highlighted ? "#FFD700" : "#FFFFFF";
+        const stroke = node.highlighted ? "#E63946" : "#457B9D";
+        const strokeWidth = node.highlighted ? 3 : 2;
+
+        result += `<circle cx="${node.x}" cy="${node.y}" r="25" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}" filter="drop-shadow(0px 2px 3px rgba(0,0,0,0.2))"/>`;
+        result += `<text x="${node.x}" y="${node.y + 5}" text-anchor="middle" fill="${node.visited || node.highlighted ? '#1D3557' : '#1D3557'}" font-weight="bold" font-size="18">${node.val}</text>`;
+
+        return result;
+      }
+
+      return renderNode(tree);
+    }
+
+    // ===== CONTROLS =====
+    function handleStageChange(index) {
+      if (index > state.currentStage + 1) return;
+      state.currentStage = index;
+      state.currentFrame = 0;
+      state.isPlaying = false;
+      state.showReversal = false;
+      state.showInsight = false;
+      if (state.playInterval) clearInterval(state.playInterval);
+
+      // Generate frames for new stage
+      if (index === 0) preorderFrames = generatePreorderFrames();
+      if (index === 2) modifiedPreorderFrames = generateModifiedPreorderFrames();
+      if (index === 3) twoStackFrames = generateTwoStackFrames();
+
+      render();
+    }
+
+    function togglePlay() {
+      const frames = getCurrentFrames();
+      if (state.currentFrame >= frames.length - 1) state.currentFrame = 0;
+
+      state.isPlaying = !state.isPlaying;
+
+      if (state.isPlaying) {
+        state.playInterval = setInterval(() => {
+          const frames = getCurrentFrames();
+          if (state.currentFrame < frames.length - 1) {
+            state.currentFrame++;
+            render();
+          } else {
+            state.isPlaying = false;
+            clearInterval(state.playInterval);
+            render();
+          }
+        }, 2000 / state.playbackSpeed);
+      } else {
+        if (state.playInterval) clearInterval(state.playInterval);
+      }
+      render();
+    }
+
+    function stepPrev() {
+      if (state.currentFrame > 0) { state.currentFrame--; render(); }
+    }
+
+    function stepNext() {
+      const frames = getCurrentFrames();
+      if (state.currentFrame < frames.length - 1) { state.currentFrame++; render(); }
+    }
+
+    function skipToStart() { state.currentFrame = 0; render(); }
+    function skipToEnd() { const frames = getCurrentFrames(); state.currentFrame = frames.length - 1; render(); }
+
+    function getCurrentFrames() {
+      if (state.currentStage === 0) return preorderFrames;
+      if (state.currentStage === 2) return modifiedPreorderFrames;
+      if (state.currentStage === 3) return twoStackFrames;
+      return [];
+    }
+
+    // ===== MAIN RENDER =====
+    function render() {
+      const app = document.getElementById('app');
+      const frames = getCurrentFrames();
+      const currentFrameData = frames[state.currentFrame] || { tree: sampleTree, stack: [], stack1: [], stack2: [], result: [], message: '' };
+
+      let html = `
+        <!-- Header -->
+        <div class="header">
+          <div class="header-left">
+            <div class="shield">
+              <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+                <path d="M50 5L10 20V40C10 65 25 80 50 95C75 80 90 65 90 40V20L50 5Z" fill="#A51C30"/>
+                <path d="M50 15L20 25V40C20 60 30 70 50 85C70 70 80 60 80 40V25L50 15Z" fill="#FFF"/>
+                <path d="M50 25L30 35V45C30 60 40 65 50 75C60 65 70 60 70 45V35L50 25Z" fill="#A51C30"/>
+                <path d="M35 45H65V50H35V45Z" fill="#FFF"/>
+                <path d="M35 55H65V60H35V55Z" fill="#FFF"/>
+                <path d="M35 65H65V70H35V65Z" fill="#FFF"/>
+              </svg>
+            </div>
+            <div>
+              <h1>From Preorder to Postorder</h1>
+              <p>An Interactive Discovery Journey</p>
+            </div>
+          </div>
+          <div class="header-right">
+            <p>Harvard University</p>
+            <p>Computer Science Department</p>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${(state.currentStage / (stages.length - 1)) * 100}%"></div>
+          </div>
+          <div class="progress-labels">
+            ${stages.map((s, i) => `<div class="progress-label ${state.currentStage >= i ? 'active' : ''}">${s.title}</div>`).join('')}
+          </div>
+        </div>
+
+        <!-- Stage Buttons -->
+        <div class="stage-buttons">
+          ${stages.map((s, i) => `
+            <button class="stage-btn ${s.color} ${state.currentStage === i ? 'active' : ''}" ${i > state.currentStage + 1 ? 'disabled' : ''} onclick="handleStageChange(${i})">
+              ${s.icon} ${i + 1}. ${s.title}
+            </button>
+          `).join('')}
+        </div>
+      `;
+
+      // Playback controls for stages with frames
+      if (frames.length > 0) {
+        html += `
+          <div class="playback-controls">
+            <div class="controls-row">
+              <div class="control-btns">
+                <button class="control-btn" onclick="skipToStart()" ${state.currentFrame === 0 ? 'disabled' : ''}>⏮</button>
+                <button class="control-btn" onclick="stepPrev()" ${state.currentFrame === 0 ? 'disabled' : ''}>◀</button>
+                <button class="control-btn ${state.isPlaying ? 'playing' : ''}" onclick="togglePlay()">${state.isPlaying ? '⏸' : '▶'}</button>
+                <button class="control-btn" onclick="stepNext()" ${state.currentFrame === frames.length - 1 ? 'disabled' : ''}>▶</button>
+                <button class="control-btn" onclick="skipToEnd()" ${state.currentFrame === frames.length - 1 ? 'disabled' : ''}>⏭</button>
+              </div>
+              <div class="speed-controls">
+                <span class="speed-label">Speed:</span>
+                <input type="range" class="speed-slider" min="0.5" max="2" step="0.5" value="${state.playbackSpeed}" onchange="state.playbackSpeed = parseFloat(this.value)">
+                <span class="speed-label">${state.playbackSpeed}x</span>
+              </div>
+            </div>
+            <span class="frame-badge">Frame: ${state.currentFrame + 1} / ${frames.length}</span>
+          </div>
+        `;
+      }
+
+      // Stage Content
+      html += renderStageContent(currentFrameData, frames);
+
+      // Footer
+      html += `
+        <div class="footer">
+          <div class="shield" style="margin: 0 auto 0.5rem; width: 40px;">
+            <svg width="40" height="40" viewBox="0 0 100 100" fill="none">
+              <path d="M50 5L10 20V40C10 65 25 80 50 95C75 80 90 65 90 40V20L50 5Z" fill="#A51C30"/>
+              <path d="M50 15L20 25V40C20 60 30 70 50 85C70 70 80 60 80 40V25L50 15Z" fill="#FFF"/>
+              <path d="M50 25L30 35V45C30 60 40 65 50 75C60 65 70 60 70 45V35L50 25Z" fill="#A51C30"/>
+            </svg>
+          </div>
+          <p class="font-bold">Harvard University Computer Science Department</p>
+          <p>Interactive Educational Tool - From Preorder to Postorder</p>
+          <p class="small">(c) ${new Date().getFullYear()} Harvard University. All rights reserved.</p>
+        </div>
+      `;
+
+      app.innerHTML = html;
+    }
+
+    function renderStageContent(frameData, frames) {
+      switch (state.currentStage) {
+        case 0: return renderPreorderStage(frameData, frames);
+        case 1: return renderCompareStage();
+        case 2: return renderModifiedPreorderStage(frameData, frames);
+        case 3: return renderTwoStackStage(frameData, frames);
+        case 4: return renderSummaryStage();
+        default: return '';
+      }
+    }
+
+    function renderPreorderStage(frameData, frames) {
+      return `
+        <div class="card blue">
+          <div class="card-header">
+            <div class="card-title">📖 Preorder Traversal</div>
+            <div class="card-description">Preorder visits: <strong>Root -> Left -> Right</strong></div>
+          </div>
+          <div class="card-content">
+            <div class="grid-2">
+              <div class="tree-container">
+                <div class="tree-title">🌳 Binary Tree</div>
+                <svg viewBox="0 0 300 250" class="tree-svg">${renderTreeSVG(frameData.tree)}</svg>
+              </div>
+              <div>
+                <div class="stack-container mb-4">
+                  <div class="stack-title">📚 Stack</div>
+                  ${frameData.stack.length === 0 ? '<div class="stack-empty">Empty</div>' :
+                    '<div class="stack-items">' + frameData.stack.map(s => `<div class="stack-item">${typeof s === 'string' ? s : s.val}</div>`).join('') + '</div>'}
+                </div>
+                <div class="result-container">
+                  <div class="result-title">✅ Output Sequence</div>
+                  ${frameData.result.length === 0 ? '<div class="result-empty">Empty</div>' :
+                    '<div class="result-items">' + frameData.result.map(r => `<div class="result-item">${r}</div>`).join('') + '</div>'}
+                </div>
+              </div>
+            </div>
+            <div class="message-box blue">
+              <span class="message-icon">💡</span>
+              <span>${frameData.message}</span>
+            </div>
+            ${state.currentFrame === frames.length - 1 ? `
+              <div class="insight-box blue mt-4">
+                <div class="insight-title">Key Insights about Preorder</div>
+                <ul class="insight-list">
+                  <li>Preorder is <strong>Root -> Left -> Right</strong></li>
+                  <li>Easy to implement iteratively with one stack</li>
+                  <li>We visit a node as soon as we pop it</li>
+                  <li>Push children in reverse order (right first, then left)</li>
+                </ul>
+              </div>
+              <div class="btn-row">
+                <button class="btn blue" onclick="handleStageChange(1)">Continue to Observe Postorder ></button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCompareStage() {
+      return `
+        <div class="card purple">
+          <div class="card-header">
+            <div class="card-title">📚 Comparing Traversals</div>
+            <div class="card-description">Let's compare preorder and postorder traversals</div>
+          </div>
+          <div class="card-content">
+            <div class="tree-container mb-6" style="max-width: 350px; margin: 0 auto;">
+              <div class="tree-title">🌳 Binary Tree</div>
+              <svg viewBox="0 0 300 250" class="tree-svg">${renderTreeSVG(sampleTree)}</svg>
+            </div>
+
+            <div class="grid-2 mb-6">
+              <div class="comparison-box blue">
+                <div class="comparison-title">📖 Preorder</div>
+                <div class="comparison-order">Root -> Left -> Right</div>
+                <div class="comparison-items">
+                  ${preorderResult.map(r => `<div class="comparison-item">${r}</div>`).join('')}
+                </div>
+              </div>
+              <div class="comparison-box green">
+                <div class="comparison-title">🔄 Postorder</div>
+                <div class="comparison-order">Left -> Right -> Root</div>
+                <div class="comparison-items">
+                  ${postorderResult.map(r => `<div class="comparison-item">${r}</div>`).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="insight-box amber">
+              <div class="insight-title">💡 The Challenge</div>
+              <p class="insight-content">
+                Preorder is easy to implement iteratively because we visit the node as soon as we see it.
+                But postorder requires visiting a node <strong>after</strong> all its children.<br><br>
+                <strong>Question:</strong> Can we get postorder by modifying preorder somehow?
+              </p>
+            </div>
+
+            <div class="btn-row">
+              <button class="btn purple" onclick="handleStageChange(2)">Explore Modified Preorder ></button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderModifiedPreorderStage(frameData, frames) {
+      if (!state.showReversal) {
+        return `
+          <div class="card amber">
+            <div class="card-header">
+              <div class="card-title">💡 Modified Preorder</div>
+              <div class="card-description">What if we change the order of children?</div>
+            </div>
+            <div class="card-content">
+              <div class="insight-box blue mb-4">
+                <div class="insight-title">A New Idea</div>
+                <p class="insight-content">
+                  If preorder is <strong>Root -> Left -> Right</strong>, what if we swap?<br>
+                  Let's try <strong>Root -> Right -> Left</strong> - "Modified Preorder"
+                </p>
+              </div>
+
+              <div class="grid-2">
+                <div class="tree-container">
+                  <div class="tree-title">🌳 Binary Tree</div>
+                  <svg viewBox="0 0 300 250" class="tree-svg">${renderTreeSVG(frameData.tree)}</svg>
+                </div>
+                <div>
+                  <div class="stack-container mb-4">
+                    <div class="stack-title">📚 Stack</div>
+                    ${frameData.stack.length === 0 ? '<div class="stack-empty">Empty</div>' :
+                      '<div class="stack-items">' + frameData.stack.map(s => `<div class="stack-item">${typeof s === 'string' ? s : s.val}</div>`).join('') + '</div>'}
+                  </div>
+                  <div class="result-container">
+                    <div class="result-title">✅ Output Sequence</div>
+                    ${frameData.result.length === 0 ? '<div class="result-empty">Empty</div>' :
+                      '<div class="result-items">' + frameData.result.map(r => `<div class="result-item">${r}</div>`).join('') + '</div>'}
+                  </div>
+                </div>
+              </div>
+              <div class="message-box blue">
+                <span class="message-icon">💡</span>
+                <span>${frameData.message}</span>
+              </div>
+              ${state.currentFrame === frames.length - 1 ? `
+                <div class="btn-row" style="justify-content: center;">
+                  <button class="btn amber" onclick="state.showReversal = true; render();">🔄 Reverse the Result</button>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      } else {
+        return `
+          <div class="card amber">
+            <div class="card-header">
+              <div class="card-title">💡 Modified Preorder</div>
+              <div class="card-description">The relationship between traversals</div>
+            </div>
+            <div class="card-content">
+              <div class="comparison-grid">
+                <div class="comparison-box blue">
+                  <div class="comparison-title">📖 Preorder</div>
+                  <div class="comparison-order">Root -> Left -> Right</div>
+                  <div class="comparison-items">${preorderResult.map(r => `<div class="comparison-item">${r}</div>`).join('')}</div>
+                </div>
+                <div class="comparison-box purple">
+                  <div class="comparison-title">🔄 Modified Preorder</div>
+                  <div class="comparison-order">Root -> Right -> Left</div>
+                  <div class="comparison-items">${modifiedPreorderResult.map(r => `<div class="comparison-item">${r}</div>`).join('')}</div>
+                </div>
+                <div class="comparison-box green">
+                  <div class="comparison-title">🔄 Postorder</div>
+                  <div class="comparison-order">Left -> Right -> Root</div>
+                  <div class="comparison-items">${postorderResult.map(r => `<div class="comparison-item">${r}</div>`).join('')}</div>
+                </div>
+              </div>
+
+              <div class="insight-box green">
+                <div class="insight-title">✨ Eureka Moment!</div>
+                <div class="grid-2 mb-4">
+                  <div class="eureka-box">
+                    <div style="font-weight:700; text-align:center; color:#6d28d9;">Modified Preorder</div>
+                    <p style="text-align:center; font-size:1.125rem; font-weight:700; margin:0.5rem 0;">A, C, F, B, E, D</p>
+                  </div>
+                  <div class="eureka-box">
+                    <div style="font-weight:700; text-align:center; color:#166534;">Reversed</div>
+                    <p style="text-align:center; font-size:1.125rem; font-weight:700; margin:0.5rem 0;">D, E, B, F, C, A</p>
+                  </div>
+                </div>
+                <div class="eureka-box">
+                  <p class="eureka-formula">Postorder = reversed(Modified Preorder)</p>
+                </div>
+              </div>
+
+              <div class="btn-row">
+                <button class="btn amber" onclick="handleStageChange(3)">Continue to Two-Stack Solution ></button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function renderTwoStackStage(frameData, frames) {
+      return `
+        <div class="card indigo">
+          <div class="card-header">
+            <div class="card-title">📚 Two-Stack Solution</div>
+            <div class="card-description">Using two stacks to implement postorder</div>
+          </div>
+          <div class="card-content">
+            <div class="insight-box blue mb-4">
+              <div class="insight-title">The Two-Stack Approach</div>
+              <ol class="insight-list" style="list-style:decimal;">
+                <li><strong>Stack 1:</strong> Perform modified preorder (Root -> Right -> Left)</li>
+                <li><strong>Stack 2:</strong> Reversal buffer - push nodes in modified preorder</li>
+                <li>Pop from Stack 2 to get postorder!</li>
+              </ol>
+            </div>
+
+            <div class="grid-3">
+              <div class="tree-container">
+                <div class="tree-title">🌳 Binary Tree</div>
+                <svg viewBox="0 0 300 250" class="tree-svg">${renderTreeSVG(frameData.tree)}</svg>
+              </div>
+              <div class="stack-container">
+                <div class="stack-title">📚 Stack 1 (Traversal)</div>
+                ${(frameData.stack1 || []).length === 0 ? '<div class="stack-empty">Empty</div>' :
+                  '<div class="stack-items">' + frameData.stack1.map(s => `<div class="stack-item">${typeof s === 'string' ? s : s.val}</div>`).join('') + '</div>'}
+              </div>
+              <div class="stack-container">
+                <div class="stack-title">📚 Stack 2 (Reversal)</div>
+                ${(frameData.stack2 || []).length === 0 ? '<div class="stack-empty">Empty</div>' :
+                  '<div class="stack-items">' + frameData.stack2.map(s => `<div class="stack-item">${s}</div>`).join('') + '</div>'}
+              </div>
+            </div>
+
+            <div class="result-container mt-4">
+              <div class="result-title">✅ Postorder Result</div>
+              ${(frameData.result || []).length === 0 ? '<div class="result-empty">Empty</div>' :
+                '<div class="result-items">' + frameData.result.map(r => `<div class="result-item">${r}</div>`).join('') + '</div>'}
+            </div>
+
+            <div class="message-box blue">
+              <span class="message-icon">💡</span>
+              <span>${frameData.message}</span>
+            </div>
+
+            ${state.currentFrame === frames.length - 1 ? `
+              <div class="btn-row">
+                <button class="btn indigo" onclick="handleStageChange(4)">Continue to Summary ></button>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSummaryStage() {
+      return `
+        <div class="card green">
+          <div class="card-header">
+            <div class="card-title">🏆 Key Insight</div>
+            <div class="card-description">Understanding the relationship between preorder and postorder</div>
+          </div>
+          <div class="card-content">
+            <div class="tree-container mb-6" style="max-width: 400px; margin: 0 auto;">
+              <div class="tree-title">🌳 Binary Tree</div>
+              <svg viewBox="0 0 300 250" class="tree-svg">${renderTreeSVG(sampleTree)}</svg>
+            </div>
+
+            <div class="insight-box green mb-6">
+              <div class="insight-title text-center">🏆 The Big Picture</div>
+              <div class="comparison-grid">
+                <div class="comparison-box blue">
+                  <div class="comparison-title">📖 Preorder</div>
+                  <div class="comparison-order">Root -> Left -> Right</div>
+                  <p style="text-align:center; font-weight:700;">A, B, D, E, C, F</p>
+                  <div style="margin-top:0.75rem; padding:0.5rem; background:white; border-radius:0.25rem; text-align:center; font-size:0.875rem;">Easy with one stack</div>
+                </div>
+                <div class="comparison-box purple">
+                  <div class="comparison-title">🔄 Modified</div>
+                  <div class="comparison-order">Root -> Right -> Left</div>
+                  <p style="text-align:center; font-weight:700;">A, C, F, B, E, D</p>
+                  <div style="margin-top:0.75rem; padding:0.5rem; background:white; border-radius:0.25rem; text-align:center; font-size:0.875rem;">Also easy with one stack</div>
+                </div>
+                <div class="comparison-box green">
+                  <div class="comparison-title">🔄 Postorder</div>
+                  <div class="comparison-order">Left -> Right -> Root</div>
+                  <p style="text-align:center; font-weight:700;">D, E, B, F, C, A</p>
+                  <div style="margin-top:0.75rem; padding:0.5rem; background:white; border-radius:0.25rem; text-align:center; font-size:0.875rem;">Harder with one stack</div>
+                </div>
+              </div>
+              <div class="eureka-box mt-4">
+                <p class="eureka-formula" style="font-size:1.5rem; color:#166534;">Postorder = reversed(Modified Preorder)</p>
+                <p style="text-align:center; margin-top:0.5rem; color:#374151;">The second stack acts as a natural reversal buffer!</p>
+              </div>
+            </div>
+
+            <div class="insight-box blue mb-6">
+              <div class="insight-title">🎓 Why This Works: Proof</div>
+              <div class="insight-content">
+                <p>For any node X with left subtree L and right subtree R:</p>
+                <ul class="insight-list">
+                  <li>Postorder visits: L, R, X</li>
+                  <li>Modified Preorder visits: X, R, L</li>
+                </ul>
+                <p style="margin-top:0.5rem;">When we reverse Modified Preorder, we get: L, R, X</p>
+                <p style="margin-top:0.5rem;">This pattern holds recursively for every subtree!</p>
+              </div>
+            </div>
+
+            <button class="btn amber" style="width:100%; margin-bottom:1rem;" onclick="state.showInsight = !state.showInsight; render();">
+              💡 ${state.showInsight ? 'Hide Analogy' : 'Show Analogy'}
+            </button>
+
+            ${state.showInsight ? `
+              <div class="insight-box purple mb-6">
+                <div class="insight-title">✨ Helpful Analogy</div>
+                <p class="insight-content" style="font-style:italic;">
+                  "Think of Stack2 as a time machine. When we put nodes into it in one order (modified preorder),
+                  and then take them out, it's like we're seeing them in reverse time. This reversal is exactly
+                  what transforms our easy-to-implement modified preorder into the postorder sequence we want."
+                </p>
+                <p style="margin-top:0.75rem;">This is why the two-stack solution feels so natural once you understand the pattern!</p>
+              </div>
+            ` : ''}
+
+            <div class="btn-row space-between">
+              <button class="btn outline green" onclick="handleStageChange(0)">🔄 Start Over</button>
+              <button class="btn green" onclick="window.print()">Print/Save Summary</button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ===== INIT =====
+    render();
+  </script>
+</body>
+</html>

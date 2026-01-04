@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Why BFS Finds Shortest Path - A Ghibli Journey 🌿</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Quicksand', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg,
+                #e8f5e9 0%,
+                #c8e6c9 20%,
+                #a5d6a7 40%,
+                #81c784 60%,
+                #66bb6a 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(255, 245, 200, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(200, 230, 201, 0.4) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow:
+                0 30px 80px rgba(102, 187, 106, 0.3),
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 3px solid rgba(129, 199, 132, 0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg,
+                #81c784 0%,
+                #66bb6a 50%,
+                #4caf50 100%);
+            color: #1b5e20;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 4px solid #2e7d32;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(circle at 10% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 30%),
+                radial-gradient(circle at 90% 80%, rgba(255, 245, 157, 0.3) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .header h1 {
+            font-size: 2.8em;
+            margin-bottom: 15px;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.3);
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+            position: relative;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            background: linear-gradient(to bottom, #f1f8e9, #e8f5e9);
+            border-bottom: 3px solid #a5d6a7;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #558b2f;
+            transition: all 0.4s ease;
+            border-bottom: 4px solid transparent;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: linear-gradient(to bottom, #c8e6c9, #a5d6a7);
+            color: #2e7d32;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            color: #1b5e20;
+            background: linear-gradient(to bottom, #ffffff, #f1f8e9);
+            border-bottom-color: #66bb6a;
+            box-shadow: 0 -3px 15px rgba(102, 187, 106, 0.3);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 50px 40px;
+            background: linear-gradient(to bottom, #ffffff, #f9fbe7);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .reason-section {
+            margin-bottom: 70px;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow:
+                0 10px 40px rgba(129, 199, 132, 0.2),
+                0 5px 15px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            border: 3px solid #c8e6c9;
+            position: relative;
+        }
+
+        .reason-header {
+            background: linear-gradient(135deg,
+                #aed581 0%,
+                #9ccc65 50%,
+                #8bc34a 100%);
+            padding: 30px 40px;
+            color: #33691e;
+            position: relative;
+            border-bottom: 3px solid #7cb342;
+        }
+
+        .reason-header::after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(to right,
+                transparent,
+                #ffeb3b 20%,
+                #fdd835 50%,
+                #ffeb3b 80%,
+                transparent);
+        }
+
+        .reason-header h2 {
+            font-size: 2em;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            font-weight: 700;
+        }
+
+        .reason-header p {
+            font-size: 1.15em;
+            opacity: 0.95;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .reason-content {
+            padding: 40px;
+        }
+
+        .demo-container {
+            background: linear-gradient(135deg, #f1f8e9 0%, #ffffff 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 25px;
+            box-shadow:
+                inset 0 2px 10px rgba(129, 199, 132, 0.1),
+                0 5px 20px rgba(0, 0, 0, 0.05);
+            border: 2px solid #dcedc8;
+        }
+
+        .demo-container h3 {
+            color: #33691e;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .grid {
+            display: inline-grid;
+            gap: 4px;
+            background: linear-gradient(135deg, #689f38, #7cb342);
+            padding: 5px;
+            border-radius: 15px;
+            margin: 20px auto;
+            box-shadow: 0 8px 25px rgba(104, 159, 56, 0.3);
+        }
+
+        .cell {
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #f1f8e9 0%, #ffffff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            color: #558b2f;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border-radius: 8px;
+            border: 2px solid #c5e1a5;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(104, 159, 56, 0.4);
+        }
+
+        .cell.wall {
+            background: linear-gradient(135deg, #5d4037, #4e342e);
+            color: #d7ccc8;
+            border-color: #3e2723;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .cell.start {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            color: #1b5e20;
+            font-weight: bold;
+            border-color: #4caf50;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.5);
+            animation: gentle-pulse 2s ease-in-out infinite;
+        }
+
+        .cell.end {
+            background: linear-gradient(135deg, #ef5350, #e53935);
+            color: white;
+            font-weight: bold;
+            border-color: #c62828;
+            box-shadow: 0 4px 15px rgba(239, 83, 80, 0.5);
+            animation: gentle-pulse 2s ease-in-out infinite;
+        }
+
+        .cell.visited {
+            background: linear-gradient(135deg, #fff9c4, #fff59d);
+            border-color: #fbc02d;
+            animation: fade-in 0.4s ease;
+        }
+
+        .cell.current {
+            background: linear-gradient(135deg, #64b5f6, #42a5f5);
+            color: white;
+            border-color: #1976d2;
+            animation: active-pulse 0.6s ease-in-out infinite alternate;
+            box-shadow: 0 0 20px rgba(66, 165, 245, 0.8);
+            font-weight: bold;
+            transform: scale(1.15);
+            z-index: 10;
+        }
+
+        .cell.path {
+            background: linear-gradient(135deg, #ffd54f, #ffca28);
+            color: #f57f17;
+            border-color: #ffa000;
+            animation: path-glow 1s ease-in-out infinite alternate;
+            font-weight: bold;
+            box-shadow: 0 0 15px rgba(255, 202, 40, 0.8);
+        }
+
+        .cell-level {
+            position: absolute;
+            top: 3px;
+            right: 5px;
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #1976d2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 5px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes gentle-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes active-pulse {
+            from { transform: scale(1.15); box-shadow: 0 0 20px rgba(66, 165, 245, 0.8); }
+            to { transform: scale(1.25); box-shadow: 0 0 30px rgba(66, 165, 245, 1); }
+        }
+
+        @keyframes path-glow {
+            from { box-shadow: 0 0 15px rgba(255, 202, 40, 0.6); }
+            to { box-shadow: 0 0 25px rgba(255, 202, 40, 1); }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-family: 'Quicksand', sans-serif;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            color: white;
+            border: 2px solid #388e3c;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f1f8e9, #dcedc8);
+            color: #33691e;
+            border: 2px solid #aed581;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #dcedc8, #c5e1a5);
+            transform: translateY(-2px);
+        }
+
+        .btn-pause {
+            background: linear-gradient(135deg, #ffb74d, #ffa726);
+            color: white;
+            border: 2px solid #f57c00;
+        }
+
+        .btn-pause:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 167, 38, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .data-structure-viz {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            border: 3px solid #64b5f6;
+            box-shadow: 0 5px 20px rgba(33, 150, 243, 0.2);
+        }
+
+        .data-structure-viz h4 {
+            color: #0d47a1;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .queue-container, .stack-container {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            min-height: 60px;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+        }
+
+        .queue-item, .stack-item {
+            padding: 10px 15px;
+            background: linear-gradient(135deg, #42a5f5, #1e88e5);
+            color: white;
+            border-radius: 8px;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(33, 150, 243, 0.3);
+            animation: item-enter 0.3s ease;
+            border: 2px solid #1565c0;
+        }
+
+        .queue-item.front, .stack-item.top {
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            border-color: #2e7d32;
+            box-shadow: 0 3px 15px rgba(76, 175, 80, 0.5);
+        }
+
+        @keyframes item-enter {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .action-log {
+            background: linear-gradient(135deg, #fff9c4, #fff59d);
+            border-radius: 15px;
+            padding: 25px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95em;
+            margin-top: 25px;
+            border: 3px solid #fbc02d;
+            box-shadow: inset 0 2px 10px rgba(251, 192, 45, 0.2);
+        }
+
+        .log-entry {
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            border-left: 5px solid #66bb6a;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+        }
+
+        .log-entry:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 187, 106, 0.3);
+        }
+
+        .log-entry.current {
+            background: linear-gradient(135deg, #fff59d, #ffee58);
+            border-left-color: #fbc02d;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(251, 192, 45, 0.4);
+        }
+
+        .log-reason {
+            color: #558b2f;
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+
+        .explanation {
+            background: linear-gradient(135deg, #e1f5fe, #b3e5fc);
+            border-left: 6px solid #0288d1;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 25px 0;
+            box-shadow: 0 5px 20px rgba(2, 136, 209, 0.2);
+        }
+
+        .explanation h3 {
+            color: #01579b;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            font-weight: 700;
+        }
+
+        .explanation p {
+            line-height: 1.8;
+            color: #263238;
+            font-size: 1.05em;
+            margin-bottom: 12px;
+        }
+
+        .explanation ul {
+            margin-left: 25px;
+            margin-top: 15px;
+        }
+
+        .explanation li {
+            line-height: 1.8;
+            color: #263238;
+            margin-bottom: 10px;
+        }
+
+        .explanation strong {
+            color: #01579b;
+            font-weight: 700;
+        }
+
+        .warning-box {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            border-left: 6px solid #f57c00;
+        }
+
+        .warning-box h3 {
+            color: #e65100;
+        }
+
+        .success-box {
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            border-left: 6px solid #388e3c;
+        }
+
+        .success-box h3 {
+            color: #1b5e20;
+        }
+
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .comparison-item {
+            background: linear-gradient(to bottom, #ffffff, #f1f8e9);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 3px solid #c5e1a5;
+        }
+
+        .comparison-item h3 {
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 1.3em;
+            font-weight: 700;
+        }
+
+        .comparison-item.bfs h3 {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            color: #1b5e20;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+
+        .comparison-item.dfs h3 {
+            background: linear-gradient(135deg, #ffab91, #ff8a65);
+            color: #bf360c;
+            box-shadow: 0 4px 15px rgba(255, 138, 101, 0.3);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 15px 30px;
+            border: 3px solid #a5d6a7;
+            background: linear-gradient(135deg, #ffffff, #f1f8e9);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #33691e;
+            box-shadow: 0 4px 12px rgba(129, 199, 132, 0.2);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(129, 199, 132, 0.3);
+        }
+
+        .mode-btn.active {
+            border-color: #4caf50;
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            color: white;
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        .mode-btn input {
+            margin-right: 8px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin: 25px 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #f1f8e9, #dcedc8);
+            border-radius: 15px;
+            justify-content: center;
+            border: 2px solid #aed581;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #33691e;
+        }
+
+        .legend-color {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: 3px solid #689f38;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+            border: 3px solid #388e3c;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            animation: stat-glow 3s ease-in-out infinite;
+        }
+
+        @keyframes stat-glow {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-20%, -20%); }
+        }
+
+        .stat-card h4 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            position: relative;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-card p {
+            opacity: 0.95;
+            font-size: 1.1em;
+            position: relative;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .cell {
+                width: 45px;
+                height: 45px;
+                font-size: 0.65em;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #dcedc8;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #81c784, #66bb6a);
+            border-radius: 10px;
+            border: 2px solid #dcedc8;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌿 Why BFS Always Finds the Shortest Path</h1>
+            <p>A Magical Journey Through Graph Traversal</p>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('core-ideas')">📚 Core Ideas & Reasons</div>
+            <div class="tab" onclick="switchTab('debug-mode')">🔧 Interactive Playground</div>
+        </div>
+
+        <!-- TAB 1: CORE IDEAS & REASONS -->
+        <div id="core-ideas" class="tab-content active">
+
+            <!-- REASON 1: Level-by-Level Guarantee -->
+            <div class="reason-section">
+                <div class="reason-header">
+                    <h2>🎯 Reason 1: Level-by-Level Exploration Guarantee</h2>
+                    <p>BFS explores every node at distance K before exploring ANY node at distance K+1. This is the fundamental guarantee that ensures shortest path!</p>
+                </div>
+                <div class="reason-content">
+                    <div class="explanation">
+                        <h3>💡 The Core Mathematical Truth</h3>
+                        <p><strong>If BFS finds the target at Level 3 (3 steps away), it is MATHEMATICALLY IMPOSSIBLE for a path at Level 1 or 2 to exist.</strong></p>
+                        <p><strong>Why?</strong> Because BFS already finished exploring:</p>
+                        <ul>
+                            <li><strong>ALL nodes at Level 0</strong> (the start node) ✅</li>
+                            <li><strong>ALL nodes at Level 1</strong> (1 step from start) ✅</li>
+                            <li><strong>ALL nodes at Level 2</strong> (2 steps from start) ✅</li>
+                        </ul>
+                        <p>Only after completely exhausting all possibilities at these levels does BFS move to Level 3. If the target existed at a closer level, BFS would have found it there first!</p>
+                        <p><strong>This is NOT luck. This is MATHEMATICAL CERTAINTY.</strong></p>
+                    </div>
+
+                    <div class="demo-container">
+                        <h3 style="text-align: center;">🌳 Watch BFS Explore Level by Level</h3>
+                        <div class="explanation" style="margin: 20px 0;">
+                            <p><strong>Observe:</strong> Notice how BFS completes an entire level before moving to the next. The numbers on each cell show which LEVEL that node is at. Watch how the algorithm GUARANTEES the shortest path!</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="demo1-grid" class="grid" style="grid-template-columns: repeat(5, 55px);"></div>
+                        </div>
+                        <div class="controls">
+                            <button class="btn btn-primary" onclick="demo1Start()">▶ Start Exploration</button>
+                            <button class="btn btn-pause" id="demo1-pause" onclick="demo1Pause()" style="display:none;">⏸ Pause</button>
+                            <button class="btn btn-secondary" onclick="demo1Reset()">↺ Reset</button>
+                        </div>
+                        <div id="demo1-log" class="action-log"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REASON 2: Queue FIFO Guarantee -->
+            <div class="reason-section">
+                <div class="reason-header">
+                    <h2>✅ Reason 2: The Queue's FIFO Property Guarantees Shortest Path</h2>
+                    <p>BFS uses a Queue (First-In-First-Out). This data structure FORCES closer nodes to be explored before distant ones!</p>
+                </div>
+                <div class="reason-content">
+                    <div class="explanation">
+                        <h3>💡 Why the Queue is Magic</h3>
+                        <p><strong>The Queue's FIFO (First-In-First-Out) property is what makes BFS work!</strong></p>
+                        <p><strong>How it works:</strong></p>
+                        <ul>
+                            <li><strong>Nodes discovered first = Nodes closer to start</strong></li>
+                            <li><strong>Queue processes in order</strong> → Closer nodes get explored first</li>
+                            <li><strong>When target is found</strong> → We're GUARANTEED it's the shortest path because all closer nodes were already checked!</li>
+                        </ul>
+                        <p><strong>Think about it:</strong> If there was a shorter path, those nodes would have been added to the queue EARLIER, and would have been processed BEFORE the current path!</p>
+                        <p><strong>The queue is not just storage—it's the ENGINE of the guarantee!</strong></p>
+                    </div>
+
+                    <div class="demo-container">
+                        <h3 style="text-align: center;">🔄 Watch the Queue in Action</h3>
+                        <div class="explanation" style="margin: 20px 0;">
+                            <p><strong>Watch carefully:</strong> The green highlighted node in the queue is what we're processing next. Notice how nodes closer to the start are ALWAYS processed before nodes further away!</p>
+                        </div>
+                        <div style="text-align: center;">
+                            <div id="demo2-grid" class="grid" style="grid-template-columns: repeat(6, 55px);"></div>
+                        </div>
+
+                        <div class="data-structure-viz">
+                            <h4>📊 Current Queue State (FIFO - First In, First Out)</h4>
+                            <div id="demo2-queue" class="queue-container"></div>
+                            <p style="margin-top: 15px; color: #0d47a1; font-weight: 600;">Green = Next to process | Blue = Waiting</p>
+                        </div>
+
+                        <div class="controls">
+                            <button class="btn btn-primary" onclick="demo2Start()">▶ Start Exploration</button>
+                            <button class="btn btn-pause" id="demo2-pause" onclick="demo2Pause()" style="display:none;">⏸ Pause</button>
+                            <button class="btn btn-secondary" onclick="demo2Reset()">↺ Reset</button>
+                        </div>
+                        <div id="demo2-log" class="action-log"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REASON 3: DFS is Just Lucky -->
+            <div class="reason-section">
+                <div class="reason-header">
+                    <h2>🎲 Reason 3: DFS Finding Shortest Path is Pure LUCK</h2>
+                    <p>DFS uses a Stack (Last-In-First-Out) which explores DEEPLY first, not BROADLY. It might stumble upon the shortest path, but there's NO GUARANTEE!</p>
+                </div>
+                <div class="reason-content">
+                    <div class="explanation warning-box">
+                        <h3>⚠️ Why DFS is Unreliable for Shortest Path</h3>
+                        <p><strong>DFS uses a Stack (LIFO - Last-In-First-Out). This fundamentally changes the exploration order!</strong></p>
+                        <p><strong>The Problem:</strong></p>
+                        <ul>
+                            <li><strong>DFS explores as DEEP as possible first</strong> → It commits to one path fully before trying others</li>
+                            <li><strong>If it goes in the "wrong" direction</strong> → It will find a LONG path and return it</li>
+                            <li><strong>Even if a shorter path exists</strong> → DFS won't backtrack to find it after finding ANY path</li>
+                            <li><strong>The order depends on which neighbor is checked first</strong> → Pure chance!</li>
+                        </ul>
+                        <p><strong>Example:</strong> Imagine two paths to the target: Path A (2 steps) and Path B (10 steps). If DFS explores Path B first, it will return the 10-step path and NEVER discover the 2-step path!</p>
+                    </div>
+
+                    <div class="demo-container">
+                        <h3 style="text-align: center;">⚔️ BFS vs DFS: The Ultimate Showdown</h3>
+
+                        <div class="explanation" style="margin: 20px 0;">
+                            <p><strong>Setup:</strong> Same grid, same start, same end. Watch how different the paths are!</p>
+                            <p><strong>BFS will find the SHORTEST path.</strong> DFS will find A path (but maybe not the shortest).</p>
+                        </div>
+
+                        <div class="comparison">
+                            <div class="comparison-item bfs">
+                                <h3>🌟 BFS: GUARANTEED SHORTEST</h3>
+                                <div style="text-align: center;">
+                                    <div id="demo3-bfs-grid" class="grid" style="grid-template-columns: repeat(6, 55px);"></div>
+                                </div>
+                                <div id="demo3-bfs-result" style="margin-top: 15px; text-align: center; font-weight: bold; font-size: 1.2em; color: #1b5e20;"></div>
+                            </div>
+
+                            <div class="comparison-item dfs">
+                                <h3>🎲 DFS: MIGHT BE LUCKY</h3>
+                                <div style="text-align: center;">
+                                    <div id="demo3-dfs-grid" class="grid" style="grid-template-columns: repeat(6, 55px);"></div>
+                                </div>
+                                <div id="demo3-dfs-result" style="margin-top: 15px; text-align: center; font-weight: bold; font-size: 1.2em; color: #bf360c;"></div>
+                            </div>
+                        </div>
+
+                        <div class="controls">
+                            <button class="btn btn-primary" onclick="demo3Start()">▶ Run Both Algorithms</button>
+                            <button class="btn btn-pause" id="demo3-pause" onclick="demo3Pause()" style="display:none;">⏸ Pause</button>
+                            <button class="btn btn-secondary" onclick="demo3Reset()">↺ Reset</button>
+                        </div>
+
+                        <div class="explanation success-box" style="margin-top: 30px;">
+                            <h3>🏆 The Verdict</h3>
+                            <p><strong>Yellow glowing path = The path each algorithm found</strong></p>
+                            <p>Notice: BFS finds the optimal path EVERY TIME. DFS found a path, but it might be longer. This demonstrates that BFS is reliable for shortest path, while DFS is not!</p>
+                            <p><strong>For shortest path problems: Always use BFS on unweighted graphs!</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: DEBUG MODE -->
+        <div id="debug-mode" class="tab-content">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #2e7d32; font-size: 2.2em;">🔧 Interactive Playground</h2>
+
+            <div class="explanation">
+                <h3>🎮 How to Use This Playground:</h3>
+                <p><strong>1. Click "📍 Set Start"</strong> then click any cell to place the starting point</p>
+                <p><strong>2. Click "🎯 Set End"</strong> then click any cell to place the target destination</p>
+                <p><strong>3. Click "🧱 Set Wall"</strong> then click cells to create obstacles (click again to remove)</p>
+                <p><strong>4. Choose BFS or DFS</strong> to select which algorithm to visualize</p>
+                <p><strong>5. Click "▶ Run"</strong> to auto-play, or use "⏭ Next Step" to step through manually</p>
+                <p><strong>6. Watch the Queue/Stack</strong> visualization to understand how each algorithm works!</p>
+            </div>
+
+            <div class="mode-selector">
+                <label class="mode-btn active" onclick="selectMode('bfs')">
+                    <input type="radio" name="mode" value="bfs" checked>
+                    🌟 BFS (Guaranteed Shortest)
+                </label>
+                <label class="mode-btn" onclick="selectMode('dfs')">
+                    <input type="radio" name="mode" value="dfs">
+                    🎲 DFS (Might Be Lucky)
+                </label>
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="debugSetStart()">📍 Set Start</button>
+                <button class="btn btn-secondary" onclick="debugSetEnd()">🎯 Set End</button>
+                <button class="btn btn-secondary" onclick="debugSetWall()">🧱 Set Wall</button>
+                <button class="btn btn-primary" onclick="debugRun()">▶ Run</button>
+                <button class="btn btn-pause" id="debug-pause" onclick="debugPause()" style="display:none;">⏸ Pause</button>
+                <button class="btn btn-secondary" onclick="debugNext()">⏭ Next Step</button>
+                <button class="btn btn-secondary" onclick="debugPrev()">⏮ Previous Step</button>
+                <button class="btn btn-secondary" onclick="debugReset()">↺ Reset</button>
+                <button class="btn btn-secondary" onclick="debugClear()">🗑 Clear All</button>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <div id="debug-grid" class="grid" style="grid-template-columns: repeat(10, 55px);"></div>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #81c784, #66bb6a);"></div>
+                    <span>Start</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #ef5350, #e53935);"></div>
+                    <span>End</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #5d4037, #4e342e);"></div>
+                    <span>Wall</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #64b5f6, #42a5f5);"></div>
+                    <span>Current</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #fff9c4, #fff59d);"></div>
+                    <span>Visited</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: linear-gradient(135deg, #ffd54f, #ffca28);"></div>
+                    <span>Path</span>
+                </div>
+            </div>
+
+            <div id="debug-data-structure" class="data-structure-viz" style="display:none;">
+                <h4 id="debug-ds-title"></h4>
+                <div id="debug-ds-container"></div>
+                <p id="debug-ds-hint" style="margin-top: 15px; font-weight: 600;"></p>
+            </div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h4 id="debug-steps">0</h4>
+                    <p>Steps Taken</p>
+                </div>
+                <div class="stat-card">
+                    <h4 id="debug-visited">0</h4>
+                    <p>Nodes Visited</p>
+                </div>
+                <div class="stat-card">
+                    <h4 id="debug-path">-</h4>
+                    <p>Path Length</p>
+                </div>
+            </div>
+
+            <div id="debug-log" class="action-log"></div>
+        </div>
+    </div>
+
+    <script>
+        let demo1Interval, demo2Interval, demo3Interval;
+        let demo1Paused = false, demo2Paused = false, demo3Paused = false;
+
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // ============================================
+        // DEMO 1: Level-by-Level Exploration
+        // ============================================
+        function createDemo1Grid() {
+            const grid = document.getElementById('demo1-grid');
+            grid.innerHTML = '';
+
+            const layout = [
+                ['S', '', '', '', ''],
+                ['', '█', '█', '', ''],
+                ['', '', '', '█', ''],
+                ['', '█', '', '', ''],
+                ['', '', '', '', 'E']
+            ];
+
+            layout.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const div = document.createElement('div');
+                    div.className = 'cell';
+                    div.dataset.row = i;
+                    div.dataset.col = j;
+                    div.innerHTML = `<span style="font-size: 0.65em;">(${i},${j})</span>`;
+
+                    if (cell === 'S') {
+                        div.classList.add('start');
+                        div.innerHTML += '<br><span style="font-size: 0.9em;">START</span>';
+                    } else if (cell === 'E') {
+                        div.classList.add('end');
+                        div.innerHTML += '<br><span style="font-size: 0.9em;">END</span>';
+                    } else if (cell === '█') {
+                        div.classList.add('wall');
+                    }
+
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        function demo1Start() {
+            demo1Reset();
+            demo1Paused = false;
+            document.getElementById('demo1-pause').style.display = 'inline-block';
+
+            const log = document.getElementById('demo1-log');
+
+            // Grid layout
+            const grid = [
+                ['S', '', '', '', ''],
+                ['', '█', '█', '', ''],
+                ['', '', '', '█', ''],
+                ['', '█', '', '', ''],
+                ['', '', '', '', 'E']
+            ];
+
+            // Run ACTUAL BFS
+            const result = runActualBFS(grid, [0, 0], [4, 4]);
+            const steps = result.steps;
+            const finalPath = result.path;
+
+            let stepIndex = 0;
+
+            demo1Interval = setInterval(() => {
+                if (demo1Paused) return;
+
+                if (stepIndex >= steps.length) {
+                    clearInterval(demo1Interval);
+                    document.getElementById('demo1-pause').style.display = 'none';
+
+                    // Highlight shortest path
+                    setTimeout(() => {
+                        finalPath.forEach(([r, c]) => {
+                            const cell = document.querySelector(`#demo1-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                            if (cell) cell.classList.add('path');
+                        });
+                        log.innerHTML += `<div class="log-entry" style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left-color: #28a745;">✅ SHORTEST PATH FOUND! Length: ${finalPath.length - 1} steps. Guaranteed optimal!</div>`;
+                    }, 500);
+                    return;
+                }
+
+                const step = steps[stepIndex];
+                const cell = document.querySelector(`#demo1-grid .cell[data-row="${step.pos[0]}"][data-col="${step.pos[1]}"]`);
+
+                if (cell && !cell.classList.contains('start') && !cell.classList.contains('end')) {
+                    cell.classList.add('visited');
+                    const levelTag = document.createElement('div');
+                    levelTag.className = 'cell-level';
+                    levelTag.textContent = `L${step.level}`;
+                    cell.appendChild(levelTag);
+                }
+
+                if (cell) {
+                    cell.classList.add('current');
+                    setTimeout(() => cell.classList.remove('current'), 500);
+                }
+
+                log.innerHTML += `<div class="log-entry">Step ${stepIndex + 1}: ${step.msg}<div class="log-reason">💡 ${step.reason}</div></div>`;
+                log.scrollTop = log.scrollHeight;
+
+                stepIndex++;
+            }, 700);
+        }
+
+        function demo1Pause() {
+            demo1Paused = !demo1Paused;
+            const btn = document.getElementById('demo1-pause');
+            btn.textContent = demo1Paused ? '▶ Resume' : '⏸ Pause';
+        }
+
+        function demo1Reset() {
+            clearInterval(demo1Interval);
+            demo1Paused = false;
+            document.getElementById('demo1-pause').style.display = 'none';
+            document.getElementById('demo1-pause').textContent = '⏸ Pause';
+            createDemo1Grid();
+            document.getElementById('demo1-log').innerHTML = '<div class="log-entry">Ready to explore! Click "Start Exploration" to begin.</div>';
+        }
+
+        // ============================================
+        // DEMO 2: Queue Visualization
+        // ============================================
+        function createDemo2Grid() {
+            const grid = document.getElementById('demo2-grid');
+            grid.innerHTML = '';
+
+            const layout = [
+                ['S', '', '█', '', '', ''],
+                ['', '█', '█', '', '█', ''],
+                ['', '', '', '', '', 'E']
+            ];
+
+            layout.forEach((row, i) => {
+                row.forEach((cell, j) => {
+                    const div = document.createElement('div');
+                    div.className = 'cell';
+                    div.dataset.row = i;
+                    div.dataset.col = j;
+                    div.innerHTML = `<span style="font-size: 0.65em;">(${i},${j})</span>`;
+
+                    if (cell === 'S') {
+                        div.classList.add('start');
+                        div.innerHTML += '<br>S';
+                    } else if (cell === 'E') {
+                        div.classList.add('end');
+                        div.innerHTML += '<br>E';
+                    } else if (cell === '█') {
+                        div.classList.add('wall');
+                    }
+
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        function demo2Start() {
+            demo2Reset();
+            demo2Paused = false;
+            document.getElementById('demo2-pause').style.display = 'inline-block';
+
+            const log = document.getElementById('demo2-log');
+            const queueDiv = document.getElementById('demo2-queue');
+
+            const grid = [
+                ['S', '', '█', '', '', ''],
+                ['', '█', '█', '', '█', ''],
+                ['', '', '', '', '', 'E']
+            ];
+
+            const result = runBFSWithQueue(grid, [0, 0], [2, 5]);
+            const steps = result.steps;
+            const finalPath = result.path;
+
+            let stepIndex = 0;
+
+            demo2Interval = setInterval(() => {
+                if (demo2Paused) return;
+
+                if (stepIndex >= steps.length) {
+                    clearInterval(demo2Interval);
+                    document.getElementById('demo2-pause').style.display = 'none';
+                    queueDiv.innerHTML = '<div class="queue-item" style="background: #ccc;">[ Empty - Target Found! ]</div>';
+
+                    setTimeout(() => {
+                        finalPath.forEach(([r, c]) => {
+                            const cell = document.querySelector(`#demo2-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                            if (cell) cell.classList.add('path');
+                        });
+                        log.innerHTML += `<div class="log-entry" style="background: linear-gradient(135deg, #d4edda, #c3e6cb);">✅ Queue guided us to the SHORTEST path! Length: ${finalPath.length - 1} steps.</div>`;
+                    }, 500);
+                    return;
+                }
+
+                const step = steps[stepIndex];
+                const cell = document.querySelector(`#demo2-grid .cell[data-row="${step.pos[0]}"][data-col="${step.pos[1]}"]`);
+
+                if (cell && !cell.classList.contains('start')) {
+                    cell.classList.add('visited');
+                }
+
+                if (cell) {
+                    cell.classList.add('current');
+                    setTimeout(() => cell.classList.remove('current'), 500);
+                }
+
+                // Update queue visualization
+                queueDiv.innerHTML = '';
+                if (step.queue.length === 0) {
+                    queueDiv.innerHTML = '<div class="queue-item" style="background: #ccc;">[ Empty ]</div>';
+                } else {
+                    step.queue.forEach((item, idx) => {
+                        const qItem = document.createElement('div');
+                        qItem.className = idx === 0 ? 'queue-item front' : 'queue-item';
+                        qItem.textContent = `(${item[0]},${item[1]})`;
+                        queueDiv.appendChild(qItem);
+                    });
+                }
+
+                log.innerHTML += `<div class="log-entry">${step.msg}<div class="log-reason">💡 ${step.reason}</div></div>`;
+                log.scrollTop = log.scrollHeight;
+
+                stepIndex++;
+            }, 900);
+        }
+
+        function demo2Pause() {
+            demo2Paused = !demo2Paused;
+            const btn = document.getElementById('demo2-pause');
+            btn.textContent = demo2Paused ? '▶ Resume' : '⏸ Pause';
+        }
+
+        function demo2Reset() {
+            clearInterval(demo2Interval);
+            demo2Paused = false;
+            document.getElementById('demo2-pause').style.display = 'none';
+            document.getElementById('demo2-pause').textContent = '⏸ Pause';
+            createDemo2Grid();
+            document.getElementById('demo2-log').innerHTML = '<div class="log-entry">Queue is ready! Click "Start Exploration" to see FIFO in action.</div>';
+            document.getElementById('demo2-queue').innerHTML = '<div class="queue-item front">(0,0)</div>';
+        }
+
+        // ============================================
+        // DEMO 3: BFS vs DFS Comparison
+        // ============================================
+        function createDemo3Grids() {
+            const layout = [
+                ['S', '', '', '', '', ''],
+                ['', '█', '', '█', '', ''],
+                ['', '', '', '', '', ''],
+                ['█', '█', '', '█', '', ''],
+                ['', '', '', '', '', ''],
+                ['', '', '', '', '', 'E']
+            ];
+
+            ['bfs', 'dfs'].forEach(type => {
+                const grid = document.getElementById(`demo3-${type}-grid`);
+                grid.innerHTML = '';
+
+                layout.forEach((row, i) => {
+                    row.forEach((cell, j) => {
+                        const div = document.createElement('div');
+                        div.className = 'cell';
+                        div.dataset.row = i;
+                        div.dataset.col = j;
+                        div.innerHTML = `<span style="font-size: 0.6em;">(${i},${j})</span>`;
+
+                        if (cell === 'S') {
+                            div.classList.add('start');
+                        } else if (cell === 'E') {
+                            div.classList.add('end');
+                        } else if (cell === '█') {
+                            div.classList.add('wall');
+                        }
+
+                        grid.appendChild(div);
+                    });
+                });
+            });
+        }
+
+        function demo3Start() {
+            demo3Reset();
+            demo3Paused = false;
+            document.getElementById('demo3-pause').style.display = 'inline-block';
+
+            const grid = [
+                ['S', '', '', '', '', ''],
+                ['', '█', '', '█', '', ''],
+                ['', '', '', '', '', ''],
+                ['█', '█', '', '█', '', ''],
+                ['', '', '', '', '', ''],
+                ['', '', '', '', '', 'E']
+            ];
+
+            const bfsResult = runActualBFS(grid, [0, 0], [5, 5]);
+            const dfsResult = runActualDFS(grid, [0, 0], [5, 5]);
+
+            const bfsVisited = bfsResult.visited;
+            const dfsVisited = dfsResult.visited;
+
+            const maxSteps = Math.max(bfsVisited.length, dfsVisited.length);
+
+            let stepIndex = 0;
+
+            demo3Interval = setInterval(() => {
+                if (demo3Paused) return;
+
+                if (stepIndex >= maxSteps) {
+                    clearInterval(demo3Interval);
+                    document.getElementById('demo3-pause').style.display = 'none';
+
+                    // Highlight paths
+                    bfsResult.path.forEach(([r, c]) => {
+                        const cell = document.querySelector(`#demo3-bfs-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                        if (cell) cell.classList.add('path');
+                    });
+
+                    dfsResult.path.forEach(([r, c]) => {
+                        const cell = document.querySelector(`#demo3-dfs-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                        if (cell) cell.classList.add('path');
+                    });
+
+                    document.getElementById('demo3-bfs-result').innerHTML = `✅ Path: ${bfsResult.path.length - 1} steps (OPTIMAL!)`;
+                    document.getElementById('demo3-dfs-result').innerHTML = `⚠️ Path: ${dfsResult.path.length - 1} steps`;
+                    return;
+                }
+
+                // BFS step
+                if (stepIndex < bfsVisited.length) {
+                    const [r, c] = bfsVisited[stepIndex];
+                    const cell = document.querySelector(`#demo3-bfs-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                    if (cell && !cell.classList.contains('start') && !cell.classList.contains('end')) {
+                        cell.classList.add('visited');
+                    }
+                }
+
+                // DFS step
+                if (stepIndex < dfsVisited.length) {
+                    const [r, c] = dfsVisited[stepIndex];
+                    const cell = document.querySelector(`#demo3-dfs-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                    if (cell && !cell.classList.contains('start') && !cell.classList.contains('end')) {
+                        cell.classList.add('visited');
+                    }
+                }
+
+                stepIndex++;
+            }, 200);
+        }
+
+        function demo3Pause() {
+            demo3Paused = !demo3Paused;
+            const btn = document.getElementById('demo3-pause');
+            btn.textContent = demo3Paused ? '▶ Resume' : '⏸ Pause';
+        }
+
+        function demo3Reset() {
+            clearInterval(demo3Interval);
+            demo3Paused = false;
+            document.getElementById('demo3-pause').style.display = 'none';
+            document.getElementById('demo3-pause').textContent = '⏸ Pause';
+            createDemo3Grids();
+            document.getElementById('demo3-bfs-result').innerHTML = '';
+            document.getElementById('demo3-dfs-result').innerHTML = '';
+        }
+
+        // ============================================
+        // ACTUAL BFS ALGORITHM
+        // ============================================
+        function runActualBFS(grid, start, end) {
+            const steps = [];
+            const visited = new Set();
+            const queue = [[start, [start], 0]]; // [position, path, level]
+            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+            const visitedOrder = [];
+
+            visited.add(`${start[0]},${start[1]}`);
+
+            while (queue.length > 0) {
+                const [[row, col], path, level] = queue.shift();
+                visitedOrder.push([row, col]);
+
+                const isStart = row === start[0] && col === start[1];
+                const isEnd = row === end[0] && col === end[1];
+
+                steps.push({
+                    pos: [row, col],
+                    level: level,
+                    msg: isStart ? `Start BFS at (${row},${col}) - Level ${level}` :
+                         isEnd ? `Found END at (${row},${col}) - Level ${level}!` :
+                         `Explore (${row},${col}) - Level ${level}`,
+                    reason: isStart ? 'This is our starting point' :
+                            isEnd ? `Target found at level ${level}! Path length = ${level}` :
+                            `Node at distance ${level} from start`
+                });
+
+                if (isEnd) {
+                    return { steps, path, visited: visitedOrder };
+                }
+
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    const key = `${newRow},${newCol}`;
+
+                    if (newRow >= 0 && newRow < grid.length &&
+                        newCol >= 0 && newCol < grid[0].length &&
+                        !visited.has(key) && grid[newRow][newCol] !== '█') {
+
+                        visited.add(key);
+                        const newPath = [...path, [newRow, newCol]];
+                        queue.push([[newRow, newCol], newPath, level + 1]);
+                    }
+                }
+            }
+
+            return { steps, path: [], visited: visitedOrder };
+        }
+
+        function runBFSWithQueue(grid, start, end) {
+            const steps = [];
+            const visited = new Set();
+            const queue = [[start, [start]]];
+            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+
+            visited.add(`${start[0]},${start[1]}`);
+
+            while (queue.length > 0) {
+                const [[row, col], path] = queue.shift();
+
+                const queueSnapshot = queue.map(item => item[0]);
+
+                if (row === end[0] && col === end[1]) {
+                    steps.push({
+                        pos: [row, col],
+                        queue: queueSnapshot,
+                        msg: `Dequeue (${row},${col}) - FOUND TARGET!`,
+                        reason: 'This is the end node! Path complete!'
+                    });
+                    return { steps, path };
+                }
+
+                const neighbors = [];
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    const key = `${newRow},${newCol}`;
+
+                    if (newRow >= 0 && newRow < grid.length &&
+                        newCol >= 0 && newCol < grid[0].length &&
+                        !visited.has(key) && grid[newRow][newCol] !== '█') {
+
+                        visited.add(key);
+                        const newPath = [...path, [newRow, newCol]];
+                        queue.push([[newRow, newCol], newPath]);
+                        neighbors.push([newRow, newCol]);
+                    }
+                }
+
+                steps.push({
+                    pos: [row, col],
+                    queue: queue.map(item => item[0]),
+                    msg: `Dequeue (${row},${col})`,
+                    reason: neighbors.length > 0
+                        ? `Added ${neighbors.length} neighbor(s) to queue: ${neighbors.map(n => `(${n[0]},${n[1]})`).join(', ')}`
+                        : 'No unvisited neighbors'
+                });
+            }
+
+            return { steps, path: [] };
+        }
+
+        function runActualDFS(grid, start, end) {
+            const visited = new Set();
+            const stack = [[start, [start]]];
+            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+            const visitedOrder = [];
+
+            while (stack.length > 0) {
+                const [[row, col], path] = stack.pop();
+                const key = `${row},${col}`;
+
+                if (visited.has(key)) continue;
+                visited.add(key);
+                visitedOrder.push([row, col]);
+
+                if (row === end[0] && col === end[1]) {
+                    return { path, visited: visitedOrder };
+                }
+
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    const keyNew = `${newRow},${newCol}`;
+
+                    if (newRow >= 0 && newRow < grid.length &&
+                        newCol >= 0 && newCol < grid[0].length &&
+                        !visited.has(keyNew) && grid[newRow][newCol] !== '█') {
+
+                        const newPath = [...path, [newRow, newCol]];
+                        stack.push([[newRow, newCol], newPath]);
+                    }
+                }
+            }
+
+            return { path: [], visited: visitedOrder };
+        }
+
+        // ============================================
+        // DEBUG MODE
+        // ============================================
+        let debugMode = 'bfs';
+        let debugState = 'view';
+        let debugGrid = [];
+        let debugStart = null;
+        let debugEnd = null;
+        let debugSteps = [];
+        let debugCurrentStep = -1;
+        let debugRunning = false;
+        let debugPaused = false;
+        let debugInterval;
+
+        function createDebugGrid() {
+            const grid = document.getElementById('debug-grid');
+            grid.innerHTML = '';
+            debugGrid = [];
+
+            for (let i = 0; i < 10; i++) {
+                debugGrid[i] = [];
+                for (let j = 0; j < 10; j++) {
+                    debugGrid[i][j] = '';
+
+                    const div = document.createElement('div');
+                    div.className = 'cell';
+                    div.dataset.row = i;
+                    div.dataset.col = j;
+                    div.innerHTML = `(${i},${j})`;
+                    div.onclick = () => debugCellClick(i, j);
+
+                    grid.appendChild(div);
+                }
+            }
+        }
+
+        function selectMode(mode) {
+            debugMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.closest('.mode-btn').classList.add('active');
+        }
+
+        function debugSetStart() {
+            debugState = 'set-start';
+        }
+
+        function debugSetEnd() {
+            debugState = 'set-end';
+        }
+
+        function debugSetWall() {
+            debugState = 'set-wall';
+        }
+
+        function debugCellClick(row, col) {
+            const cell = document.querySelector(`#debug-grid .cell[data-row="${row}"][data-col="${col}"]`);
+
+            if (debugState === 'set-start') {
+                if (debugStart) {
+                    const oldCell = document.querySelector(`#debug-grid .cell[data-row="${debugStart[0]}"][data-col="${debugStart[1]}"]`);
+                    oldCell.classList.remove('start');
+                    debugGrid[debugStart[0]][debugStart[1]] = '';
+                }
+
+                debugStart = [row, col];
+                debugGrid[row][col] = 'S';
+                cell.classList.remove('wall', 'end');
+                cell.classList.add('start');
+                debugState = 'view';
+
+            } else if (debugState === 'set-end') {
+                if (debugEnd) {
+                    const oldCell = document.querySelector(`#debug-grid .cell[data-row="${debugEnd[0]}"][data-col="${debugEnd[1]}"]`);
+                    oldCell.classList.remove('end');
+                    debugGrid[debugEnd[0]][debugEnd[1]] = '';
+                }
+
+                debugEnd = [row, col];
+                debugGrid[row][col] = 'E';
+                cell.classList.remove('wall', 'start');
+                cell.classList.add('end');
+                debugState = 'view';
+
+            } else if (debugState === 'set-wall') {
+                if (debugGrid[row][col] === '█') {
+                    debugGrid[row][col] = '';
+                    cell.classList.remove('wall');
+                } else if (debugGrid[row][col] === '') {
+                    debugGrid[row][col] = '█';
+                    cell.classList.add('wall');
+                }
+            }
+        }
+
+        function debugRun() {
+            if (!debugStart || !debugEnd) {
+                alert('⚠️ Please set both Start and End points!');
+                return;
+            }
+
+            debugSteps = [];
+            debugCurrentStep = -1;
+            debugClearVisualization();
+
+            if (debugMode === 'bfs') {
+                debugSteps = runDebugBFS();
+            } else {
+                debugSteps = runDebugDFS();
+            }
+
+            const dsDiv = document.getElementById('debug-data-structure');
+            const dsTitle = document.getElementById('debug-ds-title');
+            const dsHint = document.getElementById('debug-ds-hint');
+
+            dsDiv.style.display = 'block';
+            if (debugMode === 'bfs') {
+                dsTitle.textContent = '📊 Current Queue State (FIFO - First In, First Out)';
+                dsHint.textContent = 'Green = Next to process | Blue = Waiting in queue';
+            } else {
+                dsTitle.textContent = '📚 Current Stack State (LIFO - Last In, First Out)';
+                dsHint.textContent = 'Green = Top of stack (next to process) | Blue = Deeper in stack';
+            }
+
+            debugRunning = true;
+            debugPaused = false;
+            document.getElementById('debug-pause').style.display = 'inline-block';
+
+            debugInterval = setInterval(() => {
+                if (debugPaused) return;
+
+                if (debugCurrentStep < debugSteps.length - 1) {
+                    debugNext();
+                } else {
+                    clearInterval(debugInterval);
+                    debugRunning = false;
+                    document.getElementById('debug-pause').style.display = 'none';
+                }
+            }, 600);
+        }
+
+        function runDebugBFS() {
+            const steps = [];
+            const visited = new Set();
+            const queue = [[debugStart, [debugStart]]];
+            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+
+            visited.add(`${debugStart[0]},${debugStart[1]}`);
+            steps.push({
+                pos: debugStart,
+                action: `Start BFS at (${debugStart[0]},${debugStart[1]})`,
+                reason: 'This is our starting point',
+                queue: [[debugStart, [debugStart]]],
+                path: null
+            });
+
+            while (queue.length > 0) {
+                const [[row, col], path] = queue.shift();
+
+                if (row === debugEnd[0] && col === debugEnd[1]) {
+                    steps.push({
+                        pos: [row, col],
+                        action: `Found target at (${row},${col})!`,
+                        reason: 'This is our destination - path complete!',
+                        queue: [...queue],
+                        path: path
+                    });
+                    return steps;
+                }
+
+                const neighbors = [];
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    const key = `${newRow},${newCol}`;
+
+                    if (newRow >= 0 && newRow < 10 && newCol >= 0 && newCol < 10 &&
+                        !visited.has(key) && debugGrid[newRow][newCol] !== '█') {
+
+                        visited.add(key);
+                        const newPath = [...path, [newRow, newCol]];
+                        queue.push([[newRow, newCol], newPath]);
+                        neighbors.push([newRow, newCol]);
+                    }
+                }
+
+                steps.push({
+                    pos: [row, col],
+                    action: `Process (${row},${col})`,
+                    reason: neighbors.length > 0
+                        ? `Added ${neighbors.length} neighbor(s) to queue: ${neighbors.map(n => `(${n[0]},${n[1]})`).join(', ')}`
+                        : 'No unvisited neighbors (all walls or already visited)',
+                    queue: [...queue],
+                    path: null
+                });
+            }
+
+            steps.push({
+                pos: null,
+                action: 'No path found!',
+                reason: 'Queue is empty - target is unreachable',
+                queue: [],
+                path: null
+            });
+            return steps;
+        }
+
+        function runDebugDFS() {
+            const steps = [];
+            const visited = new Set();
+            const stack = [[debugStart, [debugStart]]];
+            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+
+            steps.push({
+                pos: debugStart,
+                action: `Start DFS at (${debugStart[0]},${debugStart[1]})`,
+                reason: 'Push starting point onto stack',
+                stack: [[debugStart, [debugStart]]],
+                path: null
+            });
+
+            while (stack.length > 0) {
+                const [[row, col], path] = stack.pop();
+                const key = `${row},${col}`;
+
+                if (visited.has(key)) {
+                    steps.push({
+                        pos: [row, col],
+                        action: `Skip (${row},${col})`,
+                        reason: 'Already visited this node',
+                        stack: [...stack],
+                        path: null
+                    });
+                    continue;
+                }
+
+                visited.add(key);
+
+                if (row === debugEnd[0] && col === debugEnd[1]) {
+                    steps.push({
+                        pos: [row, col],
+                        action: `Found target at (${row},${col})!`,
+                        reason: 'This is our destination - path complete!',
+                        stack: [...stack],
+                        path: path
+                    });
+                    return steps;
+                }
+
+                const neighbors = [];
+                for (const [dr, dc] of directions) {
+                    const newRow = row + dr;
+                    const newCol = col + dc;
+                    const keyNew = `${newRow},${newCol}`;
+
+                    if (newRow >= 0 && newRow < 10 && newCol >= 0 && newCol < 10 &&
+                        !visited.has(keyNew) && debugGrid[newRow][newCol] !== '█') {
+
+                        const newPath = [...path, [newRow, newCol]];
+                        stack.push([[newRow, newCol], newPath]);
+                        neighbors.push([newRow, newCol]);
+                    }
+                }
+
+                steps.push({
+                    pos: [row, col],
+                    action: `Process (${row},${col})`,
+                    reason: neighbors.length > 0
+                        ? `Pushed ${neighbors.length} neighbor(s) to stack: ${neighbors.map(n => `(${n[0]},${n[1]})`).join(', ')}`
+                        : 'No unvisited neighbors (all walls or already visited)',
+                    stack: [...stack],
+                    path: null
+                });
+            }
+
+            steps.push({
+                pos: null,
+                action: 'No path found!',
+                reason: 'Stack is empty - target is unreachable',
+                stack: [],
+                path: null
+            });
+            return steps;
+        }
+
+        function debugNext() {
+            if (debugCurrentStep >= debugSteps.length - 1) return;
+
+            debugCurrentStep++;
+            const step = debugSteps[debugCurrentStep];
+
+            if (step.pos) {
+                const cell = document.querySelector(`#debug-grid .cell[data-row="${step.pos[0]}"][data-col="${step.pos[1]}"]`);
+                if (cell && !cell.classList.contains('start') && !cell.classList.contains('end')) {
+                    cell.classList.add('visited');
+                    cell.classList.add('current');
+                }
+            }
+
+            if (debugCurrentStep > 0) {
+                const prevStep = debugSteps[debugCurrentStep - 1];
+                if (prevStep.pos) {
+                    const prevCell = document.querySelector(`#debug-grid .cell[data-row="${prevStep.pos[0]}"][data-col="${prevStep.pos[1]}"]`);
+                    if (prevCell) prevCell.classList.remove('current');
+                }
+            }
+
+            const dsContainer = document.getElementById('debug-ds-container');
+            dsContainer.innerHTML = '';
+            dsContainer.className = debugMode === 'bfs' ? 'queue-container' : 'stack-container';
+
+            if (debugMode === 'bfs' && step.queue) {
+                if (step.queue.length === 0) {
+                    dsContainer.innerHTML = '<div class="queue-item" style="background: #ccc;">[ Empty ]</div>';
+                } else {
+                    step.queue.forEach((item, idx) => {
+                        const qItem = document.createElement('div');
+                        qItem.className = idx === 0 ? 'queue-item front' : 'queue-item';
+                        qItem.textContent = `(${item[0][0]},${item[0][1]})`;
+                        dsContainer.appendChild(qItem);
+                    });
+                }
+            } else if (debugMode === 'dfs' && step.stack) {
+                if (step.stack.length === 0) {
+                    dsContainer.innerHTML = '<div class="stack-item" style="background: #ccc;">[ Empty ]</div>';
+                } else {
+                    const reversed = [...step.stack].reverse();
+                    reversed.forEach((item, idx) => {
+                        const sItem = document.createElement('div');
+                        sItem.className = idx === 0 ? 'stack-item top' : 'stack-item';
+                        sItem.textContent = `(${item[0][0]},${item[0][1]})`;
+                        dsContainer.appendChild(sItem);
+                    });
+                }
+            }
+
+            const log = document.getElementById('debug-log');
+            log.innerHTML += `<div class="log-entry current">Step ${debugCurrentStep + 1}: ${step.action}<div class="log-reason">💡 ${step.reason}</div></div>`;
+            log.scrollTop = log.scrollHeight;
+
+            document.getElementById('debug-steps').textContent = debugCurrentStep + 1;
+            document.getElementById('debug-visited').textContent = document.querySelectorAll('#debug-grid .visited').length;
+
+            if (step.path) {
+                step.path.forEach(([r, c]) => {
+                    const cell = document.querySelector(`#debug-grid .cell[data-row="${r}"][data-col="${c}"]`);
+                    if (cell) cell.classList.add('path');
+                });
+                document.getElementById('debug-path').textContent = step.path.length - 1;
+            }
+        }
+
+        function debugPrev() {
+            if (debugCurrentStep <= 0) return;
+
+            const step = debugSteps[debugCurrentStep];
+            if (step.pos) {
+                const cell = document.querySelector(`#debug-grid .cell[data-row="${step.pos[0]}"][data-col="${step.pos[1]}"]`);
+                if (cell) {
+                    cell.classList.remove('visited', 'current', 'path');
+                }
+            }
+
+            debugCurrentStep--;
+
+            const log = document.getElementById('debug-log');
+            const entries = log.querySelectorAll('.log-entry');
+            if (entries[entries.length - 1]) {
+                entries[entries.length - 1].remove();
+            }
+
+            document.getElementById('debug-steps').textContent = Math.max(0, debugCurrentStep + 1);
+            document.getElementById('debug-visited').textContent = document.querySelectorAll('#debug-grid .visited').length;
+
+            if (debugCurrentStep >= 0) {
+                const prevStep = debugSteps[debugCurrentStep];
+                const dsContainer = document.getElementById('debug-ds-container');
+                dsContainer.innerHTML = '';
+                dsContainer.className = debugMode === 'bfs' ? 'queue-container' : 'stack-container';
+
+                if (debugMode === 'bfs' && prevStep.queue) {
+                    if (prevStep.queue.length === 0) {
+                        dsContainer.innerHTML = '<div class="queue-item" style="background: #ccc;">[ Empty ]</div>';
+                    } else {
+                        prevStep.queue.forEach((item, idx) => {
+                            const qItem = document.createElement('div');
+                            qItem.className = idx === 0 ? 'queue-item front' : 'queue-item';
+                            qItem.textContent = `(${item[0][0]},${item[0][1]})`;
+                            dsContainer.appendChild(qItem);
+                        });
+                    }
+                } else if (debugMode === 'dfs' && prevStep.stack) {
+                    if (prevStep.stack.length === 0) {
+                        dsContainer.innerHTML = '<div class="stack-item" style="background: #ccc;">[ Empty ]</div>';
+                    } else {
+                        const reversed = [...prevStep.stack].reverse();
+                        reversed.forEach((item, idx) => {
+                            const sItem = document.createElement('div');
+                            sItem.className = idx === 0 ? 'stack-item top' : 'stack-item';
+                            sItem.textContent = `(${item[0][0]},${item[0][1]})`;
+                            dsContainer.appendChild(sItem);
+                        });
+                    }
+                }
+            }
+        }
+
+        function debugPause() {
+            debugPaused = !debugPaused;
+            const btn = document.getElementById('debug-pause');
+            btn.textContent = debugPaused ? '▶ Resume' : '⏸ Pause';
+        }
+
+        function debugReset() {
+            clearInterval(debugInterval);
+            debugRunning = false;
+            debugPaused = false;
+            debugSteps = [];
+            debugCurrentStep = -1;
+            debugClearVisualization();
+            document.getElementById('debug-log').innerHTML = '<div class="log-entry">Ready to explore! Set start, end, and optional walls, then click Run.</div>';
+            document.getElementById('debug-steps').textContent = '0';
+            document.getElementById('debug-visited').textContent = '0';
+            document.getElementById('debug-path').textContent = '-';
+            document.getElementById('debug-pause').style.display = 'none';
+            document.getElementById('debug-pause').textContent = '⏸ Pause';
+            document.getElementById('debug-data-structure').style.display = 'none';
+        }
+
+        function debugClear() {
+            debugReset();
+            createDebugGrid();
+            debugStart = null;
+            debugEnd = null;
+        }
+
+        function debugClearVisualization() {
+            document.querySelectorAll('#debug-grid .cell').forEach(cell => {
+                cell.classList.remove('visited', 'current', 'path');
+            });
+        }
+
+        // Initialize
+        createDemo1Grid();
+        createDemo2Grid();
+        createDemo3Grids();
+        createDebugGrid();
+        demo1Reset();
+        demo2Reset();
+        demo3Reset();
+        debugReset();
+    </script>
+</body>
+</html>

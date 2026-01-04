@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 Ultimate Graph Visualization Playground</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+  
+  * {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  body {
+    background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #ec4899 100%);
+    min-height: 100vh;
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.5);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .node-circle {
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    cursor: pointer;
+  }
+  
+  .node-circle:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.8));
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-in {
+    animation: slideIn 0.6s ease-out;
+  }
+  
+  @keyframes pulse-glow {
+    0%, 100% {
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 40px rgba(139, 92, 246, 0.8);
+    }
+  }
+  
+  .pulse-border {
+    animation: pulse-glow 2s infinite;
+  }
+  
+  .matrix-cell {
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .matrix-cell:hover {
+    transform: scale(1.05);
+  }
+  
+  @keyframes visit-animate {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+  
+  .visiting {
+    animation: visit-animate 0.5s ease-out;
+  }
+  
+  /* UPDATED: Added <pre> styles inside .code-block */
+  .code-block {
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+  }
+  
+  .code-block pre {
+    font-family: 'Courier New', monospace;
+    font-size: 14px; /* Slightly larger for clarity */
+    line-height: 1.7;
+    margin: 0;
+    padding: 0;
+    white-space: pre;
+  }
+  
+  .keyword { color: #c678dd; font-weight: bold; }
+  .function { color: #61afef; }
+  .string { color: #98c379; }
+  .comment { color: #5c6370; font-style: italic; }
+  .number { color: #d19a66; }
+  
+  button {
+    transition: all 0.3s ease;
+  }
+  
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  }
+  
+  .section-divider {
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2, #ec4899);
+    border-radius: 2px;
+    margin: 32px 0;
+  }
+  
+  .info-box {
+    border-left: 4px solid #8b5cf6;
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+  }
+  
+  .highlight-yellow {
+    background: #fef3c7;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  
+  .highlight-green {
+    background: #d1fae5;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  
+  .highlight-red {
+    background: #fee2e2;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body class="p-4 md:p-8">
+
+<div class="max-w-7xl mx-auto">
+  
+  <!-- Hero Header -->
+  <div class="text-center mb-12 animate-in">
+    <h1 class="text-6xl md:text-7xl font-black text-white mb-4 drop-shadow-2xl">
+      🎨 Graph Theory Masterclass
+    </h1>
+    <p class="text-2xl text-purple-100 font-light">
+      Interactive Visual Journey Through Graph Concepts
+    </p>
+    <p class="text-lg text-purple-200 mt-2">
+      ✨ Learn • Visualize • Master ✨
+    </p>
+  </div>
+
+  <!-- SECTION 1: Building Graphs from Edges -->
+  <div class="glass-card p-8 mb-8 animate-in">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="text-5xl">🔗</span>
+      <h2 class="text-4xl font-bold gradient-text">Step 1: Understanding "Building Graphs from Edges"</h2>
+    </div>
+    
+    <div class="info-box mb-6">
+      <h3 class="text-2xl font-bold text-purple-900 mb-3">💡 What Does This Mean?</h3>
+      <p class="text-lg text-gray-800 leading-relaxed mb-4">
+        Imagine you're given a simple list of connections (edges) like this:
+      </p>
+      <div class="bg-white p-4 rounded-lg shadow-inner mb-4">
+        <code class="text-xl font-semibold text-purple-700">edges = [(0, 1), (1, 2), (2, 3), (0, 3), (1, 4)]</code>
+      </div>
+      <p class="text-lg text-gray-800 leading-relaxed mb-3">
+        This tells you: <span class="highlight-yellow">0 connects to 1</span>, <span class="highlight-yellow">1 connects to 2</span>, and so on.
+      </p>
+      <p class="text-lg text-gray-800 leading-relaxed font-semibold">
+        🎯 Your Task: Transform this raw list into a <strong>data structure</strong> that lets you efficiently traverse (visit) all nodes!
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-xl font-bold mb-3 text-gray-800">📝 Input Your Edges</h3>
+        <p class="text-sm text-gray-600 mb-2">Enter edges in format: 0-1 (one per line)</p>
+        <textarea id="edgeInput" class="w-full p-4 border-4 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none text-lg" rows="6" style="resize: none;">0-1
+1-2
+2-3
+0-3
+1-4</textarea>
+        <button onclick="buildGraph()" class="w-full mt-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl">
+          🚀 Build My Graph!
+        </button>
+      </div>
+      
+      <div>
+        <h3 class="text-xl font-bold mb-3 text-gray-800">🎨 Visual Representation</h3>
+        <canvas id="graphCanvas" width="400" height="350" class="border-4 border-purple-300 rounded-xl bg-gradient-to-br from-purple-50 to-pink-50 w-full shadow-lg"></canvas>
+        <p class="text-sm text-gray-600 mt-2 text-center">👆 Your graph appears here</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- SECTION 2: The Three Representations (NOW COMBINED WITH STEP 3) -->
+  <div class="glass-card p-8 mb-8 animate-in">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="text-5xl">📊</span>
+      <h2 class="text-4xl font-bold gradient-text">Step 2: The Three Ways to Store Your Graph (And Why One Wins)</h2>
+    </div>
+
+    <p class="text-lg text-gray-700 mb-8 leading-relaxed">
+      Once you have edges, you need to <strong>organize them</strong>. Here are the 3 common ways, with their code, pros, and cons all in one place.
+    </p>
+
+    <!-- Representation 1: Adjacency Matrix (COMBINED) -->
+    <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-2xl border-4 border-blue-300">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-4xl">1️⃣</span>
+        <h3 class="text-3xl font-bold text-blue-900">Adjacency Matrix</h3>
+      </div>
+      
+      <p class="text-lg text-gray-800 mb-4">
+        A <strong>2D array</strong> where <code class="bg-blue-200 px-2 py-1 rounded">matrix[i][j] = 1</code> means node <strong>i</strong> connects to node <strong>j</strong>.
+      </p>
+      
+      <div class="bg-white p-4 rounded-xl shadow-lg mb-4" id="matrixContainer">
+        <!-- Matrix will be inserted here -->
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div class="bg-green-100 p-4 rounded-lg border-2 border-green-400">
+          <p class="font-bold text-green-800 mb-2">✅ Pros:</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>O(1) Lookup:</strong> Instantly check "Is A connected to B?" with <code class="bg-green-200">matrix[A][B]</code>.</li>
+            <li>• <strong>Simple (for dense graphs):</strong> Easy to visualize if your graph is "dense" (many connections).</li>
+          </ul>
+        </div>
+        <div class="bg-red-100 p-4 rounded-lg border-2 border-red-400">
+          <p class="font-bold text-red-800 mb-2">❌ Cons:</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>O(N²) Space:</strong> This is the killer. It wastes *enormous* memory! For 10,000 nodes, you need 100,000,000 spots, even for just a few edges.</li>
+            <li>• <strong>Slow Neighbor Iteration:</strong> To find all of A's neighbors, you must scan its *entire row* (O(N) time), even if it only has 1 neighbor.</li>
+            <li>• <strong>Requires Numeric Nodes:</strong> Bad for string nodes (like 'Wiganz' -> 'Home') unless you add a mapping layer.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Code Block and Deep Dive (Moved from Step 3) -->
+      <div class="mt-6">
+        <h4 class="text-xl font-bold text-blue-900 mb-3">🎨 The Code (Python)</h4>
+        <div class="code-block text-xs">
+<pre><span class="comment"># Python</span>
+<span class="keyword">def</span> <span class="function">build_graph</span>(edges, n):
+    matrix = [[<span class="number">0</span>]*n <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n)]
+    <span class="keyword">for</span> u, v <span class="keyword">in</span> edges:
+        matrix[u][v] = <span class="number">1</span>
+        matrix[v][u] = <span class="number">1</span>
+    <span class="keyword">return</span> matrix
+
+<span class="comment"># Problem: Need to know 'n'!</span>
+<span class="comment"># Lots of nested indexing</span></pre>
+        </div>
+        
+        <div class="mt-4 p-3 bg-blue-100 border-2 border-blue-500 rounded-lg">
+          <h5 class="font-bold text-blue-900 mb-2">💡 Code Deep-Dive:</h5>
+          <code class="text-sm text-blue-900 font-mono">[[0]*n for _ in range(n)]</code>
+          <p class="text-sm text-gray-800 mt-2">This is Python "list comprehension," a one-line loop to build a <strong>square n x n matrix</strong>.</p>
+          <p class="text-sm text-gray-800 mt-2">Let's trace it for `n = 5`:</p>
+          <ul class="text-sm text-gray-800 space-y-2 ml-4 mt-2 list-disc">
+            <li><strong>Part 1: The "Inner" Row <code>[0]*n</code></strong>
+              <br>This <i>first</i> creates a single row. `[0] * 5` becomes `[0, 0, 0, 0, 0]`.
+            </li>
+            <li><strong>Part 2: The "Outer" Loop <code>for _ in range(n)</code></strong>
+              <br>This says "Create that inner row `n` (5) times." It builds 5 *separate* copies of that row.
+            </li>
+            <li><strong>Result (A 5x5 Square):</strong>
+<pre class="bg-blue-50 p-2 rounded mt-1 text-xs">
+[
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0]
+]</pre>
+            </li>
+            <!-- FIXED: Replaced the incorrect pitfall with the correct one -->
+            <li class="font-semibold"><strong>Common Pitfall:</strong> This is <i>different</i> from `[[0] for _ in range(n)]`, which would create a *tall, 5x1* matrix: `[[0], [0], [0], [0], [0]]`.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Representation 2: Adjacency List (COMBINED) -->
+    <div class="mb-8 p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl border-4 border-green-300">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-4xl">2️⃣</span>
+        <h3 class="text-3xl font-bold text-green-900">Adjacency List</h3>
+      </div>
+      
+      <p class="text-lg text-gray-800 mb-4">
+        An <strong>array of lists</strong> where <code class="bg-green-200 px-2 py-1 rounded">list[i]</code> contains all neighbors of node <strong>i</strong>.
+      </p>
+      
+      <div class="bg-white p-4 rounded-xl shadow-lg mb-4">
+        <pre id="listContainer" class="text-lg font-mono"></pre>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div class="bg-green-100 p-4 rounded-lg border-2 border-green-400">
+          <p class="font-bold text-green-800 mb-2">✅ Pros:</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>O(V + E) Space:</strong> Super memory-efficient! You *only* store the edges that actually exist. This is the academic standard.</li>
+            <li>• <strong>Fast Neighbor Iteration:</strong> Getting neighbors is O(degree) - just read the list at <code class="bg-green-200">list[i]</code>.</li>
+          </ul>
+        </div>
+        <div class="bg-red-100 p-4 rounded-lg border-2 border-red-400">
+          <p class="font-bold text-red-800 mb-2">❌ Cons:</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>O(degree) Lookup:</strong> To check "Is A connected to B?", you must scan A's *entire* neighbor list. Worst case: O(N).</li>
+            <li>• <strong>Requires Numeric Nodes:</strong> Just like the matrix, this is awkward for string nodes. You need a separate mapping from 'Wiganz' to index 0, 'Home' to index 1, etc. This is extra, bug-prone code.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Code Block and Deep Dive (Moved from Step 3) -->
+      <div class="mt-6">
+        <h4 class="text-xl font-bold text-green-900 mb-3">🎨 The Code (Python)</h4>
+        <div class="code-block text-xs">
+<pre><span class="comment"># Python</span>
+<span class="keyword">def</span> <span class="function">build_graph</span>(edges, n):
+    graph = [[] <span class="keyword">for</span> _ <span class="keyword">in</span> <span class="function">range</span>(n)]
+    <span class="keyword">for</span> u, v <span class="keyword">in</span> edges:
+        graph[u].<span class="function">append</span>(v)
+        graph[v].<span class="function">append</span>(u)
+    <span class="keyword">return</span> graph
+
+<span class="comment"># Better, but still need 'n'</span>
+<span class="comment"># Array index confusion</span></pre>
+        </div>
+        
+        <div class="mt-4 p-3 bg-green-100 border-2 border-green-500 rounded-lg">
+          <h5 class="font-bold text-green-900 mb-2">💡 Code Deep-Dive:</h5>
+          <code class="text-sm text-green-900 font-mono">[[] for _ in range(n)]</code>
+          <p class="text-sm text-gray-800 mt-2">This is the same "list comprehension" rhythm, but creating a <strong>list of empty "buckets"</strong>.</p>
+          <p class="text-sm text-gray-800 mt-2">Let's trace it for `n = 5`:</p>
+          <ul class="text-sm text-gray-800 space-y-2 ml-4 mt-2 list-disc">
+            <li><strong>Part 1: The "Inner" Element <code>[]</code></strong>
+              <br>This is the "thing" we want to make: a single, empty list. This will be the "bucket" to hold neighbors for one node.
+            </li>
+            <li><strong>Part 2: The "Outer" Loop <code>for _ in range(n)</code></strong>
+              <br>This says "Create this empty bucket `n` (5) times."
+            </li>
+            <li><strong>Result (A list of 5 empty lists):</strong>
+<pre class="bg-green-50 p-2 rounded mt-1 text-xs">
+[
+  [],  <span class="comment">// Bucket for node 0</span>
+  [],  <span class="comment">// Bucket for node 1</span>
+  [],  <span class="comment">// Bucket for node 2</span>
+  [],  <span class="comment">// Bucket for node 3</span>
+  []   <span class="comment">// Bucket for node 4</span>
+]</pre>
+            </li>
+            <!-- FIXED: Moved the "Photocopy Problem" explanation here -->
+            <li class="font-semibold"><strong>Critical Pitfall (MUST KNOW!): The "Photocopy Problem"</strong>
+              <br>This is <i>vitally different</i> from writing `graph = [[]] * n`. Let's paint the "why" — it's a core Python concept called <strong>Reference vs. Value</strong>.
+              <ul class="text-sm text-gray-800 space-y-2 ml-4 mt-2 list-disc">
+                <li><strong>The "Wrong" Way: <code>[[]] * n</code> (The Photocopy)</strong>
+                  <p class="mt-1">This *looks* like it makes `n` buckets, but it doesn't. It creates **ONE** bucket (list) in memory (e.g., at `Address 0x1000`). It then makes `n` *photocopies* of the *pointer* to that address. All 5 slots in your graph point to the *exact same bucket*!</p>
+                  <pre class="bg-red-50 text-red-900 p-2 rounded mt-2 text-xs font-mono">
+<span class="comment">// The 'graph' list (for n=5) just holds 5 copies of the SAME pointer:</span>
+graph = [ &lt;ptr_to_0x1000&gt;, &lt;ptr_to_0x1000&gt;, &lt;ptr_to_0x1000&gt;, &lt;ptr_to_0x1000&gt;, &lt;ptr_to_0x1000&gt; ]
+                  </pre>
+                  <p class="mt-1"><strong>The Bug:</strong> If you `graph[0].append(99)`, the bucket at `Address 0x1000` becomes `[99]`. When you later check `graph[1]`, it also points to `Address 0x1000` and will show `[99]`. Chaos!</p>
+                </li>
+                <li><strong>The "Right" Way: <code>[[] for _ in range(n)]</code> (The Artist's Loop)</strong>
+                  <p class="mt-1">This is a loop. It tells Python, "Run the 'create a new bucket' code `n` separate times."</p>
+                  <p class="mt-1"><strong>The Harmony:</strong> It creates 5 *truly separate* buckets in memory (at `Address 0x2000`, `0x3000`, etc.). `graph[0]` points to the first bucket, `graph[1]` points to the second, and so on. When you `graph[0].append(99)`, it *only* affects the first bucket. This is order. This is peace.</p>
+                  <pre class="bg-green-50 text-green-900 p-2 rounded mt-2 text-xs font-mono">
+<span class="comment">// The 'graph' list (for n=5) holds 5 DIFFERENT, UNIQUE pointers:</span>
+graph = [ &lt;ptr_to_0x2000&gt;, &lt;ptr_to_0x3000&gt;, &lt;ptr_to_0x4000&gt;, &lt;ptr_to_0x5000&gt;, &lt;ptr_to_0x6000&gt; ]
+                  </pre>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Representation 3: Hash Table (THE WINNER) (COMBINED) -->
+    <div class="mb-8 p-6 bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl border-4 border-purple-500 pulse-border">
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-4xl">3️⃣</span>
+        <h3 class="text-3xl font-bold text-purple-900">Hash Table of Sets ⭐</h3>
+        <span class="bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full font-bold text-sm">INTERVIEW CHAMPION</span>
+      </div>
+      
+      <p class="text-lg text-gray-800 mb-4">
+        A <strong>dictionary/object</strong> where keys are nodes and values are <strong>sets/objects</strong> of neighbors.
+      </p>
+      
+      <div class="bg-white p-4 rounded-xl shadow-lg mb-4">
+        <pre id="hashContainer" class="text-lg font-mono"></pre>
+      </div>
+      
+      <div class="grid md:grid-cols-2 gap-4 mt-4">
+        <div class="bg-green-100 p-4 rounded-lg border-2 border-green-400">
+          <p class="font-bold text-green-800 mb-2">✅ Pros (WHY IT WINS!):</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>Handles Any Node Type:</strong> This is the magic! Nodes can be numbers, strings ('Wiganz'), or anything hashable. No extra mapping needed!</li>
+            <li>• <strong>O(1) Average Lookup:</strong> Check "Is A connected to B?" with <code class="bg-green-200">graph[A].has(B)</code>. Blazing fast.</li>
+            <li>• <strong>Dynamic & Flexible:</strong> Add new nodes on the fly without resizing a giant matrix or array.</li>
+            <li>• <strong>Shortest Code:</strong> As you'll see, the code to build this is clean, intuitive, and less prone to off-by-one index errors.</li>
+          </ul>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg border-2 border-yellow-400">
+          <p class="font-bold text-yellow-800 mb-2">⚠️ Minor Cons:</p>
+          <ul class="text-sm text-gray-700 space-y-2">
+            <li>• <strong>Slight Memory Overhead:</strong> A hash table entry uses slightly more memory than a simple list item. (A tiny price to pay).</li>
+            <li>• <strong>Worst-case O(N) Lookup:</strong> If all keys hash to the same bucket (insanely rare), it can degrade. You won't care in an interview.</li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Code Block (Moved from Step 3) -->
+      <div class="mt-6">
+        <h4 class="text-xl font-bold text-purple-900 mb-3">🎨 The Code (Python)</h4>
+        <div class="code-block text-xs">
+<pre><span class="comment"># Python</span>
+<span class="keyword">def</span> <span class="function">build_graph</span>(edges):
+    graph = {}
+    <span class="keyword">for</span> u, v <span class="keyword">in</span> edges:
+        <span class="keyword">if</span> u <span class="keyword">not in</span> graph:
+            graph[u] = <span class="function">set</span>()
+        <span class="keyword">if</span> v <span class="keyword">not in</span> graph:
+            graph[v] = <span class="function">set</span>()
+        graph[u].<span class="function">add</span>(v)
+        graph[v].<span class="function">add</span>(u)
+    <span class="keyword">return</span> graph
+
+<span class="comment"># Clean! No 'n' needed!</span>
+<span class="comment"># Clear and flexible! 🔥</span></pre>
+        </div>
+      </div>
+      
+      <div class="info-box mt-6">
+        <h3 class="text-2xl font-bold text-purple-900 mb-3">💎 The Verdict</h3>
+        <p class="text-lg text-gray-800 leading-relaxed">
+          The <strong>Hash Table</strong> wins for interviews because it provides the ultimate balance of <span class="highlight-green">Performance</span> (fast lookups), <span class="highlight-green">Flexibility</span> (any node type), and <span class="highlight-green">Ease of Coding</span> (less code, fewer bugs).
+        </p>
+        <p class="text-lg text-gray-800 leading-relaxed mt-2">
+          It avoids the <span class="highlight-red">massive space waste</span> of the Matrix and the <span class="highlight-red">node-type inflexibility</span> of the List. In a timed setting, "flexible" and "easy" are your best friends.
+        </p>
+      </div>
+      
+      <!-- Interview Code (Moved from Step 3) -->
+      <div class="bg-purple-900 text-white p-6 rounded-xl mt-6">
+        <h3 class="text-2xl font-bold mb-4">💎 Hash Table Interview Code (Copy This!)</h3>
+        <div class="grid md:grid-cols-2 gap-4">
+          <div>
+            <p class="text-sm font-semibold mb-2 text-purple-200">Python 🐍</p>
+            <div class="code-block">
+<pre><span class="keyword">from</span> collections <span class="keyword">import</span> defaultdict
+
+graph = defaultdict(<span class="function">set</span>)
+<span class="keyword">for</span> u, v <span class="keyword">in</span> edges:
+    graph[u].<span class="function">add</span>(v)
+    graph[v].<span class="function">add</span>(u)
+
+<span class="comment"># That's it! 3 lines! 🔥</span></pre>
+            </div>
+          </div>
+          <div>
+            <p class="text-sm font-semibold mb-2 text-purple-200">JavaScript ⚡</p>
+            <div class="code-block">
+<pre><span class="keyword">const</span> graph = {};
+<span class="keyword">for</span> (<span class="keyword">let</span> [u, v] <span class="keyword">of</span> edges) {
+    <span class="keyword">if</span> (!graph[u]) graph[u] = <span class="keyword">new</span> <span class="function">Set</span>();
+    <span class="keyword">if</span> (!graph[v]) graph[v] = <span class="keyword">new</span> <span class="function">Set</span>();
+    graph[u].<span class="function">add</span>(v);
+    graph[v].<span class="function">add</span>(u);
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- SECTION 3: 2D Matrix as Graph (Formerly Step 4) -->
+  <div class="glass-card p-8 mb-8 animate-in">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="text-5xl">🗺️</span>
+      <h2 class="text-4xl font-bold gradient-text">Step 3: Understanding 2D Matrix as a Graph</h2>
+    </div>
+
+    <div class="info-box mb-6">
+      <h3 class="text-2xl font-bold text-purple-900 mb-3">🎯 What This Means</h3>
+      <p class="text-lg text-gray-800 leading-relaxed mb-4">
+        This is a *huge* interview pattern, my friend. Listen close. 
+        In many problems, you aren't given <code class="bg-purple-200">edges</code>. You're given a <strong>2D grid (matrix)</strong>.
+      </p>
+      <p class="text-lg text-gray-800 leading-relaxed mb-4">
+        Think of the grid as a map, a maze, or a pixel canvas:
+      </p>
+      <ul class="text-lg text-gray-800 space-y-2 ml-6 list-disc">
+        <li>• <span class="highlight-yellow">Each cell <code>(row, col)</code> is a 'node'</span> or a 'place' you can stand.</li>
+        <li>• <span class="highlight-yellow">The 'edges' (connections) are *implicit*</span>. They aren't stored in a list. The "edge" is just the *rule* that you can move from one cell to an adjacent one.</li>
+      </ul>
+      <p class="text-lg text-gray-800 leading-relaxed mt-4 font-bold">
+        The Core Task: Explore this "map" by moving from cell to cell, following the rules.
+      </p>
+       <p class="text-lg text-gray-800 leading-relaxed mt-2 font-semibold">
+        Example problems: "Number of Islands" 🏝️, "Maze Solver" 🧩, "Flood Fill" 🎨
+      </p>
+    </div>
+
+    <div class="bg-yellow-50 border-4 border-yellow-400 p-6 rounded-xl mb-6">
+      <h3 class="text-2xl font-bold text-yellow-900 mb-4">⚠️ The Two Critical Rules</h3>
+      <p class="text-lg text-gray-700 mb-4">To 'walk' this grid-graph without falling off or getting lost in circles, you *must* follow these two rules every single time you take a step:</p>
+      <div class="space-y-4">
+        <div class="bg-white p-4 rounded-lg border-2 border-yellow-500">
+          <p class="text-xl font-bold text-yellow-900 mb-2">1️⃣ Check Boundaries (Don't fall off the map!)</p>
+          <p class="text-gray-700 mb-2">Before visiting a cell <code>(r, c)</code>, ensure it's *inside* the grid:</p>
+          <div class="code-block text-sm">
+<pre><span class="comment"># Python</span>
+<span class="keyword">if</span> <span class="number">0</span> <= row < rows <span class="keyword">and</span> <span class="number">0</span> <= col < cols:
+    <span class="comment"># Safe to visit</span></pre>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-lg border-2 border-yellow-500">
+          <p class="text-xl font-bold text-yellow-900 mb-2">2️⃣ Track Visited Cells (Don't run in circles!)</p>
+          <p class="text-gray-700 mb-2">Use a <strong>Set</strong> to remember where you've been. This prevents infinite loops.</p>
+          <div class="code-block text-sm">
+<pre><span class="comment"># Python</span>
+visited = <span class="function">set</span>()
+<span class="keyword">if</span> (row, col) <span class="keyword">in</span> visited:
+    <span class="keyword">return</span> <span class="comment"># Already been here!</span>
+visited.<span class="function">add</span>((row, col))
+<span class="comment"># Now, explore from here...</span></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visual Explanation of Directions (Kept this, it's key!) -->
+    <div class="mt-8 bg-white p-6 rounded-xl border-4 border-purple-300">
+      <h3 class="text-2xl font-bold text-purple-900 mb-4">🧭 Understanding the "Implicit Edges"</h3>
+      <p class="text-lg text-gray-700 mb-4">The "edges" are just the 4 directions you can move. This array is your key to exploring. Memorize this pattern! 🔥</p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <h4 class="font-bold text-gray-800 mb-3">The Direction Array:</h4>
+          <div class="code-block">
+<pre>directions = [
+    (<span class="number">-1</span>, <span class="number">0</span>),  <span class="comment"># UP ⬆️</span>
+    (<span class="number">1</span>, <span class="number">0</span>),   <span class="comment"># DOWN ⬇️</span>
+    (<span class="number">0</span>, <span class="number">-1</span>),  <span class="comment"># LEFT ⬅️</span>
+    (<span class="number">0</span>, <span class="number">1</span>)    <span class="comment"># RIGHT ➡️</span>
+]
+<span class="comment"># To get neighbors of (r, c):</span>
+<span class="keyword">for</span> dr, dc <span class="keyword">in</span> directions:
+    new_row = r + dr
+    new_col = c + dc
+    <span class="comment"># ... (now check boundaries!)</span></pre>
+          </div>
+        </div>
+        
+        <div>
+          <h4 class="font-bold text-gray-800 mb-3">Visual Representation:</h4>
+          <div class="flex items-center justify-center">
+            <div class="grid grid-cols-3 gap-2">
+              <div></div>
+              <div class="bg-blue-400 text-white p-3 rounded-lg text-center font-bold">
+                ⬆️<br>(-1,0)
+              </div>
+              <div></div>
+              
+              <div class="bg-blue-400 text-white p-3 rounded-lg text-center font-bold">
+                ⬅️<br>(0,-1)
+              </div>
+              <div class="bg-purple-600 text-white p-3 rounded-lg text-center font-bold">
+                CURRENT<br>(row,col)
+              </div>
+              <div class="bg-blue-400 text-white p-3 rounded-lg text-center font-bold">
+                ➡️<br>(0,1)
+              </div>
+              
+              <div></div>
+              <div class="bg-blue-400 text-white p-3 rounded-lg text-center font-bold">
+                ⬇️<br>(1,0)
+              </div>
+              <div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- NEWLY ADDED EXPLANATION FOR DIRECTIONS -->
+      <div class="info-box mt-6">
+        <h3 class="text-2xl font-bold text-purple-900 mb-3">🎨 How The Directions Array Works (The Artist's View)</h3>
+        <p class="text-lg text-gray-800 leading-relaxed mb-4">
+          This is the "engine" of movement! Think of your grid like a map with coordinates `(row, col)`.
+          The `directions` array isn't an *address*, it's a *change* to your address.
+        </p>
+        <p class="text-lg text-gray-800 leading-relaxed mb-2">
+          We use `(dr, dc)` which means <strong>"change in row"</strong> and <strong>"change in column"</strong>.
+        </p>
+        <p class="text-lg text-gray-800 leading-relaxed font-bold mb-4">
+          New Location = `(row + dr, col + dc)`
+        </p>
+        
+        <ul class="text-md text-gray-800 space-y-3">
+          <li>• <strong>To Go UP ⬆️ `(-1, 0)`:</strong> "Change row by -1" (go up). "Change col by 0" (don't move sideways).</li>
+          
+          <li>• <strong>To Go DOWN ⬇️ `(1, 0)`:</strong> "Change row by +1" (go down). "Change col by 0" (don't move sideways).</li>
+          
+          <li>• <strong>To Go LEFT ⬅️ `(0, -1)`:</strong> "Change row by 0" (don't move up/down). "Change col by -1" (go left).</li>
+          
+          <li>• <strong>To Go RIGHT ➡️ `(0, 1)`:</strong> "Change row by 0" (don't move up/down). "Change col by +1" (go right).</li>
+        </ul>
+        
+        <p class="text-lg text-gray-800 leading-relaxed mt-4 font-semibold">
+          That `for` loop is just an elegant engine that applies these 4 "change" instructions to your current spot to find all 4 neighbors!
+        </p>
+      </div>
+      
+    </div>
+    
+    <div class="info-box mt-8">
+      <h3 class="text-2xl font-bold text-purple-900 mb-3">💡 What's Next?</h3>
+      <p class="text-lg text-gray-800 leading-relaxed mb-3">
+        Now that you understand the <strong>concept</strong> of a 2D matrix as a graph (nodes = cells, edges = movements), the next logical question is:
+      </p>
+      <p class="text-lg text-gray-800 leading-relaxed font-bold">
+        "In what *order* should I visit the cells?"
+      </p>
+      <p class="text-lg text-gray-800 leading-relaxed mt-3">
+        This "walking strategy" is a <strong>traversal algorithm</strong>. The two you *must* know are:
+      </p>
+      <ul class="text-lg text-gray-800 space-y-2 ml-6 list-disc mt-3">
+        <li>🌲 <strong>DFS (Depth-First Search):</strong> Go as deep as you can in one direction before backtracking. (Think: Solving a maze by always turning right).</li>
+        <li>🌊 <strong>BFS (Breadth-First Search):</strong> Explore layer by layer, like ripples in a pond. (Think: Finding the *shortest* path).</li>
+      </ul>
+      <p class="text-lg text-gray-800 leading-relaxed mt-4 font-semibold">
+        When you're ready, we'll fire up the visuals and code for those!
+      </p>
+    </div>
+
+  </div>
+
+  <!-- Summary Section -->
+  <div class="glass-card p-8 mb-8 bg-gradient-to-br from-purple-900 to-pink-900 text-white">
+    <h2 class="text-4xl font-bold mb-6 text-center">✨ Key Takeaways ✨</h2>
+    <div class="grid md:grid-cols-2 gap-6 text-lg">
+      <div class="bg-white bg-opacity-20 p-6 rounded-xl backdrop-blur">
+        <h3 class="text-2xl font-bold mb-3">🔗 Edge Lists → Graphs</h3>
+        <p>Convert raw connections into organized data structures for efficient traversal.</p>
+      </div>
+      
+      <div class="bg-white bg-opacity-20 p-6 rounded-xl backdrop-blur">
+        <h3 class="text-2xl font-bold mb-3">📊 Three Representations</h3>
+        <p>Matrix (O(N²) space), List (O(V+E) space), Hash Table (flexible & fast).</p>
+      </div>
+      
+      <div class="bg-white bg-opacity-20 p-6 rounded-xl backdrop-blur">
+        <h3 class="text-2xl font-bold mb-3">🏆 Hash Tables Win</h3>
+        <p>Shortest code, easiest to debug, handles any node type (strings!).</p>
+      </div>
+      
+      <div class="bg-white bg-opacity-20 p-6 rounded-xl backdrop-blur">
+        <h3 class="text-2xl font-bold mb-3">🗺️ 2D Matrix = Graph</h3>
+        <p>Nodes are cells, edges are movements. Check boundaries + track visited!</p>
+      </div>
+    </div>
+    
+    <div class="mt-8 text-center">
+      <p class="text-2xl font-light italic">
+        "Let your light shine before others." — Matthew 5:16 ✨
+      </p>
+      <p class="mt-4 text-xl">
+        Keep coding with faith and creativity! 🎨🕊️
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Global state
+let currentGraph = {};
+
+// Initialize on load
+// FIXED: Switched from window.onload to DOMContentLoaded for better reliability
+document.addEventListener('DOMContentLoaded', function() {
+  buildGraph();
+});
+
+// Build graph from edge input
+function buildGraph() {
+  const input = document.getElementById('edgeInput').value;
+  const lines = input.trim().split('\n');
+  
+  // Parse edges
+  const edges = [];
+  lines.forEach(line => {
+    const [u, v] = line.trim().split('-').map(x => parseInt(x.trim()));
+    if (!isNaN(u) && !isNaN(v)) {
+      edges.push([u, v]);
+    }
+  });
+  
+  // Build hash table representation (undirected)
+  currentGraph = {};
+  edges.forEach(([u, v]) => {
+    if (!currentGraph[u]) currentGraph[u] = new Set();
+    if (!currentGraph[v]) currentGraph[v] = new Set();
+    currentGraph[u].add(v);
+    currentGraph[v].add(u);
+  });
+  
+  // Draw visualizations
+  drawGraphVisualization();
+  displayAllRepresentations();
+}
+
+// Draw graph on canvas
+function drawGraphVisualization() {
+  const canvas = document.getElementById('graphCanvas');
+  const ctx = canvas.getContext('2d');
+  const width = canvas.width;
+  const height = canvas.height;
+  
+  ctx.clearRect(0, 0, width, height);
+  
+  const nodes = Object.keys(currentGraph).map(Number).sort((a, b) => a - b);
+  if (nodes.length === 0) return;
+  
+  // Calculate node positions in a circle
+  const positions = {};
+  const centerX = width / 2;
+  const centerY = height / 2;
+  const radius = Math.min(width, height) * 0.35;
+  
+  nodes.forEach((node, i) => {
+    const angle = (2 * Math.PI * i) / nodes.length - Math.PI / 2;
+    positions[node] = {
+      x: centerX + radius * Math.cos(angle),
+      y: centerY + radius * Math.sin(angle)
+    };
+  });
+  
+  // Draw edges first
+  ctx.strokeStyle = '#8b5cf6';
+  ctx.lineWidth = 3;
+  const drawnEdges = new Set();
+  
+  nodes.forEach(node => {
+    const neighbors = Array.from(currentGraph[node]);
+    neighbors.forEach(neighbor => {
+      // Ensure neighbor exists in positions (for partially built graphs)
+      if (positions[neighbor]) {
+        const edgeKey = [Math.min(node, neighbor), Math.max(node, neighbor)].join('-');
+        if (!drawnEdges.has(edgeKey)) {
+          drawnEdges.add(edgeKey);
+          
+          const from = positions[node];
+          const to = positions[neighbor];
+          
+          // Draw line with gradient
+          const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+          gradient.addColorStop(0, '#8b5cf6');
+      
+          gradient.addColorStop(1, '#ec4899');
+          ctx.strokeStyle = gradient;
+          
+          ctx.beginPath();
+          ctx.moveTo(from.x, from.y);
+          ctx.lineTo(to.x, to.y);
+          ctx.stroke();
+        }
+      }
+    });
+  });
+  
+  // Draw nodes
+  nodes.forEach(node => {
+    const pos = positions[node];
+    
+    // Outer glow
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 28, 0, 2 * Math.PI);
+    ctx.fillStyle = 'rgba(139, 92, 246, 0.3)';
+    ctx.fill();
+    
+    // Node circle
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, 24, 0, 2 * Math.PI);
+    const nodeGradient = ctx.createRadialGradient(pos.x, pos.y, 0, pos.x, pos.y, 24);
+    nodeGradient.addColorStop(0, '#a78bfa');
+    nodeGradient.addColorStop(1, '#7c3aed');
+    ctx.fillStyle = nodeGradient;
+    ctx.fill();
+    
+    // Border
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Node label
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 18px Poppins';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(node.toString(), pos.x, pos.y);
+  });
+}
+
+// Display all three representations
+function displayAllRepresentations() {
+  const nodes = Object.keys(currentGraph).map(Number).sort((a, b) => a - b);
+  const nodeMap = new Map(nodes.map((node, i) => [node, i]));
+  const n = nodes.length;
+  
+  // FIXED: Add checks to ensure elements exist before setting innerHTML
+  const matrixEl = document.getElementById('matrixContainer');
+  const listEl = document.getElementById('listContainer');
+  const hashEl = document.getElementById('hashContainer');
+
+  if (n === 0) {
+    if (matrixEl) matrixEl.innerHTML = '<p class="text-gray-500">Build a graph first!</p>';
+    if (listEl) listEl.innerHTML = '<p class="text-gray-500">Build a graph first!</p>';
+    if (hashEl) hashEl.innerHTML = '<p class="text-gray-500">Build a graph first!</p>';
+    return;
+  }
+  
+  // 1. Adjacency Matrix
+  let matrixHTML = '<div class="overflow-x-auto"><table class="border-collapse mx-auto">';
+  matrixHTML += '<tr><th class="border-2 border-gray-400 bg-gray-200 p-3 font-bold"></th>';
+  nodes.forEach(node => {
+    matrixHTML += `<th class="border-2 border-gray-400 bg-gray-200 p-3 font-bold">${node}</th>`;
+  });
+  matrixHTML += '</tr>';
+  
+  nodes.forEach(i => {
+    matrixHTML += `<tr><th class="border-2 border-gray-400 bg-gray-200 p-3 font-bold">${i}</th>`;
+    nodes.forEach(j => {
+      const hasEdge = currentGraph[i] && currentGraph[i].has(j);
+      const bgColor = hasEdge ? 'bg-green-300' : 'bg-white';
+      const textColor = hasEdge ? 'text-green-900 font-bold' : 'text-gray-400';
+      matrixHTML += `<td class="border-2 border-gray-300 p-3 text-center ${bgColor} ${textColor}">${hasEdge ? '1' : '0'}</td>`;
+    });
+    matrixHTML += '</tr>';
+  });
+  matrixHTML += '</table></div>';
+  if (matrixEl) matrixEl.innerHTML = matrixHTML;
+  
+  // 2. Adjacency List
+  let listHTML = '<div class="space-y-2">';
+  nodes.forEach((node, i) => {
+    const neighbors = currentGraph[node] ? Array.from(currentGraph[node]).sort((a, b) => a - b) : [];
+    listHTML += `<div class="flex items-center gap-3">
+      <span class="font-bold text-purple-700">${node} (index ${i}):</span>
+      <span class="text-gray-700">[${neighbors.join(', ')}]</span>
+    </div>`;
+  });
+  listHTML += '</div>';
+  if (listEl) listEl.innerHTML = listHTML;
+  
+  // 3. Hash Table
+  let hashHTML = '<span class="text-purple-400">{</span><br>';
+  nodes.forEach((node, idx) => {
+    const neighbors = currentGraph[node] ? Array.from(currentGraph[node]).sort((a, b) => a - b) : [];
+    const isLast = idx === nodes.length - 1;
+    hashHTML += `  <span class="text-blue-400">"${node}"</span>: <span class="text-yellow-400">{${neighbors.join(', ')}}</span>${isLast ? '' : ','}<br>`;
+  });
+  hashHTML += '<span class="text-purple-400">}</span>';
+  if (hashEl) hashEl.innerHTML = hashHTML;
+}
+
+// Utility sleep function (kept in case it's needed later)
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+</script>
+
+<script>window.parent.postMessage({ action: "ready" }, "*"); 
+ 
+window.console = new Proxy(console, {
+  get(target, prop) {
+    // FIXED: Removed the stray '.' before 'warn'
+    if (['log', 'warn', 'error'].includes(prop)) {
+      return new Proxy(target[prop], {
+        apply(fn, thisArg, args) {
+          fn.apply(thisArg, args);
+          window.parent.postMessage({ action: 'console', 
+            type: prop, 
+            args: args.map((arg) => {
+              try {
+                return JSON.stringify(arg).replace(/^["']|["']$/g, '');
+              } catch (e) {
+                return arg;
+              }
+            }) 
+          }, '*');
+        }
+      });
+    }
+    return target[prop];
+  }
+});
+</script>
+</body>
+</html>

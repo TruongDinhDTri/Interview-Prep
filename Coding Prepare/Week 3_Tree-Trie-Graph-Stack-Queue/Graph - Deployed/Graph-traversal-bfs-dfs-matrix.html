@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magical Grid Traversal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Crimson+Text:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #1a0b2e 0%, #16213e 25%, #0f3460 50%, #16213e 75%, #1a0b2e 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            color: #e0e0e0;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            display: grid;
+            /* DEFAULT: 3-column layout [Studio] [Canvas] [RightPane] */
+            grid-template-columns: 2fr 3.5fr 3.5fr;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            transition: grid-template-columns 0.4s ease-in-out;
+        }
+
+        /* NEW: Class for when studio is hidden */
+        .container.studio-hidden {
+            /* YOUR VISION: 3-column layout [Canvas] [Code] [Debug] */
+            grid-template-columns: 1.5fr 1.5fr 1fr;
+        }
+
+        /* NEW: This wrapper allows us to group [Code] + [Debug] in default
+           view, but "promote" them to top-level grid items when hidden! */
+        .right-pane {
+            display: flex;
+            flex-direction: column; /* Stacks Code on Debug by default */
+            gap: 15px;
+            overflow: hidden; /* <<< BUG FIX 1: Added this back! */
+        }
+
+        .container.studio-hidden .right-pane {
+            /* The magic! This wrapper vanishes, and its children
+               (#code-column, #debug-column) become grid items. */
+            display: contents;
+        }
+
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(138, 43, 226, 0.2);
+            padding: 20px;
+            overflow-y: auto; 
+            display: flex;
+            flex-direction: column;
+            transition: opacity 0.4s ease, padding 0.4s ease;
+        }
+        
+        /* NEW: Class to hide the studio panel */
+        .card.hidden {
+            display: none;
+        }
+
+        /* NEW: Floating button to show studio */
+        #showStudioBtn {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+            padding: 10px 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2em;
+            box-shadow: 0 4px 20px rgba(245, 87, 108, 0.4);
+            transition: all 0.3s;
+        }
+        #showStudioBtn:hover {
+            transform: scale(1.1);
+        }
+
+        h1, h2 {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(138, 43, 226, 0.5);
+        }
+        
+        .title-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative; /* For button positioning */
+        }
+
+        #toggleStudioBtn {
+            position: absolute;
+            right: 0;
+            top: 0;
+            background: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #c4b5d6;
+            padding: 5px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+        #toggleStudioBtn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #e0e0e0;
+        }
+
+
+        h1 { font-size: 1.8em; color: #b19cd9; }
+        h2 { font-size: 1.3em; color: #9d84c9; }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Crimson Text', serif;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .section {
+            margin-bottom: 15px;
+        }
+
+        .section label {
+            display: block;
+            margin-bottom: 8px;
+            color: #c4b5d6;
+            font-weight: 600;
+        }
+
+        .slider {
+            width: 100%;
+            margin-bottom: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        /* REFACTORED: This is now a standalone grid item */
+        #canvas-column {
+            position: relative; /* For floating controls */
+        }
+        
+        .canvas-container {
+            flex: 1;
+            display: flex;
+            /* align-items: center; */ /* <<< FIX: Removed this */
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            /* height: 100%; */ /* <<< FIX: Removed this (redundant) */
+        }
+
+        #grid {
+            display: grid;
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            aspect-ratio: 1 / 1;
+            max-width: 100%;
+            /* max-height: 100%; */ /* <<< FIX: Removed this */
+        }
+        
+        /* --- NEW: Floating Controls --- */
+        #floating-controls {
+            display: none; /* Hidden by default */
+            position: absolute;
+            bottom: 30px; /* Aligned with card padding */
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 10px;
+            gap: 10px;
+            z-index: 50;
+        }
+        
+        .container.studio-hidden #floating-controls {
+            display: flex; /* Show when studio is hidden! */
+        }
+        
+        .float-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Crimson Text', serif;
+            font-size: 1.1em;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .float-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        /* --- End Floating Controls --- */
+
+
+        .cell {
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(30, 30, 60, 0.5);
+        }
+
+        .cell:hover {
+            transform: scale(1.05);
+        }
+
+        .cell.start {
+            background: linear-gradient(135deg, #00ff87, #60efff);
+            box-shadow: 0 0 15px #00ff87;
+        }
+
+        .cell.end {
+            background: linear-gradient(135deg, #ff006e, #ff7e5f);
+            box-shadow: 0 0 15px #ff006e;
+        }
+
+        .cell.visited-queue {
+            background: rgba(100, 200, 255, 0.4);
+        }
+
+        .cell.visited-stack {
+            background: rgba(255, 180, 100, 0.4);
+        }
+
+        .cell.visited-explored {
+            background: rgba(50, 100, 200, 0.7);
+        }
+
+        .cell.visited-dfs-explored {
+            background: rgba(200, 100, 50, 0.7);
+        }
+
+        .cell.current {
+            background: #ffd700;
+            animation: pulse 1s infinite;
+        }
+
+        .cell.checking-neighbor {
+            background: #ff69b4;
+            animation: pulse 0.5s infinite;
+        }
+        
+        .cell.path {
+            background: linear-gradient(135deg, #ff8c00, #ffaf00);
+            box-shadow: 0 0 20px #ff8c00;
+            opacity: 0.9;
+        }
+
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        #code-column {
+            /* BUG FIX 1: Make this a flex: 1 item so it shares
+               space with debug-column. */
+            flex: 1;
+            min-height: 0; /* Required for flex children to scroll */
+            /* Removed flex: 0 0 auto and overflow: visible */
+        }
+
+        #debug-column {
+            flex: 1; /* By default, it grows to fill space */
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0; 
+            background: transparent; 
+            border: none;
+            box-shadow: none;
+        }
+        
+        /* When hidden, code & debug are top-level items and can grow */
+        .container.studio-hidden #code-column,
+        .container.studio-hidden #debug-column {
+            flex: 1;
+            padding: 20px; 
+            background: rgba(255, 255, 255, 0.05); 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 20px rgba(138, 43, 226, 0.2);
+        }
+        
+
+        .code-view {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+            /* BUG FIX 1: Removed flex: 1 and overflow-y: auto.
+               The parent .card will handle scrolling. */
+        }
+
+        .code-view pre {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8em;
+            line-height: 1.4;
+            color: #d0d0d0;
+            margin: 0;
+        }
+
+        .code-line {
+            padding: 3px 8px;
+            border-radius: 3px;
+            white-space: pre;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .code-line.highlight {
+            background: rgba(240, 147, 251, 0.3);
+            color: #f093fb;
+            font-weight: bold;
+        }
+        
+        .ds-panel, .parent-map-panel, .log-panel {
+            flex: 1; /* All 3 panels grow and share space */
+            display: flex;
+            flex-direction: column;
+            min-height: 150px; /* Ensure they all have some base height */
+        }
+        
+        .ds-view, .parent-map-view, .log-view {
+            flex: 1; /* Make the *view* grow */
+            min-height: 0;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 10px;
+        }
+
+        .ds-view {
+            padding: 0; /* DS view has special padding */
+            overflow: hidden;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            display: flex;
+        }
+        
+        .ds-view-queue {
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px;
+        }
+        
+        .ds-view-stack {
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        
+        .ds-item {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #764ba2;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            flex-shrink: 0; 
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .ds-label {
+            font-size: 0.8em;
+            color: #b19cd9;
+            text-transform: uppercase;
+            font-family: 'Cinzel', serif;
+            flex-shrink: 0;
+        }
+        
+        .ds-view-stack .ds-label {
+            border-bottom: 1px solid #764ba2;
+            padding-bottom: 5px;
+            width: 80%;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+        
+        .parent-map-view {
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            display: flex;
+            flex-direction: column;
+            gap: 5px; 
+        }
+        
+        .parent-map-entry {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .map-key {
+            color: #ffb86c; /* Orange */
+            font-weight: bold;
+        }
+        
+        .map-arrow {
+            color: #ff79c6; /* Pink */
+            opacity: 0.8;
+        }
+        
+        .map-val {
+            color: #8be9fd; /* Cyan */
+        }
+
+        .log-view {
+            overflow-y: auto;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            padding: 4px 0 4px 28px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            position: relative;
+            border-left: 3px solid #555;
+            padding-left: 25px; 
+        }
+        
+        .log-entry::before {
+            content: '💬';
+            position: absolute;
+            left: 5px;
+            top: 4px;
+            font-size: 0.9em;
+        }
+
+        .log-entry.log-start { color: #82aaff; border-left-color: #82aaff; }
+        .log-entry.log-start::before { content: '🎬'; }
+        
+        .log-entry.log-success { color: #73d19e; border-left-color: #73d19e; }
+        .log-entry.log-success::before { content: '🎉'; }
+
+        .log-entry.log-path { color: #ffb86c; border-left-color: #ffb86c; }
+        .log-entry.log-path::before { content: '🗺️'; }
+        
+        .log-entry.log-error { color: #ff9e99; border-left-color: #ff9e99; }
+        .log-entry.log-error::before { content: '❌'; }
+        
+        .log-entry.log-warn { color: #ffd700; border-left-color: #ffd7D0; }
+        .log-entry.log-warn::before { content: '⚠️'; }
+        
+        .log-entry.log-info { border-left-color: #82aaff; }
+        .log-entry.log-info::before { content: '🔍'; }
+        
+        .log-entry.log-add { border-left-color: #c3aeff; }
+        .log-entry.log-add::before { content: '➕'; }
+        
+        .log-entry.log-skip { border-left-color: #aaa; }
+        .log-entry.log-skip::before { content: '⏭️'; }
+        
+        .log-entry.log-done { border-left-color: #73d19e; }
+        .log-entry.log-done::before { content: '✔️'; }
+        
+        .legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            font-size: 0.85em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+        }
+
+        .debug-var {
+            color: #ff79c6;
+            font-weight: bold;
+        }
+
+        .scrollbar-custom {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(138, 43, 226, 0.5) rgba(0, 0, 0, 0.3);
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: rgba(138, 43, 226, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- NEW: Floating Show Button -->
+    <button id="showStudioBtn" title="Show Studio">🎭</button>
+
+    <div class="container">
+        <!-- Left Column -->
+        <div class="card scrollbar-custom" id="left-column"> 
+            <div class="title-container">
+                <h1>🎭 The Studio</h1>
+                <button id="toggleStudioBtn" title="Hide Studio">Hide</button>
+            </div>
+            
+            <div class="section">
+                <label>Grid Size: <span id="gridSizeVal">10</span></label>
+                <input type="range" class="slider" id="gridSize" min="5" max="20" value="10">
+            </div>
+
+            <div class="section">
+                <label>Speed: <span id="speedVal">2000</span>ms</label>
+                <input type="range" class="slider" id="speed" min="50" max="2000" value="2000" step="50">
+            </div>
+
+            <div class="section">
+                <label>Algorithm</label>
+                <div class="btn-group">
+                    <button class="btn btn-small active" id="bfsBtn">🌊 BFS - The Ripple</button>
+                    <button class="btn btn-small" id="dfsBtn">🌀 DFS - Maze Runner</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Directions</label>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" id="dir4" checked> 4-Way</label>
+                    <label><input type="checkbox" id="dir8"> 8-Way</label>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>Tool Palette</label>
+                <div class="btn-group">
+                    <button class="btn btn-small active" id="startTool">🟢 Set Start</button>
+                    <button class="btn btn-small" id="endTool">🔴 Set End</button>
+                    <button class="btn btn-small" id="clearBtn">🧹 Clear Grid</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <button class="btn" id="runBtn" style="width: 100%; padding: 15px; font-size: 1.1em;">🚀 Run Algorithm</button>
+            </div>
+
+            <div class="section">
+                <label>Playback Controls</label>
+                <div class="btn-group">
+                    <button class="btn btn-small" id="restartBtn">⏮ Restart</button>
+                    <button class="btn btn-small" id="prevBtn">⏪ Prev</button>
+                    <button class="btn btn-small" id="playBtn">▶ Play</button>
+                    <button class="btn btn-small" id="nextBtn">⏩ Next</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <label>📖 Legend</label>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #00ff87, #60efff);"></div>
+                        <span>Start</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ff006e, #ff7e5f);"></div>
+                        <span>End</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(100, 200, 255, 0.6);"></div>
+                        <span>Queued (BFS)</span>
+                    </div>
+                     <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(255, 180, 100, 0.6);"></div>
+                        <span>In Stack (DFS)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(50, 100, 200, 0.7);"></div>
+                        <span>Explored (BFS)</span>
+                    </div>
+                     <div class="legend-item">
+                        <div class="legend-color" style="background: rgba(200, 100, 50, 0.7);"></div>
+                        <span>Explored (DFS)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffd700;"></div>
+                        <span>Current</span>
+                    </div>
+                    <!-- NEW: Legend for Path -->
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ff8c00, #ffaf00);"></div>
+                        <span>Path</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Column -->
+        <div class="card" id="canvas-column">
+            <h1>🎨 The Canvas</h1>
+            <div class="canvas-container">
+                <div id="grid"></div>
+            </div>
+            <!-- NEW: Floating Controls -->
+            <div id="floating-controls">
+                <button class="float-btn" id="floatRestartBtn" title="Restart">⏮</button>
+                <button class="float-btn" id="floatPrevBtn" title="Previous Step">⏪</button>
+                <button class="float-btn" id="floatPlayBtn" title="Play/Pause">▶</button>
+                <button class="float-btn" id="floatNextBtn" title="Next Step">⏩</button>
+            </div>
+        </div>
+
+        <!-- REFACTORED: Right-hand content is now in a wrapper -->
+        <div class="right-pane">
+            
+            <!-- Code Panel (Now a direct child of the wrapper) -->
+            <div class="code-panel card" id="code-column">
+                <h2>🐍 Python Debug Mode</h2>
+                <div class="code-view" id="codeView"></div>
+            </div>
+            
+            <!-- Debug Stack (Wrapper for the 3 debug panels) -->
+            <div class="card scrollbar-custom" id="debug-column">
+                
+                <!-- Panel 1: Data Structure -->
+                <div class="ds-panel card" id="ds-panel">
+                    <h2 id="dsTitle">📊 Queue State</h2>
+                    <div class="ds-view" id="dsView">Empty</div>
+                </div>
+                
+                <!-- Panel 2: Parent Map -->
+                <div class="parent-map-panel card" id="parent-map-panel">
+                    <h2>🗺️ Parent Map (The Blueprint)</h2>
+                    <div class="parent-map-view scrollbar-custom" id="parentMapView">Empty</div>
+                </div>
+                
+                <!-- Panel 3: Action Log -->
+                <div class="log-panel card" id="log-panel">
+                    <h2>📜 Action Log</h2>
+                    <div class="log-view scrollbar-custom" id="logView"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let gridSize = 10;
+        let algorithm = 'bfs';
+        let tool = 'start';
+        let startNode = null;
+        let endNode = null;
+        let grid = [];
+        let steps = [];
+        let currentStep = -1;
+        let playInterval = null;
+        let speed = 2000;
+        let use4Dir = true;
+        let use8Dir = false;
+
+        // --- Element Caching ---
+        const gridEl = document.getElementById('grid');
+        const codeView = document.getElementById('codeView');
+        const dsView = document.getElementById('dsView');
+        const logView = document.getElementById('logView');
+        const dsTitle = document.getElementById('dsTitle');
+        const parentMapView = document.getElementById('parentMapView'); 
+        const gridSizeSlider = document.getElementById('gridSize');
+        const gridSizeVal = document.getElementById('gridSizeVal');
+        const speedSlider = document.getElementById('speed');
+        const speedVal = document.getElementById('speedVal');
+        const bfsBtn = document.getElementById('bfsBtn');
+        const dfsBtn = document.getElementById('dfsBtn');
+        const dir4Checkbox = document.getElementById('dir4');
+        const dir8Checkbox = document.getElementById('dir8');
+        const startToolBtn = document.getElementById('startTool');
+        const endToolBtn = document.getElementById('endTool');
+        const clearBtn = document.getElementById('clearBtn');
+        const runBtn = document.getElementById('runBtn');
+        
+        // Main Playback Controls
+        const restartBtn = document.getElementById('restartBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const playBtn = document.getElementById('playBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        
+        // --- NEW: Floating Controls Caching ---
+        const floatRestartBtn = document.getElementById('floatRestartBtn');
+        const floatPrevBtn = document.getElementById('floatPrevBtn');
+        const floatPlayBtn = document.getElementById('floatPlayBtn');
+        const floatNextBtn = document.getElementById('floatNextBtn');
+        
+        // --- NEW: Studio Toggle Caching ---
+        const containerEl = document.querySelector('.container');
+        const leftColumnEl = document.getElementById('left-column');
+        const toggleStudioBtn = document.getElementById('toggleStudioBtn');
+        const showStudioBtn = document.getElementById('showStudioBtn');
+
+
+        // --- Grid Functions ---
+
+        function initGrid() {
+            grid = [];
+            gridEl.innerHTML = '';
+            gridEl.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            
+            // BUG FIX 2: Removed all JS-based width/height calculations.
+            // The CSS (`aspect-ratio: 1/1`, `max-width: 100%`)
+            // will now handle the grid sizing perfectly.
+            
+            for (let r = 0; r < gridSize; r++) {
+                grid[r] = [];
+                for (let c = 0; c < gridSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.addEventListener('click', handleCellClick);
+                    gridEl.appendChild(cell);
+                    grid[r][c] = { state: 'unvisited', el: cell };
+                }
+            }
+
+            if (startNode) {
+                const [r, c] = startNode;
+                if (r < gridSize && c < gridSize) {
+                    grid[r][c].state = 'start';
+                    grid[r][c].el.className = 'cell start';
+                } else {
+                    startNode = null;
+                }
+            }
+
+            if (endNode) {
+                const [r, c] = endNode;
+                if (r < gridSize && c < gridSize) {
+                    grid[r][c].state = 'end';
+                    grid[r][c].el.className = 'cell end';
+                } else {
+                    endNode = null;
+                }
+            }
+
+            // Don't reset logs if we're just resizing
+            if (steps.length === 0) {
+                logView.innerHTML = '';
+                dsView.textContent = 'Empty';
+                parentMapView.innerHTML = '<div class="ds-label">Empty</div>'; 
+                highlightCode(-1);
+            } else {
+                // If we are resizing mid-playback, re-render the current step
+                goToStep(currentStep);
+            }
+            
+            speedVal.textContent = `${speed}ms`;
+        }
+
+        function handleCellClick(e) {
+            const r = parseInt(e.target.dataset.row);
+            const c = parseInt(e.target.dataset.col);
+
+            if (tool === 'start') {
+                if (startNode) { 
+                    const [or, oc] = startNode;
+                    if (grid[or] && grid[or][oc]) {
+                        grid[or][oc].state = 'unvisited';
+                        grid[or][oc].el.className = 'cell';
+                    }
+                }
+                startNode = [r, c];
+                grid[r][c].state = 'start';
+                grid[r][c].el.className = 'cell start';
+                tool = 'end'; 
+                startToolBtn.classList.remove('active');
+                endToolBtn.classList.add('active');
+            } else if (tool === 'end') {
+                if (endNode) { 
+                    const [or, oc] = endNode;
+                    if (grid[or] && grid[or][oc]) {
+                        grid[or][oc].state = 'unvisited';
+                        grid[or][oc].el.className = 'cell';
+                    }
+                }
+                endNode = [r, c];
+                grid[r][c].state = 'end';
+                grid[r][c].el.className = 'cell end';
+                tool = 'start'; 
+                endToolBtn.classList.remove('active');
+                startToolBtn.classList.add('active');
+            }
+        }
+
+        // --- Code View Functions ---
+
+        function getDirections() {
+            let dirs = [];
+            if (use4Dir) dirs.push([0,1], [1,0], [0,-1], [-1,0]);
+            if (use8Dir) dirs.push([1,1], [1,-1], [-1,1], [-1,-1]);
+            return dirs;
+        }
+
+        function generateBFSCode() {
+            const dirs = getDirections();
+            const dirStr = dirs.map(d => `(${d[0]}, ${d[1]})`).join(', ');
+            return `def bfs(grid, start, end):
+    # Initialize data structures
+    directions = [${dirStr}]
+    queue = []
+    visited = set()
+    parent = {}
+    
+    # Add start node to queue
+    queue.append(start)
+    visited.add(start)
+    parent[start] = None
+    
+    # Main BFS loop
+    while len(queue) > 0:
+        
+        # Dequeue the front element
+        current = queue.pop(0)
+        
+        # Check if we reached the goal
+        if current == end:
+            # Found it!
+            return parent # Return parent map
+        
+        # Explore all neighbors
+        for direction in directions:
+            neighbor_row = current[0] + direction[0]
+            neighbor_col = current[1] + direction[1]
+            neighbor = (neighbor_row, neighbor_col)
+            
+            # Check if neighbor is out of bounds (Row)
+            if neighbor_row < 0 or neighbor_row >= len(grid):
+                continue
+            # Check if neighbor is out of bounds (Col)
+            if neighbor_col < 0 or neighbor_col >= len(grid[0]):
+                continue
+            
+            # Check if already visited
+            if neighbor in visited:
+                continue
+            
+            # Mark as visited and enqueue
+            visited.add(neighbor)
+            parent[neighbor] = current
+            queue.append(neighbor)
+    
+    # No path found
+    return None
+
+def reconstruct_path(parent, start, end):
+    path = []
+    current = end
+    while current is not None:
+        path.append(current)
+        current = parent.get(str(current))
+    path.reverse()
+    return path`;
+        }
+
+        function generateDFSCode() {
+            const dirs = getDirections();
+            const dirStr = dirs.map(d => `(${d[0]}, ${d[1]})`).join(', ');
+            return `def dfs(grid, start, end):
+    # Initialize data structures
+    directions = [${dirStr}]
+    stack = []
+    visited = set()
+    parent = {}
+    
+    # Add start node to stack
+    stack.append(start)
+    visited.add(start)
+    parent[start] = None
+    
+    # Main DFS loop
+    while len(stack) > 0:
+        
+        # Pop from stack
+        current = stack.pop()
+        
+        # Check if we reached the goal
+        if current == end:
+            # Found it!
+            return parent # Return parent map
+        
+        # Explore all neighbors
+        for direction in directions:
+            neighbor_row = current[0] + direction[0]
+            neighbor_col = current[1] + direction[1]
+            neighbor = (neighbor_row, neighbor_col)
+            
+            # Check if neighbor is out of bounds (Row)
+            if neighbor_row < 0 or neighbor_row >= len(grid):
+                continue
+            # Check if neighbor is out of bounds (Col)
+            if neighbor_col < 0 or neighbor_col >= len(grid[0]):
+                continue
+            
+            # Check if already visited
+            if neighbor in visited:
+                continue
+            
+            # Mark as visited and push to stack
+            visited.add(neighbor)
+            parent[neighbor] = current
+            stack.append(neighbor)
+    
+    # No path found
+    return None
+
+def reconstruct_path(parent, start, end):
+    path = []
+    current = end
+    while current is not None:
+        path.append(current)
+        current = parent.get(str(current))
+    path.reverse()
+    return path`;
+        }
+
+
+        function updateCodeView() {
+            const code = algorithm === 'bfs' ? generateBFSCode() : generateDFSCode();
+            const lines = code.split('\n');
+            let html = '<pre>';
+            lines.forEach((line, i) => {
+                // Line numbers start from 1 for display, but index is 0
+                html += `<div class="code-line" data-line="${i + 1}">${escapeHtml(line)}</div>`;
+            });
+            html += '</pre>';
+            codeView.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // --- Algorithm Execution ---
+
+        function runAlgorithm() {
+            if (!startNode || !endNode) {
+                addLog('⚠️ Please set both start and end nodes first!', {});
+                return;
+            }
+
+            pause();
+            steps = [];
+            currentStep = -1;
+            logView.innerHTML = '';
+            initGrid(); 
+            
+            if (algorithm === 'bfs') {
+                runBFS();
+            } else {
+                runDFS();
+            }
+
+            updateCodeView();
+            
+            if (steps.length > 0) {
+                addLog(`✅ Algorithm completed! Generated ${steps.length} steps. Press Play! 🎬`, {});
+                goToStep(0); 
+            } else {
+                addLog("😢 Something went wrong, no steps generated.", {});
+            }
+        }
+
+
+        function runBFS() {
+            const queue = [startNode];
+            const visited = new Set();
+            const parent = new Map();
+            visited.add(startNode.toString());
+            parent.set(startNode.toString(), null);
+
+            const directions = getDirections();
+            
+            // --- All line numbers are now 1-based ---
+            
+            steps.push({ line: 2, log: '🎬 Initializing data structures...', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 3, log: '...setting directions', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { dirs: '...' } });
+            steps.push({ line: 4, log: '...creating queue: []', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { queue: '[]' } });
+            steps.push({ line: 5, log: '...creating visited: set()', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { visited: 'set()' } });
+            steps.push({ line: 6, log: '...creating parent: {}', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { parent: '{}' } });
+
+            steps.push({ line: 8, log: 'Adding start node to queue...', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 9, log: `✅ Enqueued START node (${startNode[0]}, ${startNode[1]})`, gridState: [[startNode[0], startNode[1], 'visited-queue']], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { queue: `[(${startNode[0]}, ${startNode[1]})]` } });
+            visited.add(startNode.toString());
+            steps.push({ line: 10, log: `...marked START as visited`, gridState: [], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { visited: `{(${startNode[0]}, ${startNode[1]})}` } });
+            parent.set(startNode.toString(), null);
+            steps.push({ line: 11, log: `...set START parent to None`, gridState: [], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { parent: `{(${startNode[0]}, ${startNode[1]}): None}` } });
+
+            steps.push({ line: 13, log: 'Entering main loop...', gridState: [], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+
+            while (queue.length > 0) {
+                steps.push({ line: 14, log: '...while len(queue) > 0 (True)', gridState: [], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { queue_len: queue.length } });
+                
+                const preDequeueState = [...queue]; 
+                steps.push({ line: 16, log: 'Dequeuing front element...', gridState: [], dsState: preDequeueState, parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+                
+                const current = queue.shift(); 
+                const [r, c] = current;
+                steps.push({ line: 17, log: `🔍 Dequeued current = (${r}, ${c})`, gridState: [[r, c, 'current']], dsState: preDequeueState, parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { current: `(${r}, ${c})` } });
+
+                steps.push({ line: 19, log: `👀 Check if current == end...`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { current: `(${r}, ${c})`, end: `(${endNode[0]}, ${endNode[1]})` } });
+                if (r === endNode[0] && c === endNode[1]) {
+                    steps.push({ line: 20, log: `... (True) We found the end!`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                    
+                    steps.push({ line: 21, log: `🎉 Found it!`, gridState: [[r, c, 'current']], dsState: [], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                    steps.push({ line: 22, log: `...returning parent map.`, gridState: [[r, c, 'current']], dsState: [], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+
+                    // --- NEW: Run Path Reconstruction ---
+                    const pathSteps = runPathReconstruction(parent, startNode, endNode);
+                    steps = steps.concat(pathSteps);
+                    return;
+                }
+                steps.push({ line: 20, log: `... (False) Keep searching.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+
+
+                steps.push({ line: 24, log: `🧭 Exploring neighbors of (${r}, ${c})`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                steps.push({ line: 25, log: `...looping through directions...`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+
+                for (let dir of directions) {
+                    const nr = r + dir[0];
+                    steps.push({ line: 26, log: `...dir (${dir[0]},${dir[1]}) -> new_row = ${nr}`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { dir: `(${dir[0]},${dir[1]})`, neighbor_row: nr } });
+                    
+                    const nc = c + dir[1];
+                    steps.push({ line: 27, log: `...dir (${dir[0]},${dir[1]}) -> new_col = ${nc}`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { neighbor_col: nc } });
+
+                    const neighbor = [nr, nc];
+                    const nKey = neighbor.toString();
+                    steps.push({ line: 28, log: `...neighbor = (${nr}, ${nc})`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: { neighbor: `(${nr}, ${nc})` } });
+
+                    steps.push({ line: 30, log: `...is row ${nr} out of bounds?`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (nr < 0 || nr >= gridSize) {
+                        steps.push({ line: 31, log: `❌ (True) Out of bounds. Skipping.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 31, log: `... (False) Row is OK.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 32, log: `...is col ${nc} out of bounds?`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (nc < 0 || nc >= gridSize) {
+                        steps.push({ line: 33, log: `❌ (True) Out of bounds. Skipping.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 33, log: `... (False) Col is OK.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 35, log: `...is (${nr},${nc}) already visited?`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (visited.has(nKey)) {
+                        steps.push({ line: 36, log: `... (True) Already visited.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                        steps.push({ line: 37, log: `⏭️ Skipping.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 36, log: `... (False) Not visited.`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 39, log: `Marking as visited and enqueuing...`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    
+                    visited.add(nKey); 
+                    steps.push({ line: 40, log: `...visited.add((${nr},${nc}))`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    
+                    parent.set(nKey, current);
+                    steps.push({ line: 41, log: `...parent[(${nr},${nc})] = (${r},${c})`, gridState: [[r, c, 'current'], [nr, nc, 'visited-queue']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    const preQueueState = [...queue]; 
+                    queue.push(neighbor); 
+                    steps.push({ line: 42, log: `➕ Enqueued (${nr}, ${nc})`, gridState: [[r, c, 'current'], [nr, nc, 'visited-queue']], dsState: preQueueState, parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { queue_size: queue.length } });
+                
+                    steps.push({ line: 25, log: `...checking next direction...`, gridState: [[r, c, 'current']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                }
+                
+                steps.push({ line: 14, log: `✔️ Finished exploring (${r}, ${c}). Back to loop.`, gridState: [[r, c, 'visited-explored']], dsState: [...queue], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            }
+
+            steps.push({ line: 14, log: `...while len(queue) > 0 (False). Loop ends.`, gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { queue_len: 0 } });
+            
+            steps.push({ line: 44, log: 'No path found.', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 45, log: '😢 Returning None.', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+        }
+
+        function runDFS() {
+            const stack = [startNode];
+            const visited = new Set();
+            const parent = new Map();
+            visited.add(startNode.toString());
+            parent.set(startNode.toString(), null);
+
+            const directions = getDirections();
+
+            steps.push({ line: 2, log: '🎬 Initializing data structures...', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 3, log: '...setting directions', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { dirs: '...' } });
+            steps.push({ line: 4, log: '...creating stack: []', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { stack: '[]' } });
+            steps.push({ line: 5, log: '...creating visited: set()', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { visited: 'set()' } });
+            steps.push({ line: 6, log: '...creating parent: {}', gridState: [], dsState: [], parentMapState: {}, current: null, checkingNeighbor: null, vars: { parent: '{}' } });
+
+            steps.push({ line: 8, log: 'Adding start node to stack...', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 9, log: `✅ Pushed START node (${startNode[0]}, ${startNode[1]})`, gridState: [[startNode[0], startNode[1], 'visited-stack']], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { stack: `[(${startNode[0]}, ${startNode[1]})]` } });
+            visited.add(startNode.toString());
+            steps.push({ line: 10, log: `...marked START as visited`, gridState: [], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { visited: `{(${startNode[0]}, ${startNode[1]})}` } });
+            parent.set(startNode.toString(), null);
+            steps.push({ line: 11, log: `...set START parent to None`, gridState: [], dsState: [startNode], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { parent: `{(${startNode[0]}, ${startNode[1]}): None}` } });
+
+            steps.push({ line: 13, log: 'Entering main loop...', gridState: [], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            
+            while (stack.length > 0) {
+                 steps.push({ line: 14, log: '...while len(stack) > 0 (True)', gridState: [], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { stack_len: stack.length } });
+                
+                const prePopState = [...stack]; 
+                steps.push({ line: 16, log: 'Popping from stack...', gridState: [], dsState: prePopState, parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+                
+                const current = stack.pop(); 
+                const [r, c] = current;
+                steps.push({ line: 17, log: `🔍 Popped current = (${r}, ${c})`, gridState: [[r, c, 'current']], dsState: prePopState, parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { current: `(${r}, ${c})` } });
+
+                steps.push({ line: 19, log: `👀 Check if current == end...`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { current: `(${r}, ${c})`, end: `(${endNode[0]}, ${endNode[1]})` } });
+                if (r === endNode[0] && c === endNode[1]) {
+                    steps.push({ line: 20, log: `... (True) We found the end!`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                    
+                    steps.push({ line: 21, log: `🎉 Found it!`, gridState: [[r, c, 'current']], dsState: [], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                    steps.push({ line: 22, log: `...returning parent map.`, gridState: [[r, c, 'current']], dsState: [], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+
+                    // --- NEW: Run Path Reconstruction ---
+                    const pathSteps = runPathReconstruction(parent, startNode, endNode);
+                    steps = steps.concat(pathSteps);
+                    return;
+                }
+                steps.push({ line: 20, log: `... (False) Keep searching.`, gridState: [[r, c, 'visited-dfs-explored']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} }); 
+
+
+                steps.push({ line: 24, log: `🧭 Exploring neighbors of (${r}, ${c})`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                steps.push({ line: 25, log: `...looping through directions...`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+
+                for (let dir of directions) {
+                    const nr = r + dir[0];
+                    steps.push({ line: 26, log: `...dir (${dir[0]},${dir[1]}) -> new_row = ${nr}`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { dir: `(${dir[0]},${dir[1]})`, neighbor_row: nr } });
+                    
+                    const nc = c + dir[1];
+                    steps.push({ line: 27, log: `...dir (${dir[0]},${dir[1]}) -> new_col = ${nc}`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { neighbor_col: nc } });
+
+                    const neighbor = [nr, nc];
+                    const nKey = neighbor.toString();
+                    steps.push({ line: 28, log: `...neighbor = (${nr}, ${nc})`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: { neighbor: `(${nr}, ${nc})` } });
+
+                    steps.push({ line: 30, log: `...is row ${nr} out of bounds?`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (nr < 0 || nr >= gridSize) {
+                        steps.push({ line: 31, log: `❌ (True) Out of bounds. Skipping.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 31, log: `... (False) Row is OK.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 32, log: `...is col ${nc} out of bounds?`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (nc < 0 || nc >= gridSize) {
+                        steps.push({ line: 33, log: `❌ (True) Out of bounds. Skipping.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 33, log: `... (False) Col is OK.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 35, log: `...is (${nr},${nc}) already visited?`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    if (visited.has(nKey)) {
+                        steps.push({ line: 36, log: `... (True) Already visited.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                        steps.push({ line: 37, log: `⏭️ Skipping.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                        continue;
+                    }
+                    steps.push({ line: 36, log: `... (False) Not visited.`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    steps.push({ line: 39, log: `Marking as visited and pushing...`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    
+                    visited.add(nKey); 
+                    steps.push({ line: 40, log: `...visited.add((${nr},${nc}))`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+                    
+                    parent.set(nKey, current);
+                    steps.push({ line: 41, log: `...parent[(${nr},${nc})] = (${r},${c})`, gridState: [[r, c, 'current'], [nr, nc, 'visited-stack']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: neighbor, vars: {} });
+
+                    const preStackState = [...stack]; 
+                    stack.push(neighbor); 
+                    steps.push({ line: 42, log: `➕ Pushed (${nr}, ${nc})`, gridState: [[r, c, 'current'], [nr, nc, 'visited-stack']], dsState: preStackState, parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: { stack_size: stack.length } });
+                
+                    steps.push({ line: 25, log: `...checking next direction...`, gridState: [[r, c, 'current']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: current, checkingNeighbor: null, vars: {} });
+                }
+                
+                steps.push({ line: 14, log: `✔️ Finished exploring (${r}, ${c}). Back to loop.`, gridState: [[r, c, 'visited-dfs-explored']], dsState: [...stack], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            }
+
+            steps.push({ line: 14, log: `...while len(stack) > 0 (False). Loop ends.`, gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: { stack_len: 0 } });
+            
+            steps.push({ line: 44, log: 'No path found.', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+            steps.push({ line: 45, log: '😢 Returning None.', gridState: [], dsState: [], parentMapState: Object.fromEntries(parent), current: null, checkingNeighbor: null, vars: {} });
+        }
+        
+        // --- NEW: Path Reconstruction Function ---
+        function runPathReconstruction(parent, start, end) {
+            const pathSteps = [];
+            let current = end;
+            const parentMapObj = Object.fromEntries(parent); // For display
+            const dsState = (algorithm === 'bfs') ? dsView.innerHTML : dsView.innerHTML; // Get final state
+            
+            const startLine = (algorithm === 'bfs' ? 47 : 47); // Line number for reconstruct_path
+            
+            pathSteps.push({ 
+                line: startLine, 
+                log: '🗺️ Calling reconstruct_path()', 
+                gridState: [], 
+                dsState: [], 
+                parentMapState: parentMapObj, 
+                current: end, 
+                checkingNeighbor: null, 
+                vars: { parent: '...', start: `(${start[0]},${start[1]})`, end: `(${end[0]},${end[1]})` } 
+            });
+            
+            pathSteps.push({ line: startLine + 1, log: '...path = []', gridState: [], dsState: [], parentMapState: parentMapObj, current: end, checkingNeighbor: null, vars: { path: '[]' } });
+            pathSteps.push({ line: startLine + 2, log: `...current = end (${end[0]},${end[1]})`, gridState: [[end[0], end[1], 'path']], dsState: [], parentMapState: parentMapObj, current: end, checkingNeighbor: null, vars: { current: `(${end[0]},${end[1]})` } });
+
+            while (current) {
+                const [r, c] = current;
+                const currentKey = current.toString();
+                const parentNode = parent.get(currentKey);
+                
+                pathSteps.push({ line: startLine + 3, log: '...while current is not None (True)', gridState: [[r, c, 'path']], dsState: [], parentMapState: parentMapObj, current: current, checkingNeighbor: null, vars: {} });
+                pathSteps.push({ line: startLine + 4, log: `...path.append((${r}, ${c}))`, gridState: [[r, c, 'path']], dsState: [], parentMapState: parentMapObj, current: current, checkingNeighbor: null, vars: {} });
+                
+                let parentLog = parentNode ? `(${parentNode[0]},${parentNode[1]})` : 'None';
+                pathSteps.push({ line: startLine + 5, log: `...current = parent.get((${r},${c})) -> ${parentLog}`, gridState: [[r, c, 'path']], dsState: [], parentMapState: parentMapObj, current: current, checkingNeighbor: null, vars: { current: parentLog } });
+
+                current = parentNode;
+                
+                if (current) {
+                    const [nr, nc] = current;
+                    // Add a step to show the *next* node in the path
+                    pathSteps.push({ line: startLine + 3, log: `...looping, current is now (${nr},${nc})`, gridState: [[nr, nc, 'path']], dsState: [], parentMapState: parentMapObj, current: current, checkingNeighbor: null, vars: {} });
+                }
+            }
+
+            pathSteps.push({ line: startLine + 3, log: '...while current is not None (False)', gridState: [], dsState: [], parentMapState: parentMapObj, current: null, checkingNeighbor: null, vars: {} });
+            pathSteps.push({ line: startLine + 6, log: '...reversing path', gridState: [], dsState: [], parentMapState: parentMapObj, current: null, checkingNeighbor: null, vars: {} });
+            pathSteps.push({ line: startLine + 7, log: '...return path', gridState: [], dsState: [], parentMapState: parentMapObj, current: null, checkingNeighbor: null, vars: {} });
+            
+            pathSteps.push({ line: -1, log: '✨ Path Reconstructed! ✨', gridState: [], dsState: [], parentMapState: parentMapObj, current: null, checkingNeighbor: null, vars: {} });
+            
+            return pathSteps;
+        }
+
+
+        // --- Playback Controls ---
+
+        function goToStep(step) {
+            if (step < 0 || step >= steps.length) return;
+            currentStep = step;
+            
+            // Handle edge case where step is out of bounds
+            if (!steps[currentStep]) return; 
+            
+            const s = steps[currentStep];
+
+            // 1. Reset grid
+            for (let r = 0; r < gridSize; r++) {
+                for (let c = 0; c < gridSize; c++) {
+                    if (!grid[r] || !grid[r][c]) continue; 
+                    
+                    const node = grid[r][c];
+                    if (node.state !== 'start' && node.state !== 'end') {
+                        node.state = 'unvisited';
+                        node.el.className = 'cell';
+                    }
+                    // Always remove path/current/checking, they are overlays
+                    node.el.classList.remove('path', 'current', 'checking-neighbor');
+                }
+            }
+
+            // 2. Apply history (visited/queued states)
+            for (let i = 0; i <= currentStep; i++) {
+                const histStep = steps[i];
+                if (!histStep) continue;
+                
+                histStep.gridState.forEach(([r, c, state]) => {
+                    if (grid[r] && grid[r][c] && grid[r][c].state !== 'start' && grid[r][c].state !== 'end') {
+                        if (state !== 'path' && state !== 'current' && state !== 'checking-neighbor') { 
+                             grid[r][c].state = state;
+                             grid[r][c].el.className = `cell ${state}`;
+                        }
+                    }
+                });
+            }
+            
+            // --- NEW: 3. Apply Path Overlay ---
+            // Re-draw the *entire* path up to this point
+            const pathNodes = new Set();
+            for (let i = 0; i <= currentStep; i++) {
+                const histStep = steps[i];
+                if (!histStep) continue;
+                
+                histStep.gridState.forEach(([r, c, state]) => {
+                    if (state === 'path') {
+                        pathNodes.add(`${r},${c}`);
+                    }
+                });
+            }
+            pathNodes.forEach(nodeStr => {
+                const [r, c] = nodeStr.split(',').map(Number);
+                if (grid[r] && grid[r][c] && grid[r][c].state !== 'start' && grid[r][c].state !== 'end') {
+                    grid[r][c].el.classList.add('path');
+                }
+            });
+            
+            // 4. Apply current step's overlays (current/checking)
+            if (s.current) {
+                const [r, c] = s.current;
+                if (grid[r] && grid[r][c] && grid[r][c].state !== 'start' && grid[r][c].state !== 'end') {
+                     grid[r][c].el.classList.add('current');
+                }
+            }
+             if (s.checkingNeighbor) {
+                const [r, c] = s.checkingNeighbor;
+                 if (r >= 0 && r < gridSize && c >= 0 && c < gridSize && grid[r][c].state !== 'start' && grid[r][c].state !== 'end') {
+                    grid[r][c].el.classList.add('checking-neighbor');
+                }
+            }
+
+            // 5. Update UI panels
+            highlightCode(s.line);
+            updateDSView(s.dsState);
+            updateParentMapView(s.parentMapState); 
+            
+            // Re-render log if going backward
+            if (step < logView.children.length - 1) {
+                logView.innerHTML = '';
+                for (let i = 0; i <= currentStep; i++) {
+                    if (steps[i]) addLog(steps[i].log, steps[i].vars);
+                }
+            } else {
+                 addLog(s.log, s.vars);
+            }
+        }
+        
+        function highlightCode(line) {
+            document.querySelectorAll('.code-line').forEach(el => {
+                el.classList.remove('highlight');
+            });
+            if (line > -1) {
+                const el = document.querySelector(`.code-line[data-line="${line}"]`);
+                if (el) {
+                    el.classList.add('highlight');
+                }
+            }
+        }
+
+        function updateDSView(ds) {
+            dsView.innerHTML = ''; 
+            dsView.className = 'ds-view scrollbar-custom'; 
+            
+            // Handle empty or null ds
+            if (!ds || ds.length === 0) {
+                if (algorithm === 'bfs') dsView.classList.add('ds-view-queue');
+                else dsView.classList.add('ds-view-stack');
+                dsView.innerHTML = '<div class="ds-label">Empty</div>';
+                return;
+            }
+
+            if (algorithm === 'bfs') {
+                dsView.classList.add('ds-view-queue');
+                let html = '<div class="ds-label">Front</div>';
+                html += ds.map(n => `<div class="ds-item">(${n[0]}, ${n[1]})</div>`).join('');
+                html += '<div class="ds-label">Back</div>';
+                dsView.innerHTML = html;
+                dsView.scrollLeft = 0; 
+            } else {
+                dsView.classList.add('ds-view-stack');
+                let html = '<div class="ds-label">Top</div>';
+                html += [...ds].reverse().map(n => `<div class="ds-item">(${n[0]}, ${n[1]})</div>`).join('');
+                dsView.innerHTML = html;
+                dsView.scrollTop = 0; 
+            }
+        }
+
+        function updateParentMapView(parentMap) {
+            parentMapView.innerHTML = ''; 
+            
+            if (!parentMap || Object.keys(parentMap).length === 0) {
+                parentMapView.innerHTML = '<div class="ds-label">Empty</div>';
+                return;
+            }
+
+            if (startNode && parentMap[startNode.toString()] === null) {
+                const entry = document.createElement('div');
+                entry.className = 'parent-map-entry';
+                entry.innerHTML = `<span class="map-key">(${startNode.toString()})</span> <span class="map-arrow">→</span> <span class="map-val">None</span>`;
+                parentMapView.appendChild(entry);
+            }
+
+            for (const key in parentMap) {
+                if (startNode && key === startNode.toString()) continue; 
+                
+                const value = parentMap[key];
+                const entry = document.createElement('div');
+                entry.className = 'parent-map-entry';
+                const valStr = value ? `(${value[0]}, ${value[1]})` : 'None';
+                // Key might be "r,c" from map, needs parens
+                const keyStr = `(${key})`; 
+                
+                entry.innerHTML = `<span class="map-key">${keyStr}</span> <span class="map-arrow">→</span> <span class="map-val">${valStr}</span>`;
+                parentMapView.appendChild(entry);
+            }
+            parentMapView.scrollTop = parentMapView.scrollHeight;
+        }
+
+        function addLog(message, vars) {
+            if (!message) return; // Guard against undefined messages
+            
+            let varHtml = '';
+            if (vars && Object.keys(vars).length > 0) {
+                varHtml = ' | ' + Object.entries(vars).map(([key, val]) => `<span class="debug-var">${key}</span>: ${val}`).join(', ');
+            }
+            const entry = document.createElement('div');
+            
+            entry.className = 'log-entry';
+            if (message.includes('🎬')) entry.classList.add('log-start');
+            else if (message.includes('🎉')) entry.classList.add('log-success');
+            else if (message.includes('✅')) entry.classList.add('log-success');
+            else if (message.includes('✨')) entry.classList.add('log-success');
+            else if (message.includes('🗺️')) entry.classList.add('log-path'); // New Path Style
+            else if (message.includes('❌')) entry.classList.add('log-error');
+            else if (message.includes('😢')) entry.classList.add('log-error');
+            else if (message.includes('⚠️')) entry.classList.add('log-warn');
+            else if (message.includes('➕')) entry.classList.add('log-add');
+            else if (message.includes('⏭️')) entry.classList.add('log-skip');
+            else if (message.includes('✔️')) entry.classList.add('log-done');
+            else if (message.includes('🔍')) entry.classList.add('log-info');
+            else if (message.includes('👀')) entry.classList.add('log-info');
+
+            entry.innerHTML = `${message}${varHtml}`;
+            logView.appendChild(entry);
+            logView.scrollTop = logView.scrollHeight;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                goToStep(currentStep + 1);
+            } else {
+                pause(); 
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                goToStep(currentStep - 1);
+            }
+        }
+        
+        function play() {
+            if (playInterval) return; 
+            
+            // Update both buttons
+            playBtn.textContent = '❚❚ Pause';
+            floatPlayBtn.textContent = '❚❚';
+            
+            if (currentStep >= steps.length - 1) {
+                 goToStep(0); 
+            }
+            
+            if (currentStep <= 0) {
+                logView.innerHTML = '';
+            }
+
+            playInterval = setInterval(() => {
+                nextStep();
+                if (currentStep >= steps.length - 1) {
+                    pause(); 
+                }
+            }, speed);
+        }
+
+        function pause() {
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+                // Update both buttons
+                playBtn.textContent = '▶ Play';
+                floatPlayBtn.textContent = '▶';
+            }
+        }
+        
+        function togglePlayPause() {
+            if (playInterval) {
+                pause();
+            } else {
+                play();
+            }
+        }
+
+        function restart() {
+            pause();
+            goToStep(0);
+        }
+
+        // --- Event Listeners ---
+
+        gridSizeSlider.addEventListener('input', (e) => {
+            gridSize = parseInt(e.target.value);
+            gridSizeVal.textContent = gridSize;
+            steps = [];
+            currentStep = -1;
+            pause();
+            initGrid();
+        });
+
+        speedSlider.addEventListener('input', (e) => {
+            speed = parseInt(e.target.value); 
+            speedVal.textContent = `${speed}ms`;
+            if (playInterval) { 
+                pause();
+                play();
+            }
+        });
+
+        bfsBtn.addEventListener('click', () => {
+            algorithm = 'bfs';
+            bfsBtn.classList.add('active');
+            dfsBtn.classList.remove('active');
+            dsTitle.textContent = '📊 Queue State';
+            updateCodeView();
+            highlightCode(-1);
+        });
+
+        dfsBtn.addEventListener('click', () => {
+            algorithm = 'dfs';
+            dfsBtn.classList.add('active');
+            bfsBtn.classList.remove('active');
+            dsTitle.textContent = '📊 Stack State';
+            updateCodeView();
+            highlightCode(-1);
+        });
+
+        dir4Checkbox.addEventListener('change', () => {
+            use4Dir = dir4Checkbox.checked;
+            updateCodeView();
+        });
+
+        // FIXED SYNTAX ERROR HERE
+        dir8Checkbox.addEventListener('change', () => {
+            use8Dir = dir8Checkbox.checked;
+            updateCodeView();
+        });
+
+        startToolBtn.addEventListener('click', () => {
+            tool = 'start';
+            startToolBtn.classList.add('active');
+            endToolBtn.classList.remove('active');
+        });
+
+        endToolBtn.addEventListener('click', () => {
+            tool = 'end';
+            endToolBtn.classList.add('active');
+            startToolBtn.classList.remove('active');
+        });
+
+        clearBtn.addEventListener('click', () => {
+            startNode = null;
+            endNode = null;
+            steps = [];
+            currentStep = -1;
+            pause();
+            initGrid();
+        });
+
+        runBtn.addEventListener('click', runAlgorithm);
+        
+        // Main controls
+        restartBtn.addEventListener('click', restart);
+        prevBtn.addEventListener('click', prevStep);
+        playBtn.addEventListener('click', togglePlayPause);
+        nextBtn.addEventListener('click', nextStep);
+
+        // --- NEW: Floating Control Listeners ---
+        floatRestartBtn.addEventListener('click', restart);
+        floatPrevBtn.addEventListener('click', prevStep);
+        floatPlayBtn.addEventListener('click', togglePlayPause);
+        floatNextBtn.addEventListener('click', nextStep);
+        
+        
+        // --- NEW: Studio Toggle Listeners ---
+        toggleStudioBtn.addEventListener('click', () => {
+            leftColumnEl.classList.add('hidden');
+            containerEl.classList.add('studio-hidden');
+            showStudioBtn.style.display = 'block';
+            // We must re-init the grid because the canvas size changed
+            setTimeout(initGrid, 400); // Wait for animation
+        });
+        
+        showStudioBtn.addEventListener('click', () => {
+            leftColumnEl.classList.remove('hidden');
+            containerEl.classList.remove('studio-hidden');
+            showStudioBtn.style.display = 'none';
+            // We must re-init the grid because the canvas size changed
+            setTimeout(initGrid, 400); // Wait for animation
+        });
+        
+        // Resize listener
+        window.addEventListener('resize', () => {
+            pause();
+            // A small debounce
+            setTimeout(initGrid, 100);
+        });
+
+        // --- Initial Setup ---
+        initGrid();
+        updateCodeView();
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Abdul Bari Style: BFS & DFS Visualization</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .visualization-area {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #graphCanvas {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #ffffff;
+            cursor: pointer;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        button.reset {
+            background-color: #6c757d;
+        }
+
+        button.reset:hover {
+            background-color: #545b62;
+        }
+
+        .log-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            height: 500px;
+        }
+
+        .log-container {
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f8f9fa;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            background: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .log-entry.highlight {
+            border-left-color: #28a745;
+            background-color: #e8f5e9;
+        }
+
+        .log-entry.queue {
+            border-left-color: #ffc107;
+        }
+
+        .log-entry.stack {
+            border-left-color: #dc3545;
+        }
+
+        .data-structures {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .ds-box {
+            flex: 1;
+            border: 1px solid #ccc;
+            padding: 10px;
+            border-radius: 6px;
+            min-height: 60px;
+            background: white;
+        }
+
+        .ds-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .ds-content {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .ds-item {
+            padding: 4px 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Graph Traversal Visualizer</h1>
+    <p>Demonstrating BFS and DFS with Step-by-Step Logic (Abdul Bari Style)</p>
+
+    <div class="container">
+        <div class="visualization-area">
+            <canvas id="graphCanvas" width="600" height="400"></canvas>
+            
+            <div class="data-structures">
+                <div class="ds-box">
+                    <div class="ds-title">Queue / Stack</div>
+                    <div id="ds-container" class="ds-content"></div>
+                </div>
+                <div class="ds-box">
+                    <div class="ds-title">Visited Array</div>
+                    <div id="visited-container" class="ds-content"></div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button id="btnBFS" onclick="startTraversal('BFS')">Start BFS</button>
+                <button id="btnDFS" onclick="startTraversal('DFS')">Start DFS</button>
+                <button id="btnNext" onclick="nextStep()" disabled>Next Step</button>
+                <button class="reset" onclick="resetGraph()">Reset</button>
+            </div>
+        </div>
+
+        <div class="log-area">
+            <h3>Action Log</h3>
+            <div id="actionLog" class="log-container">
+                <div class="log-entry">Select BFS or DFS to begin...</div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- Graph Data (Abdul Bari Style Example) ---
+    // Structure:
+    //      1
+    //    /   \
+    //   2     3
+    //  / \   / \
+    // 4---5-6---7
+    //
+    // Edges added to make it interesting: (4-5), (5-6), (6-7)
+    
+    const nodes = [
+        { id: 1, x: 300, y: 50 },
+        { id: 2, x: 150, y: 150 },
+        { id: 3, x: 450, y: 150 },
+        { id: 4, x: 80, y: 300 },
+        { id: 5, x: 220, y: 300 },
+        { id: 6, x: 380, y: 300 },
+        { id: 7, x: 520, y: 300 }
+    ];
+
+    const adjacencyList = {
+        1: [2, 3],
+        2: [1, 4, 5],
+        3: [1, 6, 7],
+        4: [2, 5],
+        5: [2, 4, 6],
+        6: [3, 5, 7],
+        7: [3, 6]
+    };
+
+    // --- State Management ---
+    let currentState = {
+        queue: [],      // Used for BFS
+        stack: [],      // Used for DFS
+        visited: new Set(),
+        currentNode: null,
+        steps: [],      // Pre-calculated steps to replay
+        stepIndex: 0,
+        type: null      // 'BFS' or 'DFS'
+    };
+
+    const canvas = document.getElementById('graphCanvas');
+    const ctx = canvas.getContext('2d');
+    const logContainer = document.getElementById('actionLog');
+    const dsContainer = document.getElementById('ds-container');
+    const visitedContainer = document.getElementById('visited-container');
+    const btnNext = document.getElementById('btnNext');
+
+    // --- Drawing Functions ---
+    function drawGraph() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Draw Edges
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#999';
+        
+        // Use a set to avoid drawing edges twice
+        let drawnEdges = new Set();
+
+        nodes.forEach(node => {
+            let neighbors = adjacencyList[node.id];
+            neighbors.forEach(neighborId => {
+                let neighbor = nodes.find(n => n.id === neighborId);
+                
+                // Create unique edge ID (smaller-larger)
+                let edgeId = [node.id, neighborId].sort().join('-');
+                
+                if (!drawnEdges.has(edgeId)) {
+                    ctx.beginPath();
+                    ctx.moveTo(node.x, node.y);
+                    ctx.lineTo(neighbor.x, neighbor.y);
+                    ctx.stroke();
+                    drawnEdges.add(edgeId);
+                }
+            });
+        });
+
+        // Draw Nodes
+        nodes.forEach(node => {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI);
+            
+            // Fill Color Logic
+            if (currentState.currentNode === node.id) {
+                ctx.fillStyle = '#ff5722'; // Current Active Node (Orange)
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ff5722';
+            } else if (currentState.visited.has(node.id)) {
+                ctx.fillStyle = '#4caf50'; // Visited (Green)
+                ctx.shadowBlur = 0;
+            } else if (currentState.queue.includes(node.id) || currentState.stack.includes(node.id)) {
+                ctx.fillStyle = '#ffc107'; // In Queue/Stack (Yellow)
+                ctx.shadowBlur = 0;
+            } else {
+                ctx.fillStyle = '#fff'; // Default (White)
+                ctx.shadowBlur = 0;
+            }
+
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.shadowBlur = 0; // Reset shadow for text
+
+            // Draw Text
+            ctx.fillStyle = currentState.currentNode === node.id ? '#fff' : '#000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.id, node.x, node.y);
+        });
+    }
+
+    // --- Logic & Algorithms ---
+
+    function log(message, type = 'normal') {
+        const div = document.createElement('div');
+        div.className = `log-entry ${type}`;
+        div.innerHTML = `<strong>Step ${currentState.stepIndex + 1}:</strong> ${message}`;
+        logContainer.insertBefore(div, logContainer.firstChild);
+    }
+
+    function updateUI() {
+        drawGraph();
+        
+        // Update Queue/Stack Display
+        dsContainer.innerHTML = '';
+        let list = currentState.type === 'BFS' ? currentState.queue : currentState.stack;
+        list.forEach(item => {
+            let span = document.createElement('span');
+            span.className = 'ds-item';
+            span.textContent = item;
+            span.style.backgroundColor = currentState.type === 'BFS' ? '#fff3cd' : '#f8d7da';
+            dsContainer.appendChild(span);
+        });
+
+        // Update Visited Display
+        visitedContainer.innerHTML = '';
+        currentState.visited.forEach(item => {
+            let span = document.createElement('span');
+            span.className = 'ds-item';
+            span.textContent = item;
+            span.style.backgroundColor = '#d4edda';
+            visitedContainer.appendChild(span);
+        });
+    }
+
+    function calculateBFS(startNode) {
+        let steps = [];
+        let visited = new Set(); // Local visited for calculation
+        let queue = [startNode];
+        visited.add(startNode);
+
+        steps.push({
+            type: 'INIT',
+            msg: `Initialize BFS. Start at Node ${startNode}. Add ${startNode} to Queue. Mark ${startNode} as visited.`, 
+            queue: [...queue],
+            visited: new Set(visited),
+            current: null
+        });
+
+        while (queue.length > 0) {
+            let u = queue.shift(); // Dequeue
+            
+            steps.push({
+                type: 'VISIT',
+                msg: `Dequeue Node ${u}. This is now our Current Node.`, 
+                queue: [...queue],
+                visited: new Set(visited),
+                current: u
+            });
+
+            // Explore neighbors
+            let neighbors = adjacencyList[u].sort((a,b) => a-b); // Sort for deterministic output
+            
+            let newNeighbors = [];
+            neighbors.forEach(v => {
+                if (!visited.has(v)) {
+                    visited.add(v);
+                    queue.push(v);
+                    newNeighbors.push(v);
+                }
+            });
+
+            if (newNeighbors.length > 0) {
+                steps.push({
+                    type: 'EXPLORE',
+                    msg: `Explore neighbors of ${u}. Found unvisited: [${newNeighbors.join(', ')}]. Add them to Queue and mark visited.`, 
+                    queue: [...queue],
+                    visited: new Set(visited),
+                    current: u
+                });
+            } else {
+                steps.push({
+                    type: 'EXPLORE',
+                    msg: `Explore neighbors of ${u}. All neighbors [${neighbors.join(', ')}] are already visited. Backtrack.`, 
+                    queue: [...queue],
+                    visited: new Set(visited),
+                    current: u
+                });
+            }
+        }
+
+        steps.push({
+            type: 'DONE',
+            msg: `Queue is empty. BFS Traversal Complete!`, 
+            queue: [],
+            visited: new Set(visited),
+            current: null
+        });
+
+        return steps;
+    }
+
+    function calculateDFS(startNode) {
+        let steps = [];
+        let visited = new Set();
+        let stack = [startNode];
+        
+        // Note: In typical iterative DFS (like Abdul Bari shows), 
+        // we might push neighbors and visit when popping.
+        // Or visit immediately. 
+        // Let's use the standard stack-based approach where we visit upon POP.
+        
+        steps.push({
+            type: 'INIT',
+            msg: `Initialize DFS. Push Start Node ${startNode} to Stack.`, 
+            stack: [...stack],
+            visited: new Set(visited),
+            current: null
+        });
+
+        while (stack.length > 0) {
+            let u = stack.pop();
+
+            if (!visited.has(u)) {
+                visited.add(u);
+                
+                steps.push({
+                    type: 'VISIT',
+                    msg: `Pop Node ${u} from Stack. It is unvisited. Mark as Visited. Current Node: ${u}.`, 
+                    stack: [...stack],
+                    visited: new Set(visited),
+                    current: u
+                });
+
+                // Get neighbors
+                let neighbors = adjacencyList[u].sort((a,b) => b-a); // Reverse sort so smaller IDs popped first
+                
+                let added = [];
+                neighbors.forEach(v => {
+                    if (!visited.has(v)) {
+                        stack.push(v);
+                        added.push(v);
+                    }
+                });
+
+                if (added.length > 0) {
+                    steps.push({
+                        type: 'EXPLORE',
+                        msg: `Check neighbors of ${u}. Push unvisited neighbors [${added.reverse().join(', ')}] to Stack.`, 
+                        stack: [...stack],
+                        visited: new Set(visited),
+                        current: u
+                    });
+                } else {
+                     steps.push({
+                        type: 'EXPLORE',
+                        msg: `Check neighbors of ${u}. All are visited. Backtrack.`, 
+                        stack: [...stack],
+                        visited: new Set(visited),
+                        current: u
+                    });
+                }
+            } else {
+                steps.push({
+                    type: 'SKIP',
+                    msg: `Pop Node ${u} from Stack. Already visited. Skip.`, 
+                    stack: [...stack],
+                    visited: new Set(visited),
+                    current: null
+                });
+            }
+        }
+
+        steps.push({
+            type: 'DONE',
+            msg: `Stack is empty. DFS Traversal Complete!`, 
+            stack: [],
+            visited: new Set(visited),
+            current: null
+        });
+
+        return steps;
+    }
+
+    // --- Control Functions ---
+
+    function startTraversal(type) {
+        resetGraph();
+        currentState.type = type;
+        
+        log(`<strong>Starting ${type} Algorithm...</strong>`, 'highlight');
+
+        if (type === 'BFS') {
+            currentState.steps = calculateBFS(1);
+        } else {
+            currentState.steps = calculateDFS(1);
+        }
+        
+        btnNext.disabled = false;
+        document.getElementById('btnBFS').disabled = true;
+        document.getElementById('btnDFS').disabled = true;
+        
+        // Execute first step immediately? No, let user click next.
+        // Or pre-fill the UI with initial state?
+    }
+
+    function nextStep() {
+        if (currentState.stepIndex >= currentState.steps.length) {
+            log("Traversal Finished.", "highlight");
+            btnNext.disabled = true;
+            return;
+        }
+
+        let step = currentState.steps[currentState.stepIndex];
+        
+        // Apply state
+        if (currentState.type === 'BFS') {
+            currentState.queue = step.queue;
+        } else {
+            currentState.stack = step.stack;
+        }
+        
+        currentState.visited = step.visited;
+        currentState.currentNode = step.current;
+
+        // Log message
+        let logType = 'normal';
+        if (step.type === 'VISIT') logType = 'highlight';
+        if (step.type === 'EXPLORE') logType = currentState.type === 'BFS' ? 'queue' : 'stack';
+        
+        log(step.msg, logType);
+
+        updateUI();
+        currentState.stepIndex++;
+
+        if (currentState.stepIndex >= currentState.steps.length) {
+            btnNext.textContent = "Finished";
+            btnNext.disabled = true;
+        }
+    }
+
+    function resetGraph() {
+        currentState = {
+            queue: [],
+            stack: [],
+            visited: new Set(),
+            currentNode: null,
+            steps: [],
+            stepIndex: 0,
+            type: null
+        };
+        logContainer.innerHTML = '';
+        dsContainer.innerHTML = '';
+        visitedContainer.innerHTML = '';
+        btnNext.disabled = true;
+        btnNext.textContent = "Next Step";
+        document.getElementById('btnBFS').disabled = false;
+        document.getElementById('btnDFS').disabled = false;
+        drawGraph();
+    }
+
+    // Initial Draw
+    drawGraph();
+
+</script>
+</body>
+</html>

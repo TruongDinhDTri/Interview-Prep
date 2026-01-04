@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heapify Explanation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            line-height: 1.6;
+            color: #37352f;
+            background: #ffffff;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            font-size: 18px;
+            opacity: 0.95;
+        }
+        
+        .section {
+            background: #f7f6f3;
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #37352f;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e8e7e2;
+        }
+        
+        .step-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .tree-display {
+            background: #fafafa;
+            padding: 24px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 16px 0;
+            border: 1px solid #e8e7e2;
+        }
+        
+        .array-display {
+            background: #fff3cd;
+            padding: 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            margin: 12px 0;
+            border-left: 3px solid #ffc107;
+        }
+        
+        .note {
+            background: #e3f2fd;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 3px solid #2196f3;
+            font-size: 15px;
+        }
+        
+        .warning {
+            background: #fff3e0;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 3px solid #ff9800;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .success {
+            background: #e8f5e9;
+            padding: 16px;
+            border-radius: 6px;
+            margin: 12px 0;
+            border-left: 3px solid #4caf50;
+            font-size: 15px;
+        }
+        
+        .highlight {
+            color: #667eea;
+            font-weight: 600;
+        }
+        
+        .formula {
+            background: #f5f5f5;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            display: inline-block;
+            margin: 8px 0;
+        }
+        
+        .takeaway-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .takeaway-list li {
+            background: white;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #764ba2;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+        
+        .takeaway-list li strong {
+            color: #667eea;
+            font-size: 16px;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #e8e7e2, transparent);
+            margin: 32px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌱 What is Heapify?</h1>
+            <p>Fix the tree so every parent is bigger than its children (for max heap)</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title">📋 Starting Point</div>
+            
+            <div class="step">
+                <div class="step-header">Your Initial Array</div>
+                <div class="array-display">[10, 20, 15, 12, 40, 25, 18]</div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Visualized as a Tree</div>
+                <div class="tree-display">       10
+      /  \
+    20    15
+   / \    / \
+  12 40  25 18</div>
+                <div class="warning">❌ Not a heap yet! Violations: 10 &lt; 20, 20 &lt; 40, 15 &lt; 25</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <div class="section-title">🔧 The Heapify Process</div>
+            
+            <div class="step">
+                <div class="step-header">Step 0: Find the Last Parent Node</div>
+                <div class="formula">Formula: (n ÷ 2) - 1 where n = 7</div>
+                <div class="formula">Result: (7 ÷ 2) - 1 = 2 → Index 2 = Value 15</div>
+                <div class="note">💡 We ignore all leaves—they're already valid heaps by themselves!</div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Step 1: Index 2, Value = 15</div>
+                <p><strong>Compare with children:</strong> [25, 18]</p>
+                <p><strong>Action:</strong> Largest child is <span class="highlight">25</span> → SWAP!</p>
+                <div class="tree-display">       10
+      /  \
+    20    <span class="highlight">25</span>  ← swapped
+   / \    / \
+  12 40  15 18</div>
+                <div class="array-display">Array: [10, 20, <span class="highlight">25</span>, 12, 40, 15, 18]</div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Step 2: Index 1, Value = 20</div>
+                <p><strong>Compare with children:</strong> [12, 40]</p>
+                <p><strong>Action:</strong> Largest child is <span class="highlight">40</span> → SWAP!</p>
+                <div class="tree-display">       10
+      /  \
+    <span class="highlight">40</span>    25  ← swapped
+   / \    / \
+  12 20  15 18</div>
+                <div class="array-display">Array: [10, <span class="highlight">40</span>, 25, 12, 20, 15, 18]</div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Step 3: Index 0, Value = 10 (THE ROOT)</div>
+                <p><strong>Compare with children:</strong> [40, 25]</p>
+                <p><strong>Action:</strong> Largest child is <span class="highlight">40</span> → SWAP!</p>
+                <div class="tree-display">       <span class="highlight">40</span>  ← swapped
+      /  \
+    10    25
+   / \    / \
+  12 20  15 18</div>
+                <div class="array-display">Array: [<span class="highlight">40</span>, 10, 25, 12, 20, 15, 18]</div>
+                <div class="warning">⚠️ WAIT! 10 moved down and might still violate heap property!</div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Step 4: Fix Subtree at Index 1, Value = 10</div>
+                <p><strong>Compare with children:</strong> [12, 20]</p>
+                <p><strong>Action:</strong> Largest child is <span class="highlight">20</span> → SWAP!</p>
+                <div class="tree-display">       40
+      /  \
+    <span class="highlight">20</span>    25  ← swapped
+   / \    / \
+  12 10  15 18</div>
+                <div class="array-display">Array: [40, <span class="highlight">20</span>, 25, 12, 10, 15, 18]</div>
+                <div class="note">✓ 10 is now a leaf → STOP</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <div class="section-title">✅ Final Max Heap</div>
+            <div class="tree-display">       40
+      /  \
+    20    25
+   / \    / \
+  12 10  15 18</div>
+            <div class="success"><strong>Final Array:</strong> [40, 20, 25, 12, 10, 15, 18] ✅</div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section" id="bottom-up-detail">
+            <div class="section-title">🧠 Deep Dive: Why Bottom-Up Works</div>
+            
+            <div class="step">
+                <div class="step-header">The Core Insight</div>
+                <p style="font-size: 16px; margin-bottom: 16px;">When we heapify bottom-up, we ensure that <strong>before we fix a parent, all its children's subtrees are already valid heaps</strong>. This is crucial!</p>
+                
+                <div class="note">
+                    <strong>Key Principle:</strong> A node only needs ONE operation (sift-down) to find its correct position because its children are already heap-roots.
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Example: Why Order Matters</div>
+                
+                <p style="margin-bottom: 12px;"><strong>In our example with [10, 20, 15, 12, 40, 25, 18]:</strong></p>
+                
+                <div class="tree-display">       10
+      /  \
+    20    15
+   / \    / \
+  12 40  25 18</div>
+
+                <p style="margin-top: 20px; margin-bottom: 12px;"><strong>Step 1: Fix index 2 (value 15) first</strong></p>
+                <div class="note">
+                    Before: Subtree rooted at 15 has children [25, 18]<br>
+                    After: We swap 15 with 25<br>
+                    <strong>Result:</strong> Now the right subtree is a valid heap with 25 as root
+                </div>
+
+                <div class="tree-display">       10
+      /  \
+    20    <strong>25</strong>  ← This is now a valid heap!
+   / \    / \
+  12 40  15 18</div>
+
+                <p style="margin-top: 20px; margin-bottom: 12px;"><strong>Step 2: Fix index 1 (value 20)</strong></p>
+                <div class="note">
+                    Before: Subtree rooted at 20 has children [12, 40]<br>
+                    After: We swap 20 with 40<br>
+                    <strong>Result:</strong> Now the left subtree is a valid heap with 40 as root
+                </div>
+
+                <div class="tree-display">       10
+      /  \
+    <strong>40</strong>    <strong>25</strong>  ← Both subtrees are valid heaps!
+   / \    / \
+  12 20  15 18</div>
+
+                <p style="margin-top: 20px; margin-bottom: 12px;"><strong>Step 3: Fix the root (value 10)</strong></p>
+                <div class="success">
+                    <strong>This is where bottom-up shines!</strong><br><br>
+                    When we fix 10, we know:<br>
+                    • Left child (40) is the root of a valid max heap<br>
+                    • Right child (25) is the root of a valid max heap<br><br>
+                    So we only need to compare 10 with [40, 25], swap with the larger one (40), and then recursively fix where 10 lands.<br><br>
+                    We're guaranteed that 40 and 25 are already bigger than all their descendants!
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">What If We Did Top-Down Instead?</div>
+                
+                <div class="warning">
+                    <strong>❌ Top-Down Would Be Broken!</strong><br><br>
+                    If we started from the root (10) and moved down:<br><br>
+                    1. We'd swap 10 with 20<br>
+                    2. But 20's subtree (12, 40) isn't a heap yet!<br>
+                    3. We'd have to fix it, but then 15's subtree (25, 18) still isn't fixed<br>
+                    4. We'd keep bouncing around making swaps that break things we already "fixed"<br><br>
+                    <strong>Result:</strong> We'd need multiple passes through the tree, making it O(n log n) instead of O(n)
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">Visual Proof: The Processing Order</div>
+                
+                <p style="margin-bottom: 16px;"><strong>We process nodes in this order (backwards from last parent to root):</strong></p>
+                
+                <div class="tree-display">Array: [10, 20, 15, 12, 40, 25, 18]
+Index:   0   1   2   3   4   5   6
+
+       10 (index 0) ← Process LAST
+      /  \
+    20    15 (index 2) ← Process FIRST
+   (1)    (2)
+   / \    / \
+  12 40  25 18
+ (3)(4) (5)(6) ← Leaves (never processed)</div>
+
+                <div style="background: #fff9e6; padding: 16px; border-radius: 8px; margin: 16px 0; border-left: 3px solid #ff9800;">
+                    <p style="font-weight: 600; margin-bottom: 8px;">Processing Order:</p>
+                    <p>1️⃣ Index 2 (value 15) ← Start here</p>
+                    <p>2️⃣ Index 1 (value 20)</p>
+                    <p>3️⃣ Index 0 (value 10) ← End here</p>
+                </div>
+
+                <div style="background: #f0f7ff; padding: 20px; border-radius: 8px; margin-top: 16px;">
+                    <p style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Let's trace what's "done" at each step:</p>
+                    
+                    <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border: 2px solid #e3f2fd;">
+                        <p style="font-weight: 600; color: #667eea;">📍 BEFORE Processing Index 2 (value 15):</p>
+                        <div class="tree-display" style="margin: 12px 0;">       10
+      /  \
+    20    <span style="background: #ffe082; padding: 2px 4px;">15</span> ← About to process
+   / \    / \
+  12 40  <span style="background: #c8e6c9; padding: 2px 4px;">25 18</span> ← Children (leaves = already valid)</div>
+                        <p style="margin: 8px 0;">✓ Its children [25, 18] are leaves → automatically valid heaps</p>
+                        <p style="margin: 8px 0;">✓ All nodes "below" it (descendants) = its children, which are valid</p>
+                    </div>
+
+                    <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border: 2px solid #e3f2fd;">
+                        <p style="font-weight: 600; color: #667eea;">📍 BEFORE Processing Index 1 (value 20):</p>
+                        <div class="tree-display" style="margin: 12px 0;">       10
+      /  \
+    <span style="background: #ffe082; padding: 2px 4px;">20</span>    <span style="background: #c8e6c9; padding: 2px 4px;">25</span> ← Already processed ✓
+   / \    / \
+  <span style="background: #c8e6c9; padding: 2px 4px;">12 40</span>  15 18</div>
+                        <p style="margin: 8px 0;">✓ Its children [12, 40] are leaves → automatically valid heaps</p>
+                        <p style="margin: 8px 0;">✓ Node 15 (index 2) was already processed → right subtree is done</p>
+                        <p style="margin: 8px 0;">✓ All nodes "below" it (descendants) = its children, which are valid</p>
+                    </div>
+
+                    <div style="background: white; padding: 16px; border-radius: 6px; margin-bottom: 16px; border: 2px solid #e3f2fd;">
+                        <p style="font-weight: 600; color: #667eea;">📍 BEFORE Processing Index 0 (value 10 - THE ROOT):</p>
+                        <div class="tree-display" style="margin: 12px 0;">       <span style="background: #ffe082; padding: 2px 4px;">10</span> ← About to process
+      /  \
+    <span style="background: #c8e6c9; padding: 2px 4px;">40</span>    <span style="background: #c8e6c9; padding: 2px 4px;">25</span> ← Both already processed ✓
+   / \    / \
+  12 20  15 18</div>
+                        <p style="margin: 8px 0;">✓ Its left child (40) is the ROOT of a valid heap</p>
+                        <p style="margin: 8px 0;">✓ Its right child (25) is the ROOT of a valid heap</p>
+                        <p style="margin: 8px 0;">✓ ALL nodes below it (the entire tree) have been processed</p>
+                        <p style="margin: 8px 0; padding: 12px; background: #e8f5e9; border-radius: 4px;"><strong>🎯 This is the KEY!</strong> Both subtrees are complete valid heaps, so we only need to compare with [40, 25] and sift down once.</p>
+                    </div>
+                </div>
+
+                <div style="background: #e8f5e9; padding: 16px; border-radius: 8px; margin-top: 16px; border-left: 3px solid #4caf50;">
+                    <p style="font-weight: 600; margin-bottom: 8px;">💡 The Simple Rule:</p>
+                    <p style="margin: 8px 0;">When we process a node, <strong>all its descendants have already been processed</strong> (because we go bottom-up).</p>
+                    <p style="margin: 8px 0;">This means <strong>its children are roots of valid heaps</strong>, so one sift-down operation is sufficient!</p>
+                </div>
+            </div>
+
+            <div class="step">
+                <div class="step-header">The Mathematical Reason It's O(n)</div>
+                
+                <div class="note">
+                    <strong>Why bottom-up is O(n) instead of O(n log n):</strong><br><br>
+                    
+                    • Most nodes are at the bottom (leaves and near-leaves)<br>
+                    • Leaves don't need any work (0 operations)<br>
+                    • Nodes one level up need at most 1 comparison/swap<br>
+                    • Nodes two levels up need at most 2 comparisons/swaps<br>
+                    • Only the root needs up to log(n) operations<br><br>
+                    
+                    <strong>The work decreases as we go up the tree!</strong><br><br>
+                    
+                    Formula: Sum of (number of nodes at height h) × h<br>
+                    This sum converges to O(n), not O(n log n)
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section">
+            <div class="section-title">🎯 Key Takeaways</div>
+            <ul class="takeaway-list">
+                <li>
+                    <strong>Heapify = Bottom-Up Repair Job</strong><br>
+                    Start from last parent: (n ÷ 2) - 1<br>
+                    Work backwards toward root<br>
+                    At each node, push it down until heap property holds
+                </li>
+                <li>
+                    <strong>Why Start from Last Parent?</strong><br>
+                    Leaves are already valid heaps (no children to violate!)<br>
+                    We only need to fix parents
+                </li>
+                <li>
+                    <strong>Why Bottom-Up?</strong><br>
+                    When we fix a parent, all its subtrees are already heaps<br>
+                    This guarantees correctness as we move upward<br><br>
+                    <a href="#bottom-up-detail" style="color: #667eea; text-decoration: none; font-weight: 600;">→ Click here for detailed explanation</a>
+                </li>
+                <li>
+                    <strong>Time Complexity: O(n)</strong><br>
+                    Much faster than inserting elements one-by-one (O(n log n))
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

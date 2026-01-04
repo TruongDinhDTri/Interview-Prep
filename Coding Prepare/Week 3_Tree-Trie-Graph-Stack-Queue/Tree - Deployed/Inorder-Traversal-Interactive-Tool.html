@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Inorder Traversal - Interactive Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #5b21b6 0%, #3b82f6 100%);
+            color: #1e293b;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .stage-nav {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stage-btn {
+            background: white;
+            border: 3px solid #cbd5e1;
+            padding: 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stage-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .stage-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        .stage-btn .icon {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .stage-btn .title {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 5px;
+        }
+
+        .stage-btn .desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .stage-content {
+            display: none;
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+
+        .stage-content.active {
+            display: block;
+        }
+
+        .controls {
+            background: #f1f5f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+        }
+
+        .panel h3 {
+            color: #1e40af;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tree-svg {
+            display: block;
+            margin: 0 auto;
+        }
+
+        .code-block {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            line-height: 1.8;
+        }
+
+        .code-line {
+            display: flex;
+            padding: 4px 0;
+        }
+
+        .code-line.active {
+            background: rgba(251, 191, 36, 0.2);
+            border-left: 4px solid #fbbf24;
+        }
+
+        .code-line .num {
+            color: #64748b;
+            width: 40px;
+            text-align: right;
+            padding-right: 15px;
+            user-select: none;
+        }
+
+        .code-line.active .num {
+            color: #fbbf24;
+            font-weight: bold;
+        }
+
+        .keyword {
+            color: #c084fc;
+        }
+
+        .function {
+            color: #60a5fa;
+        }
+
+        .variable {
+            color: #fde047;
+        }
+
+        .stack-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stack-item {
+            background: #3b82f6;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .result-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .result-item {
+            background: #10b981;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .message-box {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .message-box p {
+            color: #1e40af;
+            font-weight: 500;
+            font-size: 1.05rem;
+        }
+
+        .info-box {
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .info-box h3 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .info-box ul {
+            margin-left: 25px;
+            line-height: 2;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .comparison-card {
+            background: white;
+            border: 3px solid;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .comparison-card h4 {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .comparison-card .subtitle {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .comparison-card .values {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .comparison-card .values .val {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-2, .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🐍 Inorder Traversal (Python3)</h1>
+            <p style="font-size: 1.1rem; margin-top: 10px;">From Recursion to Iteration: An Interactive Journey</p>
+        </div>
+
+        <!-- Stage Navigation -->
+        <div class="stage-nav">
+            <div class="stage-btn active" onclick="switchStage(0)">
+                <div class="icon">📖</div>
+                <div class="title">Understanding</div>
+                <div class="desc">What is inorder?</div>
+            </div>
+            <div class="stage-btn" onclick="switchStage(1)">
+                <div class="icon">🔁</div>
+                <div class="title">Recursive</div>
+                <div class="desc">Natural approach</div>
+            </div>
+            <div class="stage-btn" onclick="switchStage(2)">
+                <div class="icon">💡</div>
+                <div class="title">Challenge</div>
+                <div class="desc">Why iterative is tricky</div>
+            </div>
+            <div class="stage-btn" onclick="switchStage(3)">
+                <div class="icon">🐛</div>
+                <div class="title">Debug Mode</div>
+                <div class="desc">Step-by-step</div>
+            </div>
+        </div>
+
+        <!-- Stage 0: Understanding -->
+        <div id="stage-0" class="stage-content active">
+            <h2 style="color: #1e40af; text-align: center; font-size: 2rem; margin-bottom: 30px;">Understanding Inorder Traversal</h2>
+
+            <div class="panel" style="margin-bottom: 30px;">
+                <h3>🌳 Binary Tree</h3>
+                <svg class="tree-svg" width="300" height="250">
+                    <!-- Will be rendered by JS -->
+                </svg>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card" style="border-color: #3b82f6;">
+                    <h4 style="color: #1e40af;">📖 Preorder</h4>
+                    <div class="subtitle">Root → Left → Right</div>
+                    <div class="values">
+                        <div class="val">A</div>
+                        <div class="val">B</div>
+                        <div class="val">D</div>
+                        <div class="val">E</div>
+                        <div class="val">C</div>
+                        <div class="val">F</div>
+                    </div>
+                </div>
+                <div class="comparison-card" style="border-color: #7c3aed;">
+                    <h4 style="color: #6b21a8;">↔️ Inorder</h4>
+                    <div class="subtitle">Left → Root → Right</div>
+                    <div class="values">
+                        <div class="val">D</div>
+                        <div class="val">B</div>
+                        <div class="val">E</div>
+                        <div class="val">A</div>
+                        <div class="val">F</div>
+                        <div class="val">C</div>
+                    </div>
+                </div>
+                <div class="comparison-card" style="border-color: #10b981;">
+                    <h4 style="color: #047857;">🔄 Postorder</h4>
+                    <div class="subtitle">Left → Right → Root</div>
+                    <div class="values">
+                        <div class="val">D</div>
+                        <div class="val">E</div>
+                        <div class="val">B</div>
+                        <div class="val">F</div>
+                        <div class="val">C</div>
+                        <div class="val">A</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-box" style="background: #dbeafe; border-left: 4px solid #3b82f6;">
+                <h3 style="color: #1e40af;">💡 Why Inorder Matters</h3>
+                <ul style="color: #1e40af;">
+                    <li>In a Binary Search Tree (BST), inorder traversal gives nodes in <strong>ascending order</strong></li>
+                    <li>It's often used to "flatten" a tree into a sorted sequence</li>
+                    <li>Inorder is natural for expression trees (think of mathematical expressions)</li>
+                    <li>It's the basis for many tree algorithms and transformations</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="background: #e9d5ff; border-left: 4px solid #7c3aed;">
+                <h3 style="color: #6b21a8;">✨ Key Characteristic</h3>
+                <p style="color: #6b21a8; font-size: 1.1rem;">
+                    The defining feature of inorder traversal is that we <strong>visit a node between its left and right subtrees</strong>.
+                    This "in-between" timing is what gives inorder traversal its name.
+                </p>
+            </div>
+
+            <div style="text-align: right;">
+                <button class="btn btn-primary" onclick="switchStage(1)">Next: Recursive Approach →</button>
+            </div>
+        </div>
+
+        <!-- Stage 1: Recursive -->
+        <div id="stage-1" class="stage-content">
+            <h2 style="color: #7c3aed; text-align: center; font-size: 2rem; margin-bottom: 30px;">🔁 Recursive Inorder Traversal</h2>
+
+            <div class="code-block" style="margin-bottom: 30px;">
+<div class="code-line"><span class="num">1</span><span><span class="keyword">def</span> <span class="function">inorder_traversal</span>(root):</span></div>
+<div class="code-line"><span class="num">2</span><span>    <span class="variable">result</span> = []</span></div>
+<div class="code-line"><span class="num">3</span><span></span></div>
+<div class="code-line"><span class="num">4</span><span>    <span class="keyword">def</span> <span class="function">inorder</span>(node):</span></div>
+<div class="code-line"><span class="num">5</span><span>        <span class="keyword">if</span> node <span class="keyword">is None</span>:</span></div>
+<div class="code-line"><span class="num">6</span><span>            <span class="keyword">return</span></span></div>
+<div class="code-line"><span class="num">7</span><span></span></div>
+<div class="code-line"><span class="num">8</span><span>        <span class="function">inorder</span>(node.left)   <span style="color: #6ee7b7;"># First recur on left</span></span></div>
+<div class="code-line"><span class="num">9</span><span>        <span class="variable">result</span>.<span class="function">append</span>(node.val)  <span style="color: #6ee7b7;"># Then visit</span></span></div>
+<div class="code-line"><span class="num">10</span><span>        <span class="function">inorder</span>(node.right)  <span style="color: #6ee7b7;"># Finally recur on right</span></span></div>
+<div class="code-line"><span class="num">11</span><span></span></div>
+<div class="code-line"><span class="num">12</span><span>    <span class="function">inorder</span>(root)</span></div>
+<div class="code-line"><span class="num">13</span><span>    <span class="keyword">return</span> <span class="variable">result</span></span></div>
+            </div>
+
+            <div class="info-box" style="background: #e9d5ff; border-left: 4px solid #7c3aed;">
+                <h3 style="color: #6b21a8;">✨ Recursive Elegance</h3>
+                <p style="color: #6b21a8; font-size: 1.05rem; margin-bottom: 15px;">
+                    The recursive implementation is remarkably elegant and mirrors the definition of inorder traversal perfectly:
+                </p>
+                <ol style="color: #6b21a8; margin-left: 25px; line-height: 2;">
+                    <li>First traverse the left subtree</li>
+                    <li>Then visit the root node</li>
+                    <li>Finally traverse the right subtree</li>
+                </ol>
+                <p style="color: #6b21a8; font-size: 1.05rem; margin-top: 15px;">
+                    The call stack naturally keeps track of where we are in the traversal, allowing us to "pause" at each node,
+                    process its left subtree, visit the node itself, and then process its right subtree.
+                </p>
+            </div>
+
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn" onclick="switchStage(0)">← Back</button>
+                <button class="btn btn-primary" onclick="switchStage(2)">Next: Iterative Challenge →</button>
+            </div>
+        </div>
+
+        <!-- Stage 2: Challenge -->
+        <div id="stage-2" class="stage-content">
+            <h2 style="color: #f59e0b; text-align: center; font-size: 2rem; margin-bottom: 30px;">💡 The Iterative Challenge</h2>
+
+            <div class="panel" style="margin-bottom: 30px;">
+                <h3>🌳 Binary Tree</h3>
+                <svg class="tree-svg" width="300" height="250">
+                    <!-- Will be rendered by JS -->
+                </svg>
+            </div>
+
+            <div class="info-box" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+                <h3 style="color: #92400e;">💡 The Challenge</h3>
+                <p style="color: #92400e; font-size: 1.05rem; margin-bottom: 15px;">
+                    Converting a recursive algorithm to an iterative one usually involves using a stack to simulate the call stack.
+                    However, inorder traversal presents a unique challenge:
+                </p>
+                <ul style="color: #92400e; margin-left: 25px; line-height: 2;">
+                    <li>We need to visit a node <strong>after</strong> its left subtree but <strong>before</strong> its right subtree</li>
+                    <li>We need to "remember" to come back to a node after processing its left subtree</li>
+                    <li>We can't simply push children onto a stack and process them immediately when popped</li>
+                </ul>
+            </div>
+
+            <div class="info-box" style="background: #dbeafe; border-left: 4px solid #3b82f6;">
+                <h3 style="color: #1e40af;">✨ Key Insight</h3>
+                <p style="color: #1e40af; font-size: 1.05rem; margin-bottom: 10px;">
+                    The key insight is to use a combination of a stack and a <strong>current node pointer</strong> to:
+                </p>
+                <ol style="color: #1e40af; margin-left: 25px; line-height: 2;">
+                    <li>First go as far left as possible, pushing nodes onto the stack</li>
+                    <li>Then pop a node, visit it, and move to its right child</li>
+                    <li>Repeat this process until both the stack is empty and there's no current node</li>
+                </ol>
+            </div>
+
+            <div style="display: flex; justify-content: space-between;">
+                <button class="btn" onclick="switchStage(1)">← Back</button>
+                <button class="btn btn-primary" onclick="switchStage(3)">Next: Debug Mode →</button>
+            </div>
+        </div>
+
+        <!-- Stage 3: Debug Mode -->
+        <div id="stage-3" class="stage-content">
+            <h2 style="color: #4f46e5; text-align: center; font-size: 2rem; margin-bottom: 30px;">🐛 Debug Mode - Step-by-Step</h2>
+
+            <div class="controls">
+                <div class="btn-group">
+                    <button class="btn" onclick="resetDebug()">🔄</button>
+                    <button class="btn" onclick="prevDebugStep()" id="debugPrevBtn">◀</button>
+                    <button class="btn btn-primary" onclick="toggleDebugPlay()" id="debugPlayBtn">▶ Play</button>
+                    <button class="btn" onclick="nextDebugStep()" id="debugNextBtn">▶▶</button>
+                </div>
+                <div style="font-weight: bold; color: #475569;" id="debugCounter">Step 1/1</div>
+            </div>
+
+            <div class="message-box">
+                <p id="debugMessage">Initializing...</p>
+            </div>
+
+            <div class="grid-2">
+                <div>
+                    <div class="panel">
+                        <h3>🌳 Binary Tree</h3>
+                        <svg id="debugTree" class="tree-svg" width="280" height="280"></svg>
+                    </div>
+
+                    <div class="code-block" style="margin-top: 20px;" id="debugCode">
+                        <!-- Code with highlighting will be rendered by JS -->
+                    </div>
+                </div>
+
+                <div>
+                    <div class="panel" style="margin-bottom: 20px;">
+                        <h3>📚 Stack (<span id="stackCount">0</span>)</h3>
+                        <div class="stack-container" id="stackContent"></div>
+                    </div>
+
+                    <div class="panel">
+                        <h3>✅ Output Sequence</h3>
+                        <div class="result-container" id="resultContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: left;">
+                <button class="btn" onclick="switchStage(2)">← Back to Challenge</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = 0;
+        let debugStep = 0;
+        let debugSteps = [];
+        let debugPlaying = false;
+        let debugInterval = null;
+
+        const sampleTree = {
+            val: 'A', x: 150, y: 50,
+            left: {
+                val: 'B', x: 75, y: 120,
+                left: { val: 'D', x: 40, y: 190 },
+                right: { val: 'E', x: 110, y: 190 }
+            },
+            right: {
+                val: 'C', x: 225, y: 120,
+                left: { val: 'F', x: 190, y: 190 }
+            }
+        };
+
+        const codeTemplate = `def inorder_traversal(root):
+  result = []
+  stack = []
+  current = root
+
+  while current is not None or len(stack) > 0:
+      while current is not None:
+          stack.append(current)
+          current = current.left
+
+      current = stack.pop()
+      result.append(current.val)
+      current = current.right
+
+  return result`;
+
+        function switchStage(stage) {
+            currentStage = stage;
+
+            // Update stage buttons
+            document.querySelectorAll('.stage-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === stage);
+            });
+
+            // Update stage content
+            document.querySelectorAll('.stage-content').forEach((content, idx) => {
+                content.classList.toggle('active', idx === stage);
+            });
+
+            // Render trees
+            renderStaticTree(document.querySelector('#stage-0 svg'), sampleTree);
+            renderStaticTree(document.querySelector('#stage-2 svg'), sampleTree);
+
+            // Initialize debug mode if entering
+            if (stage === 3) {
+                initDebugMode();
+            }
+        }
+
+        function renderStaticTree(svg, tree) {
+            if (!svg) return;
+            svg.innerHTML = '';
+            drawTreeNode(svg, tree);
+        }
+
+        function drawTreeNode(parent, node, isHighlighted = false) {
+            if (!node) return;
+
+            // Draw edges
+            if (node.left) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', node.x);
+                line.setAttribute('y1', node.y);
+                line.setAttribute('x2', node.left.x);
+                line.setAttribute('y2', node.left.y);
+                line.setAttribute('stroke', '#457B9D');
+                line.setAttribute('stroke-width', '2');
+                parent.appendChild(line);
+                drawTreeNode(parent, node.left);
+            }
+
+            if (node.right) {
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', node.x);
+                line.setAttribute('y1', node.y);
+                line.setAttribute('x2', node.right.x);
+                line.setAttribute('y2', node.right.y);
+                line.setAttribute('stroke', '#457B9D');
+                line.setAttribute('stroke-width', '2');
+                parent.appendChild(line);
+                drawTreeNode(parent, node.right);
+            }
+
+            // Draw node
+            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            circle.setAttribute('cx', node.x);
+            circle.setAttribute('cy', node.y);
+            circle.setAttribute('r', '25');
+            circle.setAttribute('fill', isHighlighted ? '#FFD700' : '#FFFFFF');
+            circle.setAttribute('stroke', isHighlighted ? '#E63946' : '#457B9D');
+            circle.setAttribute('stroke-width', isHighlighted ? '3' : '2');
+            parent.appendChild(circle);
+
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', node.x);
+            text.setAttribute('y', node.y + 5);
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('fill', '#1D3557');
+            text.setAttribute('font-weight', 'bold');
+            text.setAttribute('font-size', '18');
+            text.textContent = node.val;
+            parent.appendChild(text);
+        }
+
+        function initDebugMode() {
+            debugSteps = generateDebugSteps();
+            debugStep = 0;
+            renderDebugStep();
+        }
+
+        function generateDebugSteps() {
+            // Simplified debug steps for demonstration
+            return [
+                { line: 1, message: "Start: Initialize result list", stack: [], result: [], current: 'A' },
+                { line: 2, message: "Initialize empty stack", stack: [], result: [], current: 'A' },
+                { line: 3, message: "Set current = root (A)", stack: [], result: [], current: 'A' },
+                { line: 5, message: "Check while condition: current is not None", stack: [], result: [], current: 'A' },
+                { line: 6, message: "Inner while: current (A) is not None", stack: [], result: [], current: 'A' },
+                { line: 7, message: "Append A to stack", stack: ['A'], result: [], current: 'A' },
+                { line: 8, message: "Move to left child of A: B", stack: ['A'], result: [], current: 'B' },
+                { line: 7, message: "Append B to stack", stack: ['A', 'B'], result: [], current: 'B' },
+                { line: 8, message: "Move to left child of B: D", stack: ['A', 'B'], result: [], current: 'D' },
+                { line: 7, message: "Append D to stack", stack: ['A', 'B', 'D'], result: [], current: 'D' },
+                { line: 8, message: "Move to left child of D: None", stack: ['A', 'B', 'D'], result: [], current: null },
+                { line: 10, message: "Pop D from stack", stack: ['A', 'B'], result: [], current: 'D' },
+                { line: 11, message: "Visit node D, append to result", stack: ['A', 'B'], result: ['D'], current: 'D' },
+                { line: 12, message: "Move to right child of D: None", stack: ['A', 'B'], result: ['D'], current: null },
+                { line: 10, message: "Pop B from stack", stack: ['A'], result: ['D'], current: 'B' },
+                { line: 11, message: "Visit node B, append to result", stack: ['A'], result: ['D', 'B'], current: 'B' },
+                { line: 12, message: "Move to right child of B: E", stack: ['A'], result: ['D', 'B'], current: 'E' },
+                { line: 7, message: "Append E to stack", stack: ['A', 'E'], result: ['D', 'B'], current: 'E' },
+                { line: 8, message: "Move to left child of E: None", stack: ['A', 'E'], result: ['D', 'B'], current: null },
+                { line: 10, message: "Pop E from stack", stack: ['A'], result: ['D', 'B'], current: 'E' },
+                { line: 11, message: "Visit node E, append to result", stack: ['A'], result: ['D', 'B', 'E'], current: 'E' },
+                { line: 12, message: "Move to right child of E: None", stack: ['A'], result: ['D', 'B', 'E'], current: null },
+                { line: 10, message: "Pop A from stack", stack: [], result: ['D', 'B', 'E'], current: 'A' },
+                { line: 11, message: "Visit node A, append to result", stack: [], result: ['D', 'B', 'E', 'A'], current: 'A' },
+                { line: 12, message: "Move to right child of A: C", stack: [], result: ['D', 'B', 'E', 'A'], current: 'C' },
+                { line: 7, message: "Append C to stack", stack: ['C'], result: ['D', 'B', 'E', 'A'], current: 'C' },
+                { line: 8, message: "Move to left child of C: F", stack: ['C'], result: ['D', 'B', 'E', 'A'], current: 'F' },
+                { line: 7, message: "Append F to stack", stack: ['C', 'F'], result: ['D', 'B', 'E', 'A'], current: 'F' },
+                { line: 8, message: "Move to left child of F: None", stack: ['C', 'F'], result: ['D', 'B', 'E', 'A'], current: null },
+                { line: 10, message: "Pop F from stack", stack: ['C'], result: ['D', 'B', 'E', 'A'], current: 'F' },
+                { line: 11, message: "Visit node F, append to result", stack: ['C'], result: ['D', 'B', 'E', 'A', 'F'], current: 'F' },
+                { line: 12, message: "Move to right child of F: None", stack: ['C'], result: ['D', 'B', 'E', 'A', 'F'], current: null },
+                { line: 10, message: "Pop C from stack", stack: [], result: ['D', 'B', 'E', 'A', 'F'], current: 'C' },
+                { line: 11, message: "Visit node C, append to result", stack: [], result: ['D', 'B', 'E', 'A', 'F', 'C'], current: 'C' },
+                { line: 12, message: "Move to right child of C: None", stack: [], result: ['D', 'B', 'E', 'A', 'F', 'C'], current: null },
+                { line: 14, message: "Return final result: [D, B, E, A, F, C]", stack: [], result: ['D', 'B', 'E', 'A', 'F', 'C'], current: null }
+            ];
+        }
+
+        function renderDebugStep() {
+            const step = debugSteps[debugStep];
+
+            // Render message
+            document.getElementById('debugMessage').textContent = step.message;
+
+            // Render stack
+            document.getElementById('stackCount').textContent = step.stack.length;
+            document.getElementById('stackContent').innerHTML = step.stack.length > 0
+                ? step.stack.slice().reverse().map(item => `<div class="stack-item">${item}</div>`).join('')
+                : '<p style="color: #9ca3af; font-style: italic; text-align: center;">Empty</p>';
+
+            // Render result
+            document.getElementById('resultContent').innerHTML = step.result.length > 0
+                ? step.result.map(item => `<div class="result-item">${item}</div>`).join('')
+                : '<p style="color: #9ca3af; font-style: italic;">Empty</p>';
+
+            // Render code with highlighting
+            const lines = codeTemplate.split('\n');
+            document.getElementById('debugCode').innerHTML = lines.map((line, idx) => {
+                const lineNum = idx + 1;
+                const isActive = lineNum === step.line;
+                return `<div class="code-line ${isActive ? 'active' : ''}">
+                    <span class="num">${lineNum}</span>
+                    <span>${line}</span>
+                </div>`;
+            }).join('');
+
+            // Render tree (simplified - just highlight current node)
+            const svg = document.getElementById('debugTree');
+            svg.innerHTML = '';
+            renderTreeWithHighlight(svg, sampleTree, step.current);
+
+            // Update counter
+            document.getElementById('debugCounter').textContent = `Step ${debugStep + 1}/${debugSteps.length}`;
+
+            // Update buttons
+            document.getElementById('debugPrevBtn').disabled = debugStep === 0;
+            document.getElementById('debugNextBtn').disabled = debugStep >= debugSteps.length - 1;
+        }
+
+        function renderTreeWithHighlight(svg, tree, highlightVal) {
+            function draw(node) {
+                if (!node) return;
+
+                // Draw edges
+                if (node.left) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', node.x);
+                    line.setAttribute('y1', node.y);
+                    line.setAttribute('x2', node.left.x);
+                    line.setAttribute('y2', node.left.y);
+                    line.setAttribute('stroke', '#457B9D');
+                    line.setAttribute('stroke-width', '2');
+                    svg.appendChild(line);
+                    draw(node.left);
+                }
+
+                if (node.right) {
+                    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    line.setAttribute('x1', node.x);
+                    line.setAttribute('y1', node.y);
+                    line.setAttribute('x2', node.right.x);
+                    line.setAttribute('y2', node.right.y);
+                    line.setAttribute('stroke', '#457B9D');
+                    line.setAttribute('stroke-width', '2');
+                    svg.appendChild(line);
+                    draw(node.right);
+                }
+
+                // Draw node
+                const isHighlighted = node.val === highlightVal;
+                const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                circle.setAttribute('cx', node.x);
+                circle.setAttribute('cy', node.y);
+                circle.setAttribute('r', '25');
+                circle.setAttribute('fill', isHighlighted ? '#FFD700' : '#FFFFFF');
+                circle.setAttribute('stroke', isHighlighted ? '#E63946' : '#457B9D');
+                circle.setAttribute('stroke-width', isHighlighted ? '3' : '2');
+                svg.appendChild(circle);
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', node.x);
+                text.setAttribute('y', node.y + 5);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('fill', '#1D3557');
+                text.setAttribute('font-weight', 'bold');
+                text.setAttribute('font-size', '18');
+                text.textContent = node.val;
+                svg.appendChild(text);
+            }
+
+            draw(tree);
+        }
+
+        function nextDebugStep() {
+            if (debugStep < debugSteps.length - 1) {
+                debugStep++;
+                renderDebugStep();
+            }
+        }
+
+        function prevDebugStep() {
+            if (debugStep > 0) {
+                debugStep--;
+                renderDebugStep();
+            }
+        }
+
+        function resetDebug() {
+            debugStep = 0;
+            if (debugPlaying) toggleDebugPlay();
+            renderDebugStep();
+        }
+
+        function toggleDebugPlay() {
+            debugPlaying = !debugPlaying;
+            const playBtn = document.getElementById('debugPlayBtn');
+
+            if (debugPlaying) {
+                playBtn.textContent = '⏸ Pause';
+                debugInterval = setInterval(() => {
+                    if (debugStep >= debugSteps.length - 1) {
+                        toggleDebugPlay();
+                    } else {
+                        nextDebugStep();
+                    }
+                }, 1500);
+            } else {
+                playBtn.textContent = '▶ Play';
+                if (debugInterval) {
+                    clearInterval(debugInterval);
+                    debugInterval = null;
+                }
+            }
+        }
+
+        // Initialize
+        renderStaticTree(document.querySelector('#stage-0 svg'), sampleTree);
+    </script>
+</body>
+</html>

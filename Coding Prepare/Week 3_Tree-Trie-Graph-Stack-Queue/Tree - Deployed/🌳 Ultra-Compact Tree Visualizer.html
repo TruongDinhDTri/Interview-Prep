@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tree Traversal Visualizer - Preorder, Inorder, Postorder</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      height: 100vh;
+      background: linear-gradient(135deg, #eef2ff 0%, #faf5ff 50%, #fdf2f8 100%);
+      padding: 0.75rem;
+      overflow: hidden;
+    }
+
+    .container {
+      height: 100%;
+      max-width: 1536px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 0.75rem;
+    }
+
+    .header h1 {
+      font-size: 1.875rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #4f46e5, #7c3aed, #db2777);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    /* Main Layout */
+    .main-layout {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 3fr 2fr;
+      gap: 0.75rem;
+      overflow: hidden;
+    }
+
+    @media (max-width: 1024px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Left Side - Tree */
+    .left-side {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+    }
+
+    .tree-card {
+      flex: 1;
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      border: 2px solid #c7d2fe;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tree-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .tree-header h2 {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .info-btn {
+      font-size: 0.75rem;
+      background: #e0e7ff;
+      color: #4338ca;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: background 0.2s ease;
+    }
+
+    .info-btn:hover {
+      background: #c7d2fe;
+    }
+
+    .tree-svg-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .tree-svg {
+      width: 100%;
+      height: 100%;
+      max-height: 100%;
+    }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid;
+    }
+
+    .legend-item.current {
+      background: #fffbeb;
+      border-color: #fcd34d;
+    }
+
+    .legend-item.visited {
+      background: #ecfdf5;
+      border-color: #6ee7b7;
+    }
+
+    .legend-item.stack {
+      background: #eef2ff;
+      border-color: #a5b4fc;
+    }
+
+    .legend-item.unvisited {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+    }
+
+    .legend-dot {
+      width: 0.75rem;
+      height: 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid;
+    }
+
+    .legend-dot.current {
+      background: linear-gradient(135deg, #fcd34d 0%, #f59e0b 100%);
+      border-color: #d97706;
+      animation: pulse 2s infinite;
+    }
+
+    .legend-dot.visited {
+      background: linear-gradient(135deg, #6ee7b7 0%, #059669 100%);
+      border-color: #047857;
+    }
+
+    .legend-dot.stack {
+      background: linear-gradient(135deg, #a5b4fc 0%, #4f46e5 100%);
+      border-color: #4338ca;
+    }
+
+    .legend-dot.unvisited {
+      background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+      border-color: #64748b;
+    }
+
+    .legend-text {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #1f2937;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* Info Panel */
+    .info-panel {
+      background: linear-gradient(90deg, #6366f1, #8b5cf6, #ec4899);
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 0.75rem;
+      color: white;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .info-item {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(4px);
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    .info-item h3 {
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-item p {
+      font-size: 0.75rem;
+      opacity: 0.9;
+    }
+
+    /* Right Side - Controls */
+    .right-side {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow-y: auto;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      padding: 0.75rem;
+      border: 2px solid;
+    }
+
+    .panel.purple {
+      border-color: #e9d5ff;
+    }
+
+    .panel.indigo {
+      border-color: #c7d2fe;
+    }
+
+    .panel.gradient-purple {
+      background: linear-gradient(135deg, #f3e8ff 0%, #fce7f3 100%);
+      border-color: #e9d5ff;
+    }
+
+    .panel.gradient-blue {
+      background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%);
+      border-color: #bfdbfe;
+    }
+
+    .panel.gradient-green {
+      background: linear-gradient(135deg, #dcfce7 0%, #d1fae5 100%);
+      border-color: #86efac;
+    }
+
+    .panel-title {
+      font-size: 0.875rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .panel.purple .panel-title { color: #581c87; }
+    .panel.indigo .panel-title { color: #312e81; }
+    .panel.gradient-purple .panel-title { color: #581c87; }
+    .panel.gradient-blue .panel-title { color: #1e3a8a; }
+    .panel.gradient-green .panel-title { color: #14532d; }
+
+    /* Traversal Type Buttons */
+    .type-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .type-btn {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      color: #374151;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .type-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .type-btn.active.preorder {
+      background: linear-gradient(90deg, #fbbf24, #f97316);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .type-btn.active.inorder {
+      background: linear-gradient(90deg, #4ade80, #10b981);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .type-btn.active.postorder {
+      background: linear-gradient(90deg, #818cf8, #8b5cf6);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Control Buttons */
+    .control-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .control-btn {
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      font-weight: 700;
+      font-size: 0.75rem;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.25rem;
+      transition: all 0.3s ease;
+      color: white;
+    }
+
+    .control-btn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .control-btn.play {
+      flex: 1;
+      background: linear-gradient(90deg, #22c55e, #10b981);
+    }
+
+    .control-btn.prev {
+      background: linear-gradient(90deg, #9ca3af, #6b7280);
+    }
+
+    .control-btn.next {
+      background: linear-gradient(90deg, #3b82f6, #4f46e5);
+    }
+
+    .control-btn.reset {
+      background: linear-gradient(90deg, #f97316, #dc2626);
+    }
+
+    /* Speed Control */
+    .speed-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      justify-content: center;
+      background: #f3f4f6;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+    }
+
+    .speed-label {
+      font-weight: 700;
+      color: #374151;
+      font-size: 0.75rem;
+    }
+
+    .speed-select {
+      flex: 1;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      border: 1px solid #d1d5db;
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+
+    .speed-select:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+
+    .step-count {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #4b5563;
+    }
+
+    /* Current Step Display */
+    .step-display {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+    }
+
+    .step-display p {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #1f2937;
+      text-align: center;
+    }
+
+    /* Call Stack */
+    .stack-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      max-height: 8rem;
+      overflow-y: auto;
+    }
+
+    .stack-item {
+      background: linear-gradient(90deg, #60a5fa, #6366f1);
+      color: white;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      font-weight: 700;
+      text-align: center;
+      font-size: 0.75rem;
+      transition: all 0.3s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .stack-item:hover {
+      transform: scale(1.05);
+    }
+
+    .empty-stack {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      text-align: center;
+      color: #6b7280;
+      font-style: italic;
+      font-size: 0.75rem;
+    }
+
+    /* Visited Order */
+    .visited-display {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 0.75rem;
+    }
+
+    .visited-display p {
+      text-align: center;
+    }
+
+    .visited-display .empty {
+      color: #6b7280;
+      font-style: italic;
+      font-size: 0.75rem;
+    }
+
+    .visited-display .order {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #15803d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app"></div>
+
+  <script>
+    // ===== STATE =====
+    let state = {
+      traversalType: 'preorder',
+      steps: [],
+      currentStep: 0,
+      isPlaying: false,
+      speed: 1000,
+      showInfo: false,
+      playInterval: null
+    };
+
+    // ===== TREE DATA =====
+    const tree = {
+      id: 1, value: 1, x: 360, y: 50,
+      left: {
+        id: 2, value: 2, x: 180, y: 170,
+        left: { id: 4, value: 4, x: 100, y: 300, left: null, right: null },
+        right: { id: 5, value: 5, x: 250, y: 300, left: null, right: null }
+      },
+      right: {
+        id: 3, value: 3, x: 520, y: 170,
+        left: { id: 6, value: 6, x: 450, y: 300, left: null, right: null },
+        right: { id: 7, value: 7, x: 600, y: 300, left: null, right: null }
+      }
+    };
+
+    // ===== STEP GENERATION =====
+    function generateSteps(type) {
+      const out = [];
+      const visited = [];
+      const stack = [];
+
+      function snapshot(payload) {
+        out.push({
+          currentNode: payload.currentNode ?? null,
+          visited: payload.visited ?? [...visited],
+          stack: payload.stack ?? [...stack],
+          explanation: payload.explanation ?? '',
+          action: payload.action ?? 'complete'
+        });
+      }
+
+      function preorder(node, depth = 0) {
+        if (!node) return;
+        stack.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Enter node ${node.value} (depth ${depth})`, action: 'push' });
+
+        visited.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Visit node ${node.value} (pre-order)`, action: 'visit' });
+
+        if (node.left) {
+          snapshot({ currentNode: node.value, explanation: `Move left -> node ${node.left.value}`, action: 'push' });
+          preorder(node.left, depth + 1);
+        }
+
+        if (node.right) {
+          snapshot({ currentNode: node.value, explanation: `Move right -> node ${node.right.value}`, action: 'push' });
+          preorder(node.right, depth + 1);
+        }
+
+        stack.pop();
+        snapshot({ currentNode: node.value, explanation: `Return from node ${node.value}`, action: 'pop' });
+      }
+
+      function inorder(node, depth = 0) {
+        if (!node) return;
+        stack.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Enter node ${node.value} (depth ${depth})`, action: 'push' });
+
+        if (node.left) {
+          snapshot({ currentNode: node.value, explanation: `Go left -> node ${node.left.value}`, action: 'push' });
+          inorder(node.left, depth + 1);
+        }
+
+        visited.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Visit node ${node.value} (in-order)`, action: 'visit' });
+
+        if (node.right) {
+          snapshot({ currentNode: node.value, explanation: `Go right -> node ${node.right.value}`, action: 'push' });
+          inorder(node.right, depth + 1);
+        }
+
+        stack.pop();
+        snapshot({ currentNode: node.value, explanation: `Return from node ${node.value}`, action: 'pop' });
+      }
+
+      function postorder(node, depth = 0) {
+        if (!node) return;
+        stack.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Enter node ${node.value} (depth ${depth})`, action: 'push' });
+
+        if (node.left) {
+          snapshot({ currentNode: node.value, explanation: `Go left -> node ${node.left.value}`, action: 'push' });
+          postorder(node.left, depth + 1);
+        }
+
+        if (node.right) {
+          snapshot({ currentNode: node.value, explanation: `Go right -> node ${node.right.value}`, action: 'push' });
+          postorder(node.right, depth + 1);
+        }
+
+        visited.push(node.value);
+        snapshot({ currentNode: node.value, explanation: `Visit node ${node.value} (post-order)`, action: 'visit' });
+
+        stack.pop();
+        snapshot({ currentNode: node.value, explanation: `Return from node ${node.value}`, action: 'pop' });
+      }
+
+      if (type === 'preorder') preorder(tree);
+      else if (type === 'inorder') inorder(tree);
+      else postorder(tree);
+
+      snapshot({ currentNode: null, explanation: `Complete! Order: ${visited.join(' -> ')}`, action: 'complete' });
+
+      return out;
+    }
+
+    // ===== HELPER FUNCTIONS =====
+    function setTraversalType(type) {
+      if (state.playInterval) clearInterval(state.playInterval);
+      state.traversalType = type;
+      state.steps = generateSteps(type);
+      state.currentStep = 0;
+      state.isPlaying = false;
+      render();
+    }
+
+    function togglePlay() {
+      if (state.currentStep >= state.steps.length - 1) {
+        state.currentStep = 0;
+      }
+      state.isPlaying = !state.isPlaying;
+
+      if (state.isPlaying) {
+        state.playInterval = setInterval(() => {
+          if (state.currentStep + 1 >= state.steps.length) {
+            state.isPlaying = false;
+            clearInterval(state.playInterval);
+            render();
+          } else {
+            state.currentStep++;
+            render();
+          }
+        }, state.speed);
+      } else {
+        if (state.playInterval) clearInterval(state.playInterval);
+      }
+      render();
+    }
+
+    function stepPrev() {
+      if (state.currentStep > 0) {
+        state.currentStep--;
+        render();
+      }
+    }
+
+    function stepNext() {
+      if (state.currentStep < state.steps.length - 1) {
+        state.currentStep++;
+        render();
+      }
+    }
+
+    function resetSteps() {
+      if (state.playInterval) clearInterval(state.playInterval);
+      state.currentStep = 0;
+      state.isPlaying = false;
+      render();
+    }
+
+    function setSpeed(newSpeed) {
+      state.speed = newSpeed;
+      if (state.isPlaying) {
+        if (state.playInterval) clearInterval(state.playInterval);
+        state.playInterval = setInterval(() => {
+          if (state.currentStep + 1 >= state.steps.length) {
+            state.isPlaying = false;
+            clearInterval(state.playInterval);
+            render();
+          } else {
+            state.currentStep++;
+            render();
+          }
+        }, state.speed);
+      }
+    }
+
+    function toggleInfo() {
+      state.showInfo = !state.showInfo;
+      render();
+    }
+
+    // ===== RENDER TREE SVG =====
+    function renderTreeSVG(currentStepData) {
+      let svg = `
+        <defs>
+          <linearGradient id="currentGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#FCD34D"/>
+            <stop offset="100%" stop-color="#F59E0B"/>
+          </linearGradient>
+          <linearGradient id="visitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#34D399"/>
+            <stop offset="100%" stop-color="#059669"/>
+          </linearGradient>
+          <linearGradient id="stackGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#818CF8"/>
+            <stop offset="100%" stop-color="#4F46E5"/>
+          </linearGradient>
+          <linearGradient id="unvisitedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#E2E8F0"/>
+            <stop offset="100%" stop-color="#CBD5E1"/>
+          </linearGradient>
+        </defs>
+      `;
+
+      function renderNode(node) {
+        if (!node) return '';
+
+        let result = '';
+
+        // Lines to children
+        if (node.left) {
+          result += `<line x1="${node.x}" y1="${node.y}" x2="${node.left.x}" y2="${node.left.y}" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>`;
+          result += renderNode(node.left);
+        }
+        if (node.right) {
+          result += `<line x1="${node.x}" y1="${node.y}" x2="${node.right.x}" y2="${node.right.y}" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" opacity="0.6"/>`;
+          result += renderNode(node.right);
+        }
+
+        const isCurrent = currentStepData.currentNode === node.value;
+        const isVisited = currentStepData.visited.includes(node.value);
+        const inStack = currentStepData.stack.includes(node.value);
+
+        const fill = isCurrent ? 'url(#currentGradient)'
+          : isVisited ? 'url(#visitedGradient)'
+          : inStack ? 'url(#stackGradient)'
+          : 'url(#unvisitedGradient)';
+
+        const stroke = isCurrent ? '#F59E0B' : isVisited ? '#059669' : inStack ? '#4F46E5' : '#94A3B8';
+        const strokeWidth = isCurrent ? 4 : 3;
+
+        // Glow effect for current
+        if (isCurrent) {
+          result += `<circle cx="${node.x}" cy="${node.y}" r="38" fill="none" stroke="#FBBF24" stroke-width="2" opacity="0.35"/>`;
+          result += `<circle cx="${node.x}" cy="${node.y}" r="34" fill="none" stroke="#FCD34D" stroke-width="1.5" opacity="0.5"/>`;
+        }
+
+        result += `<circle cx="${node.x}" cy="${node.y}" r="30" fill="${fill}" stroke="${stroke}" stroke-width="${strokeWidth}"/>`;
+
+        const textFill = (isCurrent || isVisited) ? '#ffffff' : '#0f172a';
+        result += `<text x="${node.x}" y="${node.y}" text-anchor="middle" dominant-baseline="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="700" font-size="18" fill="${textFill}">${node.value}</text>`;
+
+        return result;
+      }
+
+      svg += renderNode(tree);
+      return svg;
+    }
+
+    // ===== MAIN RENDER =====
+    function render() {
+      const app = document.getElementById('app');
+      const currentStepData = state.steps[state.currentStep] || {
+        currentNode: null,
+        visited: [],
+        stack: [],
+        explanation: '',
+        action: 'complete'
+      };
+
+      let html = `
+        <!-- Header -->
+        <div class="header">
+          <h1>
+            <span>✨</span>
+            Tree Traversal Visualizer
+            <span>✨</span>
+          </h1>
+        </div>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+          <!-- Left Side - Tree -->
+          <div class="left-side">
+            <div class="tree-card">
+              <div class="tree-header">
+                <h2>🌳 Binary Tree</h2>
+                <button class="info-btn" id="infoBtn">
+                  ${state.showInfo ? '▲' : '▼'} Info
+                </button>
+              </div>
+
+              <div class="tree-svg-container">
+                <svg viewBox="0 0 700 380" class="tree-svg">
+                  ${renderTreeSVG(currentStepData)}
+                </svg>
+              </div>
+
+              <!-- Legend -->
+              <div class="legend">
+                <div class="legend-item current">
+                  <div class="legend-dot current"></div>
+                  <span class="legend-text">Current</span>
+                </div>
+                <div class="legend-item visited">
+                  <div class="legend-dot visited"></div>
+                  <span class="legend-text">Visited</span>
+                </div>
+                <div class="legend-item stack">
+                  <div class="legend-dot stack"></div>
+                  <span class="legend-text">Stack</span>
+                </div>
+                <div class="legend-item unvisited">
+                  <div class="legend-dot unvisited"></div>
+                  <span class="legend-text">Unvisited</span>
+                </div>
+              </div>
+            </div>
+
+            ${state.showInfo ? `
+            <!-- Info Panel -->
+            <div class="info-panel">
+              <div class="info-grid">
+                <div class="info-item">
+                  <h3>Pre-order</h3>
+                  <p>Root -> Left -> Right</p>
+                </div>
+                <div class="info-item">
+                  <h3>In-order</h3>
+                  <p>Left -> Root -> Right</p>
+                </div>
+                <div class="info-item">
+                  <h3>Post-order</h3>
+                  <p>Left -> Right -> Root</p>
+                </div>
+              </div>
+            </div>
+            ` : ''}
+          </div>
+
+          <!-- Right Side - Controls -->
+          <div class="right-side">
+            <!-- Traversal Type -->
+            <div class="panel purple">
+              <h3 class="panel-title">🎯 Traversal Type</h3>
+              <div class="type-buttons">
+                <button class="type-btn ${state.traversalType === 'preorder' ? 'active preorder' : ''}" data-type="preorder">Pre</button>
+                <button class="type-btn ${state.traversalType === 'inorder' ? 'active inorder' : ''}" data-type="inorder">In</button>
+                <button class="type-btn ${state.traversalType === 'postorder' ? 'active postorder' : ''}" data-type="postorder">Post</button>
+              </div>
+            </div>
+
+            <!-- Playback Controls -->
+            <div class="panel indigo">
+              <h3 class="panel-title">🎮 Controls</h3>
+              <div class="control-buttons">
+                <button class="control-btn play" id="playBtn" ${state.steps.length === 0 ? 'disabled' : ''}>
+                  ${state.isPlaying ? '⏸ Pause' : '▶ Play'}
+                </button>
+                <button class="control-btn prev" id="prevBtn" ${state.steps.length === 0 || state.currentStep <= 0 ? 'disabled' : ''}>◀</button>
+                <button class="control-btn next" id="nextBtn" ${state.steps.length === 0 || state.currentStep >= state.steps.length - 1 ? 'disabled' : ''}>▶</button>
+                <button class="control-btn reset" id="resetBtn">🔄</button>
+              </div>
+
+              <div class="speed-control">
+                <label class="speed-label">⚡</label>
+                <select class="speed-select" id="speedSelect">
+                  <option value="2000" ${state.speed === 2000 ? 'selected' : ''}>0.5x</option>
+                  <option value="1000" ${state.speed === 1000 ? 'selected' : ''}>1x</option>
+                  <option value="600" ${state.speed === 600 ? 'selected' : ''}>1.5x</option>
+                  <option value="400" ${state.speed === 400 ? 'selected' : ''}>2x</option>
+                  <option value="200" ${state.speed === 200 ? 'selected' : ''}>4x</option>
+                </select>
+                <span class="step-count">${state.currentStep + 1}/${state.steps.length}</span>
+              </div>
+            </div>
+
+            <!-- Current Step -->
+            <div class="panel gradient-purple">
+              <h3 class="panel-title">💡 Current Step</h3>
+              <div class="step-display">
+                <p>${currentStepData.explanation || 'Select a traversal type to begin'}</p>
+              </div>
+            </div>
+
+            <!-- Call Stack -->
+            <div class="panel gradient-blue">
+              <h3 class="panel-title">📚 Call Stack</h3>
+              <div class="stack-items">
+                ${currentStepData.stack.length === 0 ? `
+                  <div class="empty-stack">Empty</div>
+                ` : currentStepData.stack.slice().reverse().map(val => `
+                  <div class="stack-item">Node ${val}</div>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- Visited Order -->
+            <div class="panel gradient-green">
+              <h3 class="panel-title">✅ Visited Order</h3>
+              <div class="visited-display">
+                ${currentStepData.visited.length === 0 ? `
+                  <p class="empty">None yet</p>
+                ` : `
+                  <p class="order">${currentStepData.visited.join(' -> ')}</p>
+                `}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      app.innerHTML = html;
+      attachEventListeners();
+    }
+
+    // ===== EVENT LISTENERS =====
+    function attachEventListeners() {
+      document.getElementById('infoBtn')?.addEventListener('click', toggleInfo);
+      document.getElementById('playBtn')?.addEventListener('click', togglePlay);
+      document.getElementById('prevBtn')?.addEventListener('click', stepPrev);
+      document.getElementById('nextBtn')?.addEventListener('click', stepNext);
+      document.getElementById('resetBtn')?.addEventListener('click', resetSteps);
+
+      document.getElementById('speedSelect')?.addEventListener('change', (e) => {
+        setSpeed(Number(e.target.value));
+      });
+
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setTraversalType(btn.dataset.type);
+        });
+      });
+    }
+
+    // ===== INIT =====
+    state.steps = generateSteps(state.traversalType);
+    render();
+  </script>
+</body>
+</html>

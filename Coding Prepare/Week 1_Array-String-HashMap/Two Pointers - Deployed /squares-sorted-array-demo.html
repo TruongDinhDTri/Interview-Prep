@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Squares of a Sorted Array - Simplified</title>
+    <style>
+        :root {
+            --background: #f4f4f5;
+            --surface: #ffffff;
+            --primary: #3b82f6;
+            --text-main: #1f2937;
+            --text-light: #6b7280;
+            --border: #d1d5db;
+            --left-ptr: #8b5cf6;
+            --right-ptr: #ec4899;
+            --winner: #f59e0b;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--background);
+            color: var(--text-main);
+            line-height: 1.7;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .section {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+
+        h1, h2 {
+            letter-spacing: -0.5px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .core-idea {
+            background: #eef2ff;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .core-idea p {
+            font-size: 1.1rem;
+        }
+
+        .array-display {
+            margin: 2rem 0;
+        }
+
+        .array-label {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .array-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            min-height: 80px;
+            padding-bottom: 40px; /* Space for pointers */
+        }
+
+        .array-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 1.5rem;
+            font-weight: 500;
+            position: relative;
+            background: #fafafa;
+            transition: all 0.3s ease-out;
+        }
+        
+        .array-cell.result-cell.empty {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+
+        .array-cell.result-cell.filled {
+            background: #dbeafe;
+            border-color: #93c5fd;
+            transform: scale(1.05);
+        }
+
+        .array-cell .index {
+            position: absolute;
+            top: -22px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+        
+        .array-cell .pointer {
+            position: absolute;
+            bottom: -30px;
+            font-size: 0.8rem;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .pointer.left { background-color: var(--left-ptr); }
+        .pointer.right { background-color: var(--right-ptr); }
+        
+        .array-cell.left-highlight { border-color: var(--left-ptr); }
+        .array-cell.right-highlight { border-color: var(--right-ptr); }
+        
+        .array-cell.processed {
+            opacity: 0.3;
+            background-color: var(--border);
+        }
+
+        .explanation {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .explanation h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+        
+        .explanation .comparison {
+            font-size: 1.25rem;
+            font-weight: 500;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .explanation .decision {
+            background: #eef2ff;
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { opacity: 0.85; }
+        .btn-secondary { background-color: var(--border); color: var(--text-main); }
+        .btn-secondary:hover { background-color: #9ca3af; }
+        
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #e5e7eb;
+            padding: 2px 5px;
+            border-radius: 4px;
+            color: #4b5563;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Squares of a Sorted Array</h1>
+        <p class="subtitle">A Clear Guide to the Two-Pointer Method</p>
+
+        <div class="section">
+            <h2>💡 The Core Idea</h2>
+            <div class="core-idea">
+                <p>When we square numbers in a sorted array like <code>[-10, -2, 3]</code>, the result is <code>[100, 4, 9]</code>, which is not sorted.</p>
+                <p>The key insight is that the <strong>largest squared value</strong> must come from either the first or the last number in the original sorted array.</p>
+                <p>We can use this fact to build the new sorted array <strong>from largest to smallest</strong> without having to sort at the end.</p>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>🧠 What You Must Remember: The Algorithm</h2>
+            <ol>
+                <li><strong>Set up two pointers:</strong> a <code>left</code> pointer at the start of the input array and a <code>right</code> pointer at the end.</li>
+                <li><strong>Create a new result array,</strong> but prepare to fill it from the **end to the beginning**.</li>
+                <li><strong>Compare and place:</strong> Compare the squared values at the <code>left</code> and <code>right</code> pointers. Whichever is bigger is the largest remaining square, so place it at the current end of the result array.</li>
+                <li><strong>Move the pointers:</strong> If the left side's square was bigger, move the <code>left</code> pointer one step to the right. Otherwise, move the <code>right</code> pointer one step to the left. Also, move the position in the result array one step to the left.</li>
+                <li><strong>Repeat</strong> until the pointers cross.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Live Demonstration</h2>
+            
+            <div class="array-display">
+                <div class="array-label">Input Array:</div>
+                <div class="array-container" id="inputContainer"></div>
+            </div>
+            
+            <div class="array-display">
+                <div class="array-label">Result Array (we fill this from right to left):</div>
+                <div class="array-container" id="resultContainer"></div>
+            </div>
+
+            <div id="explanation" class="explanation">
+                <h3>Step 0: Setup</h3>
+                <p>We have our input array, two pointers (<code>left</code> and <code>right</code>), and an empty result array of the same size. We will fill the result array from the last position backwards.</p>
+            </div>
+
+            <div class="controls">
+                <button class="btn-secondary" onclick="reset()">Reset</button>
+                <button class="btn-primary" onclick="nextStep()">Next Step</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const initialArr = [-4, -1, 0, 3, 10];
+        const n = initialArr.length;
+        let left, right, result, resultIndex, step, isDone;
+
+        function setup() {
+            left = 0;
+            right = n - 1;
+            result = new Array(n).fill('?');
+            resultIndex = n - 1;
+            step = 0;
+            isDone = false;
+        }
+
+        function render() {
+            const inputContainer = document.getElementById('inputContainer');
+            inputContainer.innerHTML = '';
+            initialArr.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell';
+                if (idx === left && !isDone) cell.classList.add('left-highlight');
+                if (idx === right && !isDone) cell.classList.add('right-highlight');
+                if (idx < left || idx > right) cell.classList.add('processed');
+                
+                cell.innerHTML = `
+                    <div class="index">${idx}</div>
+                    <div>${val}</div>
+                    ${idx === left && !isDone ? '<div class="pointer left">Left</div>' : ''}
+                    ${idx === right && !isDone ? '<div class="pointer right">Right</div>' : ''}
+                `;
+                inputContainer.appendChild(cell);
+            });
+
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+            result.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'array-cell result-cell';
+                if (val === '?') cell.classList.add('empty');
+                if (idx === resultIndex && !isDone) cell.classList.add('filled');
+
+                cell.innerHTML = `
+                    <div class="index">${idx}</div>
+                    <div>${val}</div>
+                `;
+                resultContainer.appendChild(cell);
+            });
+            
+            updateExplanation();
+        }
+
+        function updateExplanation() {
+            const explainer = document.getElementById('explanation');
+            if (isDone) {
+                explainer.innerHTML = `<h3>✅ Complete!</h3><p>The pointers have crossed and the result array is now sorted.</p>`;
+                return;
+            }
+            if (step === 0) {
+                 explainer.innerHTML = `<h3>Step 0: Setup</h3><p>We have our input array, two pointers (<code>left</code> and <code>right</code>), and an empty result array of the same size. We will fill the result array from the last position backwards.</p>`;
+                 return;
+            }
+            
+            const leftVal = initialArr[left];
+            const rightVal = initialArr[right];
+            const leftSq = leftVal * leftVal;
+            const rightSq = rightVal * rightVal;
+
+            let decisionText = '';
+            if (leftSq > rightSq) {
+                decisionText = `The <strong>left square ( ${leftSq} )</strong> is larger. We place it in the result array and move the <code>left</code> pointer inward.`;
+            } else {
+                decisionText = `The <strong>right square ( ${rightSq} )</strong> is larger or equal. We place it in the result array and move the <code>right</code> pointer inward.`;
+            }
+
+            explainer.innerHTML = `
+                <h3>Step ${step}: Compare and Place</h3>
+                <div class="comparison">
+                   Compare <code>(${leftVal})²</code> vs <code>(${rightVal})²</code>
+                   <br>
+                   <strong>${leftSq}</strong> vs <strong>${rightSq}</strong>
+                </div>
+                <div class="decision">
+                   ${decisionText}
+                </div>
+            `;
+        }
+        
+        function nextStep() {
+            if (isDone) return;
+            
+            step++;
+            
+            const leftVal = initialArr[left];
+            const rightVal = initialArr[right];
+            const leftSq = leftVal * leftVal;
+            const rightSq = rightVal * rightVal;
+            
+            if (leftSq > rightSq) {
+                result[resultIndex] = leftSq;
+                left++;
+            } else {
+                result[resultIndex] = rightSq;
+                right--;
+            }
+            resultIndex--;
+            
+            if (left > right) {
+                isDone = true;
+                if (resultIndex === -1) { // Final element if n is odd
+                     // The loop condition left > right handles everything.
+                     // The last element is placed when left === right.
+                }
+                 // Handle the very last element when left == right
+                if (resultIndex >= 0) {
+                     result[resultIndex] = initialArr[left] * initialArr[left];
+                }
+            }
+            if (resultIndex < 0) {
+                isDone = true;
+            }
+
+            render();
+        }
+
+        function reset() {
+            setup();
+            render();
+        }
+
+        // Initial setup
+        setup();
+        render();
+    </script>
+</body>
+</html>

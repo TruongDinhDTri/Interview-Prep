@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BST Validation Visualizer - Full View Edition</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&family=Source+Code+Pro:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+      min-height: 100vh;
+      padding: 15px;
+      color: #2c3e50;
+      overflow: hidden;
+    }
+    
+    .container {
+      max-width: 1900px;
+      height: calc(100vh - 30px);
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px 24px;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.35);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 3px solid #8B0000;
+      padding-bottom: 8px;
+    }
+    
+    h1 {
+      font-family: 'Crimson Text', serif;
+      font-size: 2.2em;
+      font-weight: 700;
+      color: #8B0000;
+      margin-bottom: 3px;
+      letter-spacing: -0.5px;
+    }
+    
+    .subtitle {
+      font-family: 'Crimson Text', serif;
+      font-size: 1em;
+      color: #555;
+      font-style: italic;
+    }
+    
+    .section-title {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #2c3e50;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .controls-section {
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 10px;
+      border: 1px solid #e1e4e8;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .control-label {
+      font-weight: 600;
+      font-size: 0.85em;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    
+    button {
+      padding: 8px 14px;
+      font-size: 13px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      white-space: nowrap;
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+    }
+    
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    .btn-example { 
+      background: linear-gradient(135deg, #8B0000 0%, #A52A2A 100%); 
+      color: white; 
+    }
+    
+    .btn-control { 
+      background: #2c5282; 
+      color: white; 
+    }
+    
+    .btn-prev {
+      background: #805AD5;
+      color: white;
+    }
+    
+    .btn-auto { 
+      background: #D97706; 
+      color: white; 
+    }
+    
+    .btn-control:disabled, .btn-prev:disabled { 
+      background: #cbd5e0; 
+      cursor: not-allowed; 
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .speed-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      background: white;
+      color: #2c5282;
+      border: 2px solid #2c5282;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-weight: 600;
+    }
+    
+    .speed-btn.active {
+      background: #2c5282;
+      color: white;
+    }
+    
+    .speed-btn:hover {
+      transform: scale(1.05);
+    }
+    
+    .progress-container {
+      background: #e2e8f0;
+      height: 6px;
+      border-radius: 10px;
+      overflow: hidden;
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8B0000 0%, #D97706 100%);
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 10px;
+    }
+    
+    .step-counter {
+      font-size: 0.9em;
+      color: #555;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    
+    .main-content {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      min-height: 0;
+    }
+    
+    .panel {
+      background: #f8f9fb;
+      border-radius: 10px;
+      padding: 14px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+      border: 1px solid #e1e4e8;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    
+    .tree-panel {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .canvas-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 0;
+    }
+    
+    canvas {
+      display: block;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e1e4e8;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    
+    .legend-circle {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .right-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .code-section {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .code-panel {
+      background: #1e1e1e;
+      color: #d4d4d4;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow: visible;
+      border: 1px solid #333;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .code-line {
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: all 0.3s;
+      border-left: 3px solid transparent;
+      white-space: nowrap;
+    }
+    
+    .code-line.active {
+      background: #264f78;
+      border-left: 3px solid #4CAF50;
+      animation: pulse 0.6s ease;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { background: #264f78; }
+      50% { background: #3a6ba5; }
+    }
+    
+    .info-section {
+      background: white;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border-left: 4px solid #8B0000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      animation: fadeIn 0.4s ease;
+      flex-shrink: 0;
+    }
+    
+    .info-section h3 {
+      font-family: 'Crimson Text', serif;
+      font-size: 1.1em;
+      color: #2c3e50;
+      margin-bottom: 4px;
+    }
+    
+    .info-section p {
+      line-height: 1.3;
+      margin-bottom: 3px;
+      font-size: 0.85em;
+    }
+    
+    .info-section code {
+      background: #f1f3f5;
+      padding: 2px 5px;
+      border-radius: 3px;
+      font-family: 'Source Code Pro', monospace;
+      color: #8B0000;
+      font-weight: 600;
+      font-size: 0.85em;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .call-stack {
+      background: white;
+      border-radius: 8px;
+      padding: 12px;
+      border: 2px solid #2c5282;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .call-stack h3 {
+      font-family: 'Crimson Text', serif;
+      color: #2c5282;
+      margin-bottom: 8px;
+      font-size: 1.2em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    
+    .stack-depth {
+      font-size: 0.7em;
+      background: #2c5282;
+      color: white;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+    
+    .stack-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column-reverse;
+      gap: 6px;
+      padding: 8px;
+      background: #f8f9fb;
+      border-radius: 6px;
+      min-height: 0;
+      overflow-y: auto;
+    }
+    
+    .stack-container::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .stack-container::-webkit-scrollbar-track {
+      background: #e2e8f0;
+      border-radius: 10px;
+    }
+    
+    .stack-container::-webkit-scrollbar-thumb {
+      background: #2c5282;
+      border-radius: 10px;
+    }
+    
+    .stack-item {
+      background: linear-gradient(135deg, #718096 0%, #4a5568 100%);
+      color: white;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: 11px;
+      animation: slideIn 0.3s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      border-left: 3px solid #4a5568;
+      position: relative;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    
+    .stack-item .depth-badge {
+      position: absolute;
+      top: -6px;
+      right: 8px;
+      background: #4a5568;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 9px;
+      font-weight: bold;
+      border: 2px solid white;
+    }
+    
+    .stack-item.active {
+      background: linear-gradient(135deg, #D97706 0%, #F59E0B 100%);
+      border-left: 3px solid #B45309;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(217, 119, 6, 0.5);
+      transform: scale(1.02);
+    }
+    
+    .stack-item.active .depth-badge {
+      background: #B45309;
+      animation: badgePulse 1s ease infinite;
+    }
+    
+    .stack-item.returning {
+      background: linear-gradient(135deg, #48BB78 0%, #38A169 100%);
+      border-left: 3px solid #2F855A;
+      box-shadow: 0 3px 10px rgba(72, 187, 120, 0.4);
+    }
+    
+    .stack-item.returning .depth-badge {
+      background: #2F855A;
+    }
+    
+    .stack-item.failed {
+      background: linear-gradient(135deg, #F56565 0%, #E53E3E 100%);
+      border-left: 3px solid #C53030;
+      box-shadow: 0 3px 10px rgba(245, 101, 101, 0.4);
+    }
+    
+    .stack-item.failed .depth-badge {
+      background: #C53030;
+    }
+    
+    @keyframes badgePulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .stack-empty {
+      text-align: center;
+      color: #718096;
+      font-style: italic;
+      padding: 15px;
+      font-size: 13px;
+    }
+    
+    .status {
+      padding: 10px 14px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 14px;
+      animation: fadeIn 0.4s ease;
+      flex-shrink: 0;
+    }
+    
+    .status.checking {
+      background: linear-gradient(135deg, #3182ce 0%, #2c5282 100%);
+      color: white;
+    }
+    
+    .status.valid {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      color: white;
+    }
+    
+    .status.invalid {
+      background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎓 Binary Search Tree Validation</h1>
+      <p class="subtitle">Interactive Algorithm Visualization • Full View Edition</p>
+    </div>
+
+    <div class="controls-section">
+      <div class="control-group">
+        <span class="control-label">📚 Examples</span>
+        <div class="controls">
+          <button class="btn-example" onclick="loadTree(1)">✅ Valid</button>
+          <button class="btn-example" onclick="loadTree(2)">❌ Tricky</button>
+          <button class="btn-example" onclick="loadTree(3)">✅ Perfect</button>
+          <button class="btn-example" onclick="loadTree(4)">❌ Invalid</button>
+        </div>
+      </div>
+
+      <div style="width: 1px; height: 25px; background: #ddd;"></div>
+
+      <div class="control-group">
+        <span class="control-label">🎮 Controls</span>
+        <div class="controls">
+          <button class="btn-control" onclick="startValidation()" id="startBtn">▶️ Start</button>
+          <button class="btn-prev" onclick="prevStep()" id="prevBtn">⏮️ Prev</button>
+          <button class="btn-control" onclick="nextStep()" id="nextBtn">⏭️ Next</button>
+          <button class="btn-auto" onclick="autoPlay()" id="autoBtn">🎬 Auto</button>
+          <button class="btn-control" onclick="resetValidation()" id="resetBtn">🔄 Reset</button>
+        </div>
+      </div>
+
+      <div style="width: 1px; height: 25px; background: #ddd;"></div>
+
+      <div class="control-group">
+        <span class="control-label">⚡ Speed</span>
+        <button class="speed-btn" onclick="setSpeed(0.5)">0.5x</button>
+        <button class="speed-btn active" onclick="setSpeed(1)">1x</button>
+        <button class="speed-btn" onclick="setSpeed(2)">2x</button>
+        <button class="speed-btn" onclick="setSpeed(3)">3x</button>
+      </div>
+
+      <div style="flex: 1; display: flex; align-items: center; gap: 10px; min-width: 180px;">
+        <div class="progress-container">
+          <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="step-counter" id="stepCounter">0/0</div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <div class="panel tree-panel">
+        <h2 class="section-title">🌳 Tree Structure</h2>
+        <div class="canvas-container">
+          <canvas id="treeCanvas" width="700" height="450"></canvas>
+        </div>
+        <div class="legend">
+          <div class="legend-item">
+            <div class="legend-circle" style="background:#9E9E9E"></div>
+            <span>Unvisited</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-circle" style="background:#FFC107"></div>
+            <span>Current</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-circle" style="background:#2196F3"></div>
+            <span>Processing</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-circle" style="background:#4CAF50"></div>
+            <span>Valid</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-circle" style="background:#f44336"></div>
+            <span>Invalid</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel right-panel">
+        <div class="code-section">
+          <h2 class="section-title">💻 Algorithm</h2>
+          <div class="code-panel" id="codePanel">
+            <div class="code-line" id="line1"><span style="color:#569cd6">def</span> <span style="color:#dcdcaa">isValidBST</span>(root, min_val, max_val):</div>
+            <div class="code-line" id="line2">    <span style="color:#569cd6">if not</span> root:</div>
+            <div class="code-line" id="line3">        <span style="color:#569cd6">return</span> <span style="color:#569cd6">True</span></div>
+            <div class="code-line" id="line4">    </div>
+            <div class="code-line" id="line5">    <span style="color:#569cd6">if not</span> (min_val &lt; root.val &lt; max_val):</div>
+            <div class="code-line" id="line6">        <span style="color:#569cd6">return</span> <span style="color:#569cd6">False</span></div>
+            <div class="code-line" id="line7">    </div>
+            <div class="code-line" id="line8">    <span style="color:#569cd6">return</span> (</div>
+            <div class="code-line" id="line9">        <span style="color:#dcdcaa">isValidBST</span>(root.left, min_val, root.val) <span style="color:#569cd6">and</span></div>
+            <div class="code-line" id="line10">        <span style="color:#dcdcaa">isValidBST</span>(root.right, root.val, max_val)</div>
+            <div class="code-line" id="line11">    )</div>
+          </div>
+        </div>
+
+        <div class="call-stack">
+          <h3>📚 Call Stack <span class="stack-depth" id="stackDepth">Depth: 0</span></h3>
+          <div class="stack-container" id="stackContainer">
+            <div class="stack-empty">Stack is empty - Click Start to begin! 🚀</div>
+          </div>
+        </div>
+
+        <div class="info-section" id="stepInfo">
+          <h3>👋 Welcome!</h3>
+          <p>Select a tree and click <strong>Start</strong> to begin. Watch the <strong>Call Stack</strong> grow and shrink as recursion happens!</p>
+          <p><strong>💡 Tip:</strong> Bottom of stack = first call, Top = current executing!</p>
+        </div>
+
+        <div class="status checking" id="status">🚀 Ready to validate!</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('treeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const trees = {
+      1: { val: 10, left: { val: 5, left: { val: 2 }, right: { val: 7 } }, right: { val: 15, right: { val: 20 } } },
+      2: { val: 10, left: { val: 5 }, right: { val: 15, left: { val: 6 }, right: { val: 20 } } },
+      3: { val: 50, left: { val: 30, left: { val: 20 }, right: { val: 40 } }, right: { val: 70, left: { val: 60 }, right: { val: 80 } } },
+      4: { val: 5, left: { val: 1 }, right: { val: 4, left: { val: 3 }, right: { val: 6 } } }
+    };
+
+    let currentTree = null;
+    let steps = [];
+    let currentStep = 0;
+    let nodeStates = new Map();
+    let nodePositions = new Map();
+    let autoPlayInterval = null;
+    let playbackSpeed = 1;
+
+    function loadTree(num) {
+      currentTree = trees[num];
+      resetValidation();
+      drawTree();
+    }
+
+    function drawTree() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!currentTree) return;
+      nodePositions.clear();
+      drawNode(currentTree, canvas.width / 2, 70, canvas.width / 4, 'root');
+    }
+
+    function drawNode(node, x, y, offset, path) {
+      if (!node) return;
+
+      nodePositions.set(path, { x, y, val: node.val });
+
+      if (node.left) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + 20);
+        ctx.lineTo(x - offset, y + 100 - 20);
+        ctx.strokeStyle = '#b0b0b0';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.closePath();
+        drawNode(node.left, x - offset, y + 100, offset / 2, path + '.L');
+      }
+
+      if (node.right) {
+        ctx.beginPath();
+        ctx.moveTo(x, y + 20);
+        ctx.lineTo(x + offset, y + 100 - 20);
+        ctx.strokeStyle = '#b0b0b0';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+        ctx.closePath();
+        drawNode(node.right, x + offset, y + 100, offset / 2, path + '.R');
+      }
+
+      const state = nodeStates.get(path) || 'default';
+      const colors = {
+        'default': '#9E9E9E',
+        'processing': '#2196F3',
+        'current': '#FFC107',
+        'valid': '#4CAF50',
+        'invalid': '#f44336'
+      };
+      const fill = colors[state] || colors.default;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 28, 0, Math.PI * 2);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.lineWidth = 3.5;
+      ctx.strokeStyle = '#2c3e50';
+      ctx.stroke();
+      ctx.closePath();
+
+      if (state === 'current') {
+        ctx.save();
+        ctx.shadowColor = 'rgba(255, 193, 7, 0.8)';
+        ctx.shadowBlur = 22;
+        ctx.beginPath();
+        ctx.arc(x, y, 38, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255,193,7,0.08)';
+        ctx.fill();
+        ctx.closePath();
+        ctx.restore();
+      }
+
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 22px Inter';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(node.val, x, y);
+    }
+
+    function startValidation() {
+      if (!currentTree) return alert('⚠️ Please load a tree first.');
+      steps = [];
+      currentStep = 0;
+      nodeStates = new Map();
+      generateSteps(currentTree, -Infinity, Infinity, 'root', 0, []);
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('nextBtn').disabled = false;
+      document.getElementById('prevBtn').disabled = true;
+      document.getElementById('autoBtn').disabled = false;
+      document.getElementById('status').className = 'status checking';
+      document.getElementById('status').textContent = '🔄 Validating...';
+      updateStepCounter();
+      nextStep();
+    }
+
+    function generateSteps(node, min, max, path, depth, callStack) {
+      const currentCall = { node: node ? node.val : 'null', min, max, path, depth };
+      const newStack = [...callStack, currentCall];
+
+      if (!node) {
+        steps.push({ type: 'null', path, line: 2, depth, callStack: newStack, action: 'return_true' });
+        return true;
+      }
+
+      steps.push({ type: 'enter', node: node.val, min, max, path, line: 1, depth, callStack: newStack });
+      steps.push({ type: 'check', node: node.val, min, max, path, line: 5, isValid: min < node.val && node.val < max, depth, callStack: newStack });
+
+      if (!(min < node.val && node.val < max)) {
+        steps.push({ type: 'invalid', node: node.val, path, line: 6, depth, callStack: newStack, action: 'return_false' });
+        return false;
+      }
+
+      steps.push({ type: 'recurse_left', node: node.val, path, line: 9, depth, callStack: newStack });
+      const leftValid = generateSteps(node.left, min, node.val, path + '.L', depth + 1, newStack);
+      
+      if (!leftValid) {
+        steps.push({ type: 'return_from_left_failed', node: node.val, path, depth, callStack: newStack, action: 'return_false' });
+        return false;
+      }
+      
+      steps.push({ type: 'return_from_left', node: node.val, path, depth, callStack: newStack });
+
+      steps.push({ type: 'recurse_right', node: node.val, path, line: 10, depth, callStack: newStack });
+      const rightValid = generateSteps(node.right, node.val, max, path + '.R', depth + 1, newStack);
+      
+      if (!rightValid) {
+        steps.push({ type: 'return_from_right_failed', node: node.val, path, depth, callStack: newStack, action: 'return_false' });
+        return false;
+      }
+      
+      steps.push({ type: 'return_from_right', node: node.val, path, depth, callStack: newStack });
+
+      steps.push({ type: 'valid', node: node.val, path, line: 8, depth, callStack: newStack, action: 'return_true' });
+      return true;
+    }
+
+    function nextStep() {
+      if (currentStep >= steps.length) {
+        document.getElementById('nextBtn').disabled = true;
+        document.getElementById('autoBtn').disabled = true;
+        stopAutoPlay();
+        const finalValid = steps.length > 0 && steps[steps.length - 1].type === 'valid';
+        document.getElementById('status').className = finalValid ? 'status valid' : 'status invalid';
+        document.getElementById('status').textContent = finalValid ? '✅ VALID BST - All constraints satisfied!' : '❌ INVALID BST - Constraint violated!';
+        document.getElementById('progressBar').style.width = '100%';
+        return;
+      }
+
+      const step = steps[currentStep];
+      updateVisualization(step);
+      updateProgress();
+      currentStep++;
+      
+      document.getElementById('prevBtn').disabled = currentStep <= 1;
+      updateStepCounter();
+    }
+
+    function prevStep() {
+      if (currentStep <= 1) return;
+      
+      currentStep--;
+      
+      nodeStates = new Map();
+      for (let i = 0; i < currentStep; i++) {
+        const s = steps[i];
+        if (s.type === 'enter' || s.type === 'check') {
+          nodeStates.set(s.path, 'processing');
+        } else if (s.type === 'valid') {
+          nodeStates.set(s.path, 'valid');
+        } else if (s.type === 'invalid') {
+          nodeStates.set(s.path, 'invalid');
+        }
+      }
+      
+      const step = steps[currentStep - 1];
+      updateVisualization(step);
+      updateProgress();
+      
+      document.getElementById('nextBtn').disabled = false;
+      document.getElementById('prevBtn').disabled = currentStep <= 1;
+      updateStepCounter();
+    }
+
+    function updateVisualization(step) {
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      if (step.line) {
+        const el = document.getElementById('line' + step.line);
+        if (el) el.classList.add('active');
+      }
+
+      for (const [k, v] of Array.from(nodeStates.entries())) {
+        if (v === 'current') nodeStates.set(k, 'processing');
+      }
+
+      buildCallStack(step);
+
+      let info = '';
+      switch (step.type) {
+        case 'enter':
+          nodeStates.set(step.path, 'current');
+          info = `<h3>🎯 Entering Node ${step.node}</h3>
+                  <p><strong>Path:</strong> <code>${step.path}</code> | <strong>Depth:</strong> <code>${step.depth}</code> | <strong>Range:</strong> <code>(${step.min === -Infinity ? '-∞' : step.min}, ${step.max === Infinity ? '+∞' : step.max})</code></p>`;
+          break;
+
+        case 'null':
+          info = `<h3>⚪ Null Node</h3>
+                  <p><strong>Path:</strong> <code>${step.path}</code> | <strong>Action:</strong> Return <code>True</code></p>`;
+          break;
+
+        case 'check':
+          nodeStates.set(step.path, 'current');
+          const minDisp = step.min === -Infinity ? '-∞' : step.min;
+          const maxDisp = step.max === Infinity ? '+∞' : step.max;
+          info = `<h3>🔍 Validating ${step.node}</h3>
+                  <p><strong>Check:</strong> <code>${minDisp} &lt; ${step.node} &lt; ${maxDisp}</code> → ${step.isValid ? '<span style="color:#4CAF50">✅ PASS</span>' : '<span style="color:#f44336">❌ FAIL</span>'}</p>`;
+          break;
+
+        case 'invalid':
+          nodeStates.set(step.path, 'invalid');
+          info = `<h3>❌ Invalid!</h3>
+                  <p><strong>Node:</strong> <code>${step.node}</code> violates BST | <strong>Action:</strong> Return <code>False</code></p>`;
+          break;
+
+        case 'recurse_left':
+          nodeStates.set(step.path, 'processing');
+          info = `<h3>⬅️ Going Left</h3>
+                  <p><strong>From:</strong> <code>${step.node}</code> | <strong>New max:</strong> <code>${step.node}</code></p>`;
+          break;
+
+        case 'return_from_left':
+          info = `<h3>↩️ Back from Left</h3>
+                  <p><strong>At:</strong> <code>${step.node}</code> | Left subtree valid ✅</p>`;
+          break;
+
+        case 'return_from_left_failed':
+          info = `<h3>❌ Left Failed</h3>
+                  <p><strong>At:</strong> <code>${step.node}</code> | Propagating failure</p>`;
+          break;
+
+        case 'recurse_right':
+          nodeStates.set(step.path, 'processing');
+          info = `<h3>➡️ Going Right</h3>
+                  <p><strong>From:</strong> <code>${step.node}</code> | <strong>New min:</strong> <code>${step.node}</code></p>`;
+          break;
+
+        case 'return_from_right':
+          info = `<h3>↩️ Back from Right</h3>
+                  <p><strong>At:</strong> <code>${step.node}</code> | Both subtrees valid ✅</p>`;
+          break;
+
+        case 'return_from_right_failed':
+          info = `<h3>❌ Right Failed</h3>
+                  <p><strong>At:</strong> <code>${step.node}</code> | Propagating failure</p>`;
+          break;
+
+        case 'valid':
+          nodeStates.set(step.path, 'valid');
+          info = `<h3>✅ Valid!</h3>
+                  <p><strong>Node:</strong> <code>${step.node}</code> | <strong>Action:</strong> Return <code>True</code></p>`;
+          break;
+      }
+
+      document.getElementById('stepInfo').innerHTML = info;
+      drawTree();
+    }
+
+    function buildCallStack(step) {
+      const container = document.getElementById('stackContainer');
+      const stack = step.callStack || [];
+      
+      document.getElementById('stackDepth').textContent = `Depth: ${stack.length}`;
+      
+      if (stack.length === 0) {
+        container.innerHTML = '<div class="stack-empty">Stack is empty 📭</div>';
+        return;
+      }
+
+      let html = '';
+      stack.forEach((call, index) => {
+        const minStr = call.min === -Infinity ? '-∞' : call.min;
+        const maxStr = call.max === Infinity ? '+∞' : call.max;
+        const isActive = index === stack.length - 1;
+        const isReturning = step.action && step.action.startsWith('return') && isActive;
+        const isFailed = step.action === 'return_false' && isActive;
+        
+        let className = 'stack-item';
+        if (isActive && !isReturning) className += ' active';
+        if (isReturning && !isFailed) className += ' returning';
+        if (isFailed) className += ' failed';
+        
+        const nodeDisplay = call.node === 'null' ? 'null' : call.node;
+        
+        html += `
+          <div class="${className}">
+            <div class="depth-badge">Level ${index}</div>
+            isValidBST(${nodeDisplay}, ${minStr}, ${maxStr})
+          </div>
+        `;
+      });
+      
+      container.innerHTML = html;
+    }
+
+    function updateProgress() {
+      const progress = (currentStep / steps.length) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+    }
+
+    function updateStepCounter() {
+      document.getElementById('stepCounter').textContent = `${currentStep}/${steps.length}`;
+    }
+
+    function setSpeed(speed) {
+      playbackSpeed = speed;
+      document.querySelectorAll('.speed-btn').forEach(btn => btn.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (autoPlayInterval) {
+        stopAutoPlay();
+        autoPlay();
+      }
+    }
+
+    function autoPlay() {
+      if (autoPlayInterval) {
+        stopAutoPlay();
+        return;
+      }
+      
+      document.getElementById('autoBtn').textContent = '⏸️ Pause';
+      const baseDelay = 1200;
+      const delay = baseDelay / playbackSpeed;
+      
+      autoPlayInterval = setInterval(() => {
+        if (currentStep >= steps.length) {
+          stopAutoPlay();
+          return;
+        }
+        nextStep();
+      }, delay);
+    }
+
+    function stopAutoPlay() {
+      if (autoPlayInterval) {
+        clearInterval(autoPlayInterval);
+        autoPlayInterval = null;
+        document.getElementById('autoBtn').textContent = '🎬 Auto';
+      }
+    }
+
+    function resetValidation() {
+      stopAutoPlay();
+      steps = [];
+      currentStep = 0;
+      nodeStates = new Map();
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('nextBtn').disabled = true;
+      document.getElementById('prevBtn').disabled = true;
+      document.getElementById('autoBtn').disabled = true;
+      document.getElementById('stepInfo').innerHTML = `<h3>👋 Welcome!</h3>
+        <p>Select a tree and click <strong>Start</strong> to begin. Watch the <strong>Call Stack</strong> grow and shrink as recursion happens!</p>
+        <p><strong>💡 Tip:</strong> Bottom of stack = first call, Top = current executing!</p>`;
+      document.getElementById('status').className = 'status checking';
+      document.getElementById('status').textContent = '🚀 Ready to validate!';
+      document.getElementById('stackContainer').innerHTML = '<div class="stack-empty">Stack is empty - Click Start to begin! 🚀</div>';
+      document.getElementById('stackDepth').textContent = 'Depth: 0';
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('stepCounter').textContent = '0/0';
+      document.querySelectorAll('.code-line').forEach(el => el.classList.remove('active'));
+      drawTree();
+    }
+
+    loadTree(1);
+  </script>
+</body>
+</html>
