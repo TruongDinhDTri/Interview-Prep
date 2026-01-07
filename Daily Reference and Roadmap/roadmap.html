@@ -895,43 +895,98 @@
                 grid-template-columns: 1fr;
             }
 
-            /* Responsive Tables - Refined Scroll View */
-            .cozy-table {
+            /* Responsive Tables - Stacked Block View */
+            .cozy-table, .cozy-table tbody {
                 display: block;
                 width: 100%;
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                border: 2px solid var(--sage-light);
-                border-radius: 12px;
-                white-space: nowrap; /* Keep columns on one line */
+                border: none;
+                background: transparent; /* Fix white background issue */
+                box-shadow: none; /* Remove shadow from container */
             }
 
-            .cozy-table thead, 
-            .cozy-table tbody, 
+            .cozy-table thead {
+                display: none; 
+            }
+
             .cozy-table tr {
-                display: table; /* Reset to table behavior */
+                display: block;
+                background: white;
+                border: 2px solid var(--sage-light);
+                border-radius: 16px;
+                margin-bottom: 2rem;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.06); /* Shadow moves to card */
+                overflow: hidden;
+            }
+
+            .cozy-table td {
+                display: block; 
                 width: 100%;
-                min-width: 600px; /* Ensure enough room for columns */
+                text-align: left; 
+                padding: 1rem 1.5rem;
+                border-bottom: 1px solid #eee;
+                color: var(--text-main);
+                font-size: 1rem;
+                white-space: normal !important;
+                line-height: 1.6;
             }
 
-            .cozy-table td, 
-            .cozy-table th {
-                display: table-cell;
-                padding: 1rem !important;
-                white-space: normal; /* Allow text inside cells to wrap */
-                min-width: 120px;
+            .cozy-table td:last-child {
+                border-bottom: none;
             }
 
-            /* Custom scrollbar for a cleaner look */
-            .cozy-table::-webkit-scrollbar {
-                height: 6px;
+            .cozy-table td::before {
+                content: attr(data-label);
+                display: block;
+                font-size: 0.75rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-light);
+                margin-bottom: 0.5rem;
             }
-            .cozy-table::-webkit-scrollbar-track {
-                background: var(--bg-color);
-            }
-            .cozy-table::-webkit-scrollbar-thumb {
+
+            .cozy-table td:first-child {
                 background: var(--sage-light);
-                border-radius: 10px;
+                color: #4a5a3b;
+                font-weight: 800;
+                padding: 1.2rem 1.5rem;
+                border-bottom: 2px solid #cbd4b8;
+                font-size: 1.2rem;
+            }
+            
+            .cozy-table td:first-child::before {
+                display: none; 
+            }
+
+            /* Fix Daily Grid (Day-to-Day) for Mobile */
+            .daily-grid {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .day-label {
+                background: var(--clay-light);
+                color: var(--clay);
+                padding: 0.5rem 1rem;
+                border-radius: 8px;
+                display: inline-block;
+                width: auto;
+                align-self: flex-start;
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .session-card {
+                margin-bottom: 0.5rem;
+                border-left: 4px solid var(--sage-green);
+            }
+            
+            /* Fix Timeline Visual "slipping" */
+            #timeline-visual div[style*="display: flex"] {
+                flex-direction: column !important;
+                align-items: flex-start !important;
+                gap: 0.5rem;
             }
         }
 
@@ -1249,13 +1304,15 @@
 
             <h3 style="margin-top: 2rem;">The Goal</h3>
             <table class="cozy-table">
-                <tr><th>Metric</th><th>Target</th></tr>
-                <tr><td>Primary Goal</td><td>Escape toxic job → Remote position $3,000-4,000+/month</td></tr>
-                <tr><td>Minimum Acceptable</td><td>$2,500/month</td></tr>
-                <tr><td>Target Salary</td><td>$3,500/month</td></tr>
-                <tr><td>Stretch Goal</td><td>$4,500/month</td></tr>
-                <tr><td>Timeline</td><td>12 weeks (Jan 5 - Mar 29, 2026)</td></tr>
-                <tr><td>Fallback</td><td>Any decent remote job to ESCAPE current toxic environment</td></tr>
+                <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Metric">Primary Goal</td><td data-label="Target">Escape toxic job → Remote position $3,000-4,000+/month</td></tr>
+                <tr><td data-label="Metric">Minimum Acceptable</td><td data-label="Target">$2,500/month</td></tr>
+                <tr><td data-label="Metric">Target Salary</td><td data-label="Target">$3,500/month</td></tr>
+                <tr><td data-label="Metric">Stretch Goal</td><td data-label="Target">$4,500/month</td></tr>
+                <tr><td data-label="Metric">Timeline</td><td data-label="Target">12 weeks (Jan 5 - Mar 29, 2026)</td></tr>
+                <tr><td data-label="Metric">Fallback</td><td data-label="Target">Any decent remote job to ESCAPE current toxic environment</td></tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">The Strategy</h3>
@@ -1265,17 +1322,19 @@
 
             <h3 style="margin-top: 2rem;">Key Numbers at a Glance</h3>
             <table class="cozy-table">
-                <tr><th>Metric</th><th>Target</th></tr>
-                <tr><td>Topics already learned</td><td><strong>14 topics (20 weeks)</strong> ✅</td></tr>
-                <tr><td>Patterns to master</td><td><strong>15 core patterns</strong></td></tr>
-                <tr><td>STAR stories</td><td><strong>5 key stories</strong> (NEW)</td></tr>
-                <tr><td>Backend prep</td><td><strong>6 sessions (5.5h)</strong> (ENHANCED)</td></tr>
-                <tr><td>Coding problems to solve</td><td><strong>120-150</strong> (topic + pattern-based)</td></tr>
-                <tr><td>Applications to send</td><td><strong>100-120</strong> total</td></tr>
-                <tr><td>Interviews to get</td><td><strong>10-18</strong></td></tr>
-                <tr><td>Offers needed</td><td><strong>1-3</strong></td></tr>
-                <tr><td>Timeline</td><td><strong>12 weeks</strong></td></tr>
-                <tr><td>Hours/day</td><td><strong>4 hours</strong> (quality > quantity)</td></tr>
+                <thead><tr><th>Metric</th><th>Target</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Metric">Topics already learned</td><td data-label="Target"><strong>14 topics (20 weeks)</strong> ✅</td></tr>
+                <tr><td data-label="Metric">Patterns to master</td><td data-label="Target"><strong>15 core patterns</strong></td></tr>
+                <tr><td data-label="Metric">STAR stories</td><td data-label="Target"><strong>5 key stories</strong> (NEW)</td></tr>
+                <tr><td data-label="Metric">Backend prep</td><td data-label="Target"><strong>6 sessions (5.5h)</strong> (ENHANCED)</td></tr>
+                <tr><td data-label="Metric">Coding problems to solve</td><td data-label="Target"><strong>120-150</strong> (topic + pattern-based)</td></tr>
+                <tr><td data-label="Metric">Applications to send</td><td data-label="Target"><strong>100-120</strong> total</td></tr>
+                <tr><td data-label="Metric">Interviews to get</td><td data-label="Target"><strong>10-18</strong></td></tr>
+                <tr><td data-label="Metric">Offers needed</td><td data-label="Target"><strong>1-3</strong></td></tr>
+                <tr><td data-label="Metric">Timeline</td><td data-label="Target"><strong>12 weeks</strong></td></tr>
+                <tr><td data-label="Metric">Hours/day</td><td data-label="Target"><strong>4 hours</strong> (quality > quantity)</td></tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">Resource Allocation (288 hours total)</h3>
@@ -1324,17 +1383,19 @@
 
         <!-- CURRENT STATE ANALYSIS -->
         <section id="current-state" class="paper-card">
-            <div class="section-header"><h2>Current State Analysis</h2></div>
+            <h3 style="margin-top: 2rem;">Current State Analysis</h3>
             <h3>What You Have (Assets)</h3>
             <table class="cozy-table">
-                <tr><th>Skill</th><th>Level</th><th>Evidence</th><th>Job Market Value</th></tr>
-                <tr><td>Python</td><td>⭐⭐⭐⭐⭐ Master</td><td>Years of experience</td><td>HIGH - Always in demand</td></tr>
-                <tr><td>Django/DRF</td><td>⭐⭐⭐⭐⭐ Expert</td><td>Professional experience</td><td>HIGH - Backend staple</td></tr>
-                <tr><td>JavaScript</td><td>⭐⭐⭐⭐ Good</td><td>Working knowledge</td><td>HIGH - Required everywhere</td></tr>
-                <tr><td>React</td><td>⭐⭐ Basic</td><td>"Biết 1 xíu"</td><td>MEDIUM - Need to improve</td></tr>
-                <tr><td>SQL/Databases</td><td>⭐⭐⭐⭐ Strong</td><td>From Django work</td><td>HIGH - Essential</td></tr>
-                <tr><td>Git</td><td>⭐⭐⭐⭐ Strong</td><td>Professional work</td><td>Required baseline</td></tr>
-                <tr><td>AI Tools</td><td>⭐⭐⭐⭐⭐ Expert</td><td>Copilot, Claude, Gemini</td><td>DIFFERENTIATOR</td></tr>
+                <thead><tr><th>Skill</th><th>Level</th><th>Evidence</th><th>Job Market Value</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Skill">Python</td><td data-label="Level">⭐⭐⭐⭐⭐ Master</td><td data-label="Evidence">Years of experience</td><td data-label="Value">HIGH - Always in demand</td></tr>
+                <tr><td data-label="Skill">Django/DRF</td><td data-label="Level">⭐⭐⭐⭐⭐ Expert</td><td data-label="Evidence">Professional experience</td><td data-label="Value">HIGH - Backend staple</td></tr>
+                <tr><td data-label="Skill">JavaScript</td><td data-label="Level">⭐⭐⭐⭐ Good</td><td data-label="Evidence">Working knowledge</td><td data-label="Value">HIGH - Required everywhere</td></tr>
+                <tr><td data-label="Skill">React</td><td data-label="Level">⭐⭐ Basic</td><td data-label="Evidence">"Biết 1 xíu"</td><td data-label="Value">MEDIUM - Need to improve</td></tr>
+                <tr><td data-label="Skill">SQL/Databases</td><td data-label="Level">⭐⭐⭐⭐ Strong</td><td data-label="Evidence">From Django work</td><td data-label="Value">HIGH - Essential</td></tr>
+                <tr><td data-label="Skill">Git</td><td data-label="Level">⭐⭐⭐⭐ Strong</td><td data-label="Evidence">Professional work</td><td data-label="Value">Required baseline</td></tr>
+                <tr><td data-label="Skill">AI Tools</td><td data-label="Level">⭐⭐⭐⭐⭐ Expert</td><td data-label="Evidence">Copilot, Claude, Gemini</td><td data-label="Value">DIFFERENTIATOR</td></tr>
+                </tbody>
             </table>
             
             <h3 style="margin-top: 2rem;">20 Weeks Foundation — Topics Covered ✅</h3>
@@ -1377,13 +1438,15 @@
 
             <h3 style="margin-top: 2rem;">Soft Skills & Differentiators</h3>
             <table class="cozy-table">
-                <tr><th>Asset</th><th>Why It Matters</th></tr>
-                <tr><td><strong>English 8/10</strong></td><td>Opens global market, rare among VN devs</td></tr>
-                <tr><td><strong>Design mindset</strong></td><td>Product Engineer fit, can bridge design-dev</td></tr>
-                <tr><td><strong>AI-native profile</strong></td><td>2025 differentiator, uses AI tools effectively</td></tr>
-                <tr><td><strong>Creative thinking</strong></td><td>Problem-solving, unique solutions</td></tr>
-                <tr><td><strong>20 weeks dedication</strong></td><td>Proves commitment, discipline</td></tr>
-                <tr><td><strong>Grokking course owned</strong></td><td>$69 invested = structured learning ready</td></tr>
+                <thead><tr><th>Asset</th><th>Why It Matters</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Asset"><strong>English 8/10</strong></td><td data-label="Why It Matters">Opens global market, rare among VN devs</td></tr>
+                <tr><td data-label="Asset"><strong>Design mindset</strong></td><td data-label="Why It Matters">Product Engineer fit, can bridge design-dev</td></tr>
+                <tr><td data-label="Asset"><strong>AI-native profile</strong></td><td data-label="Why It Matters">2025 differentiator, uses AI tools effectively</td></tr>
+                <tr><td data-label="Asset"><strong>Creative thinking</strong></td><td data-label="Why It Matters">Problem-solving, unique solutions</td></tr>
+                <tr><td data-label="Asset"><strong>20 weeks dedication</strong></td><td data-label="Why It Matters">Proves commitment, discipline</td></tr>
+                <tr><td data-label="Asset"><strong>Grokking course owned</strong></td><td data-label="Why It Matters">$69 invested = structured learning ready</td></tr>
+                </tbody>
             </table>
         </section>
 
@@ -1437,12 +1500,14 @@
 
             <h3 style="margin-top: 2rem;">Integrated Learning Flow (UPDATED)</h3>
             <table class="cozy-table">
-                <tr><th>Step</th><th>Activity</th><th>Duration</th></tr>
-                <tr><td><strong>Step 1</strong></td><td>📚 <strong>Topic Quick Review</strong> — Review underlying DS/concept from 20 weeks</td><td>10-15 min</td></tr>
-                <tr><td><strong>Step 2</strong></td><td>🎯 <strong>Pattern Learning</strong> — Read Grokking, understand WHEN to use, memorize template</td><td>20 min</td></tr>
-                <tr><td><strong>Step 3</strong></td><td>💪 <strong>Solve Problems</strong> — Apply pattern, notice how topic knowledge helps</td><td>60-90 min</td></tr>
-                <tr><td><strong>Step 4</strong></td><td>🗣️ <strong>Behavioral Work</strong> (NEW) — STAR stories, practice questions</td><td>10-15 min</td></tr>
-                <tr><td><strong>Step 5</strong></td><td>💼 <strong>Backend Articulation</strong> (ENHANCED) — Practice explaining Django/DRF concepts</td><td>Weekly 45min</td></tr>
+                <thead><tr><th>Step</th><th>Activity</th><th>Duration</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Step"><strong>Step 1</strong></td><td data-label="Activity">📚 <strong>Topic Quick Review</strong> — Review underlying DS/concept from 20 weeks</td><td data-label="Duration">10-15 min</td></tr>
+                <tr><td data-label="Step"><strong>Step 2</strong></td><td data-label="Activity">🎯 <strong>Pattern Learning</strong> — Read Grokking, understand WHEN to use, memorize template</td><td data-label="Duration">20 min</td></tr>
+                <tr><td data-label="Step"><strong>Step 3</strong></td><td data-label="Activity">💪 <strong>Solve Problems</strong> — Apply pattern, notice how topic knowledge helps</td><td data-label="Duration">60-90 min</td></tr>
+                <tr><td data-label="Step"><strong>Step 4</strong></td><td data-label="Activity">🗣️ <strong>Behavioral Work</strong> (NEW) — STAR stories, practice questions</td><td data-label="Duration">10-15 min</td></tr>
+                <tr><td data-label="Step"><strong>Step 5</strong></td><td data-label="Activity">💼 <strong>Backend Articulation</strong> (ENHANCED) — Practice explaining Django/DRF concepts</td><td data-label="Duration">Weekly 45min</td></tr>
+                </tbody>
             </table>
         </section>
 
@@ -1453,11 +1518,13 @@
             <div style="margin-bottom: 2rem;">
                 <h3 style="color: var(--clay);">Decision 1: Topic Review + Pattern Learning (INTEGRATED)</h3>
                 <table class="cozy-table">
-                    <tr><th>Old Approach (Random LeetCode)</th><th>New Integrated Approach</th></tr>
-                    <tr><td>Learn patterns cold (feels new)</td><td>Review topic → Then learn pattern</td></tr>
-                    <tr><td>"What is Two Pointers?"</td><td>"I know Arrays, now HOW to use for pairs?"</td></tr>
-                    <tr><td>45-90 min per problem</td><td>20-30 min per problem</td></tr>
-                    <tr><td>Low transfer learning</td><td>High transfer learning</td></tr>
+                    <thead><tr><th>Old Approach (Random LeetCode)</th><th>New Integrated Approach</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Old Approach">Learn patterns cold (feels new)</td><td data-label="New Approach">Review topic → Then learn pattern</td></tr>
+                    <tr><td data-label="Old Approach">"What is Two Pointers?"</td><td data-label="New Approach">"I know Arrays, now HOW to use for pairs?"</td></tr>
+                    <tr><td data-label="Old Approach">45-90 min per problem</td><td data-label="New Approach">20-30 min per problem</td></tr>
+                    <tr><td data-label="Old Approach">Low transfer learning</td><td data-label="New Approach">High transfer learning</td></tr>
+                    </tbody>
                 </table>
             </div>
 
@@ -1469,12 +1536,14 @@
             <div style="margin-bottom: 2rem;">
                 <h3 style="color: var(--clay);">Decision 3: Add Behavioral Preparation (NEW)</h3>
                 <table class="cozy-table">
-                    <tr><th>Without Behavioral Prep</th><th>With Behavioral Prep (NEW)</th></tr>
-                    <tr><td>Strong coding, weak story</td><td>Strong coding + Strong communication</td></tr>
-                    <tr><td>Struggle in culture fit rounds</td><td>Confident in all interview types</td></tr>
-                    <tr><td>40-50% pass rate on finals</td><td>60-70% pass rate on finals</td></tr>
-                    <tr><td>Can't articulate past work well</td><td>Clear STAR stories ready</td></tr>
-                    <tr><td>Miss 30-40% of interview weight</td><td>Cover 100% of interview evaluation</td></tr>
+                    <thead><tr><th>Without Behavioral Prep</th><th>With Behavioral Prep (NEW)</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Without">Strong coding, weak story</td><td data-label="With">Strong coding + Strong communication</td></tr>
+                    <tr><td data-label="Without">Struggle in culture fit rounds</td><td data-label="With">Confident in all interview types</td></tr>
+                    <tr><td data-label="Without">40-50% pass rate on finals</td><td data-label="With">60-70% pass rate on finals</td></tr>
+                    <tr><td data-label="Without">Can't articulate past work well</td><td data-label="With">Clear STAR stories ready</td></tr>
+                    <tr><td data-label="Without">Miss 30-40% of interview weight</td><td data-label="With">Cover 100% of interview evaluation</td></tr>
+                    </tbody>
                 </table>
                 <p><strong>Why it matters:</strong> Behavioral interviews = 30-40% of total evaluation. Many strong coders get rejected due to poor behavioral answers.</p>
             </div>
@@ -1482,11 +1551,13 @@
             <div style="margin-bottom: 2rem;">
                 <h3 style="color: var(--clay);">Decision 4: Enhanced Backend Talking Points (ENHANCED)</h3>
                 <table class="cozy-table">
-                    <tr><th>Without Backend Prep</th><th>With Enhanced Backend Prep (NEW)</th></tr>
-                    <tr><td>Expert Django but can't explain</td><td>Expert Django AND can articulate clearly</td></tr>
-                    <tr><td>Fumble technical discussions</td><td>Confident in backend conversations</td></tr>
-                    <tr><td>Generic "I know Django" answers</td><td>Specific, detailed technical discussions</td></tr>
-                    <tr><td>2h total prep</td><td>5.5h structured practice</td></tr>
+                    <thead><tr><th>Without Backend Prep</th><th>With Enhanced Backend Prep (NEW)</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Without">Expert Django but can't explain</td><td data-label="With">Expert Django AND can articulate clearly</td></tr>
+                    <tr><td data-label="Without">Fumble technical discussions</td><td data-label="With">Confident in backend conversations</td></tr>
+                    <tr><td data-label="Without">Generic "I know Django" answers</td><td data-label="With">Specific, detailed technical discussions</td></tr>
+                    <tr><td data-label="Without">2h total prep</td><td data-label="With">5.5h structured practice</td></tr>
+                    </tbody>
                 </table>
                 <p><strong>Why it matters:</strong> You're targeting Backend/Full-stack roles. "Weak and confused" when talking ≠ Expert level work.</p>
             </div>
@@ -1509,9 +1580,11 @@
             <div style="margin-bottom: 2rem;">
                 <h3 style="color: var(--clay);">Decision 8: Target Series A-C Startups FIRST</h3>
                 <table class="cozy-table">
-                    <tr><th>Target</th><th>Interview Rounds</th><th>Timeline</th><th>Success Rate</th></tr>
-                    <tr><td>FAANG</td><td>6-8 rounds</td><td>2-3 months</td><td>10-20%</td></tr>
-                    <tr><td><strong>Series A-C Startups</strong> ✅</td><td>2-4 rounds</td><td>2-4 weeks</td><td><strong>40-60%</strong></td></tr>
+                    <thead><tr><th>Target</th><th>Interview Rounds</th><th>Timeline</th><th>Success Rate</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Target">FAANG</td><td data-label="Rounds">6-8 rounds</td><td data-label="Timeline">2-3 months</td><td data-label="Success Rate">10-20%</td></tr>
+                    <tr><td data-label="Target"><strong>Series A-C Startups</strong> ✅</td><td data-label="Rounds">2-4 rounds</td><td data-label="Timeline">2-4 weeks</td><td data-label="Success Rate"><strong>40-60%</strong></td></tr>
+                    </tbody>
                 </table>
             </div>
         </section>
@@ -1521,22 +1594,24 @@
             <div class="section-header"><h2>Topics ↔ Patterns Mapping</h2></div>
             <p>Your 20 weeks of study are fully integrated into the 15 patterns:</p>
             <table class="cozy-table">
-                <tr><th>Your Topic</th><th>Covered By Pattern(s)</th><th>Status</th></tr>
-                <tr><td><strong>Array</strong></td><td>Two Pointers, Sliding Window, Binary Search, Prefix Sum, Cyclic Sort</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>String</strong></td><td>Two Pointers, Sliding Window, Hash Maps</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Hash Table</strong></td><td>Hash Maps pattern</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Linked List</strong></td><td>Fast & Slow Pointers</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Stack</strong></td><td>Stacks pattern, DFS (uses stack)</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Queue</strong></td><td>BFS (uses queue)</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Tree</strong></td><td>BFS, DFS</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Graph</strong></td><td>BFS, DFS</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Heap</strong></td><td>Top K Elements, Two Heaps</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Matrix</strong></td><td>BFS, DFS (2D traversal)</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Recursion</strong></td><td>DFS, Subsets/Backtracking</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Sorting</strong></td><td>Binary Search, Cyclic Sort, Merge Intervals</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Interval</strong></td><td>Merge Intervals</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Dynamic Programming</strong></td><td>0/1 Knapsack DP</td><td>✅ COVERED</td></tr>
-                <tr><td><strong>Trie</strong></td><td>Not included</td><td>⚠️ Skip (low ROI)</td></tr>
+                <thead><tr><th>Your Topic</th><th>Covered By Pattern(s)</th><th>Status</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Topic"><strong>Array</strong></td><td data-label="Patterns">Two Pointers, Sliding Window, Binary Search, Prefix Sum, Cyclic Sort</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>String</strong></td><td data-label="Patterns">Two Pointers, Sliding Window, Hash Maps</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Hash Table</strong></td><td data-label="Patterns">Hash Maps pattern</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Linked List</strong></td><td data-label="Patterns">Fast & Slow Pointers</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Stack</strong></td><td data-label="Patterns">Stacks pattern, DFS (uses stack)</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Queue</strong></td><td data-label="Patterns">BFS (uses queue)</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Tree</strong></td><td data-label="Patterns">BFS, DFS</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Graph</strong></td><td data-label="Patterns">BFS, DFS</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Heap</strong></td><td data-label="Patterns">Top K Elements, Two Heaps</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Matrix</strong></td><td data-label="Patterns">BFS, DFS (2D traversal)</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Recursion</strong></td><td data-label="Patterns">DFS, Subsets/Backtracking</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Sorting</strong></td><td data-label="Patterns">Binary Search, Cyclic Sort, Merge Intervals</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Interval</strong></td><td data-label="Patterns">Merge Intervals</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Dynamic Programming</strong></td><td data-label="Patterns">0/1 Knapsack DP</td><td data-label="Status">✅ COVERED</td></tr>
+                <tr><td data-label="Topic"><strong>Trie</strong></td><td data-label="Patterns">Not included</td><td data-label="Status">⚠️ Skip (low ROI)</td></tr>
+                </tbody>
             </table>
             
             <div class="coverage-banner">
@@ -1613,27 +1688,29 @@ TOTAL COVERAGE: ~92% of startup interview questions
             <h3 style="margin-top: 2rem;">The STAR Framework</h3>
             <p>STAR = Situation, Task, Action, Result. Use this structure to craft compelling stories that demonstrate your skills and values.</p>
             <table class="cozy-table">
-                <tr><th>Component</th><th>Description</th><th>Example</th></tr>
+                <thead><tr><th>Component</th><th>Description</th><th>Example</th></tr></thead>
+                <tbody>
                 <tr>
-                    <td><strong>Situation</strong></td>
-                    <td>Set the context</td>
-                    <td>"At my previous company, our API response times were 2-3 seconds..."</td>
+                    <td data-label="Component"><strong>Situation</strong></td>
+                    <td data-label="Description">Set the context</td>
+                    <td data-label="Example">"At my previous company, our API response times were 2-3 seconds..."</td>
                 </tr>
                 <tr>
-                    <td><strong>Task</strong></td>
-                    <td>Your responsibility</td>
-                    <td>"I was tasked with improving performance to under 500ms..."</td>
+                    <td data-label="Component"><strong>Task</strong></td>
+                    <td data-label="Description">Your responsibility</td>
+                    <td data-label="Example">"I was tasked with improving performance to under 500ms..."</td>
                 </tr>
                 <tr>
-                    <td><strong>Action</strong></td>
-                    <td>What YOU did (specific steps)</td>
-                    <td>"I profiled queries, added select_related, implemented Redis caching..."</td>
+                    <td data-label="Component"><strong>Action</strong></td>
+                    <td data-label="Description">What YOU did (specific steps)</td>
+                    <td data-label="Example">"I profiled queries, added select_related, implemented Redis caching..."</td>
                 </tr>
                 <tr>
-                    <td><strong>Result</strong></td>
-                    <td>Measurable outcome</td>
-                    <td>"Reduced response time to 300ms, 85% improvement, users loved it"</td>
+                    <td data-label="Component"><strong>Result</strong></td>
+                    <td data-label="Description">Measurable outcome</td>
+                    <td data-label="Example">"Reduced response time to 300ms, 85% improvement, users loved it"</td>
                 </tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">The 5 STAR Stories You'll Prepare</h3>
@@ -1668,15 +1745,17 @@ TOTAL COVERAGE: ~92% of startup interview questions
 
             <h3 style="margin-top: 2rem;">Timeline & Practice Schedule</h3>
             <table class="cozy-table">
-                <tr><th>Week</th><th>Behavioral Work</th><th>Time</th></tr>
-                <tr><td>Week 1</td><td>Learn STAR framework + Draft 30-second self-intro</td><td>1h</td></tr>
-                <tr><td>Week 2</td><td>Write Story #1 (High-Impact) + Story #2 (Difficulty)</td><td>1.5h</td></tr>
-                <tr><td>Week 3</td><td>Write Story #3 (Conflict) + Story #4 (Growth) + Practice all 4</td><td>1.5h</td></tr>
-                <tr><td>Week 4</td><td>Write Story #5 (Leadership) + Finalize "Big Three" + First mock</td><td>2.5h</td></tr>
-                <tr><td>Week 5</td><td>Practice 10 common questions with AI (ChatGPT/Claude)</td><td>1.5h</td></tr>
-                <tr><td>Week 6</td><td>30-min full mock behavioral interview + Refine stories</td><td>2h</td></tr>
-                <tr><td>Week 7-12</td><td>Continue practicing during mock interviews</td><td>2h</td></tr>
-                <tr><td colspan="2"><strong>Total Behavioral Prep Time</strong></td><td><strong>12h</strong></td></tr>
+                <thead><tr><th>Week</th><th>Behavioral Work</th><th>Time</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Week">Week 1</td><td data-label="Task">Learn STAR framework + Draft 30-second self-intro</td><td data-label="Time">1h</td></tr>
+                <tr><td data-label="Week">Week 2</td><td data-label="Task">Write Story #1 (High-Impact) + Story #2 (Difficulty)</td><td data-label="Time">1.5h</td></tr>
+                <tr><td data-label="Week">Week 3</td><td data-label="Task">Write Story #3 (Conflict) + Story #4 (Growth) + Practice all 4</td><td data-label="Time">1.5h</td></tr>
+                <tr><td data-label="Week">Week 4</td><td data-label="Task">Write Story #5 (Leadership) + Finalize "Big Three" + First mock</td><td data-label="Time">2.5h</td></tr>
+                <tr><td data-label="Week">Week 5</td><td data-label="Task">Practice 10 common questions with AI (ChatGPT/Claude)</td><td data-label="Time">1.5h</td></tr>
+                <tr><td data-label="Week">Week 6</td><td data-label="Task">30-min full mock behavioral interview + Refine stories</td><td data-label="Time">2h</td></tr>
+                <tr><td data-label="Week">Week 7-12</td><td data-label="Task">Continue practicing during mock interviews</td><td data-label="Time">2h</td></tr>
+                <tr><td data-label="Total" colspan="2"><strong>Total Behavioral Prep Time</strong></td><td data-label="Time"><strong>12h</strong></td></tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">Common Behavioral Questions</h3>
@@ -1818,19 +1897,21 @@ Date | Problem | Mistake | Why | Prevention
 
                 <h5 style="color: #6a9a6a; margin: 1.5rem 0 0.8rem 0;">The Time Machine Schedule:</h5>
                 <table class="cozy-table">
-                <tr><th>Current Week</th><th>Problem 1 (from...)</th><th>Problem 2 (from...)</th><th>Notes</th></tr>
-                <tr><td>Week 1</td><td>None</td><td>None</td><td>No old material yet</td></tr>
-                <tr><td>Week 2</td><td>None</td><td>None</td><td>Only 1 week of history</td></tr>
-                <tr><td>Week 3</td><td>Week 1 (2 weeks ago)</td><td>Week 1 (redo different problem)</td><td>Limited material</td></tr>
-                <tr><td>Week 4</td><td>Week 2 (2 weeks ago)</td><td>Week 1 (3 weeks ago)</td><td>✅ Full Time Machine starts</td></tr>
-                <tr><td>Week 5</td><td>Week 3 (2 weeks ago)</td><td>Week 1 (4 weeks ago)</td><td></td></tr>
-                <tr><td>Week 6</td><td>Week 4 (2 weeks ago)</td><td>Week 2 (4 weeks ago)</td><td></td></tr>
-                <tr><td>Week 7</td><td>Week 5 (2 weeks ago)</td><td>Week 1-2 (5-6 weeks ago)</td><td>Rotate old material</td></tr>
-                <tr><td>Week 8</td><td>Week 6 (2 weeks ago)</td><td>Week 3 (5 weeks ago)</td><td></td></tr>
-                <tr><td>Week 9</td><td>Week 7 (2 weeks ago)</td><td>Week 3-4 (5-6 weeks ago)</td><td>Interview phase</td></tr>
-                <tr><td>Week 10</td><td>Week 8 (2 weeks ago)</td><td>Week 4-5 (5-6 weeks ago)</td><td></td></tr>
-                <tr><td>Week 11</td><td>Week 9 (2 weeks ago)</td><td>Week 5-6 (5-6 weeks ago)</td><td></td></tr>
-                <tr><td>Week 12</td><td>Week 10 (2 weeks ago)</td><td>Week 1-2 (10-11 weeks ago!)</td><td>Full circle!</td></tr>
+                <thead><tr><th>Current Week</th><th>Problem 1 (from...)</th><th>Problem 2 (from...)</th><th>Notes</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Week">Week 1</td><td data-label="Problem 1">None</td><td data-label="Problem 2">None</td><td data-label="Notes">No old material yet</td></tr>
+                <tr><td data-label="Week">Week 2</td><td data-label="Problem 1">None</td><td data-label="Problem 2">None</td><td data-label="Notes">Only 1 week of history</td></tr>
+                <tr><td data-label="Week">Week 3</td><td data-label="Problem 1">Week 1 (2 weeks ago)</td><td data-label="Problem 2">Week 1 (redo different problem)</td><td data-label="Notes">Limited material</td></tr>
+                <tr><td data-label="Week">Week 4</td><td data-label="Problem 1">Week 2 (2 weeks ago)</td><td data-label="Problem 2">Week 1 (3 weeks ago)</td><td data-label="Notes">✅ Full Time Machine starts</td></tr>
+                <tr><td data-label="Week">Week 5</td><td data-label="Problem 1">Week 3 (2 weeks ago)</td><td data-label="Problem 2">Week 1 (4 weeks ago)</td><td data-label="Notes"></td></tr>
+                <tr><td data-label="Week">Week 6</td><td data-label="Problem 1">Week 4 (2 weeks ago)</td><td data-label="Problem 2">Week 2 (4 weeks ago)</td><td data-label="Notes"></td></tr>
+                <tr><td data-label="Week">Week 7</td><td data-label="Problem 1">Week 5 (2 weeks ago)</td><td data-label="Problem 2">Week 1-2 (5-6 weeks ago)</td><td data-label="Notes">Rotate old material</td></tr>
+                <tr><td data-label="Week">Week 8</td><td data-label="Problem 1">Week 6 (2 weeks ago)</td><td data-label="Problem 2">Week 3 (5 weeks ago)</td><td data-label="Notes"></td></tr>
+                <tr><td data-label="Week">Week 9</td><td data-label="Problem 1">Week 7 (2 weeks ago)</td><td data-label="Problem 2">Week 3-4 (5-6 weeks ago)</td><td data-label="Notes">Interview phase</td></tr>
+                <tr><td data-label="Week">Week 10</td><td data-label="Problem 1">Week 8 (2 weeks ago)</td><td data-label="Problem 2">Week 4-5 (5-6 weeks ago)</td><td data-label="Notes"></td></tr>
+                <tr><td data-label="Week">Week 11</td><td data-label="Problem 1">Week 9 (2 weeks ago)</td><td data-label="Problem 2">Week 5-6 (5-6 weeks ago)</td><td data-label="Notes"></td></tr>
+                <tr><td data-label="Week">Week 12</td><td data-label="Problem 1">Week 10 (2 weeks ago)</td><td data-label="Problem 2">Week 1-2 (10-11 weeks ago!)</td><td data-label="Notes">Full circle!</td></tr>
+                </tbody>
                 </table>
 
                 <h5 style="color: #6a9a6a; margin: 1.5rem 0 0.8rem 0;">How it works:</h5>
@@ -2271,29 +2352,33 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr>
-                        <tr><td>Two Pointers</td><td>Two Sum II (#167), 3Sum (#15), Container With Most Water (#11)</td><td>Med, Med, Med</td></tr>
-                        <tr><td>Two Pointers</td><td>Remove Duplicates (#26), Squares of Sorted Array (#977), Trapping Rain (#42)</td><td>Easy, Easy, Hard</td></tr>
-                        <tr><td>Sliding Window</td><td>Max Sum Subarray of Size K, Longest Substring Without Repeat (#3)</td><td>Easy, Med</td></tr>
-                        <tr><td>Sliding Window</td><td>Minimum Window Substring (#76), Permutation in String (#567)</td><td>Hard, Med</td></tr>
-                        <tr><td>Hash Maps</td><td>Two Sum (#1), Group Anagrams (#49), Valid Anagram (#242)</td><td>Easy, Med, Easy</td></tr>
-                        <tr><td>Prefix Sum</td><td>Range Sum Query (#303), Subarray Sum Equals K (#560)</td><td>Easy, Med</td></tr>
+                        <thead><tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Pattern">Two Pointers</td><td data-label="Problems">Two Sum II (#167), 3Sum (#15), Container With Most Water (#11)</td><td data-label="Difficulty">Med, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Two Pointers</td><td data-label="Problems">Remove Duplicates (#26), Squares of Sorted Array (#977), Trapping Rain (#42)</td><td data-label="Difficulty">Easy, Easy, Hard</td></tr>
+                        <tr><td data-label="Pattern">Sliding Window</td><td data-label="Problems">Max Sum Subarray of Size K, Longest Substring Without Repeat (#3)</td><td data-label="Difficulty">Easy, Med</td></tr>
+                        <tr><td data-label="Pattern">Sliding Window</td><td data-label="Problems">Minimum Window Substring (#76), Permutation in String (#567)</td><td data-label="Difficulty">Hard, Med</td></tr>
+                        <tr><td data-label="Pattern">Hash Maps</td><td data-label="Problems">Two Sum (#1), Group Anagrams (#49), Valid Anagram (#242)</td><td data-label="Difficulty">Easy, Med, Easy</td></tr>
+                        <tr><td data-label="Pattern">Prefix Sum</td><td data-label="Problems">Range Sum Query (#303), Subarray Sum Equals K (#560)</td><td data-label="Difficulty">Easy, Med</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 1 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Topic Review</td><td>Array, String, Hash Table</td><td>1h</td></tr>
-                        <tr><td>Pattern Learning</td><td>4 patterns</td><td>4h</td></tr>
-                        <tr><td>Problem Solving</td><td>17 problems</td><td>8h</td></tr>
-                        <tr><td>React basics</td><td>JSX, Components, Props, useState</td><td>4h</td></tr>
-                        <tr><td>CV</td><td>Draft v1 complete</td><td>2.5h</td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>STAR + Self-intro</strong></td><td><strong>1h</strong></td></tr>
-                        <tr><td>Planning/Review</td><td>-</td><td>1.5h</td></tr>
-                        <tr><td><strong>Anki Reviews</strong></td><td><strong>Daily (50min/week)</strong></td><td><strong>0.83h</strong></td></tr>
-                        <tr><td><strong>Crystallization</strong></td><td><strong>Saturday morning (1.5h)</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Error Log</strong></td><td><strong>Saturday (30min)</strong></td><td><strong>0.5h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>26.83h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Topic Review</td><td data-label="Target">Array, String, Hash Table</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category">Pattern Learning</td><td data-label="Target">4 patterns</td><td data-label="Hours">4h</td></tr>
+                        <tr><td data-label="Category">Problem Solving</td><td data-label="Target">17 problems</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">React basics</td><td data-label="Target">JSX, Components, Props, useState</td><td data-label="Hours">4h</td></tr>
+                        <tr><td data-label="Category">CV</td><td data-label="Target">Draft v1 complete</td><td data-label="Hours">2.5h</td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>STAR + Self-intro</strong></td><td data-label="Hours"><strong>1h</strong></td></tr>
+                        <tr><td data-label="Category">Planning/Review</td><td data-label="Target">-</td><td data-label="Hours">1.5h</td></tr>
+                        <tr><td data-label="Category"><strong>Anki Reviews</strong></td><td data-label="Target"><strong>Daily (50min/week)</strong></td><td data-label="Hours"><strong>0.83h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Crystallization</strong></td><td data-label="Target"><strong>Saturday morning (1.5h)</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Error Log</strong></td><td data-label="Target"><strong>Saturday (30min)</strong></td><td data-label="Hours"><strong>0.5h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>26.83h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 1 Checklist</h4>
@@ -2380,29 +2465,33 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr>
-                        <tr><td>Binary Search</td><td>Binary Search (#704), Search in Rotated Array (#33), Find Peak (#162)</td><td>Easy, Med, Med</td></tr>
-                        <tr><td>Binary Search</td><td>Search 2D Matrix (#74), First Bad Version (#278), Koko Eating Bananas (#875)</td><td>Med, Easy, Med</td></tr>
-                        <tr><td>Fast/Slow</td><td>Linked List Cycle (#141), Middle of Linked List (#876), Cycle II (#142)</td><td>Easy, Easy, Med</td></tr>
-                        <tr><td>Merge Intervals</td><td>Merge Intervals (#56), Insert Interval (#57), Meeting Rooms II (#253)</td><td>Med, Med, Med</td></tr>
-                        <tr><td>Cyclic Sort</td><td>Find Missing Number (#268), Find Duplicate (#287)</td><td>Easy, Med</td></tr>
+                        <thead><tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Pattern">Binary Search</td><td data-label="Problems">Binary Search (#704), Search in Rotated Array (#33), Find Peak (#162)</td><td data-label="Difficulty">Easy, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Binary Search</td><td data-label="Problems">Search 2D Matrix (#74), First Bad Version (#278), Koko Eating Bananas (#875)</td><td data-label="Difficulty">Med, Easy, Med</td></tr>
+                        <tr><td data-label="Pattern">Fast/Slow</td><td data-label="Problems">Linked List Cycle (#141), Middle of Linked List (#876), Cycle II (#142)</td><td data-label="Difficulty">Easy, Easy, Med</td></tr>
+                        <tr><td data-label="Pattern">Merge Intervals</td><td data-label="Problems">Merge Intervals (#56), Insert Interval (#57), Meeting Rooms II (#253)</td><td data-label="Difficulty">Med, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Cyclic Sort</td><td data-label="Problems">Find Missing Number (#268), Find Duplicate (#287)</td><td data-label="Difficulty">Easy, Med</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 2 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Topic Review</td><td>Linked List, Sorting, Interval</td><td>1h</td></tr>
-                        <tr><td>Pattern Learning</td><td>4 patterns</td><td>4h</td></tr>
-                        <tr><td>Problem Solving</td><td>14 problems</td><td>7h</td></tr>
-                        <tr><td>React</td><td>useEffect, event handling</td><td>3h</td></tr>
-                        <tr><td>CV + LinkedIn</td><td>FINALIZED</td><td>3h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>Django/DRF Session #1</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td>System Design</td><td>Ch.1 start</td><td>2h</td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>2 STAR stories</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Anki Reviews</strong></td><td><strong>Daily (50min/week)</strong></td><td><strong>0.83h</strong></td></tr>
-                        <tr><td><strong>Crystallization</strong></td><td><strong>Saturday morning (1.5h)</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Error Log</strong></td><td><strong>Saturday (30min)</strong></td><td><strong>0.5h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>27.08h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Topic Review</td><td data-label="Target">Linked List, Sorting, Interval</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category">Pattern Learning</td><td data-label="Target">4 patterns</td><td data-label="Hours">4h</td></tr>
+                        <tr><td data-label="Category">Problem Solving</td><td data-label="Target">14 problems</td><td data-label="Hours">7h</td></tr>
+                        <tr><td data-label="Category">React</td><td data-label="Target">useEffect, event handling</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category">CV + LinkedIn</td><td data-label="Target">FINALIZED</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>Django/DRF Session #1</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.1 start</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>2 STAR stories</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Anki Reviews</strong></td><td data-label="Target"><strong>Daily (50min/week)</strong></td><td data-label="Hours"><strong>0.83h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Crystallization</strong></td><td data-label="Target"><strong>Saturday morning (1.5h)</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Error Log</strong></td><td data-label="Target"><strong>Saturday (30min)</strong></td><td data-label="Hours"><strong>0.5h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>27.08h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 2 Checklist</h4>
@@ -2493,30 +2582,34 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr>
-                        <tr><td>BFS</td><td>Level Order Traversal (#102), Rotting Oranges (#994), Word Ladder (#127)</td><td>Med, Med, Hard</td></tr>
-                        <tr><td>BFS</td><td>Binary Tree Right Side View (#199), Zigzag Level Order (#103)</td><td>Med, Med</td></tr>
-                        <tr><td>DFS</td><td>Max Depth (#104), Path Sum (#112), Number of Islands (#200)</td><td>Easy, Easy, Med</td></tr>
-                        <tr><td>DFS</td><td>Clone Graph (#133), Course Schedule (#207)</td><td>Med, Med</td></tr>
-                        <tr><td>Stacks</td><td>Valid Parentheses (#20), Daily Temperatures (#739), Min Stack (#155)</td><td>Easy, Med, Med</td></tr>
-                        <tr><td>Subsets</td><td>Subsets (#78), Permutations (#46), Combination Sum (#39)</td><td>Med, Med, Med</td></tr>
+                        <thead><tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Pattern">BFS</td><td data-label="Problems">Level Order Traversal (#102), Rotting Oranges (#994), Word Ladder (#127)</td><td data-label="Difficulty">Med, Med, Hard</td></tr>
+                        <tr><td data-label="Pattern">BFS</td><td data-label="Problems">Binary Tree Right Side View (#199), Zigzag Level Order (#103)</td><td data-label="Difficulty">Med, Med</td></tr>
+                        <tr><td data-label="Pattern">DFS</td><td data-label="Problems">Max Depth (#104), Path Sum (#112), Number of Islands (#200)</td><td data-label="Difficulty">Easy, Easy, Med</td></tr>
+                        <tr><td data-label="Pattern">DFS</td><td data-label="Problems">Clone Graph (#133), Course Schedule (#207)</td><td data-label="Difficulty">Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Stacks</td><td data-label="Problems">Valid Parentheses (#20), Daily Temperatures (#739), Min Stack (#155)</td><td data-label="Difficulty">Easy, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Subsets</td><td data-label="Problems">Subsets (#78), Permutations (#46), Combination Sum (#39)</td><td data-label="Difficulty">Med, Med, Med</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 3 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Topic Review</td><td>Tree, Graph, Stack, Queue, Recursion</td><td>1h</td></tr>
-                        <tr><td>Pattern Learning</td><td>4 patterns</td><td>4h</td></tr>
-                        <tr><td>Problem Solving</td><td>16 problems</td><td>8h</td></tr>
-                        <tr><td>Applications</td><td><strong>15 apps sent</strong> 🚀</td><td>3.5h</td></tr>
-                        <tr><td>React</td><td>Lists, Keys, Conditional rendering</td><td>2h</td></tr>
-                        <tr><td>System Design</td><td>Ch.1 finish + Ch.3 start</td><td>2h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>Auth & Security Session #2</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Stories #3-4 + Practice</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Anki Reviews</strong></td><td><strong>Daily (50min/week)</strong></td><td><strong>0.83h</strong></td></tr>
-                        <tr><td><strong>Crystallization</strong></td><td><strong>Saturday morning (1.5h)</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Error Log</strong></td><td><strong>Saturday (30min)</strong></td><td><strong>0.5h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>27.08h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Topic Review</td><td data-label="Target">Tree, Graph, Stack, Queue, Recursion</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category">Pattern Learning</td><td data-label="Target">4 patterns</td><td data-label="Hours">4h</td></tr>
+                        <tr><td data-label="Category">Problem Solving</td><td data-label="Target">16 problems</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target"><strong>15 apps sent</strong> 🚀</td><td data-label="Hours">3.5h</td></tr>
+                        <tr><td data-label="Category">React</td><td data-label="Target">Lists, Keys, Conditional rendering</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.1 finish + Ch.3 start</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>Auth & Security Session #2</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Stories #3-4 + Practice</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Anki Reviews</strong></td><td data-label="Target"><strong>Daily (50min/week)</strong></td><td data-label="Hours"><strong>0.83h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Crystallization</strong></td><td data-label="Target"><strong>Saturday morning (1.5h)</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Error Log</strong></td><td data-label="Target"><strong>Saturday (30min)</strong></td><td data-label="Hours"><strong>0.5h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>27.08h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 3 Checklist</h4>
@@ -2606,30 +2699,34 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr>
-                        <tr><td>Top K Elements</td><td>Kth Largest (#215), Top K Frequent (#347), K Closest Points (#973)</td><td>Med, Med, Med</td></tr>
-                        <tr><td>Two Heaps</td><td>Find Median from Data Stream (#295), Sliding Window Median (#480)</td><td>Hard, Hard</td></tr>
-                        <tr><td>0/1 Knapsack DP</td><td>0/1 Knapsack, Partition Equal Subset Sum (#416), Target Sum (#494)</td><td>Med, Med, Med</td></tr>
-                        <tr><td>0/1 Knapsack DP</td><td>Coin Change (#322), Longest Common Subsequence (#1143)</td><td>Med, Med</td></tr>
+                        <thead><tr><th>Pattern</th><th>Problems (LeetCode #)</th><th>Difficulty</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Pattern">Top K Elements</td><td data-label="Problems">Kth Largest (#215), Top K Frequent (#347), K Closest Points (#973)</td><td data-label="Difficulty">Med, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">Two Heaps</td><td data-label="Problems">Find Median from Data Stream (#295), Sliding Window Median (#480)</td><td data-label="Difficulty">Hard, Hard</td></tr>
+                        <tr><td data-label="Pattern">0/1 Knapsack DP</td><td data-label="Problems">0/1 Knapsack, Partition Equal Subset Sum (#416), Target Sum (#494)</td><td data-label="Difficulty">Med, Med, Med</td></tr>
+                        <tr><td data-label="Pattern">0/1 Knapsack DP</td><td data-label="Problems">Coin Change (#322), Longest Common Subsequence (#1143)</td><td data-label="Difficulty">Med, Med</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 4 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Topic Review</td><td>Heap, DP</td><td>1h</td></tr>
-                        <tr><td>Pattern Learning</td><td>3 patterns</td><td>3h</td></tr>
-                        <tr><td>Problem Solving</td><td>10 problems</td><td>5h</td></tr>
-                        <tr><td>Applications</td><td>20 apps (35 total)</td><td>4h</td></tr>
-                        <tr><td>React</td><td>API integration</td><td>2h</td></tr>
-                        <tr><td>System Design</td><td>Ch.3 (Interview Framework)</td><td>2h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>Database & ORM Session #3</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Story #5 + Big Three + Mock</strong></td><td><strong>2.5h</strong></td></tr>
-                        <tr><td>Mock Interview</td><td>#1 (coding + behavioral)</td><td>1.5h</td></tr>
-                        <tr><td><strong>Anki Reviews</strong></td><td><strong>Daily (50min/week)</strong></td><td><strong>0.83h</strong></td></tr>
-                        <tr><td><strong>Crystallization</strong></td><td><strong>Saturday morning (1.5h)</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td><strong>Error Log</strong></td><td><strong>Saturday (30min)</strong></td><td><strong>0.5h</strong></td></tr>
-                        <tr><td><strong>Time Machine</strong></td><td><strong>Saturday afternoon (1.5h)</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>26.08h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Topic Review</td><td data-label="Target">Heap, DP</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category">Pattern Learning</td><td data-label="Target">3 patterns</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category">Problem Solving</td><td data-label="Target">10 problems</td><td data-label="Hours">5h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target">20 apps (35 total)</td><td data-label="Hours">4h</td></tr>
+                        <tr><td data-label="Category">React</td><td data-label="Target">API integration</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.3 (Interview Framework)</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>Database & ORM Session #3</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Story #5 + Big Three + Mock</strong></td><td data-label="Hours"><strong>2.5h</strong></td></tr>
+                        <tr><td data-label="Category">Mock Interview</td><td data-label="Target">#1 (coding + behavioral)</td><td data-label="Hours">1.5h</td></tr>
+                        <tr><td data-label="Category"><strong>Anki Reviews</strong></td><td data-label="Target"><strong>Daily (50min/week)</strong></td><td data-label="Hours"><strong>0.83h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Crystallization</strong></td><td data-label="Target"><strong>Saturday morning (1.5h)</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Error Log</strong></td><td data-label="Target"><strong>Saturday (30min)</strong></td><td data-label="Hours"><strong>0.5h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Time Machine</strong></td><td data-label="Target"><strong>Saturday afternoon (1.5h)</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>26.08h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 4 Checklist</h4>
@@ -2717,14 +2814,16 @@ Date | Problem | Mistake | Why | Prevention
             <div class="paper-card" style="background: linear-gradient(135deg, #e8f4f8 0%, #f8fcfe 100%); margin: 2rem 0; padding: 2rem; border-left: 6px solid #90c4d4;">
                 <h3 style="color: #5a8aa0; margin: 0 0 1.5rem 0;"><i class="fa-solid fa-compass"></i> Phase 2 Overview</h3>
                 <table class="cozy-table">
-                    <tr><th style="background: #d4e8f4;">Attribute</th><th style="background: #d4e8f4;">Detail</th></tr>
-                    <tr><td><strong>Duration</strong></td><td>Feb 2 - Mar 1, 2026 (4 weeks)</td></tr>
-                    <tr><td><strong>Focus</strong></td><td>Blind75 sprint (by topic) + Build Tracker Lite + Aggressive applying</td></tr>
-                    <tr><td><strong>Problems</strong></td><td>~60 Blind75 problems</td></tr>
-                    <tr><td><strong>Behavioral</strong></td><td>Practice & refine stories + Mock behavioral interview (NEW)</td></tr>
-                    <tr><td><strong>Backend</strong></td><td>3 more articulation sessions (2.25h total) (ENHANCED)</td></tr>
-                    <tr><td><strong>Applications</strong></td><td>50 more (85 total)</td></tr>
-                    <tr><td><strong>Output</strong></td><td>Blind75 done, Tracker Lite deployed, interviews happening, stories polished, backend confidence high</td></tr>
+                    <thead><tr><th style="background: #d4e8f4;">Attribute</th><th style="background: #d4e8f4;">Detail</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Attribute"><strong>Duration</strong></td><td data-label="Detail">Feb 2 - Mar 1, 2026 (4 weeks)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Focus</strong></td><td data-label="Detail">Blind75 sprint (by topic) + Build Tracker Lite + Aggressive applying</td></tr>
+                    <tr><td data-label="Attribute"><strong>Problems</strong></td><td data-label="Detail">~60 Blind75 problems</td></tr>
+                    <tr><td data-label="Attribute"><strong>Behavioral</strong></td><td data-label="Detail">Practice & refine stories + Mock behavioral interview (NEW)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Backend</strong></td><td data-label="Detail">3 more articulation sessions (2.25h total) (ENHANCED)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Applications</strong></td><td data-label="Detail">50 more (85 total)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Output</strong></td><td data-label="Detail">Blind75 done, Tracker Lite deployed, interviews happening, stories polished, backend confidence high</td></tr>
+                    </tbody>
                 </table>
             </div>
 
@@ -2788,34 +2887,40 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Blind75 Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Topic</th><th>Problems</th></tr>
-                        <tr><td>Array</td><td>Two Sum, Best Time to Buy/Sell Stock, Contains Duplicate, Product Except Self, Maximum Subarray, Maximum Product Subarray, Find Minimum in Rotated Sorted Array, Search in Rotated Sorted Array, 3Sum, Container With Most Water</td></tr>
-                        <tr><td>String</td><td>Longest Substring Without Repeating, Longest Repeating Character Replacement, Minimum Window Substring, Valid Anagram, Group Anagrams, Valid Parentheses, Valid Palindrome, Longest Palindromic Substring</td></tr>
+                        <thead><tr><th>Topic</th><th>Problems</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Topic">Array</td><td data-label="Problems">Two Sum, Best Time to Buy/Sell Stock, Contains Duplicate, Product Except Self, Maximum Subarray, Maximum Product Subarray, Find Minimum in Rotated Sorted Array, Search in Rotated Sorted Array, 3Sum, Container With Most Water</td></tr>
+                        <tr><td data-label="Topic">String</td><td data-label="Problems">Longest Substring Without Repeating, Longest Repeating Character Replacement, Minimum Window Substring, Valid Anagram, Group Anagrams, Valid Parentheses, Valid Palindrome, Longest Palindromic Substring</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Tracker Lite Backend Tasks</h4>
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Backend Task</th><th>Hours</th></tr>
-                        <tr><td>Mon</td><td>Django project setup, settings, database config</td><td>1.5h</td></tr>
-                        <tr><td>Tue</td><td>Application model, STATUS_CHOICES, migrations</td><td>1.5h</td></tr>
-                        <tr><td>Wed</td><td>Serializers: ApplicationSerializer, StatsSerializer</td><td>1h</td></tr>
-                        <tr><td>Thu</td><td>ViewSets: ApplicationViewSet, StatsViewSet, URLs</td><td>1.5h</td></tr>
-                        <tr><td>Fri</td><td>Testing API endpoints with Postman, bug fixes</td><td>1h</td></tr>
-                        <tr><td>Sat</td><td>Buffer / Polish</td><td>1h</td></tr>
-                        <tr><td></td><td><strong>TOTAL Backend Hours</strong></td><td><strong>8h</strong></td></tr>
+                        <thead><tr><th>Day</th><th>Backend Task</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day">Mon</td><td data-label="Task">Django project setup, settings, database config</td><td data-label="Hours">1.5h</td></tr>
+                        <tr><td data-label="Day">Tue</td><td data-label="Task">Application model, STATUS_CHOICES, migrations</td><td data-label="Hours">1.5h</td></tr>
+                        <tr><td data-label="Day">Wed</td><td data-label="Task">Serializers: ApplicationSerializer, StatsSerializer</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Day">Thu</td><td data-label="Task">ViewSets: ApplicationViewSet, StatsViewSet, URLs</td><td data-label="Hours">1.5h</td></tr>
+                        <tr><td data-label="Day">Fri</td><td data-label="Task">Testing API endpoints with Postman, bug fixes</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Day">Sat</td><td data-label="Task">Buffer / Polish</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL Backend Hours</strong></td><td data-label="Hours"><strong>8h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 5 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Blind75</td><td>18 problems</td><td>9h</td></tr>
-                        <tr><td>Tracker Lite Backend</td><td>Django API complete</td><td>8h</td></tr>
-                        <tr><td>Applications</td><td>15 apps (50 total)</td><td>3h</td></tr>
-                        <tr><td>System Design</td><td>Ch.4 (Rate Limiter)</td><td>2h</td></tr>
-                        <tr><td>Mock Interview</td><td>#2 session (tech)</td><td>1h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>API Design Session #4</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Practice questions</strong></td><td><strong>1h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>24.75h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Blind75</td><td data-label="Target">18 problems</td><td data-label="Hours">9h</td></tr>
+                        <tr><td data-label="Category">Tracker Lite Backend</td><td data-label="Target">Django API complete</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target">15 apps (50 total)</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.4 (Rate Limiter)</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">Mock Interview</td><td data-label="Target">#2 session (tech)</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>API Design Session #4</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Practice questions</strong></td><td data-label="Hours"><strong>1h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>24.75h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 5 Checklist</h4>
@@ -2891,33 +2996,39 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Blind75 Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Topic</th><th>Problems</th></tr>
-                        <tr><td>Tree</td><td>Maximum Depth, Same Tree, Invert Binary Tree, Binary Tree Level Order, Subtree of Another Tree, Lowest Common Ancestor, Binary Tree Right Side View, Validate BST, Kth Smallest Element in BST</td></tr>
-                        <tr><td>Graph</td><td>Number of Islands, Clone Graph, Course Schedule, Pacific Atlantic Water Flow, Graph Valid Tree, Number of Connected Components, Alien Dictionary</td></tr>
+                        <thead><tr><th>Topic</th><th>Problems</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Topic">Tree</td><td data-label="Problems">Maximum Depth, Same Tree, Invert Binary Tree, Binary Tree Level Order, Subtree of Another Tree, Lowest Common Ancestor, Binary Tree Right Side View, Validate BST, Kth Smallest Element in BST</td></tr>
+                        <tr><td data-label="Topic">Graph</td><td data-label="Problems">Number of Islands, Clone Graph, Course Schedule, Pacific Atlantic Water Flow, Graph Valid Tree, Number of Connected Components, Alien Dictionary</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Tracker Lite Frontend Tasks</h4>
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Frontend Task</th><th>Hours</th></tr>
-                        <tr><td>Mon</td><td>Create React App, folder structure, Tailwind setup</td><td>2h</td></tr>
-                        <tr><td>Tue</td><td>ApplicationList component, map through data</td><td>2h</td></tr>
-                        <tr><td>Wed</td><td>AddApplication form, EditApplication form</td><td>2h</td></tr>
-                        <tr><td>Thu</td><td>API integration with fetch, state management</td><td>2h</td></tr>
-                        <tr><td>Sat</td><td>Tailwind styling, responsive design</td><td>2h</td></tr>
-                        <tr><td></td><td><strong>TOTAL Frontend Hours</strong></td><td><strong>10h</strong></td></tr>
+                        <thead><tr><th>Day</th><th>Frontend Task</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day">Mon</td><td data-label="Task">Create React App, folder structure, Tailwind setup</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Tue</td><td data-label="Task">ApplicationList component, map through data</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Wed</td><td data-label="Task">AddApplication form, EditApplication form</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Thu</td><td data-label="Task">API integration with fetch, state management</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Sat</td><td data-label="Task">Tailwind styling, responsive design</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL Frontend Hours</strong></td><td data-label="Hours"><strong>10h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 6 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Blind75</td><td>16 problems</td><td>8h</td></tr>
-                        <tr><td>Tracker Lite Frontend</td><td>React UI complete</td><td>10h</td></tr>
-                        <tr><td>Applications</td><td>12 apps (62 total)</td><td>3h</td></tr>
-                        <tr><td>System Design</td><td>Ch.8 (URL Shortener)</td><td>2h</td></tr>
-                        <tr><td>Mock Interview</td><td>#3 session (tech)</td><td>1h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>Performance & Caching Session #5</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Mock behavioral interview</strong></td><td><strong>1.5h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>26.25h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Blind75</td><td data-label="Target">16 problems</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Tracker Lite Frontend</td><td data-label="Target">React UI complete</td><td data-label="Hours">10h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target">12 apps (62 total)</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.8 (URL Shortener)</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">Mock Interview</td><td data-label="Target">#3 session (tech)</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>Performance & Caching Session #5</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Mock behavioral interview</strong></td><td data-label="Hours"><strong>1.5h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>26.25h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 6 Checklist</h4>
@@ -2996,32 +3107,38 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Blind75 Problem List</h4>
                     <table class="cozy-table">
-                        <tr><th>Topic</th><th>Problems</th></tr>
-                        <tr><td>DP</td><td>Climbing Stairs, Coin Change, Longest Increasing Subsequence, Longest Common Subsequence, Word Break, Combination Sum IV, House Robber, House Robber II, Decode Ways, Unique Paths</td></tr>
-                        <tr><td>Linked List</td><td>Reverse Linked List, Merge Two Sorted Lists, Linked List Cycle, Reorder List, Remove Nth Node From End</td></tr>
+                        <thead><tr><th>Topic</th><th>Problems</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Topic">DP</td><td data-label="Problems">Climbing Stairs, Coin Change, Longest Increasing Subsequence, Longest Common Subsequence, Word Break, Combination Sum IV, House Robber, House Robber II, Decode Ways, Unique Paths</td></tr>
+                        <tr><td data-label="Topic">Linked List</td><td data-label="Problems">Reverse Linked List, Merge Two Sorted Lists, Linked List Cycle, Reorder List, Remove Nth Node From End</td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Tracker Lite Polish Tasks</h4>
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Polish Task</th><th>Hours</th></tr>
-                        <tr><td>Mon</td><td>Dashboard component with stats visualization</td><td>2h</td></tr>
-                        <tr><td>Tue</td><td>Connect stats API, show totals by status</td><td>2h</td></tr>
-                        <tr><td>Thu</td><td>Filter by status, search by company name</td><td>2h</td></tr>
-                        <tr><td>Sat</td><td>UI polish, loading states, error handling</td><td>2h</td></tr>
-                        <tr><td></td><td><strong>TOTAL Polish Hours</strong></td><td><strong>8h</strong></td></tr>
+                        <thead><tr><th>Day</th><th>Polish Task</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day">Mon</td><td data-label="Task">Dashboard component with stats visualization</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Tue</td><td data-label="Task">Connect stats API, show totals by status</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Thu</td><td data-label="Task">Filter by status, search by company name</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Sat</td><td data-label="Task">UI polish, loading states, error handling</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL Polish Hours</strong></td><td data-label="Hours"><strong>8h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 7 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Blind75</td><td>15 problems</td><td>8h</td></tr>
-                        <tr><td>Tracker Lite Polish</td><td>Dashboard + features</td><td>8h</td></tr>
-                        <tr><td>Applications</td><td>10 apps (72 total)</td><td>2h</td></tr>
-                        <tr><td>System Design</td><td>Ch.5 (Consistent Hashing)</td><td>2h</td></tr>
-                        <tr><td>Mock Interview</td><td>#4 session</td><td>1h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>DevOps & Deployment Session #6</strong></td><td><strong>0.75h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Company research prep</strong></td><td><strong>1h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>22.75h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Blind75</td><td data-label="Target">15 problems</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Tracker Lite Polish</td><td data-label="Target">Dashboard + features</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target">10 apps (72 total)</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">System Design</td><td data-label="Target">Ch.5 (Consistent Hashing)</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">Mock Interview</td><td data-label="Target">#4 session</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>DevOps & Deployment Session #6</strong></td><td data-label="Hours"><strong>0.75h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Company research prep</strong></td><td data-label="Hours"><strong>1h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>22.75h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 7 Checklist</h4>
@@ -3100,41 +3217,31 @@ Date | Problem | Mistake | Why | Prevention
 
                     <h4 style="margin-top: 1.5rem;">Tracker Lite Deployment Tasks</h4>
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Deployment Task</th><th>Hours</th></tr>
-                        <tr><td>Mon</td><td>Environment variables, production settings, requirements.txt</td><td>2h</td></tr>
-                        <tr><td>Tue</td><td>Railway setup, PostgreSQL provision, deploy backend</td><td>2h</td></tr>
-                        <tr><td>Wed</td><td>Vercel setup, environment config, deploy frontend</td><td>2h</td></tr>
-                        <tr><td>Thu</td><td>Connect frontend to production API, testing</td><td>1h</td></tr>
-                        <tr><td>Fri</td><td>Bug fixes, final testing</td><td>1h</td></tr>
-                        <tr><td></td><td><strong>TOTAL Deployment Hours</strong></td><td><strong>8h</strong></td></tr>
+                        <thead><tr><th>Day</th><th>Deployment Task</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day">Mon</td><td data-label="Task">Environment variables, production settings, requirements.txt</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Tue</td><td data-label="Task">Railway setup, PostgreSQL provision, deploy backend</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Wed</td><td data-label="Task">Vercel setup, environment config, deploy frontend</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Day">Thu</td><td data-label="Task">Connect frontend to production API, testing</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Day">Fri</td><td data-label="Task">Bug fixes, final testing</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL Deployment Hours</strong></td><td data-label="Hours"><strong>8h</strong></td></tr>
+                        </tbody>
                     </table>
 
                     <h4 style="margin-top: 1.5rem;">Week 8 Totals</h4>
                     <table class="cozy-table">
-                        <tr><th>Category</th><th>Target</th><th>Hours</th></tr>
-                        <tr><td>Blind75 Complete</td><td>Remaining + review</td><td>8h</td></tr>
-                        <tr><td>Tracker Lite Deploy</td><td><strong>LIVE on production</strong> 🚀</td><td>8h</td></tr>
-                        <tr><td>Applications</td><td>13 apps (85 total)</td><td>3h</td></tr>
-                        <tr><td>System Design Review</td><td>All 5 concepts</td><td>2h</td></tr>
-                        <tr><td>Mock Interview</td><td>#5 session</td><td>1h</td></tr>
-                        <tr><td><strong>Backend Prep (NEW)</strong></td><td><strong>Final Polish (1h)</strong></td><td><strong>1h</strong></td></tr>
-                        <tr><td><strong>Behavioral (NEW)</strong></td><td><strong>Story review + Questions</strong></td><td><strong>1h</strong></td></tr>
-                        <tr><td colspan="2"><strong>TOTAL</strong></td><td><strong>24h</strong></td></tr>
+                        <thead><tr><th>Category</th><th>Target</th><th>Hours</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Category">Blind75 Complete</td><td data-label="Target">Remaining + review</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Tracker Lite Deploy</td><td data-label="Target"><strong>LIVE on production</strong> 🚀</td><td data-label="Hours">8h</td></tr>
+                        <tr><td data-label="Category">Applications</td><td data-label="Target">13 apps (85 total)</td><td data-label="Hours">3h</td></tr>
+                        <tr><td data-label="Category">System Design Review</td><td data-label="Target">All 5 concepts</td><td data-label="Hours">2h</td></tr>
+                        <tr><td data-label="Category">Mock Interview</td><td data-label="Target">#5 session</td><td data-label="Hours">1h</td></tr>
+                        <tr><td data-label="Category"><strong>Backend Prep (NEW)</strong></td><td data-label="Target"><strong>Final Polish (1h)</strong></td><td data-label="Hours"><strong>1h</strong></td></tr>
+                        <tr><td data-label="Category"><strong>Behavioral (NEW)</strong></td><td data-label="Target"><strong>Story review + Questions</strong></td><td data-label="Hours"><strong>1h</strong></td></tr>
+                        <tr><td data-label="Total" colspan="2"><strong>TOTAL</strong></td><td data-label="Hours"><strong>24h</strong></td></tr>
+                        </tbody>
                     </table>
-
-                    <h4 style="margin-top: 1.5rem;">Week 8 Checklist</h4>
-                    <div class="checklist-item"><input type="checkbox"> Blind75 COMPLETE (~75 problems)</div>
-                    <div class="checklist-item"><input type="checkbox"> Tracker Lite DEPLOYED (Live URL ready!)</div>
-                    <div class="checklist-item"><input type="checkbox"> System Design: All 5 concepts mastered</div>
-                    <div class="checklist-item"><input type="checkbox"> 💼 All 6 backend topics reviewed & polished</div>
-                    <div class="checklist-item"><input type="checkbox"> 💼 Can confidently explain Django/DRF decisions</div>
-                    <div class="checklist-item"><input type="checkbox"> Mock Interview #5 done</div>
-                    <div class="checklist-item"><input type="checkbox"> 85 total applications</div>
-                    <div class="checklist-item"><input type="checkbox"> 4-6 interviews completed</div>
-                    <div class="checklist-item"><input type="checkbox"> 🗣️ All stories polished & ready</div>
-                    <div class="checklist-item"><input type="checkbox"> 🗣️ Questions to ask prepared</div>
-                </div>
-            </details>
 
             <div class="paper-card" style="margin-top: 2rem; background: linear-gradient(135deg, var(--sky-light) 0%, var(--clay-light) 100%);">
                 <div class="section-header"><h3><i class="fa-solid fa-flag-checkered"></i> PHASE 2 EXIT CRITERIA</h3></div>
@@ -3200,12 +3307,14 @@ Date | Problem | Mistake | Why | Prevention
             <div class="paper-card" style="background: linear-gradient(135deg, #fef3e2 0%, #fff8f0 100%); margin: 2rem 0; padding: 2rem; border-left: 6px solid #e8b4a8;">
                 <h3 style="color: #c17767; margin: 0 0 1.5rem 0;"><i class="fa-solid fa-compass"></i> Phase 3 Overview</h3>
                 <table class="cozy-table">
-                    <tr><th style="background: #f4e8e2;">Attribute</th><th style="background: #f4e8e2;">Detail</th></tr>
-                    <tr><td><strong>Duration</strong></td><td>Mar 2 - Mar 29, 2026 (4 weeks)</td></tr>
-                    <tr><td><strong>Focus</strong></td><td>Convert interviews to OFFERS</td></tr>
-                    <tr><td><strong>Problems</strong></td><td>Targeted practice only</td></tr>
-                    <tr><td><strong>Applications</strong></td><td>15-20 more (keep pipeline warm)</td></tr>
-                    <tr><td><strong>Output</strong></td><td><strong>JOB OFFER ACCEPTED</strong> 🎉</td></tr>
+                    <thead><tr><th style="background: #f4e8e2;">Attribute</th><th style="background: #f4e8e2;">Detail</th></tr></thead>
+                    <tbody>
+                    <tr><td data-label="Attribute"><strong>Duration</strong></td><td data-label="Detail">Mar 2 - Mar 29, 2026 (4 weeks)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Focus</strong></td><td data-label="Detail">Convert interviews to OFFERS</td></tr>
+                    <tr><td data-label="Attribute"><strong>Problems</strong></td><td data-label="Detail">Targeted practice only</td></tr>
+                    <tr><td data-label="Attribute"><strong>Applications</strong></td><td data-label="Detail">15-20 more (keep pipeline warm)</td></tr>
+                    <tr><td data-label="Attribute"><strong>Output</strong></td><td data-label="Detail"><strong>JOB OFFER ACCEPTED</strong> 🎉</td></tr>
+                    </tbody>
                 </table>
             </div>
 
@@ -3353,9 +3462,11 @@ Date | Problem | Mistake | Why | Prevention
             
             <h3 style="color: var(--clay);">Strategy: Basics Only + Build to Learn</h3>
             <table class="cozy-table">
-                <tr><th>Approach</th><th>Time</th><th>Outcome</th></tr>
-                <tr><td>Tutorial hell</td><td>60-80h</td><td>Know theory, can't build</td></tr>
-                <tr><td><strong>Basics + build</strong> ✅</td><td><strong>25-30h</strong></td><td><strong>Can build simple apps</strong></td></tr>
+                <thead><tr><th>Approach</th><th>Time</th><th>Outcome</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Approach">Tutorial hell</td><td data-label="Time">60-80h</td><td data-label="Outcome">Know theory, can't build</td></tr>
+                <tr><td data-label="Approach"><strong>Basics + build</strong> ✅</td><td data-label="Time"><strong>25-30h</strong></td><td data-label="Outcome"><strong>Can build simple apps</strong></td></tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">Week-by-Week React Timeline</h3>
@@ -3364,12 +3475,14 @@ Date | Problem | Mistake | Why | Prevention
                 <summary>Week 1: Setup + JSX + Components (4h)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr>
-                        <tr><td><strong>Mon</strong></td><td>Environment setup</td><td>30m</td><td>Create React App</td><td>Project running locally</td></tr>
-                        <tr><td><strong>Mon</strong></td><td>JSX basics</td><td>1h</td><td>react.dev</td><td>Understand JSX syntax, expressions</td></tr>
-                        <tr><td><strong>Wed</strong></td><td>Components</td><td>1h</td><td>react.dev</td><td>Create functional components</td></tr>
-                        <tr><td><strong>Wed</strong></td><td>Props</td><td>30m</td><td>react.dev</td><td>Pass data between components</td></tr>
-                        <tr><td><strong>Fri</strong></td><td>useState</td><td>1h</td><td>react.dev</td><td>Manage component state</td></tr>
+                        <thead><tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day"><strong>Mon</strong></td><td data-label="Topic">Environment setup</td><td data-label="Time">30m</td><td data-label="Resource">Create React App</td><td data-label="Output">Project running locally</td></tr>
+                        <tr><td data-label="Day"><strong>Mon</strong></td><td data-label="Topic">JSX basics</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Understand JSX syntax, expressions</td></tr>
+                        <tr><td data-label="Day"><strong>Wed</strong></td><td data-label="Topic">Components</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Create functional components</td></tr>
+                        <tr><td data-label="Day"><strong>Wed</strong></td><td data-label="Topic">Props</td><td data-label="Time">30m</td><td data-label="Resource">react.dev</td><td data-label="Output">Pass data between components</td></tr>
+                        <tr><td data-label="Day"><strong>Fri</strong></td><td data-label="Topic">useState</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Manage component state</td></tr>
+                        </tbody>
                     </table>
                     <div class="checklist-item"><input type="checkbox"> Create React App project set up</div>
                     <div class="checklist-item"><input type="checkbox"> Understand JSX syntax</div>
@@ -3383,11 +3496,13 @@ Date | Problem | Mistake | Why | Prevention
                 <summary>Week 2: Hooks + Events (3h)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr>
-                        <tr><td><strong>Mon</strong></td><td>useEffect basics</td><td>1h</td><td>react.dev</td><td>Understand side effects, cleanup</td></tr>
-                        <tr><td><strong>Wed</strong></td><td>Event handling</td><td>30m</td><td>react.dev</td><td>onClick, onChange, onSubmit</td></tr>
-                        <tr><td><strong>Thu</strong></td><td>Forms in React</td><td>1h</td><td>react.dev</td><td>Controlled components, form state</td></tr>
-                        <tr><td><strong>Sat</strong></td><td>Practice: Simple form</td><td>30m</td><td>-</td><td>Build a simple contact form</td></tr>
+                        <thead><tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day"><strong>Mon</strong></td><td data-label="Topic">useEffect basics</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Understand side effects, cleanup</td></tr>
+                        <tr><td data-label="Day"><strong>Wed</strong></td><td data-label="Topic">Event handling</td><td data-label="Time">30m</td><td data-label="Resource">react.dev</td><td data-label="Output">onClick, onChange, onSubmit</td></tr>
+                        <tr><td data-label="Day"><strong>Thu</strong></td><td data-label="Topic">Forms in React</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Controlled components, form state</td></tr>
+                        <tr><td data-label="Day"><strong>Sat</strong></td><td data-label="Topic">Practice: Simple form</td><td data-label="Time">30m</td><td data-label="Resource">-</td><td data-label="Output">Build a simple contact form</td></tr>
+                        </tbody>
                     </table>
                     <div class="checklist-item"><input type="checkbox"> useEffect for data fetching, cleanup</div>
                     <div class="checklist-item"><input type="checkbox"> Handle onClick, onChange, onSubmit</div>
@@ -3400,10 +3515,12 @@ Date | Problem | Mistake | Why | Prevention
                 <summary>Week 3: Lists + Conditional Rendering (2h)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr>
-                        <tr><td><strong>Tue</strong></td><td>Lists and keys</td><td>1h</td><td>react.dev</td><td>Map through arrays, unique keys</td></tr>
-                        <tr><td><strong>Thu</strong></td><td>Conditional rendering</td><td>30m</td><td>react.dev</td><td>&& operator, ternary, early returns</td></tr>
-                        <tr><td><strong>Sat</strong></td><td>Practice: Todo list</td><td>30m</td><td>-</td><td>Simple todo list with add/delete</td></tr>
+                        <thead><tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day"><strong>Tue</strong></td><td data-label="Topic">Lists and keys</td><td data-label="Time">1h</td><td data-label="Resource">react.dev</td><td data-label="Output">Map through arrays, unique keys</td></tr>
+                        <tr><td data-label="Day"><strong>Thu</strong></td><td data-label="Topic">Conditional rendering</td><td data-label="Time">30m</td><td data-label="Resource">react.dev</td><td data-label="Output">&& operator, ternary, early returns</td></tr>
+                        <tr><td data-label="Day"><strong>Sat</strong></td><td data-label="Topic">Practice: Todo list</td><td data-label="Time">30m</td><td data-label="Resource">-</td><td data-label="Output">Simple todo list with add/delete</td></tr>
+                        </tbody>
                     </table>
                     <div class="checklist-item"><input type="checkbox"> Render lists with map()</div>
                     <div class="checklist-item"><input type="checkbox"> Use proper keys</div>
@@ -3416,9 +3533,11 @@ Date | Problem | Mistake | Why | Prevention
                 <summary>Week 4: API Integration + Prep for Tracker Lite (2h)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                        <tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr>
-                        <tr><td><strong>Mon</strong></td><td>Fetch API</td><td>1h</td><td>MDN</td><td>GET, POST requests, handle loading/errors</td></tr>
-                        <tr><td><strong>Thu</strong></td><td>Practice: API integration</td><td>1h</td><td>-</td><td>Fetch from public API, display data</td></tr>
+                        <thead><tr><th>Day</th><th>Topic</th><th>Time</th><th>Resource</th><th>Output</th></tr></thead>
+                        <tbody>
+                        <tr><td data-label="Day"><strong>Mon</strong></td><td data-label="Topic">Fetch API</td><td data-label="Time">1h</td><td data-label="Resource">MDN</td><td data-label="Output">GET, POST requests, handle loading/errors</td></tr>
+                        <tr><td data-label="Day"><strong>Thu</strong></td><td data-label="Topic">Practice: API integration</td><td data-label="Time">1h</td><td data-label="Resource">-</td><td data-label="Output">Fetch from public API, display data</td></tr>
+                        </tbody>
                     </table>
                     <div class="checklist-item"><input type="checkbox"> Use fetch for API calls</div>
                     <div class="checklist-item"><input type="checkbox"> Handle loading states</div>
@@ -3447,26 +3566,30 @@ Date | Problem | Mistake | Why | Prevention
             
             <h4>Must Know ✅</h4>
             <table class="cozy-table">
-                <tr><th>Concept</th><th>When You'll Use It</th></tr>
-                <tr><td>Components</td><td>Every part of your UI</td></tr>
-                <tr><td>Props</td><td>Passing data between components</td></tr>
-                <tr><td>useState</td><td>Managing form inputs, toggles, lists</td></tr>
-                <tr><td>useEffect</td><td>Fetching API data, side effects</td></tr>
-                <tr><td>Event handling</td><td>Button clicks, form submissions</td></tr>
-                <tr><td>Lists and keys</td><td>Displaying application list</td></tr>
-                <tr><td>Conditional rendering</td><td>Show/hide elements, filter states</td></tr>
-                <tr><td>API calls with fetch</td><td>CRUD operations with Django backend</td></tr>
+                <thead><tr><th>Concept</th><th>When You'll Use It</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Concept">Components</td><td data-label="Use Case">Every part of your UI</td></tr>
+                <tr><td data-label="Concept">Props</td><td data-label="Use Case">Passing data between components</td></tr>
+                <tr><td data-label="Concept">useState</td><td data-label="Use Case">Managing form inputs, toggles, lists</td></tr>
+                <tr><td data-label="Concept">useEffect</td><td data-label="Use Case">Fetching API data, side effects</td></tr>
+                <tr><td data-label="Concept">Event handling</td><td data-label="Use Case">Button clicks, form submissions</td></tr>
+                <tr><td data-label="Concept">Lists and keys</td><td data-label="Use Case">Displaying application list</td></tr>
+                <tr><td data-label="Concept">Conditional rendering</td><td data-label="Use Case">Show/hide elements, filter states</td></tr>
+                <tr><td data-label="Concept">API calls with fetch</td><td data-label="Use Case">CRUD operations with Django backend</td></tr>
+                </tbody>
             </table>
 
             <h4>Not Needed Now ❌</h4>
             <table class="cozy-table">
-                <tr><th>Concept</th><th>Why Skip</th></tr>
-                <tr><td>Class components</td><td>Functional components are modern standard</td></tr>
-                <tr><td>Redux</td><td>useState is enough for Tracker Lite</td></tr>
-                <tr><td>Next.js</td><td>Not needed for simple SPA</td></tr>
-                <tr><td>TypeScript</td><td>JavaScript is sufficient for your timeline</td></tr>
-                <tr><td>Testing</td><td>Skip for MVP, add later</td></tr>
-                <tr><td>Context API</td><td>useState is enough for this scope</td></tr>
+                <thead><tr><th>Concept</th><th>Why Skip</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Concept">Class components</td><td data-label="Reason">Functional components are modern standard</td></tr>
+                <tr><td data-label="Concept">Redux</td><td data-label="Reason">useState is enough for Tracker Lite</td></tr>
+                <tr><td data-label="Concept">Next.js</td><td data-label="Reason">Not needed for simple SPA</td></tr>
+                <tr><td data-label="Concept">TypeScript</td><td data-label="Reason">JavaScript is sufficient for your timeline</td></tr>
+                <tr><td data-label="Concept">Testing</td><td data-label="Reason">Skip for MVP, add later</td></tr>
+                <tr><td data-label="Concept">Context API</td><td data-label="Reason">useState is enough for this scope</td></tr>
+                </tbody>
             </table>
         </section>
 
@@ -3477,16 +3600,18 @@ Date | Problem | Mistake | Why | Prevention
             
             <h3 style="margin-top: 1.5rem;">Week-by-Week System Design Timeline</h3>
             <table class="cozy-table">
-                <tr><th>Week</th><th>Chapter</th><th>Topic</th><th>Time</th><th>Session</th></tr>
-                <tr><td><strong>Week 2</strong></td><td>Ch.1</td><td>Scale from Zero to Millions</td><td>2h</td><td>Sat Session 2</td></tr>
-                <tr><td><strong>Week 3</strong></td><td>Ch.1</td><td>Scale (finish)</td><td>1h</td><td>Sat Session 2</td></tr>
-                <tr><td><strong>Week 3</strong></td><td>Ch.3</td><td>Interview Framework (start)</td><td>1h</td><td>Sat Session 2</td></tr>
-                <tr><td><strong>Week 4</strong></td><td>Ch.3</td><td>Interview Framework (finish)</td><td>2h</td><td>Tue + Sat Session 2</td></tr>
-                <tr><td><strong>Week 5</strong></td><td>Ch.4</td><td>Design a Rate Limiter</td><td>2h</td><td>Fri Session 2</td></tr>
-                <tr><td><strong>Week 6</strong></td><td>Ch.8</td><td>Design a URL Shortener</td><td>2h</td><td>Fri Session 2</td></tr>
-                <tr><td><strong>Week 7</strong></td><td>Ch.5</td><td>Design Consistent Hashing</td><td>2h</td><td>Fri Session 2</td></tr>
-                <tr><td><strong>Week 8</strong></td><td>-</td><td>Review all concepts</td><td>2h</td><td>Fri Session 1</td></tr>
-                <tr><td></td><td></td><td><strong>TOTAL</strong></td><td><strong>14h</strong></td><td></td></tr>
+                <thead><tr><th>Week</th><th>Chapter</th><th>Topic</th><th>Time</th><th>Session</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Week"><strong>Week 2</strong></td><td data-label="Chapter">Ch.1</td><td data-label="Topic">Scale from Zero to Millions</td><td data-label="Time">2h</td><td data-label="Session">Sat Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 3</strong></td><td data-label="Chapter">Ch.1</td><td data-label="Topic">Scale (finish)</td><td data-label="Time">1h</td><td data-label="Session">Sat Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 3</strong></td><td data-label="Chapter">Ch.3</td><td data-label="Topic">Interview Framework (start)</td><td data-label="Time">1h</td><td data-label="Session">Sat Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 4</strong></td><td data-label="Chapter">Ch.3</td><td data-label="Topic">Interview Framework (finish)</td><td data-label="Time">2h</td><td data-label="Session">Tue + Sat Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 5</strong></td><td data-label="Chapter">Ch.4</td><td data-label="Topic">Design a Rate Limiter</td><td data-label="Time">2h</td><td data-label="Session">Fri Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 6</strong></td><td data-label="Chapter">Ch.8</td><td data-label="Topic">Design a URL Shortener</td><td data-label="Time">2h</td><td data-label="Session">Fri Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 7</strong></td><td data-label="Chapter">Ch.5</td><td data-label="Topic">Design Consistent Hashing</td><td data-label="Time">2h</td><td data-label="Session">Fri Session 2</td></tr>
+                <tr><td data-label="Week"><strong>Week 8</strong></td><td data-label="Chapter">-</td><td data-label="Topic">Review all concepts</td><td data-label="Time">2h</td><td data-label="Session">Fri Session 1</td></tr>
+                <tr><td data-label="Total" colspan="2"></td><td data-label="Topic"><strong>TOTAL</strong></td><td data-label="Time"><strong>14h</strong></td><td data-label="Session"></td></tr>
+                </tbody>
             </table>
 
             <h3 style="margin-top: 2rem;">5 Core Concepts to Master</h3>
@@ -3597,12 +3722,14 @@ Message Queues (async processing)
 
             <h3 style="margin-top: 2rem;">System Design Practice Schedule</h3>
             <table class="cozy-table">
-                <tr><th>Week</th><th>Practice Task</th><th>Time</th></tr>
-                <tr><td><strong>Week 4</strong></td><td>Draw scaling diagram from memory</td><td>15m</td></tr>
-                <tr><td><strong>Week 5</strong></td><td>Explain rate limiter to rubber duck</td><td>15m</td></tr>
-                <tr><td><strong>Week 6</strong></td><td>Design URL shortener (whiteboard simulation)</td><td>30m</td></tr>
-                <tr><td><strong>Week 7</strong></td><td>Explain consistent hashing</td><td>15m</td></tr>
-                <tr><td><strong>Week 8</strong></td><td>Full mock: Design a system (any topic)</td><td>45m</td></tr>
+                <thead><tr><th>Week</th><th>Practice Task</th><th>Time</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Week"><strong>Week 4</strong></td><td data-label="Task">Draw scaling diagram from memory</td><td data-label="Time">15m</td></tr>
+                <tr><td data-label="Week"><strong>Week 5</strong></td><td data-label="Task">Explain rate limiter to rubber duck</td><td data-label="Time">15m</td></tr>
+                <tr><td data-label="Week"><strong>Week 6</strong></td><td data-label="Task">Design URL shortener (whiteboard simulation)</td><td data-label="Time">30m</td></tr>
+                <tr><td data-label="Week"><strong>Week 7</strong></td><td data-label="Task">Explain consistent hashing</td><td data-label="Time">15m</td></tr>
+                <tr><td data-label="Week"><strong>Week 8</strong></td><td data-label="Task">Full mock: Design a system (any topic)</td><td data-label="Time">45m</td></tr>
+                </tbody>
             </table>
         </section>
 
@@ -3610,12 +3737,14 @@ Message Queues (async processing)
             <div class="section-header"><h2>Interview Tracker Lite Project (DETAILED)</h2></div>
             
             <table class="cozy-table">
-                <tr><th>Attribute</th><th>Detail</th></tr>
-                <tr><td><strong>Purpose</strong></td><td>Track job applications + Portfolio piece + React learning</td></tr>
-                <tr><td><strong>Time Budget</strong></td><td>35 hours MAX (scope locked)</td></tr>
-                <tr><td><strong>Timeline</strong></td><td>Week 5-8</td></tr>
-                <tr><td><strong>Tech Stack</strong></td><td>Django REST + React + Tailwind + PostgreSQL</td></tr>
-                <tr><td><strong>Deploy</strong></td><td>Vercel (frontend) + Railway (backend)</td></tr>
+                <thead><tr><th>Attribute</th><th>Detail</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Attribute"><strong>Purpose</strong></td><td data-label="Detail">Track job applications + Portfolio piece + React learning</td></tr>
+                <tr><td data-label="Attribute"><strong>Time Budget</strong></td><td data-label="Detail">35 hours MAX (scope locked)</td></tr>
+                <tr><td data-label="Attribute"><strong>Timeline</strong></td><td data-label="Detail">Week 5-8</td></tr>
+                <tr><td data-label="Attribute"><strong>Tech Stack</strong></td><td data-label="Detail">Django REST + React + Tailwind + PostgreSQL</td></tr>
+                <tr><td data-label="Attribute"><strong>Deploy</strong></td><td data-label="Detail">Vercel (frontend) + Railway (backend)</td></tr>
+                </tbody>
             </table>
             
             <h3 style="margin-top: 2rem;">Features (SCOPE LOCKED — NO ADDITIONS)</h3>
@@ -3644,10 +3773,11 @@ Message Queues (async processing)
                 <summary>Week 5: Backend (8 hours)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                <tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr>
+                <thead><tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr></thead>
+                <tbody>
                 <tr>
-                    <td><strong>Mon</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Mon</strong></td>
+                    <td data-label="Task">
                         Django project setup
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Create virtual environment</li>
@@ -3655,12 +3785,12 @@ Message Queues (async processing)
                             <li>Configure settings (CORS, database)</li>
                         </ul>
                     </td>
-                    <td>1.5h</td>
-                    <td>Project structure, settings</td>
+                    <td data-label="Hours">1.5h</td>
+                    <td data-label="Deliverable">Project structure, settings</td>
                 </tr>
                 <tr>
-                    <td><strong>Tue</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Tue</strong></td>
+                    <td data-label="Task">
                         Application model
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Define Application model with all fields</li>
@@ -3668,24 +3798,24 @@ Message Queues (async processing)
                             <li>Run migrations</li>
                         </ul>
                     </td>
-                    <td>1.5h</td>
-                    <td>Model + migrations</td>
+                    <td data-label="Hours">1.5h</td>
+                    <td data-label="Deliverable">Model + migrations</td>
                 </tr>
                 <tr>
-                    <td><strong>Wed</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Wed</strong></td>
+                    <td data-label="Task">
                         Serializers
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>ApplicationSerializer</li>
                             <li>StatsSerializer (for dashboard)</li>
                         </ul>
                     </td>
-                    <td>1h</td>
-                    <td>Serializers ready</td>
+                    <td data-label="Hours">1h</td>
+                    <td data-label="Deliverable">Serializers ready</td>
                 </tr>
                 <tr>
-                    <td><strong>Thu</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Thu</strong></td>
+                    <td data-label="Task">
                         ViewSets + URLs
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>ApplicationViewSet (CRUD)</li>
@@ -3693,27 +3823,28 @@ Message Queues (async processing)
                             <li>URL routing</li>
                         </ul>
                     </td>
-                    <td>1.5h</td>
-                    <td>API endpoints working</td>
+                    <td data-label="Hours">1.5h</td>
+                    <td data-label="Deliverable">API endpoints working</td>
                 </tr>
                 <tr>
-                    <td><strong>Fri</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Fri</strong></td>
+                    <td data-label="Task">
                         Testing + Documentation
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Test with Postman</li>
                             <li>Fix bugs</li>
                         </ul>
                     </td>
-                    <td>1h</td>
-                    <td>API fully functional</td>
+                    <td data-label="Hours">1h</td>
+                    <td data-label="Deliverable">API fully functional</td>
                 </tr>
                 <tr>
-                    <td><strong>Sat</strong></td>
-                    <td>Buffer / Polish</td>
-                    <td>1h</td>
-                    <td>Ready for frontend</td>
+                    <td data-label="Day"><strong>Sat</strong></td>
+                    <td data-label="Task">Buffer / Polish</td>
+                    <td data-label="Hours">1h</td>
+                    <td data-label="Deliverable">Ready for frontend</td>
                 </tr>
+                </tbody>
             </table>
                     <div class="checklist-item"><input type="checkbox"> Django project created</div>
                     <div class="checklist-item"><input type="checkbox"> Application model with all fields</div>
@@ -3727,10 +3858,11 @@ Message Queues (async processing)
                 <summary>Week 6: Frontend (10 hours)</summary>
                 <div class="details-content">
                     <table class="cozy-table">
-                <tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr>
+                <thead><tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr></thead>
+                <tbody>
                 <tr>
-                    <td><strong>Mon</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Mon</strong></td>
+                    <td data-label="Task">
                         React setup + Structure
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Create React App</li>
@@ -3738,12 +3870,12 @@ Message Queues (async processing)
                             <li>Create folder structure (components, pages, api)</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Project running</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Project running</td>
                 </tr>
                 <tr>
-                    <td><strong>Tue</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Tue</strong></td>
+                    <td data-label="Task">
                         ApplicationList component
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Fetch applications from API</li>
@@ -3751,12 +3883,12 @@ Message Queues (async processing)
                             <li>Status badges with colors</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>List displays</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">List displays</td>
                 </tr>
                 <tr>
-                    <td><strong>Wed</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Wed</strong></td>
+                    <td data-label="Task">
                         Add/Edit forms
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>AddApplication form</li>
@@ -3764,12 +3896,12 @@ Message Queues (async processing)
                             <li>Form validation</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Forms working</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Forms working</td>
                 </tr>
                 <tr>
-                    <td><strong>Thu</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Thu</strong></td>
+                    <td data-label="Task">
                         API integration
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Create application (POST)</li>
@@ -3777,12 +3909,12 @@ Message Queues (async processing)
                             <li>Delete application (DELETE)</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Full CRUD working</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Full CRUD working</td>
                 </tr>
                 <tr>
-                    <td><strong>Sat</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Sat</strong></td>
+                    <td data-label="Task">
                         Styling
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Tailwind styling</li>
@@ -3790,9 +3922,10 @@ Message Queues (async processing)
                             <li>Status color coding</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Looks professional</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Looks professional</td>
                 </tr>
+                </tbody>
             </table>
             <div class="checklist-item"><input type="checkbox"> React project with Tailwind</div>
             <div class="checklist-item"><input type="checkbox"> ApplicationList showing data</div>
@@ -3807,10 +3940,11 @@ Message Queues (async processing)
                 <summary>Week 7: Dashboard + Polish (8 hours)</summary>
                 <div class="details-content">
             <table class="cozy-table">
-                <tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr>
+                <thead><tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr></thead>
+                <tbody>
                 <tr>
-                    <td><strong>Mon</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Mon</strong></td>
+                    <td data-label="Task">
                         Dashboard component
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Total applications count</li>
@@ -3818,36 +3952,36 @@ Message Queues (async processing)
                             <li>This week vs last week</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Stats displaying</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Stats displaying</td>
                 </tr>
                 <tr>
-                    <td><strong>Tue</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Tue</strong></td>
+                    <td data-label="Task">
                         Stats API integration
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Fetch from /api/stats/</li>
                             <li>Display with nice UI</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Dashboard connected</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Dashboard connected</td>
                 </tr>
                 <tr>
-                    <td><strong>Thu</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Thu</strong></td>
+                    <td data-label="Task">
                         Filter + Search
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Filter by status</li>
                             <li>Search by company name</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Filtering works</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Filtering works</td>
                 </tr>
                 <tr>
-                    <td><strong>Sat</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Sat</strong></td>
+                    <td data-label="Task">
                         Polish
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Loading states</li>
@@ -3855,9 +3989,10 @@ Message Queues (async processing)
                             <li>Empty states</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Production ready</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Production ready</td>
                 </tr>
+                </tbody>
             </table>
             <div class="checklist-item"><input type="checkbox"> Dashboard with stats</div>
             <div class="checklist-item"><input type="checkbox"> Filter by status</div>
@@ -3871,10 +4006,11 @@ Message Queues (async processing)
                 <summary>Week 8: Deploy (8 hours)</summary>
                 <div class="details-content">
             <table class="cozy-table">
-                <tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr>
+                <thead><tr><th>Day</th><th>Task</th><th>Hours</th><th>Deliverable</th></tr></thead>
+                <tbody>
                 <tr>
-                    <td><strong>Mon</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Mon</strong></td>
+                    <td data-label="Task">
                         Deployment prep
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Environment variables</li>
@@ -3882,12 +4018,12 @@ Message Queues (async processing)
                             <li>requirements.txt / package.json</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Ready for deploy</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Ready for deploy</td>
                 </tr>
                 <tr>
-                    <td><strong>Tue</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Tue</strong></td>
+                    <td data-label="Task">
                         Backend deploy (Railway)
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Create Railway project</li>
@@ -3895,12 +4031,12 @@ Message Queues (async processing)
                             <li>Deploy Django</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>API live</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">API live</td>
                 </tr>
                 <tr>
-                    <td><strong>Wed</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Wed</strong></td>
+                    <td data-label="Task">
                         Frontend deploy (Vercel)
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Create Vercel project</li>
@@ -3908,12 +4044,12 @@ Message Queues (async processing)
                             <li>Deploy React</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>UI live</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">UI live</td>
                 </tr>
                 <tr>
-                    <td><strong>Thu-Fri</strong></td>
-                    <td>
+                    <td data-label="Day"><strong>Thu-Fri</strong></td>
+                    <td data-label="Task">
                         Testing + Bug fixes
                         <ul style="margin-top: 0.5rem; margin-bottom: 0; padding-left: 1.2rem; font-size: 0.9em; color: var(--text-light);">
                             <li>Test all features on production</li>
@@ -3921,9 +4057,10 @@ Message Queues (async processing)
                             <li>Verify mobile responsiveness</li>
                         </ul>
                     </td>
-                    <td>2h</td>
-                    <td>Everything working</td>
+                    <td data-label="Hours">2h</td>
+                    <td data-label="Deliverable">Everything working</td>
                 </tr>
+                </tbody>
             </table>
             <div class="checklist-item"><input type="checkbox"> Backend live on Railway</div>
             <div class="checklist-item"><input type="checkbox"> Frontend live on Vercel</div>
@@ -3963,13 +4100,15 @@ STATUS_CHOICES = [
 
             <h3 style="margin-top: 2rem;">API Endpoints</h3>
             <table class="cozy-table">
-                <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
-                <tr><td><code>/api/applications/</code></td><td>GET</td><td>List all applications</td></tr>
-                <tr><td><code>/api/applications/</code></td><td>POST</td><td>Create new application</td></tr>
-                <tr><td><code>/api/applications/&lt;id&gt;/</code></td><td>GET</td><td>Get single application</td></tr>
-                <tr><td><code>/api/applications/&lt;id&gt;/</code></td><td>PUT</td><td>Update application</td></tr>
-                <tr><td><code>/api/applications/&lt;id&gt;/</code></td><td>DELETE</td><td>Delete application</td></tr>
-                <tr><td><code>/api/stats/</code></td><td>GET</td><td>Get dashboard stats</td></tr>
+                <thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Endpoint"><code>/api/applications/</code></td><td data-label="Method">GET</td><td data-label="Description">List all applications</td></tr>
+                <tr><td data-label="Endpoint"><code>/api/applications/</code></td><td data-label="Method">POST</td><td data-label="Description">Create new application</td></tr>
+                <tr><td data-label="Endpoint"><code>/api/applications/&lt;id&gt;/</code></td><td data-label="Method">GET</td><td data-label="Description">Get single application</td></tr>
+                <tr><td data-label="Endpoint"><code>/api/applications/&lt;id&gt;/</code></td><td data-label="Method">PUT</td><td data-label="Description">Update application</td></tr>
+                <tr><td data-label="Endpoint"><code>/api/applications/&lt;id&gt;/</code></td><td data-label="Method">DELETE</td><td data-label="Description">Delete application</td></tr>
+                <tr><td data-label="Endpoint"><code>/api/stats/</code></td><td data-label="Method">GET</td><td data-label="Description">Get dashboard stats</td></tr>
+                </tbody>
             </table>
         </section>
 
@@ -3979,14 +4118,16 @@ STATUS_CHOICES = [
             
             <h3 style="margin-top: 1.5rem;">Preparation Schedule: 5.5 hours total</h3>
             <table class="cozy-table">
-                <tr><th>Week</th><th>Session</th><th>Topic</th><th>Time</th><th>Day</th></tr>
-                <tr><td><strong>Week 2</strong></td><td>Session #1</td><td>Django/DRF Core Concepts</td><td>45min</td><td>Friday</td></tr>
-                <tr><td><strong>Week 3</strong></td><td>Session #2</td><td>Authentication & Security</td><td>45min</td><td>Wednesday</td></tr>
-                <tr><td><strong>Week 4</strong></td><td>Session #3</td><td>Database & ORM</td><td>45min</td><td>Wednesday</td></tr>
-                <tr><td><strong>Week 5</strong></td><td>Session #4</td><td>API Design & REST Principles</td><td>45min</td><td>Wednesday</td></tr>
-                <tr><td><strong>Week 6</strong></td><td>Session #5</td><td>Performance & Caching</td><td>45min</td><td>Thursday</td></tr>
-                <tr><td><strong>Week 7</strong></td><td>Session #6</td><td>DevOps & Deployment</td><td>45min</td><td>Wednesday</td></tr>
-                <tr><td><strong>Week 8</strong></td><td>Final Polish</td><td>Review all 6 topics, practice</td><td>1h</td><td>Saturday</td></tr>
+                <thead><tr><th>Week</th><th>Session</th><th>Topic</th><th>Time</th><th>Day</th></tr></thead>
+                <tbody>
+                <tr><td data-label="Week"><strong>Week 2</strong></td><td data-label="Session">Session #1</td><td data-label="Topic">Django/DRF Core Concepts</td><td data-label="Time">45min</td><td data-label="Day">Friday</td></tr>
+                <tr><td data-label="Week"><strong>Week 3</strong></td><td data-label="Session">Session #2</td><td data-label="Topic">Authentication & Security</td><td data-label="Time">45min</td><td data-label="Day">Wednesday</td></tr>
+                <tr><td data-label="Week"><strong>Week 4</strong></td><td data-label="Session">Session #3</td><td data-label="Topic">Database & ORM</td><td data-label="Time">45min</td><td data-label="Day">Wednesday</td></tr>
+                <tr><td data-label="Week"><strong>Week 5</strong></td><td data-label="Session">Session #4</td><td data-label="Topic">API Design & REST Principles</td><td data-label="Time">45min</td><td data-label="Day">Wednesday</td></tr>
+                <tr><td data-label="Week"><strong>Week 6</strong></td><td data-label="Session">Session #5</td><td data-label="Topic">Performance & Caching</td><td data-label="Time">45min</td><td data-label="Day">Thursday</td></tr>
+                <tr><td data-label="Week"><strong>Week 7</strong></td><td data-label="Session">Session #6</td><td data-label="Topic">DevOps & Deployment</td><td data-label="Time">45min</td><td data-label="Day">Wednesday</td></tr>
+                <tr><td data-label="Week"><strong>Week 8</strong></td><td data-label="Session">Final Polish</td><td data-label="Topic">Review all 6 topics, practice</td><td data-label="Time">1h</td><td data-label="Day">Saturday</td></tr>
+                </tbody>
             </table>
 
             <hr style="margin: 2rem 0; border: none; border-top: 1px dashed var(--sage-light);">
