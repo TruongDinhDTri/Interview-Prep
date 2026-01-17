@@ -1,0 +1,596 @@
+
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Floyd's Cycle Algorithm: Source of Truth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .math-font { font-family: 'Times New Roman', serif; font-style: italic; }
+        .step-card { transition: all 0.3s ease; }
+        .step-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-r from-blue-700 to-indigo-800 text-white p-8 shadow-lg">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex items-center gap-3 mb-2">
+                <i data-lucide="book-open-check" class="w-8 h-8 text-yellow-300"></i>
+                <h1 class="text-3xl font-bold tracking-tight">Floyd's Cycle Detection</h1>
+            </div>
+            <p class="text-blue-100 text-lg mb-4">Source of Truth (Cội Nguồn Chân Lý) - Rùa & Thỏ 🐢🐇</p>
+            <div class="inline-block bg-blue-900/50 px-4 py-2 rounded-full border border-blue-400/30 italic text-sm">
+                "Hai người há đồng đi được, nếu không hẹn cùng nhau sao?" - A-mốt 3:3
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-6 space-y-12">
+
+        <!-- SECTION 1: DEFINITIONS -->
+        <section id="definitions">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
+                <i data-lucide="map-pin" class="text-red-500"></i> 1. Định Nghĩa & Biến Số
+            </h2>
+            
+            <div class="bg-white p-6 rounded-xl shadow border border-slate-200 grid md:grid-cols-2 gap-8 items-center">
+                <!-- SVG Illustration -->
+                <div class="relative h-64 w-full bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center">
+                    <svg viewBox="0 0 400 250" class="w-full h-full">
+                        <!-- L (Straight) -->
+                        <line x1="20" y1="125" x2="150" y2="125" stroke="#3b82f6" stroke-width="4" />
+                        <text x="85" y="115" class="text-xs font-bold fill-blue-600">L (Đoạn thẳng)</text>
+                        
+                        <!-- Cycle Dashed Base -->
+                        <circle cx="250" cy="125" r="80" fill="none" stroke="#e2e8f0" stroke-width="4" stroke-dasharray="8,4" />
+                        
+                        <!-- Arcs for X and R (CORRECTED POSITIONS) -->
+                        
+                        <!-- X: Entry to Meet (Clockwise - TOP ARC/Large) -->
+                        <!-- From (150,125) to (306,181) via Top -->
+                        <path d="M 150 125 A 80 80 0 1 1 306 181" fill="none" stroke="#22c55e" stroke-width="4" stroke-linecap="round" />
+                        <text x="250" y="65" text-anchor="middle" class="text-sm font-bold fill-green-600 bg-white">X</text>
+
+                        <!-- R: Meet to Entry (Clockwise - BOTTOM ARC/Small) -->
+                        <!-- From (306,181) to (150,125) via Bottom -->
+                        <path d="M 306 181 A 80 80 0 0 1 150 125" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" />
+                        <text x="240" y="195" text-anchor="middle" class="text-sm font-bold fill-purple-600">R</text>
+
+                        <!-- Points (Draw these LAST to be on top) -->
+                        <circle cx="20" cy="125" r="6" fill="#64748b" stroke="white" stroke-width="2" /> <!-- Head -->
+                        <text x="20" y="145" text-anchor="middle" class="text-[10px] font-bold fill-slate-500">HEAD</text>
+
+                        <circle cx="150" cy="125" r="6" fill="#eab308" stroke="white" stroke-width="2" /> <!-- Entry -->
+                        <text x="135" y="145" text-anchor="middle" class="text-[10px] font-bold fill-yellow-600">ENTRY</text>
+
+                        <circle cx="306" cy="181" r="6" fill="#ef4444" stroke="white" stroke-width="2" /> <!-- Meet -->
+                        <text x="330" y="195" text-anchor="middle" class="text-[10px] font-bold fill-red-600">MEET</text>
+
+                        <!-- Direction Arrows (Optional but helpful) -->
+                        <!-- Arrow on X -->
+                        <path d="M 250 45 l 6 4 l -6 4" stroke="#22c55e" stroke-width="2" fill="none" transform="rotate(0 250 49)" />
+                    </svg>
+                </div>
+
+                <!-- Variable Explanations -->
+                <ul class="space-y-4">
+                    <li class="flex items-start gap-3">
+                        <span class="bg-blue-100 text-blue-800 font-bold px-2 py-1 rounded text-sm">L</span>
+                        <div>
+                            <p class="font-semibold text-slate-800">Khoảng cách đến cửa vòng</p>
+                            <p class="text-sm text-slate-600">Từ Head đến điểm bắt đầu cycle.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="bg-green-100 text-green-800 font-bold px-2 py-1 rounded text-sm">X</span>
+                        <div>
+                            <p class="font-semibold text-slate-800">Khoảng cách đã đi trong vòng</p>
+                            <p class="text-sm text-slate-600">Từ cửa cycle đến điểm gặp nhau (Meeting Point).</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="bg-purple-100 text-purple-800 font-bold px-2 py-1 rounded text-sm">R</span>
+                        <div>
+                            <p class="font-semibold text-slate-800">Khoảng cách còn lại</p>
+                            <p class="text-sm text-slate-600">Từ điểm gặp nhau về lại cửa cycle.</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                        <span class="bg-gray-100 text-gray-800 font-bold px-2 py-1 rounded text-sm">C</span>
+                        <div>
+                            <p class="font-semibold text-slate-800">Chu vi vòng tròn</p>
+                            <p class="text-sm text-slate-600 font-mono">C = X + R</p>
+                            <p class="text-xs text-slate-500 italic mt-1">
+                                (X: phần đã đi + R: phần còn lại = Trọn vẹn 1 vòng)
+                            </p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- SECTION 2: THE 400M ANALOGY -->
+        <section id="analogy">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
+                <i data-lucide="timer" class="text-orange-500"></i> 2. Ví Dụ Sân Vận Động 400m
+            </h2>
+            <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-lg shadow-sm">
+                <h3 class="font-bold text-lg text-orange-800 mb-2">Chân lý về sự chênh lệch (Gap)</h3>
+                <p class="text-slate-700 mb-4 leading-relaxed">
+                    Tưởng tượng đường chạy 400m. Nếu <strong>Thỏ</strong> chạy nhanh hơn và bắt kịp <strong>Rùa</strong> tại cùng một điểm, thì Thỏ chắc chắn đã chạy nhiều hơn Rùa đúng một số nguyên lần vòng sân.
+                </p>
+                <div class="bg-white p-4 rounded border border-orange-200 text-center mb-4">
+                    <p class="text-xl font-mono font-bold text-slate-800">
+                        S<sub>thỏ</sub> - S<sub>rùa</sub> = n × C
+                    </p>
+                    <p class="text-sm text-slate-500 mt-1 italic">(Chênh lệch quãng đường luôn là bội số của vòng tròn)</p>
+                </div>
+
+                <!-- ADDED: VISUAL GAP EXPLANATION -->
+                <div class="bg-white p-6 rounded-lg border border-orange-200 shadow-inner">
+                    <h4 class="font-bold text-orange-800 mb-4 flex items-center gap-2 text-sm uppercase tracking-wide">
+                        <i data-lucide="eye" class="w-4 h-4"></i>
+                        Minh Họa: Tại sao chênh lệch BẮT BUỘC là n × C?
+                    </h4>
+                    
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+                        
+                        <!-- Linear View -->
+                        <div class="flex-1 w-full space-y-6">
+                            <!-- Rùa -->
+                            <div class="relative">
+                                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                    <span>🐢 Rùa (Chạy chậm)</span>
+                                    <span>Tổng: 120m</span>
+                                </div>
+                                <div class="h-6 bg-slate-100 rounded-full w-full relative overflow-hidden border border-slate-200">
+                                    <div class="absolute top-0 left-0 h-full bg-green-500 w-[30%] flex items-center justify-end px-2 text-[10px] text-white font-bold">
+                                        120m
+                                    </div>
+                                </div>
+                            </div>
+                
+                            <!-- Thỏ (1 Vòng) -->
+                            <div class="relative">
+                                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                    <span>🐇 Thỏ (Thêm 1 vòng)</span>
+                                    <span>Tổng: 520m</span>
+                                </div>
+                                <div class="h-6 bg-slate-100 rounded-full w-full relative flex border border-slate-200 overflow-hidden">
+                                    <div class="h-full bg-green-500 w-[30%] border-r border-green-600/30"></div> <!-- X portion -->
+                                    <div class="h-full bg-orange-400 w-[70%] flex items-center justify-center text-[10px] text-white font-bold animate-pulse">
+                                        + 1 Vòng Tròn (400m)
+                                    </div> <!-- nC portion -->
+                                </div>
+                                <div class="text-xs text-orange-600 mt-1 font-semibold text-right">
+                                    Chênh lệch = 400m (1 Vòng)
+                                </div>
+                            </div>
+                            
+                            <!-- Siêu Thỏ (2 Vòng) -->
+                            <div class="relative">
+                                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                                    <span>🚀 Siêu Thỏ (Thêm 2 vòng)</span>
+                                    <span>Tổng: 920m</span>
+                                </div>
+                                <div class="h-6 bg-slate-100 rounded-full w-full relative flex border border-slate-200 overflow-hidden">
+                                    <div class="h-full bg-green-500 w-[30%] border-r border-green-600/30"></div> 
+                                    <div class="h-full bg-orange-400 w-[35%] flex items-center justify-center text-[10px] text-white font-bold border-r border-orange-300">
+                                        Vòng 1
+                                    </div>
+                                    <div class="h-full bg-orange-500 w-[35%] flex items-center justify-center text-[10px] text-white font-bold">
+                                        Vòng 2
+                                    </div>
+                                </div>
+                                <div class="text-xs text-orange-600 mt-1 font-semibold text-right">
+                                    Chênh lệch = 800m (2 Vòng)
+                                </div>
+                            </div>
+                        </div>
+                
+                        <!-- Circular Map View -->
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-32 h-32 flex-shrink-0">
+                                 <svg viewBox="0 0 100 100" class="w-full h-full">
+                                    <circle cx="50" cy="50" r="40" stroke="#cbd5e1" stroke-width="8" fill="none" />
+                                    <!-- Finish Line / Meeting Point at 3 o'clock (0 deg) -->
+                                    <line x1="90" y1="50" x2="100" y2="50" stroke="#ef4444" stroke-width="4" />
+                                    
+                                    <!-- Runners -->
+                                    <circle cx="90" cy="50" r="4" fill="#22c55e" /> <!-- Turtle -->
+                                    <circle cx="90" cy="50" r="4" fill="#f97316" stroke="white" stroke-width="1" transform="translate(0, -6)" /> <!-- Hare -->
+                                     <circle cx="90" cy="50" r="4" fill="#ef4444" stroke="white" stroke-width="1" transform="translate(0, 6)" /> <!-- Super Hare -->
+                                     
+                                     <text x="50" y="55" text-anchor="middle" font-size="10" class="font-bold fill-slate-500">Đích</text>
+                                 </svg>
+                            </div>
+                             <div class="text-center text-xs mt-2 font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded">
+                                "Cuốn" lại vào vòng tròn,<br>tất cả ở CÙNG 1 CHỖ
+                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 bg-orange-100 p-3 rounded text-sm text-orange-900 italic border-l-4 border-orange-500">
+                        "Nếu bạn thấy 2 người đứng cùng một chỗ trên sân vận động, thì hoặc là họ chạy bằng nhau, hoặc người này đã chạy hơn người kia đúng trọn vẹn các vòng sân. Không thể nào hơn 1.5 vòng được (vì lúc đó sẽ đứng đối diện nhau)."
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SECTION 3: THE MATH PROOF -->
+        <section id="proof">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
+                <i data-lucide="sigma" class="text-indigo-500"></i> 3. Chứng Minh Toán Học (L = R)
+            </h2>
+            
+            <div class="space-y-4">
+                <!-- Step 1 -->
+                <div class="step-card bg-white p-5 rounded-lg border border-slate-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-indigo-100 text-indigo-700 font-bold w-8 h-8 flex items-center justify-center rounded-full">1</span>
+                        <h4 class="font-bold text-slate-800">Thiết lập phương trình cơ bản</h4>
+                    </div>
+                    <p class="text-slate-600 pl-11">
+                        Do vận tốc Thỏ gấp đôi Rùa: <span class="math-font font-bold">S<sub>thỏ</sub> = 2 × S<sub>rùa</sub></span><br>
+                        Từ ví dụ 400m ta có: <span class="math-font font-bold">S<sub>thỏ</sub> - S<sub>rùa</sub> = n × C</span>
+                    </p>
+                    <div class="pl-11 mt-2 p-2 bg-slate-50 rounded font-mono text-indigo-700">
+                        ⇒ (2 × S<sub>rùa</sub>) - S<sub>rùa</sub> = n × C <br>
+                        ⇒ <span class="font-bold border-b-2 border-indigo-500">S<sub>rùa</sub> = n × C</span>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="step-card bg-white p-5 rounded-lg border border-slate-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-indigo-100 text-indigo-700 font-bold w-8 h-8 flex items-center justify-center rounded-full">2</span>
+                        <h4 class="font-bold text-slate-800">Phân tích S<sub>rùa</sub></h4>
+                    </div>
+                    <p class="text-slate-600 pl-11">
+                        Rùa đi từ đầu đến cửa (L) rồi đi thêm đoạn trong vòng (X) để gặp Thỏ.
+                    </p>
+                    <div class="pl-11 mt-2 p-2 bg-slate-50 rounded font-mono text-indigo-700">
+                        S<sub>rùa</sub> = L + X
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="step-card bg-white p-5 rounded-lg border border-slate-200">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-indigo-100 text-indigo-700 font-bold w-8 h-8 flex items-center justify-center rounded-full">3</span>
+                        <h4 class="font-bold text-slate-800">Kết hợp & Bắc cầu (The Bridge)</h4>
+                    </div>
+                    <p class="text-slate-600 pl-11">
+                        Từ (1) và (2) ta có:
+                    </p>
+                    <div class="pl-11 mt-2 p-2 bg-slate-50 rounded font-mono text-indigo-700 font-bold">
+                        L + X = n × C
+                    </div>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="step-card bg-indigo-50 border border-indigo-200 p-5 rounded-lg ring-2 ring-indigo-500 ring-offset-2">
+                    <div class="flex items-center gap-3 mb-2">
+                        <span class="bg-indigo-600 text-white font-bold w-8 h-8 flex items-center justify-center rounded-full">4</span>
+                        <h4 class="font-bold text-indigo-900">Kết Luận Cuối Cùng (The Revelation)</h4>
+                    </div>
+                    
+                    <!-- Case n = 1 -->
+                    <div class="pl-11 mb-4">
+                        <p class="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                            <i data-lucide="check" class="w-4 h-4"></i> Trường hợp 1: Thỏ chấp đúng 1 vòng (n = 1)
+                        </p>
+                        
+                        <!-- Clarify C = X + R -->
+                        <div class="mb-3 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                            <strong>💡 Tại sao C = X + R?</strong> Hãy nhìn hình vẽ:
+                            <ul class="list-disc list-inside ml-2 mt-1">
+                                <li><strong>X</strong>: Đoạn đường "đã đi" (Từ Cửa → Điểm Gặp).</li>
+                                <li><strong>R</strong>: Đoạn đường "còn lại" để về đích (Từ Điểm Gặp → Về Cửa).</li>
+                            </ul>
+                            <span class="italic">👉 Cộng hai đoạn này lại ta được đúng một vòng tròn hoàn chỉnh.</span>
+                        </div>
+
+                        <code class="block w-full bg-white p-3 rounded border border-indigo-100 text-indigo-900 shadow-sm">
+                            1. Ta có phương trình: <span class="font-bold">L + X = 1 × C</span> <br>
+                            2. Thay C = X + R vào: <span class="font-bold">L + X = (X + R)</span> <br>
+                            3. Triệt tiêu X ở hai vế: <span class="opacity-50 line-through">X</span> + L = <span class="opacity-50 line-through">X</span> + R <br>
+                            <div class="mt-2 pt-2 border-t border-dashed border-indigo-200">
+                                ⇒ <span class="text-2xl font-bold text-red-600">L = R</span>
+                            </div>
+                        </code>
+                    </div>
+
+                    <!-- Case n > 1 -->
+                    <div class="pl-11 mt-6 pt-4 border-t border-indigo-200">
+                        <p class="text-indigo-800 font-semibold mb-2 flex items-center gap-2">
+                            <i data-lucide="layers" class="w-4 h-4"></i> Phân tích sâu: Khi n > 1 (Thỏ chạy nhiều vòng)
+                        </p>
+                        <code class="block w-full bg-white p-3 rounded border border-indigo-100 text-indigo-900 mb-3 text-sm shadow-sm">
+                            L + X = n × C <br>
+                            ⇒ L = nC - X <br>
+                            ⇒ L = (n - 1)C + (C - X)<br>
+                            ⇒ <span class="font-bold text-indigo-700 text-base">L = R + (n - 1)C</span>
+                        </code>
+                        
+                        <div class="bg-indigo-100/50 p-3 rounded text-sm text-indigo-900 space-y-2 border border-indigo-200">
+                            <p><strong>Giải mã hành trình gặp nhau tại Cửa (Phase 2):</strong></p>
+                            <p>Khi ta thả Rùa ở <code>Head</code> và Thỏ ở <code>Meet Point</code>, cả hai cùng đi một quãng đường dài bằng <strong>L</strong>.</p>
+                            <ul class="list-decimal list-inside space-y-2 ml-1 mt-2">
+                                <li>
+                                    <strong>Rùa (tại Head):</strong> Đi quãng đường <strong>L</strong> ⇒ Đến đúng <strong>Cửa Vòng (Entry)</strong>.
+                                </li>
+                                <li>
+                                    <strong>Thỏ (tại Meet Point):</strong> Cũng đi quãng đường <strong>L</strong>. Nhưng vì <strong>L = R + (n-1)C</strong>, nên hành trình của nó là:
+                                    <ul class="list-disc list-inside ml-5 mt-1 text-slate-700 bg-white/50 p-2 rounded">
+                                        <li>Đi đoạn <strong>R</strong> đầu tiên: Từ Meet Point ⇒ Vừa khít về đến <strong>Cửa Vòng</strong>.</li>
+                                        <li>Đi tiếp <strong>(n-1)C</strong> còn lại: Chính là chạy thêm <strong>(n-1) vòng "vô nghĩa"</strong>.</li>
+                                        <li>Kết quả: Sau khi chạy hết các vòng đó, vị trí cuối cùng vẫn là <strong>Cửa Vòng</strong>.</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                            <p class="font-semibold text-indigo-800 mt-2 border-l-4 border-indigo-500 pl-2">
+                                🎯 Kết luận: Quãng đường L của Rùa giúp Rùa đến Cửa. Quãng đường L của Thỏ giúp Thỏ đi hết đoạn R (để về Cửa) cộng thêm vài vòng chơi chơi ngay tại Cửa. Hai đứa chắc chắn gặp nhau tại Cửa!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: INTERACTIVE DEMO -->
+        <section id="demo" class="pb-10">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2 mb-6">
+                <i data-lucide="play-circle" class="text-green-500"></i> 4. Mô Phỏng Thực Tế
+            </h2>
+            
+            <div class="bg-slate-900 rounded-xl p-6 text-white shadow-2xl relative overflow-hidden">
+                <!-- Status Bar -->
+                <div class="flex justify-between items-center mb-6 bg-slate-800 p-3 rounded-lg border border-slate-700">
+                    <div>
+                        <span class="text-xs uppercase tracking-wider text-slate-400">Trạng thái</span>
+                        <div id="status-text" class="font-bold text-green-400">Phase 1: Tìm điểm gặp nhau</div>
+                    </div>
+                    <button onclick="resetSim()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-sm flex items-center gap-2 transition-colors">
+                        <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Reset
+                    </button>
+                </div>
+
+                <!-- Simulation Area -->
+                <div class="relative h-60 w-full flex justify-center items-center">
+                    <svg viewBox="0 0 600 300" class="w-full h-full max-w-lg">
+                        <!-- Path Definition for Animation -->
+                        <!-- Head(50,150) -> Entry(200,150) -> Loop(Circle center 350,150 r=100) -->
+                        <path d="M 50 150 L 200 150" stroke="#475569" stroke-width="6" fill="none" />
+                        <circle cx="350" cy="150" r="100" stroke="#475569" stroke-width="6" fill="none" />
+                        
+                        <!-- Labels -->
+                        <text x="50" y="190" fill="#94a3b8" text-anchor="middle" font-size="12">HEAD</text>
+                        <text x="200" y="190" fill="#facc15" text-anchor="middle" font-size="12" font-weight="bold">CỬA (Entry)</text>
+                        <circle cx="200" cy="150" r="8" fill="#facc15" />
+
+                        <!-- Dynamic Agents -->
+                        <g id="tortoise" style="transition: transform 0.5s ease;">
+                            <circle r="12" fill="#22c55e" stroke="white" stroke-width="2"/>
+                            <text y="4" text-anchor="middle" font-size="10" fill="white">🐢</text>
+                        </g>
+                        <g id="hare" style="transition: transform 0.5s ease;">
+                            <circle r="12" fill="#ef4444" stroke="white" stroke-width="2"/>
+                            <text y="4" text-anchor="middle" font-size="10" fill="white">🐇</text>
+                        </g>
+
+                        <!-- Special Markers -->
+                        <circle id="meet-marker" r="0" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="4,2"/>
+                    </svg>
+                </div>
+
+                <!-- Controls -->
+                <div class="mt-4 flex justify-center">
+                    <button id="next-btn" onclick="nextStep()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all flex items-center gap-2">
+                        <i data-lucide="footprints"></i> Bước Tiếp Theo
+                    </button>
+                </div>
+
+                <!-- Log -->
+                <div id="log" class="mt-4 text-center text-sm text-slate-400 font-mono h-6">
+                    Rùa (1 bước) - Thỏ (2 bước)
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-100 py-8 text-center border-t border-slate-200">
+        <p class="text-slate-600 mb-2">Được tạo ra để làm sáng tỏ chân lý.</p>
+        <div class="text-slate-400 text-sm italic">
+            "Sự khôn ngoan là điều chính yếu; vậy hãy cầu lấy sự khôn ngoan." - Châm Ngôn 4:7
+        </div>
+    </footer>
+
+    <!-- LOGIC SCRIPT -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // Config
+        const pathStraight = 150; // Length of L visually
+        const loopRadius = 100;
+        const loopCenter = { x: 350, y: 150 };
+        const head = { x: 50, y: 150 };
+        const entry = { x: 200, y: 150 };
+        const stepSize = 30; // Distance per step unit
+
+        // State
+        let tDist = 0;
+        let hDist = 0;
+        let phase = 1; // 1: Meeting, 2: Finding Entry
+        let steps = 0;
+        let isDone = false;
+
+        // Visual mapping function
+        function getCoords(dist) {
+            if (dist <= pathStraight) {
+                return { x: head.x + dist, y: head.y };
+            } else {
+                // In loop
+                const distInLoop = dist - pathStraight;
+                const circumference = 2 * Math.PI * loopRadius;
+                // Angle in radians. Start at PI (left side of circle) and go clockwise
+                // Clockwise from left (PI) -> Top (1.5PI) -> Right (0) -> Bottom (0.5PI)
+                // Actually standard param equation: x = cx + r*cos(a), y = cy + r*sin(a)
+                // Entry point is at (-1, 0) relative to center, which is PI radians.
+                // Moving clockwise means angle decreases? Or we set coordinate system properly.
+                // Let's assume clockwise movement.
+                const angle = Math.PI - (distInLoop / loopRadius); 
+                return {
+                    x: loopCenter.x + loopRadius * Math.cos(angle),
+                    y: loopCenter.y - loopRadius * Math.sin(angle) // SVG y is down
+                };
+            }
+        }
+
+        function updatePositions() {
+            const tPos = getCoords(tDist);
+            const hPos = getCoords(hDist);
+
+            const tEl = document.getElementById('tortoise');
+            const hEl = document.getElementById('hare');
+
+            tEl.style.transform = `translate(${tPos.x}px, ${tPos.y}px)`;
+            hEl.style.transform = `translate(${hPos.x}px, ${hPos.y}px)`;
+        }
+
+        // Logic Check Intersection
+        // Simplify: discrete steps logic mapping to visual distance
+        // Let's abstract the "nodes". L = 5 nodes. Loop = 10 nodes.
+        // Node 0(head)..4(entry)..13(loop back to 4)
+        const L_NODES = 5; 
+        const C_NODES = 10;
+        // Total unique nodes: 0,1,2,3,4(entry),5,6,7,8,9,10,11,12,13. (14 nodes total in line+loop structure)
+        
+        // Map abstract node index to visual distance
+        function nodeToDist(nodeIdx) {
+            if (nodeIdx < L_NODES) {
+                return (nodeIdx / L_NODES) * pathStraight;
+            } else {
+                // Inside loop
+                const loopIdx = (nodeIdx - L_NODES) % C_NODES;
+                return pathStraight + (loopIdx / C_NODES) * (2 * Math.PI * loopRadius);
+            }
+        }
+
+        let tNode = 0;
+        let hNode = 0;
+
+        // Reset visual initially
+        updatePositions();
+
+        function nextStep() {
+            if (isDone) return;
+
+            steps++;
+            
+            if (phase === 1) {
+                // Tortoise +1, Hare +2
+                tNode += 1;
+                hNode += 2;
+
+                // Adjust logical nodes for Hare wrapping around loop
+                // Logic: If node >= L_NODES + C_NODES, it wraps
+                // But simplified: effectively we just track absolute distance/node index and map properly
+            } else {
+                // Phase 2: Both speed 1
+                tNode += 1;
+                hNode += 1;
+            }
+
+            // Calculate efficient Node ID (for comparison)
+            // If node < L_NODES, id = node
+            // If node >= L_NODES, id = L_NODES + (node - L_NODES) % C_NODES
+            
+            const getEffectiveId = (n) => {
+                if (n < L_NODES) return n;
+                return L_NODES + (n - L_NODES) % C_NODES;
+            }
+
+            const tEff = getEffectiveId(tNode);
+            const hEff = getEffectiveId(hNode);
+
+            // Update Visuals
+            tDist = nodeToDist(tNode);
+            hDist = nodeToDist(hNode);
+            updatePositions();
+
+            const logEl = document.getElementById('log');
+            const statusEl = document.getElementById('status-text');
+            const btn = document.getElementById('next-btn');
+
+            if (phase === 1) {
+                logEl.innerText = `Bước ${steps}: Rùa tại ${tEff} - Thỏ tại ${hEff}`;
+                
+                if (tEff === hEff && steps > 0) {
+                    phase = 2;
+                    statusEl.innerText = "GẶP NHAU! Chuyển sang Phase 2 (L = R)";
+                    statusEl.className = "font-bold text-yellow-400";
+                    logEl.innerText = "Reset Rùa về Head. Thỏ giữ nguyên. Tốc độ 1-1.";
+                    
+                    // Show Marker
+                    const meetPos = getCoords(tDist);
+                    const marker = document.getElementById('meet-marker');
+                    marker.setAttribute('cx', meetPos.x);
+                    marker.setAttribute('cy', meetPos.y);
+                    marker.setAttribute('r', 15);
+                    
+                    // Reset Tortoise to Head logic for next click
+                    // Wait a moment visually? No, instant logic change for next click.
+                    // But we need to set T back to 0 NOW for Phase 2 start?
+                    // Usually Phase 2 starts with T=0, H=Meet.
+                    
+                    // Let's implement the "Reset" action immediately for visual clarity
+                    setTimeout(() => {
+                        tNode = 0;
+                        tDist = 0;
+                        updatePositions();
+                        btn.innerHTML = `<i data-lucide="footprints"></i> Chạy Phase 2 (1-1)`;
+                        lucide.createIcons();
+                    }, 800);
+                }
+            } else {
+                logEl.innerText = `Phase 2: Rùa tại ${tEff} - Thỏ tại ${hEff}`;
+                if (tEff === hEff) {
+                    isDone = true;
+                    statusEl.innerText = "THÀNH CÔNG! Gặp nhau tại Cửa (Entry Node).";
+                    statusEl.className = "font-bold text-blue-400";
+                    btn.className = "bg-gray-600 text-white font-bold py-3 px-8 rounded-full cursor-not-allowed flex items-center gap-2";
+                    btn.innerHTML = `<i data-lucide="check-circle"></i> Hoàn Tất`;
+                    lucide.createIcons();
+                }
+            }
+        }
+
+        function resetSim() {
+            tNode = 0; hNode = 0;
+            tDist = 0; hDist = 0;
+            phase = 1; steps = 0; isDone = false;
+            updatePositions();
+            
+            document.getElementById('meet-marker').setAttribute('r', 0);
+            document.getElementById('status-text').innerText = "Phase 1: Tìm điểm gặp nhau";
+            document.getElementById('status-text').className = "font-bold text-green-400";
+            document.getElementById('log').innerText = "Sẵn sàng...";
+            
+            const btn = document.getElementById('next-btn');
+            btn.className = "bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full shadow-lg transform active:scale-95 transition-all flex items-center gap-2";
+            btn.innerHTML = `<i data-lucide="footprints"></i> Bước Tiếp Theo`;
+            lucide.createIcons();
+        }
+
+    </script>
+</body>
+</html>

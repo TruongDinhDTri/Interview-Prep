@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Selection Sort - Talent Show Edition!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff6b9d 0%, #c06c84 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #c06c84;
+            margin-bottom: 5px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .right-panel {
+            /* Removed sticky positioning to allow code section to expand fully */
+        }
+
+        .visualization-area {
+            background: linear-gradient(135deg, #2c1e3e 0%, #4a2c5a 50%, #6b3d7a 100%);
+            padding: 30px 15px;
+            border-radius: 15px;
+            min-height: 350px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .stage-lights {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: radial-gradient(circle at 50% 0%, rgba(255, 215, 0, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            animation: lights 3s ease-in-out infinite;
+        }
+
+        @keyframes lights {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 0.8; }
+        }
+
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 280px;
+            gap: 10px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Temp Value Box for Selection Sort */
+        .temp-value-box {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border: 3px solid #c92a2a;
+            border-radius: 15px;
+            padding: 15px 25px;
+            box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5);
+            z-index: 10;
+            animation: pulse 1.5s ease-in-out infinite;
+            min-width: 180px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 12px 32px rgba(255, 107, 107, 0.7); }
+        }
+
+        .temp-value-box-title {
+            font-size: 0.85em;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .temp-value-display {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .temp-value-label {
+            font-size: 0.75em;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .temp-value-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #c92a2a;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .temp-value-index {
+            font-size: 0.85em;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .bar {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .contestant {
+            width: 65px;
+            height: 75px;
+            background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+            border: 3px solid #bbb;
+            position: relative;
+            animation: idle 2s ease-in-out infinite;
+        }
+
+        .bar.searching .contestant {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-color: #ff9800;
+            animation: spotlight 1s ease-in-out infinite;
+            transform: translateY(-10px) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+        }
+
+        .bar.minimum .contestant {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-color: #c92a2a;
+            animation: winner 0.8s ease-in-out infinite;
+            transform: translateY(-15px) scale(1.1);
+            box-shadow: 0 0 40px rgba(255, 107, 107, 0.7);
+        }
+
+        .bar.swapping .contestant {
+            background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%);
+            animation: move 0.6s ease;
+        }
+
+        .bar.sorted .contestant {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            border-color: #2f9e44;
+            box-shadow: 0 8px 20px rgba(80, 250, 123, 0.6);
+        }
+
+        .bar.sorted::after {
+            content: '⭐';
+            position: absolute;
+            top: -25px;
+            font-size: 1.2em;
+            animation: star 2s ease-in-out infinite;
+        }
+
+        @keyframes idle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-3px); }
+        }
+
+        @keyframes spotlight {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 50px rgba(255, 215, 0, 0.9); }
+        }
+
+        @keyframes winner {
+            0%, 100% { transform: translateY(-15px) scale(1.1); }
+            50% { transform: translateY(-20px) scale(1.15); }
+        }
+
+        @keyframes move {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-8px) rotate(-3deg); }
+            75% { transform: translateX(8px) rotate(3deg); }
+        }
+
+        @keyframes star {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+        }
+
+        .bar-value {
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 1.4em;
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+        }
+
+        .index-indicator {
+            position: absolute;
+            bottom: -45px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .index-indicator span {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .indicator-i { color: #ff00ff; text-shadow: 0 0 5px rgba(255, 0, 255, 0.5); }
+        .indicator-j { color: #ffd700; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        .indicator-min { color: #ff6b6b; text-shadow: 0 0 5px rgba(255, 107, 107, 0.5); }
+
+        .explanation-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #f5576c;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .explanation-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #c7254e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-text {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .why-box {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #00acc1;
+        }
+
+        .why-title {
+            font-weight: bold;
+            color: #00838f;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .why-text {
+            color: #004d56;
+            font-size: 0.85em;
+            line-height: 1.7;
+            white-space: pre-line;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .explanation-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .explanation-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .explanation-box::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #f5576c, #f093fb);
+            border-radius: 10px;
+        }
+
+        .code-section {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 15px;
+            overflow: visible;
+            border: 2px solid #3d3d5c;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+            max-height: none;
+        }
+
+        .code-section h3 {
+            color: #50fa7b;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(80, 250, 123, 0.3);
+        }
+
+        .code-line {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            line-height: 1.4;
+            padding: 2px 12px 2px 50px;
+            margin: 1px 0;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+            position: relative;
+        }
+
+        .code-line::before {
+            content: attr(data-line);
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6272a4;
+            font-size: 0.85em;
+            width: 30px;
+            text-align: right;
+            user-select: none;
+            opacity: 0.6;
+        }
+
+        .code-line::after {
+            content: '';
+            position: absolute;
+            left: 45px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(98, 114, 164, 0.2);
+        }
+
+        .code-line:hover::before {
+            color: #8be9fd;
+            opacity: 1;
+        }
+
+        .code-line.active {
+            background: linear-gradient(90deg, rgba(80, 250, 123, 0.15) 0%, rgba(80, 250, 123, 0.05) 100%);
+            border-left: 5px solid #50fa7b;
+            padding-left: 54px;
+            transform: translateX(6px);
+            box-shadow: 0 0 20px rgba(80, 250, 123, 0.4);
+        }
+
+        .code-line.active::before {
+            color: #50fa7b;
+            font-weight: bold;
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(80, 250, 123, 0.5);
+        }
+
+        .keyword { color: #ff79c6; font-weight: bold; text-shadow: 0 0 5px rgba(255, 121, 198, 0.3); }
+        .function { color: #50fa7b; font-weight: bold; text-shadow: 0 0 5px rgba(80, 250, 123, 0.3); }
+        .variable { color: #8be9fd; text-shadow: 0 0 3px rgba(139, 233, 253, 0.2); }
+        .comment { color: #6272a4; font-style: italic; }
+        .number { color: #bd93f9; font-weight: bold; }
+        .operator { color: #ff79c6; }
+        .builtin { color: #ffb86c; font-weight: bold; text-shadow: 0 0 5px rgba(255, 184, 108, 0.3); }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9ecff 100%);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #c06c84;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #c06c84 0%, #6c5b7b 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .slider {
+            width: 150px;
+            height: 6px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #c06c84;
+            cursor: pointer;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 40px;
+            height: 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-guide {
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9ecff 100%);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c06c84;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        .quick-guide strong {
+            color: #c06c84;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌟 Selection Sort Visualizer - Talent Show Edition!</h1>
+        <p class="subtitle">Find the star performer and move them to the winner's circle!</p>
+
+        <div class="quick-guide">
+            <strong>🎭 The Talent Show Metaphor:</strong> Imagine a talent competition where judges select the best contestant in each round! We scan all remaining contestants to find the one with the smallest number (best score), then move them to the winner's podium. Round by round, we build our sorted list of winners from smallest to largest!
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #e8e8e8 0%, #d0d0d0 100%); border: 2px solid #bbb;"></div>
+                <span>🎭 Unsorted</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 2px solid #ff9800;"></div>
+                <span>🔍 Searching</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); border: 2px solid #c92a2a;"></div>
+                <span>🏆 Current Min</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%); border: 2px solid #339af0;"></div>
+                <span>💫 Swapping</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); border: 2px solid #2f9e44;"></div>
+                <span>⭐ Winners</span>
+            </div>
+        </div>
+
+        <div class="slider-container">
+            <label for="speedSlider"><strong>Speed:</strong></label>
+            <input type="range" id="speedSlider" class="slider" min="1" max="10" value="3">
+            <span id="speedValue">3</span>
+            <label for="sizeSlider" style="margin-left: 20px;"><strong>Size:</strong></label>
+            <input type="range" id="sizeSlider" class="slider" min="5" max="12" value="7">
+            <span id="sizeValue">7</span>
+        </div>
+
+        <div class="controls">
+            <button class="btn-success" id="generateBtn">🎲 New Array</button>
+            <button class="btn-primary" id="startBtn" disabled>▶️ Start</button>
+            <button class="btn-secondary" id="prevBtn" disabled>⏮️ Previous</button>
+            <button class="btn-secondary" id="stepBtn" disabled>⏭️ Next</button>
+            <button class="btn-danger" id="pauseBtn" disabled>⏸️ Pause</button>
+            <button class="btn-secondary" id="resetBtn" disabled>🔄 Reset</button>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="stage-lights"></div>
+                    <div class="temp-value-box" id="tempValueBox" style="display: none;">
+                        <div class="temp-value-box-title">🏆 Current Minimum</div>
+                        <div class="temp-value-display">
+                            <div class="temp-value-label">Value</div>
+                            <div class="temp-value-number" id="tempValue">--</div>
+                            <div class="temp-value-index" id="tempIndex">at index: --</div>
+                        </div>
+                    </div>
+                    <div class="bars-container" id="barsContainer"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="comparisons">0</div>
+                        <div class="stat-label">Comparisons</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="swaps">0</div>
+                        <div class="stat-label">Swaps</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="passes">0</div>
+                        <div class="stat-label">Rounds</div>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <div class="explanation-title">
+                        <span id="stepIcon">📍</span>
+                        <span id="stepTitle">What's Happening:</span>
+                    </div>
+                    <div class="explanation-text" id="whatText">
+                        Click "New Array" to start!
+                    </div>
+                    <div class="why-box" id="whyBox" style="display: none;">
+                        <div class="why-title">🤔 Why?</div>
+                        <div class="why-text" id="whyText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="code-section">
+                    <h3>🐍 Live Python Code Execution</h3>
+                    <div id="codeContainer">
+                        <div class="code-line" data-line="1"><span class="keyword">def</span> <span class="function">selection_sort</span>(<span class="variable">arr</span>):</div>
+                        <div class="code-line" data-line="2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">n</span> <span class="operator">=</span> <span class="builtin">len</span>(<span class="variable">arr</span>)</div>
+                        <div class="code-line" data-line="3"></div>
+                        <div class="code-line" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Outer loop: position to fill</span></div>
+                        <div class="code-line" data-line="5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="builtin">range</span>(<span class="variable">n</span> <span class="operator">-</span> <span class="number">1</span>):</div>
+                        <div class="code-line" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">min_idx</span> <span class="operator">=</span> <span class="variable">i</span></div>
+                        <div class="code-line" data-line="7"></div>
+                        <div class="code-line" data-line="8">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Find minimum in unsorted part</span></div>
+                        <div class="code-line" data-line="9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> <span class="variable">j</span> <span class="keyword">in</span> <span class="builtin">range</span>(<span class="variable">i</span> <span class="operator">+</span> <span class="number">1</span>, <span class="variable">n</span>):</div>
+                        <div class="code-line" data-line="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">if</span> <span class="variable">arr</span>[<span class="variable">j</span>] <span class="operator">&lt;</span> <span class="variable">arr</span>[<span class="variable">min_idx</span>]:</div>
+                        <div class="code-line" data-line="11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">min_idx</span> <span class="operator">=</span> <span class="variable">j</span></div>
+                        <div class="code-line" data-line="12"></div>
+                        <div class="code-line" data-line="13">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Swap minimum to position i</span></div>
+                        <div class="code-line" data-line="14">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">arr</span>[<span class="variable">i</span>], <span class="variable">arr</span>[<span class="variable">min_idx</span>] <span class="operator">=</span> <span class="variable">arr</span>[<span class="variable">min_idx</span>], <span class="variable">arr</span>[<span class="variable">i</span>]</div>
+                        <div class="code-line" data-line="15"></div>
+                        <div class="code-line" data-line="16">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="variable">arr</span></div>
+                        <div class="code-line" data-line="17"></div>
+                        <div class="code-line" data-line="18"><span class="comment"># Time Complexity: O(n²)</span></div>
+                        <div class="code-line" data-line="19"><span class="comment"># Space Complexity: O(1)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let array = [];
+        let states = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationId = null;
+        let speed = 3;
+        let arraySize = 7;
+
+        const barsContainer = document.getElementById('barsContainer');
+        const whatText = document.getElementById('whatText');
+        const whyBox = document.getElementById('whyBox');
+        const whyText = document.getElementById('whyText');
+        const stepIcon = document.getElementById('stepIcon');
+        const comparisonsSpan = document.getElementById('comparisons');
+        const swapsSpan = document.getElementById('swaps');
+        const passesSpan = document.getElementById('passes');
+        const generateBtn = document.getElementById('generateBtn');
+        const startBtn = document.getElementById('startBtn');
+        const stepBtn = document.getElementById('stepBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+
+        function generateArray() {
+            array = [];
+            for (let i = 0; i < arraySize; i++) {
+                array.push(Math.floor(Math.random() * 90) + 10);
+            }
+            states = generateSelectionSortStates(array.slice());
+            currentStep = 0;
+            updateStats(0, 0, 0);
+            renderBars();
+            startBtn.disabled = false;
+            stepBtn.disabled = false;
+            prevBtn.disabled = true;
+            resetBtn.disabled = false;
+        }
+
+        function generateSelectionSortStates(arr) {
+            const states = [];
+            const n = arr.length;
+            let comparisons = 0;
+            let swaps = 0;
+            let rounds = 0;
+
+            states.push({
+                array: arr.slice(),
+                searchingIndex: -1,
+                minIndex: -1,
+                sortedIndices: [],
+                whatMessage: `🌟 Starting Selection Sort: [${arr.join(', ')}]`,
+                whyMessage: `📚 INITIALIZATION:
+• Function: selection_sort(arr)
+• Array size: ${n} elements
+• Variable n stores length
+
+🎭 THE TALENT SHOW CONCEPT:
+• Think of a competition with judges!
+• Each round: find the BEST contestant (minimum value)
+• Move winner to the podium (sorted section)
+• Left side = winners (sorted)
+• Right side = contestants still competing (unsorted)
+
+⚙️ HOW IT WORKS:
+• Outer loop: ${n-1} rounds (one per position)
+• Inner loop: Find minimum in remaining contestants
+• Swap minimum to current position
+• One less contestant each round!`,
+                codeLine: 1,
+                icon: '🚀',
+                comparisons, swaps, rounds,
+                i: -1, j: -1, min_idx: -1
+            });
+
+            for (let i = 0; i < n - 1; i++) {
+                rounds++;
+                let min_idx = i;
+
+                states.push({
+                    array: arr.slice(),
+                    searchingIndex: i,
+                    minIndex: i,
+                    sortedIndices: Array.from({ length: i }, (_, k) => k),
+                    whatMessage: `🎯 Round ${rounds}: Finding winner for position ${i}`,
+                    whyMessage: `🔄 OUTER LOOP (Round ${rounds}):
+• Current position i = ${i}
+• range(n - 1) = range(${n-1})
+• Python range(${n-1}): i goes from 0 to ${n-2}
+
+🏆 CURRENT STATUS:
+• Winners already chosen: ${i} (positions 0 to ${i-1})
+• Current podium spot: position ${i}
+• Contestants remaining: ${n-i} (positions ${i} to ${n-1})
+
+🎯 THIS ROUND:
+• Assume position ${i} has minimum (min_idx = ${i})
+• Will search positions ${i+1} to ${n-1}
+• Find the smallest value among remaining
+• Swap it to position ${i}`,
+                    codeLine: 5,
+                    icon: '🎯',
+                    comparisons, swaps, rounds,
+                    i: i, j: -1, min_idx: i
+                });
+
+                states.push({
+                    array: arr.slice(),
+                    searchingIndex: i,
+                    minIndex: min_idx,
+                    sortedIndices: Array.from({ length: i }, (_, k) => k),
+                    whatMessage: `📍 Initialize: min_idx = ${i}, value = ${arr[i]}`,
+                    whyMessage: `📍 INITIALIZE MINIMUM:
+• min_idx = i = ${i}
+• Current minimum value: arr[${i}] = ${arr[i]}
+• Starting assumption: position ${i} has smallest value
+
+🔍 WHY START HERE?
+• We need a baseline to compare against
+• As we scan, we'll update if we find smaller
+• min_idx tracks INDEX, not the value itself
+• This is our "current best contestant"`,
+                    codeLine: 6,
+                    icon: '📍',
+                    comparisons, swaps, rounds,
+                    i: i, j: -1, min_idx: min_idx
+                });
+
+                for (let j = i + 1; j < n; j++) {
+                    comparisons++;
+
+                    states.push({
+                        array: arr.slice(),
+                        searchingIndex: j,
+                        minIndex: min_idx,
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        whatMessage: `🔍 Compare: arr[${j}]=${arr[j]} vs min arr[${min_idx}]=${arr[min_idx]}`,
+                        whyMessage: `🔁 INNER LOOP (j=${j}):
+• range(i + 1, n) = range(${i+1}, ${n})
+• Python range(${i+1}, ${n}): j goes from ${i+1} to ${n-1}
+• Current j = ${j}
+
+🔍 COMPARISON #${comparisons}:
+• Checking contestant: arr[${j}] = ${arr[j]}
+• Current champion: arr[${min_idx}] = ${arr[min_idx]}
+• Condition: arr[${j}] < arr[${min_idx}]?
+• Is ${arr[j]} < ${arr[min_idx]}? ${arr[j] < arr[min_idx] ? 'YES ✓' : 'NO ✗'}
+
+${arr[j] < arr[min_idx] ? '🏆 NEW CHAMPION! Update min_idx to ' + j : '❌ Current champion still wins'}`,
+                        codeLine: 10,
+                        icon: '🔍',
+                        comparisons, swaps, rounds,
+                        i: i, j: j, min_idx: min_idx
+                    });
+
+                    if (arr[j] < arr[min_idx]) {
+                        const oldMinIdx = min_idx;
+                        const oldMinValue = arr[min_idx];
+                        min_idx = j;
+
+                        states.push({
+                            array: arr.slice(),
+                            searchingIndex: j,
+                            minIndex: min_idx,
+                            sortedIndices: Array.from({ length: i }, (_, k) => k),
+                            whatMessage: `🏆 New minimum! min_idx: ${oldMinIdx} → ${min_idx}`,
+                            whyMessage: `🏆 UPDATE MINIMUM (Line 11):
+• Old champion: arr[${oldMinIdx}] = ${oldMinValue}
+• New champion: arr[${min_idx}] = ${arr[min_idx]}
+• min_idx updated: ${oldMinIdx} → ${min_idx}
+
+✨ WHY UPDATE?
+• Found smaller value (better contestant)!
+• ${arr[min_idx]} < ${oldMinValue}
+• min_idx now points to position ${min_idx}
+• Will continue searching for even better
+
+🎯 REMEMBER:
+• min_idx is an INDEX (position), not value
+• Tracks location of smallest element found so far
+• May update again if we find even smaller`,
+                            codeLine: 11,
+                            icon: '🏆',
+                            comparisons, swaps, rounds,
+                            i: i, j: j, min_idx: min_idx
+                        });
+                    }
+                }
+
+                states.push({
+                    array: arr.slice(),
+                    searchingIndex: -1,
+                    minIndex: min_idx,
+                    sortedIndices: Array.from({ length: i }, (_, k) => k),
+                    whatMessage: `✅ Search complete! Minimum found at index ${min_idx}, value ${arr[min_idx]}`,
+                    whyMessage: `✅ INNER LOOP FINISHED:
+• Scanned all positions from ${i+1} to ${n-1}
+• Total comparisons this round: ${n - i - 1}
+• Winner: arr[${min_idx}] = ${arr[min_idx]}
+
+🎯 WHAT WE FOUND:
+• Position ${min_idx} has smallest value
+• This is the best contestant for round ${rounds}
+• Ready to move to podium at position ${i}
+
+${min_idx === i ? '⚡ OPTIMIZATION: Already in correct spot!\n• No swap needed\n• arr[' + i + '] was already minimum' : '💫 SWAP NEEDED:\n• Move arr[' + min_idx + '] to position ' + i + '\n• This places winner in sorted section'}`,
+                    codeLine: 9,
+                    icon: '✅',
+                    comparisons, swaps, rounds,
+                    i: i, j: -1, min_idx: min_idx
+                });
+
+                if (min_idx !== i) {
+                    const oldI = arr[i];
+                    const oldMin = arr[min_idx];
+                    [arr[i], arr[min_idx]] = [arr[min_idx], arr[i]];
+                    swaps++;
+
+                    states.push({
+                        array: arr.slice(),
+                        searchingIndex: -1,
+                        minIndex: -1,
+                        swappingIndices: [i, min_idx],
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        whatMessage: `💫 SWAP! Position ${i} ↔ ${min_idx}: ${oldI} ↔ ${oldMin}`,
+                        whyMessage: `💫 SWAP EXECUTED (Line 14):
+• Before: arr[${i}]=${oldI}, arr[${min_idx}]=${oldMin}
+• After: arr[${i}]=${arr[i]}, arr[${min_idx}]=${arr[min_idx]}
+• Swap count: ${swaps}
+
+🐍 PYTHON TUPLE SWAP:
+• arr[i], arr[min_idx] = arr[min_idx], arr[i]
+• Simultaneous assignment (elegant!)
+• No temporary variable needed
+
+🏆 WINNER CROWNED:
+• ${arr[i]} is now at position ${i}
+• This position is now SORTED (green star!)
+• ${oldI} moved to position ${min_idx}
+• One more element in final position!`,
+                        codeLine: 14,
+                        icon: '💫',
+                        comparisons, swaps, rounds,
+                        i: i, j: -1, min_idx: min_idx
+                    });
+                } else {
+                    states.push({
+                        array: arr.slice(),
+                        searchingIndex: -1,
+                        minIndex: -1,
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        whatMessage: `⚡ No swap needed! arr[${i}]=${arr[i]} already minimum`,
+                        whyMessage: `⚡ OPTIMIZATION (Line 14):
+• min_idx = ${min_idx}, i = ${i}
+• They're the same position!
+• arr[${i}] = ${arr[i]} was already smallest
+
+✨ WHY NO SWAP?
+• Element already in correct position
+• Swapping with itself is pointless
+• Save operations = efficient!
+• Still counts as sorted (green star!)
+
+💡 COMPLEXITY NOTE:
+• Even though no swap, we still did ${n-i-1} comparisons
+• Selection sort ALWAYS does same comparisons
+• Unlike bubble sort, can't optimize early`,
+                        codeLine: 14,
+                        icon: '⚡',
+                        comparisons, swaps, rounds,
+                        i: i, j: -1, min_idx: min_idx
+                    });
+                }
+
+                states.push({
+                    array: arr.slice(),
+                    searchingIndex: -1,
+                    minIndex: -1,
+                    sortedIndices: Array.from({ length: i + 1 }, (_, k) => k),
+                    whatMessage: `⭐ Round ${rounds} complete! Position ${i} is sorted: ${arr[i]}`,
+                    whyMessage: `⭐ ROUND ${rounds} FINISHED:
+• Winner placed: arr[${i}] = ${arr[i]}
+• Position ${i} now SORTED (green star!)
+• Will never be touched again
+
+📊 PROGRESS:
+• Rounds completed: ${rounds} / ${n-1}
+• Winners chosen: ${i+1} / ${n}
+• Percentage: ${Math.round((i+1)/n * 100)}%
+• Remaining contestants: ${n-i-1}
+
+🔄 NEXT ROUND:
+${i+1 < n-1 ? '• i will increment to ' + (i+1) + '\n• Search positions ' + (i+2) + ' to ' + (n-1) + '\n• Find next minimum' : '• Last element auto-sorted!\n• No need to search 1 element'}
+
+💡 KEY INSIGHT:
+• Each round = exactly 1 element sorted
+• Fixed number of comparisons per round
+• Different from bubble sort's variable work`,
+                    codeLine: 5,
+                    icon: '⭐',
+                    comparisons, swaps, rounds,
+                    i: i, j: -1, min_idx: -1
+                });
+            }
+
+            states.push({
+                array: arr.slice(),
+                searchingIndex: -1,
+                minIndex: -1,
+                sortedIndices: Array.from({ length: n }, (_, k) => k),
+                whatMessage: `🎉 SORTING COMPLETE! All winners chosen: [${arr.join(', ')}]`,
+                whyMessage: `🎉 ALGORITHM FINISHED (Line 16):
+• All ${n} elements sorted!
+• Array in ascending order
+• Every winner on the podium!
+
+📊 PERFORMANCE STATISTICS:
+• Total comparisons: ${comparisons}
+  └─ Formula: n(n-1)/2 = ${n}×${n-1}/2 = ${n*(n-1)/2}
+  └─ ALWAYS the same, regardless of input!
+• Total swaps: ${swaps}
+  └─ Best case: 0 (already sorted)
+  └─ Worst case: n-1 (this had ${swaps})
+• Rounds completed: ${rounds}
+
+⏱️ TIME COMPLEXITY:
+• ALL cases: O(n²) - nested loops
+  └─ Outer loop: n-1 iterations
+  └─ Inner loop: (n-1) + (n-2) + ... + 1 = n²/2
+• Not adaptive: same work even if sorted!
+• More predictable than bubble sort
+
+💾 SPACE COMPLEXITY:
+• O(1) - Constant space
+• In-place sorting
+• Only uses: i, j, min_idx variables
+
+🎯 CHARACTERISTICS:
+• NOT stable: equal elements may swap order
+• NOT adaptive: same time even if sorted
+• Fewer swaps than bubble sort
+• Good when swaps are expensive
+
+🔍 VS OTHER SORTS:
+• Bubble: O(n²) avg, O(n) best (adaptive)
+• Insertion: O(n²) avg, O(n) best (adaptive)
+• Selection: O(n²) ALWAYS (not adaptive)
+• Advantage: Minimizes swaps (max n-1)
+
+💡 REAL WORLD:
+• Use when swap operations are costly
+• Good for small datasets
+• Educational value (simple concept)
+• Not used in production (better O(n log n) exists)`,
+                codeLine: 16,
+                icon: '🎉',
+                comparisons, swaps, rounds,
+                i: -1, j: -1, min_idx: -1
+            });
+
+            return states;
+        }
+
+        function renderBars() {
+            const state = states[currentStep];
+            barsContainer.innerHTML = '';
+
+            const maxValue = Math.max(...state.array);
+
+            // Update temp value box
+            const tempValueBox = document.getElementById('tempValueBox');
+            const tempValue = document.getElementById('tempValue');
+            const tempIndex = document.getElementById('tempIndex');
+
+            if (state.min_idx !== undefined && state.min_idx >= 0) {
+                tempValueBox.style.display = 'block';
+                tempValue.textContent = state.array[state.min_idx];
+                tempIndex.textContent = `at index: ${state.min_idx}`;
+            } else {
+                tempValueBox.style.display = 'none';
+            }
+
+            state.array.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+
+                const bottomPosition = (value / maxValue) * 200;
+                bar.style.marginBottom = `${bottomPosition}px`;
+
+                if (index === state.searchingIndex) {
+                    bar.classList.add('searching');
+                }
+                if (index === state.minIndex) {
+                    bar.classList.add('minimum');
+                }
+                if (state.swappingIndices && state.swappingIndices.includes(index)) {
+                    bar.classList.add('swapping');
+                }
+                if (state.sortedIndices && state.sortedIndices.includes(index)) {
+                    bar.classList.add('sorted');
+                }
+
+                const contestant = document.createElement('div');
+                contestant.className = 'contestant';
+
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'bar-value';
+                valueLabel.textContent = value;
+
+                contestant.appendChild(valueLabel);
+                bar.appendChild(contestant);
+
+                // Add variable indicators - showing loop variables i, j, min_idx
+                // i = position to fill (winner's podium), j = current search position, min_idx = current champion
+                if (state.i !== undefined && state.i >= 0 && state.i === index) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'index-indicator indicator-i';
+                    indicator.innerHTML = `<span>i=${state.i}</span><span>↑</span>`;
+                    indicator.title = `Outer loop: Filling position ${state.i} with the minimum`;
+                    bar.appendChild(indicator);
+                }
+                
+                // Show min_idx indicator - the current minimum found
+                if (state.min_idx !== undefined && state.min_idx >= 0 && state.min_idx === index) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'index-indicator indicator-min';
+                    // Adjust position if overlapping with i
+                    if (state.i === index) {
+                        indicator.style.bottom = "-75px";
+                    }
+                    indicator.innerHTML = `<span>min=${state.min_idx}</span><span>↑</span>`;
+                    indicator.title = `Current minimum: arr[${state.min_idx}] = ${state.array[state.min_idx]}`;
+                    bar.appendChild(indicator);
+                }
+
+                // Show j indicator - currently examining this position
+                if (state.j !== undefined && state.j >= 0 && state.j === index) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'index-indicator indicator-j';
+                    // Stack if others are present
+                    let bottomPos = "-45px";
+                    if (state.i === index && state.min_idx === index) {
+                        bottomPos = "-105px";
+                    } else if (state.i === index || state.min_idx === index) {
+                        bottomPos = "-75px";
+                    }
+                    indicator.style.bottom = bottomPos;
+                    indicator.innerHTML = `<span>j=${state.j}</span><span>↑</span>`;
+                    indicator.title = `Inner loop: Searching at position ${state.j}`;
+                    bar.appendChild(indicator);
+                }
+
+                barsContainer.appendChild(bar);
+            });
+
+            stepIcon.textContent = state.icon;
+            whatText.textContent = state.whatMessage;
+            if (state.whyMessage) {
+                whyBox.style.display = 'block';
+                whyText.textContent = state.whyMessage;
+            } else {
+                whyBox.style.display = 'none';
+            }
+
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('active');
+            });
+            if (state.codeLine) {
+                const activeLine = document.querySelector(`[data-line="${state.codeLine}"]`);
+                if (activeLine) {
+                    activeLine.classList.add('active');
+                    // Removed scrollIntoView to keep all code visible at once
+                    // activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            updateStats(state.comparisons, state.swaps, state.rounds);
+        }
+
+        function updateStats(comparisons, swaps, rounds) {
+            comparisonsSpan.textContent = comparisons;
+            swapsSpan.textContent = swaps;
+            passesSpan.textContent = rounds;
+        }
+
+        function animate() {
+            if (currentStep < states.length - 1) {
+                currentStep++;
+                renderBars();
+                const delay = 1200 / speed;
+                animationId = setTimeout(animate, delay);
+            } else {
+                stopAnimation();
+                stepBtn.disabled = true;
+                prevBtn.disabled = false;
+            }
+        }
+
+        function startAnimation() {
+            if (currentStep >= states.length - 1) {
+                currentStep = 0;
+            }
+            isPlaying = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stepBtn.disabled = true;
+            prevBtn.disabled = true;
+            generateBtn.disabled = true;
+            animate();
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                clearTimeout(animationId);
+                animationId = null;
+            }
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stepBtn.disabled = false;
+            prevBtn.disabled = currentStep === 0;
+            generateBtn.disabled = false;
+        }
+
+        function stepForward() {
+            if (currentStep < states.length - 1) {
+                currentStep++;
+                renderBars();
+                prevBtn.disabled = false;
+            }
+            if (currentStep >= states.length - 1) {
+                stepBtn.disabled = true;
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderBars();
+                stepBtn.disabled = false;
+            }
+            if (currentStep <= 0) {
+                prevBtn.disabled = true;
+            }
+        }
+
+        function reset() {
+            stopAnimation();
+            currentStep = 0;
+            renderBars();
+            prevBtn.disabled = true;
+            stepBtn.disabled = false;
+        }
+
+        generateBtn.addEventListener('click', generateArray);
+        startBtn.addEventListener('click', startAnimation);
+        pauseBtn.addEventListener('click', stopAnimation);
+        stepBtn.addEventListener('click', stepForward);
+        prevBtn.addEventListener('click', stepBackward);
+        resetBtn.addEventListener('click', reset);
+
+        speedSlider.addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+            speedValue.textContent = speed;
+        });
+
+        sizeSlider.addEventListener('input', (e) => {
+            arraySize = parseInt(e.target.value);
+            sizeValue.textContent = arraySize;
+        });
+    </script>
+</body>
+</html>

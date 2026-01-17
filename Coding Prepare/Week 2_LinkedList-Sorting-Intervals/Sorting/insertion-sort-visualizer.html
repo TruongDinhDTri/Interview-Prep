@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🃏 Insertion Sort - Card Game Edition!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .left-panel, .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .right-panel {
+            /* Removed sticky positioning to allow code section to expand fully */
+        }
+
+        .visualization-area {
+            background: linear-gradient(135deg, #2d1b3d 0%, #1a0f2e 100%);
+            padding: 30px 15px;
+            border-radius: 15px;
+            min-height: 350px;
+            position: relative;
+            overflow: visible;
+            box-shadow: inset 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .temp-value-box {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            padding: 15px 25px;
+            border-radius: 12px;
+            border: 3px solid #ff9800;
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+            z-index: 100;
+            animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+
+        .temp-value-box .temp-label {
+            font-size: 0.75em;
+            font-weight: bold;
+            color: #ff6b00;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .temp-value-box .temp-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #b8002b;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 8px 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 8px 25px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.6);
+                transform: scale(1.05);
+            }
+        }
+
+        .bars-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            height: 280px;
+            gap: 8px;
+            margin-bottom: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .bar {
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            width: 60px;
+            height: 85px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.5);
+            border: 3px solid #ddd;
+            position: relative;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        .bar.current .card {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            border-color: #ff9800;
+            animation: glow 1s ease-in-out infinite;
+            transform: translateY(-15px) scale(1.1);
+        }
+
+        .bar.comparing .card {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            border-color: #c92a2a;
+            transform: translateY(-10px);
+        }
+
+        .bar.sorted .card {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            border-color: #2f9e44;
+        }
+
+        .bar.shifting .card {
+            background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%);
+            animation: shift 0.5s ease;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 8px 20px rgba(255, 215, 0, 0.6), 0 0 30px rgba(255, 215, 0, 0.4); }
+            50% { box-shadow: 0 8px 30px rgba(255, 215, 0, 0.9), 0 0 50px rgba(255, 215, 0, 0.6); }
+        }
+
+        @keyframes shift {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+        .bar-value {
+            color: #1a1a2e;
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+
+        .index-indicator {
+            position: absolute;
+            bottom: -45px;
+            font-weight: bold;
+            font-size: 1.3em;
+            text-align: center;
+            width: 100%;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 2px solid;
+        }
+
+        .index-indicator span {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .indicator-i {
+            color: #ff00ff;
+            text-shadow: 0 0 8px rgba(255, 0, 255, 0.8), 0 0 15px rgba(255, 0, 255, 0.5);
+            border-color: #ff00ff;
+            animation: pulse-i 1s ease-in-out infinite;
+        }
+        .indicator-j {
+            color: #00ffff;
+            text-shadow: 0 0 8px rgba(0, 255, 255, 0.8), 0 0 15px rgba(0, 255, 255, 0.5);
+            border-color: #00ffff;
+            animation: pulse-j 1s ease-in-out infinite;
+        }
+        .indicator-key {
+            color: #ffd700;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.8), 0 0 15px rgba(255, 215, 0, 0.5);
+            border-color: #ffd700;
+        }
+
+        @keyframes pulse-i {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        @keyframes pulse-j {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 18px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            color: #333;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .explanation-box {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 15px;
+            border-radius: 15px;
+            border: 3px solid #f5576c;
+            min-height: 400px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .explanation-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #c7254e;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .explanation-text {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+
+        .why-box {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #00acc1;
+        }
+
+        .why-title {
+            font-weight: bold;
+            color: #00838f;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .why-text {
+            color: #004d56;
+            font-size: 0.85em;
+            line-height: 1.7;
+            white-space: pre-line;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .explanation-box::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .explanation-box::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .explanation-box::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #f5576c, #f093fb);
+            border-radius: 10px;
+        }
+
+        .code-section {
+            background: linear-gradient(135deg, #1e1e2e 0%, #2d2d44 100%);
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 15px;
+            overflow: visible;
+            border: 2px solid #3d3d5c;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+            max-height: none;
+        }
+
+        .code-section h3 {
+            color: #50fa7b;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            text-shadow: 0 0 10px rgba(80, 250, 123, 0.3);
+        }
+
+        .code-line {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            line-height: 1.4;
+            padding: 2px 12px 2px 50px;
+            margin: 1px 0;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 0.85em;
+            position: relative;
+        }
+
+        .code-line::before {
+            content: attr(data-line);
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6272a4;
+            font-size: 0.85em;
+            width: 30px;
+            text-align: right;
+            user-select: none;
+            opacity: 0.6;
+        }
+
+        .code-line::after {
+            content: '';
+            position: absolute;
+            left: 45px;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: rgba(98, 114, 164, 0.2);
+        }
+
+        .code-line:hover::before {
+            color: #8be9fd;
+            opacity: 1;
+        }
+
+        .code-line.active {
+            background: linear-gradient(90deg, rgba(80, 250, 123, 0.15) 0%, rgba(80, 250, 123, 0.05) 100%);
+            border-left: 5px solid #50fa7b;
+            padding-left: 54px;
+            transform: translateX(6px);
+            box-shadow: 0 0 20px rgba(80, 250, 123, 0.4);
+        }
+
+        .code-line.active::before {
+            color: #50fa7b;
+            font-weight: bold;
+            opacity: 1;
+            text-shadow: 0 0 8px rgba(80, 250, 123, 0.5);
+        }
+
+        .keyword { color: #ff79c6; font-weight: bold; text-shadow: 0 0 5px rgba(255, 121, 198, 0.3); }
+        .function { color: #50fa7b; font-weight: bold; text-shadow: 0 0 5px rgba(80, 250, 123, 0.3); }
+        .variable { color: #8be9fd; text-shadow: 0 0 3px rgba(139, 233, 253, 0.2); }
+        .comment { color: #6272a4; font-style: italic; }
+        .number { color: #bd93f9; font-weight: bold; }
+        .operator { color: #ff79c6; }
+        .builtin { color: #ffb86c; font-weight: bold; text-shadow: 0 0 5px rgba(255, 184, 108, 0.3); }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9ecff 100%);
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 3px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.8em;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .slider {
+            width: 150px;
+            height: 6px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            font-size: 0.85em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-color {
+            width: 40px;
+            height: 24px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .quick-guide {
+            background: linear-gradient(135deg, #f6f8ff 0%, #e9ecff 100%);
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+
+        .quick-guide strong {
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🃏 Insertion Sort Visualizer - Card Game Edition!</h1>
+        <p class="subtitle">Like sorting playing cards in your hand - pick and insert!</p>
+
+        <div class="quick-guide">
+            <strong>🎴 The Card Game Metaphor:</strong> Imagine picking up cards one by one from a table. You hold sorted cards in your left hand and pick a new card with your right hand. You then insert this new card into the correct position in your left hand by shifting cards right until you find the right spot. That's exactly how insertion sort works!
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%); border: 2px solid #ddd;"></div>
+                <span>🃏 Unsorted</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%); border: 2px solid #ff9800;"></div>
+                <span>⭐ Current Key</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); border: 2px solid #c92a2a;"></div>
+                <span>🔍 Comparing</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%); border: 2px solid #339af0;"></div>
+                <span>➡️ Shifting</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); border: 2px solid #2f9e44;"></div>
+                <span>✅ Sorted</span>
+            </div>
+        </div>
+
+        <div class="slider-container">
+            <label for="speedSlider"><strong>Speed:</strong></label>
+            <input type="range" id="speedSlider" class="slider" min="1" max="10" value="3">
+            <span id="speedValue">3</span>
+            <label for="sizeSlider" style="margin-left: 20px;"><strong>Size:</strong></label>
+            <input type="range" id="sizeSlider" class="slider" min="5" max="12" value="7">
+            <span id="sizeValue">7</span>
+        </div>
+
+        <div class="controls">
+            <button class="btn-success" id="generateBtn">🎲 New Array</button>
+            <button class="btn-primary" id="startBtn" disabled>▶️ Start</button>
+            <button class="btn-secondary" id="prevBtn" disabled>⏮️ Previous</button>
+            <button class="btn-secondary" id="stepBtn" disabled>⏭️ Next</button>
+            <button class="btn-danger" id="pauseBtn" disabled>⏸️ Pause</button>
+            <button class="btn-secondary" id="resetBtn" disabled>🔄 Reset</button>
+        </div>
+
+        <div class="main-grid">
+            <div class="left-panel">
+                <div class="visualization-area">
+                    <div class="temp-value-box" id="tempValueBox" style="display: none;">
+                        <div class="temp-label">🃏 Key (Temp)</div>
+                        <div class="temp-value" id="tempValue">--</div>
+                    </div>
+                    <div class="bars-container" id="barsContainer"></div>
+                </div>
+
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="comparisons">0</div>
+                        <div class="stat-label">Comparisons</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="shifts">0</div>
+                        <div class="stat-label">Shifts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="passes">0</div>
+                        <div class="stat-label">Cards Inserted</div>
+                    </div>
+                </div>
+
+                <div class="explanation-box">
+                    <div class="explanation-title">
+                        <span id="stepIcon">📍</span>
+                        <span id="stepTitle">What's Happening:</span>
+                    </div>
+                    <div class="explanation-text" id="whatText">
+                        Click "New Array" to start!
+                    </div>
+                    <div class="why-box" id="whyBox" style="display: none;">
+                        <div class="why-title">🤔 Why?</div>
+                        <div class="why-text" id="whyText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="code-section">
+                    <h3>🐍 Live Python Code Execution</h3>
+                    <div id="codeContainer">
+                        <div class="code-line" data-line="1"><span class="keyword">def</span> <span class="function">insertion_sort</span>(<span class="variable">arr</span>):</div>
+                        <div class="code-line" data-line="2">&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">n</span> <span class="operator">=</span> <span class="builtin">len</span>(<span class="variable">arr</span>)</div>
+                        <div class="code-line" data-line="3"></div>
+                        <div class="code-line" data-line="4">&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Start from 2nd element (index 1)</span></div>
+                        <div class="code-line" data-line="5">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">for</span> <span class="variable">i</span> <span class="keyword">in</span> <span class="builtin">range</span>(<span class="number">1</span>, <span class="variable">n</span>):</div>
+                        <div class="code-line" data-line="6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">key</span> <span class="operator">=</span> <span class="variable">arr</span>[<span class="variable">i</span>]</div>
+                        <div class="code-line" data-line="7">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">j</span> <span class="operator">=</span> <span class="variable">i</span> <span class="operator">-</span> <span class="number">1</span></div>
+                        <div class="code-line" data-line="8"></div>
+                        <div class="code-line" data-line="9">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Shift elements right while key is smaller</span></div>
+                        <div class="code-line" data-line="10">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">while</span> <span class="variable">j</span> <span class="operator">&gt;=</span> <span class="number">0</span> <span class="keyword">and</span> <span class="variable">arr</span>[<span class="variable">j</span>] <span class="operator">&gt;</span> <span class="variable">key</span>:</div>
+                        <div class="code-line" data-line="11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">arr</span>[<span class="variable">j</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">=</span> <span class="variable">arr</span>[<span class="variable">j</span>]</div>
+                        <div class="code-line" data-line="12">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">j</span> <span class="operator">-=</span> <span class="number">1</span></div>
+                        <div class="code-line" data-line="13"></div>
+                        <div class="code-line" data-line="14">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="comment"># Insert key at correct position</span></div>
+                        <div class="code-line" data-line="15">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="variable">arr</span>[<span class="variable">j</span> <span class="operator">+</span> <span class="number">1</span>] <span class="operator">=</span> <span class="variable">key</span></div>
+                        <div class="code-line" data-line="16"></div>
+                        <div class="code-line" data-line="17">&nbsp;&nbsp;&nbsp;&nbsp;<span class="keyword">return</span> <span class="variable">arr</span></div>
+                        <div class="code-line" data-line="18"></div>
+                        <div class="code-line" data-line="19"><span class="comment"># Time: O(n²) worst, O(n) best</span></div>
+                        <div class="code-line" data-line="20"><span class="comment"># Space: O(1)</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let array = [];
+        let states = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let animationId = null;
+        let speed = 3;
+        let arraySize = 7;
+
+        const barsContainer = document.getElementById('barsContainer');
+        const whatText = document.getElementById('whatText');
+        const whyBox = document.getElementById('whyBox');
+        const whyText = document.getElementById('whyText');
+        const stepIcon = document.getElementById('stepIcon');
+        const comparisonsSpan = document.getElementById('comparisons');
+        const shiftsSpan = document.getElementById('shifts');
+        const passesSpan = document.getElementById('passes');
+        const generateBtn = document.getElementById('generateBtn');
+        const startBtn = document.getElementById('startBtn');
+        const stepBtn = document.getElementById('stepBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+        const sizeSlider = document.getElementById('sizeSlider');
+        const sizeValue = document.getElementById('sizeValue');
+
+        function generateArray() {
+            array = [];
+            for (let i = 0; i < arraySize; i++) {
+                array.push(Math.floor(Math.random() * 90) + 10);
+            }
+            states = generateInsertionSortStates(array.slice());
+            currentStep = 0;
+            updateStats(0, 0, 0);
+            renderBars();
+            startBtn.disabled = false;
+            stepBtn.disabled = false;
+            prevBtn.disabled = true;
+            resetBtn.disabled = false;
+        }
+
+        function generateInsertionSortStates(arr) {
+            const states = [];
+            const n = arr.length;
+            let comparisons = 0;
+            let shifts = 0;
+            let cardsInserted = 0;
+
+            states.push({
+                array: arr.slice(),
+                currentIndex: -1,
+                comparingIndices: [],
+                sortedIndices: [0],
+                i: -1,
+                j: -1,
+                key: undefined,
+                whatMessage: `🃏 Starting Insertion Sort: [${arr.join(', ')}]`,
+                whyMessage: `📚 INITIALIZATION:
+• Function: insertion_sort(arr)
+• Array size: ${n} elements
+• First element (index 0) is already "sorted"
+
+🎴 THE CONCEPT:
+• Like sorting cards in your hand!
+• Left side = sorted cards (in hand)
+• Right side = unsorted cards (on table)
+• Pick one card at a time from right
+• Insert it into correct position on left
+
+⚙️ HOW IT WORKS:
+• Start from index 1 (2nd element)
+• Pick current element as "key"
+• Compare key with sorted elements (left side)
+• Shift larger elements to the right
+• Insert key at correct position`,
+                codeLine: 1,
+                icon: '🚀',
+                comparisons, shifts, cardsInserted
+            });
+
+            for (let i = 1; i < n; i++) {
+                const key = arr[i];
+                cardsInserted++;
+
+                states.push({
+                    array: arr.slice(),
+                    currentIndex: i,
+                    comparingIndices: [],
+                    sortedIndices: Array.from({ length: i }, (_, k) => k),
+                    i: i,
+                    j: -1,
+                    key: key,
+                    whatMessage: `⭐ Picking card at index ${i}: key = ${key}`,
+                    whyMessage: `🔄 OUTER LOOP (i=${i}):
+• range(1, n) = range(1, ${n})
+• Python range(1, ${n}): i goes from 1 to ${n-1}
+• Current i = ${i}
+
+📍 PICKING THE KEY:
+• key = arr[${i}] = ${key}
+• This is the card we're inserting
+• Left side (0 to ${i-1}): Already sorted ✓
+• Right side (${i} to ${n-1}): Still unsorted
+
+🎯 GOAL:
+• Find correct position for ${key} in sorted section
+• Shift elements > ${key} to the right
+• Insert ${key} at the gap created`,
+                    codeLine: 6,
+                    icon: '⭐',
+                    comparisons, shifts, cardsInserted
+                });
+
+                states.push({
+                    array: arr.slice(),
+                    currentIndex: i,
+                    comparingIndices: [],
+                    sortedIndices: Array.from({ length: i }, (_, k) => k),
+                    i: i,
+                    j: i - 1,
+                    key: key,
+                    whatMessage: `👈 Starting at j = ${i-1} (one position left)`,
+                    whyMessage: `📍 INITIALIZE j:
+• j = i - 1 = ${i} - 1 = ${i-1}
+• j points to rightmost sorted element
+• We'll compare key (${key}) with arr[j]
+
+🔍 WHY j = i - 1?
+• We compare with element immediately left
+• Then move leftward (j--) as needed
+• Stop when: j < 0 OR arr[j] <= key`,
+                    codeLine: 7,
+                    icon: '👈',
+                    comparisons, shifts, cardsInserted
+                });
+
+                let j = i - 1;
+                while (j >= 0 && arr[j] > key) {
+                    comparisons++;
+
+                    states.push({
+                        array: arr.slice(),
+                        currentIndex: i,
+                        comparingIndices: [j],
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        i: i,
+                        j: j,
+                        key: key,
+                        whatMessage: `🔍 Compare: arr[${j}]=${arr[j]} > key=${key}?`,
+                        whyMessage: `🔍 WHILE LOOP CONDITION:
+• Check 1: j >= 0? ${j >= 0 ? 'YES ✓' : 'NO ✗'}
+• Check 2: arr[${j}] > key? ${arr[j]} > ${key}? ${arr[j] > key ? 'YES ✓' : 'NO ✗'}
+• Both true? ${j >= 0 && arr[j] > key ? 'YES - Enter loop' : 'NO - Exit loop'}
+
+📊 COMPARISON #${comparisons}:
+• Comparing arr[${j}] (${arr[j]}) with key (${key})
+• Result: ${arr[j] > key ? 'arr[j] is LARGER' : 'arr[j] is SMALLER/EQUAL'}
+
+${arr[j] > key ? '➡️ ACTION: Shift arr[' + j + '] to position ' + (j+1) : '⏹️ ACTION: Stop! Found correct position'}`,
+                        codeLine: 10,
+                        icon: '🔍',
+                        comparisons, shifts, cardsInserted
+                    });
+
+                    shifts++;
+                    arr[j + 1] = arr[j];
+
+                    states.push({
+                        array: arr.slice(),
+                        currentIndex: i,
+                        comparingIndices: [],
+                        shiftingIndex: j + 1,
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        i: i,
+                        j: j,
+                        key: key,
+                        whatMessage: `➡️ Shift: arr[${j+1}] = arr[${j}] (value ${arr[j+1]})`,
+                        whyMessage: `➡️ SHIFTING (Line 11):
+• arr[${j+1}] = arr[${j}]
+• Moved ${arr[j+1]} from position ${j} to ${j+1}
+• Creating space for key (${key})
+• Shift count: ${shifts}
+
+💡 WHY SHIFT?
+• arr[${j}] (${arr[j+1]}) > key (${key})
+• It should be to the right of key
+• Move it one position right
+• Keep going left to find more elements to shift`,
+                        codeLine: 11,
+                        icon: '➡️',
+                        comparisons, shifts, cardsInserted
+                    });
+
+                    j--;
+
+                    states.push({
+                        array: arr.slice(),
+                        currentIndex: i,
+                        comparingIndices: [],
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        i: i,
+                        j: j,
+                        key: key,
+                        whatMessage: `👈 Move left: j = ${j}`,
+                        whyMessage: `👈 DECREMENT j (Line 12):
+• j -= 1, so j is now ${j}
+• Moving leftward through sorted section
+• Next: Check while condition again
+
+🔄 LOOP CONTINUES:
+${j >= 0 ? '• j = ' + j + ' (still >= 0)\n• Will compare arr[' + j + '] with key next' : '• j = ' + j + ' (< 0, will exit loop)\n• Reached beginning of array'}`,
+                        codeLine: 12,
+                        icon: '👈',
+                        comparisons, shifts, cardsInserted
+                    });
+                }
+
+                if (j >= 0) {
+                    comparisons++;
+                    states.push({
+                        array: arr.slice(),
+                        currentIndex: i,
+                        comparingIndices: [j],
+                        sortedIndices: Array.from({ length: i }, (_, k) => k),
+                        i: i,
+                        j: j,
+                        key: key,
+                        whatMessage: `⏹️ Stop: arr[${j}]=${arr[j]} <= key=${key}`,
+                        whyMessage: `⏹️ WHILE LOOP EXIT:
+• j = ${j}
+• arr[${j}] = ${arr[j]}
+• key = ${key}
+• Condition: arr[${j}] > ${key}? NO ✗
+
+✅ FOUND POSITION:
+• arr[${j}] <= key
+• key (${key}) should go after arr[${j}]
+• Insert at position ${j+1}
+• Comparison #${comparisons}`,
+                        codeLine: 10,
+                        icon: '⏹️',
+                        comparisons, shifts, cardsInserted
+                    });
+                }
+
+                arr[j + 1] = key;
+
+                states.push({
+                    array: arr.slice(),
+                    currentIndex: -1,
+                    comparingIndices: [],
+                    sortedIndices: Array.from({ length: i + 1 }, (_, k) => k),
+                    i: i,
+                    j: j,
+                    key: undefined,
+                    whatMessage: `✅ Insert: arr[${j+1}] = key (${key}) → [${arr.join(', ')}]`,
+                    whyMessage: `✅ INSERTION (Line 15):
+• arr[${j+1}] = key
+• Placed ${key} at position ${j+1}
+• Now ${i+1} elements are sorted!
+
+🎯 CARD ${cardsInserted} INSERTED:
+• Key ${key} found its home
+• Sorted section: indices 0 to ${i}
+• All green cards are in order
+
+📊 PROGRESS:
+• Cards inserted: ${cardsInserted} / ${n-1}
+• Elements sorted: ${i+1} / ${n}
+• Percentage: ${Math.round((i+1)/n * 100)}%
+• Next: Pick card at index ${i+1 < n ? i+1 : 'DONE'}`,
+                    codeLine: 15,
+                    icon: '✅',
+                    comparisons, shifts, cardsInserted
+                });
+            }
+
+            states.push({
+                array: arr.slice(),
+                currentIndex: -1,
+                comparingIndices: [],
+                sortedIndices: Array.from({ length: n }, (_, k) => k),
+                i: -1,
+                j: -1,
+                key: undefined,
+                whatMessage: `🎉 SORTING COMPLETE! Final: [${arr.join(', ')}]`,
+                whyMessage: `🎉 ALGORITHM FINISHED (Line 17):
+• All ${n} cards inserted
+• Array fully sorted in ascending order
+• Every element in correct position!
+
+📊 PERFORMANCE STATISTICS:
+• Total comparisons: ${comparisons}
+  └─ Compared key with sorted elements
+• Total shifts: ${shifts}
+  └─ Moved elements right to make space
+• Cards inserted: ${cardsInserted}
+  └─ Picked from unsorted and placed in sorted
+
+⏱️ TIME COMPLEXITY:
+• Worst case: O(n²) - reverse sorted array
+  └─ Each insertion requires i comparisons
+  └─ Total: 1+2+3+...+(n-1) = n²/2
+• Average case: O(n²) - random array
+• Best case: O(n) - already sorted array
+  └─ Only 1 comparison per element, no shifts
+
+💾 SPACE COMPLEXITY:
+• O(1) - Constant extra space
+• Sorts in-place
+• Only uses: i, j, key variables
+
+🎯 CHARACTERISTICS:
+• Stable sort: Equal elements keep relative order
+• Adaptive: Fast on nearly-sorted data (O(n))
+• Online: Can sort data as it arrives
+• Good for: Small datasets, nearly-sorted data
+
+💡 REAL WORLD:
+• Used in hybrid algorithms (Timsort uses it)
+• Efficient for small subarrays
+• Simple implementation
+• Natural human sorting method`,
+                codeLine: 17,
+                icon: '🎉',
+                comparisons, shifts, cardsInserted
+            });
+
+            return states;
+        }
+
+        function renderBars() {
+            const state = states[currentStep];
+            barsContainer.innerHTML = '';
+
+            // Show/hide temp value box
+            const tempValueBox = document.getElementById('tempValueBox');
+            const tempValue = document.getElementById('tempValue');
+            if (state.key !== undefined) {
+                tempValueBox.style.display = 'block';
+                tempValue.textContent = state.key;
+            } else {
+                tempValueBox.style.display = 'none';
+            }
+
+            const maxValue = Math.max(...state.array);
+
+            state.array.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+
+                const bottomPosition = (value / maxValue) * 200;
+                bar.style.marginBottom = `${bottomPosition}px`;
+
+                if (index === state.currentIndex) {
+                    bar.classList.add('current');
+                }
+                if (state.comparingIndices && state.comparingIndices.includes(index)) {
+                    bar.classList.add('comparing');
+                }
+                if (index === state.shiftingIndex) {
+                    bar.classList.add('shifting');
+                }
+                if (state.sortedIndices && state.sortedIndices.includes(index)) {
+                    bar.classList.add('sorted');
+                }
+
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const valueLabel = document.createElement('div');
+                valueLabel.className = 'bar-value';
+                valueLabel.textContent = value;
+
+                card.appendChild(valueLabel);
+                bar.appendChild(card);
+                
+                // Add variable indicators - showing loop variables i, j, key
+                // i = current card being inserted, j = position in sorted section being compared
+                const stateI = states[currentStep].i !== undefined ? states[currentStep].i : -1;
+                const stateJ = states[currentStep].j !== undefined ? states[currentStep].j : -1;
+                const stateKey = states[currentStep].key;
+                
+                // Show i indicator - the current card being picked
+                if (stateI >= 0 && stateI === index) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'index-indicator indicator-i';
+                    indicator.innerHTML = `<span>i=${stateI}</span><span>↑</span>`;
+                    indicator.title = `Outer loop: Inserting card at position ${stateI}`;
+                    bar.appendChild(indicator);
+                }
+                
+                // Show j indicator - comparing position in sorted section
+                if (stateJ >= 0 && stateJ === index) {
+                    const indicator = document.createElement('div');
+                    indicator.className = 'index-indicator indicator-j';
+                    let bottomPos = "-45px";
+                    if (stateI === index) {
+                        bottomPos = "-75px";
+                    }
+                    indicator.style.bottom = bottomPos;
+                    indicator.innerHTML = `<span>j=${stateJ}</span><span>↑</span>`;
+                    indicator.title = `While loop: Comparing arr[${stateJ}] with key=${stateKey}`;
+                    bar.appendChild(indicator);
+                }
+                
+                // Show key indicator on the current element being inserted
+                if (stateKey !== undefined && stateI >= 0 && stateI === index) {
+                    const keyIndicator = document.createElement('div');
+                    keyIndicator.className = 'index-indicator indicator-key';
+                    keyIndicator.style.bottom = "-75px";
+                    keyIndicator.innerHTML = `<span>key=${stateKey}</span><span>↑</span>`;
+                    keyIndicator.title = `Current value being inserted: ${stateKey}`;
+                    bar.appendChild(keyIndicator);
+                }
+
+                barsContainer.appendChild(bar);
+            });
+
+            stepIcon.textContent = state.icon;
+            whatText.textContent = state.whatMessage;
+            if (state.whyMessage) {
+                whyBox.style.display = 'block';
+                whyText.textContent = state.whyMessage;
+            } else {
+                whyBox.style.display = 'none';
+            }
+
+            document.querySelectorAll('.code-line').forEach(line => {
+                line.classList.remove('active');
+            });
+            if (state.codeLine) {
+                const activeLine = document.querySelector(`[data-line="${state.codeLine}"]`);
+                if (activeLine) {
+                    activeLine.classList.add('active');
+                    // Removed scrollIntoView to keep all code visible at once
+                    // activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            updateStats(state.comparisons, state.shifts, state.cardsInserted);
+        }
+
+        function updateStats(comparisons, shifts, cardsInserted) {
+            comparisonsSpan.textContent = comparisons;
+            shiftsSpan.textContent = shifts;
+            passesSpan.textContent = cardsInserted;
+        }
+
+        function animate() {
+            if (currentStep < states.length - 1) {
+                currentStep++;
+                renderBars();
+                const delay = 1200 / speed;
+                animationId = setTimeout(animate, delay);
+            } else {
+                stopAnimation();
+                stepBtn.disabled = true;
+                prevBtn.disabled = false;
+            }
+        }
+
+        function startAnimation() {
+            if (currentStep >= states.length - 1) {
+                currentStep = 0;
+            }
+            isPlaying = true;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            stepBtn.disabled = true;
+            prevBtn.disabled = true;
+            generateBtn.disabled = true;
+            animate();
+        }
+
+        function stopAnimation() {
+            isPlaying = false;
+            if (animationId) {
+                clearTimeout(animationId);
+                animationId = null;
+            }
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            stepBtn.disabled = false;
+            prevBtn.disabled = currentStep === 0;
+            generateBtn.disabled = false;
+        }
+
+        function stepForward() {
+            if (currentStep < states.length - 1) {
+                currentStep++;
+                renderBars();
+                prevBtn.disabled = false;
+            }
+            if (currentStep >= states.length - 1) {
+                stepBtn.disabled = true;
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderBars();
+                stepBtn.disabled = false;
+            }
+            if (currentStep <= 0) {
+                prevBtn.disabled = true;
+            }
+        }
+
+        function reset() {
+            stopAnimation();
+            currentStep = 0;
+            renderBars();
+            prevBtn.disabled = true;
+            stepBtn.disabled = false;
+        }
+
+        generateBtn.addEventListener('click', generateArray);
+        startBtn.addEventListener('click', startAnimation);
+        pauseBtn.addEventListener('click', stopAnimation);
+        stepBtn.addEventListener('click', stepForward);
+        prevBtn.addEventListener('click', stepBackward);
+        resetBtn.addEventListener('click', reset);
+
+        speedSlider.addEventListener('input', (e) => {
+            speed = parseInt(e.target.value);
+            speedValue.textContent = speed;
+        });
+
+        sizeSlider.addEventListener('input', (e) => {
+            arraySize = parseInt(e.target.value);
+            sizeValue.textContent = arraySize;
+        });
+    </script>
+</body>
+</html>
