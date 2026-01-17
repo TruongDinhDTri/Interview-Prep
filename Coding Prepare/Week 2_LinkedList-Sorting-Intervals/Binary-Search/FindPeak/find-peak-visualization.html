@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Peak Element - Why Left == Right is ALWAYS Peak 🔥</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+            color: #2d3748;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #718096;
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 5px solid #f56565;
+        }
+
+        .key-insight h3 {
+            color: #742a2a;
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+
+        .key-insight p {
+            color: #2d3748;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-case-btn, .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .test-case-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .test-case-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .test-case-btn.active {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+        }
+
+        .control-btn {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+            color: #2d3748;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .visualization {
+            margin: 40px 0;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .array-element {
+            position: relative;
+            width: 70px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            transition: all 0.5s ease;
+        }
+
+        .bar {
+            width: 50px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px 8px 0 0;
+            transition: all 0.5s ease;
+            position: relative;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 8px;
+        }
+
+        .bar.eliminated {
+            background: linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%);
+            opacity: 0.3;
+        }
+
+        .bar.in-range {
+            background: linear-gradient(180deg, #48bb78 0%, #38a169 100%);
+            box-shadow: 0 0 20px rgba(72, 187, 120, 0.6);
+        }
+
+        .bar.mid {
+            background: linear-gradient(180deg, #f6ad55 0%, #ed8936 100%);
+            box-shadow: 0 0 20px rgba(237, 137, 54, 0.6);
+        }
+
+        .bar.peak {
+            background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.8);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .value {
+            color: white;
+            font-weight: 700;
+            font-size: 1.1em;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .index {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.9em;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .pointer {
+            position: absolute;
+            top: -30px;
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .pointer.left {
+            color: #48bb78;
+        }
+
+        .pointer.right {
+            color: #f56565;
+        }
+
+        .pointer.mid {
+            color: #ed8936;
+        }
+
+        .step-info {
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 5px solid #0ea5e9;
+        }
+
+        .step-info h3 {
+            color: #075985;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .step-info p {
+            color: #0c4a6e;
+            line-height: 1.8;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .step-info .comparison {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #1e40af;
+            font-weight: 600;
+        }
+
+        .step-info .decision {
+            background: #fef3c7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f59e0b;
+            margin-top: 15px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .legend-box {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+        }
+
+        .final-explanation {
+            background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 30px;
+            border: 3px solid #48bb78;
+        }
+
+        .final-explanation h2 {
+            color: #22543d;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+            text-align: center;
+        }
+
+        .final-explanation p {
+            color: #2f855a;
+            line-height: 1.8;
+            margin-bottom: 12px;
+            font-size: 1.1em;
+        }
+
+        .final-explanation .highlight {
+            background: #fef3c7;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: 700;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Find Peak Element - The "WHY" Behind It 🔥</h1>
+        <p class="subtitle">Tại sao khi left == right → Chắc chắn là PEAK?</p>
+
+        <div class="key-insight">
+            <h3>💡 Key Insight:</h3>
+            <p><strong>Nguyên tắc vàng:</strong> Luôn đi về phía CAO hơn!</p>
+            <p>✅ <strong>Khi nums[mid] < nums[mid+1]:</strong> Phải cao hơn → left = mid + 1 (BỎ mid và bên trái)</p>
+            <p>✅ <strong>Khi nums[mid] ≥ nums[mid+1]:</strong> Trái cao hơn → right = mid (GIỮ mid, bỏ bên phải)</p>
+            <p><strong>Kết quả:</strong> Khi left == right → Đã loại bỏ HẾT các phần tử thấp hơn → Còn lại PEAK! 🏔️</p>
+        </div>
+
+        <div class="controls">
+            <button class="test-case-btn active" onclick="loadTestCase(0)">Test 1: [1,2,3,1]</button>
+            <button class="test-case-btn" onclick="loadTestCase(1)">Test 2: [1,2,1,3,5,6,4]</button>
+            <button class="test-case-btn" onclick="loadTestCase(2)">Test 3: [1,2,3,4,5]</button>
+            <button class="test-case-btn" onclick="loadTestCase(3)">Test 4: [5,4,3,2,1]</button>
+        </div>
+
+        <div class="controls">
+            <button class="control-btn" onclick="reset()">🔄 Reset</button>
+            <button class="control-btn" onclick="prevStep()" id="prevBtn">⬅️ Previous Step</button>
+            <button class="control-btn" onclick="nextStep()" id="nextBtn">Next Step ➡️</button>
+            <button class="control-btn" onclick="autoPlay()" id="autoBtn">▶️ Auto Play</button>
+        </div>
+
+        <div id="stepInfo" class="step-info">
+            <h3>Bước 0: Khởi tạo</h3>
+            <p>Bắt đầu binary search. Left ở đầu, Right ở cuối.</p>
+            <p>🎯 <strong>Mục tiêu:</strong> Tìm peak bằng cách loại bỏ phần thấp hơn!</p>
+        </div>
+
+        <div class="visualization">
+            <div id="arrayContainer" class="array-container"></div>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(180deg, #48bb78 0%, #38a169 100%);"></div>
+                <span><strong>Search Range (left...right)</strong></span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(180deg, #f6ad55 0%, #ed8936 100%);"></div>
+                <span><strong>Mid (comparing)</strong></span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(180deg, #cbd5e0 0%, #a0aec0 100%); opacity: 0.3;"></div>
+                <span><strong>Eliminated (thấp hơn)</strong></span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box" style="background: linear-gradient(180deg, #ffd700 0%, #ff8c00 100%);"></div>
+                <span><strong>PEAK FOUND! 🏔️</strong></span>
+            </div>
+        </div>
+
+        <div id="finalExplanation"></div>
+    </div>
+
+    <script>
+        const testCases = [
+            [1, 2, 3, 1],
+            [1, 2, 1, 3, 5, 6, 4],
+            [1, 2, 3, 4, 5],
+            [5, 4, 3, 2, 1]
+        ];
+
+        let currentTestCase = 0;
+        let currentArray = [];
+        let steps = [];
+        let currentStep = 0;
+        let autoPlayInterval = null;
+
+        function findPeakWithSteps(nums) {
+            const steps = [];
+            let left = 0;
+            let right = nums.length - 1;
+
+            steps.push({
+                left, right, mid: null,
+                message: "Khởi tạo: left = 0, right = " + (nums.length - 1),
+                comparison: null,
+                decision: "Bắt đầu binary search để tìm peak!",
+                eliminated: []
+            });
+
+            while (left < right) {
+                const mid = Math.floor(left + (right - left) / 2);
+                const comparison = `nums[${mid}] = ${nums[mid]} vs nums[${mid + 1}] = ${nums[mid + 1]}`;
+
+                let decision, newLeft = left, newRight = right, eliminated = [];
+
+                if (nums[mid] < nums[mid + 1]) {
+                    decision = `${nums[mid]} < ${nums[mid + 1]} → Bên PHẢI cao hơn! Đi phải (left = ${mid + 1})`;
+                    newLeft = mid + 1;
+                    // Eliminate left side including mid
+                    for (let i = left; i <= mid; i++) {
+                        eliminated.push(i);
+                    }
+                } else {
+                    decision = `${nums[mid]} ≥ ${nums[mid + 1]} → Bên TRÁI cao hơn! Đi trái (right = ${mid})`;
+                    newRight = mid;
+                    // Eliminate right side after mid
+                    for (let i = mid + 1; i <= right; i++) {
+                        eliminated.push(i);
+                    }
+                }
+
+                steps.push({
+                    left, right, mid,
+                    message: `So sánh mid=${mid} với mid+1=${mid+1}`,
+                    comparison,
+                    decision,
+                    eliminated: [],
+                    beforeElimination: true
+                });
+
+                left = newLeft;
+                right = newRight;
+
+                steps.push({
+                    left, right, mid: null,
+                    message: `Sau khi cập nhật: left=${left}, right=${right}`,
+                    comparison: null,
+                    decision: eliminated.length > 0 ? `Loại bỏ ${eliminated.length} phần tử vì chúng THẤP HƠN!` : "",
+                    eliminated
+                });
+            }
+
+            steps.push({
+                left, right, mid: null,
+                message: "🎉 FOUND PEAK! 🎉",
+                comparison: null,
+                decision: `left (${left}) == right (${right}) → Đây là PEAK tại index ${left}, value = ${nums[left]}`,
+                eliminated: [],
+                isPeak: true
+            });
+
+            return steps;
+        }
+
+        function loadTestCase(index) {
+            currentTestCase = index;
+            currentArray = testCases[index];
+            steps = findPeakWithSteps(currentArray);
+            currentStep = 0;
+
+            // Update button states
+            document.querySelectorAll('.test-case-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+
+            renderStep();
+        }
+
+        function renderStep() {
+            const step = steps[currentStep];
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+
+            // Get all eliminated indices up to current step
+            const allEliminated = new Set();
+            for (let i = 0; i <= currentStep; i++) {
+                steps[i].eliminated.forEach(idx => allEliminated.add(idx));
+            }
+
+            // Render array
+            currentArray.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${value * 15 + 30}px`;
+
+                // Determine bar state
+                if (step.isPeak && index === step.left) {
+                    bar.classList.add('peak');
+                } else if (allEliminated.has(index)) {
+                    bar.classList.add('eliminated');
+                } else if (index === step.mid && step.beforeElimination) {
+                    bar.classList.add('mid');
+                } else if (index >= step.left && index <= step.right) {
+                    bar.classList.add('in-range');
+                }
+
+                const valueSpan = document.createElement('span');
+                valueSpan.className = 'value';
+                valueSpan.textContent = value;
+                bar.appendChild(valueSpan);
+
+                const indexSpan = document.createElement('span');
+                indexSpan.className = 'index';
+                indexSpan.textContent = `[${index}]`;
+
+                // Add pointers
+                if (index === step.left && step.left === step.right && !step.isPeak) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer left';
+                    pointer.textContent = 'L=R';
+                    element.appendChild(pointer);
+                } else {
+                    if (index === step.left) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer left';
+                        pointer.textContent = 'L';
+                        element.appendChild(pointer);
+                    }
+                    if (index === step.right && step.left !== step.right) {
+                        const pointer = document.createElement('div');
+                        pointer.className = 'pointer right';
+                        pointer.textContent = 'R';
+                        element.appendChild(pointer);
+                    }
+                }
+                if (index === step.mid) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer mid';
+                    pointer.textContent = 'M';
+                    element.appendChild(pointer);
+                }
+
+                element.appendChild(bar);
+                element.appendChild(indexSpan);
+                container.appendChild(element);
+            });
+
+            // Update step info
+            const stepInfo = document.getElementById('stepInfo');
+            let html = `<h3>Bước ${currentStep}: ${step.message}</h3>`;
+            html += `<p><strong>Left = ${step.left}, Right = ${step.right}${step.mid !== null ? ', Mid = ' + step.mid : ''}</strong></p>`;
+
+            if (step.comparison) {
+                html += `<div class="comparison">${step.comparison}</div>`;
+            }
+
+            if (step.decision) {
+                html += `<div class="decision"><strong>💡 Quyết định:</strong> ${step.decision}</div>`;
+            }
+
+            stepInfo.innerHTML = html;
+
+            // Show final explanation when peak is found
+            const finalExpl = document.getElementById('finalExplanation');
+            if (step.isPeak) {
+                finalExpl.innerHTML = `
+                    <div class="final-explanation">
+                        <h2>🏔️ TẠI SAO ĐÂY LÀ PEAK? 🏔️</h2>
+                        <p>✅ <span class="highlight">Left = ${step.left}</span> và <span class="highlight">Right = ${step.right}</span> → Chỉ còn 1 phần tử!</p>
+                        <p>✅ Tất cả phần tử bên TRÁI đã bị loại bỏ vì chúng <strong>THẤP HƠN</strong></p>
+                        <p>✅ Tất cả phần tử bên PHẢI đã bị loại bỏ vì chúng <strong>THẤP HƠN</strong></p>
+                        <p>✅ Phần tử còn lại (<span class="highlight">nums[${step.left}] = ${currentArray[step.left]}</span>) → <strong>CAO HƠN cả 2 bên</strong> → <strong>ĐÂY LÀ PEAK!</strong></p>
+                        <p style="text-align: center; margin-top: 20px; font-size: 1.3em;">🔥 <strong>Khi left == right → CHẮC CHẮN là peak vì đã loại bỏ hết phần thấp hơn!</strong> 🔥</p>
+                    </div>
+                `;
+            } else {
+                finalExpl.innerHTML = '';
+            }
+
+            // Update button states
+            document.getElementById('prevBtn').disabled = currentStep === 0;
+            document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+        }
+
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                renderStep();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                renderStep();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            renderStep();
+            stopAutoPlay();
+        }
+
+        function autoPlay() {
+            if (autoPlayInterval) {
+                stopAutoPlay();
+            } else {
+                const btn = document.getElementById('autoBtn');
+                btn.textContent = '⏸️ Pause';
+                autoPlayInterval = setInterval(() => {
+                    if (currentStep < steps.length - 1) {
+                        nextStep();
+                    } else {
+                        stopAutoPlay();
+                    }
+                }, 2000);
+            }
+        }
+
+        function stopAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                document.getElementById('autoBtn').textContent = '▶️ Auto Play';
+            }
+        }
+
+        // Initialize
+        loadTestCase(0);
+    </script>
+</body>
+</html>

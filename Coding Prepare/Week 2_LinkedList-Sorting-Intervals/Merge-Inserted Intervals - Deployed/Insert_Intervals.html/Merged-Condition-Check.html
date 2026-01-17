@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interval Merging Visualizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .transition-all-custom { transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        .glow { box-shadow: 0 0 15px rgba(99, 102, 241, 0.5); }
+        .grid-bg {
+            background-image: linear-gradient(to right, #e2e8f0 1px, transparent 1px);
+            background-size: 5% 100%; 
+        }
+        /* Custom label styling for a0, b1 etc */
+        .var-tag {
+            position: absolute;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            z-index: 30;
+            white-space: nowrap;
+        }
+        /* Adjusted tag positions */
+        .tag-top { transform: translate(-50%, -100%); top: -8px; }
+        .tag-bottom { transform: translate(-50%, 100%); bottom: -8px; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen p-4 md:p-8">
+
+    <div id="app" class="max-w-6xl mx-auto">
+        <!-- Header -->
+        <header class="mb-6 text-center space-y-2">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-indigo-900 flex items-center justify-center gap-3">
+                <i data-lucide="layers" class="w-8 h-8 md:w-10 md:h-10 text-indigo-600"></i>
+                Interval Merger Pro
+            </h1>
+            <p class="text-slate-500 italic">"Let all things be done decently and in order." — 1 Corinthians 14:40 ✝️</p>
+        </header>
+
+        <!-- Controls -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 mb-6 flex flex-col md:flex-row gap-4 justify-between items-center sticky top-2 z-40">
+            <div class="flex gap-2 bg-slate-100 p-1 rounded-lg flex-wrap">
+                <button onclick="setScenario('blend')" id="btn-blend" class="px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-white hover:shadow-sm">The Blend 🎨</button>
+                <button onclick="setScenario('gap')" id="btn-gap" class="px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-white hover:shadow-sm">The Gap 🌌</button>
+                <button onclick="setScenario('full')" id="btn-full" class="px-4 py-2 rounded-md text-sm font-semibold transition-colors bg-white shadow-sm text-indigo-700">Full Run 🚀</button>
+                <button onclick="setScenario('deepdive')" id="btn-deepdive" class="px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-white hover:shadow-sm bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200">Why 1 Condition? 🧠</button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="reset()" class="p-2 text-slate-400 hover:text-slate-600 transition-colors" title="Reset">
+                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                </button>
+                <button onclick="prevStep()" class="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors disabled:opacity-50" id="btn-prev">
+                    <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                </button>
+                <button onclick="togglePlay()" id="btn-play" class="flex items-center gap-2 px-6 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95">
+                    <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+                    <span>Play</span>
+                </button>
+                <button onclick="nextStep()" class="p-3 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors disabled:opacity-50" id="btn-next">
+                    <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- NEW LOCATION: Focus Beam (Comparison Area) -->
+        <!-- Placed OUTSIDE the canvas to avoid covering intervals -->
+        <div class="mb-4 h-28 flex justify-center items-center">
+             <div id="focus-beam" class="bg-white border border-indigo-100 px-10 py-4 rounded-xl shadow-lg flex items-center gap-8 transition-all duration-300 opacity-0 translate-y-4 w-full md:w-auto justify-center max-w-3xl">
+                
+                <!-- Left Variable -->
+                <div class="flex flex-col items-center relative min-w-[80px]">
+                    <span class="text-sm text-indigo-600 font-mono font-bold bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100 mb-1" id="focus-left-label">a0</span>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1" id="focus-left-desc">Start</span>
+                    <span class="text-4xl font-extrabold text-slate-700 font-mono" id="focus-left">8</span>
+                </div>
+
+                <!-- Operator -->
+                <div class="flex flex-col items-center justify-center pt-4">
+                    <div class="text-5xl text-slate-300 font-light mb-2" id="focus-op">≤</div>
+                </div>
+
+                <!-- Right Variable -->
+                <div class="flex flex-col items-center relative min-w-[80px]">
+                    <span class="text-sm text-purple-600 font-mono font-bold bg-purple-50 px-2 py-0.5 rounded border border-purple-100 mb-1" id="focus-right-label">b1</span>
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1" id="focus-right-desc">End</span>
+                    <span class="text-4xl font-extrabold text-indigo-600 font-mono" id="focus-right">3</span>
+                </div>
+
+                <div class="h-16 w-px bg-slate-200 mx-4"></div>
+                
+                <!-- Result -->
+                <div class="flex flex-col items-center min-w-[100px]">
+                    <span class="text-xs text-slate-400 uppercase tracking-wider font-bold mb-1">Result</span>
+                    <div id="focus-result" class="font-extrabold text-3xl">NO</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden mb-6 relative">
+            <div class="relative h-96 w-full overflow-hidden bg-slate-50 grid-bg" id="canvas-container">
+                <!-- X-Axis Labels generated by JS -->
+                <div id="axis-labels" class="absolute bottom-0 left-0 right-0 h-8 border-t border-slate-200 flex text-xs text-slate-400 font-mono"></div>
+
+                <!-- Intervals Container -->
+                <div id="intervals-layer" class="absolute inset-0 top-0"></div>
+                
+                <!-- Labels for Layers -->
+                <div class="absolute left-2 top-[30px] text-xs font-bold text-indigo-400 uppercase tracking-widest opacity-50 pointer-events-none">New Interval (B)</div>
+                <div class="absolute left-2 top-[160px] text-xs font-bold text-slate-400 uppercase tracking-widest opacity-50 pointer-events-none">Existing List (A)</div>
+            </div>
+        </div>
+
+        <!-- Dashboard / Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Step Description -->
+            <div class="md:col-span-2 bg-indigo-50/50 rounded-2xl p-6 border border-indigo-100 flex gap-4 items-start">
+                <div class="bg-white p-3 rounded-xl shadow-sm text-indigo-600 shrink-0">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-indigo-400 uppercase tracking-wider mb-1">Logic Explainer</h3>
+                    <p id="step-description" class="text-lg font-medium text-slate-800 leading-relaxed font-sans">
+                        Initializing visualization...
+                    </p>
+                </div>
+            </div>
+
+            <!-- Legend Card -->
+            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm flex flex-col justify-center gap-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Variable Legend</h4>
+                
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-indigo-600 flex items-center justify-center text-white font-bold text-xs relative shrink-0">
+                         <span class="absolute -top-2 -left-2 bg-indigo-100 text-indigo-700 px-1 text-[10px] rounded border border-indigo-200 mono">b</span>
+                    </div>
+                    <div class="text-sm leading-tight">
+                        <span class="font-bold text-indigo-700">Interval B</span> (New)<br>
+                        <span class="mono text-xs text-slate-500">Top Layer • b0=Start, b1=End</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded bg-white border-2 border-slate-400 flex items-center justify-center text-slate-600 font-bold text-xs relative shrink-0">
+                        <span class="absolute -top-2 -left-2 bg-slate-100 text-slate-600 px-1 text-[10px] rounded border border-slate-300 mono">a</span>
+                    </div>
+                    <div class="text-sm leading-tight">
+                        <span class="font-bold text-slate-700">Interval A</span> (List)<br>
+                        <span class="mono text-xs text-slate-500">Bottom Layer • a0=Start, a1=End</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Result Array strip -->
+        <div class="mt-6 bg-slate-800 rounded-xl p-4 text-slate-200 font-mono shadow-inner flex items-center gap-4">
+             <div class="text-xs text-slate-400 uppercase tracking-wider flex items-center gap-2 shrink-0">
+                <i data-lucide="database" class="w-4 h-4"></i> Result List:
+            </div>
+            <div id="result-array" class="text-lg overflow-x-auto whitespace-nowrap scrollbar-hide flex gap-2">
+                []
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Logic Script -->
+    <script>
+        // --- State ---
+        const state = {
+            scenario: 'full',
+            stepIndex: 0,
+            isPlaying: false,
+            timer: null,
+            steps: [],
+            min: 0,
+            max: 20,
+            width: 100 // percent
+        };
+
+        const scenarios = {
+            blend: { intervals: [[4, 8]], newInterval: [6, 10] },
+            gap: { intervals: [[8, 12]], newInterval: [3, 7] },
+            full: { intervals: [[1, 2], [3, 5], [6, 7], [8, 10], [12, 16]], newInterval: [4, 9] },
+            deepdive: { intervals: [[1, 3], [4, 6], [7, 12]], newInterval: [5, 11], isDeepDive: true }
+        };
+
+        // --- Deep Dive: Why Only ONE Condition in Merge Loop? ---
+        function generateDeepDiveSteps(intervals, newInt) {
+            let steps = [];
+            let i = 0;
+            let n = intervals.length;
+            let currentNew = [...newInt];
+            let result = [];
+
+            // Introduction
+            steps.push({
+                text: `🧠 <b>Deep Dive: Why Only ONE Condition?</b><br><br>Question: In the merge loop, we only check <b>a0 <= b1</b>.<br>Why don't we ALSO check <b>a1 >= b0</b>?<br><br>Let's discover the answer! 🔥`,
+                highlightIdx: -1,
+                currentNew: [...currentNew],
+                result: [...result],
+                focus: null
+            });
+
+            // Skip non-overlapping (Left Loop)
+            while (i < n && intervals[i][1] < currentNew[0]) {
+                steps.push({
+                    text: `⏭️ Interval A [${intervals[i]}] ends at ${intervals[i][1]}, which is < new interval start (${currentNew[0]}).<br>It <b>ends too soon</b> → Add to result, move on.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+                result.push(intervals[i]);
+                i++;
+            }
+
+            // FIRST MERGE - Show BOTH conditions work
+            if (i < n && intervals[i][0] <= currentNew[1]) {
+                steps.push({
+                    text: `🎯 <b>FIRST Overlap Found!</b><br>Interval A [${intervals[i]}] at position ${i}.<br><br>Let's check BOTH conditions:`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                // Check condition 1: a1 >= b0
+                steps.push({
+                    text: `✅ <b>Condition 1:</b> Does A END late enough?<br>Is <b>a1</b> (${intervals[i][1]}) >= <b>b0</b> (${currentNew[0]})?<br><b>YES!</b> ${intervals[i][1]} >= ${currentNew[0]}.<br>✓ A ends AFTER or AT new interval start.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: {
+                        leftVal: intervals[i][1], leftLabel: 'a1', leftDesc: 'A End',
+                        op: '>=',
+                        rightVal: currentNew[0], rightLabel: 'b0', rightDesc: 'B Start',
+                        res: 'YES',
+                        type: 'check'
+                    }
+                });
+
+                // Check condition 2: a0 <= b1
+                steps.push({
+                    text: `✅ <b>Condition 2:</b> Does A START soon enough?<br>Is <b>a0</b> (${intervals[i][0]}) <= <b>b1</b> (${currentNew[1]})?<br><b>YES!</b> ${intervals[i][0]} <= ${currentNew[1]}.<br>✓ A starts BEFORE or AT new interval end.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: {
+                        leftVal: intervals[i][0], leftLabel: 'a0', leftDesc: 'A Start',
+                        op: '<=',
+                        rightVal: currentNew[1], rightLabel: 'b1', rightDesc: 'B End',
+                        res: 'YES',
+                        type: 'check'
+                    }
+                });
+
+                steps.push({
+                    text: `🎨 <b>BOTH conditions pass → MERGE!</b><br>Old B: [${currentNew[0]}, ${currentNew[1]}]<br>Merging with A: [${intervals[i][0]}, ${intervals[i][1]}]`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                let oldStart = currentNew[0];
+                let oldEnd = currentNew[1];
+                currentNew[0] = Math.min(currentNew[0], intervals[i][0]);
+                currentNew[1] = Math.max(currentNew[1], intervals[i][1]);
+
+                steps.push({
+                    text: `✨ <b>After Merge:</b><br>New B: [${currentNew[0]}, ${currentNew[1]}]<br><br>📊 Changes:<br>• Start: ${oldStart} → ${currentNew[0]}<br>• End: ${oldEnd} → ${currentNew[1]}`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null,
+                    action: 'merge'
+                });
+                i++;
+            }
+
+            // SECOND MERGE - The Key Insight!
+            if (i < n && intervals[i][0] <= currentNew[1]) {
+                steps.push({
+                    text: `🔥 <b>Next Interval!</b><br>Now checking A [${intervals[i]}] at position ${i}.<br><br>⚡ <b>KEY QUESTION:</b><br>We only check: <b>a0 <= b1</b> (${intervals[i][0]} <= ${currentNew[1]})<br><br>But what about <b>a1 >= b0</b>?<br>Do we need to check it?`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                steps.push({
+                    text: `🧠 <b>The Deep Insight!</b><br><br>We DON'T need to check <b>a1 >= b0</b> anymore! Here's why:<br><br>1️⃣ The FIRST overlap was [${intervals[i-1][0]}, ${intervals[i-1][1]}]<br>2️⃣ Its end (${intervals[i-1][1]}) was >= B's original start (${newInt[0]})<br>3️⃣ CURRENT interval [${intervals[i]}] has end = ${intervals[i][1]}<br>4️⃣ <b>Intervals are SORTED!</b> So ${intervals[i][1]} >= ${intervals[i-1][1]} >= ${newInt[0]}`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                steps.push({
+                    text: `💡 <b>Even MORE True Now!</b><br><br>Plus, B's start DECREASED during merge!<br>• Original B start: ${newInt[0]}<br>• Current B start: ${currentNew[0]}<br><br>So if A's end (${intervals[i][1]}) was ALREADY >= old B start (${newInt[0]}),<br>it's DEFINITELY >= new B start (${currentNew[0]})!<br><br>🎯 <b>Condition 1 is GUARANTEED!</b>`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                steps.push({
+                    text: `✅ <b>Let's verify by checking anyway:</b><br>Is <b>a1</b> (${intervals[i][1]}) >= <b>b0</b> (${currentNew[0]})?<br><br><b>Predicted: YES</b> (because of sorted intervals!)<br>Let's confirm...`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: {
+                        leftVal: intervals[i][1], leftLabel: 'a1', leftDesc: 'A End',
+                        op: '>=',
+                        rightVal: currentNew[0], rightLabel: 'b0', rightDesc: 'B Start',
+                        res: intervals[i][1] >= currentNew[0] ? 'YES ✓' : 'NO',
+                        type: 'verify'
+                    }
+                });
+
+                steps.push({
+                    text: `🎉 <b>EXACTLY AS PREDICTED!</b><br><br>Because intervals are sorted by start time,<br>once we START merging, EVERY subsequent interval's end<br>is GUARANTEED to be >= B's start!<br><br>That's why we only need to check <b>ONE</b> condition:<br>✓ <b>a0 <= b1</b> (Does A start soon enough?)`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+
+                steps.push({
+                    text: `🔄 <b>Now let's actually merge:</b><br>Check condition: a0 (${intervals[i][0]}) <= b1 (${currentNew[1]})?<br><b>YES!</b> Merge them!`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: {
+                        leftVal: intervals[i][0], leftLabel: 'a0', leftDesc: 'A Start',
+                        op: '<=',
+                        rightVal: currentNew[1], rightLabel: 'b1', rightDesc: 'B End',
+                        res: 'YES',
+                        type: 'merge-check'
+                    }
+                });
+
+                currentNew[0] = Math.min(currentNew[0], intervals[i][0]);
+                currentNew[1] = Math.max(currentNew[1], intervals[i][1]);
+
+                steps.push({
+                    text: `✨ <b>Merged!</b> New B: [${currentNew[0]}, ${currentNew[1]}]`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null,
+                    action: 'merge'
+                });
+                i++;
+            }
+
+            // Finish up
+            result.push(currentNew);
+            steps.push({
+                text: `🎓 <b>Algorithm Complete!</b><br><br><b>Key Takeaway:</b><br>In a SORTED array of intervals, once we find the FIRST overlap,<br>all subsequent intervals we merge are GUARANTEED to satisfy<br>the "ends late enough" condition!<br><br>That's the beauty of sorted data! 🔥`,
+                highlightIdx: -1,
+                currentNew: [...currentNew],
+                result: [...result],
+                focus: null,
+                isDone: true
+            });
+
+            while (i < n) {
+                result.push(intervals[i]);
+                i++;
+            }
+
+            return steps;
+        }
+
+        // --- Core Algorithm (Generates Steps) ---
+        function generateSteps(intervals, newInt) {
+            let steps = [];
+            let i = 0;
+            let n = intervals.length;
+            let currentNew = [...newInt];
+            let result = [];
+
+            // 0. Start
+            steps.push({
+                text: "🚀 Algorithm Start. <br><b>B</b> (New Interval) is positioned <b>Above</b>.<br><b>A</b> (Existing List) is <b>Below</b>.",
+                highlightIdx: -1,
+                currentNew: [...currentNew],
+                result: [...result],
+                focus: null
+            });
+
+            // 1. Left Loop (Too Early)
+            // Condition: intervals[i][1] < newInterval[0]
+            // Translation: a1 < b0
+            while (i < n && intervals[i][1] < currentNew[0]) {
+                steps.push({
+                    text: `🛡️ <b>Left Check (Too Early?):</b><br>Is <b>a1</b> (Current End) < <b>b0</b> (New Start)?<br>Is ${intervals[i][1]} < ${currentNew[0]}? <b>YES</b>.<br>It <b>Ends Too Soon</b> to overlap.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: { 
+                        leftVal: intervals[i][1], leftLabel: 'a1', leftDesc: 'Curr End',
+                        op: '<', 
+                        rightVal: currentNew[0], rightLabel: 'b0', rightDesc: 'New Start',
+                        res: 'YES', 
+                        type: 'shield' 
+                    }
+                });
+                result.push(intervals[i]);
+                steps.push({
+                    text: `✅ Since it <b>Ends Too Soon</b>, we assume no conflict. Add <b>A</b> to result.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+                i++;
+            }
+
+            // Transition (Shield Drops)
+            if (i < n) {
+                steps.push({
+                    text: `🛡️ <b>Left Check (Too Early?):</b><br>Is <b>a1</b> < <b>b0</b>?<br>Is ${intervals[i][1]} < ${currentNew[0]}? <b>NO</b>.<br>It <b>Ends Late Enough</b> (Does NOT end too soon). Check merge next.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: { 
+                        leftVal: intervals[i][1], leftLabel: 'a1', leftDesc: 'Curr End',
+                        op: '<', 
+                        rightVal: currentNew[0], rightLabel: 'b0', rightDesc: 'New Start',
+                        res: 'NO', 
+                        type: 'shield-fail' 
+                    }
+                });
+            }
+
+            // 2. Merge Loop (Overlapping)
+            // Condition: intervals[i][0] <= newInterval[1]
+            // Translation: a0 <= b1
+            while (i < n && intervals[i][0] <= currentNew[1]) {
+                steps.push({
+                    text: `⚔️ <b>Merge Check (Starts Soon Enough?):</b><br>Is <b>a0</b> (Current Start) <= <b>b1</b> (New End)?<br>Is ${intervals[i][0]} <= ${currentNew[1]}? <b>YES</b>.<br>It <b>Starts Soon Enough</b> (Does NOT start too late). Merge!`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: { 
+                        leftVal: intervals[i][0], leftLabel: 'a0', leftDesc: 'Curr Start',
+                        op: '≤', 
+                        rightVal: currentNew[1], rightLabel: 'b1', rightDesc: 'New End',
+                        res: 'YES', 
+                        type: 'sword' 
+                    }
+                });
+
+                let oldNew = [...currentNew];
+                currentNew[0] = Math.min(currentNew[0], intervals[i][0]);
+                currentNew[1] = Math.max(currentNew[1], intervals[i][1]);
+
+                steps.push({
+                    text: `🎨 <b>Merging:</b><br>New Start <b>b0</b> = min(a0, b0) = ${currentNew[0]}<br>New End <b>b1</b> = max(a1, b1) = ${currentNew[1]}`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null,
+                    action: 'merge'
+                });
+                i++;
+            }
+
+            // 3. Right Loop Check (Stop Condition)
+            // Condition Fails: intervals[i][0] > newInterval[1]
+            if (i < n) {
+                steps.push({
+                    text: `🛑 <b>Merge Check (Starts Too Late?):</b><br>Is <b>a0</b> <= <b>b1</b>?<br>Is ${intervals[i][0]} <= ${currentNew[1]}? <b>NO</b>.<br>It <b>Starts Too Late</b> to overlap. Stop merging.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: { 
+                        leftVal: intervals[i][0], leftLabel: 'a0', leftDesc: 'Curr Start',
+                        op: '≤', 
+                        rightVal: currentNew[1], rightLabel: 'b1', rightDesc: 'New End',
+                        res: 'NO', 
+                        type: 'stop' 
+                    }
+                });
+            }
+
+            // Add New
+            result.push(currentNew);
+            steps.push({
+                text: `✨ Done Merging. Add the final merged <b>B</b> [${currentNew}] to result.`,
+                highlightIdx: i,
+                currentNew: [...currentNew],
+                result: [...result],
+                focus: null
+            });
+
+            // Add Remaining
+            while (i < n) {
+                result.push(intervals[i]);
+                steps.push({
+                    text: `📥 Adding remaining interval <b>A</b> [${intervals[i]}] to result.`,
+                    highlightIdx: i,
+                    currentNew: [...currentNew],
+                    result: [...result],
+                    focus: null
+                });
+                i++;
+            }
+
+            steps.push({
+                text: "🎉 Algorithm Complete.",
+                highlightIdx: -1,
+                currentNew: [...currentNew],
+                result: [...result],
+                focus: null,
+                isDone: true
+            });
+
+            return steps;
+        }
+
+        // --- Rendering ---
+        function init() {
+            lucide.createIcons();
+            setScenario('blend'); 
+            window.addEventListener('resize', render);
+        }
+
+        function setScenario(key) {
+            state.scenario = key;
+            state.stepIndex = 0;
+            state.isPlaying = false;
+            
+            // Update buttons
+            document.querySelectorAll('button[id^="btn-"]').forEach(b => {
+                if (b.id === 'btn-deepdive') {
+                    b.className = "px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-white hover:shadow-sm bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200";
+                } else {
+                    b.className = "px-4 py-2 rounded-md text-sm font-semibold transition-colors hover:bg-white hover:shadow-sm";
+                }
+            });
+
+            if (key === 'deepdive') {
+                document.getElementById('btn-deepdive').className = "px-4 py-2 rounded-md text-sm font-semibold transition-colors bg-white shadow-sm text-green-700 ring-2 ring-green-300";
+            } else {
+                document.getElementById(`btn-${key}`).className = "px-4 py-2 rounded-md text-sm font-semibold transition-colors bg-white shadow-sm text-indigo-700 ring-1 ring-indigo-100";
+            }
+
+            // Calc Scale
+            const sc = scenarios[key];
+            const allPoints = [...sc.intervals.flat(), ...sc.newInterval];
+            // Add padding to min/max for visual comfort
+            state.min = Math.min(...allPoints) - 1;
+            state.max = Math.max(...allPoints) + 2;
+
+            // Use special deep dive generator if in deep dive mode
+            if (sc.isDeepDive) {
+                state.steps = generateDeepDiveSteps(sc.intervals, sc.newInterval);
+            } else {
+                state.steps = generateSteps(sc.intervals, sc.newInterval);
+            }
+            render();
+        }
+
+        function render() {
+            const step = state.steps[state.stepIndex];
+            const sc = scenarios[state.scenario];
+            
+            // 1. Text Updates
+            document.getElementById('step-description').innerHTML = step.text;
+            
+            const resHtml = step.result.length === 0 ? '<span class="text-slate-500 italic">Empty</span>' : 
+                step.result.map(r => `<span class="inline-block px-3 py-1 bg-slate-700 text-slate-200 rounded text-sm mono border border-slate-600">[${r[0]}, ${r[1]}]</span>`).join('');
+            document.getElementById('result-array').innerHTML = resHtml;
+
+            // 2. Focus Beam (Now outside canvas)
+            const beam = document.getElementById('focus-beam');
+            if (step.focus) {
+                beam.classList.remove('opacity-0', 'translate-y-4');
+                
+                // Left
+                document.getElementById('focus-left').innerText = step.focus.leftVal;
+                document.getElementById('focus-left-label').innerText = step.focus.leftLabel;
+                document.getElementById('focus-left-desc').innerText = step.focus.leftDesc;
+                
+                // Operator
+                document.getElementById('focus-op').innerText = step.focus.op;
+                
+                // Right
+                document.getElementById('focus-right').innerText = step.focus.rightVal;
+                document.getElementById('focus-right-label').innerText = step.focus.rightLabel;
+                document.getElementById('focus-right-desc').innerText = step.focus.rightDesc;
+                
+                // Result
+                const resultDiv = document.getElementById('focus-result');
+                resultDiv.innerText = step.focus.res;
+                resultDiv.className = `font-extrabold text-3xl ${step.focus.res.startsWith('YES') ? 'text-green-500' : 'text-red-500'}`;
+            } else {
+                beam.classList.add('opacity-0', 'translate-y-4');
+            }
+
+            // 3. Canvas (Intervals)
+            const container = document.getElementById('intervals-layer');
+            container.innerHTML = '';
+            
+            const unit = 100 / (state.max - state.min);
+            const getLeft = (val) => (val - state.min) * unit;
+            const getWidth = (start, end) => (end - start) * unit;
+
+            // Draw Axis Labels
+            const axisContainer = document.getElementById('axis-labels');
+            axisContainer.innerHTML = '';
+            // Adjust background grid size
+            document.getElementById('canvas-container').style.backgroundSize = `${unit}% 100%`;
+
+            for (let i = state.min; i <= state.max; i++) {
+                const mark = document.createElement('div');
+                mark.className = 'absolute top-0 bottom-0 border-l border-slate-200 flex flex-col justify-end pb-1 pl-1';
+                mark.style.left = `${getLeft(i)}%`;
+                mark.innerText = i;
+                axisContainer.appendChild(mark);
+            }
+
+            // Draw Existing Intervals (List A) - BOTTOM LAYER
+            sc.intervals.forEach((int, idx) => {
+                const isProcessed = step.result.some(r => r[0] === int[0] && r[1] === int[1] && r !== step.currentNew);
+                const isMerged = int[0] >= step.currentNew[0] && int[1] <= step.currentNew[1];
+                const isCurrent = idx === step.highlightIdx;
+                
+                const div = document.createElement('div');
+                // Positions: Active=160px, Processed=180px
+                div.className = `absolute h-20 rounded-lg flex items-center justify-center font-bold text-sm border-2 transition-all-custom
+                    ${isProcessed ? 'bg-slate-200 border-slate-300 text-slate-400 opacity-60 top-[200px]' : 'bg-white border-slate-400 text-slate-600 top-[160px]'}
+                    ${isCurrent ? 'ring-4 ring-indigo-200 scale-105 z-10 border-indigo-500' : ''}
+                    ${isMerged && !isProcessed && !isCurrent ? 'opacity-30 border-dashed scale-95' : ''}
+                `;
+                
+                div.style.left = `${getLeft(int[0])}%`;
+                div.style.width = `${getWidth(int[0], int[1])}%`;
+                div.innerHTML = `<span class="mono">[${int[0]}, ${int[1]}]</span>`;
+
+                // Add Labels (a0, a1)
+                if (isCurrent && step.focus) {
+                    const lblStart = document.createElement('div');
+                    lblStart.className = 'var-tag bg-slate-100 text-slate-700 border border-slate-300 tag-bottom';
+                    lblStart.style.left = '0%';
+                    lblStart.innerText = 'a0';
+                    div.appendChild(lblStart);
+
+                    const lblEnd = document.createElement('div');
+                    lblEnd.className = 'var-tag bg-slate-100 text-slate-700 border border-slate-300 tag-bottom';
+                    lblEnd.style.left = '100%';
+                    lblEnd.innerText = 'a1';
+                    div.appendChild(lblEnd);
+                }
+                
+                container.appendChild(div);
+            });
+
+            // Draw New Interval (B) - TOP LAYER
+            const newDiv = document.createElement('div');
+            // Position: 50px
+            newDiv.className = `absolute h-20 rounded-lg flex items-center justify-center font-bold text-lg text-white shadow-xl transition-all-custom z-20 top-[50px]
+                ${step.isDone ? 'bg-green-500 border-green-600' : 'bg-indigo-600 border-indigo-700 glow'}
+            `;
+            newDiv.style.left = `${getLeft(step.currentNew[0])}%`;
+            newDiv.style.width = `${getWidth(step.currentNew[0], step.currentNew[1])}%`;
+            newDiv.innerHTML = `
+                <div class="flex items-center gap-2">
+                    ${step.action === 'merge' ? '<i data-lucide="minimize-2" class="w-4 h-4 animate-pulse"></i>' : ''}
+                    <span class="mono">[${step.currentNew[0]}, ${step.currentNew[1]}]</span>
+                </div>
+            `;
+
+            // Add Labels (b0, b1)
+            if (step.focus && !step.isDone) {
+                const lblStart = document.createElement('div');
+                lblStart.className = 'var-tag bg-indigo-100 text-indigo-700 border border-indigo-300 tag-top';
+                lblStart.style.left = '0%';
+                lblStart.innerText = 'b0';
+                newDiv.appendChild(lblStart);
+
+                const lblEnd = document.createElement('div');
+                lblEnd.className = 'var-tag bg-indigo-100 text-indigo-700 border border-indigo-300 tag-top';
+                lblEnd.style.left = '100%';
+                lblEnd.innerText = 'b1';
+                newDiv.appendChild(lblEnd);
+            }
+
+            container.appendChild(newDiv);
+            
+            lucide.createIcons();
+            
+            // Buttons State
+            document.getElementById('btn-prev').disabled = state.stepIndex === 0;
+            document.getElementById('btn-next').disabled = state.stepIndex === state.steps.length - 1;
+            
+            const playBtn = document.getElementById('btn-play');
+            playBtn.innerHTML = state.isPlaying 
+                ? '<i data-lucide="pause" class="w-5 h-5 fill-current"></i><span>Pause</span>' 
+                : '<i data-lucide="play" class="w-5 h-5 fill-current"></i><span>Play</span>';
+            
+            if(state.isPlaying) {
+                playBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+                playBtn.classList.add('bg-red-500', 'hover:bg-red-600');
+            } else {
+                playBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+                playBtn.classList.remove('bg-red-500', 'hover:bg-red-600');
+            }
+        }
+
+        // --- Controls ---
+        function nextStep() {
+            if (state.stepIndex < state.steps.length - 1) {
+                state.stepIndex++;
+                render();
+            } else {
+                state.isPlaying = false;
+                render();
+            }
+        }
+
+        function prevStep() {
+            if (state.stepIndex > 0) {
+                state.stepIndex--;
+                render();
+            }
+        }
+
+        function togglePlay() {
+            state.isPlaying = !state.isPlaying;
+            render();
+            if (state.isPlaying) loop();
+        }
+        
+        function reset() {
+            state.stepIndex = 0;
+            state.isPlaying = false;
+            render();
+        }
+
+        function loop() {
+            if (!state.isPlaying) return;
+            if (state.stepIndex < state.steps.length - 1) {
+                setTimeout(() => {
+                    if (state.isPlaying) {
+                        state.stepIndex++;
+                        render();
+                        loop();
+                    }
+                }, 2000); // 2 second delay per step
+            } else {
+                state.isPlaying = false;
+                render();
+            }
+        }
+
+        // Init
+        init();
+
+    </script>
+</body>
+</html>
