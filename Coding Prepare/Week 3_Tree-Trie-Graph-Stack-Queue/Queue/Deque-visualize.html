@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python Deque Visualizer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        /* Custom animations not in Tailwind default */
+        @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes zoom-in { from { transform: scale(0.9); } to { transform: scale(1); } }
+        .animate-in { animation: fade-in 0.3s ease-out, zoom-in 0.3s ease-out; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Icons (Inlined for standalone usage) ---
+        const Icon = ({ children, className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+                {children}
+            </svg>
+        );
+
+        const LinkIcon = (props) => <Icon {...props}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></Icon>;
+        const ArrowLeft = (props) => <Icon {...props}><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></Icon>;
+        const ArrowRight = (props) => <Icon {...props}><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></Icon>;
+        const Plus = (props) => <Icon {...props}><path d="M5 12h14"/><path d="M12 5v14"/></Icon>;
+        const Trash2 = (props) => <Icon {...props}><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></Icon>;
+        const Zap = (props) => <Icon {...props}><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></Icon>;
+        const AlertCircle = (props) => <Icon {...props}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></Icon>;
+        const Check = (props) => <Icon {...props}><polyline points="20 6 9 17 4 12"/></Icon>;
+        const X = (props) => <Icon {...props}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></Icon>;
+
+        // --- Main Component ---
+        const DequeVisualizer = () => {
+            const [nodes, setNodes] = useState([
+                { id: 1, val: 10 },
+                { id: 2, val: 20 },
+                { id: 3, val: 30 }
+            ]);
+            const [nextId, setNextId] = useState(4);
+            const [message, setMessage] = useState("Ready to operate!");
+            const [flash, setFlash] = useState(null); // 'left' or 'right'
+
+            const addLeft = () => {
+                const newItem = { id: nextId, val: Math.floor(Math.random() * 99) };
+                setNodes([newItem, ...nodes]);
+                setNextId(prev => prev + 1);
+                setMessage("appendleft(): New HEAD created. Prev pointer set to None. O(1) ⚡");
+                setFlash('left');
+                setTimeout(() => setFlash(null), 500);
+            };
+
+            const addRight = () => {
+                const newItem = { id: nextId, val: Math.floor(Math.random() * 99) };
+                setNodes([...nodes, newItem]);
+                setNextId(prev => prev + 1);
+                setMessage("append(): New TAIL created. Next pointer set to None. O(1) ⚡");
+                setFlash('right');
+                setTimeout(() => setFlash(null), 500);
+            };
+
+            const removeLeft = () => {
+                if (nodes.length === 0) return;
+                setNodes(nodes.slice(1));
+                setMessage("popleft(): Head removed. Neighbor becomes new Head. O(1) ⚡");
+                setFlash('left');
+                setTimeout(() => setFlash(null), 500);
+            };
+
+            const removeRight = () => {
+                if (nodes.length === 0) return;
+                setNodes(nodes.slice(0, -1));
+                setMessage("pop(): Tail removed. Neighbor becomes new Tail. O(1) ⚡");
+                setFlash('right');
+                setTimeout(() => setFlash(null), 500);
+            };
+
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4 font-sans text-slate-800">
+                
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-indigo-700 flex items-center justify-center gap-2">
+                    <LinkIcon size={32} /> Python Deque Visualizer
+                    </h1>
+                    <p className="text-slate-600 mt-2 italic flex items-center gap-2 justify-center">
+                    "Doubly Linked List" Structure
+                    </p>
+                </div>
+
+                {/* Visualization Area */}
+                <div className="w-full max-w-5xl bg-white rounded-xl shadow-xl p-8 min-h-[350px] flex flex-col items-center relative overflow-hidden mb-8">
+                    
+                    {/* Memory Representation */}
+                    <div className="flex items-center justify-center flex-wrap gap-0 mb-12 w-full overflow-x-auto py-12 px-4">
+                        
+                        {nodes.length === 0 && (
+                        <div className="text-slate-400 flex flex-col items-center">
+                            <AlertCircle size={48} />
+                            <p className="mt-2">Deque is empty</p>
+                        </div>
+                        )}
+
+                        {nodes.length > 0 && (
+                        <>
+                            {/* Left Null Pointer (Terminator) */}
+                            <div className="flex flex-col items-center justify-center mr-2 opacity-40">
+                                <span className="font-mono text-xs mb-1">None</span>
+                                <div className="w-8 h-[2px] bg-slate-400 relative">
+                                    <div className="absolute right-0 -top-1 w-2 h-2 border-t-2 border-r-2 border-slate-400 transform rotate-45"></div>
+                                </div>
+                                <span className="text-[10px] text-slate-500 mt-1">Prev</span>
+                            </div>
+
+                            {nodes.map((node, index) => (
+                            <div key={node.id} className="flex items-center animate-in fade-in zoom-in duration-300 relative group">
+                                
+                                {/* Node Box */}
+                                <div className={`
+                                relative flex flex-col items-center justify-between
+                                w-28 h-32 border-2 rounded-xl shadow-lg transition-all duration-300 bg-white
+                                ${index === 0 ? 'border-indigo-500 shadow-indigo-100 ring-4 ring-indigo-50' : ''}
+                                ${index === nodes.length - 1 ? 'border-blue-500 shadow-blue-100 ring-4 ring-blue-50' : ''}
+                                ${(index !== 0 && index !== nodes.length -1) ? 'border-slate-300' : ''}
+                                ${flash === 'left' && index === 0 ? 'scale-105 bg-green-50 border-green-500' : ''}
+                                ${flash === 'right' && index === nodes.length - 1 ? 'scale-105 bg-green-50 border-green-500' : ''}
+                                `}>
+                                
+                                {/* HEAD / TAIL LABELS (Badges) - STATIC NOW */}
+                                {index === 0 && (
+                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                                        <span className="bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap z-10 uppercase tracking-wider">
+                                        HEAD
+                                        </span>
+                                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-indigo-600"></div>
+                                    </div>
+                                )}
+                                {index === nodes.length - 1 && (
+                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 flex flex-col items-center">
+                                        <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md whitespace-nowrap z-10 uppercase tracking-wider">
+                                        TAIL
+                                        </span>
+                                        <div className="w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[8px] border-t-blue-600"></div>
+                                    </div>
+                                )}
+
+                                {/* Internal Structure */}
+                                <div className="w-full flex justify-between px-2 pt-2">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-2 h-2 rounded-full bg-slate-300" title="Prev Pointer"></div>
+                                        <span className="text-[9px] text-slate-400 font-mono">prev</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-2 h-2 rounded-full bg-slate-300" title="Next Pointer"></div>
+                                        <span className="text-[9px] text-slate-400 font-mono">next</span>
+                                    </div>
+                                </div>
+
+                                {/* Value */}
+                                <div className="flex-1 flex items-center justify-center">
+                                    <span className="text-4xl font-bold text-slate-700">{node.val}</span>
+                                </div>
+                                
+                                {/* Memory Address */}
+                                <div className="w-full bg-slate-50 border-t border-slate-100 text-[10px] text-slate-400 font-mono text-center py-1 rounded-b-lg">
+                                    0x{node.id}A
+                                </div>
+
+                                </div>
+
+                                {/* Link Arrows (Double) */}
+                                {index < nodes.length - 1 && (
+                                <div className="flex flex-col items-center justify-center mx-1 w-16 px-1">
+                                    {/* Next Pointer Arrow */}
+                                    <div className="w-full flex items-center gap-1 mb-1">
+                                        <div className="h-[1px] w-full bg-indigo-300 relative">
+                                            <ArrowRight size={12} className="absolute -right-1 -top-[6px] text-indigo-400" />
+                                        </div>
+                                    </div>
+                                    {/* Prev Pointer Arrow */}
+                                    <div className="w-full flex items-center gap-1">
+                                        <div className="h-[1px] w-full bg-slate-300 relative">
+                                            <ArrowLeft size={12} className="absolute -left-1 -top-[6px] text-slate-400" />
+                                        </div>
+                                    </div>
+                                    <span className="text-[9px] text-slate-400 mt-1 italic">linked</span>
+                                </div>
+                                )}
+                            </div>
+                            ))}
+
+                            {/* Right Null Pointer (Terminator) */}
+                            <div className="flex flex-col items-center justify-center ml-2 opacity-40">
+                                <span className="font-mono text-xs mb-1">None</span>
+                                <div className="w-8 h-[2px] bg-slate-400 relative">
+                                    <div className="absolute left-0 -top-1 w-2 h-2 border-b-2 border-l-2 border-slate-400 transform rotate-45"></div>
+                                </div>
+                                <span className="text-[10px] text-slate-500 mt-1">Next</span>
+                            </div>
+                        </>
+                        )}
+                    </div>
+
+                    {/* Status Message */}
+                    <div className="bg-slate-100 px-6 py-3 rounded-full flex items-center gap-2 mb-6 shadow-inner border border-slate-200">
+                    <Zap size={20} className="text-yellow-500 fill-yellow-500" />
+                    <span className="font-medium text-slate-700">{message}</span>
+                    </div>
+
+                    {/* Controls */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-2xl">
+                    <button 
+                        onClick={addLeft}
+                        className="flex flex-col items-center justify-center gap-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 py-3 px-4 rounded-xl font-bold transition-all border-2 border-indigo-200 hover:shadow-md active:scale-95 group font-mono"
+                    >
+                        <div className="flex items-center gap-1">
+                            <Plus size={18} /> appendleft()
+                        </div>
+                    </button>
+
+                    <button 
+                        onClick={removeLeft}
+                        className="flex flex-col items-center justify-center gap-1 bg-red-50 hover:bg-red-100 text-red-700 py-3 px-4 rounded-xl font-bold transition-all border-2 border-red-200 hover:shadow-md active:scale-95 group font-mono"
+                    >
+                        <div className="flex items-center gap-1">
+                            <Trash2 size={18} /> popleft()
+                        </div>
+                    </button>
+
+                    <button 
+                        onClick={removeRight}
+                        className="flex flex-col items-center justify-center gap-1 bg-orange-50 hover:bg-orange-100 text-orange-700 py-3 px-4 rounded-xl font-bold transition-all border-2 border-orange-200 hover:shadow-md active:scale-95 group font-mono"
+                    >
+                        <div className="flex items-center gap-1">
+                            <Trash2 size={18} /> pop()
+                        </div>
+                    </button>
+
+                    <button 
+                        onClick={addRight}
+                        className="flex flex-col items-center justify-center gap-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-3 px-4 rounded-xl font-bold transition-all border-2 border-blue-200 hover:shadow-md active:scale-95 group font-mono"
+                    >
+                        <div className="flex items-center gap-1">
+                            <Plus size={18} /> append()
+                        </div>
+                    </button>
+                    </div>
+                </div>
+
+                {/* Why Deque is Better - Explanation Section */}
+                <div className="w-full max-w-5xl bg-white rounded-xl shadow-xl p-8">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-2">
+                        <Zap className="text-yellow-500" /> Why use Deque instead of List?
+                    </h2>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* List Problem */}
+                        <div className="bg-red-50 p-6 rounded-xl border border-red-100">
+                            <h3 className="font-bold text-red-700 flex items-center gap-2 mb-4">
+                                <X size={20} /> The Problem with List
+                            </h3>
+                            <div className="text-sm text-slate-700 mb-4">
+                                When you <code className="bg-white px-1 rounded border border-red-200">pop(0)</code> from a list, Python has to physically <strong>shift</strong> every single remaining item to the left to fill the empty hole.
+                            </div>
+                            {/* Visual Metaphor for List */}
+                            <div className="bg-white p-4 rounded-lg border border-red-200 flex items-center justify-center gap-1 opacity-70">
+                                <div className="w-8 h-8 bg-red-100 border border-red-300 flex items-center justify-center rounded text-xs text-red-400 line-through">0</div>
+                                <ArrowLeft size={16} className="text-red-500" />
+                                <div className="w-8 h-8 bg-slate-100 border border-slate-300 flex items-center justify-center rounded text-xs">1</div>
+                                <ArrowLeft size={16} className="text-red-500" />
+                                <div className="w-8 h-8 bg-slate-100 border border-slate-300 flex items-center justify-center rounded text-xs">2</div>
+                                <ArrowLeft size={16} className="text-red-500" />
+                                <div className="w-8 h-8 bg-slate-100 border border-slate-300 flex items-center justify-center rounded text-xs">3</div>
+                            </div>
+                            <div className="mt-2 text-center text-xs font-bold text-red-600">O(n) - Slow for large data 🐢</div>
+                        </div>
+
+                        {/* Deque Solution */}
+                        <div className="bg-green-50 p-6 rounded-xl border border-green-100">
+                            <h3 className="font-bold text-green-700 flex items-center gap-2 mb-4">
+                                <Check size={20} /> The Deque Advantage
+                            </h3>
+                            <div className="text-sm text-slate-700 mb-4">
+                                When you <code className="bg-white px-1 rounded border border-green-200">popleft()</code> from a deque, Python just <strong>unlinks</strong> the first node. The other items don't move at all!
+                            </div>
+                            {/* Visual Metaphor for Deque */}
+                            <div className="bg-white p-4 rounded-lg border border-green-200 flex items-center justify-center gap-1">
+                                <div className="w-8 h-8 bg-green-100 border border-green-300 flex items-center justify-center rounded text-xs text-green-600 opacity-50 border-dashed">X</div>
+                                <div className="text-green-500 text-xs px-1">link broken</div>
+                                <div className="w-8 h-8 bg-indigo-100 border border-indigo-300 flex items-center justify-center rounded text-xs font-bold">1</div>
+                                <div className="w-4 h-[2px] bg-slate-300"></div>
+                                <div className="w-8 h-8 bg-indigo-50 border border-indigo-200 flex items-center justify-center rounded text-xs">2</div>
+                            </div>
+                            <div className="mt-2 text-center text-xs font-bold text-green-600">O(1) - Instant speed ⚡</div>
+                        </div>
+                    </div>
+                </div>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<DequeVisualizer />);
+    </script>
+</body>
+</html>
