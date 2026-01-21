@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spiral Matrix Visualizer</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 0;
+            overflow: hidden; /* Prevent body scroll */
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Custom Scrollbar Styling to keep it minimal/hidden */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #1e1e1e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 4px;
+            border: 2px solid #1e1e1e;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4f4f4f;
+        }
+
+        /* Hide scrollbar utility */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useRef } = React;
+
+        // --- ICONS (Inline SVGs to replace lucide-react) ---
+        const IconWrapper = ({ children, size = 18, className = "" }) => (
+            <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                width={size} 
+                height={size} 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                className={className}
+            >
+                {children}
+            </svg>
+        );
+
+        const Play = (props) => <IconWrapper {...props}><polygon points="5 3 19 12 5 21 5 3"></polygon></IconWrapper>;
+        const Pause = (props) => <IconWrapper {...props}><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></IconWrapper>;
+        const RotateCcw = (props) => <IconWrapper {...props}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></IconWrapper>;
+        const ChevronRight = (props) => <IconWrapper {...props}><polyline points="9 18 15 12 9 6"></polyline></IconWrapper>;
+        const ChevronLeft = (props) => <IconWrapper {...props}><polyline points="15 18 9 12 15 6"></polyline></IconWrapper>;
+        const Terminal = (props) => <IconWrapper {...props}><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></IconWrapper>;
+        const Code = (props) => <IconWrapper {...props}><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></IconWrapper>;
+        const LayoutTemplate = (props) => <IconWrapper {...props}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></IconWrapper>;
+
+
+        const SpiralMatrixVisualizer = () => {
+            // --- Config ---
+            const matrix = [
+                [1, 2, 3, 4],
+                [5, 6, 7, 8],
+                [9, 10, 11, 12]
+            ];
+            const ROWS = matrix.length;     // 3
+            const COLS = matrix[0].length;  // 4
+
+            // --- State ---
+            const [currentStepIndex, setCurrentStepIndex] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [speed, setSpeed] = useState(800);
+            const [autoScrollLog, setAutoScrollLog] = useState(true);
+
+            const logContainerRef = useRef(null);
+
+            // --- Logic Timeline ---
+            const timeline = useMemo(() => {
+                const steps = [];
+                
+                // INITIALIZATION (Standard Python/NeetCode)
+                let top = 0;
+                let bottom = ROWS; // 3
+                let left = 0;
+                let right = COLS;  // 4
+                
+                let r = 0, c = -1; 
+                let direction = 0; 
+                const path = [];
+                const visited = new Set();
+                
+                const addSnapshot = (type, msg, highlight = null, codeLine = null) => {
+                    steps.push({
+                        matrixState: { r, c, val: highlight ? matrix[highlight[0]][highlight[1]] : null },
+                        boundaries: { top, bottom, left, right },
+                        direction,
+                        visited: new Set(visited),
+                        path: [...path],
+                        log: { type, msg, step: steps.length + 1 },
+                        codeLine
+                    });
+                };
+
+                addSnapshot('INIT', `Init: left=0, top=0 (Inclusive)\nInit: right=${COLS}, bottom=${ROWS} (Exclusive)`, null, 'init');
+
+                while (left < right && top < bottom) {
+                    // 1. Traverse Right (Top Row)
+                    addSnapshot('PHASE', '➡️ Traverse Top Row', null, 'right-loop');
+                    for (let i = left; i < right; i++) {
+                        r = top; c = i;
+                        visited.add(`${r},${c}`);
+                        path.push(matrix[r][c]);
+                        addSnapshot('MOVE', `Append matrix[${r}][${c}]`, [r,c], 'right-append');
+                    }
+                    top++;
+                    addSnapshot('WALL', `✅ Top Row Done. top += 1 (Now ${top})`, null, 'top-inc');
+
+                    if (!(left < right && top < bottom)) {
+                        addSnapshot('CHECK', '🚫 Break: left >= right or top >= bottom', null, 'break-check');
+                        break;
+                    }
+
+                    // 2. Traverse Down (Right Col)
+                    addSnapshot('PHASE', '⬇️ Traverse Right Col', null, 'down-loop');
+                    for (let i = top; i < bottom; i++) {
+                        r = i; c = right - 1; 
+                        visited.add(`${r},${c}`);
+                        path.push(matrix[r][c]);
+                        addSnapshot('MOVE', `Append matrix[${r}][${c}]`, [r,c], 'down-append');
+                    }
+                    right--;
+                    addSnapshot('WALL', `✅ Right Col Done. right -= 1 (Now ${right})`, null, 'right-dec');
+
+                    if (!(left < right && top < bottom)) {
+                        addSnapshot('CHECK', '🚫 Break: left >= right or top >= bottom', null, 'break-check');
+                        break;
+                    }
+
+                    // 3. Traverse Left (Bottom Row)
+                    addSnapshot('PHASE', '⬅️ Traverse Bottom Row', null, 'left-loop');
+                    for (let i = right - 1; i >= left; i--) {
+                        r = bottom - 1; c = i; 
+                        visited.add(`${r},${c}`);
+                        path.push(matrix[r][c]);
+                        addSnapshot('MOVE', `Append matrix[${r}][${c}]`, [r,c], 'left-append');
+                    }
+                    bottom--;
+                    addSnapshot('WALL', `✅ Bottom Row Done. bottom -= 1 (Now ${bottom})`, null, 'bottom-dec');
+
+                    if (!(left < right && top < bottom)) break;
+
+                    // 4. Traverse Up (Left Col)
+                    addSnapshot('PHASE', '⬆️ Traverse Left Col', null, 'up-loop');
+                    for (let i = bottom - 1; i >= top; i--) {
+                        r = i; c = left;
+                        visited.add(`${r},${c}`);
+                        path.push(matrix[r][c]);
+                        addSnapshot('MOVE', `Append matrix[${r}][${c}]`, [r,c], 'up-append');
+                    }
+                    left++;
+                    addSnapshot('WALL', `✅ Left Col Done. left += 1 (Now ${left})`, null, 'left-inc');
+                }
+
+                addSnapshot('DONE', '🎉 Spiral Complete!', null, 'done');
+                return steps;
+            }, [ROWS, COLS]);
+
+            const currentState = timeline[currentStepIndex];
+
+            // --- Controls ---
+            const handleNext = () => {
+                if (currentStepIndex < timeline.length - 1) setCurrentStepIndex(prev => prev + 1);
+                else setIsPlaying(false);
+            };
+            const handlePrev = () => {
+                if (currentStepIndex > 0) setCurrentStepIndex(prev => prev - 1);
+            };
+            const jumpTo = (idx) => {
+                setCurrentStepIndex(Math.max(0, Math.min(idx, timeline.length - 1)));
+                setIsPlaying(false);
+            };
+
+            useEffect(() => {
+                let interval;
+                if (isPlaying) interval = setInterval(handleNext, speed);
+                return () => clearInterval(interval);
+            }, [isPlaying, speed, currentStepIndex]);
+
+            useEffect(() => {
+                if (autoScrollLog && logContainerRef.current) {
+                    logContainerRef.current.scrollTop = logContainerRef.current.scrollHeight;
+                }
+            }, [currentStepIndex, autoScrollLog]);
+
+            // --- Layout Helpers ---
+            const CELL_SIZE = 56; 
+            const GAP = 12;
+            const TOTAL_CELL = CELL_SIZE + GAP; // 68px step
+            
+            // Boundary Positions Calculation
+            // -----------------------------------------------------------
+            // INCLUSIVE (Top/Left): Center of cell
+            const topPos = currentState.boundaries.top * TOTAL_CELL + (CELL_SIZE / 2);
+            const leftPos = currentState.boundaries.left * TOTAL_CELL + (CELL_SIZE / 2);
+
+            // EXCLUSIVE (Bottom/Right): Gap after last cell
+            const bottomPos = currentState.boundaries.bottom * TOTAL_CELL - (GAP / 2);
+            const rightPos = currentState.boundaries.right * TOTAL_CELL - (GAP / 2);
+            // -----------------------------------------------------------
+
+            // Colors
+            const colors = {
+                bg: '#1e1e1e',
+                panel: '#252526',
+                border: '#3e3e42',
+                keyword: '#c586c0',
+                func: '#dcdcaa',
+                var: '#9cdcfe',
+                num: '#b5cea8',
+                comment: '#6a9955',
+                string: '#ce9178',
+            };
+
+            // Syntax Components
+            const Kwd = ({children}) => <span style={{color: colors.keyword}}>{children}</span>;
+            const Func = ({children}) => <span style={{color: colors.func}}>{children}</span>;
+            const Var = ({children}) => <span style={{color: colors.var}}>{children}</span>;
+            const Num = ({children}) => <span style={{color: colors.num}}>{children}</span>;
+            const Comm = ({children}) => <span style={{color: colors.comment}}>{children}</span>;
+            const Ctrl = ({children}) => <span style={{color: '#d4d4d4'}}>{children}</span>;
+
+            const CodeLine = ({ id, children, indent=0 }) => {
+                const isActive = currentState.codeLine === id;
+                return (
+                    <div className={`px-4 py-[1px] font-mono text-xs whitespace-pre flex items-center leading-5 ${isActive ? 'bg-[#264f78]/50 border-l-2 border-amber-500' : 'border-l-2 border-transparent hover:bg-[#2a2d2e]'}`}>
+                        <div style={{ paddingLeft: `${indent * 20}px` }}>{children}</div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="flex flex-col h-screen w-full bg-[#1e1e1e] text-[#d4d4d4] font-sans">
+                    
+                    {/* --- HEADER --- */}
+                    <div className="h-12 bg-[#333333] flex items-center px-4 border-b border-[#252526] justify-between shrink-0 sticky top-0 z-50 shadow-md">
+                        <div className="flex items-center gap-2">
+                            <LayoutTemplate className="text-blue-400" size={18} />
+                            <span className="font-bold text-white text-sm">Spiral Matrix Visualizer</span>
+                        </div>
+                        <div className="flex items-center gap-6 text-xs font-mono">
+                            <div className="flex gap-3">
+                                <span className="text-emerald-400 font-bold border-b border-emerald-400/30">Top:{currentState.boundaries.top}</span>
+                                <span className="text-emerald-400 font-bold border-b border-emerald-400/30">Bot:{currentState.boundaries.bottom}</span>
+                                <span className="text-blue-400 font-bold border-b border-blue-400/30">Left:{currentState.boundaries.left}</span>
+                                <span className="text-blue-400 font-bold border-b border-blue-400/30">Right:{currentState.boundaries.right}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* --- MAIN SPLIT VIEW --- */}
+                    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+                        
+                        {/* LEFT PANEL: GRID STAGE (60%) */}
+                        <div className="flex-[3] bg-[#1e1e1e] relative border-r border-[#3e3e42] flex flex-col min-h-[400px]">
+                            
+                            {/* Scrollable Stage Area */}
+                            <div className="flex-1 flex items-center justify-center p-12 bg-[#1e1e1e] relative overflow-auto custom-scrollbar">
+                                <div className="relative inline-block">
+                                    
+                                    {/* INDEX LABELS (Top) */}
+                                    <div className="flex absolute -top-8 left-0 gap-[12px]">
+                                        {[0,1,2,3,4].map(i => (
+                                            <div key={i} className="w-[56px] text-center text-[10px] font-mono text-[#555]">
+                                                {i === 4 ? <span className="text-blue-500 font-bold">4 (Excl)</span> : i}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    {/* INDEX LABELS (Left) */}
+                                    <div className="flex flex-col absolute -left-8 top-0 gap-[12px]">
+                                        {[0,1,2,3].map(i => (
+                                            <div key={i} className="h-[56px] flex items-center justify-end text-[10px] font-mono text-[#555]">
+                                                {i === 3 ? <span className="text-emerald-500 font-bold whitespace-nowrap mr-2">3 (Excl)</span> : i}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* THE GRID */}
+                                    <div className="grid grid-cols-4 relative z-10" style={{ gap: `${GAP}px` }}>
+                                        {matrix.map((row, rIdx) => (
+                                            row.map((val, cIdx) => {
+                                                const isVisited = currentState.visited.has(`${rIdx},${cIdx}`);
+                                                const isCurrent = currentState.matrixState.r === rIdx && currentState.matrixState.c === cIdx;
+                                                
+                                                return (
+                                                    <div 
+                                                        key={`${rIdx}-${cIdx}`}
+                                                        className={`
+                                                            flex items-center justify-center rounded-md font-bold text-xl transition-all duration-300 border
+                                                            ${isCurrent ? 'bg-amber-500 text-black border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.5)] scale-110 z-50' : ''}
+                                                            ${!isCurrent && isVisited ? 'bg-[#252526] text-[#444] border-[#333]' : 'bg-[#2d2d2d] text-[#e1e1e1] border-[#3e3e42]'}
+                                                        `}
+                                                        style={{ width: `${CELL_SIZE}px`, height: `${CELL_SIZE}px` }}
+                                                    >
+                                                        {val}
+                                                    </div>
+                                                );
+                                            })
+                                        ))}
+                                    </div>
+
+                                    {/* --- BOUNDARY LINES --- */}
+                                    
+                                    {/* TOP WALL - Inclusive - Center of Row */}
+                                    <div className="absolute h-[2px] z-40 transition-all duration-500 ease-in-out"
+                                        style={{
+                                            backgroundColor: colors.func, boxShadow: `0 0 8px ${colors.func}`,
+                                            left: -30, right: -30,
+                                            top: topPos,
+                                            opacity: 0.8
+                                        }}>
+                                        <div className="absolute -left-12 -top-2.5 text-[10px] font-bold text-[#dcdcaa] bg-[#1e1e1e]/80 px-1 rounded">TOP</div>
+                                    </div>
+
+                                    {/* BOTTOM WALL - Exclusive - Gap After */}
+                                    <div className="absolute h-[2px] z-40 transition-all duration-500 ease-in-out"
+                                        style={{
+                                            backgroundColor: colors.func, boxShadow: `0 0 8px ${colors.func}`,
+                                            left: -30, right: -30,
+                                            top: bottomPos
+                                        }}>
+                                        <div className="absolute -left-12 -top-2.5 text-[10px] font-bold text-[#dcdcaa] bg-[#1e1e1e]/80 px-1 rounded">BOT</div>
+                                    </div>
+
+                                    {/* LEFT WALL - Inclusive - Center of Col */}
+                                    <div className="absolute w-[2px] z-40 transition-all duration-500 ease-in-out"
+                                        style={{
+                                            backgroundColor: colors.var, boxShadow: `0 0 8px ${colors.var}`,
+                                            top: -30, bottom: -30,
+                                            left: leftPos,
+                                            opacity: 0.8
+                                        }}>
+                                        <div className="absolute -top-8 -left-1.5 text-[10px] font-bold text-[#9cdcfe] bg-[#1e1e1e]/80 px-1 rounded">L</div>
+                                    </div>
+
+                                    {/* RIGHT WALL - Exclusive - Gap After */}
+                                    <div className="absolute w-[2px] z-40 transition-all duration-500 ease-in-out"
+                                        style={{
+                                            backgroundColor: colors.var, boxShadow: `0 0 8px ${colors.var}`,
+                                            top: -30, bottom: -30,
+                                            left: rightPos
+                                        }}>
+                                        <div className="absolute -top-8 -left-1.5 text-[10px] font-bold text-[#9cdcfe] bg-[#1e1e1e]/80 px-1 rounded">R</div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            {/* Player Controls */}
+                            <div className="bg-[#252526] border-t border-[#3e3e42] p-3 flex gap-4 items-center shrink-0 z-50">
+                                <button onClick={() => setIsPlaying(!isPlaying)} className={`w-10 h-10 flex items-center justify-center rounded text-white shadow-lg ${isPlaying ? 'bg-amber-600' : 'bg-emerald-600'}`}>
+                                    {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                                </button>
+                                
+                                <div className="flex-1 flex flex-col gap-1">
+                                    <input type="range" min="0" max={timeline.length - 1} value={currentStepIndex} onChange={(e) => jumpTo(parseInt(e.target.value))} className="w-full h-1 bg-[#3e3e42] accent-blue-500 appearance-none rounded cursor-pointer"/>
+                                    <div className="flex justify-between text-[10px] text-[#858585] font-mono">
+                                        <span>STEP: {currentStepIndex}</span>
+                                        <span>SPEED: {1050 - speed}ms</span>
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-1">
+                                    <button onClick={handlePrev} className="p-2 hover:bg-[#3e3e42] rounded text-white"><ChevronLeft size={16}/></button>
+                                    <button onClick={handleNext} className="p-2 hover:bg-[#3e3e42] rounded text-white"><ChevronRight size={16}/></button>
+                                    <button onClick={() => jumpTo(0)} className="p-2 hover:bg-[#3e3e42] rounded text-white" title="Reset"><RotateCcw size={16}/></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT PANEL: CODE & LOG (40%) */}
+                        <div className="flex-[2] flex flex-col bg-[#1e1e1e] min-w-[350px] border-l border-[#3e3e42]">
+                            
+                            {/* Code Editor */}
+                            <div className="flex-1 bg-[#1e1e1e] flex flex-col overflow-hidden">
+                                <div className="bg-[#252526] text-[10px] text-[#ccc] px-4 py-1 border-b border-[#3e3e42] flex justify-between shrink-0">
+                                    <span>solution.py</span>
+                                    <span>Python</span>
+                                </div>
+                                
+                                {/* Scrollable content if needed, but flex-1 tries to contain it */}
+                                <div className="py-2 flex-1 overflow-auto no-scrollbar">
+                                    <CodeLine id="init">
+                                        <Kwd>class</Kwd> <Func>Solution</Func><Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="init" indent={1}>
+                                        <Kwd>def</Kwd> <Func>spiralOrder</Func><Ctrl>(</Ctrl><Var>self</Var>, <Var>matrix</Var><Ctrl>):</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="init" indent={2}>
+                                        <Var>res</Var> <Ctrl>=</Ctrl> []
+                                    </CodeLine>
+                                    <CodeLine id="init" indent={2}>
+                                        <Var>left</Var>, <Var>right</Var> <Ctrl>=</Ctrl> <Num>0</Num>, <Func>len</Func>(<Var>matrix</Var>[<Num>0</Num>])
+                                    </CodeLine>
+                                    <CodeLine id="init" indent={2}>
+                                        <Var>top</Var>, <Var>bottom</Var> <Ctrl>=</Ctrl> <Num>0</Num>, <Func>len</Func>(<Var>matrix</Var>)
+                                    </CodeLine>
+                                    <br/>
+                                    <CodeLine indent={2}>
+                                        <Kwd>while</Kwd> <Var>left</Var> <Ctrl>&lt;</Ctrl> <Var>right</Var> <Kwd>and</Kwd> <Var>top</Var> <Ctrl>&lt;</Ctrl> <Var>bottom</Var><Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    
+                                    {/* 1. RIGHT */}
+                                    <CodeLine id="right-loop" indent={3}>
+                                        <Comm># 1. Traverse Right (Top Row)</Comm>
+                                    </CodeLine>
+                                    <CodeLine id="right-loop" indent={3}>
+                                        <Kwd>for</Kwd> <Var>i</Var> <Kwd>in</Kwd> <Func>range</Func>(<Var>left</Var>, <Var>right</Var>)<Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="right-append" indent={4}>
+                                        <Var>res</Var>.<Func>append</Func>(<Var>matrix</Var>[<Var>top</Var>][<Var>i</Var>])
+                                    </CodeLine>
+                                    <CodeLine id="top-inc" indent={3}>
+                                        <Var>top</Var> <Ctrl>+=</Ctrl> <Num>1</Num>
+                                    </CodeLine>
+                                    
+                                    {/* 2. DOWN */}
+                                    <CodeLine id="down-loop" indent={3}>
+                                        <Comm># 2. Traverse Down (Right Col)</Comm>
+                                    </CodeLine>
+                                    <CodeLine id="down-loop" indent={3}>
+                                        <Kwd>for</Kwd> <Var>i</Var> <Kwd>in</Kwd> <Func>range</Func>(<Var>top</Var>, <Var>bottom</Var>)<Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="down-append" indent={4}>
+                                        <Var>res</Var>.<Func>append</Func>(<Var>matrix</Var>[<Var>i</Var>][<Var>right</Var> <Ctrl>-</Ctrl> <Num>1</Num>])
+                                    </CodeLine>
+                                    <CodeLine id="right-dec" indent={3}>
+                                        <Var>right</Var> <Ctrl>-=</Ctrl> <Num>1</Num>
+                                    </CodeLine>
+                                    
+                                    <CodeLine id="break-check" indent={3}>
+                                        <Kwd>if</Kwd> <Kwd>not</Kwd> (<Var>left</Var> <Ctrl>&lt;</Ctrl> <Var>right</Var> <Kwd>and</Kwd> <Var>top</Var> <Ctrl>&lt;</Ctrl> <Var>bottom</Var>)<Ctrl>:</Ctrl> <Kwd>break</Kwd>
+                                    </CodeLine>
+                                    
+                                    {/* 3. LEFT */}
+                                    <CodeLine id="left-loop" indent={3}>
+                                        <Comm># 3. Traverse Left (Bottom Row)</Comm>
+                                    </CodeLine>
+                                    <CodeLine id="left-loop" indent={3}>
+                                        <Kwd>for</Kwd> <Var>i</Var> <Kwd>in</Kwd> <Func>range</Func>(<Var>right</Var><Ctrl>-</Ctrl><Num>1</Num>, <Var>left</Var><Ctrl>-</Ctrl><Num>1</Num>, <Ctrl>-</Ctrl><Num>1</Num>)<Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="left-append" indent={4}>
+                                        <Var>res</Var>.<Func>append</Func>(<Var>matrix</Var>[<Var>bottom</Var><Ctrl>-</Ctrl><Num>1</Num>][<Var>i</Var>])
+                                    </CodeLine>
+                                    <CodeLine id="bottom-dec" indent={3}>
+                                        <Var>bottom</Var> <Ctrl>-=</Ctrl> <Num>1</Num>
+                                    </CodeLine>
+
+                                    {/* 4. UP */}
+                                    <CodeLine id="up-loop" indent={3}>
+                                        <Comm># 4. Traverse Up (Left Col)</Comm>
+                                    </CodeLine>
+                                    <CodeLine id="up-loop" indent={3}>
+                                        <Kwd>for</Kwd> <Var>i</Var> <Kwd>in</Kwd> <Func>range</Func>(<Var>bottom</Var><Ctrl>-</Ctrl><Num>1</Num>, <Var>top</Var><Ctrl>-</Ctrl><Num>1</Num>, <Ctrl>-</Ctrl><Num>1</Num>)<Ctrl>:</Ctrl>
+                                    </CodeLine>
+                                    <CodeLine id="up-append" indent={4}>
+                                        <Var>res</Var>.<Func>append</Func>(<Var>matrix</Var>[<Var>i</Var>][<Var>left</Var>])
+                                    </CodeLine>
+                                    <CodeLine id="left-inc" indent={3}>
+                                        <Var>left</Var> <Ctrl>+=</Ctrl> <Num>1</Num>
+                                    </CodeLine>
+                                </div>
+                            </div>
+
+                            {/* Log Console */}
+                            <div className="h-40 bg-[#1e1e1e] border-t border-[#3e3e42] flex flex-col shrink-0">
+                                <div className="flex items-center gap-2 px-4 py-1 bg-[#252526] text-[#858585] text-[10px] border-b border-[#3e3e42]">
+                                    <Terminal size={12} />
+                                    <span className="font-bold">OUTPUT LOG</span>
+                                    <label className="ml-auto flex items-center gap-1 cursor-pointer hover:text-white">
+                                        <input type="checkbox" checked={autoScrollLog} onChange={e => setAutoScrollLog(e.target.checked)} /> Auto-scroll
+                                    </label>
+                                </div>
+                                
+                                <div className="flex-1 overflow-y-auto p-2 font-mono text-xs space-y-1 custom-scrollbar" ref={logContainerRef}>
+                                    {timeline.slice(0, currentStepIndex + 1).map((step, idx) => (
+                                        <div key={idx} className={`${idx === currentStepIndex ? 'bg-[#3b3b3b]' : ''} px-2 py-0.5 rounded`}>
+                                            <span className="text-[#555] mr-2">[{String(idx).padStart(2, '0')}]</span>
+                                            <span className={step.log.type === 'PHASE' ? 'text-emerald-400 font-bold' : step.log.type === 'WALL' ? 'text-amber-400 font-bold' : 'text-[#bbb]'}>
+                                                {step.log.msg}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SpiralMatrixVisualizer />);
+    </script>
+</body>
+</html>

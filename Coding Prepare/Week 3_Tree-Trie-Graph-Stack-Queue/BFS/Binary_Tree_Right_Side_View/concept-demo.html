@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Tree Right Side View Visualization</title>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #FdfcF6;
+            color: #4A453E;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        h1 { color: #8A9A5B; margin-bottom: 5px; }
+        .container {
+            display: flex;
+            gap: 60px;
+            margin-top: 20px;
+            align-items: flex-start;
+        }
+        .tree-wrapper {
+            position: relative;
+            width: 350px;
+            height: 350px;
+            border: 2px dashed #E3E8D6;
+            border-radius: 20px;
+            background: white;
+        }
+        /* The Camera Viewport on the Right */
+        .camera-zone {
+            position: absolute;
+            right: -60px;
+            top: 0;
+            width: 50px;
+            height: 100%;
+            border-left: 4px solid #D68C70;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #D68C70;
+            font-weight: bold;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .camera-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .node {
+            width: 40px;
+            height: 40px;
+            background: #E3E8D6;
+            border: 2px solid #8A9A5B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.4s ease;
+            z-index: 2;
+        }
+        .node.processing {
+            background: #Sun; 
+            border-color: #EBC986;
+            transform: scale(1.1);
+        }
+        .node.visible {
+            background: #D68C70; /* Clay color for right view */
+            color: white;
+            box-shadow: 0 0 15px rgba(214, 140, 112, 0.8);
+            border-color: #D68C70;
+            z-index: 10;
+        }
+        .queue-box, .result-box {
+            width: 250px;
+            background: white;
+            padding: 15px;
+            border-radius: 15px;
+            box-shadow: 8px 8px 0px rgba(138, 154, 91, 0.15);
+            border: 1px solid #F0ECE1;
+            margin-bottom: 20px;
+        }
+        .item {
+            padding: 8px;
+            margin: 4px 0;
+            background: #F2DCD3;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            color: #D68C70;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .info-panel {
+            margin-top: 20px;
+            font-style: italic;
+            height: 50px;
+            color: #5C677D;
+            text-align: center;
+            max-width: 600px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 12px 24px;
+            background: #8A9A5B;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        
+        /* Loop indicator */
+        .loop-indicator {
+            font-family: monospace;
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌲 Binary Tree Right Side View</h1>
+    <p>BFS Level Order Traversal: Picking the <strong>last node</strong> (i == size - 1).</p>
+
+    <div class="container">
+        <!-- Tree Area -->
+        <div class="tree-wrapper">
+            <!-- Camera -->
+            <div class="camera-zone">
+                <div class="camera-icon">👁️</div>
+                <div>VIEW</div>
+            </div>
+
+            <!-- Level 1 -->
+            <div id="n1" class="node" style="top: 30px; left: 150px;">1</div>
+            
+            <!-- Level 2 -->
+            <div id="n2" class="node" style="top: 110px; left: 100px;">2</div>
+            <div id="n3" class="node" style="top: 110px; left: 200px;">3</div>
+
+            <!-- Level 3 -->
+            <div id="n5" class="node" style="top: 190px; left: 120px;">5</div>
+            <div id="n4" class="node" style="top: 190px; left: 240px;">4</div>
+
+            <!-- Connections -->
+            <svg style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;">
+                <line x1="170" y1="50" x2="120" y2="130" stroke="#ccc" stroke-width="2"/>
+                <line x1="170" y1="50" x2="220" y2="130" stroke="#ccc" stroke-width="2"/>
+                <line x1="120" y1="130" x2="140" y2="210" stroke="#ccc" stroke-width="2"/>
+                <line x1="220" y1="130" x2="260" y2="210" stroke="#ccc" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <!-- Dashboard -->
+        <div style="display:flex; flex-direction: column;">
+            <div class="queue-box">
+                <h3>Queue 📥</h3>
+                <div id="queue-display"></div>
+            </div>
+
+            <div class="result-box">
+                <h3>Result List 📋</h3>
+                <div id="result-display"></div>
+            </div>
+
+            <div class="loop-indicator" id="code-display">
+                Waiting to start...
+            </div>
+        </div>
+    </div>
+
+    <div class="info-panel" id="step-text">Ready? Click Next Step to trace the logic.</div>
+    <button onclick="nextStep()">Next Step ▶</button>
+
+    <script>
+        const queueDisplay = document.getElementById('queue-display');
+        const resultDisplay = document.getElementById('result-display');
+        const codeDisplay = document.getElementById('code-display');
+        const stepText = document.getElementById('step-text');
+        
+        let step = 0;
+
+        function updateQueue(arr) {
+            queueDisplay.innerHTML = '';
+            arr.forEach(val => {
+                let span = document.createElement('span');
+                span.className = 'item';
+                span.innerText = val;
+                queueDisplay.appendChild(span);
+            });
+        }
+
+        function updateResult(arr) {
+            resultDisplay.innerHTML = '';
+            arr.forEach(val => {
+                let span = document.createElement('span');
+                span.className = 'item';
+                span.style.background = '#D68C70';
+                span.style.color = 'white';
+                span.innerText = val;
+                resultDisplay.appendChild(span);
+            });
+        }
+
+        function highlightNode(id, type) {
+            // type: 'processing', 'visible', 'clear'
+            if (!id) return;
+            const el = document.getElementById('n' + id);
+            if (type === 'clear') {
+                el.classList.remove('processing');
+            } else if (type === 'processing') {
+                el.classList.add('processing');
+            } else if (type === 'visible') {
+                el.classList.remove('processing');
+                el.classList.add('visible');
+            }
+        }
+
+        const steps = [
+            // Level 1
+            () => {
+                stepText.innerText = "Initialize: Queue starts with Root (1).";
+                updateQueue([1]);
+                codeDisplay.innerText = "queue = [1]";
+            },
+            () => {
+                stepText.innerText = "Start Level 1. Snapshot: level_size = 1.";
+                codeDisplay.innerText = "level_size = 1\nfor i in range(1):";
+            },
+            () => {
+                stepText.innerText = "i=0 (Last index!). Pop 1. It is visible!";
+                updateQueue([]);
+                highlightNode(1, 'visible');
+                updateResult([1]);
+                codeDisplay.innerText = "if i == 0: result.append(1) ✅";
+            },
+            () => {
+                stepText.innerText = "Add children of 1 (2, 3) to Queue.";
+                updateQueue([2, 3]);
+                codeDisplay.innerText = "queue.append(2)\nqueue.append(3)";
+            },
+            
+            // Level 2
+            () => {
+                stepText.innerText = "Start Level 2. Snapshot: level_size = 2.";
+                codeDisplay.innerText = "level_size = 2\nfor i in range(2):";
+            },
+            () => {
+                stepText.innerText = "i=0. Pop 2. Not last index (0 != 1).";
+                updateQueue([3]);
+                highlightNode(2, 'processing');
+                codeDisplay.innerText = "if i == 1: ... ❌ (Skipped)";
+            },
+            () => {
+                stepText.innerText = "Add child of 2 (5) to Queue.";
+                updateQueue([3, 5]);
+                codeDisplay.innerText = "queue.append(5)";
+            },
+            () => {
+                stepText.innerText = "i=1. Pop 3. Last index! (1 == 1). Visible!";
+                updateQueue([5]);
+                highlightNode(2, 'clear'); // unhighlight 2
+                highlightNode(3, 'visible');
+                updateResult([1, 3]);
+                codeDisplay.innerText = "if i == 1: result.append(3) ✅";
+            },
+            () => {
+                stepText.innerText = "Add child of 3 (4) to Queue.";
+                updateQueue([5, 4]);
+                codeDisplay.innerText = "queue.append(4)";
+            },
+
+            // Level 3
+            () => {
+                stepText.innerText = "Start Level 3. Snapshot: level_size = 2.";
+                codeDisplay.innerText = "level_size = 2\nfor i in range(2):";
+            },
+            () => {
+                stepText.innerText = "i=0. Pop 5. Not last index.";
+                updateQueue([4]);
+                highlightNode(5, 'processing');
+                codeDisplay.innerText = "if i == 1: ... ❌";
+            },
+            () => {
+                stepText.innerText = "5 has no children. Nothing added.";
+            },
+            () => {
+                stepText.innerText = "i=1. Pop 4. Last index! Visible!";
+                updateQueue([]);
+                highlightNode(5, 'clear');
+                highlightNode(4, 'visible');
+                updateResult([1, 3, 4]);
+                codeDisplay.innerText = "if i == 1: result.append(4) ✅";
+            },
+            () => {
+                stepText.innerText = "Queue empty. Traversal complete!";
+                codeDisplay.innerText = "return result";
+            }
+        ];
+
+        function nextStep() {
+            if (step < steps.length) {
+                steps[step]();
+                step++;
+            }
+        }
+    </script>
+</body>
+</html>

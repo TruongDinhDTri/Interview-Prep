@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BFS Level Order Visualization</title>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #FdfcF6;
+            color: #4A453E;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+        }
+        h1 { color: #8A9A5B; }
+        .container {
+            display: flex;
+            gap: 40px;
+            margin-top: 20px;
+        }
+        .tree-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 2px dashed #E3E8D6;
+            border-radius: 20px;
+            background: white;
+        }
+        .node {
+            width: 40px;
+            height: 40px;
+            background: #E3E8D6;
+            border: 2px solid #8A9A5B;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.5s ease;
+        }
+        .node.active {
+            background: #D68C70;
+            color: white;
+            transform: scale(1.2);
+            box-shadow: 0 0 15px rgba(214, 140, 112, 0.6);
+        }
+        .queue-container, .result-container {
+            width: 250px;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 8px 8px 0px rgba(138, 154, 91, 0.15);
+            border: 1px solid #F0ECE1;
+        }
+        .box-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #F2DCD3;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+            color: #D68C70;
+        }
+        .result-row {
+            padding: 10px;
+            margin: 5px 0;
+            background: #DFE9ED;
+            border-radius: 8px;
+            color: #5C677D;
+            font-family: monospace;
+        }
+        button {
+            margin-top: 30px;
+            padding: 12px 24px;
+            background: #8A9A5B;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        button:hover { transform: translateY(-2px); }
+        .step-desc {
+            margin-top: 20px;
+            font-style: italic;
+            height: 40px;
+            color: #5C677D;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌱 BFS Level Order Traversal</h1>
+    <p>Watch how we process the queue <strong>level by level</strong>.</p>
+
+    <div class="container">
+        <!-- Tree Visualization -->
+        <div class="tree-container">
+            <!-- Level 1 -->
+            <div id="n3" class="node" style="top: 20px; left: 130px;">3</div>
+            <!-- Level 2 -->
+            <div id="n9" class="node" style="top: 100px; left: 80px;">9</div>
+            <div id="n20" class="node" style="top: 100px; left: 180px;">20</div>
+            <!-- Level 3 -->
+            <div id="n15" class="node" style="top: 180px; left: 140px;">15</div>
+            <div id="n7" class="node" style="top: 180px; left: 220px;">7</div>
+            
+            <!-- Lines -->
+            <svg style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:-1;">
+                <line x1="150" y1="40" x2="100" y2="120" stroke="#ccc" stroke-width="2"/>
+                <line x1="150" y1="40" x2="200" y2="120" stroke="#ccc" stroke-width="2"/>
+                <line x1="200" y1="120" x2="160" y2="200" stroke="#ccc" stroke-width="2"/>
+                <line x1="200" y1="120" x2="240" y2="200" stroke="#ccc" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <!-- Queue State -->
+        <div class="queue-container">
+            <h3>Queue 📥</h3>
+            <div id="queue-box">
+                <!-- Items go here -->
+            </div>
+        </div>
+
+        <!-- Result State -->
+        <div class="result-container">
+            <h3>Result List 📋</h3>
+            <div id="result-box">
+                <!-- Result arrays go here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="step-desc" id="step-text">Ready to start...</div>
+    <button onclick="nextStep()">Next Step ▶</button>
+
+    <script>
+        let step = 0;
+        const queueBox = document.getElementById('queue-box');
+        const resultBox = document.getElementById('result-box');
+        const text = document.getElementById('step-text');
+
+        function updateQueue(items) {
+            queueBox.innerHTML = '';
+            items.forEach(val => {
+                const div = document.createElement('div');
+                div.className = 'box-item';
+                div.innerText = `Node(${val})`;
+                queueBox.appendChild(div);
+            });
+        }
+
+        function updateResult(lists) {
+            resultBox.innerHTML = '';
+            lists.forEach(sublist => {
+                const div = document.createElement('div');
+                div.className = 'result-row';
+                div.innerText = `[${sublist.join(', ')}]`;
+                resultBox.appendChild(div);
+            });
+        }
+
+        function highlight(id) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            if(id) document.getElementById('n'+id).classList.add('active');
+        }
+
+        // Simulation Steps
+        const steps = [
+            () => { 
+                text.innerText = "1. Initialize Queue with Root (3)"; 
+                updateQueue([3]); 
+                highlight('3');
+            },
+            () => { 
+                text.innerText = "2. Level 1 start. Size = 1. Pop 3."; 
+                updateQueue([]); 
+                highlight('3');
+            },
+            () => { 
+                text.innerText = "3. Add 3 to current level list. Add children 9, 20."; 
+                updateQueue([9, 20]); 
+                updateResult([]);
+            },
+            () => { 
+                text.innerText = "4. Level 1 done. Commit [3] to Result."; 
+                updateResult([[3]]);
+            },
+            () => { 
+                text.innerText = "5. Level 2 start. Size = 2. Pop 9."; 
+                updateQueue([20]); 
+                highlight('9');
+            },
+            () => { 
+                text.innerText = "6. 9 has no children. Current level: [9]"; 
+                highlight('9');
+            },
+            () => { 
+                text.innerText = "7. Still Level 2. Pop 20."; 
+                updateQueue([]); 
+                highlight('20');
+            },
+            () => { 
+                text.innerText = "8. Add children 15, 7. Current level: [9, 20]"; 
+                updateQueue([15, 7]);
+            },
+            () => { 
+                text.innerText = "9. Level 2 done. Commit [9, 20] to Result."; 
+                updateResult([[3], [9, 20]]);
+            },
+            () => { 
+                text.innerText = "10. Level 3 start. Size = 2. Pop 15."; 
+                updateQueue([7]); 
+                highlight('15');
+            },
+            () => { 
+                text.innerText = "11. Pop 7. Level done. Commit [15, 7]."; 
+                updateQueue([]); 
+                highlight('7');
+                updateResult([[3], [9, 20], [15, 7]]);
+            },
+            () => {
+                text.innerText = "🎉 Traversal Complete!";
+                highlight(null);
+            }
+        ];
+
+        function nextStep() {
+            if (step < steps.length) {
+                steps[step]();
+                step++;
+            }
+        }
+    </script>
+</body>
+</html>

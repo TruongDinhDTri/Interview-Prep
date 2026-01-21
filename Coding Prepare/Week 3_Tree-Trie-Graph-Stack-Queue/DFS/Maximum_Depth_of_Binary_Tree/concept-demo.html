@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DFS Max Depth Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Lora:ital@1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FdfcF6;
+            --sage: #8A9A5B;
+            --sage-light: #E3E8D6;
+            --clay: #D68C70;
+            --sky: #8AB0C0;
+            --sun: #EBC986;
+        }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            color: #4A453E;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            overflow-x: hidden;
+        }
+        h1 { font-family: 'Lora', serif; color: var(--sage); margin-bottom: 10px; }
+        .container {
+            display: flex;
+            gap: 50px;
+            margin-top: 30px;
+            position: relative;
+        }
+        .tree-area {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            background: white;
+            border-radius: 30px;
+            border: 2px dashed var(--sage-light);
+            box-shadow: 10px 10px 0px rgba(138, 154, 91, 0.1);
+        }
+        .node {
+            width: 45px;
+            height: 45px;
+            background: var(--sage-light);
+            border: 2px solid var(--sage);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: absolute;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 2;
+        }
+        .node .val { font-size: 1.1rem; }
+        .node .depth-tag {
+            font-size: 0.7rem;
+            color: var(--clay);
+            position: absolute;
+            bottom: -18px;
+            font-weight: 800;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .node.active {
+            background: var(--sun);
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(235, 201, 134, 0.6);
+        }
+        .node.returned {
+            background: var(--clay);
+            color: white;
+            border-color: #bc6c4d;
+        }
+        .node.returned .depth-tag { opacity: 1; }
+
+        .call-stack {
+            width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            border: 1px solid #F0ECE1;
+            box-shadow: 8px 8px 0px rgba(214, 140, 112, 0.1);
+        }
+        .stack-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #FDFBF7;
+            border-left: 4px solid var(--sky);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .controls { margin-top: 40px; display: flex; gap: 20px; align-items: center; }
+        button {
+            padding: 12px 28px;
+            background: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        button:hover { transform: translateY(-2px); }
+        .step-info {
+            font-style: italic;
+            color: #5C677D;
+            max-width: 500px;
+            text-align: center;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌱 DFS: Maximum Depth Visualization</h1>
+    <p>Recursive DFS: We dive to the bottom, then bubble the height back up.</p>
+
+    <div class="container">
+        <div class="tree-area">
+            <!-- Tree Nodes -->
+            <div id="n3" class="node" style="top: 30px; left: 175px;"><span class="val">3</span><span class="depth-tag">H=3</span></div>
+            <div id="n9" class="node" style="top: 130px; left: 80px;"><span class="val">9</span><span class="depth-tag">H=1</span></div>
+            <div id="n20" class="node" style="top: 130px; left: 270px;"><span class="val">20</span><span class="depth-tag">H=2</span></div>
+            <div id="n15" class="node" style="top: 230px; left: 220px;"><span class="val">15</span><span class="depth-tag">H=1</span></div>
+            <div id="n7" class="node" style="top: 230px; left: 320px;"><span class="val">7</span><span class="depth-tag">H=1</span></div>
+
+            <svg style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;">
+                <line x1="197" y1="75" x2="102" y2="130" stroke="#ccc" stroke-width="2"/>
+                <line x1="197" y1="75" x2="292" y2="130" stroke="#ccc" stroke-width="2"/>
+                <line x1="292" y1="175" x2="242" y2="230" stroke="#ccc" stroke-width="2"/>
+                <line x1="292" y1="175" x2="342" y2="230" stroke="#ccc" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div class="call-stack">
+            <h3>Call Stack 📚</h3>
+            <div id="stack-box"></div>
+        </div>
+    </div>
+
+    <div class="step-info" id="step-desc">Click "Next" to begin the depth-first search.</div>
+    
+    <div class="controls">
+        <button onclick="nextStep()">Next Step ▶</button>
+    </div>
+
+    <script>
+        let step = 0;
+        const stackBox = document.getElementById('stack-box');
+        const stepDesc = document.getElementById('step-desc');
+
+        function pushStack(name) {
+            const div = document.createElement('div');
+            div.className = 'stack-item';
+            div.id = 'stack-' + name;
+            div.innerText = `maxDepth(Node ${name})`;
+            stackBox.prepend(div);
+        }
+
+        function popStack() {
+            if (stackBox.firstChild) stackBox.removeChild(stackBox.firstChild);
+        }
+
+        function setActive(id) {
+            document.querySelectorAll('.node').forEach(n => n.classList.remove('active'));
+            if(id) document.getElementById('n'+id).classList.add('active');
+        }
+
+        function setReturned(id) {
+            const el = document.getElementById('n'+id);
+            el.classList.remove('active');
+            el.classList.add('returned');
+        }
+
+        const steps = [
+            () => {
+                stepDesc.innerText = "Call maxDepth(3). Diving into left child first.";
+                pushStack('3');
+                setActive(3);
+            },
+            () => {
+                stepDesc.innerText = "Call maxDepth(9). It's a leaf node.";
+                pushStack('9');
+                setActive(9);
+            },
+            () => {
+                stepDesc.innerText = "9 asks its None children. They return 0.";
+            },
+            () => {
+                stepDesc.innerText = "Node 9 returns 1 + max(0, 0) = 1 to parent.";
+                setReturned(9);
+                popStack();
+                setActive(3);
+            },
+            () => {
+                stepDesc.innerText = "Now Node 3 calls maxDepth(20) for the right side.";
+                pushStack('20');
+                setActive(20);
+            },
+            () => {
+                stepDesc.innerText = "Node 20 calls maxDepth(15).";
+                pushStack('15');
+                setActive(15);
+            },
+            () => {
+                stepDesc.innerText = "Node 15 is a leaf. Returns 1 to parent (20).";
+                setReturned(15);
+                popStack();
+                setActive(20);
+            },
+            () => {
+                stepDesc.innerText = "Node 20 calls maxDepth(7).";
+                pushStack('7');
+                setActive(7);
+            },
+            () => {
+                stepDesc.innerText = "Node 7 is a leaf. Returns 1 to parent (20).";
+                setReturned(7);
+                popStack();
+                setActive(20);
+            },
+            () => {
+                stepDesc.innerText = "Node 20 has L=1, R=1. Returns 1 + max(1, 1) = 2 to root.";
+                setReturned(20);
+                popStack();
+                setActive(3);
+            },
+            () => {
+                stepDesc.innerText = "Root (3) has L=1, R=2. Final depth = 1 + max(1, 2) = 3.";
+                setReturned(3);
+                popStack();
+            },
+            () => {
+                stepDesc.innerText = "🎉 Process Complete! Max Depth is 3.";
+            }
+        ];
+
+        function nextStep() {
+            if (step < steps.length) {
+                steps[step]();
+                step++;
+            }
+        }
+    </script>
+</body>
+</html>
