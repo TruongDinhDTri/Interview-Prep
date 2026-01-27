@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack Fundamentals - The Mountain Realm</title>
+    
+    <!-- Ghibli-inspired Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Klee+One:wght@400;600&family=Patrick+Hand&family=Indie+Flower&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --forest-deep: #2d4a3e;
+            --sky-ghibli: #7ec8e3;
+            --cloud-cream: #fdf8ef;
+            --earth-brown: #7a5c42;
+            --parchment: #fef6e4;
+            --ink-warm: #4a3728;
+            --lavender-mist: #c4b4d4;
+            --gold-accent: #d4a84b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Klee One', 'Patrick Hand', cursive;
+            background: linear-gradient(180deg,
+                #7ec8e3 0%,
+                #aadff0 30%,
+                #e4f4f8 60%,
+                #fdf5e8 100%
+            );
+            min-height: 100vh;
+            padding: 3rem 2rem;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' result='noise'/%3E%3CfeDiffuseLighting in='noise' lighting-color='%23fffef8' surfaceScale='2'%3E%3CfeDistantLight azimuth='45' elevation='55'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)' opacity='0.15'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.7;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .header-card {
+            background: linear-gradient(145deg,
+                #fef8ef 0%,
+                #fdf5e6 50%,
+                #fae8cc 100%
+            );
+            border-radius: 20px;
+            padding: 3rem 3rem 2rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 25px 70px rgba(74, 55, 40, 0.2),
+                       0 10px 35px rgba(74, 55, 40, 0.12);
+            position: relative;
+        }
+
+        .header-card::before {
+            content: '';
+            position: absolute;
+            inset: -5px;
+            border-radius: 24px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M 3,2 Q 25,0 50,2 T 97,1 Q 100,25 98,50 T 100,98 Q 75,100 50,98 T 3,100 Q 0,75 2,50 T 3,2' fill='none' stroke='%237a5c42' stroke-width='0.6' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/100% 100%;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .realm-icon {
+            width: 70px;
+            height: 70px;
+            background: var(--cloud-cream);
+            border-radius: 50%;
+            border: 3px solid var(--lavender-mist);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 8px 25px rgba(74, 55, 40, 0.2);
+        }
+
+        h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--ink-warm);
+            text-align: center;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+        }
+
+        .intro-text {
+            font-family: 'Indie Flower', cursive;
+            font-size: 1.2rem;
+            color: var(--earth-brown);
+            text-align: center;
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .concept-box {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(253, 248, 239, 0.6) 100%);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 2px dashed var(--lavender-mist);
+        }
+
+        .concept-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--lavender-mist);
+            margin-bottom: 0.5rem;
+        }
+
+        .concept-text {
+            font-size: 1rem;
+            color: var(--ink-warm);
+            line-height: 1.6;
+        }
+
+        .visualizations-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        .viz-card {
+            position: relative;
+            background: linear-gradient(155deg,
+                #fffefa 0%,
+                #fdfaf2 50%,
+                #faf5e8 100%
+            );
+            border-radius: 12px;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            box-shadow: 0 8px 25px rgba(74, 55, 40, 0.12);
+        }
+
+        .viz-card::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 16px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M 3,2 Q 25,0 50,2 T 97,1 Q 100,25 98,50 T 100,98 Q 75,100 50,98 T 3,100 Q 0,75 2,50 T 3,2' fill='none' stroke='%237a5c42' stroke-width='0.7' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/100% 100%;
+            opacity: 0.5;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .viz-card:hover {
+            transform: translateY(-8px) rotate(-1deg);
+            box-shadow: 0 15px 40px rgba(74, 55, 40, 0.18);
+        }
+
+        .viz-card:hover::before {
+            opacity: 0.7;
+        }
+
+        .viz-title {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--ink-warm);
+            margin-bottom: 0.8rem;
+        }
+
+        .viz-description {
+            font-family: 'Klee One', cursive;
+            font-size: 1rem;
+            color: var(--earth-brown);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: linear-gradient(135deg, #a090c0 0%, #8878a8 100%);
+            color: white;
+            border-radius: 20px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(160, 144, 192, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: var(--lavender-mist);
+            text-decoration: none;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .back-link:hover {
+            transform: translateX(-5px);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 2rem 1rem;
+            }
+
+            h1 {
+                font-size: 2.2rem;
+            }
+
+            .header-card {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="../../../index.html" class="back-link">← Back to Mountain Realm</a>
+        
+        <div class="header-card">
+            <div class="realm-icon">📚</div>
+            <h1>Stack Adventures</h1>
+            <p class="intro-text">
+                Climb the tower of plates where Last-In-First-Out reigns supreme,
+                like a stack of books in Kiki's cozy library...
+            </p>
+
+            <div class="concept-box">
+                <div class="concept-title">💡 What is a Stack?</div>
+                <div class="concept-text">
+                    A Stack is like a tower of pancakes - you can only add (push) or remove (pop) from the top! 
+                    This <strong>LIFO (Last In, First Out)</strong> structure is perfect for problems involving:
+                    <br><br>
+                    • Matching pairs (parentheses, brackets)<br>
+                    • Tracking previous states (undo operations)<br>
+                    • Solving next greater/smaller element problems<br>
+                    • Function call tracking (recursion stack)
+                </div>
+            </div>
+        </div>
+
+        <div class="visualizations-grid">
+            <a href="valid-parentheses-demo.html" class="viz-card">
+                <div class="viz-title">Valid Parentheses</div>
+                <div class="viz-description">
+                    Master the classic stack problem of matching parentheses! 
+                    Watch as opening brackets push onto the stack and closing brackets pop to verify matches.
+                    Step through the algorithm to understand how stacks elegantly solve matching problems.
+                </div>
+                <span class="badge">Interactive Demo</span>
+            </a>
+
+            <a href="daily-temperatures-demo.html" class="viz-card">
+                <div class="viz-title">Daily Temperatures</div>
+                <div class="viz-description">
+                    Discover the power of monotonic stacks! 
+                    Solve "when will I see the next warmer day?" by maintaining a stack in decreasing order.
+                    This pattern unlocks solutions to many "next greater element" style challenges.
+                </div>
+                <span class="badge">Interactive Demo</span>
+            </a>
+        </div>
+    </div>
+</body>
+</html>
