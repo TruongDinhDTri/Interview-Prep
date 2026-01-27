@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid Parentheses - Stack Visualization</title>
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --card-bg: #ffffff;
+            --stack-color: #e2e8f0;
+            --item-bg: #81e6d9;
+            --item-border: #38b2ac;
+            --highlight: #fbd38d;
+            --text-color: #2d3748;
+            --accent: #ed8936; /* Ghibli orange */
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 { color: var(--accent); margin-bottom: 10px; }
+        .controls {
+            margin: 20px;
+            padding: 20px;
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input {
+            padding: 10px;
+            border: 2px solid var(--stack-color);
+            border-radius: 5px;
+            font-size: 1.2rem;
+            width: 200px;
+            letter-spacing: 3px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+        button:hover { transform: scale(1.05); }
+        button:disabled { background-color: #cbd5e0; cursor: not-allowed; }
+
+        .visualization-area {
+            display: flex;
+            gap: 50px;
+            align-items: flex-start;
+            margin-top: 30px;
+        }
+        
+        /* String Display */
+        .string-container {
+            display: flex;
+            gap: 5px;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            height: 50px;
+            justify-content: center;
+        }
+        .char-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+            background: var(--card-bg);
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .char-box.current {
+            border-color: var(--accent);
+            background-color: var(--highlight);
+            transform: translateY(-5px);
+            font-weight: bold;
+        }
+
+        /* Stack Visualization */
+        .stack-container {
+            width: 100px;
+            height: 300px;
+            border: 4px solid var(--text-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column-reverse;
+            padding: 10px;
+            gap: 5px;
+            position: relative;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .stack-item {
+            width: 80%;
+            height: 40px;
+            background-color: var(--item-bg);
+            border: 2px solid var(--item-border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: pushAnimation 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .stack-item.popping {
+            animation: popAnimation 0.5s forwards;
+            background-color: #fc8181; /* Red for pop */
+            border-color: #c53030;
+        }
+        
+        @keyframes pushAnimation {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popAnimation {
+            to { opacity: 0; transform: translateX(100px) rotate(45deg); }
+        }
+
+        .status-box {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            min-height: 1.5em;
+            text-align: center;
+            max-width: 600px;
+            color: #4a5568;
+        }
+        .result-badge {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-top: 20px;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .valid { color: #48bb78; opacity: 1; }
+        .invalid { color: #f56565; opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <h1>Valid Parentheses Strategy 🔥</h1>
+    
+    <div class="controls">
+        <input type="text" id="inputString" value="{[]}()" placeholder="Enter brackets: ( ) { } [ ]">
+        <button onclick="startVisualization()">Start</button>
+        <button onclick="nextStep()" id="nextBtn" disabled>Next Step ➡️</button>
+        <button onclick="reset()">Reset</button>
+    </div>
+
+    <div class="string-container" id="stringDisplay"></div>
+    <div class="status-box" id="statusText">Enter a string to start training.</div>
+
+    <div class="visualization-area">
+        <div class="stack-container" id="stack">
+            <!-- Stack items go here -->
+        </div>
+    </div>
+
+    <div id="result" class="result-badge"></div>
+
+    <script>
+        let inputStr = "";
+        let currentIndex = 0;
+        let stack = [];
+        let map = {
+            ')': '(',
+            '}': '{',
+            ']': '['
+        };
+        let isRunning = false;
+
+        function startVisualization() {
+            reset();
+            inputStr = document.getElementById('inputString').value;
+            if (!inputStr) return;
+            
+            const display = document.getElementById('stringDisplay');
+            display.innerHTML = '';
+            for(let char of inputStr) {
+                const span = document.createElement('div');
+                span.className = 'char-box';
+                span.innerText = char;
+                display.appendChild(span);
+            }
+            
+            document.getElementById('nextBtn').disabled = false;
+            isRunning = true;
+            currentIndex = 0;
+            stack = [];
+            updateStatus("Starting... Looking at the first bracket.");
+        }
+
+        function nextStep() {
+            if (!isRunning) return;
+
+            // Clear previous highlight
+            const boxes = document.querySelectorAll('.char-box');
+            boxes.forEach(b => b.classList.remove('current'));
+
+            // Check if done
+            if (currentIndex >= inputStr.length) {
+                finalize();
+                return;
+            }
+
+            // Highlight current
+            boxes[currentIndex].classList.add('current');
+            const char = inputStr[currentIndex];
+            const stackContainer = document.getElementById('stack');
+
+            // Logic
+            if (char === '(' || char === '{' || char === '[') {
+                // Open bracket -> PUSH
+                updateStatus(`Found open bracket '<b>${char}</b>'. Pushing to Stack.`);
+                stack.push(char);
+                
+                const item = document.createElement('div');
+                item.className = 'stack-item';
+                item.innerText = char;
+                item.id = `item-${stack.length-1}`;
+                stackContainer.appendChild(item);
+                
+                currentIndex++;
+
+            } else {
+                // Close bracket
+                if (stack.length === 0) {
+                    updateStatus(`Found close bracket '<b>${char}</b>' but Stack is <b>EMPTY</b>! ❌ Invalid.`);
+                    document.getElementById('result').innerText = "FALSE ❌";
+                    document.getElementById('result').className = "result-badge invalid";
+                    isRunning = false;
+                    document.getElementById('nextBtn').disabled = true;
+                    return;
+                }
+
+                const lastOpen = stack[stack.length - 1];
+                if (map[char] !== lastOpen) {
+                    updateStatus(`Found '<b>${char}</b>'. Matches '<b>${lastOpen}</b>'? NO! ❌ Mismatch.`);
+                    document.getElementById('result').innerText = "FALSE ❌";
+                    document.getElementById('result').className = "result-badge invalid";
+                    
+                    // Highlight mismatch
+                    const topItem = document.getElementById(`item-${stack.length-1}`);
+                    topItem.style.backgroundColor = '#feb2b2';
+                    
+                    isRunning = false;
+                    document.getElementById('nextBtn').disabled = true;
+                } else {
+                    updateStatus(`Found '<b>${char}</b>'. Matches '<b>${lastOpen}</b>'? YES! ✅ Popping.`);
+                    const topItem = document.getElementById(`item-${stack.length-1}`);
+                    topItem.classList.add('popping');
+                    setTimeout(() => topItem.remove(), 500);
+                    stack.pop();
+                    currentIndex++;
+                }
+            }
+        }
+
+        function finalize() {
+            if (stack.length === 0) {
+                updateStatus("Finished string. Stack is EMPTY. Perfect balance! 🔥");
+                document.getElementById('result').innerText = "TRUE ✅";
+                document.getElementById('result').className = "result-badge valid";
+            } else {
+                updateStatus(`Finished string. But Stack is <b>NOT EMPTY</b> (${stack.join(', ')}). Leftovers! ❌`);
+                document.getElementById('result').innerText = "FALSE ❌";
+                document.getElementById('result').className = "result-badge invalid";
+            }
+            isRunning = false;
+            document.getElementById('nextBtn').disabled = true;
+        }
+
+        function updateStatus(msg) {
+            document.getElementById('statusText').innerHTML = msg;
+        }
+
+        function reset() {
+            document.getElementById('stack').innerHTML = '';
+            document.getElementById('stringDisplay').innerHTML = '';
+            document.getElementById('result').innerText = '';
+            document.getElementById('result').className = 'result-badge';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('statusText').innerText = "Ready to start.";
+            isRunning = false;
+        }
+    </script>
+</body>
+</html>

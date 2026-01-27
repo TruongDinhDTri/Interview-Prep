@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Temperatures Visualization</title>
+    <style>
+        :root {
+            --ghibli-sky: #87CEEB;
+            --ghibli-cloud: #F0F8FF;
+            --ghibli-grass: #90EE90;
+            --ghibli-text: #2F4F4F;
+            --accent-warm: #FF6B6B;
+            --accent-cool: #4ECDC4;
+            --stack-color: #FFE66D;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--ghibli-cloud);
+            color: var(--ghibli-text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: var(--accent-warm);
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: row;
+            gap: 50px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Array Styles */
+        .array-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .array-box {
+            display: flex;
+            gap: 10px;
+        }
+
+        .array-item {
+            width: 60px;
+            height: 80px;
+            border: 2px solid var(--ghibli-text);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .array-item.active {
+            border-color: var(--accent-warm);
+            background-color: #fff0f0;
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .array-item.solved {
+            background-color: var(--ghibli-grass);
+            color: var(--ghibli-text);
+        }
+
+        .temp-val { font-size: 1.2rem; font-weight: bold; }
+        .index-val { font-size: 0.8rem; color: #888; margin-top: 5px; }
+        .ans-val { 
+            position: absolute; 
+            bottom: -30px; 
+            font-weight: bold; 
+            color: var(--accent-cool);
+        }
+
+        /* Stack Styles */
+        .stack-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            width: 120px;
+            height: 400px;
+            border-left: 4px solid var(--ghibli-text);
+            border-bottom: 4px solid var(--ghibli-text);
+            border-right: 4px solid var(--ghibli-text);
+            border-radius: 0 0 10px 10px;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            position: relative;
+        }
+
+        .stack-item {
+            width: 90%;
+            height: 40px;
+            background-color: var(--stack-color);
+            border: 2px solid #DAA520;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--accent-cool);
+            color: white;
+            font-weight: bold;
+            transition: transform 0.1s;
+        }
+
+        button:hover { transform: scale(1.05); }
+        button:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .log-box {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 600px;
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+            min-height: 60px;
+            text-align: center;
+            font-style: italic;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🌡️ Daily Temperatures Visualization</h1>
+
+    <div class="container">
+        <!-- Array Display -->
+        <div class="array-container">
+            <h3>Temperatures Array</h3>
+            <div class="array-box" id="arrayBox">
+                <!-- Generated by JS -->
+            </div>
+            <div style="margin-top: 40px; width: 100%; border-top: 2px dashed #ccc;"></div>
+            <h3>Answer Array</h3>
+            <div class="array-box" id="answerBox">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+
+        <!-- Stack Display -->
+        <div style="display: flex; flex-direction: column; align-items: center;">
+            <h3>Monotonic Stack (Indices)</h3>
+            <div class="stack-container" id="stackBox">
+                <!-- Generated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <div class="log-box" id="logBox">
+        Press "Start" to begin the visualization...
+    </div>
+
+    <div class="controls">
+        <button id="btnStart" onclick="start()">Start / Reset</button>
+        <button id="btnNext" onclick="nextStep()" disabled>Next Step</button>
+    </div>
+
+    <script>
+        const temps = [73, 74, 75, 71, 69, 72, 76, 73];
+        const n = temps.length;
+        let stack = []; // Stores indices
+        let answers = new Array(n).fill(0);
+        let currentIdx = 0;
+        let stepState = 'check_stack'; // 'check_stack', 'pop', 'push', 'next_idx'
+        
+        const arrayBox = document.getElementById('arrayBox');
+        const answerBox = document.getElementById('answerBox');
+        const stackBox = document.getElementById('stackBox');
+        const logBox = document.getElementById('logBox');
+        const btnNext = document.getElementById('btnNext');
+
+        function renderArrays() {
+            arrayBox.innerHTML = '';
+            answerBox.innerHTML = '';
+
+            temps.forEach((t, i) => {
+                // Temp Array Element
+                const el = document.createElement('div');
+                el.className = 'array-item';
+                el.id = `temp-${i}`;
+                if (i === currentIdx && stepState !== 'finished') el.classList.add('active');
+                
+                el.innerHTML = `
+                    <span class="temp-val">${t}°</span>
+                    <span class="index-val">Idx: ${i}</span>
+                `;
+                arrayBox.appendChild(el);
+
+                // Answer Array Element
+                const ansEl = document.createElement('div');
+                ansEl.className = 'array-item';
+                ansEl.id = `ans-${i}`;
+                if (answers[i] !== 0) ansEl.classList.add('solved');
+                ansEl.innerHTML = `<span class="temp-val">${answers[i]}</span>`;
+                answerBox.appendChild(ansEl);
+            });
+        }
+
+        function renderStack() {
+            stackBox.innerHTML = '';
+            // Render from top to bottom visually, so iterate backwards logic or use flex-end
+            // We want top of stack at top visually? No, standard stack view is bottom-up.
+            // HTML flex-direction is column-reverse or justify-content flex-end.
+            
+            // Let's copy stack for rendering to not mutate
+            [...stack].forEach(idx => {
+                const item = document.createElement('div');
+                item.className = 'stack-item';
+                item.innerText = `Idx: ${idx} (${temps[idx]}°)`;
+                stackBox.prepend(item); // Prepend to put newer items on top
+            });
+        }
+
+        function log(msg) {
+            logBox.innerText = msg;
+        }
+
+        function start() {
+            stack = [];
+            answers = new Array(n).fill(0);
+            currentIdx = 0;
+            stepState = 'check_stack';
+            btnNext.disabled = false;
+            renderArrays();
+            renderStack();
+            log("Starting! We will iterate through each day.");
+        }
+
+        function nextStep() {
+            if (currentIdx >= n) {
+                log("Finished! All days processed.");
+                stepState = 'finished';
+                renderArrays();
+                btnNext.disabled = true;
+                return;
+            }
+
+            const currentTemp = temps[currentIdx];
+
+            if (stepState === 'check_stack') {
+                log(`Day ${currentIdx} (${currentTemp}°): Checking Stack...`);
+                
+                if (stack.length > 0) {
+                    const topIdx = stack[stack.length - 1];
+                    const topTemp = temps[topIdx];
+                    
+                    if (currentTemp > topTemp) {
+                        log(`WARMER! ${currentTemp}° > ${topTemp}° (Stack Top). Preparing to POP Index ${topIdx}.`);
+                        stepState = 'pop';
+                    } else {
+                        log(`Not warmer (${currentTemp}° <= ${topTemp}°). Cannot pop anymore.`);
+                        stepState = 'push';
+                    }
+                } else {
+                    log("Stack is empty. Nothing to compare.");
+                    stepState = 'push';
+                }
+            } 
+            else if (stepState === 'pop') {
+                const topIdx = stack.pop();
+                const daysWait = currentIdx - topIdx;
+                answers[topIdx] = daysWait;
+                
+                log(`POPPED Index ${topIdx}. Answer[${topIdx}] = ${currentIdx} - ${topIdx} = ${daysWait} days.`);
+                renderStack();
+                renderArrays(); // Update answer color
+                
+                // Go back to check stack again (while loop logic)
+                stepState = 'check_stack'; 
+            }
+            else if (stepState === 'push') {
+                stack.push(currentIdx);
+                log(`Pushed current Day ${currentIdx} (${currentTemp}°) to Stack.`);
+                renderStack();
+                stepState = 'next_idx';
+            }
+            else if (stepState === 'next_idx') {
+                currentIdx++;
+                if (currentIdx < n) {
+                    log(`Moving to next day: Index ${currentIdx}`);
+                } else {
+                    log("End of array reached.");
+                }
+                renderArrays();
+                stepState = 'check_stack';
+            }
+        }
+
+        // Initial render
+        renderArrays();
+        renderStack();
+    </script>
+</body>
+</html>
