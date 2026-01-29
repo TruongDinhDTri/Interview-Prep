@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subsets II - Duplicate Handling Visualization</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f0e8 0%, #e8e0d5 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #4a4a4a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #5d4e37;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7d6e57;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 32px rgba(93, 78, 55, 0.1);
+            border: 2px solid rgba(93, 78, 55, 0.1);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        label {
+            font-weight: 600;
+            color: #5d4e37;
+        }
+
+        input[type="text"] {
+            padding: 12px 20px;
+            border: 2px solid #c9b99a;
+            border-radius: 12px;
+            font-size: 1rem;
+            width: 200px;
+            background: #fffef9;
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #8fbc8f;
+            box-shadow: 0 0 12px rgba(143, 188, 143, 0.3);
+        }
+
+        button {
+            padding: 12px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8fbc8f 0%, #6b8e6b 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(107, 142, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #d4a574 0%, #c49464 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(196, 148, 100, 0.4);
+        }
+
+        .btn-step {
+            background: linear-gradient(135deg, #87ceeb 0%, #6bb3d9 100%);
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .visualization-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        @media (max-width: 900px) {
+            .visualization-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(93, 78, 55, 0.1);
+            border: 2px solid rgba(93, 78, 55, 0.1);
+        }
+
+        .panel h2 {
+            color: #5d4e37;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .array-display {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .array-item {
+            width: 55px;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-radius: 12px;
+            transition: all 0.4s ease;
+            position: relative;
+        }
+
+        .array-item-normal {
+            background: linear-gradient(135deg, #f0e6d3 0%, #e6dcc9 100%);
+            color: #5d4e37;
+            border: 2px solid #c9b99a;
+        }
+
+        .array-item-current {
+            background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            color: #5d4e37;
+            border: 2px solid #e6ac00;
+            transform: scale(1.15);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .array-item-included {
+            background: linear-gradient(135deg, #90EE90 0%, #66cc66 100%);
+            color: #2d5a2d;
+            border: 2px solid #4CAF50;
+        }
+
+        .array-item-skipped {
+            background: linear-gradient(135deg, #ffcccb 0%, #f08080 100%);
+            color: #8b0000;
+            border: 2px solid #dc143c;
+            opacity: 0.6;
+        }
+
+        .array-item-excluded {
+            background: linear-gradient(135deg, #ddd 0%, #bbb 100%);
+            color: #666;
+            border: 2px dashed #999;
+        }
+
+        .index-label {
+            position: absolute;
+            bottom: -22px;
+            font-size: 0.75rem;
+            color: #7d6e57;
+        }
+
+        .current-state {
+            background: #fffef9;
+            border-radius: 12px;
+            padding: 18px;
+            margin-top: 15px;
+            border: 2px solid #e6dcc9;
+        }
+
+        .state-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .state-label {
+            color: #7d6e57;
+            font-weight: 600;
+        }
+
+        .state-value {
+            color: #5d4e37;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+        }
+
+        .tree-container {
+            min-height: 300px;
+            overflow-x: auto;
+        }
+
+        .tree-node {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 5px;
+            position: relative;
+        }
+
+        .node-content {
+            background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+            border: 2px solid #c9b99a;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+        }
+
+        .node-content.active {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #fffacd 0%, #fff8dc 100%);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .node-content.completed {
+            border-color: #4CAF50;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .node-content.skipped {
+            border-color: #dc143c;
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            text-decoration: line-through;
+            opacity: 0.7;
+        }
+
+        .branch-label {
+            font-size: 0.7rem;
+            color: #7d6e57;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .branch-include {
+            color: #4CAF50;
+        }
+
+        .branch-exclude {
+            color: #9e9e9e;
+        }
+
+        .branch-skip {
+            color: #dc143c;
+        }
+
+        .result-section {
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(93, 78, 55, 0.1);
+            border: 2px solid rgba(93, 78, 55, 0.1);
+        }
+
+        .result-section h2 {
+            color: #5d4e37;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .subsets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .subset-item {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border: 2px solid #81c784;
+            border-radius: 10px;
+            padding: 10px 18px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            color: #2e7d32;
+            transition: all 0.3s ease;
+        }
+
+        .subset-item:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(129, 199, 132, 0.4);
+        }
+
+        .subset-item.new {
+            animation: popIn 0.5s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .explanation-box {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #ffca28;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .explanation-box h3 {
+            color: #f57c00;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            border: 2px solid #64b5f6;
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .key-insight h3 {
+            color: #1976d2;
+            margin-bottom: 15px;
+        }
+
+        .key-insight ul {
+            margin-left: 20px;
+        }
+
+        .key-insight li {
+            margin: 8px 0;
+            color: #0d47a1;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .speed-control input {
+            width: 150px;
+        }
+
+        .call-stack {
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 200px;
+            overflow-y: auto;
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .stack-frame {
+            padding: 5px 10px;
+            margin: 3px 0;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .stack-frame.active {
+            background: #44475a;
+        }
+
+        .stack-frame .include {
+            color: #50fa7b;
+        }
+
+        .stack-frame .exclude {
+            color: #ff79c6;
+        }
+
+        .stack-frame .skip {
+            color: #ff5555;
+            text-decoration: line-through;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Subsets II - Handling Duplicates</h1>
+        <p class="subtitle">Visualizing the Include/Exclude Pattern with Duplicate Skipping</p>
+
+        <div class="input-section">
+            <div class="input-group">
+                <label for="numsInput">Input Array:</label>
+                <input type="text" id="numsInput" value="1, 3, 3" placeholder="e.g., 1, 3, 3">
+                <button class="btn-primary" onclick="startVisualization()">▶ Start</button>
+                <button class="btn-secondary" onclick="resetVisualization()">↺ Reset</button>
+            </div>
+            <div class="controls">
+                <button class="btn-step" onclick="stepForward()">Step →</button>
+                <button class="btn-step" onclick="autoPlay()">Auto Play</button>
+                <button class="btn-step" onclick="pausePlay()">Pause</button>
+            </div>
+            <div class="speed-control">
+                <label>Speed:</label>
+                <input type="range" id="speedSlider" min="200" max="2000" value="1000">
+                <span id="speedLabel">1.0s</span>
+            </div>
+        </div>
+
+        <div class="visualization-area">
+            <div class="panel">
+                <h2>📊 Array State</h2>
+                <div class="array-display" id="arrayDisplay"></div>
+                <div class="current-state">
+                    <div class="state-row">
+                        <span class="state-label">Current Index:</span>
+                        <span class="state-value" id="currentIndex">-</span>
+                    </div>
+                    <div class="state-row">
+                        <span class="state-label">Current Path:</span>
+                        <span class="state-value" id="currentPath">[]</span>
+                    </div>
+                    <div class="state-row">
+                        <span class="state-label">Action:</span>
+                        <span class="state-value" id="currentAction">Ready</span>
+                    </div>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ffd700, #ffb347);"></div>
+                        <span>Current</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #90EE90, #66cc66);"></div>
+                        <span>Included</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ddd, #bbb);"></div>
+                        <span>Excluded</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: linear-gradient(135deg, #ffcccb, #f08080);"></div>
+                        <span>Skipped (Dup)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>📚 Call Stack</h2>
+                <div class="call-stack" id="callStack">
+                    <div class="stack-frame">Waiting to start...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="result-section">
+            <h2>✅ Found Subsets (<span id="subsetCount">0</span>)</h2>
+            <div class="subsets-grid" id="subsetsGrid"></div>
+        </div>
+
+        <div class="explanation-box" id="explanationBox">
+            <h3>💡 What's Happening</h3>
+            <p id="explanationText">Click "Start" to begin the visualization. We'll trace through the backtracking algorithm step by step, showing how we handle duplicates!</p>
+        </div>
+
+        <div class="key-insight">
+            <h3>🔥 Key Insight: Why Skip Duplicates in EXCLUDE Branch?</h3>
+            <ul>
+                <li><strong>When you INCLUDE element A</strong> → You might later EXCLUDE duplicate B → Creates subset with A</li>
+                <li><strong>When you EXCLUDE element A</strong> → If you INCLUDE duplicate B → Creates SAME subset!</li>
+                <li><strong>Solution:</strong> If you EXCLUDE an element, skip ALL consecutive duplicates</li>
+                <li><strong>Precondition:</strong> Array must be SORTED so duplicates are neighbors!</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let nums = [];
+        let steps = [];
+        let currentStepIndex = 0;
+        let isPlaying = false;
+        let playInterval = null;
+
+        const speedSlider = document.getElementById('speedSlider');
+        speedSlider.addEventListener('input', function() {
+            document.getElementById('speedLabel').textContent = (this.value / 1000).toFixed(1) + 's';
+        });
+
+        function parseInput() {
+            const input = document.getElementById('numsInput').value;
+            nums = input.split(',').map(x => parseInt(x.trim())).filter(x => !isNaN(x));
+            nums.sort((a, b) => a - b);
+            return nums;
+        }
+
+        function generateSteps(nums) {
+            const steps = [];
+            const result = [];
+
+            function backtrack(index, path, included, stackDepth) {
+                // Record current state
+                steps.push({
+                    type: 'visit',
+                    index: index,
+                    path: [...path],
+                    included: [...included],
+                    action: index === nums.length ? 'Base case reached - save subset!' : `At index ${index}, value = ${nums[index]}`,
+                    depth: stackDepth
+                });
+
+                if (index === nums.length) {
+                    result.push([...path]);
+                    steps.push({
+                        type: 'save',
+                        index: index,
+                        path: [...path],
+                        included: [...included],
+                        subset: [...path],
+                        action: `Saved: [${path.join(', ')}]`,
+                        depth: stackDepth
+                    });
+                    return;
+                }
+
+                // Include branch
+                steps.push({
+                    type: 'include',
+                    index: index,
+                    value: nums[index],
+                    path: [...path, nums[index]],
+                    included: [...included, index],
+                    action: `INCLUDE nums[${index}] = ${nums[index]}`,
+                    depth: stackDepth
+                });
+
+                path.push(nums[index]);
+                included.push(index);
+                backtrack(index + 1, path, included, stackDepth + 1);
+                path.pop();
+                included.pop();
+
+                // Exclude branch
+                steps.push({
+                    type: 'exclude',
+                    index: index,
+                    value: nums[index],
+                    path: [...path],
+                    included: [...included],
+                    action: `EXCLUDE nums[${index}] = ${nums[index]}`,
+                    depth: stackDepth
+                });
+
+                // Skip duplicates
+                let skipped = [];
+                let skipIndex = index;
+                while (skipIndex + 1 < nums.length && nums[skipIndex] === nums[skipIndex + 1]) {
+                    skipped.push(skipIndex + 1);
+                    skipIndex++;
+                }
+
+                if (skipped.length > 0) {
+                    steps.push({
+                        type: 'skip',
+                        index: index,
+                        skippedIndices: skipped,
+                        newIndex: skipIndex,
+                        path: [...path],
+                        included: [...included],
+                        action: `SKIP duplicates! Indices ${skipped.join(', ')} also have value ${nums[index]}. Jump to index ${skipIndex + 1}`,
+                        depth: stackDepth
+                    });
+                }
+
+                backtrack(skipIndex + 1, path, included, stackDepth + 1);
+            }
+
+            backtrack(0, [], [], 0);
+            return { steps, result };
+        }
+
+        function renderArray(step) {
+            const container = document.getElementById('arrayDisplay');
+            container.innerHTML = '';
+
+            nums.forEach((num, i) => {
+                const item = document.createElement('div');
+                item.className = 'array-item ';
+
+                if (step && step.included && step.included.includes(i)) {
+                    item.className += 'array-item-included';
+                } else if (step && step.type === 'skip' && step.skippedIndices && step.skippedIndices.includes(i)) {
+                    item.className += 'array-item-skipped';
+                } else if (step && step.index === i && step.type !== 'save') {
+                    item.className += 'array-item-current';
+                } else if (step && step.included && !step.included.includes(i) && i < (step.index || 0)) {
+                    item.className += 'array-item-excluded';
+                } else {
+                    item.className += 'array-item-normal';
+                }
+
+                item.innerHTML = `${num}<span class="index-label">[${i}]</span>`;
+                container.appendChild(item);
+            });
+        }
+
+        function renderState(step) {
+            document.getElementById('currentIndex').textContent = step ? (step.index !== undefined ? step.index : '-') : '-';
+            document.getElementById('currentPath').textContent = step ? `[${step.path.join(', ')}]` : '[]';
+            document.getElementById('currentAction').textContent = step ? step.action : 'Ready';
+        }
+
+        function renderCallStack(step) {
+            const container = document.getElementById('callStack');
+            if (!step) {
+                container.innerHTML = '<div class="stack-frame">Waiting to start...</div>';
+                return;
+            }
+
+            let html = '';
+            for (let i = 0; i <= step.depth; i++) {
+                const indent = '  '.repeat(i);
+                let frameClass = i === step.depth ? 'active' : '';
+                html += `<div class="stack-frame ${frameClass}">${indent}backtrack(${i}, [...])</div>`;
+            }
+
+            if (step.type === 'include') {
+                html += `<div class="stack-frame active"><span class="include">→ INCLUDE ${step.value}</span></div>`;
+            } else if (step.type === 'exclude') {
+                html += `<div class="stack-frame active"><span class="exclude">→ EXCLUDE ${step.value}</span></div>`;
+            } else if (step.type === 'skip') {
+                html += `<div class="stack-frame active"><span class="skip">⚠ SKIP duplicates at indices ${step.skippedIndices.join(', ')}</span></div>`;
+            } else if (step.type === 'save') {
+                html += `<div class="stack-frame active"><span class="include">✓ SAVE [${step.subset.join(', ')}]</span></div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderSubsets(step) {
+            const container = document.getElementById('subsetsGrid');
+            if (!step) {
+                container.innerHTML = '';
+                document.getElementById('subsetCount').textContent = '0';
+                return;
+            }
+
+            // Find all saved subsets up to current step
+            const saved = steps.slice(0, currentStepIndex + 1)
+                .filter(s => s.type === 'save')
+                .map(s => s.subset);
+
+            container.innerHTML = saved.map((subset, i) => {
+                const isNew = i === saved.length - 1 && step.type === 'save';
+                return `<div class="subset-item ${isNew ? 'new' : ''}">[${subset.length === 0 ? '∅' : subset.join(', ')}]</div>`;
+            }).join('');
+
+            document.getElementById('subsetCount').textContent = saved.length;
+        }
+
+        function renderExplanation(step) {
+            const box = document.getElementById('explanationText');
+            if (!step) {
+                box.textContent = 'Click "Start" to begin the visualization.';
+                return;
+            }
+
+            let text = '';
+            switch (step.type) {
+                case 'visit':
+                    if (step.index === nums.length) {
+                        text = `🎯 Reached the end of array! Current path [${step.path.join(', ')}] is a valid subset. Saving it!`;
+                    } else {
+                        text = `📍 Now at index ${step.index} with value ${nums[step.index]}. Current path: [${step.path.join(', ')}]. We'll decide to INCLUDE or EXCLUDE this element.`;
+                    }
+                    break;
+                case 'include':
+                    text = `✅ INCLUDE: Adding ${step.value} to our path. Path becomes [${step.path.join(', ')}]. Now we recurse to explore what happens with this choice.`;
+                    break;
+                case 'exclude':
+                    text = `❌ EXCLUDE: NOT adding ${step.value} to our path. We keep path as [${step.path.join(', ')}]. Before recursing, we check for duplicates...`;
+                    break;
+                case 'skip':
+                    text = `⚠️ DUPLICATE DETECTED! Since we excluded ${nums[step.index]}, we must skip ALL consecutive ${nums[step.index]}s (indices ${step.skippedIndices.join(', ')}). This prevents duplicate subsets! Jumping to index ${step.newIndex + 1}.`;
+                    break;
+                case 'save':
+                    text = `🎉 SAVED subset: [${step.subset.length === 0 ? 'empty' : step.subset.join(', ')}]! This is a unique subset we found.`;
+                    break;
+            }
+            box.textContent = text;
+        }
+
+        function renderStep(stepIndex) {
+            const step = steps[stepIndex] || null;
+            renderArray(step);
+            renderState(step);
+            renderCallStack(step);
+            renderSubsets(step);
+            renderExplanation(step);
+        }
+
+        function startVisualization() {
+            parseInput();
+            const generated = generateSteps(nums);
+            steps = generated.steps;
+            currentStepIndex = 0;
+            renderStep(0);
+        }
+
+        function resetVisualization() {
+            pausePlay();
+            currentStepIndex = 0;
+            renderStep(null);
+            document.getElementById('subsetsGrid').innerHTML = '';
+            document.getElementById('subsetCount').textContent = '0';
+        }
+
+        function stepForward() {
+            if (currentStepIndex < steps.length - 1) {
+                currentStepIndex++;
+                renderStep(currentStepIndex);
+            }
+        }
+
+        function autoPlay() {
+            if (isPlaying) return;
+            isPlaying = true;
+            const speed = parseInt(speedSlider.value);
+            playInterval = setInterval(() => {
+                if (currentStepIndex < steps.length - 1) {
+                    stepForward();
+                } else {
+                    pausePlay();
+                }
+            }, speed);
+        }
+
+        function pausePlay() {
+            isPlaying = false;
+            if (playInterval) {
+                clearInterval(playInterval);
+                playInterval = null;
+            }
+        }
+
+        // Initialize
+        parseInput();
+        renderArray(null);
+    </script>
+</body>
+</html>

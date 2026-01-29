@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hadriel's Cyclic Sort Visualization</title>
+    <style>
+        /* Ghibli-inspired Palette & Reset */
+        :root {
+            --bg-color: #f4f1ea; /* Creamy paper */
+            --text-color: #2b2b2b;
+            --box-bg: #e6e2d3;
+            --box-border: #b0a890;
+            --correct-bg: #c5e1a5; /* Soft Green */
+            --correct-border: #7cb342;
+            --wrong-bg: #ef9a9a; /* Soft Red */
+            --wrong-border: #e53935;
+            --active-border: #42a5f5; /* Soft Blue */
+            --btn-primary: #5d4037; /* Brown earth tone */
+            --btn-hover: #4e342e;
+            --btn-disabled: #a1887f;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #3e2723;
+            margin-bottom: 5px;
+            font-size: 2.5rem;
+        }
+
+        .subtitle {
+            color: #5d4037;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            font-style: italic;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(93, 64, 55, 0.15);
+            text-align: center;
+            max-width: 800px;
+            width: 90%;
+            border: 1px solid #d7ccc8;
+        }
+
+        .array-container {
+            display: flex;
+            justify-content: center;
+            margin: 40px 0;
+            gap: 20px;
+            perspective: 1000px;
+        }
+
+        .element-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .index-label {
+            font-size: 16px;
+            color: #8d6e63;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-family: monospace;
+        }
+
+        .box {
+            width: 80px;
+            height: 80px;
+            background: var(--box-bg);
+            border: 4px solid var(--box-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 800;
+            color: #5d4037;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        /* States */
+        .box.correct {
+            background: var(--correct-bg);
+            border-color: var(--correct-border);
+            color: #1b5e20;
+            transform: scale(1.05);
+        }
+
+        .box.wrong {
+            background: var(--wrong-bg);
+            border-color: var(--wrong-border);
+            color: #b71c1c;
+        }
+
+        .box.active {
+            border-color: var(--active-border);
+            transform: translateY(-10px) scale(1.1);
+            box-shadow: 0 15px 25px rgba(66, 165, 245, 0.3);
+            z-index: 10;
+        }
+
+        .controls {
+            margin-top: 30px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 14px 28px;
+            font-size: 18px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        button:active { transform: scale(0.95); }
+
+        #nextBtn {
+            background-color: var(--btn-primary);
+            color: white;
+        }
+        #nextBtn:hover { background-color: var(--btn-hover); }
+        #nextBtn:disabled { background-color: var(--btn-disabled); cursor: not-allowed; }
+
+        #resetBtn {
+            background-color: #eceff1;
+            color: #546e7a;
+        }
+        #resetBtn:hover { background-color: #cfd8dc; }
+
+        .explanation-box {
+            min-height: 100px;
+            margin-top: 25px;
+            padding: 20px;
+            background: #fff8e1; /* Light yellow note */
+            border-left: 5px solid #ffb300;
+            text-align: left;
+            border-radius: 8px;
+            font-size: 18px;
+            line-height: 1.6;
+            color: #4e342e;
+        }
+
+        .highlight-val { color: #d81b60; font-weight: bold; background: #fce4ec; padding: 0 4px; border-radius: 4px; }
+        .highlight-idx { color: #1565c0; font-weight: bold; background: #e3f2fd; padding: 0 4px; border-radius: 4px; }
+        .success-text { color: #2e7d32; font-weight: bold; }
+
+    </style>
+</head>
+<body>
+
+    <h1>🌀 Cyclic Sort Visualization</h1>
+    <p class="subtitle">"Mày số mấy? Về đúng cái nhà số đó ngay!"</p>
+
+    <div class="container">
+        <div class="array-container" id="arrayContainer"></div>
+
+        <div class="explanation-box" id="explanation">
+            👋 <b>Welcome!</b><br>
+            We have numbers 1 to 5. They must go to Index 0 to 4.<br>
+            Click <b>"Next Step"</b> to start sorting!
+        </div>
+
+        <div class="controls">
+            <button id="resetBtn" onclick="reset()">Reset ↺</button>
+            <button id="nextBtn" onclick="nextStep()">Next Step ➡️</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Configuration
+        // Correct index for Value X is X-1
+        let nums = [3, 1, 5, 4, 2];
+        const originalNums = [3, 1, 5, 4, 2];
+        let i = 0;
+        let stepState = 'check'; // 'check' -> 'swap' -> 'move'
+
+        function render() {
+            const container = document.getElementById('arrayContainer');
+            container.innerHTML = '';
+            
+            nums.forEach((val, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'element-wrapper';
+                
+                const label = document.createElement('div');
+                label.className = 'index-label';
+                label.innerText = `Idx ${idx}`;
+                
+                const box = document.createElement('div');
+                box.className = 'box';
+                box.innerText = val;
+                box.id = `box-${idx}`;
+                
+                // Visual status: Green if in correct spot (val == idx + 1)
+                if (val === idx + 1) {
+                    box.classList.add('correct');
+                } 
+                // Blue outline if we are currently inspecting this index (i)
+                else if (idx === i && stepState !== 'done') {
+                   box.style.borderWidth = '4px';
+                   box.style.borderColor = '#42a5f5'; 
+                }
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(box);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function updateExplanation(text) {
+            document.getElementById('explanation').innerHTML = text;
+        }
+
+        function highlight(idx, type) {
+            const el = document.getElementById(`box-${idx}`);
+            if(el) {
+                if(type === 'wrong') el.classList.add('wrong');
+                if(type === 'active') el.classList.add('active');
+            }
+        }
+
+        function reset() {
+            nums = [...originalNums];
+            i = 0;
+            stepState = 'check';
+            render();
+            updateExplanation('🔄 Reset!<br>Click "Next Step" to start again.');
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('nextBtn').innerText = "Next Step ➡️";
+        }
+
+        async function nextStep() {
+            render();
+            
+            if (i >= nums.length) {
+                updateExplanation("🎉 <span class='success-text'>DONE!</span> All numbers are in their correct homes.<br>Array is sorted!");
+                document.getElementById('nextBtn').disabled = true;
+                return;
+            }
+
+            const currentVal = nums[i];
+            const correctIdx = currentVal - 1; // Formula for Range 1-N
+
+            if (stepState === 'check') {
+                highlight(i, 'active');
+                
+                if (nums[i] !== nums[correctIdx]) {
+                    // Need to swap
+                    updateExplanation(`
+                        👀 Inspecting <b>Index ${i}</b>.<br>
+                        Person <span class="highlight-val">${currentVal}</span> is here.<br>
+                        Their correct home is <b>Index ${correctIdx}</b>.<br>
+                        👉 <b>SWAP</b> them to their home!
+                    `);
+                    
+                    // Highlight target briefly to show where it's going
+                    setTimeout(() => {
+                        const targetBox = document.getElementById(`box-${correctIdx}`);
+                        if(targetBox) targetBox.classList.add('wrong'); // Red indicating "intruder" being kicked out
+                    }, 100);
+
+                    stepState = 'swap';
+                } else {
+                    // Already correct
+                    if (nums[i] === i + 1) {
+                         updateExplanation(`
+                            ✅ Person <span class="highlight-val">${currentVal}</span> is at <b>Index ${i}</b>.<br>
+                            This is the correct home.<br>
+                            👉 <b>Move to next house!</b>
+                         `);
+                    } else {
+                        // Duplicate case (not in this dataset, but for completeness)
+                         updateExplanation(`Duplicate found. Moving on.`);
+                    }
+                    stepState = 'move';
+                }
+
+            } else if (stepState === 'swap') {
+                // Perform swap logic
+                [nums[i], nums[correctIdx]] = [nums[correctIdx], nums[i]];
+                render();
+                
+                // Highlight the swapped element (now correct)
+                const newHomeBox = document.getElementById(`box-${correctIdx}`);
+                if(newHomeBox) newHomeBox.classList.add('correct');
+
+                // Highlight current pos again because we got a NEW person
+                highlight(i, 'active');
+                
+                updateExplanation(`
+                    🔄 <b>Swapped!</b><br>
+                    Person <span class="highlight-val">${currentVal}</span> is now safe at Index ${correctIdx}.<br>
+                    ⚠️ But who did we get back at Index ${i}?<br>
+                    <b>Check Index ${i} again!</b> (Don't move i yet)
+                `);
+                stepState = 'check'; // IMPORTANT: Check index i again
+                
+            } else if (stepState === 'move') {
+                i++;
+                render();
+                if (i < nums.length) {
+                    highlight(i, 'active');
+                    updateExplanation(`🚶 Moving to <b>Index ${i}</b>...`);
+                    stepState = 'check';
+                } else {
+                    nextStep(); // Finish trigger
+                }
+            }
+        }
+
+        // Initial Render
+        render();
+    </script>
+</body>
+</html>

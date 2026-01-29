@@ -122,19 +122,7 @@ Use subsets when you need to:
 * ✨ Make **independent yes/no decisions**
 * ✨ Partition a set into groups
 * **Find combinations** that meet certain criteria
-* ✨ Explore **all include/exclude possibilities**
-
----
-
-### 🌍 Real-World Scenarios
-
-| Scenario          | Subset Application       |
-| ----------------- | ------------------------ |
-| 🍕 Pizza toppings | All topping combinations |
-| 💼 Job offers     | Choosing among offers    |
-| 🎒 Backpack       | Knapsack-style selection |
-| 💰 Coins          | All sum combinations     |
-| 👥 Teams          | Team formation           |
+* ✨ Explore **all include/exclude possibilities
 
 ---
 
@@ -179,25 +167,6 @@ Question 4: Each element used AT MOST once?
 ```
 
 ✅ **Subset problem!**
-
----
-
-### 🌳 Visual Decision Tree
-
-```
-Problem about elements?
-        ↓
-Need to select?
-        ↓
-Does order matter?
-     YES     NO
-     ↓       ↓
-Permutation  Continue
-             ↓
-         Need ALL ways?
-             ↓
-          SUBSET 🎯
-```
 
 ---
 

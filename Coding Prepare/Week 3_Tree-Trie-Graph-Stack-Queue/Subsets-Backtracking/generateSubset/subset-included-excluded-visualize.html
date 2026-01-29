@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Subset Forge 2.0 🔥</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vscode-bg: #282c34;
+            --vscode-line-highlight: rgba(255, 255, 255, 0.05);
+            --vscode-keyword: #c678dd;
+            --vscode-func: #61afef;
+            --vscode-string: #98c379;
+            --vscode-comment: #7f848e;
+            --vscode-num: #d19a66;
+            --vscode-param: #e06c75;
+            --ghibli-parchment: #FDFBF7;
+            --forge-orange: #FF9F1C;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--ghibli-parchment);
+            color: #434343;
+        }
+        .font-code { font-family: 'Fira Code', monospace; }
+        
+        /* Resizable Dividers */
+        .resizer {
+            position: relative;
+            cursor: col-resize;
+            width: 6px;
+            background: linear-gradient(90deg, transparent 0%, #cbd5e1 50%, transparent 100%);
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .resizer:hover {
+            background: linear-gradient(90deg, transparent 0%, #FF9F1C 50%, transparent 100%);
+        }
+        .resizer::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 3px;
+            height: 40px;
+            background: #94a3b8;
+            border-radius: 3px;
+            opacity: 0.5;
+        }
+        .resizer:hover::before {
+            background: #FF9F1C;
+            opacity: 1;
+        }
+
+        /* VS Code Theming */
+        .vscode-editor {
+            background-color: var(--vscode-bg);
+            color: #abb2bf;
+            font-family: 'Fira Code', monospace;
+            border-radius: 0;
+        }
+        .token-keyword { color: var(--vscode-keyword); }
+        .token-func { color: var(--vscode-func); }
+        .token-comment { color: var(--vscode-comment); font-style: italic; }
+        .token-num { color: var(--vscode-num); }
+        .token-param { color: var(--vscode-param); }
+        
+        .line-active {
+            background-color: var(--vscode-line-highlight);
+            position: relative;
+        }
+        .line-active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background-color: var(--forge-orange);
+        }
+
+        /* Tree Visualization */
+        .tree-node {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 24px;
+            transition: all 0.3s ease;
+        }
+        .tree-line-v {
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #E2E8F0;
+            border-radius: 2px;
+        }
+        .tree-line-h {
+            position: absolute;
+            left: 10px;
+            top: 14px;
+            width: 18px;
+            height: 2px;
+            background: #E2E8F0;
+            border-radius: 2px;
+        }
+        .active-branch > .tree-line-v, 
+        .active-branch > .tree-line-h {
+            background: var(--forge-orange) !important;
+            box-shadow: 0 0 8px rgba(255, 159, 28, 0.4);
+        }
+        .depth-badge {
+            position: absolute;
+            left: -48px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 900;
+            font-size: 10px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+            min-width: 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .depth-badge.return-target {
+            background: linear-gradient(135deg, #84cc16 0%, #65a30d 100%) !important;
+            box-shadow: 0 6px 20px rgba(132, 204, 22, 0.8) !important;
+            transform: translateY(-50%) scale(1.3) !important;
+            animation: targetGlow 0.8s ease-in-out infinite;
+            border: 3px solid #bef264;
+            font-size: 12px;
+        }
+        @keyframes targetGlow {
+            0%, 100% { 
+                box-shadow: 0 6px 20px rgba(132, 204, 22, 0.8);
+                transform: translateY(-50%) scale(1.3);
+            }
+            50% { 
+                box-shadow: 0 8px 30px rgba(132, 204, 22, 1);
+                transform: translateY(-50%) scale(1.35);
+            }
+        }
+        /* State Badges - Redesigned for Maximum Visibility */
+        .state-badge-container {
+            position: absolute;
+            top: -45px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 25;
+            pointer-events: none;
+        }
+
+        /* BLUE - Standing/Exploring at this node */
+        .standing-here-badge {
+            background: #3b82f6;
+            color: white;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 10px 18px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.6),
+                        0 0 0 4px rgba(59, 130, 246, 0.2);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: standingPulse 1.5s ease-in-out infinite;
+            border: 3px solid #93c5fd;
+        }
+        @keyframes standingPulse {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(59, 130, 246, 0.6),
+                            0 0 0 4px rgba(59, 130, 246, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 12px 32px rgba(59, 130, 246, 0.9),
+                            0 0 0 6px rgba(59, 130, 246, 0.3);
+                transform: scale(1.05);
+            }
+        }
+        .standing-icon {
+            font-size: 16px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* RED - Returning FROM this node */
+        .return-from-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 10px 18px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.6),
+                        0 0 0 4px rgba(239, 68, 68, 0.2);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: returnFromPulse 1.2s ease-in-out infinite;
+            border: 3px solid #fca5a5;
+        }
+        @keyframes returnFromPulse {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(239, 68, 68, 0.6),
+                            0 0 0 4px rgba(239, 68, 68, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 12px 32px rgba(239, 68, 68, 0.9),
+                            0 0 0 6px rgba(239, 68, 68, 0.3);
+                transform: scale(1.05);
+            }
+        }
+        .return-from-icon {
+            font-size: 18px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* GREEN - Landing/Arriving AT this node */
+        .landing-here-badge {
+            background: #22c55e;
+            color: white;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 10px 18px;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(34, 197, 94, 0.6),
+                        0 0 0 4px rgba(34, 197, 94, 0.2);
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: landingPulse 1.2s ease-in-out infinite;
+            border: 3px solid #86efac;
+        }
+        @keyframes landingPulse {
+            0%, 100% {
+                box-shadow: 0 8px 24px rgba(34, 197, 94, 0.6),
+                            0 0 0 4px rgba(34, 197, 94, 0.2);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 12px 32px rgba(34, 197, 94, 0.9),
+                            0 0 0 6px rgba(34, 197, 94, 0.3);
+                transform: scale(1.05);
+            }
+        }
+        .landing-icon {
+            font-size: 18px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+        }
+
+        /* Visual indicator for active node background */
+        .node-wrapper.with-badge {
+            background: rgba(59, 130, 246, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin: -12px;
+        }
+        .node-wrapper.with-return-badge {
+            background: rgba(239, 68, 68, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin: -12px;
+        }
+        .node-wrapper.with-landing-badge {
+            background: rgba(34, 197, 94, 0.05);
+            padding: 12px;
+            border-radius: 12px;
+            margin: -12px;
+        }
+        .node-wrapper {
+            position: relative;
+            margin-left: 50px;
+        }
+        .node-label {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 14px;
+            border-radius: 6px;
+            background: white;
+            border: 1px solid #E2E8F0;
+            font-size: 13px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .active-label {
+            background: var(--forge-orange) !important;
+            color: white !important;
+            border-color: var(--forge-orange) !important;
+            transform: scale(1.05) translateX(5px);
+            box-shadow: 0 4px 12px rgba(255, 159, 28, 0.3);
+            font-weight: 800;
+        }
+        .standing-after-return-label {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+            color: white !important;
+            border: 3px solid #6ee7b7 !important;
+            transform: scale(1.08) translateX(5px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            font-weight: 800;
+            animation: standingGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes standingGlow {
+            0%, 100% {
+                box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+            }
+            50% {
+                box-shadow: 0 8px 28px rgba(16, 185, 129, 0.8);
+            }
+        }
+
+        /* Stack Frames */
+        .stack-frame {
+            width: 100%;
+            border-radius: 10px;
+            background: white;
+            border: 2px solid #E2E8F0;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .stack-frame.active {
+            border-color: var(--forge-orange);
+            background: #FFFBF0;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px -4px rgba(255, 159, 28, 0.2);
+        }
+
+        /* Animations */
+        @keyframes ghibli-float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-ghibli { animation: ghibli-float 4s ease-in-out infinite; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- Header with Controls & Global State -->
+    <header class="h-20 bg-[#1e2227] text-white flex items-center justify-between px-8 shadow-2xl z-50 border-b border-white/10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-[#FF9F1C] rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <i data-lucide="sparkles" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-lg tracking-tight">The Subset Forge <span class="text-orange-400 text-xs font-medium bg-orange-400/10 px-2 py-0.5 rounded ml-2">v2.1 PRO</span></h1>
+                <p class="text-[10px] text-slate-500 font-code tracking-widest uppercase">Visualizing Recursive Combinations</p>
+            </div>
+        </div>
+
+        <!-- Global State in Header -->
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3 bg-white/5 rounded-xl px-4 py-2 border border-white/10">
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold">Current Depth</span>
+                    <span id="current-depth" class="text-xl font-black text-purple-400 font-code">0</span>
+                </div>
+                <div class="w-px h-10 bg-white/10"></div>
+                <div class="flex flex-col items-center min-w-[80px]">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold">Branch</span>
+                    <span id="current-branch" class="text-sm font-black text-cyan-400 font-code">Root</span>
+                </div>
+                <div class="w-px h-10 bg-white/10"></div>
+                <div class="flex flex-col items-center">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold">Index</span>
+                    <span id="reg-index" class="text-xl font-black text-orange-400 font-code">0</span>
+                </div>
+                <div class="w-px h-10 bg-white/10"></div>
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-slate-400 uppercase font-bold mb-1">Path</span>
+                    <div id="reg-path" class="flex gap-1.5 min-h-[24px]">
+                        <!-- Path items -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center bg-white/5 rounded-full p-1.5 border border-white/10 shadow-inner">
+                <button onclick="resetSim()" class="p-2 hover:bg-white/10 rounded-full transition-all text-slate-400 hover:text-white"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>
+                <button onclick="prevStep()" class="p-2 hover:bg-white/10 rounded-full transition-all text-slate-400 hover:text-white"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+                <button id="play-btn" onclick="togglePlay()" class="mx-2 px-6 py-2 bg-[#FF9F1C] rounded-full text-xs font-black uppercase flex items-center gap-2 hover:bg-[#e08e1a] shadow-lg shadow-orange-500/20 active:scale-95 transition-all">
+                    <i data-lucide="play" class="w-4 h-4 fill-current"></i> Play
+                </button>
+                <button onclick="nextStep()" class="p-2 hover:bg-white/10 rounded-full transition-all text-slate-400 hover:text-white"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        
+        <!-- LEFT PANEL: Code + Stack (Vertically Split) -->
+        <aside id="left-panel" class="bg-[#282C34] flex flex-col z-40 shrink-0" style="width: 400px;">
+            <!-- VS Code Section -->
+            <div class="flex-1 flex flex-col overflow-hidden border-b border-white/10">
+                <div class="h-10 bg-[#21252b] flex items-center px-4 border-b border-black/20">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="file-code" class="w-3 h-3 text-orange-400"></i>
+                        <span class="text-[11px] text-slate-300 font-semibold">subset_solver.py</span>
+                    </div>
+                </div>
+                <div id="code-panel" class="vscode-editor flex-1 overflow-auto p-4 text-[13px] leading-[1.6]">
+                    <!-- Colored Code -->
+                </div>
+            </div>
+
+            <!-- Stack Section -->
+            <div class="flex-1 flex flex-col overflow-hidden bg-[#1e2227]">
+                <div class="p-3 bg-[#21252b] border-b border-white/5 flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="layers" class="w-4 h-4 text-slate-500"></i>
+                        <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Call Stack</span>
+                    </div>
+                    <span id="stack-depth" class="text-[10px] bg-white/5 px-2 py-0.5 rounded-full text-slate-400 font-code">0</span>
+                </div>
+                <div id="stack-visual" class="flex-1 overflow-y-auto p-3 space-y-2">
+                    <!-- Stack Frames -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Resizer -->
+        <div class="resizer" id="resizer-1"></div>
+
+        <!-- CENTER PANEL: Decision Tree + Results -->
+        <section id="center-panel" class="flex flex-col bg-[#FDFBF7] relative overflow-hidden" style="flex: 1;">
+            <div class="h-12 border-b flex items-center px-6 bg-white/70 backdrop-blur z-10 justify-between">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="git-branch" class="w-4 h-4 text-slate-400"></i>
+                    <span class="text-[11px] font-black uppercase text-slate-500 tracking-widest">Decision Tree</span>
+                </div>
+                <div id="status-bubble" class="px-3 py-1 bg-white rounded-full border shadow-sm text-xs font-bold text-indigo-600 flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                    <span>Initializing...</span>
+                </div>
+            </div>
+            
+            <div id="tree-container" class="flex-1 overflow-auto p-8 font-code">
+                <!-- The Indented Tree -->
+            </div>
+
+            <!-- Results Footer -->
+            <div class="h-32 bg-white border-t border-slate-200 p-4 shrink-0 flex flex-col shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+                <h3 class="text-[10px] font-black uppercase text-slate-400 mb-3 tracking-widest flex items-center gap-2">
+                    <i data-lucide="check-square" class="w-3 h-3"></i> Found Subsets
+                </h3>
+                <div id="results-shelf" class="flex-1 overflow-auto flex flex-wrap content-start gap-2">
+                    <!-- Found subsets -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Resizer -->
+        <div class="resizer" id="resizer-2"></div>
+
+        <!-- RIGHT PANEL: Action Log -->
+        <aside id="right-panel" class="bg-[#1e2227] flex flex-col z-40 shrink-0" style="width: 380px;">
+            <div class="p-3 bg-[#21252b] border-b border-white/5 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="activity" class="w-4 h-4 text-slate-500"></i>
+                    <span class="text-[10px] font-black uppercase text-slate-400 tracking-widest">Execution Log</span>
+                </div>
+                <span class="text-[9px] text-slate-600 font-bold">LIVE</span>
+            </div>
+            <div id="action-log" class="flex-1 overflow-auto p-4 space-y-2 font-code text-[12px]">
+                <!-- Insight entries -->
+            </div>
+        </aside>
+
+    </main>
+
+    <script>
+        // --- RESIZABLE PANELS ---
+        let isResizing = false;
+        let currentResizer = null;
+
+        document.getElementById('resizer-1').addEventListener('mousedown', (e) => {
+            isResizing = true;
+            currentResizer = 'left';
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.getElementById('resizer-2').addEventListener('mousedown', (e) => {
+            isResizing = true;
+            currentResizer = 'right';
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            if (currentResizer === 'left') {
+                const leftPanel = document.getElementById('left-panel');
+                const newWidth = e.clientX;
+                if (newWidth >= 300 && newWidth <= 800) {
+                    leftPanel.style.width = newWidth + 'px';
+                }
+            } else if (currentResizer === 'right') {
+                const rightPanel = document.getElementById('right-panel');
+                const newWidth = window.innerWidth - e.clientX;
+                if (newWidth >= 300 && newWidth <= 800) {
+                    rightPanel.style.width = newWidth + 'px';
+                }
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                currentResizer = null;
+                document.body.style.cursor = 'default';
+            }
+        });
+
+        // --- VS CODE THEME SETUP ---
+        const CODE_SNIPPET = [
+            [{ t: "def ", c: "keyword" }, { t: "backtrack", c: "func" }, { t: "(index, path):", c: "" }],
+            [{ t: "    # Base Case: end reached", c: "comment" }],
+            [{ t: "    if ", c: "keyword" }, { t: "index == ", c: "" }, { t: "len(nums)", c: "func" }, { t: ":", c: "" }],
+            [{ t: "        res.append(path[:])", c: "" }],
+            [{ t: "        return", c: "keyword" }],
+            [{ t: "", c: "" }],
+            [{ t: "    # Choice 1: INCLUDE", c: "comment" }],
+            [{ t: "    path.append(nums[index])", c: "" }],
+            [{ t: "    ", c: "" }, { t: "backtrack", c: "func" }, { t: "(index + 1, path)", c: "" }],
+            [{ t: "", c: "" }],
+            [{ t: "    # Choice 2: EXCLUDE", c: "comment" }],
+            [{ t: "    path.pop()", c: "" }, { t: "  # Backtrack", c: "comment" }],
+            [{ t: "    ", c: "" }, { t: "backtrack", c: "func" }, { t: "(index + 1, path)", c: "" }]
+        ];
+
+        const NUMS = [1, 2, 3];
+        
+        // --- STEP GENERATION ---
+        let steps = [];
+        let results = [];
+
+        function generateSteps() {
+            steps = [];
+            results = [];
+            let stack = [];
+            let path = [];
+
+            function record(line, action, insight, type='info', explicitReturnDepth = null, isBacktracking = false) {
+                const currentDepth = stack.length - 1;
+                let returnToDepth = -1;
+                if (type === 'return' || type === 'warn') {
+                    // When returning, the target is the depth we'll be at AFTER the current frame pops
+                    returnToDepth = explicitReturnDepth !== null ? explicitReturnDepth : (stack.length >= 2 ? stack.length - 2 : -1);
+                }
+
+                // CRITICAL FIX: For tree node matching, we need the path TO this node, not including current node's decision
+                // Tree node at depth N has pathStr built from decisions at depths 0 to N-1
+                // Example: Node "(index=2) Include 2" has pathStr="LL" (decisions from depths 0,1)
+                // But stack at depth 2 has decisions ['L', 'L', 'L'] if we've set frame2.decision='L'
+                // So we exclude the current frame's decision for proper matching
+                const pathToCurrentNode = stack.slice(0, -1).map(s => s.decision).filter(d => d).join('');
+                const fullPath = stack.map(s => s.decision).filter(d => d).join('');
+
+                steps.push({
+                    line, action, insight,
+                    index: stack.length > 0 ? stack[stack.length-1].index : 0,
+                    path: [...path],
+                    stack: JSON.parse(JSON.stringify(stack)),
+                    results: [...results],
+                    type,
+                    activePathStr: pathToCurrentNode,  // Use path TO current node
+                    fullPathStr: fullPath,              // Keep full path for reference
+                    currentDepth: currentDepth,
+                    isReturning: type === 'return' || type === 'warn',
+                    returnToDepth: returnToDepth,
+                    phase: (type === 'return' || type === 'warn') ? 'RETURNING' : 'EXPLORING',
+                    isBacktracking: isBacktracking
+                });
+            }
+
+            function solve(index) {
+                const name = `backtrack(idx=${index}, path=[${path}])`;
+                stack.push({ index, name, path: [...path], decision: null });
+                const currentDepth = stack.length - 1;
+
+                // ENTERING NEW FRAME
+                const elementToDecide = index < NUMS.length ? `nums[${index}] = ${NUMS[index]}` : '(none - base case)';
+                record(0, `📍 Enter Depth ${currentDepth}`, `════════════════════════════════\nbacktrack(${index}, [${path.join(', ') || 'empty'}])\n════════════════════════════════\nPosition:\n  • Depth: ${currentDepth}\n  • Index: ${index}\n  • Path so far: [${path.join(', ') || 'empty'}]\n\nDecision to make:\n  • ${index < NUMS.length ? `Include or Exclude ${NUMS[index]}?` : 'None - reached base case'}`, 'call');
+
+                record(2, `❓ Check: index == len(nums)?`, `if index == len(nums):\n  ${index} == ${NUMS.length}?\n  Result: ${index === NUMS.length ? '✓ YES - BASE CASE!' : '✗ NO - Continue'}\n\n${index === NUMS.length ? '→ All elements processed, save subset' : `→ Still have ${NUMS.length - index} element(s) to process`}`, 'info');
+                
+                if (index === NUMS.length) {
+                    results.push([...path]);
+                    const targetDepth = currentDepth - 1;
+                    const targetIndex = targetDepth >= 0 && stack[targetDepth] ? stack[targetDepth].index : 0;
+
+                    record(3, `✅ Save Subset`, `res.append(path[:])\n  → Saving: [${path.join(', ') || 'empty'}]\n  → Total subsets found: ${results.length}`, 'success');
+
+                    const parentBranch = targetDepth >= 0 && stack[targetDepth] ? (stack[targetDepth].decision === 'L' ? 'Include' : 'Exclude') : '';
+                    record(4, `⬆️ RETURN to Depth ${targetDepth}`, `════════════════════════════════\nLEAF NODE - BASE CASE\n════════════════════════════════\nLeaving:\n  • Depth ${currentDepth} (LEAF)\n  • Subset [${path.join(', ') || 'empty'}] saved ✓\n\nReturning to parent:\n  • Depth ${targetDepth} (index=${targetIndex})\n  • Continue exploring ${parentBranch} branch`, 'return', targetDepth);
+                    stack.pop();
+                    return;
+                }
+
+                record(7, `➊ INCLUDE ${NUMS[index]}`, `════════════════════════════════\nDECISION: Include nums[${index}] = ${NUMS[index]}\n════════════════════════════════\nAt Depth ${currentDepth}:\n  path.append(${NUMS[index]})\n  Path: [${path.join(', ') || 'empty'}] → `, 'push');
+                path.push(NUMS[index]);
+                record(7, `→ Path = [${path.join(', ')}]`, `  Path: [${path.join(', ')}]\n\nExplore all subsets that INCLUDE ${NUMS[index]}`, 'push');
+
+                stack[stack.length-1].decision = 'L';
+                record(8, `🔽 Recurse (Include ${NUMS[index]})`, `Call: backtrack(${index + 1}, [${path.join(', ')}])\n\n  Depth ${currentDepth} → Depth ${currentDepth + 1}\n  Index ${index} → Index ${index + 1}\n\nExploring Include-${NUMS[index]} subtree...`, 'call');
+                solve(index + 1);
+
+                const pathBeforePop = path.join(', ');
+                record(11, `🔙 Back at Depth ${currentDepth}`, `════════════════════════════════\nInclude-${NUMS[index]} subtree DONE ✓\n════════════════════════════════\nReturned to Depth ${currentDepth}:\n  • Path: [${pathBeforePop}]\n  • All subsets with ${NUMS[index]} found\n\nBacktrack: undo path.append(${NUMS[index]})`, 'info', null, true);
+                path.pop();
+                record(11, `✖ path.pop()`, `path.pop() removes ${NUMS[index]}:\n  [${pathBeforePop}] → [${path.join(', ') || 'empty'}]\n\nStill at Depth ${currentDepth}, Index ${index}\nReady for: Exclude-${NUMS[index]} subtree`, 'info', null, true);
+
+                stack[stack.length-1].decision = 'R';
+                record(12, `➋ EXCLUDE ${NUMS[index]}`, `════════════════════════════════\nDECISION: Exclude nums[${index}] = ${NUMS[index]}\n════════════════════════════════\nAt Depth ${currentDepth}:\n  Path unchanged: [${path.join(', ') || 'empty'}]\n\nExplore all subsets that EXCLUDE ${NUMS[index]}`, 'call');
+                record(12, `🔽 Recurse (Exclude ${NUMS[index]})`, `Call: backtrack(${index + 1}, [${path.join(', ') || 'empty'}])\n\n  Depth ${currentDepth} → Depth ${currentDepth + 1}\n  Index ${index} → Index ${index + 1}\n\nExploring Exclude-${NUMS[index]} subtree...`, 'call');
+                solve(index + 1);
+
+                const targetDepth2 = currentDepth - 1;
+                const targetIndex2 = targetDepth2 >= 0 && stack[targetDepth2] ? stack[targetDepth2].index : 0;
+                const currentPathDisplay = path.join(', ') || 'empty';
+
+                record(12, `⬆️ Return to Depth ${targetDepth2}`, `════════════════════════════════\nDepth ${currentDepth} DONE for path [${currentPathDisplay}]\n════════════════════════════════\nCompleted at Depth ${currentDepth}, Index ${index}:\n  ✓ Include-${NUMS[index]} subtree done\n  ✓ Exclude-${NUMS[index]} subtree done\n  → All subsets with prefix [${currentPathDisplay}] found\n\nReturning to:\n  Depth ${targetDepth2}, Index ${targetIndex2}`, 'return', targetDepth2);
+                stack.pop();
+            }
+
+            solve(0);
+        }
+
+        generateSteps();
+
+        // --- RENDER ENGINE ---
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval;
+
+        function render() {
+            const s = steps[currentStep];
+            if (!s) return;
+
+            // Global State
+            document.getElementById('current-depth').innerText = s.currentDepth;
+
+            // Determine current branch - which branch did we take to GET HERE?
+            // Look at the LAST decision in the path, not the current frame's decision
+            let branchText = 'Root';
+            if (s.activePathStr.length > 0) {
+                const lastDecision = s.activePathStr[s.activePathStr.length - 1];
+                branchText = lastDecision === 'L' ? 'Include' : 'Exclude';
+            }
+            document.getElementById('current-branch').innerText = branchText;
+            document.getElementById('current-branch').style.color = branchText === 'Include' ? '#22c55e' : (branchText === 'Exclude' ? '#ef4444' : '#06b6d4');
+
+            document.getElementById('reg-index').innerText = s.index;
+            const pathEl = document.getElementById('reg-path');
+            pathEl.innerHTML = s.path.length === 0 ? '<span class="text-slate-500 italic text-[10px]">[]</span>' :
+                s.path.map(n => `<div class="w-6 h-6 bg-orange-500 text-white rounded text-xs font-black flex items-center justify-center">${n}</div>`).join('');
+
+            document.getElementById('status-bubble').querySelector('span:last-child').innerText = s.action;
+
+            // Stack Frames
+            const stackVisual = document.getElementById('stack-visual');
+            document.getElementById('stack-depth').innerText = s.stack.length;
+            
+            stackVisual.innerHTML = s.stack.map((frame, idx) => {
+                const isActive = idx === s.stack.length - 1;
+                const depthLevel = idx;
+                const pathStr = frame.path.length > 0 ? frame.path.join(', ') : '';
+                return `
+                    <div class="stack-frame ${isActive ? 'active' : ''}">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[11px] font-bold ${isActive ? 'text-orange-600' : 'text-slate-700'} tracking-wider">DEPTH ${depthLevel}</span>
+                            <div class="w-2.5 h-2.5 rounded-full ${isActive ? 'bg-orange-500 animate-pulse shadow-lg shadow-orange-500/50' : 'bg-slate-300'}"></div>
+                        </div>
+                        <div class="font-code ${isActive ? 'text-slate-900' : 'text-slate-800'} leading-relaxed" style="font-size: 13px; font-weight: 500;">
+                            <span class="${isActive ? 'text-indigo-700' : 'text-indigo-700'} font-semibold">backtrack</span><span class="${isActive ? 'text-slate-700' : 'text-slate-700'}">(</span><span class="${isActive ? 'text-orange-700' : 'text-orange-700'}">index=${frame.index}</span><span class="${isActive ? 'text-slate-700' : 'text-slate-700'}">, </span><span class="${isActive ? 'text-emerald-700' : 'text-emerald-700'}">path=[${pathStr}]</span><span class="${isActive ? 'text-slate-700' : 'text-slate-700'}">)</span>
+                        </div>
+                    </div>
+                `;
+            }).reverse().join('');
+
+            // Tree
+            renderTree(s);
+
+            // Code
+            const codePanel = document.getElementById('code-panel');
+            codePanel.innerHTML = CODE_SNIPPET.map((lineTokens, idx) => {
+                const active = idx === s.line;
+                let lineNo = `<span class="inline-block w-8 text-right mr-6 text-slate-600 select-none text-[11px]">${idx}</span>`;
+                
+                let content = lineTokens.map(tok => {
+                    let text = tok.t.replace(/ /g, '&nbsp;');
+                    return tok.c ? `<span class="token-${tok.c}">${text}</span>` : text;
+                }).join('');
+                
+                return `<div class="px-2 border-l-2 transition-all ${active ? 'line-active' : 'border-transparent'}">${lineNo}${content}</div>`;
+            }).join('');
+            
+            const activeLine = codePanel.children[s.line];
+            if (activeLine) activeLine.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            // Results
+            const shelf = document.getElementById('results-shelf');
+            shelf.innerHTML = s.results.map(res => `
+                <div class="px-2 py-1 bg-indigo-600 text-white rounded text-xs font-bold shadow-md">
+                    [${res.join(', ')}]
+                </div>
+            `).join('');
+
+            // Log
+            const logPanel = document.getElementById('action-log');
+            const logs = steps.slice(0, currentStep + 1).slice(-30);
+            logPanel.innerHTML = logs.map(log => {
+                const colorMap = {
+                    'call': 'text-blue-400',
+                    'push': 'text-emerald-400',
+                    'success': 'text-orange-400 font-black',
+                    'warn': 'text-amber-400',
+                    'return': 'text-rose-400'
+                };
+                const color = colorMap[log.type] || 'text-slate-400';
+                let phaseTag = '';
+                let borderColor = '';
+
+                if (log.phase === 'RETURNING') {
+                    phaseTag = '<span class="bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded text-[8px] font-black mr-1">RETURN</span>';
+                    borderColor = 'border-rose-500/50';
+                } else if (log.isBacktracking) {
+                    phaseTag = '<span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded text-[8px] font-black mr-1">BACKTRACK</span>';
+                    borderColor = 'border-emerald-500/50';
+                } else {
+                    phaseTag = '<span class="bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded text-[8px] font-black mr-1">EXPLORE</span>';
+                    borderColor = 'border-blue-500/30';
+                }
+
+                // Convert newlines to <br> for proper display
+                const formattedInsight = log.insight.replace(/\n/g, '<br>');
+
+                return `
+                    <div class="border-l-2 ${borderColor} pl-3 pb-3 mb-2">
+                        <div class="text-[9px] text-slate-600 font-bold uppercase mb-1 flex items-center gap-1">
+                            ${phaseTag}${log.action}
+                        </div>
+                        <div class="${color} leading-relaxed text-[11px] font-mono">${formattedInsight}</div>
+                    </div>
+                `;
+            }).join('');
+            logPanel.scrollTop = logPanel.scrollHeight;
+
+            lucide.createIcons();
+        }
+
+        function renderTree(state) {
+            const container = document.getElementById('tree-container');
+            
+            function buildBranch(index, pathStr, currentPathItems, depth = 0) {
+                if (index > NUMS.length) return '';
+
+                const activePath = state.activePathStr;
+                const isLeaf = index === NUMS.length;
+
+                // CRITICAL: Match by PATH string, not just depth/index!
+                // Multiple nodes can have same depth & index but different paths
+                // e.g., "Include 1 → Include 2" vs "Exclude 1 → Include 2" both have depth=2, index=2
+                const isCurrentNode = (pathStr === activePath) && (index === state.index);
+                const isAncestor = activePath.startsWith(pathStr) && pathStr.length < activePath.length;
+
+                // Landing detection: match parent path when returning
+                const landingPathStr = activePath.substring(0, state.returnToDepth);
+                const isLandingAt = state.isReturning &&
+                                   depth === state.returnToDepth &&
+                                   pathStr === landingPathStr;
+
+                // Check if we're returning from this depth
+                const isReturningFrom = state.isReturning && isCurrentNode;
+
+                // Check if this is where we're currently standing
+                const isStandingHere = !state.isReturning && isCurrentNode && !state.isBacktracking;
+
+                // NEW: Check if we're standing here AFTER a return (backtracking state)
+                const isStandingAfterReturn = state.isBacktracking && isCurrentNode;
+
+                const isCurrent = isCurrentNode;
+                
+                let labelText = index === 0 ? `<span class="text-indigo-600 font-semibold">(index=${index})</span> Start []` : "";
+                if (pathStr.length > 0) {
+                    const move = pathStr[pathStr.length - 1];
+                    const num = NUMS[index - 1];
+                    labelText = move === 'L' ? `<span class="text-indigo-600 font-semibold">(index=${index})</span> Include ${num} → [${currentPathItems}]` : `<span class="text-indigo-600 font-semibold">(index=${index})</span> Exclude ${num}`;
+                }
+
+                if (isLeaf) {
+                    labelText += ` <span class="text-emerald-500 font-black">✓</span>`;
+                }
+
+                // Determine which branch we're on at this depth
+                let branchInfo = '';
+                if (pathStr.length > 0) {
+                    const lastDecision = pathStr[pathStr.length - 1];
+                    branchInfo = lastDecision === 'L' ? ' (Include)' : ' (Exclude)';
+                }
+
+                // Build badge HTML and determine wrapper class
+                let badgeHtml = '';
+                let wrapperClass = '';
+                let labelClass = '';
+
+                // SHOW GREEN "STANDING AFTER RETURN" - After backtracking to this node
+                if (isStandingAfterReturn) {
+                    wrapperClass = 'with-landing-badge';
+                    labelClass = 'standing-after-return-label';
+                    badgeHtml = `
+                        <div class="state-badge-container">
+                            <div class="landing-here-badge">
+                                <span class="landing-icon">✓</span>
+                                <span>BACK AT D${depth}${branchInfo}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // SHOW BADGE ON CURRENT NODE - Blue "Standing" badge
+                else if (isStandingHere) {
+                    wrapperClass = 'with-badge';
+                    labelClass = 'active-label';
+                    badgeHtml = `
+                        <div class="state-badge-container">
+                            <div class="standing-here-badge">
+                                <span class="standing-icon">📍</span>
+                                <span>STANDING AT D${depth}${branchInfo}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // SHOW RED "RETURNING FROM" BADGE on current node when returning
+                else if (isReturningFrom) {
+                    wrapperClass = 'with-return-badge';
+                    labelClass = 'active-label';
+                    badgeHtml = `
+                        <div class="state-badge-container">
+                            <div class="return-from-badge">
+                                <span class="return-from-icon">⬆️</span>
+                                <span>RETURNING FROM D${depth}${branchInfo}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // SHOW GREEN "LANDING AT" BADGE on the parent/target node
+                else if (isLandingAt) {
+                    wrapperClass = 'with-landing-badge';
+                    labelClass = 'active-label';
+                    badgeHtml = `
+                        <div class="state-badge-container">
+                            <div class="landing-here-badge">
+                                <span class="landing-icon">⬇️</span>
+                                <span>LANDING AT D${depth}${branchInfo}</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // Default: use orange active label if current
+                else if (isCurrent) {
+                    labelClass = 'active-label';
+                }
+
+                return `
+                    <div class="tree-node ${isAncestor || isCurrent ? 'active-branch' : ''}">
+                        ${pathStr.length > 0 ? `<div class="tree-line-v"></div><div class="tree-line-h"></div>` : ''}
+
+                        <div class="node-wrapper ${wrapperClass}" style="position: relative;">
+                            <div class="depth-badge ${isLandingAt || isStandingAfterReturn ? 'return-target' : ''}">D${depth}</div>
+
+                            ${badgeHtml}
+
+                            <div class="node-label ${labelClass}">
+                                <i data-lucide="${isLeaf ? 'check-circle' : (isCurrent ? 'target' : 'circle')}" class="w-3 h-3 mr-2"></i>
+                                ${labelText}
+                            </div>
+                        </div>
+
+                        ${!isLeaf ? `
+                            <div class="children mt-3">
+                                ${buildBranch(index + 1, pathStr + 'L', [...currentPathItems, NUMS[index]], depth + 1)}
+                                ${buildBranch(index + 1, pathStr + 'R', currentPathItems, depth + 1)}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `<div class="min-w-max pb-32 pt-16 ml-48">${buildBranch(0, "", [], 0)}</div>`;
+            const active = container.querySelector('.active-label');
+            if (active) active.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // --- CONTROLS ---
+        function nextStep() { 
+            if (currentStep < steps.length - 1) { 
+                currentStep++; 
+                render(); 
+            } else { 
+                pauseSim(); 
+            } 
+        }
+        function prevStep() { 
+            if (currentStep > 0) { 
+                currentStep--; 
+                render(); 
+            } 
+        }
+        function togglePlay() { 
+            if (isPlaying) pauseSim(); 
+            else playSim(); 
+        }
+        function playSim() {
+            isPlaying = true;
+            document.getElementById('play-btn').innerHTML = `<i data-lucide="pause" class="w-4 h-4 fill-current"></i> Pause`;
+            document.getElementById('play-btn').classList.replace('bg-[#FF9F1C]', 'bg-rose-500');
+            playInterval = setInterval(() => nextStep(), 1500);
+            lucide.createIcons();
+        }
+        function pauseSim() {
+            isPlaying = false;
+            clearInterval(playInterval);
+            document.getElementById('play-btn').innerHTML = `<i data-lucide="play" class="w-4 h-4 fill-current"></i> Play`;
+            document.getElementById('play-btn').classList.replace('bg-rose-500', 'bg-[#FF9F1C]');
+            lucide.createIcons();
+        }
+        function resetSim() { 
+            pauseSim(); 
+            currentStep = 0; 
+            render(); 
+        }
+
+        window.onload = () => { 
+            generateSteps(); 
+            render(); 
+            lucide.createIcons(); 
+        };
+    </script>
+</body>
+</html>
