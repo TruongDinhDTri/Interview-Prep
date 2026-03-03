@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Two Heaps: Find the Median of a Number Stream</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Lato:wght@300;400;700&family=Fira+Code:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Crimson Text', serif;
+            background: linear-gradient(135deg, #fdfbf7 0%, #e2e8f0 100%);
+            color: #1e293b;
+        }
+        .sans { font-family: 'Lato', sans-serif; }
+        .mono { font-family: 'Fira Code', monospace; }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes glowBlue {
+            0%, 100% { box-shadow: 0 0 6px rgba(37,99,235,0.5); }
+            50%      { box-shadow: 0 0 18px rgba(37,99,235,0.8); }
+        }
+        @keyframes glowPink {
+            0%, 100% { box-shadow: 0 0 6px rgba(219,39,119,0.5); }
+            50%      { box-shadow: 0 0 18px rgba(219,39,119,0.8); }
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-10px); opacity: 0; }
+            to   { transform: translateY(0);     opacity: 1; }
+        }
+
+        .node-pop        { animation: popIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards; }
+        .root-glow-blue  { animation: glowBlue 2s infinite; }
+        .root-glow-pink  { animation: glowPink 2s infinite; }
+        .slide-down      { animation: slideDown 0.3s ease forwards; }
+
+        .glass-panel {
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 8px 32px rgba(31,38,135,0.1);
+        }
+
+        .tab-active   { border-bottom: 3px solid #4f46e5; color: #4f46e5; font-weight: 700; }
+        .tab-inactive { border-bottom: 3px solid transparent; color: #64748b; }
+        .tab-inactive:hover { color: #334155; }
+
+        /* Code block */
+        .code-block   { background-color: #1e1e1e; color: #d4d4d4; border-radius: 0.5rem; overflow: hidden; }
+        .code-header  { background-color: #252526; padding: 0.5rem 1rem; display: flex; align-items: center; gap: 0.5rem; border-bottom: 1px solid #333; }
+        .code-content { padding: 1rem; overflow-x: auto; line-height: 2; }
+        .token-keyword  { color: #c586c0; }
+        .token-function { color: #dcdcaa; }
+        .token-number   { color: #b5cea8; }
+        .token-comment  { color: #6a9955; font-style: italic; }
+        .token-class    { color: #4ec9b0; }
+        .token-self     { color: #9cdcfe; }
+
+        /* Stream pills */
+        .stream-done    { background: #f1f5f9; border-color: #cbd5e1 !important; color: #94a3b8; }
+        .stream-current { background: #eef2ff; border-color: #6366f1 !important; box-shadow: 0 2px 10px rgba(99,102,241,0.4); transform: scale(1.15); z-index: 10; position: relative; }
+        .stream-waiting { background: white;    border-color: #e2e8f0 !important; opacity: 0.45; }
+
+        /* Median badge */
+        .median-badge {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white; border-radius: 999px;
+            padding: 10px 28px; font-weight: 700;
+            box-shadow: 0 4px 14px rgba(79,70,229,0.4);
+            transition: transform 0.2s;
+        }
+        .median-badge:hover { transform: scale(1.04); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+
+<div class="max-w-6xl mx-auto">
+
+    <!-- ─── HEADER ─── -->
+    <div class="text-center mb-8">
+        <h1 class="text-4xl md:text-5xl sans font-bold text-indigo-900 mb-2 tracking-tight">
+            <i class="fas fa-layer-group mr-3 text-indigo-600"></i>Two Heaps
+        </h1>
+        <p class="text-xl text-slate-500 italic font-serif">"Find the Median of a Number Stream"</p>
+    </div>
+
+    <!-- ─── TAB NAV ─── -->
+    <div class="flex flex-wrap justify-center gap-4 mb-8 border-b border-slate-200 pb-1">
+        <button onclick="switchTab('idea')" id="btn-idea" class="sans tab-active px-6 py-3 text-lg transition-all">
+            <i class="fas fa-lightbulb mr-2"></i>The Idea
+        </button>
+        <button onclick="switchTab('sim')" id="btn-sim" class="sans tab-inactive px-6 py-3 text-lg transition-all">
+            <i class="fas fa-play-circle mr-2"></i>Live Sim
+        </button>
+        <button onclick="switchTab('code')" id="btn-code" class="sans tab-inactive px-6 py-3 text-lg transition-all">
+            <i class="fas fa-code mr-2"></i>The Code
+        </button>
+    </div>
+
+    <!-- ===================== TAB: THE IDEA ===================== -->
+    <div id="tab-idea" class="section block">
+      <div class="glass-panel rounded-2xl p-8 md:p-10 mb-6">
+
+        <!-- The Question -->
+        <div class="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-r-lg mb-8">
+            <p class="sans text-xs font-bold text-indigo-500 uppercase tracking-widest mb-2">The Question</p>
+            <p class="text-2xl font-serif leading-relaxed text-indigo-900">
+                Numbers keep arriving one by one.<br>
+                After <strong>each</strong> number someone asks:<br>
+                <em>"What's the median right now?"</em>
+            </p>
+        </div>
+
+        <!-- Naive vs Smart -->
+        <div class="flex flex-col sm:flex-row gap-4 mb-10">
+            <div class="flex-1 bg-red-50 border border-red-200 rounded-xl p-5 flex gap-4 items-start">
+                <span class="text-2xl">❌</span>
+                <div>
+                    <p class="sans font-bold text-red-700">Sort after every insert</p>
+                    <p class="text-red-500 text-sm">O(n log n) per number — unusable on large streams.</p>
+                </div>
+            </div>
+            <div class="flex-1 bg-green-50 border border-green-200 rounded-xl p-5 flex gap-4 items-start">
+                <span class="text-2xl">✅</span>
+                <div>
+                    <p class="sans font-bold text-green-700">Two Heaps</p>
+                    <p class="text-green-500 text-sm">O(log n) insert · O(1) median. Only track the middle.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- The Split -->
+        <h2 class="text-2xl sans font-bold text-gray-800 mb-2">The Two-Bucket Split</h2>
+        <p class="text-gray-500 mb-6 font-serif">Split numbers into two groups. Keep them balanced. The median hides at the boundary.</p>
+
+        <div class="flex flex-col md:flex-row gap-4 items-stretch mb-4">
+            <!-- Left -->
+            <div class="flex-1 bg-blue-50 border-2 border-blue-200 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-11 h-11 bg-blue-600 rounded-full flex items-center justify-center text-white text-xl shadow"><i class="fas fa-arrow-down"></i></div>
+                    <div>
+                        <h3 class="sans font-bold text-blue-800 text-lg">Left · Max-Heap</h3>
+                        <p class="text-xs text-blue-500">Smaller half</p>
+                    </div>
+                </div>
+                <!-- mini tree -->
+                <div class="bg-white rounded-xl border border-blue-100 p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-blue-200 border-2 border-blue-500 rounded-full flex items-center justify-center font-bold text-blue-800 text-lg shadow-sm">3</div>
+                    <div class="w-0.5 h-4 bg-blue-300"></div>
+                    <div class="flex gap-6">
+                        <div><div class="w-0.5 h-3 bg-blue-200 mx-auto"></div><div class="w-10 h-10 bg-blue-100 border border-blue-300 rounded-full flex items-center justify-center font-bold text-blue-700">1</div></div>
+                        <div><div class="w-0.5 h-3 bg-blue-200 mx-auto"></div><div class="w-10 h-10 bg-blue-100 border border-blue-300 rounded-full flex items-center justify-center font-bold text-blue-700">2</div></div>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-blue-500 mt-3 italic">Root = <strong>biggest</strong> in this group</p>
+            </div>
+
+            <!-- arrow -->
+            <div class="flex items-center justify-center">
+                <div class="bg-indigo-100 rounded-full w-14 h-14 flex items-center justify-center">
+                    <span class="text-indigo-600 text-2xl font-bold">⟷</span>
+                </div>
+            </div>
+
+            <!-- Right -->
+            <div class="flex-1 bg-pink-50 border-2 border-pink-200 rounded-2xl p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-11 h-11 bg-pink-600 rounded-full flex items-center justify-center text-white text-xl shadow"><i class="fas fa-arrow-up"></i></div>
+                    <div>
+                        <h3 class="sans font-bold text-pink-800 text-lg">Right · Min-Heap</h3>
+                        <p class="text-xs text-pink-500">Larger half</p>
+                    </div>
+                </div>
+                <!-- mini tree -->
+                <div class="bg-white rounded-xl border border-pink-100 p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-pink-200 border-2 border-pink-500 rounded-full flex items-center justify-center font-bold text-pink-800 text-lg shadow-sm">5</div>
+                    <div class="w-0.5 h-4 bg-pink-300"></div>
+                    <div class="flex gap-6">
+                        <div><div class="w-0.5 h-3 bg-pink-200 mx-auto"></div><div class="w-10 h-10 bg-pink-100 border border-pink-300 rounded-full flex items-center justify-center font-bold text-pink-700">7</div></div>
+                        <div><div class="w-0.5 h-3 bg-pink-200 mx-auto"></div><div class="w-10 h-10 bg-pink-100 border border-pink-300 rounded-full flex items-center justify-center font-bold text-pink-700">8</div></div>
+                    </div>
+                </div>
+                <p class="text-center text-sm text-pink-500 mt-3 italic">Root = <strong>smallest</strong> in this group</p>
+            </div>
+        </div>
+
+        <!-- Median lives here -->
+        <div class="bg-indigo-100 border border-indigo-200 rounded-xl p-6 text-center mt-8 mb-10">
+            <p class="text-indigo-600 font-serif text-lg mb-3">The median lives <strong>right between the two roots</strong></p>
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+                <div class="bg-blue-200 text-blue-800 font-bold px-5 py-2 rounded-lg sans shadow-sm">Left Root = 3</div>
+                <div class="text-indigo-500 font-bold text-xl">↔</div>
+                <div class="bg-pink-200 text-pink-800 font-bold px-5 py-2 rounded-lg sans shadow-sm">Right Root = 5</div>
+            </div>
+            <p class="text-indigo-700 mt-3 font-serif text-lg">Equal size → median = (3 + 5) / 2 = <strong>4</strong></p>
+        </div>
+
+        <!-- The 3 Steps -->
+        <h2 class="text-2xl sans font-bold text-gray-800 mb-4">Every Time a Number Arrives — 3 Steps</h2>
+        <div class="space-y-3">
+            <div class="flex items-start gap-4 bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold sans flex-shrink-0 shadow">1</div>
+                <div>
+                    <p class="sans font-bold text-gray-800">Put it in the right bucket</p>
+                    <p class="text-gray-500 text-sm mt-1">Left empty → Left &nbsp;·&nbsp; num ≤ Left root → Left &nbsp;·&nbsp; num > Left root → Right</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 bg-indigo-600 rounded-full flex items-center justify-center text-white font-bold sans flex-shrink-0 shadow">2</div>
+                <div>
+                    <p class="sans font-bold text-gray-800">If one side is too big → move its root to the other side</p>
+                    <p class="text-gray-500 text-sm mt-1">Left has 2+ extra → move Left root Right &nbsp;·&nbsp; Right bigger → move Right root Left</p>
+                </div>
+            </div>
+            <div class="flex items-start gap-4 bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
+                <div class="w-10 h-10 bg-pink-600 rounded-full flex items-center justify-center text-white font-bold sans flex-shrink-0 shadow">3</div>
+                <div>
+                    <p class="sans font-bold text-gray-800">Read the median from the roots</p>
+                    <p class="text-gray-500 text-sm mt-1">Equal size → (Left root + Right root) / 2 &nbsp;·&nbsp; Left has +1 → Left root</p>
+                </div>
+            </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB: LIVE SIM ===================== -->
+    <div id="tab-sim" class="section hidden">
+      <div class="glass-panel rounded-2xl p-6 md:p-8">
+
+        <!-- header row -->
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-5 gap-3">
+            <div>
+                <h2 class="text-2xl sans font-bold text-gray-800">Live Simulation</h2>
+                <p class="text-gray-400 text-sm">Watch numbers arrive · heaps rebalance · median updates</p>
+            </div>
+            <div class="median-badge sans text-lg" id="median-display">
+                <i class="fas fa-bullseye mr-2"></i>Median: —
+            </div>
+        </div>
+
+        <!-- stream -->
+        <div class="mb-5">
+            <p class="text-xs sans font-bold text-gray-400 uppercase tracking-widest mb-2">Number Stream</p>
+            <div class="flex flex-wrap gap-2 items-center" id="stream-display"></div>
+        </div>
+
+        <!-- controls -->
+        <div class="flex gap-3 mb-6 bg-gray-50 p-4 rounded-xl border border-gray-200">
+            <button onclick="resetSim()" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 sans font-bold shadow-sm transition-all">
+                <i class="fas fa-undo mr-1"></i>Reset
+            </button>
+            <button onclick="prevStep()" id="btn-prev" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 sans font-bold shadow-sm disabled:opacity-30 transition-all" disabled>
+                <i class="fas fa-chevron-left mr-1"></i>Prev
+            </button>
+            <button onclick="nextStep()" id="btn-next" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 sans font-bold shadow-md disabled:opacity-30 disabled:bg-gray-400 transition-all">
+                Next Step <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
+
+        <!-- two heap trees -->
+        <div class="grid md:grid-cols-2 gap-5 mb-5">
+            <!-- Left -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="sans font-bold text-blue-700"><i class="fas fa-arrow-down mr-2"></i>Left · Max-Heap</h3>
+                    <span class="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full sans font-bold" id="left-size">size: 0</span>
+                </div>
+                <p class="text-xs text-blue-400 mb-2">Smaller half · Root = biggest here</p>
+                <div class="bg-white rounded-xl border border-blue-100 p-2" style="min-height:210px;">
+                    <svg id="svg-left" width="100%" height="200" class="overflow-visible"></svg>
+                </div>
+            </div>
+            <!-- Right -->
+            <div class="bg-pink-50 border-2 border-pink-200 rounded-2xl p-4">
+                <div class="flex items-center justify-between mb-1">
+                    <h3 class="sans font-bold text-pink-700"><i class="fas fa-arrow-up mr-2"></i>Right · Min-Heap</h3>
+                    <span class="text-xs bg-pink-200 text-pink-700 px-2 py-0.5 rounded-full sans font-bold" id="right-size">size: 0</span>
+                </div>
+                <p class="text-xs text-pink-400 mb-2">Larger half · Root = smallest here</p>
+                <div class="bg-white rounded-xl border border-pink-100 p-2" style="min-height:210px;">
+                    <svg id="svg-right" width="100%" height="200" class="overflow-visible"></svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- narrative -->
+        <div id="narrative-box" class="bg-indigo-50 border border-indigo-200 rounded-xl p-5">
+            <p class="text-indigo-700 font-serif text-lg">👉 Click <strong>Next Step</strong> to begin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===================== TAB: THE CODE ===================== -->
+    <div id="tab-code" class="section hidden">
+      <div class="glass-panel rounded-2xl p-8 md:p-10">
+        <h2 class="text-2xl sans font-bold text-gray-800 mb-1">The Solution</h2>
+        <p class="text-gray-400 mb-6">Two Heaps · Find the Median from a Number Stream</p>
+
+        <div class="code-block shadow-xl mb-8">
+            <div class="code-header">
+                <span class="w-3 h-3 rounded-full bg-red-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-yellow-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>
+                <span class="text-sm mono font-bold ml-3 text-gray-500">solution.py</span>
+            </div>
+            <div class="code-content mono text-sm">
+                <div><span class="token-keyword">from</span> heapq <span class="token-keyword">import</span> *</div>
+                <br>
+                <div><span class="token-keyword">class</span> <span class="token-class">Solution</span>:</div>
+                <div class="pl-4"><span class="token-keyword">def</span> <span class="token-function">__init__</span>(<span class="token-self">self</span>):</div>
+                <div class="pl-8"><span class="token-comment"># max-heap (left) — negate values; Python only has min-heap</span></div>
+                <div class="pl-8"><span class="token-self">self</span>.left &nbsp;= []</div>
+                <div class="pl-8"><span class="token-comment"># min-heap (right) — values as-is</span></div>
+                <div class="pl-8"><span class="token-self">self</span>.right = []</div>
+                <br>
+                <div class="pl-4"><span class="token-keyword">def</span> <span class="token-function">insertNum</span>(<span class="token-self">self</span>, num):</div>
+                <div class="pl-8"><span class="token-comment"># ① route to the right bucket</span></div>
+                <div class="pl-8"><span class="token-keyword">if</span> <span class="token-self">self</span>.left == []:</div>
+                <div class="pl-12"><span class="token-function">heappush</span>(<span class="token-self">self</span>.left, -num)</div>
+                <div class="pl-8"><span class="token-keyword">elif</span> num <= -<span class="token-self">self</span>.left[<span class="token-number">0</span>]:</div>
+                <div class="pl-12"><span class="token-function">heappush</span>(<span class="token-self">self</span>.left, -num)</div>
+                <div class="pl-8"><span class="token-keyword">else</span>:</div>
+                <div class="pl-12"><span class="token-function">heappush</span>(<span class="token-self">self</span>.right, num)</div>
+                <br>
+                <div class="pl-8"><span class="token-comment"># ② rebalance sizes</span></div>
+                <div class="pl-8"><span class="token-keyword">if</span> <span class="token-function">len</span>(<span class="token-self">self</span>.left) - <span class="token-function">len</span>(<span class="token-self">self</span>.right) > <span class="token-number">1</span>:</div>
+                <div class="pl-12"><span class="token-function">heappush</span>(<span class="token-self">self</span>.right, -<span class="token-function">heappop</span>(<span class="token-self">self</span>.left))</div>
+                <div class="pl-8"><span class="token-keyword">elif</span> <span class="token-function">len</span>(<span class="token-self">self</span>.left) < <span class="token-function">len</span>(<span class="token-self">self</span>.right):</div>
+                <div class="pl-12"><span class="token-function">heappush</span>(<span class="token-self">self</span>.left, -<span class="token-function">heappop</span>(<span class="token-self">self</span>.right))</div>
+                <br>
+                <div class="pl-4"><span class="token-keyword">def</span> <span class="token-function">findMedian</span>(<span class="token-self">self</span>):</div>
+                <div class="pl-8"><span class="token-comment"># ③ read the median</span></div>
+                <div class="pl-8"><span class="token-keyword">if</span> <span class="token-function">len</span>(<span class="token-self">self</span>.right) == <span class="token-function">len</span>(<span class="token-self">self</span>.left):</div>
+                <div class="pl-12"><span class="token-keyword">return</span> ((-<span class="token-self">self</span>.left[<span class="token-number">0</span>]) + (<span class="token-self">self</span>.right[<span class="token-number">0</span>])) / <span class="token-number">2</span></div>
+                <div class="pl-8"><span class="token-keyword">return</span> -<span class="token-self">self</span>.left[<span class="token-number">0</span>] / <span class="token-number">1.0</span></div>
+            </div>
+        </div>
+
+        <!-- Complexity -->
+        <div class="grid md:grid-cols-2 gap-5 mb-6">
+            <div class="bg-green-50 border border-green-200 rounded-xl p-6">
+                <h3 class="sans font-bold text-green-800 mb-3"><i class="fas fa-clock mr-2"></i>Time Complexity</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">insertNum()</span>
+                        <span class="mono font-bold text-green-700 bg-green-100 px-3 py-1 rounded">O(log n)</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-600">findMedian()</span>
+                        <span class="mono font-bold text-green-700 bg-green-100 px-3 py-1 rounded">O(1)</span>
+                    </div>
+                </div>
+                <p class="text-xs text-green-500 mt-3 italic">At most 2 heap ops per insert (push + rebalance)</p>
+            </div>
+            <div class="bg-purple-50 border border-purple-200 rounded-xl p-6">
+                <h3 class="sans font-bold text-purple-800 mb-3"><i class="fas fa-database mr-2"></i>Space Complexity</h3>
+                <div class="flex justify-between items-center">
+                    <span class="text-gray-600">Total</span>
+                    <span class="mono font-bold text-purple-700 bg-purple-100 px-3 py-1 rounded">O(n)</span>
+                </div>
+                <p class="text-xs text-purple-500 mt-3 italic">All n numbers stored across both heaps</p>
+            </div>
+        </div>
+
+        <!-- Why not sort -->
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-5 rounded-r-lg">
+            <p class="sans font-bold text-yellow-800 mb-1"><i class="fas fa-question-circle mr-2"></i>Why not just sort each time?</p>
+            <p class="text-yellow-700 text-sm">Sort = O(n log n) per insert. Two Heaps = O(log n). At 1,000,000 numbers the difference is <strong>massive</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── FOOTER ─── -->
+    <div class="mt-10 text-center text-slate-400 text-sm pb-6 font-serif">
+        "The heart of the wise inclines to the right." — Ecclesiastes 10:2 😎<br>
+        Two Heaps · Made with Spirit &amp; Code.
+    </div>
+</div>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+
+// ─── TAB SWITCHING ─────────────────────────────
+function switchTab(id) {
+    document.querySelectorAll('.section').forEach(el => el.classList.add('hidden'));
+    document.getElementById('tab-' + id).classList.remove('hidden');
+    ['idea','sim','code'].forEach(t => {
+        const btn = document.getElementById('btn-' + t);
+        btn.classList.toggle('tab-active',   t === id);
+        btn.classList.toggle('tab-inactive', t !== id);
+    });
+    if (id === 'sim') setTimeout(renderUI, 60);
+}
+
+// ─── MIN-HEAP PRIMITIVES ───────────────────────
+function heapPush(heap, val) {
+    heap.push(val);
+    let i = heap.length - 1;
+    while (i > 0) {
+        const p = (i - 1) >> 1;
+        if (heap[i] < heap[p]) { [heap[i], heap[p]] = [heap[p], heap[i]]; i = p; }
+        else break;
+    }
+}
+function heapPop(heap) {
+    const top = heap[0];
+    const last = heap.pop();
+    if (heap.length > 0) {
+        heap[0] = last;
+        let i = 0;
+        while (true) {
+            let s = i, l = 2*i+1, r = 2*i+2;
+            if (l < heap.length && heap[l] < heap[s]) s = l;
+            if (r < heap.length && heap[r] < heap[s]) s = r;
+            if (s !== i) { [heap[i], heap[s]] = [heap[s], heap[i]]; i = s; }
+            else break;
+        }
+    }
+    return top;
+}
+
+// ─── STEP GENERATION ───────────────────────────
+const STREAM = [3, 1, 5, 4, 2, 8, 6, 7];
+var allSteps = [];
+var curStep  = 0;
+
+function generateSteps() {
+    const small = []; // max-heap via negation (min-heap of negatives)
+    const large = []; // min-heap
+    allSteps = [];
+
+    // step 0 — empty initial state
+    allSteps.push({ num: null, left: [], right: [], median: null,
+        narrative: '👉 Click <strong>Next Step</strong> to begin. Numbers will arrive one by one.' });
+
+    for (const num of STREAM) {
+        let n = '';
+        const leftRoot = small.length > 0 ? -small[0] : null;
+
+        // ── Route ──
+        if (small.length === 0) {
+            heapPush(small, -num);
+            n += `<strong style="font-size:1.15em">${num}</strong> arrives.<br>
+                  Left is empty → goes <span style="color:#2563eb;font-weight:700">Left</span>.<br>`;
+        } else if (num <= leftRoot) {
+            n += `<strong style="font-size:1.15em">${num}</strong> arrives.<br>
+                  ${num} ≤ ${leftRoot} (Left root) → goes <span style="color:#2563eb;font-weight:700">Left</span>.<br>`;
+            heapPush(small, -num);
+        } else {
+            n += `<strong style="font-size:1.15em">${num}</strong> arrives.<br>
+                  ${num} > ${leftRoot} (Left root) → goes <span style="color:#db2777;font-weight:700">Right</span>.<br>`;
+            heapPush(large, num);
+        }
+
+        // ── Rebalance ──
+        const lSz = small.length, rSz = large.length;
+        if (lSz - rSz > 1) {
+            const moved = -heapPop(small);
+            n += `<br>Left too big (${lSz} vs ${rSz}) → move <strong>${moved}</strong> to Right.<br>`;
+            heapPush(large, moved);
+        } else if (rSz > lSz) {
+            const moved = heapPop(large);
+            n += `<br>Right too big (${lSz} vs ${rSz}) → move <strong>${moved}</strong> to Left.<br>`;
+            heapPush(small, -moved);
+        } else {
+            n += `<br>Balanced (${lSz} vs ${rSz}) ✓<br>`;
+        }
+
+        // ── Median ──
+        let median;
+        if (small.length > large.length) {
+            median = -small[0];
+            n += `<br><span style="color:#4f46e5;font-weight:700;font-size:1.05em">Left has extra → median = ${median}</span>`;
+        } else {
+            median = (-small[0] + large[0]) / 2;
+            n += `<br><span style="color:#4f46e5;font-weight:700;font-size:1.05em">Equal size → median = (${-small[0]} + ${large[0]}) / 2 = ${median}</span>`;
+        }
+
+        allSteps.push({
+            num,
+            left:  small.map(v => -v),  // negate back for display (preserves heap-array order)
+            right: [...large],
+            median,
+            narrative: n
+        });
+    }
+
+    // final completion step
+    const last = allSteps[allSteps.length - 1];
+    allSteps.push({
+        num: null, left: last.left, right: last.right, median: last.median,
+        narrative: `🎉 <strong>Stream complete!</strong><br>
+                    Left = [${last.left}] &nbsp;·&nbsp; Right = [${last.right}]<br>
+                    <span style="color:#4f46e5;font-weight:700;font-size:1.1em">Final median = ${last.median}</span>`
+    });
+}
+
+// ─── SVG HEAP RENDERER ─────────────────────────
+function renderHeap(svgId, values, side) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return;
+    svg.innerHTML = '';
+
+    const W = svg.clientWidth || 280;
+    const R = 22, vGap = 58;
+
+    if (values.length === 0) {
+        const t = document.createElementNS("http://www.w3.org/2000/svg","text");
+        t.setAttribute("x", W/2);
+        t.setAttribute("y", 100);
+        t.setAttribute("text-anchor","middle");
+        t.setAttribute("fill","#cbd5e1");
+        t.setAttribute("font-family","Lato,sans-serif");
+        t.setAttribute("font-size","15px");
+        t.textContent = "empty";
+        svg.appendChild(t);
+        return;
+    }
+
+    // position helper — binary-tree layout from array index
+    const pos = (idx) => {
+        const lvl   = Math.floor(Math.log2(idx + 1));
+        const count = Math.pow(2, lvl);
+        const p     = idx - (count - 1);
+        return { x: (W / (count + 1)) * (p + 1), y: 26 + lvl * vGap };
+    };
+
+    const isLeft = (side === 'left');
+    const lineC  = isLeft ? '#93c5fd'  : '#f9a8d4';
+    const fillN  = isLeft ? '#dbeafe'  : '#fce7f3';
+    const strN   = isLeft ? '#3b82f6'  : '#ec4899';
+    const fillR  = isLeft ? '#bfdbfe'  : '#fbcfe8';
+    const strR   = isLeft ? '#2563eb'  : '#db2777';
+    const txtR   = isLeft ? '#1d4ed8'  : '#be123c';
+
+    // edges first (so nodes draw on top)
+    values.forEach((v, i) => {
+        if (i === 0) return;
+        const a = pos((i - 1) >> 1), b = pos(i);
+        const line = document.createElementNS("http://www.w3.org/2000/svg","line");
+        line.setAttribute("x1", a.x); line.setAttribute("y1", a.y);
+        line.setAttribute("x2", b.x); line.setAttribute("y2", b.y);
+        line.setAttribute("stroke", lineC);
+        line.setAttribute("stroke-width", "2.5");
+        svg.appendChild(line);
+    });
+
+    // nodes
+    values.forEach((v, i) => {
+        const p      = pos(i);
+        const isRoot = (i === 0);
+
+        const circle = document.createElementNS("http://www.w3.org/2000/svg","circle");
+        circle.setAttribute("cx", p.x);
+        circle.setAttribute("cy", p.y);
+        circle.setAttribute("r",  R);
+        circle.setAttribute("fill",   isRoot ? fillR : fillN);
+        circle.setAttribute("stroke", isRoot ? strR  : strN);
+        circle.setAttribute("stroke-width", isRoot ? "3" : "2");
+        if (isRoot) circle.setAttribute("class", isLeft ? "root-glow-blue" : "root-glow-pink");
+        svg.appendChild(circle);
+
+        const text = document.createElementNS("http://www.w3.org/2000/svg","text");
+        text.setAttribute("x", p.x);
+        text.setAttribute("y", p.y + 5);
+        text.setAttribute("text-anchor","middle");
+        text.setAttribute("fill", isRoot ? txtR : '#1e293b');
+        text.setAttribute("font-weight","bold");
+        text.setAttribute("font-family","Lato,sans-serif");
+        text.setAttribute("font-size","16px");
+        text.textContent = v;
+        svg.appendChild(text);
+    });
+}
+
+// ─── STREAM BAR ────────────────────────────────
+function renderStream() {
+    const el = document.getElementById('stream-display');
+    el.innerHTML = '';
+    const atEnd = (curStep >= allSteps.length - 1);
+    STREAM.forEach((num, idx) => {
+        const sIdx = idx + 1;
+        const d = document.createElement('div');
+        let cls = 'sans font-bold text-sm w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-200 ';
+        if      (atEnd || sIdx < curStep)  cls += 'stream-done';
+        else if (sIdx === curStep)         cls += 'stream-current';
+        else                               cls += 'stream-waiting';
+        d.className = cls;
+        d.textContent = num;
+        el.appendChild(d);
+    });
+}
+
+// ─── FULL UI UPDATE ────────────────────────────
+function renderUI() {
+    const s = allSteps[curStep] || { left:[], right:[], median:null, narrative:'' };
+
+    renderHeap('svg-left',  s.left,  'left');
+    renderHeap('svg-right', s.right, 'right');
+    renderStream();
+
+    document.getElementById('left-size').textContent  = 'size: ' + s.left.length;
+    document.getElementById('right-size').textContent = 'size: ' + s.right.length;
+
+    document.getElementById('median-display').innerHTML = s.median !== null
+        ? '<i class="fas fa-bullseye mr-2"></i>Median: ' + s.median
+        : '<i class="fas fa-bullseye mr-2"></i>Median: —';
+
+    document.getElementById('narrative-box').innerHTML =
+        '<p class="text-indigo-700 font-serif text-lg leading-relaxed">' + s.narrative + '</p>';
+
+    document.getElementById('btn-prev').disabled = (curStep <= 0);
+    document.getElementById('btn-next').disabled = (curStep >= allSteps.length - 1);
+}
+
+// ─── CONTROLS ──────────────────────────────────
+function nextStep() { if (curStep < allSteps.length - 1) { curStep++; renderUI(); } }
+function prevStep() { if (curStep > 0)                   { curStep--; renderUI(); } }
+function resetSim() { curStep = 0; renderUI(); }
+
+// ─── INIT ──────────────────────────────────────
+window.onload = function () {
+    generateSteps();
+    curStep = 0;
+    renderUI();
+    switchTab('idea');
+};
+
+</script>
+</body>
+</html>

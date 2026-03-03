@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monotonic Stack — Interactive Guide</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --sky:          #87CEEB;
+            --cloud:        #F0F8FF;
+            --warm:         #FF6B6B;
+            --cool:         #4ECDC4;
+            --stack-gold:   #FFE66D;
+            --stack-border: #DAA520;
+            --incoming:     #FFB347;
+            --ink:          #4a3728;
+            --earth:        #7a5c42;
+            --lavender:     #c4b4d4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(180deg, #7ec8e3 0%, #aadff0 25%, #e4f4f8 55%, #fdf5e8 100%);
+            min-height: 100vh;
+            padding: 2rem 1.5rem;
+            color: var(--ink);
+        }
+
+        .container { max-width: 960px; margin: 0 auto; }
+
+        /* ─── Back Link ─── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            color: var(--lavender);
+            text-decoration: none;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s;
+        }
+        .back-link:hover { transform: translateX(-5px); }
+
+        /* ─── Header ─── */
+        .header {
+            background: linear-gradient(145deg, #fef8ef, #fdf5e6, #fae8cc);
+            border-radius: 20px;
+            padding: 2.5rem 2rem 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 50px rgba(74,55,40,0.18);
+            text-align: center;
+        }
+        .header-icon { font-size: 2.8rem; margin-bottom: 0.6rem; }
+        .header h1 {
+            font-family: 'Caveat', cursive;
+            font-size: 2.9rem;
+            font-weight: 700;
+            color: var(--ink);
+            text-shadow: 2px 2px 0 rgba(255,255,255,0.8);
+            margin-bottom: 0.4rem;
+        }
+        .header p {
+            font-family: 'Indie Flower', cursive;
+            font-size: 1.15rem;
+            color: var(--earth);
+            line-height: 1.7;
+        }
+
+        /* ─── Tab System ─── */
+        .tabs {
+            display: flex;
+            gap: 0.6rem;
+            margin-bottom: 1.8rem;
+            justify-content: center;
+        }
+        .tab-btn {
+            padding: 0.65rem 1.7rem;
+            border: 2px solid var(--lavender);
+            border-radius: 30px;
+            background: rgba(255,255,255,0.65);
+            font-family: 'Caveat', cursive;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--earth);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn:hover {
+            background: rgba(196,180,212,0.3);
+            transform: translateY(-2px);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #a090c0, #8878a8);
+            color: white;
+            border-color: #8878a8;
+            box-shadow: 0 4px 15px rgba(160,144,192,0.4);
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+        /* ─── Shared Card ─── */
+        .card {
+            background: rgba(255,255,255,0.78);
+            border-radius: 16px;
+            padding: 1.8rem;
+            margin-bottom: 1.4rem;
+            box-shadow: 0 6px 20px rgba(74,55,40,0.1);
+            border: 1px solid rgba(196,180,212,0.35);
+        }
+        .card h2 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            color: var(--ink);
+            margin-bottom: 0.7rem;
+        }
+        .card p { font-size: 1.05rem; line-height: 1.7; color: var(--ink); }
+
+        /* ═══════════════════════════════════════════
+           TAB 1 — THE CONCEPT
+           ═══════════════════════════════════════════ */
+
+        /* Two Types Grid */
+        .types-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.2rem;
+            margin-top: 0.8rem;
+        }
+        .type-card {
+            border-radius: 14px;
+            padding: 1.3rem 1rem;
+            text-align: center;
+        }
+        .type-card.inc {
+            background: linear-gradient(135deg, rgba(78,205,196,0.1), rgba(78,205,196,0.04));
+            border: 2px solid rgba(78,205,196,0.45);
+        }
+        .type-card.dec {
+            background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,107,107,0.04));
+            border: 2px solid rgba(255,107,107,0.45);
+        }
+        .type-card h3 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.35rem;
+            margin-bottom: 0.5rem;
+        }
+        .type-card.inc h3 { color: #2a9d8f; }
+        .type-card.dec h3 { color: #e76f51; }
+
+        /* Mini stack visual */
+        .mini-stack {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 5px;
+            height: 78px;
+            margin: 0.7rem 0;
+        }
+        .mini-block {
+            width: 30px;
+            border-radius: 5px 5px 0 0;
+            background: var(--stack-gold);
+            border: 2px solid var(--stack-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.82rem;
+            color: var(--ink);
+        }
+
+        .type-detail { font-size: 0.95rem; color: var(--ink); line-height: 1.65; }
+        .type-detail em { font-style: normal; font-weight: 600; }
+        .finds-badge {
+            display: inline-block;
+            margin-top: 0.45rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+        }
+        .type-card.inc .finds-badge { background: rgba(78,205,196,0.2);  color: #2a9d8f; }
+        .type-card.dec .finds-badge { background: rgba(255,107,107,0.2); color: #e76f51; }
+
+        /* 3-Step Flow */
+        .steps-flow {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin: 1rem 0 0.3rem;
+            flex-wrap: nowrap;
+        }
+        .step-box {
+            text-align: center;
+            padding: 0.9rem 1.1rem;
+            border-radius: 12px;
+            min-width: 130px;
+            position: relative;
+        }
+        .step-box:not(:last-child)::after {
+            content: '→';
+            position: absolute;
+            right: -16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.4rem;
+            color: var(--lavender);
+            z-index: 1;
+        }
+        .step-box.s-check { background: rgba(196,180,212,0.28); border: 2px solid var(--lavender); }
+        .step-box.s-pop   { background: rgba(255,107,107,0.2);  border: 2px solid rgba(255,107,107,0.5); }
+        .step-box.s-push  { background: rgba(78,205,196,0.2);   border: 2px solid rgba(78,205,196,0.5); }
+        .step-num  { font-family: 'Patrick Hand', cursive; font-size: 0.82rem; opacity: 0.55; }
+        .step-name { font-family: 'Caveat', cursive; font-size: 1.3rem; font-weight: 700; margin-bottom: 0.15rem; }
+        .s-check .step-name { color: #7a6b8a; }
+        .s-pop   .step-name { color: #e76f51; }
+        .s-push  .step-name { color: #2a9d8f; }
+        .step-desc { font-size: 0.86rem; color: var(--ink); }
+
+        /* Signal Words */
+        .signal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.6rem;
+            margin-top: 0.7rem;
+        }
+        .signal-item {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.55rem 0.75rem;
+            background: rgba(255,255,255,0.72);
+            border-radius: 10px;
+            border: 1px solid rgba(196,180,212,0.3);
+        }
+        .signal-text { font-size: 0.95rem; color: var(--ink); flex: 1; }
+        .strength {
+            padding: 0.18rem 0.55rem;
+            border-radius: 8px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            font-family: 'Patrick Hand', cursive;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+        .strength.instant  { background: #ff6b6b22; color: #c0392b; }
+        .strength.strong   { background: #ffa50033; color: #e67e22; }
+        .strength.moderate { background: #4ecdc433; color: #2a9d8f; }
+
+        /* Decision Helper */
+        .decision-box {
+            background: linear-gradient(135deg, rgba(253,246,228,0.92), rgba(254,248,239,0.88));
+            border: 2px dashed var(--lavender);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .decision-box h3 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.5rem;
+            color: var(--ink);
+            margin-bottom: 0.4rem;
+        }
+        .decision-sub { font-size: 1rem; color: var(--earth); margin-bottom: 0.75rem; }
+        .decision-btns { display: flex; justify-content: center; gap: 1rem; margin-bottom: 0.8rem; }
+        .d-btn {
+            padding: 0.55rem 1.3rem;
+            border: 2.5px solid;
+            border-radius: 25px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+        .d-btn.greater { border-color: #e76f51; color: #e76f51; }
+        .d-btn.smaller { border-color: #2a9d8f; color: #2a9d8f; }
+        .d-btn.greater:hover, .d-btn.greater.on { background: #e76f51; color: white; }
+        .d-btn.smaller:hover, .d-btn.smaller.on { background: #2a9d8f; color: white; }
+        .d-result { font-size: 1.05rem; color: var(--ink); min-height: 1.6rem; font-family: 'Indie Flower', cursive; }
+        .d-rule {
+            margin-top: 0.8rem;
+            padding: 0.55rem 1rem;
+            background: rgba(212,168,75,0.13);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--ink);
+        }
+        .d-rule strong { color: var(--earth); }
+
+        /* ═══════════════════════════════════════════
+           TAB 2 — LIVE SIMULATION
+           ═══════════════════════════════════════════ */
+
+        .sim-mode-row {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.4rem;
+        }
+        .mode-btns { display: flex; gap: 0.8rem; }
+        .m-btn {
+            padding: 0.5rem 1.2rem;
+            border: 2.5px solid;
+            border-radius: 22px;
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            background: white;
+            transition: all 0.3s;
+        }
+        .m-btn.inc { border-color: #2a9d8f; color: #2a9d8f; }
+        .m-btn.dec { border-color: #e76f51; color: #e76f51; }
+        .m-btn.inc.on { background: #2a9d8f; color: white; }
+        .m-btn.dec.on { background: #e76f51; color: white; }
+        .find-label { font-size: 0.98rem; color: var(--earth); font-family: 'Indie Flower', cursive; }
+
+        .sim-layout {
+            display: grid;
+            grid-template-columns: 1fr 110px;
+            gap: 1.4rem;
+            align-items: start;
+        }
+        .sim-left { display: flex; flex-direction: column; gap: 0.9rem; }
+
+        /* Input pills */
+        .pills-wrap {
+            background: rgba(255,255,255,0.6);
+            border-radius: 14px;
+            padding: 1rem;
+            border: 1px solid rgba(196,180,212,0.3);
+            display: flex;
+            justify-content: center;
+            gap: 0.55rem;
+            flex-wrap: wrap;
+        }
+        .pill {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: 3px solid #d0ccc4;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .pill .p-val { font-size: 1.1rem; }
+        .pill .p-idx { font-size: 0.68rem; color: #999; }
+        .pill.current {
+            border-color: var(--incoming);
+            background: #fff3e0;
+            transform: scale(1.18);
+            box-shadow: 0 4px 14px rgba(255,179,71,0.45);
+        }
+        .pill.done { border-color: #c8c4bc; background: #f0efe8; opacity: 0.55; }
+
+        /* Narrative */
+        .narrative {
+            background: white;
+            border-radius: 14px;
+            padding: 1.1rem 1.4rem;
+            border: 1px solid #e2ddd4;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+            min-height: 72px;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+        .a-badge {
+            display: inline-block;
+            padding: 0.2rem 0.65rem;
+            border-radius: 10px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.82rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .a-badge.start { background: rgba(212,168,75,0.22); color: #b8860b; }
+        .a-badge.push  { background: rgba(78,205,196,0.25);  color: #2a9d8f; }
+        .a-badge.pop   { background: rgba(255,107,107,0.25); color: #c0392b; }
+        .a-badge.done  { background: rgba(78,205,196,0.28);  color: #2a9d8f; }
+        .n-text { font-size: 0.98rem; color: var(--ink); line-height: 1.5; }
+
+        /* Extracted Answers */
+        .extracted-wrap {
+            background: rgba(255,255,255,0.6);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            border: 1px solid rgba(78,205,196,0.35);
+        }
+        .extracted-wrap h4 {
+            font-family: 'Caveat', cursive;
+            font-size: 1.1rem;
+            color: #2a9d8f;
+            margin-bottom: 0.45rem;
+        }
+        .extracted-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; min-height: 28px; align-items: center; }
+        .e-tag {
+            padding: 0.22rem 0.7rem;
+            background: linear-gradient(135deg, rgba(144,238,144,0.28), rgba(78,205,196,0.18));
+            border: 1px solid rgba(78,205,196,0.4);
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #2a9d8f;
+            font-weight: 600;
+        }
+        .e-tag.new { animation: popIn 0.38s cubic-bezier(0.34,1.56,0.64,1); }
+        @keyframes popIn { from { transform:scale(0); opacity:0; } to { transform:scale(1); opacity:1; } }
+        .e-placeholder { color: #aaa; font-size: 0.88rem; font-style: italic; }
+
+        /* Controls */
+        .sim-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.8rem;
+            margin-top: 0.3rem;
+        }
+        .c-btn {
+            padding: 0.48rem 1.2rem;
+            border: none;
+            border-radius: 20px;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--cool);
+            color: white;
+            transition: all 0.2s;
+            box-shadow: 0 3px 8px rgba(78,205,196,0.3);
+        }
+        .c-btn:hover { transform: scale(1.07); }
+        .c-btn:disabled { background: #c8c4bc; box-shadow: none; cursor: not-allowed; transform: none; }
+        .c-btn.reset-btn { background: var(--warm); box-shadow: 0 3px 8px rgba(255,107,107,0.3); }
+        .step-counter { font-family: 'Caveat', cursive; font-size: 1.05rem; color: var(--earth); min-width: 52px; text-align: center; }
+
+        /* Stack Tube */
+        .stack-section { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; }
+        .stack-label { font-family: 'Caveat', cursive; font-size: 1.15rem; color: var(--ink); font-weight: 700; }
+        .stack-tube {
+            width: 94px;
+            height: 250px;
+            border-left: 4px solid var(--ink);
+            border-right: 4px solid var(--ink);
+            border-bottom: 4px solid var(--ink);
+            border-radius: 0 0 10px 10px;
+            background: rgba(255,255,255,0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 8px;
+            gap: 5px;
+        }
+        .s-block {
+            width: 100%;
+            height: 38px;
+            background: var(--stack-gold);
+            border: 2px solid var(--stack-border);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: var(--ink);
+            animation: slideIn 0.28s ease-out;
+        }
+        .s-block.glow { box-shadow: 0 0 12px rgba(255,230,109,0.75); }
+        @keyframes slideIn { from { transform:translateY(-18px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        .tube-empty { text-align:center; color:#aaa; font-size:0.84rem; font-style:italic; align-self:center; }
+
+        /* ═══════════════════════════════════════════
+           TAB 3 — THE CODE
+           ═══════════════════════════════════════════ */
+
+        .code-block {
+            background: #1e1e2e;
+            border-radius: 14px;
+            padding: 1.4rem 1.6rem;
+            margin-bottom: 1.2rem;
+            overflow-x: auto;
+            position: relative;
+        }
+        .code-badge {
+            position: absolute;
+            top: 0.55rem;
+            right: 1rem;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.82rem;
+            padding: 0.18rem 0.65rem;
+            border-radius: 10px;
+        }
+        .code-badge.inc { background: rgba(78,205,196,0.25); color: #4ECDC4; }
+        .code-badge.dec { background: rgba(255,107,107,0.25); color: #FF6B6B; }
+        pre {
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.93rem;
+            line-height: 1.65;
+            color: #cdd6f4;
+            white-space: pre;
+        }
+        .kw { color: #cba6f7; }
+        .fn { color: #89b4fa; }
+        .cm { color: #585b70; font-style: italic; }
+        .nm { color: #f9e2af; }
+
+        /* Skeleton box */
+        .skeleton-box {
+            background: rgba(253,246,228,0.85);
+            border: 2px dashed var(--lavender);
+            border-radius: 14px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 1.4rem;
+        }
+        .skeleton-box h3 { font-family:'Caveat',cursive; font-size:1.4rem; color:var(--ink); margin-bottom:0.5rem; }
+        .skeleton-box p { font-size:1rem; line-height:1.8; color:var(--ink); }
+        .skeleton-box code { background:rgba(196,180,212,0.25); padding:0.1rem 0.4rem; border-radius:5px; font-size:0.95rem; }
+
+        /* O(N) Proof Chart */
+        .proof-card {
+            background: rgba(255,255,255,0.78);
+            border-radius: 16px;
+            padding: 1.6rem;
+            margin-bottom: 1.4rem;
+            box-shadow: 0 6px 20px rgba(74,55,40,0.1);
+            border: 1px solid rgba(196,180,212,0.35);
+        }
+        .proof-card h2 { font-family:'Caveat',cursive; font-size:1.75rem; color:var(--ink); margin-bottom:0.2rem; }
+        .proof-subtitle { font-size:0.93rem; color:var(--earth); margin-bottom:1rem; }
+        .proof-legend { display:flex; gap:1.2rem; margin-bottom:0.8rem; }
+        .legend-item { display:flex; align-items:center; gap:0.4rem; font-size:0.9rem; color:var(--ink); }
+        .l-swatch { width:18px; height:18px; border-radius:4px; }
+        .l-swatch.push { background:#4ECDC4; }
+        .l-swatch.pop  { background:#FF6B6B; }
+
+        .chart-row { display:flex; align-items:center; gap:0.55rem; margin-bottom:0.45rem; }
+        .chart-label { min-width:46px; font-family:'Caveat',cursive; font-size:1rem; color:var(--ink); font-weight:700; }
+        .chart-segs { display:flex; gap:3px; }
+        .chart-seg {
+            height:24px;
+            min-width:36px;
+            border-radius:4px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:0.78rem;
+            font-weight:700;
+            color:white;
+        }
+        .chart-seg.p { background:#4ECDC4; }
+        .chart-seg.d { background:#FF6B6B; }
+        .chart-note { font-size:0.81rem; color:var(--earth); font-style:italic; margin-left:0.3rem; }
+
+        .proof-total {
+            margin-top:0.9rem;
+            padding:0.55rem 1rem;
+            background:rgba(212,168,75,0.13);
+            border-radius:10px;
+            font-size:1rem;
+            color:var(--ink);
+        }
+        .proof-total strong { color:var(--earth); }
+
+        /* Classic Problems */
+        .problems { display:flex; flex-direction:column; gap:0.75rem; }
+        .prob-item {
+            background: rgba(255,255,255,0.72);
+            border-radius: 12px;
+            padding: 0.95rem 1.1rem;
+            border: 1px solid rgba(196,180,212,0.3);
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+        .prob-num { font-family:'Caveat',cursive; font-size:1.55rem; font-weight:700; color:var(--lavender); min-width:28px; text-align:center; }
+        .prob-body { flex:1; }
+        .prob-name { font-family:'Caveat',cursive; font-size:1.2rem; font-weight:700; color:var(--ink); }
+        .prob-desc { font-size:0.92rem; color:var(--earth); margin-top:0.15rem; }
+        .prob-solved { font-size:0.85rem; margin-top:0.2rem; }
+        .prob-solved a { color:#2a9d8f; text-decoration:none; }
+        .prob-solved a:hover { text-decoration:underline; }
+        .p-type {
+            padding:0.2rem 0.6rem;
+            border-radius:12px;
+            font-size:0.82rem;
+            font-weight:600;
+            font-family:'Patrick Hand',cursive;
+            white-space:nowrap;
+        }
+        .p-type.dec  { background:rgba(255,107,107,0.18); color:#e76f51; }
+        .p-type.inc  { background:rgba(78,205,196,0.18);  color:#2a9d8f; }
+        .p-type.both { background:rgba(196,180,212,0.28); color:#7a6b8a; }
+
+        /* ─── Mobile ─── */
+        @media (max-width: 680px) {
+            .sim-layout      { grid-template-columns: 1fr; }
+            .stack-section   { flex-direction: row; gap: 0.8rem; }
+            .types-grid      { grid-template-columns: 1fr; }
+            .signal-grid     { grid-template-columns: 1fr; }
+            .steps-flow      { flex-wrap: wrap; gap: 0.8rem; justify-content: center; }
+            .step-box:not(:last-child)::after { display: none; }
+            .step-box        { min-width: 90px; }
+            body             { padding: 1.5rem 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <a href="../index.html" class="back-link">← Back to Stack Adventures</a>
+
+    <!-- ─── HEADER ─── -->
+    <div class="header">
+        <div class="header-icon">📚</div>
+        <h1>Monotonic Stack</h1>
+        <p>A stack with one extra rule: values must stay ordered.<br>
+           When a newcomer breaks the order — magic happens.</p>
+    </div>
+
+    <!-- ─── TABS ─── -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('concept')">📖 The Concept</button>
+        <button class="tab-btn"        onclick="switchTab('sim')">🎬 Live Sim</button>
+        <button class="tab-btn"        onclick="switchTab('code')">💻 The Code</button>
+        <button class="tab-btn"        onclick="switchTab('guide')">📚 Full Guide</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 1 — THE CONCEPT
+         ═══════════════════════════════════════════════════ -->
+    <div id="tab-concept" class="tab-content active">
+
+        <!-- What Is It -->
+        <div class="card">
+            <h2>🌱 What Is a Monotonic Stack?</h2>
+            <p>A regular stack stores things in LIFO order — no rules about the values.</p>
+            <p style="margin-top:0.6rem;">A <strong>Monotonic Stack</strong> adds <em>one extra rule</em>: the values inside must stay in a specific order — either increasing or decreasing from bottom to top.</p>
+            <p style="margin-top:0.6rem;">When a new element <strong>breaks that order</strong> → you <strong>pop everything that violates it</strong> before pushing. <strong>The pop moment is where you get the answer.</strong></p>
+            <div style="margin-top:1rem; padding:0.8rem 1rem; background:rgba(212,168,75,0.12); border-radius:10px;">
+                <p style="font-size:0.95rem;"><strong>Increasing Stack:</strong> popped elements found their <strong>Next Smaller Element</strong><br>
+                   <strong>Decreasing Stack:</strong> popped elements found their <strong>Next Greater Element</strong></p>
+            </div>
+        </div>
+
+        <!-- The Two Types -->
+        <div class="card">
+            <h2>⛰️ The Two Types</h2>
+            <div class="types-grid">
+                <div class="type-card inc">
+                    <h3>↑ Monotonically Increasing</h3>
+                    <div class="mini-stack" id="miniInc"></div>
+                    <div class="type-detail">
+                        Bottom → Top: <em>small → big</em><br>
+                        Pop when: new element is <em>SMALLER</em> than top<br>
+                        <span class="finds-badge">Finds: Next Smaller Element</span>
+                    </div>
+                </div>
+                <div class="type-card dec">
+                    <h3>↓ Monotonically Decreasing</h3>
+                    <div class="mini-stack" id="miniDec"></div>
+                    <div class="type-detail">
+                        Bottom → Top: <em>big → small</em><br>
+                        Pop when: new element is <em>BIGGER</em> than top<br>
+                        <span class="finds-badge">Finds: Next Greater Element</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- The 3 Steps -->
+        <div class="card">
+            <h2>⚙️ The 3 Steps — Every Time a New Element Arrives</h2>
+            <div class="steps-flow">
+                <div class="step-box s-check">
+                    <div class="step-num">Step 1</div>
+                    <div class="step-name">CHECK</div>
+                    <div class="step-desc">Does it break the stack's order?</div>
+                </div>
+                <div class="step-box s-pop">
+                    <div class="step-num">Step 2</div>
+                    <div class="step-name">POP</div>
+                    <div class="step-desc">Pop violators. Each popped element just found its answer.</div>
+                </div>
+                <div class="step-box s-push">
+                    <div class="step-num">Step 3</div>
+                    <div class="step-name">PUSH</div>
+                    <div class="step-desc">Push the new element onto the stack.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signal Words -->
+        <div class="card">
+            <h2>🔔 Signal Words — How to Recognize It</h2>
+            <p style="font-size:0.93rem; color:var(--earth); margin-bottom:0.6rem;">See these in a problem? Think Monotonic Stack.</p>
+            <div class="signal-grid">
+                <div class="signal-item"><span class="signal-text">"next greater element"</span>      <span class="strength instant">instant</span></div>
+                <div class="signal-item"><span class="signal-text">"next smaller element"</span>      <span class="strength instant">instant</span></div>
+                <div class="signal-item"><span class="signal-text">"previous greater/smaller"</span>  <span class="strength instant">instant</span></div>
+                <div class="signal-item"><span class="signal-text">"how many days until warmer"</span><span class="strength strong">strong</span></div>
+                <div class="signal-item"><span class="signal-text">"largest rectangle"</span>         <span class="strength strong">strong</span></div>
+                <div class="signal-item"><span class="signal-text">"stock span"</span>                 <span class="strength strong">strong</span></div>
+                <div class="signal-item"><span class="signal-text">"find first X that is &gt; or &lt;"</span><span class="strength moderate">moderate</span></div>
+                <div class="signal-item"><span class="signal-text">"sequential comparison"</span>     <span class="strength moderate">moderate</span></div>
+            </div>
+        </div>
+
+        <!-- Decision Helper -->
+        <div class="decision-box">
+            <h3>🎯 Which Type Do I Pick?</h3>
+            <p class="decision-sub">I'm looking for the…</p>
+            <div class="decision-btns">
+                <button class="d-btn greater" onclick="pickType('greater')">Next Greater Element</button>
+                <button class="d-btn smaller" onclick="pickType('smaller')">Next Smaller Element</button>
+            </div>
+            <div class="d-result" id="dResult"></div>
+            <div class="d-rule">
+                <strong>The Rule:</strong> The stack order is the <strong>OPPOSITE</strong> of what you're looking for.<br>
+                Want bigger? → Keep stack <strong>decreasing</strong>.&nbsp;&nbsp;
+                Want smaller? → Keep stack <strong>increasing</strong>.
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 2 — LIVE SIMULATION
+         ═══════════════════════════════════════════════════ -->
+    <div id="tab-sim" class="tab-content">
+
+        <div class="sim-mode-row">
+            <div class="mode-btns">
+                <button class="m-btn inc on" onclick="switchMode('inc')">↑ Increasing  [1,7,9,5,4,8]</button>
+                <button class="m-btn dec"    onclick="switchMode('dec')">↓ Decreasing  [6,3,1,5,6,2]</button>
+            </div>
+            <p class="find-label" id="findLabel">Finding: <strong>Next Smaller Element</strong> for each element</p>
+        </div>
+
+        <div class="sim-layout">
+            <!-- Left column -->
+            <div class="sim-left">
+                <div class="pills-wrap" id="pillsWrap"></div>
+
+                <div class="narrative" id="narrativeBox">
+                    <span class="a-badge start" id="aBadge">Start</span>
+                    <span class="n-text" id="nText">Press Next to begin the simulation!</span>
+                </div>
+
+                <div class="extracted-wrap">
+                    <h4>🔴 Extracted Answers</h4>
+                    <div class="extracted-tags" id="extractedTags">
+                        <span class="e-placeholder">Answers appear here when elements are popped…</span>
+                    </div>
+                </div>
+
+                <div class="sim-controls">
+                    <button class="c-btn" id="btnPrev" onclick="simPrev()" disabled>← Prev</button>
+                    <button class="c-btn" id="btnNext" onclick="simNext()">Next →</button>
+                    <button class="c-btn reset-btn" onclick="simReset()">Reset</button>
+                    <span class="step-counter" id="stepCtr">0 / 0</span>
+                </div>
+            </div>
+
+            <!-- Stack tube -->
+            <div class="stack-section">
+                <div class="stack-label">Stack</div>
+                <div class="stack-tube" id="stackTube">
+                    <div class="tube-empty">empty</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 3 — THE CODE
+         ═══════════════════════════════════════════════════ -->
+    <div id="tab-code" class="tab-content">
+
+        <!-- Template A -->
+        <div class="card"><h2>📝 Template A — Monotonically Increasing (finds Next Smaller)</h2></div>
+        <div class="code-block">
+            <span class="code-badge inc">↑ Increasing</span>
+            <pre><span class="nm">stack</span> = []                                              <span class="cm"># stores indices</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="kw">range</span>(<span class="fn">len</span>(<span class="nm">arr</span>)):
+    <span class="kw">while</span> <span class="nm">stack</span> <span class="kw">and</span> <span class="nm">arr</span>[i] &lt; <span class="nm">arr</span>[<span class="nm">stack</span>[-1]]:    <span class="cm"># new element SMALLER → pop</span>
+        <span class="nm">popped_idx</span> = <span class="nm">stack</span>.<span class="fn">pop</span>()
+        <span class="cm"># arr[i] IS the Next Smaller Element for arr[popped_idx]</span>
+        <span class="nm">next_smaller</span>[<span class="nm">popped_idx</span>] = <span class="nm">arr</span>[i]
+    <span class="nm">stack</span>.<span class="fn">append</span>(i)
+<span class="cm"># Anything still in stack → has NO next smaller element</span></pre>
+        </div>
+
+        <!-- Template B -->
+        <div class="card"><h2>📝 Template B — Monotonically Decreasing (finds Next Greater)</h2></div>
+        <div class="code-block">
+            <span class="code-badge dec">↓ Decreasing</span>
+            <pre><span class="nm">stack</span> = []                                              <span class="cm"># stores indices</span>
+<span class="kw">for</span> i <span class="kw">in</span> <span class="kw">range</span>(<span class="fn">len</span>(<span class="nm">arr</span>)):
+    <span class="kw">while</span> <span class="nm">stack</span> <span class="kw">and</span> <span class="nm">arr</span>[i] &gt; <span class="nm">arr</span>[<span class="nm">stack</span>[-1]]:    <span class="cm"># new element BIGGER → pop</span>
+        <span class="nm">popped_idx</span> = <span class="nm">stack</span>.<span class="fn">pop</span>()
+        <span class="cm"># arr[i] IS the Next Greater Element for arr[popped_idx]</span>
+        <span class="nm">next_greater</span>[<span class="nm">popped_idx</span>] = <span class="nm">arr</span>[i]
+    <span class="nm">stack</span>.<span class="fn">append</span>(i)
+<span class="cm"># Anything still in stack → has NO next greater element</span></pre>
+        </div>
+
+        <!-- The Skeleton -->
+        <div class="skeleton-box">
+            <h3>🔄 The Skeleton (both types share this)</h3>
+            <p>
+                <code>for each element:</code><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>while</code> stack not empty AND current element <strong>violates</strong> the order:<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pop → current element is the <strong>answer</strong> for the popped element<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;<code>push</code> current element
+            </p>
+        </div>
+
+        <!-- O(N) Proof -->
+        <div class="proof-card">
+            <h2>⏱️ Why O(N)? — "Each Element Moves Twice"</h2>
+            <p class="proof-subtitle">Looks like nested loops (for + while). Feels like O(N²). It's actually O(N).</p>
+            <div class="proof-legend">
+                <div class="legend-item"><div class="l-swatch push"></div> Push</div>
+                <div class="legend-item"><div class="l-swatch pop"></div>  Pop</div>
+            </div>
+            <div id="proofChart"></div>
+            <div class="proof-total">
+                <strong>Total: 9 operations</strong> for 6 elements.<br>
+                Each element is pushed <strong>exactly once</strong> and popped <strong>at most once</strong> = 2N = <strong>O(N)</strong>.
+            </div>
+        </div>
+
+        <!-- Classic Problems -->
+        <div class="card"><h2>🏆 Classic Problems</h2></div>
+        <div class="problems">
+            <div class="prob-item">
+                <div class="prob-num">#1</div>
+                <div class="prob-body">
+                    <div class="prob-name">Daily Temperatures</div>
+                    <div class="prob-desc">"How many days until a warmer day?"</div>
+                    <div class="prob-solved">✅ Solved — <a href="Daily-temperatures/daily-temperatures-demo.html">Open Demo →</a></div>
+                </div>
+                <span class="p-type dec">↓ Decreasing</span>
+            </div>
+            <div class="prob-item">
+                <div class="prob-num">#2</div>
+                <div class="prob-body">
+                    <div class="prob-name">Next Greater Element</div>
+                    <div class="prob-desc">"For each element, find the first bigger one to the right"</div>
+                </div>
+                <span class="p-type dec">↓ Decreasing</span>
+            </div>
+            <div class="prob-item">
+                <div class="prob-num">#3</div>
+                <div class="prob-body">
+                    <div class="prob-name">Largest Rectangle in Histogram</div>
+                    <div class="prob-desc">"Find max area rectangle under histogram bars"</div>
+                </div>
+                <span class="p-type inc">↑ Increasing</span>
+            </div>
+            <div class="prob-item">
+                <div class="prob-num">#4</div>
+                <div class="prob-body">
+                    <div class="prob-name">Stock Span</div>
+                    <div class="prob-desc">"How many consecutive days price was ≤ today?"</div>
+                </div>
+                <span class="p-type dec">↓ Decreasing</span>
+            </div>
+            <div class="prob-item">
+                <div class="prob-num">#5</div>
+                <div class="prob-body">
+                    <div class="prob-name">Trapping Rain Water</div>
+                    <div class="prob-desc">"How much water can be trapped between bars?"</div>
+                </div>
+                <span class="p-type both">↕ Stack / Two-Pointer</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         TAB 4 — FULL REFERENCE GUIDE
+         ═══════════════════════════════════════════════════ -->
+    <div id="tab-guide" class="tab-content">
+        
+        <div class="card">
+            <h2>📚 Complete Reference Guide</h2>
+            <p>This comprehensive guide covers everything you need to master monotonic stacks. Use this as your go-to reference when solving problems.</p>
+        </div>
+
+        <!-- Quick Reference -->
+        <div style="background: linear-gradient(135deg, rgba(255,230,109,0.15), rgba(218,165,32,0.08)); border-radius: 14px; padding: 1.5rem; margin-bottom: 1.4rem; border: 2px solid rgba(218,165,32,0.3);">
+            <h3 style="font-size: 1.4rem; margin-bottom: 0.8rem;">⚡ Quick Reference</h3>
+            <div style="font-size: 0.95rem; line-height: 1.8;">
+                🔔 See "next greater/smaller" or "wait until X" → <strong>Think Monotonic Stack</strong><br><br>
+                🏗️ <strong>Two Types:</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;• Increasing (↑) bottom→top: small→big → finds <strong>Next SMALLER</strong><br>
+                &nbsp;&nbsp;&nbsp;&nbsp;• Decreasing (↓) bottom→top: big→small → finds <strong>Next GREATER</strong><br><br>
+                🔄 <strong>Which type?</strong> OPPOSITE of what you're looking for<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;• Want bigger? → Decreasing stack<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;• Want smaller? → Increasing stack<br><br>
+                ⚙️ <strong>Each element:</strong> Check → Pop violators → Push<br>
+                📍 <strong>The pop moment</strong> = "this popped element just found its answer"<br><br>
+                ⏱️ <strong>Time:</strong> O(N) — each element pushed once, popped at most once<br>
+                📦 <strong>Space:</strong> O(N)
+            </div>
+        </div>
+
+        <!-- Detailed Examples -->
+        <div class="card">
+            <h2>🔍 Live Trace Examples</h2>
+            <p style="margin-bottom: 1.2rem;">Study these step-by-step traces to understand how monotonic stacks work.</p>
+            
+            <h3 style="font-size: 1.3rem; margin: 1.5rem 0 0.8rem; color: #2a9d8f;">↑ Increasing Stack Example</h3>
+            <div style="background: rgba(78,205,196,0.08); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #2a9d8f;">
+                <pre style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.7; color: var(--ink); white-space: pre-wrap;">Input: [1, 7, 9, 5, 4, 8]
+Rule: bottom → top must be ascending. Pop when new element < top.
+
+① 1 arrives → Stack empty, push → [1]
+
+② 7 arrives → 7 > 1, push → [1, 7]
+
+③ 9 arrives → 9 > 7, push → [1, 7, 9]
+
+④ 5 arrives 
+   5 < 9 → POP 9 (9 found Next Smaller: 5) ✓
+   5 < 7 → POP 7 (7 found Next Smaller: 5) ✓  
+   5 > 1 → stop, push 5 → [1, 5]
+
+⑤ 4 arrives
+   4 < 5 → POP 5 (5 found Next Smaller: 4) ✓
+   4 > 1 → stop, push 4 → [1, 4]
+
+⑥ 8 arrives → 8 > 4, push → [1, 4, 8]
+
+Result: Elements 1, 4, 8 have NO next smaller element</pre>
+            </div>
+
+            <h3 style="font-size: 1.3rem; margin: 1.5rem 0 0.8rem; color: #e76f51;">↓ Decreasing Stack Example</h3>
+            <div style="background: rgba(255,107,107,0.08); padding: 1.2rem; border-radius: 10px; border-left: 4px solid #e76f51;">
+                <pre style="font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; line-height: 1.7; color: var(--ink); white-space: pre-wrap;">Input: [6, 3, 1, 5, 6, 2]
+Rule: bottom → top must be descending. Pop when new element > top.
+
+① 6 arrives → Stack empty, push → [6]
+
+② 3 arrives → 3 < 6, push → [6, 3]
+
+③ 1 arrives → 1 < 3, push → [6, 3, 1]
+
+④ 5 arrives
+   5 > 1 → POP 1 (1 found Next Greater: 5) ✓
+   5 > 3 → POP 3 (3 found Next Greater: 5) ✓
+   5 < 6 → stop, push 5 → [6, 5]
+
+⑤ 6 arrives
+   6 > 5 → POP 5 (5 found Next Greater: 6) ✓
+   6 ≥ 6 → equal OK, push 6 → [6, 6]
+
+⑥ 2 arrives → 2 < 6, push → [6, 6, 2]
+
+Result: Elements 6, 6, 2 have NO next greater element</pre>
+            </div>
+        </div>
+
+        <!-- Recognition Signals -->
+        <div class="card">
+            <h2>🔔 Recognition Signals</h2>
+            <p style="margin-bottom: 1rem;">Learn to spot monotonic stack problems instantly:</p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem;">
+                <div style="background: rgba(255,107,107,0.15); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,107,107,0.3);">
+                    <strong style="color: #e76f51;">🔥 Instant Signals</strong><br><br>
+                    • "next greater element"<br>
+                    • "next smaller element"<br>
+                    • "previous greater/smaller"
+                </div>
+                <div style="background: rgba(255,165,0,0.15); padding: 1rem; border-radius: 10px; border: 1px solid rgba(255,165,0,0.3);">
+                    <strong style="color: #e67e22;">⚡ Strong Signals</strong><br><br>
+                    • "how many days until warmer"<br>
+                    • "largest rectangle"<br>
+                    • "stock span"
+                </div>
+            </div>
+        </div>
+
+        <!-- Monotonic Stack vs Regular Stack -->
+        <div class="card">
+            <h2>⚖️ Monotonic vs Regular Stack</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; margin-top: 1rem;">
+                <div style="background: rgba(196,180,212,0.12); padding: 1.2rem; border-radius: 10px;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: #7a6b8a;">Regular Stack</h3>
+                    <ul style="line-height: 1.8; font-size: 0.95rem;">
+                        <li>No order rule</li>
+                        <li>Push anything</li>
+                        <li>Matching pairs</li>
+                        <li>Valid Parentheses</li>
+                        <li>Undo operations</li>
+                        <li>Expression evaluation</li>
+                    </ul>
+                </div>
+                <div style="background: rgba(78,205,196,0.12); padding: 1.2rem; border-radius: 10px;">
+                    <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; color: #2a9d8f;">Monotonic Stack</h3>
+                    <ul style="line-height: 1.8; font-size: 0.95rem;">
+                        <li>Must stay ordered</li>
+                        <li>Pop violators first</li>
+                        <li>Next greater/smaller</li>
+                        <li>Daily Temperatures</li>
+                        <li>Largest Rectangle</li>
+                        <li>Stock Span</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════════════════════ -->
+<script>
+/* ─── Tab Switching ─── */
+const TAB_ORDER = ['concept', 'sim', 'code', 'guide'];
+function switchTab(name) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    document.querySelectorAll('.tab-btn')[TAB_ORDER.indexOf(name)].classList.add('active');
+    if (name === 'sim')  renderSim();
+    if (name === 'code') renderProofChart();
+}
+
+/* ─── Concept: Mini Stacks ─── */
+function buildMiniStack(containerId, values) {
+    const el = document.getElementById(containerId);
+    el.innerHTML = '';
+    values.forEach(v => {
+        const block = document.createElement('div');
+        block.className = 'mini-block';
+        block.style.height = (16 + v * 7) + 'px';
+        block.textContent = v;
+        el.appendChild(block);
+    });
+}
+
+/* ─── Concept: Decision Helper ─── */
+function pickType(type) {
+    document.querySelectorAll('.d-btn').forEach(b => b.classList.remove('on'));
+    const res = document.getElementById('dResult');
+    if (type === 'greater') {
+        document.querySelector('.d-btn.greater').classList.add('on');
+        res.innerHTML = '→ Use a <strong style="color:#e76f51;">Monotonically Decreasing</strong> Stack (big → small).<br>Small things sit on top — ready to get popped by bigger newcomers.';
+    } else {
+        document.querySelector('.d-btn.smaller').classList.add('on');
+        res.innerHTML = '→ Use a <strong style="color:#2a9d8f;">Monotonically Increasing</strong> Stack (small → big).<br>Big things sit on top — ready to get popped by smaller newcomers.';
+    }
+}
+
+/* ─── Simulation Data ─── */
+const SIM = {
+    inc: {
+        arr: [1, 7, 9, 5, 4, 8],
+        findLabel: 'Next Smaller Element',
+        steps: [
+            { stack:[],        cur:-1, action:'start', text:'Welcome! We trace a Monotonically Increasing Stack (bottom → top ascending). Input: [1, 7, 9, 5, 4, 8]. When an element is popped, it has found its Next Smaller Element.', extracted:[] },
+            { stack:[1],       cur:0,  action:'push',  text:'1 arrives. Stack is empty — nothing to compare. Just push it.', extracted:[] },
+            { stack:[1,7],     cur:1,  action:'push',  text:'7 arrives. 7 > 1 (top) — ascending order holds. Push 7.', extracted:[] },
+            { stack:[1,7,9],   cur:2,  action:'push',  text:'9 arrives. 9 > 7 (top) — ascending order holds. Push 9.', extracted:[] },
+            { stack:[1,7],     cur:3,  action:'pop',   text:'5 arrives. 5 < 9 (top) — VIOLATES ascending order! Pop 9. → 9 found its Next Smaller: 5', extracted:[{v:9,a:5}] },
+            { stack:[1],       cur:3,  action:'pop',   text:'Still checking… 5 < 7 (top) — still violates! Pop 7. → 7 found its Next Smaller: 5', extracted:[{v:9,a:5},{v:7,a:5}] },
+            { stack:[1,5],     cur:3,  action:'push',  text:'5 > 1 (top) — ascending order restored. Push 5.', extracted:[{v:9,a:5},{v:7,a:5}] },
+            { stack:[1],       cur:4,  action:'pop',   text:'4 arrives. 4 < 5 (top) — VIOLATES! Pop 5. → 5 found its Next Smaller: 4', extracted:[{v:9,a:5},{v:7,a:5},{v:5,a:4}] },
+            { stack:[1,4],     cur:4,  action:'push',  text:'4 > 1 (top) — ascending order restored. Push 4.', extracted:[{v:9,a:5},{v:7,a:5},{v:5,a:4}] },
+            { stack:[1,4,8],   cur:5,  action:'push',  text:'8 arrives. 8 > 4 (top) — ascending order holds. Push 8.', extracted:[{v:9,a:5},{v:7,a:5},{v:5,a:4}] },
+            { stack:[1,4,8],   cur:-1, action:'done',  text:'Done! Elements [1, 4, 8] remain in stack — they have NO Next Smaller Element.', extracted:[{v:9,a:5},{v:7,a:5},{v:5,a:4}] }
+        ]
+    },
+    dec: {
+        arr: [6, 3, 1, 5, 6, 2],
+        findLabel: 'Next Greater Element',
+        steps: [
+            { stack:[],        cur:-1, action:'start', text:'Welcome! We trace a Monotonically Decreasing Stack (bottom → top descending). Input: [6, 3, 1, 5, 6, 2]. When an element is popped, it has found its Next Greater Element.', extracted:[] },
+            { stack:[6],       cur:0,  action:'push',  text:'6 arrives. Stack is empty — nothing to compare. Just push it.', extracted:[] },
+            { stack:[6,3],     cur:1,  action:'push',  text:'3 arrives. 3 < 6 (top) — descending order holds. Push 3.', extracted:[] },
+            { stack:[6,3,1],   cur:2,  action:'push',  text:'1 arrives. 1 < 3 (top) — descending order holds. Push 1.', extracted:[] },
+            { stack:[6,3],     cur:3,  action:'pop',   text:'5 arrives. 5 > 1 (top) — VIOLATES descending order! Pop 1. → 1 found its Next Greater: 5', extracted:[{v:1,a:5}] },
+            { stack:[6],       cur:3,  action:'pop',   text:'Still checking… 5 > 3 (top) — still violates! Pop 3. → 3 found its Next Greater: 5', extracted:[{v:1,a:5},{v:3,a:5}] },
+            { stack:[6,5],     cur:3,  action:'push',  text:'5 < 6 (top) — descending order restored. Push 5.', extracted:[{v:1,a:5},{v:3,a:5}] },
+            { stack:[6],       cur:4,  action:'pop',   text:'6 arrives. 6 > 5 (top) — VIOLATES! Pop 5. → 5 found its Next Greater: 6', extracted:[{v:1,a:5},{v:3,a:5},{v:5,a:6}] },
+            { stack:[6,6],     cur:4,  action:'push',  text:'6 ≥ 6 (top) — equal is OK for descending (we only pop on strict >). Push 6.', extracted:[{v:1,a:5},{v:3,a:5},{v:5,a:6}] },
+            { stack:[6,6,2],   cur:5,  action:'push',  text:'2 arrives. 2 < 6 (top) — descending order holds. Push 2.', extracted:[{v:1,a:5},{v:3,a:5},{v:5,a:6}] },
+            { stack:[6,6,2],   cur:-1, action:'done',  text:'Done! Elements [6, 6, 2] remain in stack — they have NO Next Greater Element.', extracted:[{v:1,a:5},{v:3,a:5},{v:5,a:6}] }
+        ]
+    }
+};
+
+let curMode = 'inc';
+let curStep = 0;
+let goingForward = true;
+
+/* ─── Simulation Controls ─── */
+function switchMode(m) {
+    curMode = m;
+    curStep = 0;
+    goingForward = true;
+    document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('on'));
+    document.querySelector('.m-btn.' + m).classList.add('on');
+    document.getElementById('findLabel').innerHTML = 'Finding: <strong>' + SIM[m].findLabel + '</strong> for each element';
+    renderSim();
+}
+
+function simNext() {
+    goingForward = true;
+    if (curStep < SIM[curMode].steps.length - 1) { curStep++; renderSim(); }
+}
+function simPrev() {
+    goingForward = false;
+    if (curStep > 0) { curStep--; renderSim(); }
+}
+function simReset() {
+    goingForward = true;
+    curStep = 0;
+    renderSim();
+}
+
+/* ─── Render Simulation State ─── */
+function renderSim() {
+    const mode  = SIM[curMode];
+    const step  = mode.steps[curStep];
+    const arr   = mode.arr;
+
+    // ── Pills ──
+    const wrap = document.getElementById('pillsWrap');
+    wrap.innerHTML = '';
+    arr.forEach((val, i) => {
+        const pill = document.createElement('div');
+        pill.className = 'pill';
+
+        if (curStep === 0) {
+            // start — all neutral
+        } else if (step.cur === -1) {
+            // done — all processed
+            pill.classList.add('done');
+        } else if (i === step.cur) {
+            pill.classList.add('current');
+        } else if (i < step.cur) {
+            pill.classList.add('done');
+        }
+        // else: not yet reached — stays neutral
+
+        pill.innerHTML = '<span class="p-val">' + val + '</span><span class="p-idx">[' + i + ']</span>';
+        wrap.appendChild(pill);
+    });
+
+    // ── Narrative ──
+    const badge = document.getElementById('aBadge');
+    badge.className = 'a-badge ' + step.action;
+    badge.textContent = step.action.charAt(0).toUpperCase() + step.action.slice(1);
+    document.getElementById('nText').textContent = step.text;
+
+    // ── Stack Tube ──
+    const tube = document.getElementById('stackTube');
+    tube.innerHTML = '';
+    if (step.stack.length === 0) {
+        tube.innerHTML = '<div class="tube-empty">empty</div>';
+    } else {
+        // prepend so that the last item (top) ends up at the visual top
+        step.stack.forEach((val, idx) => {
+            const block = document.createElement('div');
+            block.className = 's-block';
+            if (idx === step.stack.length - 1) block.classList.add('glow');
+            block.textContent = val;
+            tube.prepend(block);
+        });
+    }
+
+    // ── Extracted Answers ──
+    const tags = document.getElementById('extractedTags');
+    tags.innerHTML = '';
+    if (step.extracted.length === 0) {
+        tags.innerHTML = '<span class="e-placeholder">Answers appear here when elements are popped…</span>';
+    } else {
+        const label = curMode === 'inc' ? 'NSE' : 'NGE';
+        step.extracted.forEach((item, idx) => {
+            const tag = document.createElement('div');
+            tag.className = 'e-tag';
+            // animate only the newest tag, and only when going forward
+            if (goingForward && idx === step.extracted.length - 1) tag.classList.add('new');
+            tag.textContent = item.v + ' → ' + label + ' = ' + item.a;
+            tags.appendChild(tag);
+        });
+    }
+
+    // ── Buttons ──
+    document.getElementById('btnPrev').disabled = (curStep === 0);
+    document.getElementById('btnNext').disabled = (curStep === mode.steps.length - 1);
+    document.getElementById('stepCtr').textContent = curStep + ' / ' + (mode.steps.length - 1);
+}
+
+/* ─── Code Tab: O(N) Proof Chart ─── */
+const PROOF_DATA = [
+    { label:'i=0', pushes:1, pops:0, note:'' },
+    { label:'i=1', pushes:1, pops:0, note:'' },
+    { label:'i=2', pushes:1, pops:0, note:'' },
+    { label:'i=3', pushes:1, pops:2, note:'9 and 7 will never be touched again' },
+    { label:'i=4', pushes:1, pops:1, note:'5 will never be touched again' },
+    { label:'i=5', pushes:1, pops:0, note:'' }
+];
+
+function renderProofChart() {
+    const container = document.getElementById('proofChart');
+    container.innerHTML = '';
+    PROOF_DATA.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'chart-row';
+
+        const lbl = document.createElement('div');
+        lbl.className = 'chart-label';
+        lbl.textContent = row.label;
+        rowDiv.appendChild(lbl);
+
+        const segs = document.createElement('div');
+        segs.className = 'chart-segs';
+        for (let i = 0; i < row.pushes; i++) {
+            const s = document.createElement('div');
+            s.className = 'chart-seg p';
+            s.textContent = '↑';
+            segs.appendChild(s);
+        }
+        for (let i = 0; i < row.pops; i++) {
+            const s = document.createElement('div');
+            s.className = 'chart-seg d';
+            s.textContent = '↓';
+            segs.appendChild(s);
+        }
+        rowDiv.appendChild(segs);
+
+        if (row.note) {
+            const n = document.createElement('span');
+            n.className = 'chart-note';
+            n.textContent = '← ' + row.note;
+            rowDiv.appendChild(n);
+        }
+        container.appendChild(rowDiv);
+    });
+}
+
+/* ─── Init ─── */
+buildMiniStack('miniInc', [1, 4, 8]);
+buildMiniStack('miniDec', [9, 5, 2]);
+renderSim();
+renderProofChart();
+</script>
+</body>
+</html>

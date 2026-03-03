@@ -1,0 +1,1813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌸 Heap Sort - A Visual Journey 🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Patrick+Hand&family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Merriweather', serif;
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 25%, #d4a5a5 50%, #9fa5d4 75%, #a5d4d4 100%);
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.8;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 40px;
+            text-align: center;
+            border-bottom: 3px dashed #d4a5a5;
+            position: relative;
+        }
+
+        .header::before {
+            content: '🌸';
+            position: absolute;
+            left: 30px;
+            top: 30px;
+            font-size: 2.5em;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header::after {
+            content: '🌸';
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            font-size: 2.5em;
+            animation: float 3s ease-in-out infinite 1.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .header h1 {
+            font-family: 'Amatic SC', cursive;
+            font-size: 3.5em;
+            color: #6b4e4e;
+            margin-bottom: 10px;
+            text-shadow: 3px 3px 6px rgba(255,255,255,0.8);
+            letter-spacing: 3px;
+        }
+
+        .header p {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4em;
+            color: #8b6f6f;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f9f5f0;
+            border-bottom: 3px dashed #d4a5a5;
+            overflow-x: auto;
+            flex-wrap: wrap;
+            padding: 10px;
+            gap: 10px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border: none;
+            background: white;
+            font-size: 1em;
+            font-family: 'Patrick Hand', cursive;
+            font-weight: 600;
+            color: #8b6f6f;
+            transition: all 0.3s;
+            border-radius: 20px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .tab:hover {
+            background: #ffecd2;
+            transform: translateY(-2px);
+            box-shadow: 3px 3px 12px rgba(0,0,0,0.15);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%);
+            color: #6b4e4e;
+            box-shadow: inset 2px 2px 8px rgba(0,0,0,0.1);
+            transform: scale(1.05);
+        }
+
+        .content {
+            padding: 50px;
+            background: #fffef9;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-family: 'Amatic SC', cursive;
+            font-size: 2.8em;
+            color: #6b4e4e;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px dashed #d4a5a5;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .subsection-title {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 2em;
+            color: #9b7f7f;
+            margin: 40px 0 20px 0;
+            text-decoration: underline;
+            text-decoration-color: #ffecd2;
+            text-decoration-thickness: 3px;
+        }
+
+        .definition-box {
+            background: linear-gradient(135deg, #fff5e6 0%, #ffe8cc 100%);
+            border-left: 6px solid #fcb69f;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .formula-box {
+            background: linear-gradient(135deg, #fff9e6 0%, #ffeaa7 100%);
+            border: 3px dashed #fdcb6e;
+            padding: 25px;
+            margin: 25px 0;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.3em;
+            text-align: center;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .important-note {
+            background: linear-gradient(135deg, #ffe6e6 0%, #ffcccc 100%);
+            border-left: 6px solid #ff7675;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .key-insight {
+            background: linear-gradient(135deg, #e6f7e6 0%, #ccf0cc 100%);
+            border-left: 6px solid #74b9ff;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 25px 0;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .visualization {
+            background: white;
+            padding: 40px;
+            margin: 35px 0;
+            border-radius: 20px;
+            text-align: center;
+            border: 3px dashed #d4a5a5;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        .tree-container {
+            margin: 40px auto;
+            padding: 30px;
+            background: #fafaf5;
+            border-radius: 15px;
+            overflow-x: auto;
+            border: 2px solid #e8d5b7;
+        }
+
+        .step-by-step {
+            counter-reset: step;
+            margin: 30px 0;
+        }
+
+        .step {
+            counter-increment: step;
+            margin: 25px 0;
+            padding: 25px;
+            padding-left: 80px;
+            background: linear-gradient(135deg, #f0f8ff 0%, #e6f2ff 100%);
+            border-radius: 15px;
+            position: relative;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.06);
+        }
+
+        .step::before {
+            content: counter(step);
+            position: absolute;
+            left: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b4e4e;
+            font-weight: bold;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.4em;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 3px 3px 15px rgba(0,0,0,0.08);
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+        }
+
+        th {
+            background: linear-gradient(135deg, #9fa5d4 0%, #a5d4d4 100%);
+            color: white;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1em;
+        }
+
+        td {
+            background: white;
+            border-bottom: 1px solid #f0e6d2;
+        }
+
+        tr:hover td {
+            background: #fffef5;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            line-height: 2;
+        }
+
+        li {
+            margin: 15px 0;
+        }
+
+        .array-viz {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+
+        .array-cell {
+            min-width: 65px;
+            height: 65px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 3px solid #9fa5d4;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 1.3em;
+            font-family: 'Patrick Hand', cursive;
+            transition: all 0.3s;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .array-cell:hover {
+            transform: scale(1.08);
+        }
+
+        .emoji {
+            font-size: 1.6em;
+            margin: 0 8px;
+        }
+
+        strong {
+            color: #9b7f7f;
+            font-weight: 700;
+        }
+
+        .complexity-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            background: linear-gradient(135deg, #9fa5d4 0%, #74b9ff 100%);
+            color: white;
+            border-radius: 25px;
+            font-weight: bold;
+            font-family: 'Patrick Hand', cursive;
+            margin: 5px;
+            box-shadow: 2px 2px 8px rgba(0,0,0,0.15);
+        }
+
+        h3, h4 {
+            font-family: 'Patrick Hand', cursive;
+            color: #6b4e4e;
+            margin: 20px 0 10px 0;
+        }
+
+        p {
+            margin: 15px 0;
+            color: #4a4a4a;
+        }
+
+        /* Tree node styles */
+        .tree-node-circle {
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.2));
+            transition: all 0.3s;
+        }
+
+        .tree-node-circle:hover {
+            filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.3));
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Heap Sort Journey 🌸</h1>
+            <p>A peaceful visual exploration of heaps, sorting, and beauty</p>
+            <p style="font-size: 1em; margin-top: 15px; color: #6b4e4e;">Time Complexity: <span class="complexity-badge">O(n log n)</span></p>
+        </div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="showTab(0)">I. 🌳 Tree Representation</button>
+            <button class="tab" onclick="showTab(1)">II. 📐 Full | Complete Tree</button>
+            <button class="tab" onclick="showTab(2)">III. 🏔️ Heap Basics</button>
+            <button class="tab" onclick="showTab(3)">IV. ➕ Insert Operation</button>
+            <button class="tab" onclick="showTab(4)">V. ➖ Delete Operation</button>
+            <button class="tab" onclick="showTab(5)">VI. 🔄 Heap Sort</button>
+            <button class="tab" onclick="showTab(6)">VII. ⚙️ Heapify</button>
+            <button class="tab" onclick="showTab(7)">VIII. 🎯 Priority Queue</button>
+        </div>
+
+        <div class="content">
+            <!-- TAB 1: TREE REPRESENTATION -->
+            <div class="tab-content active">
+                <h2 class="section-title">I. Representation of Binary Tree 🌳</h2>
+
+                <p style="font-size: 1.15em;">When we represent a binary tree in an array, we care about two magical things:</p>
+                <ul>
+                    <li><strong>Elements</strong> - The actual values in the tree 🎨</li>
+                    <li><strong>Relationships</strong> - How nodes connect to each other 🔗</li>
+                </ul>
+
+                <div class="definition-box">
+                    <h3 class="subsection-title">🔗 Parent-Child Relationship Formulas</h3>
+                    <p>If a node lives at index <strong>i</strong>:</p>
+                    <div class="formula-box">
+                        • Left child = 2 × i<br>
+                        • Right child = 2 × i + 1<br>
+                        • Parent = ⌊i / 2⌋ (floor division)
+                    </div>
+                </div>
+
+                <div class="key-insight">
+                    <strong>💡 Example:</strong><br>
+                    If parent is at index 3.5 → floor(3.5) = 3 ✓<br>
+                    If parent is at index 2.5 → floor(2.5) = 2 ✓
+                </div>
+
+                <div class="tree-container">
+                    <h3 style="text-align: center; margin-bottom: 30px;">Visual Example:</h3>
+                    <svg width="100%" height="400" viewBox="0 0 600 400">
+                        <!-- Root -->
+                        <circle cx="300" cy="60" r="30" fill="#fcb69f" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="300" y="68" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">A</text>
+                        <text x="300" y="105" text-anchor="middle" fill="#6b4e4e" font-size="14" font-family="Patrick Hand">Index: 1</text>
+
+                        <!-- Lines to children -->
+                        <line x1="300" y1="90" x2="180" y2="150" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="300" y1="90" x2="420" y2="150" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <!-- Level 2 -->
+                        <circle cx="180" cy="180" r="28" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="180" y="188" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">B</text>
+                        <text x="180" y="220" text-anchor="middle" fill="#6b4e4e" font-size="14" font-family="Patrick Hand">Index: 2</text>
+
+                        <circle cx="420" cy="180" r="28" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="420" y="188" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">C</text>
+                        <text x="420" y="220" text-anchor="middle" fill="#6b4e4e" font-size="14" font-family="Patrick Hand">Index: 3</text>
+
+                        <!-- Lines to grandchildren -->
+                        <line x1="180" y1="208" x2="110" y2="268" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="180" y1="208" x2="250" y2="268" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <!-- Level 3 -->
+                        <circle cx="110" cy="295" r="25" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="110" y="303" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">D</text>
+                        <text x="110" y="330" text-anchor="middle" fill="#6b4e4e" font-size="13" font-family="Patrick Hand">Index: 4</text>
+
+                        <circle cx="250" cy="295" r="25" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="250" y="303" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">E</text>
+                        <text x="250" y="330" text-anchor="middle" fill="#6b4e4e" font-size="13" font-family="Patrick Hand">Index: 5</text>
+                    </svg>
+
+                    <div class="array-viz" style="margin-top: 40px;">
+                        <div class="array-cell" style="background: #f0f0f0; color: #999;">-</div>
+                        <div class="array-cell" style="background: #fcb69f; color: white;">A</div>
+                        <div class="array-cell" style="background: #a5d4d4; color: white;">B</div>
+                        <div class="array-cell" style="background: #a5d4d4; color: white;">C</div>
+                        <div class="array-cell" style="background: #9fa5d4; color: white;">D</div>
+                        <div class="array-cell" style="background: #9fa5d4; color: white;">E</div>
+                    </div>
+                    <p style="margin-top: 15px; color: #8b6f6f; text-align: center; font-family: 'Patrick Hand', cursive;">Index: 0 (unused), 1, 2, 3, 4, 5...</p>
+                </div>
+
+                <div class="important-note">
+                    <strong>⚠️ Important Rule:</strong> When filling level by level, if there's a missing node, leave it blank! Use the formulas to check. This maintains the complete binary tree property.
+                </div>
+            </div>
+
+            <!-- TAB 2: FULL | COMPLETE BINARY TREE -->
+            <div class="tab-content">
+                <h2 class="section-title">II. Full | Complete Binary Tree 📐</h2>
+
+                <h3 class="subsection-title">1️⃣ Full Binary Tree</h3>
+                <div class="definition-box">
+                    <p><strong>Definition:</strong> A full binary tree is where <strong>every node has either 0 or 2 children</strong>. No node has only one child! 🎯</p>
+                    <ul>
+                        <li>Each internal (non-leaf) node has <strong>exactly two children</strong></li>
+                        <li>It's a tree <strong>full of nodes corresponding to its height</strong></li>
+                        <li>Adding any node increases the height</li>
+                    </ul>
+                </div>
+
+                <div class="formula-box">
+                    If a tree has height H, maximum nodes:<br><br>
+                    <strong style="font-size: 1.6em; color: #9b7f7f;">2<sup>h+1</sup> - 1</strong>
+                    <br><br>(Every node has full children)
+                </div>
+
+                <div class="tree-container">
+                    <h4 style="text-align: center; color: #6b4e4e; margin-bottom: 20px; font-family: 'Patrick Hand', cursive; font-size: 1.4em;">Example: Full Binary Tree (Height = 2)</h4>
+                    <svg width="100%" height="350" viewBox="0 0 500 350">
+                        <circle cx="250" cy="40" r="28" fill="#fcb69f" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">1</text>
+
+                        <line x1="250" y1="68" x2="150" y2="118" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="250" y1="68" x2="350" y2="118" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <circle cx="150" cy="145" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="150" y="153" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">2</text>
+
+                        <circle cx="350" cy="145" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="350" y="153" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">3</text>
+
+                        <line x1="150" y1="171" x2="90" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="150" y1="171" x2="210" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="350" y1="171" x2="290" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="350" y1="171" x2="410" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <circle cx="90" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="90" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">4</text>
+
+                        <circle cx="210" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="210" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">5</text>
+
+                        <circle cx="290" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="290" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">6</text>
+
+                        <circle cx="410" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="410" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">7</text>
+                    </svg>
+                    <p style="text-align: center; margin-top: 20px; font-family: 'Patrick Hand', cursive; font-size: 1.1em;">Height = 2, Nodes = 2<sup>2+1</sup> - 1 = 7 ✓</p>
+                </div>
+
+                <h3 class="subsection-title">2️⃣ Complete Binary Tree</h3>
+
+                <div class="definition-box">
+                    <strong>Definition 1:</strong> A complete binary tree represented in an array wouldn't have any <strong>missing elements or gaps</strong>.
+                </div>
+
+                <div class="definition-box">
+                    <strong>Definition 2:</strong> All levels are <strong>fully filled except possibly the last level</strong>, and in the last level, all nodes are <strong>as far left as possible</strong>. 🏗️🌳
+                    <br><br>
+                    The tree fills up <strong>level by level, left to right</strong>, with no gaps!
+                </div>
+
+                <div class="tree-container">
+                    <h4 style="text-align: center; color: #6b4e4e; margin-bottom: 20px; font-family: 'Patrick Hand', cursive; font-size: 1.4em;">Complete Binary Tree Example:</h4>
+                    <svg width="100%" height="350" viewBox="0 0 500 350">
+                        <circle cx="250" cy="40" r="28" fill="#fcb69f" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">1</text>
+
+                        <line x1="250" y1="68" x2="150" y2="118" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="250" y1="68" x2="350" y2="118" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <circle cx="150" cy="145" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="150" y="153" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">2</text>
+
+                        <circle cx="350" cy="145" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="350" y="153" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">3</text>
+
+                        <line x1="150" y1="171" x2="90" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="150" y1="171" x2="210" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+                        <line x1="350" y1="171" x2="290" y2="221" stroke="#d4a5a5" stroke-width="3"/>
+
+                        <circle cx="90" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="90" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">4</text>
+
+                        <circle cx="210" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="210" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">5</text>
+
+                        <circle cx="290" cy="248" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                        <text x="290" y="256" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">6</text>
+                    </svg>
+                    <p style="text-align: center; margin-top: 20px; font-family: 'Patrick Hand', cursive; font-size: 1.1em;">Last level not full, but nodes 4, 5, 6 are <strong>packed left</strong>! ✓</p>
+                </div>
+
+                <h3 class="subsection-title">📏 Height of Complete Binary Tree</h3>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART A: The Formula                            -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="key-insight">
+                    <p style="font-size: 1.15em;"><strong>The height of a complete binary tree will be MINIMUM:</strong></p>
+                    <div class="formula-box">
+                        height = ⌊log₂(n)⌋
+                        <br><br>
+                        <span style="font-size: 0.85em; color: #9b7f7f;">We round <strong>DOWN (floor)</strong>, not round up!</span>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART B: ANALYSE — the 3-part breakdown        -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="definition-box">
+                    <h4 style="color: #9b7f7f; font-size: 1.5em;">🔍 ANALYSE — Breaking It Down</h4>
+                    <p style="font-size: 1.05em; margin-bottom: 18px;">To understand <em>why</em> height = ⌊log₂(n)⌋, we need to understand <strong>3 things</strong>:</p>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 10px;">
+                        <div style="flex: 1 1 200px; background: #ffecd2; border-radius: 14px; padding: 20px; border-left: 5px solid #fcb69f;">
+                            <h5 style="color: #6b4e4e; margin-top: 0;">① Why 2<sup>h</sup> ?</h5>
+                            <p style="font-size: 1em;">How many nodes exist at <em>each level</em>?</p>
+                        </div>
+                        <div style="flex: 1 1 200px; background: #e8f5e9; border-radius: 14px; padding: 20px; border-left: 5px solid #a5d4a5;">
+                            <h5 style="color: #6b4e4e; margin-top: 0;">② Geometric Series</h5>
+                            <p style="font-size: 1em;">How to sum all nodes across <em>all levels</em>?</p>
+                        </div>
+                        <div style="flex: 1 1 200px; background: #e3f2fd; border-radius: 14px; padding: 20px; border-left: 5px solid #90caf9;">
+                            <h5 style="color: #6b4e4e; margin-top: 0;">③ Flip to Find h</h5>
+                            <p style="font-size: 1em;">Rearrange to <em>solve for height</em> from n.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART C: Why 2^h — level-by-level visual        -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="tree-container">
+                    <h4 style="text-align: center; color: #6b4e4e; margin-bottom: 10px; font-family: 'Patrick Hand', cursive; font-size: 1.5em;">① Why 2<sup>h</sup> ? — Each level doubles 🌳</h4>
+
+                    <div style="background: white; padding: 28px; border-radius: 15px; margin: 16px 0;">
+                        <p style="font-size: 1.05em; text-align: center; margin-bottom: 8px;"><strong>Root = level 0.</strong> Every parent splits into 2 children → each level has <strong>double</strong> the nodes.</p>
+
+                        <!-- 7-node tree with level labels -->
+                        <svg width="100%" height="260" viewBox="0 0 660 260">
+                            <!-- Level labels on the left -->
+                            <rect x="0" y="10" width="100" height="50" rx="8" fill="#ffecd2"/>
+                            <text x="50" y="40" text-anchor="middle" fill="#6b4e4e" font-family="Patrick Hand" font-size="17" font-weight="bold">Level 0</text>
+                            <rect x="0" y="100" width="100" height="50" rx="8" fill="#e8f5e9"/>
+                            <text x="50" y="130" text-anchor="middle" fill="#6b4e4e" font-family="Patrick Hand" font-size="17" font-weight="bold">Level 1</text>
+                            <rect x="0" y="190" width="100" height="50" rx="8" fill="#e3f2fd"/>
+                            <text x="50" y="220" text-anchor="middle" fill="#6b4e4e" font-family="Patrick Hand" font-size="17" font-weight="bold">Level 2</text>
+
+                            <!-- Edges -->
+                            <line x1="330" y1="55" x2="220" y2="100" stroke="#d4a5a5" stroke-width="2.5"/>
+                            <line x1="330" y1="55" x2="440" y2="100" stroke="#d4a5a5" stroke-width="2.5"/>
+                            <line x1="220" y1="145" x2="155" y2="190" stroke="#d4a5a5" stroke-width="2"/>
+                            <line x1="220" y1="145" x2="285" y2="190" stroke="#d4a5a5" stroke-width="2"/>
+                            <line x1="440" y1="145" x2="375" y2="190" stroke="#d4a5a5" stroke-width="2"/>
+                            <line x1="440" y1="145" x2="505" y2="190" stroke="#d4a5a5" stroke-width="2"/>
+
+                            <!-- Level 0: 1 node -->
+                            <circle cx="330" cy="35" r="26" fill="#fcb69f" stroke="#6b4e4e" stroke-width="2.5"/>
+                            <text x="330" y="42" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">A</text>
+
+                            <!-- Level 1: 2 nodes -->
+                            <circle cx="220" cy="125" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2.5"/>
+                            <text x="220" y="132" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">B</text>
+                            <circle cx="440" cy="125" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2.5"/>
+                            <text x="440" y="132" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">C</text>
+
+                            <!-- Level 2: 4 nodes -->
+                            <circle cx="155" cy="215" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2"/>
+                            <text x="155" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="17" font-family="Patrick Hand">D</text>
+                            <circle cx="285" cy="215" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2"/>
+                            <text x="285" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="17" font-family="Patrick Hand">E</text>
+                            <circle cx="375" cy="215" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2"/>
+                            <text x="375" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="17" font-family="Patrick Hand">F</text>
+                            <circle cx="505" cy="215" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2"/>
+                            <text x="505" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="17" font-family="Patrick Hand">G</text>
+
+                            <!-- Count annotations on right -->
+                            <text x="590" y="40" fill="#6b4e4e" font-family="Merriweather" font-size="15" font-weight="bold">2⁰ = 1</text>
+                            <text x="590" y="130" fill="#6b4e4e" font-family="Merriweather" font-size="15" font-weight="bold">2¹ = 2</text>
+                            <text x="590" y="220" fill="#6b4e4e" font-family="Merriweather" font-size="15" font-weight="bold">2² = 4</text>
+                        </svg>
+
+                        <div class="key-insight" style="margin-top: 12px;">
+                            <strong>Pattern:</strong> Level 0 → 1 node &nbsp;|&nbsp; Level 1 → 2 nodes &nbsp;|&nbsp; Level 2 → 4 nodes &nbsp;|&nbsp; … &nbsp;|&nbsp; <strong>Level h → 2<sup>h</sup> nodes</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART D: Geometric Series + The Magic Trick     -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="definition-box">
+                    <h4 style="color: #9b7f7f; font-size: 1.5em;">② Geometric Series — Sum of All Nodes</h4>
+                    <p style="font-size: 1.05em;">A tree of height <strong>h</strong> has levels 0, 1, 2, …, h. Total nodes = sum across every level:</p>
+
+                    <div class="formula-box" style="margin: 14px 0;">
+                        Total nodes = 2<sup>0</sup> + 2<sup>1</sup> + 2<sup>2</sup> + … + 2<sup>h</sup>
+                    </div>
+
+                    <!-- The Magic Trick Box -->
+                    <div style="background: #fff9e6; padding: 24px; border-radius: 14px; margin: 20px 0; border: 3px dashed #fdcb6e;">
+                        <h4 style="color: #6b4e4e; margin-top: 0; font-size: 1.25em;">🪄 The Magic Trick — How to Prove This Sum</h4>
+                        <p style="font-size: 1.05em; margin-bottom: 12px;">Let <strong>S</strong> = 1 + 2 + 4 + … + 2<sup>h</sup> &nbsp; (the sum we want)</p>
+
+                        <div class="step-by-step" style="margin: 0;">
+                            <div class="step" style="background: #ffecd2;">
+                                <strong>Step 1 — Write S:</strong><br>
+                                <code style="font-size: 1.05em;">S = 1 + 2 + 4 + … + 2<sup>h</sup></code>
+                            </div>
+                            <div class="step" style="background: #e8f5e9;">
+                                <strong>Step 2 — Multiply both sides by 2:</strong><br>
+                                <code style="font-size: 1.05em;">2S = 2 + 4 + 8 + … + 2<sup>h+1</sup></code>
+                            </div>
+                            <div class="step" style="background: #e3f2fd;">
+                                <strong>Step 3 — Subtract S from 2S:</strong><br>
+                                <code style="font-size: 1.05em;">2S − S = (2 + 4 + 8 + … + 2<sup>h+1</sup>) − (1 + 2 + 4 + … + 2<sup>h</sup>)</code><br><br>
+                                Almost everything <strong>cancels out</strong>! Only two terms survive:
+                            </div>
+                            <div class="step" style="background: linear-gradient(135deg, #667eea 22%, #764ba2 100%); color: white;">
+                                <strong style="font-size: 1.2em;">Result:</strong><br>
+                                <code style="font-size: 1.15em; color: #fff9e6;">S = 2<sup>h+1</sup> − 1</code>
+                            </div>
+                        </div>
+
+                        <div style="background: white; padding: 16px; border-radius: 10px; margin-top: 16px;">
+                            <p style="margin: 0; font-size: 1.05em;"><strong>🧮 Concrete example (h = 2):</strong><br>
+                            S = 1 + 2 + 4 = 7 &nbsp; → &nbsp; 2<sup>2+1</sup> − 1 = 8 − 1 = <strong>7</strong> ✅</p>
+                        </div>
+                    </div>
+
+                    <!-- Why subtract 1 -->
+                    <div style="background: #fce4ec; padding: 18px; border-radius: 12px; margin: 16px 0; border-left: 5px solid #f48fb1;">
+                        <h5 style="color: #6b4e4e; margin-top: 0;">🤨 Why Subtract 1?</h5>
+                        <p style="font-size: 1.05em;">Think of it like binary counting:<br>
+                        2<sup>h+1</sup> in binary = <strong>1</strong> followed by (h+1) zeros → e.g. 2³ = <strong>1000</strong><br>
+                        2<sup>h+1</sup> − 1 = all 1s → e.g. 8 − 1 = 7 = <strong>111</strong><br><br>
+                        Subtracting 1 fills <em>every</em> bit below — just like filling every level of the tree! 🌳</p>
+                    </div>
+
+                    <!-- Table -->
+                    <table style="margin-top: 20px;">
+                        <thead>
+                            <tr>
+                                <th>Height h</th>
+                                <th>Nodes at level h</th>
+                                <th>Total nodes (all levels)</th>
+                                <th>Formula check</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>0</td><td>2⁰ = 1</td><td>1</td><td>2¹ − 1 = 1 ✓</td></tr>
+                            <tr><td>1</td><td>2¹ = 2</td><td>1 + 2 = 3</td><td>2² − 1 = 3 ✓</td></tr>
+                            <tr><td>2</td><td>2² = 4</td><td>1 + 2 + 4 = 7</td><td>2³ − 1 = 7 ✓</td></tr>
+                            <tr><td>3</td><td>2³ = 8</td><td>1 + 2 + 4 + 8 = 15</td><td>2⁴ − 1 = 15 ✓</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART E: Flip to Solve for h — 5 Steps          -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="definition-box">
+                    <h4 style="color: #9b7f7f; font-size: 1.5em;">③ Flip the Formula — Solve for Height</h4>
+                    <p style="font-size: 1.05em; margin-bottom: 16px;">We proved: <strong>n ≤ 2<sup>h+1</sup> − 1</strong> (a complete tree of height h holds at most that many nodes). Now flip it to find <strong>h</strong> from <strong>n</strong>:</p>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong style="font-size: 1.1em;">Step 1</strong> — Start with the max-nodes inequality:<br>
+                            <code style="font-size: 1.05em;">n ≤ 2<sup>h+1</sup> − 1</code>
+                        </div>
+                        <div class="step">
+                            <strong style="font-size: 1.1em;">Step 2</strong> — Add 1 to both sides:<br>
+                            <code style="font-size: 1.05em;">n + 1 ≤ 2<sup>h+1</sup></code>
+                        </div>
+                        <div class="step">
+                            <strong style="font-size: 1.1em;">Step 3</strong> — Take log₂ of both sides (log₂ preserves ≤):<br>
+                            <code style="font-size: 1.05em;">log₂(n + 1) ≤ h + 1</code>
+                        </div>
+                        <div class="step">
+                            <strong style="font-size: 1.1em;">Step 4</strong> — Subtract 1:<br>
+                            <code style="font-size: 1.05em;">h ≥ log₂(n + 1) − 1</code>
+                        </div>
+                        <div class="step" style="background: linear-gradient(135deg, #667eea 22%, #764ba2 100%); color: white;">
+                            <strong style="font-size: 1.2em;">Step 5 — Final answer (simplified):</strong><br>
+                            <code style="font-size: 1.2em; color: #fff9e6;">h = ⌊log₂(n)⌋</code><br>
+                            <span style="font-size: 0.95em;">(For a complete binary tree, log₂(n+1)−1 ≈ log₂(n), and we floor because height is a whole number.)</span>
+                        </div>
+                    </div>
+
+                    <!-- 7-node worked example -->
+                    <div style="background: #fffef5; padding: 20px; border-radius: 12px; margin-top: 20px; border: 2px solid #fdcb6e;">
+                        <h5 style="color: #6b4e4e; margin-top: 0;">📝 Worked Example — n = 7 nodes</h5>
+                        <p style="font-size: 1.05em; line-height: 1.9;">
+                            log₂(7) = 2.807…<br>
+                            ⌊2.807⌋ = <strong>2</strong><br><br>
+                            ✅ Height = <strong>2</strong> → The tree has levels 0, 1, 2 (exactly 3 levels).<br>
+                            A perfect tree of height 2 holds 2³ − 1 = 7 nodes — fits perfectly!
+                        </p>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════ -->
+                <!-- PART F: Summary card                           -->
+                <!-- ══════════════════════════════════════════════ -->
+                <div class="key-insight">
+                    <h4>✅ Summary — The Beautiful Formulas:</h4>
+                    <div style="display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px;">
+                        <div style="flex: 1 1 180px; background: #ffecd2; padding: 16px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 0.95em; color: #6b4e4e;">Nodes at level h</div>
+                            <div style="font-size: 1.4em; font-weight: bold; color: #6b4e4e;">2<sup>h</sup></div>
+                        </div>
+                        <div style="flex: 1 1 180px; background: #e8f5e9; padding: 16px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 0.95em; color: #6b4e4e;">Max total nodes (height h)</div>
+                            <div style="font-size: 1.4em; font-weight: bold; color: #6b4e4e;">2<sup>h+1</sup> − 1</div>
+                        </div>
+                        <div style="flex: 1 1 180px; background: #e3f2fd; padding: 16px; border-radius: 10px; text-align: center;">
+                            <div style="font-size: 0.95em; color: #6b4e4e;">Height of complete tree</div>
+                            <div style="font-size: 1.4em; font-weight: bold; color: #6b4e4e;">⌊log₂(n)⌋</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: HEAP BASICS -->
+            <div class="tab-content">
+                <h2 class="section-title">III. Heap 🏔️</h2>
+
+                <div class="definition-box">
+                    <h3>1️⃣ Heap is a Complete Binary Tree</h3>
+                    <p>A heap must always be a <strong>complete binary tree</strong> - filled level by level, left to right! 🌳</p>
+                </div>
+
+                <div class="definition-box">
+                    <h3>2️⃣ Max Heap</h3>
+                    <p>A complete binary tree where:</p>
+                    <p><strong>Every node ≥ all its descendants</strong></p>
+                    <p><span class="emoji">👑</span> The <strong>largest element is the root</strong>!</p>
+                </div>
+
+                <div class="definition-box">
+                    <h3>3️⃣ Min Heap</h3>
+                    <p>A complete binary tree where:</p>
+                    <p><strong>Every node ≤ all its descendants</strong></p>
+                    <p><span class="emoji">🔻</span> The <strong>smallest element is the root</strong>!</p>
+                </div>
+
+                <div class="tree-container">
+                    <div style="display: flex; justify-content: space-around; flex-wrap: wrap; gap: 40px;">
+                        <div style="flex: 1; min-width: 300px;">
+                            <h4 style="text-align: center; font-family: 'Patrick Hand', cursive; color: #6b4e4e; margin-bottom: 20px; font-size: 1.3em;">Max Heap Example</h4>
+                            <svg width="100%" height="280" viewBox="0 0 350 280">
+                                <circle cx="175" cy="40" r="28" fill="#fcb69f" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="175" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <line x1="175" y1="68" x2="100" y2="108" stroke="#d4a5a5" stroke-width="3"/>
+                                <line x1="175" y1="68" x2="250" y2="108" stroke="#d4a5a5" stroke-width="3"/>
+
+                                <circle cx="100" cy="135" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="100" y="143" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="250" cy="135" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="250" y="143" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="100" y1="161" x2="60" y2="201" stroke="#d4a5a5" stroke-width="3"/>
+                                <line x1="100" y1="161" x2="140" y2="201" stroke="#d4a5a5" stroke-width="3"/>
+
+                                <circle cx="60" cy="228" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="60" y="236" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">15</text>
+
+                                <circle cx="140" cy="228" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="140" y="236" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">10</text>
+                            </svg>
+                            <div class="array-viz" style="justify-content: center; margin-top: 15px;">
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em; background: #fcb69f; color: white;">50</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">30</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">20</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">15</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">10</div>
+                            </div>
+                        </div>
+
+                        <div style="flex: 1; min-width: 300px;">
+                            <h4 style="text-align: center; font-family: 'Patrick Hand', cursive; color: #6b4e4e; margin-bottom: 20px; font-size: 1.3em;">Min Heap Example</h4>
+                            <svg width="100%" height="280" viewBox="0 0 350 280">
+                                <circle cx="175" cy="40" r="28" fill="#74b9ff" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="175" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <line x1="175" y1="68" x2="100" y2="108" stroke="#d4a5a5" stroke-width="3"/>
+                                <line x1="175" y1="68" x2="250" y2="108" stroke="#d4a5a5" stroke-width="3"/>
+
+                                <circle cx="100" cy="135" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="100" y="143" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <circle cx="250" cy="135" r="26" fill="#a5d4d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="250" y="143" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">35</text>
+
+                                <line x1="100" y1="161" x2="60" y2="201" stroke="#d4a5a5" stroke-width="3"/>
+                                <line x1="100" y1="161" x2="140" y2="201" stroke="#d4a5a5" stroke-width="3"/>
+
+                                <circle cx="60" cy="228" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="60" y="236" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">30</text>
+
+                                <circle cx="140" cy="228" r="24" fill="#9fa5d4" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="140" y="236" text-anchor="middle" fill="white" font-weight="bold" font-size="18" font-family="Patrick Hand">40</text>
+                            </svg>
+                            <div class="array-viz" style="justify-content: center; margin-top: 15px;">
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em; background: #74b9ff; color: white;">10</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">20</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">35</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">30</div>
+                                <div class="array-cell" style="width: 50px; height: 50px; font-size: 1em;">40</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-insight">
+                    <h4>🎯 Key Properties:</h4>
+                    <ul style="font-size: 1.1em;">
+                        <li><strong>Complete Binary Tree</strong> - Always filled level by level, left to right 🌳</li>
+                        <li><strong>Heap Property</strong> - Parent is always greater (Max) or smaller (Min) than children</li>
+                        <li><strong>Root is Special</strong> - Always the maximum or minimum element 👑</li>
+                        <li><strong>Efficient</strong> - Both Insert and Delete are O(log n)! ⚡</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab 4: Insert Operation -->
+            <div class="tab-content">
+                <h2 class="section-title">🌱 IV. Insert Operation</h2>
+                <p class="fairy-text">Inserting a new element into a heap is like planting a seed that grows upward, finding its rightful place among the branches! 🌳✨</p>
+
+                <div class="concept-box">
+                    <h3>🎯 Insert Rule: UPWARD Movement (LEAF → ROOT)</h3>
+                    <p><strong>Step 1:</strong> Add the new element as the <span style="color: #e74c3c;">next available leaf</span> (following complete binary tree rules: level by level, left to right)</p>
+                    <p><strong>Step 2:</strong> Compare with its <span style="color: #3498db;">parent</span></p>
+                    <p><strong>Step 3:</strong> If it violates heap property → <span style="color: #f39c12;">SWAP</span></p>
+                    <p><strong>Step 4:</strong> Repeat until heap property is restored</p>
+                    <p class="fairy-text">Direction: 🍃 LEAF → 🌲 ROOT (moves UPWARD)</p>
+                </div>
+
+                <div class="example-section">
+                    <h3>📚 Example: Insert 60 into Max Heap [50, 30, 20, 15, 10]</h3>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong>Initial Max Heap:</strong>
+                            <svg width="100%" height="280" viewBox="0 0 500 280" style="margin: 20px 0;">
+                                <!-- Level 0: 50 -->
+                                <circle cx="250" cy="40" r="28" fill="#e74c3c" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <!-- Level 1: 30, 20 -->
+                                <line x1="250" y1="68" x2="150" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="68" x2="350" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="150" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="150" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="350" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="350" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <!-- Level 2: 15, 10 -->
+                                <line x1="150" y1="168" x2="100" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="150" y1="168" x2="200" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="100" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="100" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="200" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2" class="tree-node-circle"/>
+                                <text x="200" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+                            </svg>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 1: Add 60 as next available leaf (left child of 20)</strong>
+                            <svg width="100%" height="280" viewBox="0 0 500 280" style="margin: 20px 0;">
+                                <!-- Same tree but with 60 added -->
+                                <circle cx="250" cy="40" r="28" fill="#e74c3c" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <line x1="250" y1="68" x2="150" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="68" x2="350" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="150" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="150" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="350" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="350" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="150" y1="168" x2="100" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="150" y1="168" x2="200" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="168" x2="300" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="100" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="100" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="200" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="200" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="300" cy="240" r="28" fill="#2ecc71" stroke="#27ae60" stroke-width="3" class="tree-node-circle"/>
+                                <text x="300" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">60</text>
+                            </svg>
+                            <p class="fairy-text">🌱 60 is planted as a leaf! But wait... 60 > 20 (parent) → violates Max Heap property!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 2: Compare 60 with parent 20 → SWAP!</strong>
+                            <svg width="100%" height="280" viewBox="0 0 500 280" style="margin: 20px 0;">
+                                <circle cx="250" cy="40" r="28" fill="#e74c3c" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <line x1="250" y1="68" x2="150" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="68" x2="350" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="150" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="150" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="350" cy="140" r="28" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+                                <text x="350" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">60</text>
+
+                                <line x1="150" y1="168" x2="100" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="150" y1="168" x2="200" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="168" x2="300" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="100" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="100" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="200" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="200" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="300" cy="240" r="28" fill="#95a5a6" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="300" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+                            </svg>
+                            <p class="fairy-text">⬆️ 60 climbs up! Now 60 > 50 (parent) → still violates!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 3: Compare 60 with parent 50 → SWAP!</strong>
+                            <svg width="100%" height="280" viewBox="0 0 500 280" style="margin: 20px 0;">
+                                <circle cx="250" cy="40" r="28" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+                                <text x="250" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">60</text>
+
+                                <line x1="250" y1="68" x2="150" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="68" x2="350" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="150" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="150" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="350" cy="140" r="28" fill="#e74c3c" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="350" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <line x1="150" y1="168" x2="100" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="150" y1="168" x2="200" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="168" x2="300" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="100" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="100" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="200" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="200" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="300" cy="240" r="28" fill="#95a5a6" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="300" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+                            </svg>
+                            <p class="fairy-text">👑 60 reaches the ROOT! Now it's the king of the heap! Max Heap property restored! ✨</p>
+                        </div>
+                    </div>
+
+                    <div class="key-insight">
+                        <h4>⏱️ Time Complexity:</h4>
+                        <p><strong>Best Case:</strong> O(1) - Element is already in correct position (e.g., inserting 6 into the heap above)</p>
+                        <p><strong>Worst Case:</strong> O(log n) - Element needs to travel from leaf to root (height of tree)</p>
+                        <p><strong>Average Case:</strong> O(log n)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Delete Operation -->
+            <div class="tab-content">
+                <h2 class="section-title">🗑️ V. Delete Operation</h2>
+                <p class="fairy-text">In a heap, only the ROOT can be deleted - like picking the ripest apple from the top of the pyramid! 🍎👑</p>
+
+                <div class="concept-box">
+                    <h3>🎯 Delete Rule: DOWNWARD Movement (ROOT → LEAF)</h3>
+                    <p class="important-note">⚠️ <strong>ONLY the ROOT element can be deleted!</strong> No other element! The root is always the maximum (Max Heap) or minimum (Min Heap).</p>
+                    <p><strong>Step 1:</strong> Delete the root element</p>
+                    <p><strong>Step 2:</strong> Replace root with the <span style="color: #e74c3c;">LAST LEAF</span> (rightmost element at the deepest level)</p>
+                    <p><strong>Step 3:</strong> Compare new root with its <span style="color: #3498db;">children</span></p>
+                    <p><strong>Step 4:</strong> Swap with the <span style="color: #f39c12;">LARGER child</span> (Max Heap) if it violates heap property</p>
+                    <p><strong>Step 5:</strong> Repeat until heap property is restored</p>
+                    <p class="fairy-text">Direction: 👑 ROOT → 🍃 LEAF (moves DOWNWARD)</p>
+                </div>
+
+                <div class="example-section">
+                    <h3>📚 Example: Delete from Max Heap [50, 30, 20, 15, 10, 8, 16]</h3>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong>Initial Max Heap:</strong>
+                            <svg width="100%" height="340" viewBox="0 0 600 340" style="margin: 20px 0;">
+                                <!-- Level 0: 50 -->
+                                <circle cx="300" cy="40" r="28" fill="#e74c3c" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="300" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">50</text>
+
+                                <!-- Level 1: 30, 20 -->
+                                <line x1="300" y1="68" x2="200" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="300" y1="68" x2="400" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="200" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="200" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="400" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="400" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <!-- Level 2: 15, 10, 8, 16 -->
+                                <line x1="200" y1="168" x2="140" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="168" x2="260" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="400" y1="168" x2="340" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="400" y1="168" x2="460" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="140" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="140" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="260" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="260" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="340" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="340" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">8</text>
+
+                                <circle cx="460" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="460" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">16</text>
+                            </svg>
+                            <p class="fairy-text">Array: [50, 30, 20, 15, 10, 8, 16]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 1-2: Delete 50, replace with last leaf (16)</strong>
+                            <svg width="100%" height="340" viewBox="0 0 600 340" style="margin: 20px 0;">
+                                <circle cx="300" cy="40" r="28" fill="#9b59b6" stroke="#8e44ad" stroke-width="3"/>
+                                <text x="300" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">16</text>
+
+                                <line x1="300" y1="68" x2="200" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="300" y1="68" x2="400" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="200" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="200" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <circle cx="400" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="400" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="200" y1="168" x2="140" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="168" x2="260" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="400" y1="168" x2="340" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="140" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="140" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="260" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="260" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="340" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="340" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">8</text>
+                            </svg>
+                            <p class="fairy-text">🔄 16 takes the root position. But 16 < 30 (left child) → violates Max Heap!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 3-4: Compare 16 with children (30, 20) → Swap with LARGER child (30)</strong>
+                            <svg width="100%" height="340" viewBox="0 0 600 340" style="margin: 20px 0;">
+                                <circle cx="300" cy="40" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="300" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <line x1="300" y1="68" x2="200" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="300" y1="68" x2="400" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="200" cy="140" r="28" fill="#9b59b6" stroke="#8e44ad" stroke-width="3"/>
+                                <text x="200" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">16</text>
+
+                                <circle cx="400" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="400" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="200" y1="168" x2="140" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="168" x2="260" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="400" y1="168" x2="340" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="140" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="140" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="260" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="260" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="340" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="340" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">8</text>
+                            </svg>
+                            <p class="fairy-text">⬇️ 16 sinks down! Now compare with children (15, 10)...</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Step 5: Compare 16 with children (15, 10) → No swap needed! Heap property restored!</strong>
+                            <svg width="100%" height="340" viewBox="0 0 600 340" style="margin: 20px 0;">
+                                <circle cx="300" cy="40" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="300" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">30</text>
+
+                                <line x1="300" y1="68" x2="200" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="300" y1="68" x2="400" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="200" cy="140" r="28" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+                                <text x="200" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">16</text>
+
+                                <circle cx="400" cy="140" r="28" fill="#e67e22" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="400" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="200" y1="168" x2="140" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="168" x2="260" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="400" y1="168" x2="340" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="140" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="140" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="260" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="260" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+
+                                <circle cx="340" cy="240" r="28" fill="#f39c12" stroke="#6b4e4e" stroke-width="2"/>
+                                <text x="340" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">8</text>
+                            </svg>
+                            <p class="fairy-text">✨ Perfect! 16 > 15 and 16 > 10. Max Heap property restored!</p>
+                        </div>
+                    </div>
+
+                    <div class="key-insight">
+                        <h4>💡 Key Observations:</h4>
+                        <ul>
+                            <li><strong>After deletion:</strong> You always get the LARGEST (Max Heap) or SMALLEST (Min Heap) element</li>
+                            <li><strong>Next deletion:</strong> Gives you the NEXT LARGEST/SMALLEST element</li>
+                            <li><strong>Store deleted elements:</strong> Place them in the "freed space" at the end of the array</li>
+                            <li><strong>Result:</strong> Automatically creates a SORTED array! 🎉 This is Heap Sort!</li>
+                        </ul>
+                        <h4>⏱️ Time Complexity:</h4>
+                        <p><strong>Worst Case:</strong> O(log n) - Element needs to travel from root to leaf (height of tree)</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 6: Heap Sort -->
+            <div class="tab-content">
+                <h2 class="section-title">🎯 VI. Heap Sort - The Complete Process</h2>
+                <p class="fairy-text">Heap Sort is like a magical sorting spell with two enchanting steps! 🪄✨</p>
+
+                <div class="concept-box">
+                    <h3>📚 The Two Sacred Steps of Heap Sort:</h3>
+                    <p><strong>STEP 1:</strong> 🏗️ <span style="color: #e74c3c;">Create a Heap</span> - Build a Max Heap by inserting elements one by one</p>
+                    <p><strong>STEP 2:</strong> 🗑️ <span style="color: #3498db;">Delete All Elements</span> - Remove the root repeatedly, storing deleted elements in freed spaces</p>
+                    <p class="fairy-text">Result: A beautifully sorted array! 🎉</p>
+                    <div class="complexity-box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px; border-radius: 15px; margin: 15px 0;">
+                        <strong>⏱️ Time Complexity:</strong><br>
+                        STEP 1: O(n log n) to build heap<br>
+                        STEP 2: O(n log n) to delete all<br>
+                        <strong>Total: O(n log n) 🚀</strong>
+                    </div>
+                </div>
+
+                <div class="example-section">
+                    <h3>📊 Example: Sort [10, 15, 20, 30, 35, 40, 50]</h3>
+
+                    <h4 style="color: #e74c3c; font-family: 'Amatic SC', cursive; font-size: 2em; margin-top: 30px;">🏗️ STEP 1: Build the Heap (Insert One by One)</h4>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong>Insert 10:</strong>
+                            <svg width="100%" height="100" viewBox="0 0 300 100" style="margin: 20px 0;">
+                                <circle cx="150" cy="50" r="28" fill="#3498db" stroke="#2980b9" stroke-width="2"/>
+                                <text x="150" y="58" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+                            </svg>
+                            <p class="fairy-text">Array: [10]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Insert 15 → Compare with parent 10 → SWAP!</strong>
+                            <svg width="100%" height="180" viewBox="0 0 300 180" style="margin: 20px 0;">
+                                <circle cx="150" cy="40" r="28" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                                <text x="150" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <line x1="150" y1="68" x2="100" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <circle cx="100" cy="140" r="28" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="100" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+                            </svg>
+                            <p class="fairy-text">Array: [15, 10]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Insert 20 → Compare with parent 15 → SWAP!</strong>
+                            <svg width="100%" height="180" viewBox="0 0 400 180" style="margin: 20px 0;">
+                                <circle cx="200" cy="40" r="28" fill="#e74c3c" stroke="#c0392b" stroke-width="2"/>
+                                <text x="200" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">20</text>
+
+                                <line x1="200" y1="68" x2="130" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="68" x2="270" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="130" cy="140" r="28" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                                <text x="130" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">15</text>
+
+                                <circle cx="270" cy="140" r="28" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="270" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">10</text>
+                            </svg>
+                            <p class="fairy-text">Array: [20, 15, 10]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Continue inserting 30, 35, 40, 50... Final Max Heap:</strong>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <!-- Level 0: 50 -->
+                                <circle cx="350" cy="40" r="30" fill="#e74c3c" stroke="#c0392b" stroke-width="3"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">50</text>
+
+                                <!-- Level 1: 35, 40 -->
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">35</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#f39c12" stroke="#e67e22" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <!-- Level 2: 10, 30, 15, 20 -->
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">30</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+                            </svg>
+                            <p class="fairy-text">✨ Max Heap Complete! Array: [50, 35, 40, 10, 30, 15, 20]</p>
+                        </div>
+                    </div>
+
+                    <h4 style="color: #3498db; font-family: 'Amatic SC', cursive; font-size: 2em; margin-top: 40px;">🗑️ STEP 2: Delete All Elements (One by One)</h4>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong>Delete 50 → Place in freed space → Heap size: 6</strong>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <!-- New root: 40 after heapifying -->
+                                <circle cx="350" cy="40" r="30" fill="#f39c12" stroke="#e67e22" stroke-width="3"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">35</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">30</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+                            </svg>
+                            <p class="fairy-text">Sorted so far: [..., <strong>50</strong>]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Delete 40 → Place in freed space → Heap size: 5</strong>
+                            <svg width="100%" height="280" viewBox="0 0 600 280" style="margin: 20px 0;">
+                                <circle cx="300" cy="40" r="30" fill="#e67e22" stroke="#d35400" stroke-width="3"/>
+                                <text x="300" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">35</text>
+
+                                <line x1="300" y1="70" x2="200" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="300" y1="70" x2="400" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="200" cy="140" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="200" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">30</text>
+
+                                <circle cx="400" cy="140" r="30" fill="#9b59b6" stroke="#8e44ad" stroke-width="2"/>
+                                <text x="400" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <line x1="200" y1="170" x2="150" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="170" x2="250" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="150" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="150" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <circle cx="250" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="250" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+                            </svg>
+                            <p class="fairy-text">Sorted so far: [..., <strong>40, 50</strong>]</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Continue deleting... Final Result:</strong>
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 15px; margin: 20px 0; color: white; text-align: center;">
+                                <h3 style="color: white; font-family: 'Amatic SC', cursive; font-size: 2.5em; margin: 0 0 15px 0;">✨ Sorted Array ✨</h3>
+                                <div style="display: flex; justify-content: center; gap: 10px; font-size: 1.5em; font-family: 'Patrick Hand', cursive; flex-wrap: wrap;">
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">10</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">15</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">20</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">30</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">35</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">40</div>
+                                    <div style="background: rgba(255,255,255,0.2); padding: 15px 25px; border-radius: 10px;">50</div>
+                                </div>
+                                <p style="margin: 15px 0 0 0; font-size: 1.2em;">From smallest to largest! Perfect ascending order! 🎉</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="key-insight">
+                        <h4>🎯 The Magic of Heap Sort:</h4>
+                        <ul>
+                            <li>Each deletion gives you the NEXT LARGEST element (Max Heap)</li>
+                            <li>Store deleted elements in the freed spaces at the end of the array</li>
+                            <li>The array becomes sorted FROM THE BACK: [... 30, 35, 40, 50]</li>
+                            <li>No extra space needed - sorting happens IN-PLACE! 🌟</li>
+                            <li>Time: O(n log n) - Guaranteed! Works for any input!</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 7: Heapify -->
+            <div class="tab-content">
+                <h2 class="section-title">🔄 VII. Heapify - The Efficient Way</h2>
+                <p class="fairy-text">There's a FASTER way to build a heap! Instead of inserting one by one, we can transform an array into a heap from bottom-up! 🚀✨</p>
+
+                <div class="concept-box">
+                    <h3>💡 What is Heapify?</h3>
+                    <p><strong>Heapify</strong> is the process of converting an arbitrary array into a valid heap using DOWNWARD adjustments.</p>
+                    <p class="important-note">🎯 Key Insight: Leaf nodes are already valid heaps! So we only heapify NON-LEAF nodes!</p>
+
+                    <h4>📋 Bottom-Up Heapify Algorithm:</h4>
+                    <ol style="font-size: 1.1em; line-height: 1.8;">
+                        <li>Start from the <strong>LAST NON-LEAF node</strong> (index = n/2 - 1)</li>
+                        <li>Move <strong>BACKWARD</strong> through the array</li>
+                        <li>For each node: Apply <strong>DOWNWARD adjustment</strong> (same as delete operation)</li>
+                        <li>Continue until we reach the root (index 0)</li>
+                    </ol>
+
+                    <div class="complexity-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 15px; border-radius: 15px; margin: 15px 0;">
+                        <strong>⏱️ Time Complexity Comparison:</strong><br>
+                        Insert One-by-One: O(n log n) ⏰<br>
+                        Bottom-Up Heapify: <strong>O(n)</strong> ⚡<br>
+                        <strong>Heapify is FASTER!</strong> 🚀
+                    </div>
+                </div>
+
+                <div class="example-section">
+                    <h3>📊 Example: Heapify [10, 20, 15, 12, 40, 25, 18]</h3>
+
+                    <div class="step-by-step">
+                        <div class="step">
+                            <strong>Initial Array (as Tree):</strong>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <!-- Level 0: 10 -->
+                                <circle cx="350" cy="40" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <!-- Level 1: 20, 15 -->
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <!-- Level 2: 12, 40, 25, 18 -->
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">12</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">25</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">18</text>
+                            </svg>
+                            <p class="fairy-text">Array: [10, 20, 15, 12, 40, 25, 18] - NOT a Max Heap yet!</p>
+                            <p><strong>Last non-leaf node:</strong> Index = 7/2 - 1 = 2 (value: 15)</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Heapify node at index 2 (value: 15)</strong>
+                            <p>Compare 15 with children (25, 18) → 25 > 15 → SWAP!</p>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <circle cx="350" cy="40" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#2ecc71" stroke="#27ae60" stroke-width="3"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">25</text>
+
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">12</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">18</text>
+                            </svg>
+                            <p class="fairy-text">✅ Subtree rooted at 25 is now a Max Heap!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Heapify node at index 1 (value: 20)</strong>
+                            <p>Compare 20 with children (12, 40) → 40 > 20 → SWAP!</p>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <circle cx="350" cy="40" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#e74c3c" stroke="#c0392b" stroke-width="3"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">25</text>
+
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">12</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">18</text>
+                            </svg>
+                            <p class="fairy-text">✅ Subtree rooted at 40 is now a Max Heap!</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Heapify node at index 0 (value: 10) - THE ROOT!</strong>
+                            <p>Compare 10 with children (40, 25) → 40 > 10 → SWAP!</p>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <circle cx="350" cy="40" r="30" fill="#e74c3c" stroke="#c0392b" stroke-width="3"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">25</text>
+
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">12</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">18</text>
+                            </svg>
+                            <p class="fairy-text">Now 20 is at root position, but it needs adjustment...</p>
+                        </div>
+
+                        <div class="step">
+                            <strong>Continue heapifying downward... Final Max Heap!</strong>
+                            <svg width="100%" height="320" viewBox="0 0 700 320" style="margin: 20px 0;">
+                                <circle cx="350" cy="40" r="30" fill="#e74c3c" stroke="#c0392b" stroke-width="3"/>
+                                <text x="350" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">40</text>
+
+                                <line x1="350" y1="70" x2="250" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="350" y1="70" x2="450" y2="110" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="250" cy="140" r="30" fill="#e67e22" stroke="#d35400" stroke-width="2"/>
+                                <text x="250" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">20</text>
+
+                                <circle cx="450" cy="140" r="30" fill="#2ecc71" stroke="#27ae60" stroke-width="2"/>
+                                <text x="450" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">25</text>
+
+                                <line x1="250" y1="170" x2="180" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="250" y1="170" x2="320" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="380" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="450" y1="170" x2="520" y2="210" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="180" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="180" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">12</text>
+
+                                <circle cx="320" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="320" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">10</text>
+
+                                <circle cx="380" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="380" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">15</text>
+
+                                <circle cx="520" cy="240" r="30" fill="#95a5a6" stroke="#7f8c8d" stroke-width="2"/>
+                                <text x="520" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="22" font-family="Patrick Hand">18</text>
+                            </svg>
+                            <p class="fairy-text">🎉 Perfect Max Heap! Array: [40, 20, 25, 12, 10, 15, 18]</p>
+                        </div>
+                    </div>
+
+                    <div class="key-insight">
+                        <h4>🚀 Why Heapify is Faster:</h4>
+                        <ul>
+                            <li><strong>Leaf nodes (50% of tree):</strong> Already valid heaps - no work needed! ✨</li>
+                            <li><strong>Bottom nodes:</strong> Only move down 1 level</li>
+                            <li><strong>Middle nodes:</strong> Move down 2-3 levels</li>
+                            <li><strong>Root:</strong> Might move down log(n) levels</li>
+                            <li><strong>Mathematical analysis:</strong> Total work = O(n), NOT O(n log n)! 🎯</li>
+                        </ul>
+                        <h4>📊 Comparison:</h4>
+                        <p><strong>Insert one-by-one:</strong> n insertions × O(log n) each = O(n log n)</p>
+                        <p><strong>Bottom-up heapify:</strong> O(n) - Much faster for large arrays! ⚡</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 8: Priority Queue -->
+            <div class="tab-content">
+                <h2 class="section-title">👑 VIII. Priority Queue - The Royal Queue</h2>
+                <p class="fairy-text">A Priority Queue is like a royal court where the most important guests are served first! 🎩✨</p>
+
+                <div class="concept-box">
+                    <h3>🎯 What is a Priority Queue?</h3>
+                    <p>A <strong>Priority Queue</strong> is a special queue where elements are served based on their <span style="color: #e74c3c;">priority</span>, not their arrival order.</p>
+                    <ul style="font-size: 1.1em; line-height: 1.8;">
+                        <li>📥 <strong>Insert:</strong> Add elements with their priority</li>
+                        <li>📤 <strong>Delete:</strong> Always remove the HIGHEST (or LOWEST) priority element</li>
+                        <li>🎯 <strong>The element's VALUE is its PRIORITY</strong></li>
+                    </ul>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;">
+                        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 15px; color: white;">
+                            <h4 style="color: white; margin-top: 0;">🔷 Min Priority Queue</h4>
+                            <p><strong>Smaller number = Higher priority</strong></p>
+                            <p>Implemented with <strong>Min Heap</strong></p>
+                            <p>Example: Emergency room triage (severity level 1 = critical)</p>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 15px; color: white;">
+                            <h4 style="color: white; margin-top: 0;">🔶 Max Priority Queue</h4>
+                            <p><strong>Larger number = Higher priority</strong></p>
+                            <p>Implemented with <strong>Max Heap</strong></p>
+                            <p>Example: VIP service (level 10 = most VIP)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-section">
+                    <h3>📊 Visual Comparison</h3>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin: 30px 0;">
+                        <div>
+                            <h4 style="text-align: center; color: #667eea; font-family: 'Amatic SC', cursive; font-size: 2em;">Min Priority Queue (Min Heap)</h4>
+                            <p style="text-align: center; font-family: 'Patrick Hand', cursive; color: #666;">Smaller = Higher Priority</p>
+                            <svg width="100%" height="280" viewBox="0 0 400 280" style="margin: 20px 0;">
+                                <!-- Level 0: 1 -->
+                                <circle cx="200" cy="40" r="28" fill="#3498db" stroke="#2980b9" stroke-width="3"/>
+                                <text x="200" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">1</text>
+                                <text x="200" y="85" text-anchor="middle" fill="#e74c3c" font-weight="bold" font-size="14" font-family="Patrick Hand">Highest Priority!</text>
+
+                                <!-- Level 1: 3, 5 -->
+                                <line x1="200" y1="68" x2="120" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="68" x2="280" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="120" cy="140" r="28" fill="#5dade2" stroke="#2980b9" stroke-width="2"/>
+                                <text x="120" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">3</text>
+
+                                <circle cx="280" cy="140" r="28" fill="#5dade2" stroke="#2980b9" stroke-width="2"/>
+                                <text x="280" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">5</text>
+
+                                <!-- Level 2: 7, 9 -->
+                                <line x1="120" y1="168" x2="70" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="120" y1="168" x2="170" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="70" cy="240" r="28" fill="#85c1e9" stroke="#2980b9" stroke-width="2"/>
+                                <text x="70" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">7</text>
+
+                                <circle cx="170" cy="240" r="28" fill="#85c1e9" stroke="#2980b9" stroke-width="2"/>
+                                <text x="170" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">9</text>
+                            </svg>
+                            <div style="background: rgba(52, 152, 219, 0.1); padding: 15px; border-radius: 10px; border: 2px dashed #3498db;">
+                                <strong>Operations:</strong><br>
+                                • Insert: O(log n) ⚡<br>
+                                • Delete Min: O(log n) ⚡<br>
+                                • Get Min: O(1) 🚀<br><br>
+                                <strong>Array:</strong> [1, 3, 5, 7, 9]
+                            </div>
+                        </div>
+
+                        <div>
+                            <h4 style="text-align: center; color: #f5576c; font-family: 'Amatic SC', cursive; font-size: 2em;">Max Priority Queue (Max Heap)</h4>
+                            <p style="text-align: center; font-family: 'Patrick Hand', cursive; color: #666;">Larger = Higher Priority</p>
+                            <svg width="100%" height="280" viewBox="0 0 400 280" style="margin: 20px 0;">
+                                <!-- Level 0: 9 -->
+                                <circle cx="200" cy="40" r="28" fill="#e74c3c" stroke="#c0392b" stroke-width="3"/>
+                                <text x="200" y="48" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">9</text>
+                                <text x="200" y="85" text-anchor="middle" fill="#3498db" font-weight="bold" font-size="14" font-family="Patrick Hand">Highest Priority!</text>
+
+                                <!-- Level 1: 7, 5 -->
+                                <line x1="200" y1="68" x2="120" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="200" y1="68" x2="280" y2="112" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="120" cy="140" r="28" fill="#e67e22" stroke="#c0392b" stroke-width="2"/>
+                                <text x="120" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">7</text>
+
+                                <circle cx="280" cy="140" r="28" fill="#e67e22" stroke="#c0392b" stroke-width="2"/>
+                                <text x="280" y="148" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">5</text>
+
+                                <!-- Level 2: 3, 1 -->
+                                <line x1="120" y1="168" x2="70" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+                                <line x1="120" y1="168" x2="170" y2="212" stroke="#d4a5a5" stroke-width="2"/>
+
+                                <circle cx="70" cy="240" r="28" fill="#f39c12" stroke="#c0392b" stroke-width="2"/>
+                                <text x="70" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">3</text>
+
+                                <circle cx="170" cy="240" r="28" fill="#f39c12" stroke="#c0392b" stroke-width="2"/>
+                                <text x="170" y="248" text-anchor="middle" fill="white" font-weight="bold" font-size="20" font-family="Patrick Hand">1</text>
+                            </svg>
+                            <div style="background: rgba(231, 76, 60, 0.1); padding: 15px; border-radius: 10px; border: 2px dashed #e74c3c;">
+                                <strong>Operations:</strong><br>
+                                • Insert: O(log n) ⚡<br>
+                                • Delete Max: O(log n) ⚡<br>
+                                • Get Max: O(1) 🚀<br><br>
+                                <strong>Array:</strong> [9, 7, 5, 3, 1]
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="key-insight">
+                        <h4>🔥 Why Use Heaps for Priority Queues?</h4>
+                        <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
+                            <thead>
+                                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                    <th style="padding: 15px; text-align: left; border: 2px solid #6b4e4e;">Implementation</th>
+                                    <th style="padding: 15px; text-align: center; border: 2px solid #6b4e4e;">Insert</th>
+                                    <th style="padding: 15px; text-align: center; border: 2px solid #6b4e4e;">Delete</th>
+                                    <th style="padding: 15px; text-align: center; border: 2px solid #6b4e4e;">Best?</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5;">Unsorted Array</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">O(1) ⚡</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">O(n) 🐢</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">❌</td>
+                                </tr>
+                                <tr style="background: rgba(255, 255, 255, 0.5);">
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5;">Sorted Array</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">O(n) 🐢</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">O(1) or O(n) ⚡🐢</td>
+                                    <td style="padding: 15px; border: 2px solid #d4a5a5; text-align: center;">❌</td>
+                                </tr>
+                                <tr style="background: rgba(46, 204, 113, 0.2);">
+                                    <td style="padding: 15px; border: 2px solid #27ae60; font-weight: bold;">Heap (Min/Max)</td>
+                                    <td style="padding: 15px; border: 2px solid #27ae60; text-align: center; font-weight: bold;">O(log n) ⚡</td>
+                                    <td style="padding: 15px; border: 2px solid #27ae60; text-align: center; font-weight: bold;">O(log n) ⚡</td>
+                                    <td style="padding: 15px; border: 2px solid #27ae60; text-align: center; font-weight: bold;">✅✅✅</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="font-size: 1.2em; text-align: center; margin: 20px 0; color: #27ae60; font-weight: bold;">
+                            🌟 Heaps give us BOTH fast insert AND fast delete! Perfect balance! 🌟
+                        </p>
+                    </div>
+
+                    <div class="concept-box" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); margin-top: 30px;">
+                        <h4>🎭 Real-World Applications:</h4>
+                        <ul style="font-size: 1.1em; line-height: 1.8;">
+                            <li><strong>Operating System:</strong> CPU task scheduling (higher priority tasks run first)</li>
+                            <li><strong>Emergency Room:</strong> Patients triaged by severity (Min Heap - lower number = more urgent)</li>
+                            <li><strong>Dijkstra's Algorithm:</strong> Finding shortest paths (Min Heap for distances)</li>
+                            <li><strong>Event Simulation:</strong> Process events in time order (Min Heap by timestamp)</li>
+                            <li><strong>Huffman Coding:</strong> Data compression (Min Heap by frequency)</li>
+                            <li><strong>A* Pathfinding:</strong> Game AI and robotics (Min Heap by cost)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function showTab(index) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+
+            contents[index].classList.add('active');
+            tabs[index].classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
