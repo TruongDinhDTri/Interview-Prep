@@ -1,0 +1,71 @@
+Question,Answer
+What is the standard authentication method for modern REST APIs?,Stateless Authentication using JWT (JSON Web Tokens). The server doesn't remember you; it gives you an ID card (Token) that proves who you are.
+What are the two tokens issued in JWT authentication?,1) Access Token - short-lived (5-15 min) for API calls. 2) Refresh Token - long-lived (24h-7 days) used ONLY to get new access tokens.
+What header format is used to send JWT in API requests?,Authorization: Bearer <access_token>
+What happens when an access token expires?,"The client uses the refresh token to request a new access token without forcing the user to log in again. Better UX, no forced re-login."
+"What does ""valid credentials"" mean in the backend authentication flow?","The server verifies that 1) the user exists in the database, and 2) the provided password matches the stored hashed password."
+Are passwords stored in plain text in Django?,Never. Django stores HASHED passwords. It hashes the incoming password and compares with the stored hash. If hashes match → valid.
+Which storage method is safer for JWT tokens: localStorage or HttpOnly cookies?,"HttpOnly cookies are safer. The browser can't access them via JavaScript, preventing XSS token theft. localStorage is vulnerable to XSS."
+What is the interview one-liner for JWT authentication?,"""JWT allows stateless authentication by issuing short-lived access tokens and refresh tokens, which the client uses to authenticate API requests."""
+Why is JWT preferred for React/mobile apps?,"""This keeps the API stateless, scalable, and works well for frontend apps like React or mobile clients."""
+What is the main difference between JWT and Session-based auth?,WHERE the user's state is stored. Session = server stores state (stateful). JWT = token contains state (stateless).
+How does Session-based authentication work?,Server creates a session ID and stores it in the database. Client holds the ID in a cookie. Server checks database on every request.
+How does JWT authentication work?,Server generates a signed token containing user data. Server stores nothing. Server just validates the signature on each request.
+Why is JWT more scalable than Session-based auth?,No database lookups for auth. No need to share sessions across servers. Server just verifies the token signature.
+When should you use Session-based auth vs JWT?,"Session: traditional server-rendered websites. JWT: APIs, Mobile Apps, SPAs (React)."
+What's the mental model for Session auth?,"""Server remembers"" - Server keeps a record (session ID) in database, user carries a ""key"" (cookie) to that record."
+What's the mental model for JWT auth?,"""Token contains the data"" - Server signs a ""badge"" (token), gives it to user, server stores nothing, user carries the whole badge."
+What are the 5 key security areas for Django applications?,"1) SQL Injection (ORM), 2) XSS (Templates auto-escape), 3) CSRF (Tokens), 4) HTTPS (SECURE_SSL_REDIRECT), 5) Rate Limiting."
+What is SQL Injection?,Attackers typing SQL commands into input fields to steal/modify data. Works because user input is treated as SQL code instead of data.
+How does Django prevent SQL Injection?,"Django ORM uses parameterized queries. Input is treated as DATA, not executable SQL. `User.objects.get(username=username)` sends `WHERE username = %s`."
+What does the SQL injection payload `' OR 1=1 --` do?,"Makes the WHERE condition always TRUE (OR 1=1) and comments out the rest (--), bypassing password check. Returns all users."
+What is XSS (Cross-Site Scripting)?,"Attackers injecting JavaScript that runs on OTHER users' browsers. Can steal JWT tokens, cookies, redirect users, act as the user."
+How does Django prevent XSS?,"Django templates auto-escape HTML. `<script>alert(1)</script>` becomes `&lt;script&gt;...` - browser sees TEXT, not code."
+What is the interview one-liner for XSS?,"""XSS is when malicious JavaScript is injected into a page and executed in the user's browser. Django prevents it by auto-escaping output in templates."""
+What is CSRF (Cross-Site Request Forgery)?,Attackers tricking a user's browser into making unwanted requests using the user's automatically-sent cookies.
+What's the core rule that makes CSRF possible?,"If your browser has a cookie for `bank.com`, it will attach that cookie to ANY request going to `bank.com`, no matter where that request started."
+How does Django prevent CSRF?,"CSRF Tokens. Every form includes a random secret code that is NOT a cookie. Hacker can't know the token, so request is blocked."
+What setting enforces HTTPS in Django production?,SECURE_SSL_REDIRECT = True
+"What is the strong opening sentence for ""How do you secure Django?""","""I secure my Django applications by combining Django's built-in security features with proper configuration and API-level protections."""
+What is CORS?,"Cross-Origin Resource Sharing. The way your backend tells the browser: ""It's okay, I know this frontend. Let them access my data."""
+What is the Same-Origin Policy (SOP)?,A browser security rule: a script on Site A is forbidden from reading data from Site B. Origin = Protocol + Domain + Port.
+Why do React (localhost:3000) and Django (localhost:8000) need CORS?,Different ports = different origins. Browser blocks the connection by default. CORS whitelists allowed origins.
+What is a CORS Preflight request?,"Browser sends an OPTIONS request asking ""Is this origin allowed?"" before sending the real request. Server checks whitelist and responds."
+What is the CORS_ALLOWED_ORIGINS setting?,"The whitelist of domains allowed to make cross-origin requests. Example: [""http://localhost:3000"", ""https://myapp.com""]"
+What does CORS_ALLOW_CREDENTIALS = True do?,Allows frontend to send HTTP cookies and authentication headers (JWT Bearer token) with cross-origin requests.
+What should you NEVER do with CORS in production?,Never use CORS_ALLOW_ALL_ORIGINS = True. Always explicitly whitelist your frontend domains.
+What is the senior signal phrase for CORS?,"""I avoid using CORS_ALLOW_ALL_ORIGINS in production for security reasons."""
+What's the key truth about CORS?,CORS is NOT about security against hackers. It's about browser rules. It controls which frontend websites can call your API.
+What is the difference between CORS and CSRF?,CORS = who can READ my data (frontend permission). CSRF = is this REALLY the user (user intent verification).
+What does CORS protect against?,Unauthorized sites from READING your data. Browser blocks reading the response unless origin is whitelisted.
+What does CSRF protect against?,Attackers making requests AS the logged-in user using automatically-sent cookies. CSRF tokens prove user intent.
+What's the CORS mental model?,"""Tinted Window"" - By default windows are blacked out (SOP). CORS gives a pass to roll down the window and see the data."
+What's the CSRF mental model?,"""Automatic Cookie"" - Cookies are sent automatically. CSRF token proves the request was intentional, not just a valid cookie."
+Why are cookies the CSRF problem?,Cookies are sent automatically to their domain. Backend cannot tell who initiated the request. CSRF tokens prove user intent.
+What problem does OAuth 2.0 solve?,"""Login with Google/GitHub"" - users can authenticate without you handling their passwords."
+What is the OAuth 2.0 Authorization Code flow?,"1) User clicks Login with Google, 2) Google returns temporary Auth Code, 3) Backend exchanges Code + Client Secret for Access Token, 4) Backend issues own JWT."
+Why doesn't Google give the Access Token directly to the browser?,"Browser is not a safe place. URLs are visible, JavaScript can be compromised, browsers can't keep secrets."
+What does the browser receive in OAuth flow?,Only a temporary Authorization Code (useless alone). Real Access Token never touches the browser or URL.
+What is the Client Secret in OAuth?,"Private proof that your backend is REALLY your app. Issued by Google when you register. Only stored on backend, never in frontend."
+What's the difference between Client ID and Client Secret?,"Client ID = ""Hi, I am App X"" (public). Client Secret = ""Proof that I am REALLY App X"" (private, backend only)."
+Where should Client Secret be stored?,"✅ Only in backend environment variables. ❌ Never in frontend code, JavaScript, or mobile apps."
+What happens if an attacker steals the Authorization Code?,It's useless without the Client Secret. Only your backend (with the secret) can exchange it for an Access Token.
+What is the interview answer for OAuth 2.0?,"""I use the OAuth 2.0 Authorization Code flow because the browser isn't secure. Google gives the browser a temporary authorization code, not the access token. My backend then exchanges that code for the real token using a secure server-to-server call with a client secret."""
+What two questions does OAuth answer?,1) Is this user really who they say they are? 2) Is this app really the app that registered with me? (Client Secret answers #2)
+Key phrase for handling authentication?,"""JWT: stateless, scalable, access + refresh tokens"""
+Key phrase for JWT vs Session?,"""Stateless vs Stateful - where is state stored?"""
+Key phrase for Django security?,"""ORM (SQL Injection), Templates (XSS), Tokens (CSRF), HTTPS, Rate Limiting"""
+Key phrase for CORS setup?,"""Whitelist origins, allow credentials, NEVER allow all in production"""
+Key phrase for CORS vs CSRF?,"""CORS = reading data, CSRF = user intent"""
+Key phrase for OAuth 2.0?,"""Authorization Code flow keeps tokens server-side"""
+What is the senior mindset for security?,"""Security is layers, not a single solution. Auth → Data → Requests → Transport"""
+"What is the ""Tinted Window"" analogy for CORS?",SOP is a tinted window that prevents you from seeing (reading) the response from another origin. CORS gives you a special pass to roll down the window and see the data.
+"Explain the ""Automatic Cookie"" problem in CSRF.","The browser automatically attaches cookies to ANY request going to the cookie's domain (e.g., bank.com), regardless of where the request originated (e.g., evil.com). This is why we need CSRF tokens to prove intent."
+"Why is the ""Secret Call"" (Step 3) in OAuth 2.0 critical?",It is a server-to-server exchange where the backend trades the Auth Code + Client Secret for the Access Token. This ensures the powerful Access Token never touches the insecure browser.
+What specific risk does `CORS_ALLOW_ALL_ORIGINS = True` introduce?,"It allows any malicious website to make requests to your API and read the responses, completely bypassing the browser's Same-Origin Policy protection."
+"What is the ""Preflight"" check in CORS?","A tiny `OPTIONS` request the browser sends *before* the real request to ask the server: ""Hey, origin X is trying to talk to you. Is that okay?"""
+"In the OAuth flow, what is the role of the ""Authorization Code""?","It acts as a temporary, single-use ""Note"" handed to the browser. It is useless on its own and must be exchanged by the backend for the real Access Token."
+How does Django's ORM prevent SQL Injection specifically with `User.objects.get(username=u)`?,"It uses parameterized queries. The input `u` is treated strictly as *data*, not executable SQL code, so payloads like `' OR 1=1 --` are just meaningless strings."
+What are the two distinct tokens in a JWT flow and their lifespans?,"1) **Access Token** (Short-lived, e.g., 15 mins) for API resources. 2) **Refresh Token** (Long-lived, e.g., 7 days) stored securely to obtain new access tokens."
+Why should Client Secrets NEVER be stored in a React app?,"React code is public (view source). Anyone can steal the secret, impersonate your app, and exchange stolen Auth Codes for Access Tokens."
+"What is the ""Senior Signal"" regarding Security headers?","Mentioning layers: ""I don't just rely on code. I also use security headers like HSTS (HTTPS), X-Frame-Options (Clickjacking), and Content-Security-Policy (XSS) at the Nginx/Cloudflare level."""

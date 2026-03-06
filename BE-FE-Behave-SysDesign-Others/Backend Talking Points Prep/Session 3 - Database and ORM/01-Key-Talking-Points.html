@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 3: Key Talking Points — Database & ORM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-muted: #9b9a97;
+            --border: #e3e2de;
+            --border-light: #eeeeec;
+            --accent-blue: #2563eb;
+            --accent-red: #eb5757;
+            --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0;
+            --accent-orange: #e97f33;
+            --code-bg: #f7f6f3;
+            --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe;
+            --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0;
+            --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8;
+            --callout-purple-border: #9065b0;
+            --sidebar-width: 260px;
+            --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #191919;
+            --bg-secondary: #202020;
+            --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de;
+            --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b;
+            --border: #333;
+            --border-light: #2a2a2a;
+            --accent-blue: #529cca;
+            --accent-red: #eb5757;
+            --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8;
+            --accent-orange: #e97f33;
+            --code-bg: #252525;
+            --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a;
+            --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28;
+            --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a;
+            --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            z-index: 1001; transition: width 0.1s linear;
+        }
+        .page-cover {
+            height: var(--cover-height);
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            position: relative;
+        }
+        [data-theme="dark"] .page-cover {
+            background: linear-gradient(135deg, #1a3a5c 0%, #0a3a4e 100%);
+        }
+        .sidebar {
+            position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh;
+            background: var(--bg-sidebar); border-right: 1px solid var(--border-light);
+            padding: 20px 0; overflow-y: auto; z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
+        .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .sidebar a {
+            display: block; color: var(--text-secondary); text-decoration: none;
+            padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400;
+            border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5;
+        }
+        .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        .main-content { margin-left: var(--sidebar-width); max-width: 900px; padding: 0 60px 80px; }
+        .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
+        .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+        .page-title { font-size: 2.2em; font-weight: 700; margin: 16px 0 8px; line-height: 1.2; letter-spacing: -0.02em; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 32px; }
+        h2 { font-size: 1.5em; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-light); letter-spacing: -0.01em; }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 { font-size: 1.15em; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+        h4 { font-size: 1em; font-weight: 600; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 32px 0; }
+        details { margin: 12px 0; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+        summary {
+            padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--bg-secondary);
+            transition: background 0.2s; list-style: none; display: flex; align-items: center;
+            gap: 8px; user-select: none; font-size: 1em;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.65em; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content { padding: 16px; border-top: 1px solid var(--border-light); }
+        .callout { display: flex; gap: 12px; padding: 16px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; }
+        .callout-emoji { font-size: 1.2em; flex-shrink: 0; line-height: 1.5; }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+        .callout-yellow { background: var(--callout-yellow-bg); border-left-color: var(--callout-yellow-border); }
+        .callout-red { background: var(--callout-red-bg); border-left-color: var(--callout-red-border); }
+        .callout-green { background: var(--callout-green-bg); border-left-color: var(--callout-green-border); }
+        .callout-blue { background: var(--callout-blue-bg); border-left-color: var(--callout-blue-border); }
+        .callout-purple { background: var(--callout-purple-bg); border-left-color: var(--callout-purple-border); }
+        code {
+            font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.88em; background: var(--code-inline-bg); padding: 2px 6px; border-radius: 3px; color: var(--accent-red);
+        }
+        pre {
+            background: var(--code-bg); border-radius: 6px; padding: 16px 20px; overflow-x: auto;
+            margin: 12px 0; border: 1px solid var(--border-light); position: relative;
+        }
+        pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
+        .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .dec { color: #e36209; } .cls { color: #6f42c1; } .op { color: #d73a49; }
+        [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .dec { color: #ffa657; } [data-theme="dark"] .cls { color: #d2a8ff; } [data-theme="dark"] .op { color: #ff7b72; }
+        .table-wrap { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        blockquote { border-left: 3px solid var(--border); padding: 8px 16px; margin: 12px 0; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 0 4px 4px 0; }
+        blockquote strong { color: var(--text-primary); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 500; margin: 2px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; } .tag-orange { background: #fed7aa; color: #9a3412; } .tag-red { background: #fecaca; color: #991b1b; } .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; } [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; } [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; } [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; } [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; } [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+        .key-phrase { background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%); padding: 0 2px; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+        .step-card { display: flex; gap: 14px; padding: 14px; margin: 8px 0; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+        .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        strong { font-weight: 600; }
+        .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
+        .interview-answer strong { font-style: normal; }
+        .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-blue); margin-bottom: 4px; }
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 0 24px 60px; }
+            .menu-toggle { display: flex; }
+            .columns { grid-template-columns: 1fr; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        @media print {
+            .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
+            .main-content { margin-left: 0; max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 3 — Key Talking Points</h3>
+    </div>
+    <a href="#schema-design">1. Schema Design</a>
+    <a href="#normalization">2. Normalization</a>
+    <a href="#n-plus-1">3. N+1 Query Problem</a>
+    <a href="#query-optimization">4. Query Optimization</a>
+    <a href="#indexing">5. Indexing Strategy</a>
+    <a href="#through-models">6. Through Models</a>
+    <a href="#summary">Summary</a>
+</nav>
+
+<div class="page-cover"></div>
+
+<div class="main-content">
+
+    <div class="breadcrumbs">
+        <a href="../Session 1 - Django DRF Core Concepts/01-Key-Talking-Points.html">Session 1</a>
+        <span>/</span>
+        <a href="../Session 2 - Authentication and Security/01-Key-Talking-Points.html">Session 2</a>
+        <span>/</span>
+        <a href="02-Practice-Questions-Answers.html">Practice Q&A</a>
+    </div>
+
+    <div class="section-label">Session 3 — Database & ORM</div>
+    <h1 class="page-title">📝 Key Talking Points</h1>
+    <p class="page-subtitle"><strong>Goal:</strong> Demonstrate deep understanding of database design principles, query optimization, and ORM best practices. Show you think like a performance-conscious engineer.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-blue">Database</span>
+        <span class="tag tag-green">ORM</span>
+        <span class="tag tag-purple">PostgreSQL</span>
+        <span class="tag tag-orange">Performance</span>
+        <span class="tag tag-gray">Django</span>
+    </div>
+
+    <!-- ═══ SECTION 1: Schema Design ═══ -->
+    <h2 id="schema-design">1. Database Schema Design — The Foundation 🏗️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Business requirements first, then entities, then normalization, then optimization."</p>
+        </div>
+    </div>
+
+    <p>👉 Prevents data redundancy and inconsistency</p>
+    <p>👉 Creates maintainable, scalable data structures</p>
+    <p>👉 Establishes clear relationships between entities</p>
+
+    <details open>
+        <summary>The Complete Design Process</summary>
+        <div class="toggle-content">
+<pre><code>1. Business Requirements  → Understand what the system needs to do
+2. Identify Entities      → Map out objects (Users, Products, Orders)
+3. Define Relationships   → One-to-Many, Many-to-Many, One-to-One
+4. Normalize (1NF-3NF)    → Remove redundancy, ensure data integrity
+5. Denormalize (if needed)→ Trade write speed for read performance</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>Step-by-Step Schema Design</summary>
+        <div class="toggle-content">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>Understand Business Requirements</strong></p>
+                    <p>Always start by asking: What data needs to be stored? How will the data be accessed? What are the relationships between entities?</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Identify Entities & Relationships</strong></p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Relationship</th><th>Example</th><th>Implementation</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>One-to-One</strong></td><td>User ↔ Profile</td><td>ForeignKey with unique=True</td></tr>
+                                <tr><td><strong>One-to-Many</strong></td><td>Company → Jobs</td><td>ForeignKey on the "many" side</td></tr>
+                                <tr><td><strong>Many-to-Many</strong></td><td>Users ↔ Courses</td><td>ManyToManyField or Through Model</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Choose Data Types & Constraints</strong></p>
+<pre><code><span class="cm"># Good practices</span>
+email = models.EmailField(unique=<span class="num">True</span>)  <span class="cm"># Enforce uniqueness at DB level</span>
+status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)  <span class="cm"># Index for filtering</span>
+price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_places=<span class="num">2</span>)  <span class="cm"># Precision for money</span></code></pre>
+                    <p><strong>Key Constraints:</strong></p>
+                    <ul>
+                        <li><code>unique=True</code> → Prevents duplicates</li>
+                        <li><code>null=False</code> (default) → Ensures data presence</li>
+                        <li><code>db_index=True</code> → Speeds up lookups</li>
+                        <li><code>ForeignKey</code> → Maintains referential integrity</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>📌 Real Example: Job Application System</summary>
+        <div class="toggle-content">
+            <p><strong>Requirement:</strong> Users apply for jobs posted by companies.</p>
+<pre><code>┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│   User      │       │    Job      │       │  Company    │
+├─────────────┤       ├─────────────┤       ├─────────────┤
+│ id          │       │ id          │       │ id          │
+│ name        │◄──────┤ company_id  │───────►│ name        │
+│ email       │       │ title       │       │ location    │
+└─────────────┘       └─────────────┘       └─────────────┘
+       │                     │
+       │    ┌────────────────┘
+       │    │
+       ▼    ▼
+┌─────────────────────┐
+│    Application      │
+├─────────────────────┤
+│ id                  │
+│ user_id      (FK)   │
+│ job_id       (FK)   │
+│ status             │
+│ created_at         │
+└─────────────────────┘</code></pre>
+
+            <h4>Django Models</h4>
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    email = models.EmailField(unique=<span class="num">True</span>)
+
+<span class="kw">class</span> <span class="cls">Company</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+    location = models.CharField(max_length=<span class="num">100</span>)
+
+<span class="kw">class</span> <span class="cls">Job</span>(models.Model):
+    title = models.CharField(max_length=<span class="num">200</span>)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+
+<span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)
+    created_at = models.DateTimeField(auto_now_add=<span class="num">True</span>, db_index=<span class="num">True</span>)</code></pre>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"My process starts with business requirements, not tables. First, I identify the core entities and their relationships — whether they're One-to-Many, Many-to-Many, or One-to-One. Then I apply normalization rules (up to 3NF) to ensure data integrity and reduce redundancy. Finally, if the system is read-heavy, I selectively denormalize specific fields to trade write speed for read performance."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SECTION 2: Normalization ═══ -->
+    <h2 id="normalization">2. Normalization — Data Integrity Rules 📐</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Normalize first, denormalize when needed."</p>
+        </div>
+    </div>
+
+    <p>👉 Eliminates data redundancy (storing the same data in multiple places)</p>
+    <p>👉 Prevents update anomalies (changing data in one place but not another)</p>
+    <p>👉 Ensures data consistency across the system</p>
+
+    <details>
+        <summary>1️⃣ First Normal Form (1NF) — Atomic Values</summary>
+        <div class="toggle-content">
+            <p><strong>Rule:</strong> Each column should contain a <strong>single, indivisible value</strong>. No arrays, no lists, no comma-separated values.</p>
+
+            <div class="columns">
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>❌ BAD Example:</strong></p>
+                        <table><thead><tr><th>id</th><th>name</th><th>skills</th></tr></thead>
+                        <tbody><tr><td>1</td><td>John</td><td>"python,django,react"</td></tr></tbody></table>
+                    </div>
+                </div>
+                <div class="callout callout-green" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>✅ GOOD Approach:</strong></p>
+                        <p>Create a separate <code>Skill</code> table with M2M relationship</p>
+                    </div>
+                </div>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    skills = models.ManyToManyField(<span class="str">'Skill'</span>)
+
+<span class="kw">class</span> <span class="cls">Skill</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">50</span>, unique=<span class="num">True</span>)</code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"In 1NF, every column should store a single value, not arrays or lists."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>2️⃣ Second Normal Form (2NF) — Full Dependency</summary>
+        <div class="toggle-content">
+            <p><strong>Rule:</strong> Non-key attributes must depend on the <strong>entire</strong> primary key. (Mostly relevant with composite primary keys)</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">❌</span>
+                <div class="callout-content">
+                    <p><strong>BAD Example (Composite Key Issue):</strong></p>
+                    <table><thead><tr><th>student_id</th><th>course_id</th><th>student_name</th><th>grade</th></tr></thead>
+                    <tbody><tr><td>1</td><td>101</td><td>John</td><td>A</td></tr></tbody></table>
+                    <p><code>student_name</code> depends only on <code>student_id</code>, not the full composite key.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content">
+                    <p><strong>GOOD Approach:</strong> Split into separate tables:</p>
+<pre><code>Students Table: student_id, student_name
+Enrollments Table: student_id, course_id, grade</code></pre>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"2NF ensures that non-key fields fully depend on the whole primary key."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>3️⃣ Third Normal Form (3NF) — No Transitive Dependencies</summary>
+        <div class="toggle-content">
+            <p><strong>Rule:</strong> Non-key attributes should depend <strong>only on the primary key</strong>, not on other non-key fields.</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">❌</span>
+                <div class="callout-content">
+                    <p><strong>BAD Example:</strong></p>
+                    <table><thead><tr><th>application_id</th><th>company_id</th><th>company_name</th><th>status</th></tr></thead></table>
+                    <p><code>company_name</code> depends on <code>company_id</code>, which depends on <code>application_id</code>. This is a <strong>transitive dependency</strong>.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content">
+                    <p><strong>GOOD Approach:</strong> Store <code>company_name</code> only in the <code>Company</code> table:</p>
+<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    status = models.CharField(max_length=<span class="num">20</span>)
+
+<span class="kw">class</span> <span class="cls">Company</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)  <span class="cm"># Only stored here</span></code></pre>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"3NF removes transitive dependencies to improve data integrity."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>⚡ When to Denormalize</summary>
+        <div class="toggle-content">
+            <p><strong>Keyword:</strong> Read-Heavy Systems</p>
+            <p><strong>The Problem:</strong> Highly normalized databases require many JOINs, which can be slow.</p>
+            <p><strong>Example Scenario:</strong> A dashboard needs to show "Number of applications per user". With normalization: <code>SELECT COUNT(*) FROM applications WHERE user_id = X</code> every time. This is expensive at scale.</p>
+
+            <p><strong>Denormalized Solution:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    application_count = models.IntegerField(default=<span class="num">0</span>)  <span class="cm"># Denormalized field</span></code></pre>
+
+<pre><code><span class="cm"># When creating an application</span>
+user.application_count = F(<span class="str">'application_count'</span>) + <span class="num">1</span>
+user.save(update_fields=[<span class="str">'application_count'</span>])</code></pre>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Aspect</th><th>Normalized</th><th>Denormalized</th></tr></thead>
+                    <tbody>
+                        <tr><td>Reads</td><td>Slower (need JOINs or COUNTs)</td><td>Faster (pre-computed)</td></tr>
+                        <tr><td>Writes</td><td>Faster</td><td>Slower (must update aggregates)</td></tr>
+                        <tr><td>Data Integrity</td><td>Guaranteed</td><td>Must maintain manually</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"For read-heavy dashboards, I may denormalize aggregated fields for performance."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I always normalize first to ensure data integrity — applying 1NF for atomic values, 2NF for full key dependency, and 3NF to remove transitive dependencies. However, for read-heavy systems like dashboards, I selectively denormalize specific aggregated fields (like counts or totals) to avoid expensive queries at runtime. It's always a trade-off: normalization ensures data integrity, denormalization improves read performance."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SECTION 3: N+1 Problem ═══ -->
+    <h2 id="n-plus-1">3. The N+1 Query Problem — Performance Killer 💀</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Fix N+1 before touching indexes — it's usually the fastest performance win."</p>
+        </div>
+    </div>
+
+    <p>👉 Eliminates unnecessary database queries</p>
+    <p>👉 Can reduce 101 queries to 1 query</p>
+    <p>👉 Dramatically improves page load times</p>
+
+    <h3>Understanding N+1</h3>
+    <p>The N+1 problem happens when:</p>
+    <ol>
+        <li><strong>1 query</strong> fetches a list of parent objects</li>
+        <li><strong>N queries</strong> fetch related child data for each parent</li>
+    </ol>
+    <p><strong>Total queries = 1 + N</strong> (where N = number of parent objects)</p>
+
+    <div class="columns">
+        <div class="callout callout-red" style="margin:0">
+            <div class="callout-content">
+                <p><strong>🔴 BAD: N+1 Queries</strong></p>
+<pre><code><span class="cm"># Loading 100 applications</span>
+applications = Application.objects.all()
+
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)
+    <span class="cm"># 💥 Hits DB EVERY loop iteration</span></code></pre>
+                <p>1 query + 100 queries = <strong>101 queries!</strong></p>
+            </div>
+        </div>
+        <div class="callout callout-green" style="margin:0">
+            <div class="callout-content">
+                <p><strong>🟢 GOOD: Fixed with select_related</strong></p>
+<pre><code><span class="cm"># Using select_related for FK</span>
+applications = Application.objects \
+    .select_related(<span class="str">'user'</span>).all()
+
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)
+    <span class="cm"># ✅ No extra queries!</span></code></pre>
+                <p>Single query with JOIN = <strong>1 query!</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <details>
+        <summary>SQL Generated — Before vs After</summary>
+        <div class="toggle-content">
+            <h4>❌ BAD — N+1 SQL</h4>
+<pre><code><span class="cm">-- Query 1</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> applications;
+
+<span class="cm">-- Query 2 (N times!)</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">1</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">2</span>;
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">3</span>;
+... (<span class="num">97</span> more times)</code></pre>
+
+            <h4>✅ GOOD — Single JOIN</h4>
+<pre><code><span class="cm">-- Single query with JOIN</span>
+<span class="kw">SELECT</span> applications.*, users.*
+<span class="kw">FROM</span> applications
+<span class="kw">INNER JOIN</span> users <span class="kw">ON</span> applications.user_id = users.id;</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>The Two ORM Tools</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Method</th><th>Use For</th><th>Mechanism</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>select_related()</code></td><td>ForeignKey, OneToOne</td><td>SQL JOIN</td></tr>
+                        <tr><td><code>prefetch_related()</code></td><td>ManyToMany, Reverse FK</td><td>2 queries + Python join</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>select_related() — For Forward Relationships</h4>
+            <p><strong>Use for:</strong> ForeignKey and OneToOneField</p>
+            <p><strong>How it works:</strong> Creates a SQL <code>JOIN</code> to fetch related objects in a single query.</p>
+<pre><code><span class="cm"># ✅ GOOD - Single query with JOIN</span>
+applications = Application.objects.select_related(<span class="str">'user'</span>, <span class="str">'job__company'</span>).all()
+
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)         <span class="cm"># No extra query</span>
+    print(app.job.company.name)  <span class="cm"># No extra query (followed the chain)</span></code></pre>
+
+            <h4>prefetch_related() — For Reverse & M2M Relationships</h4>
+            <p><strong>Use for:</strong> ManyToManyField and Reverse ForeignKey (the "many" side)</p>
+            <p><strong>How it works:</strong> 1) Fetch parent objects, 2) Fetch all related objects with <code>WHERE id IN (...)</code>, 3) Python joins them in memory.</p>
+<pre><code><span class="cm"># ❌ BAD - N+1 Queries</span>
+companies = Company.objects.all()
+<span class="kw">for</span> company <span class="kw">in</span> companies:
+    print(company.job_set.count())  <span class="cm"># 💥 Hits DB each time</span>
+
+<span class="cm"># ✅ GOOD - Optimized with prefetch_related</span>
+companies = Company.objects.prefetch_related(<span class="str">'job_set'</span>).all()
+<span class="kw">for</span> company <span class="kw">in</span> companies:
+    print(company.job_set.count())  <span class="cm"># ✅ No extra queries</span></code></pre>
+
+            <h4>When to Use Which?</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Relationship Type</th><th>Direction</th><th>Use</th></tr></thead>
+                    <tbody>
+                        <tr><td>ForeignKey</td><td>Forward (child → parent)</td><td><code>select_related()</code></td></tr>
+                        <tr><td>OneToOne</td><td>Either direction</td><td><code>select_related()</code></td></tr>
+                        <tr><td>ManyToMany</td><td>Either direction</td><td><code>prefetch_related()</code></td></tr>
+                        <tr><td>Reverse FK</td><td>Backward (parent → children)</td><td><code>prefetch_related()</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">📌</span>
+                <div class="callout-content">
+                    <p><strong>Rule of thumb:</strong> Following a ForeignKey? → <code>select_related()</code>. Getting a list of related objects? → <code>prefetch_related()</code></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"The N+1 query problem happens when the application runs one query to fetch a list of objects, then N additional queries to fetch related data. I solve it using ORM optimizations: <code>select_related()</code> for ForeignKey and OneToOne — creates a SQL JOIN, and <code>prefetch_related()</code> for ManyToMany and reverse FK — does two queries and joins in Python. Fixing N+1 queries is often the fastest way to improve backend performance."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SECTION 4: Query Optimization ═══ -->
+    <h2 id="query-optimization">4. Query Optimization — The Complete Toolkit ⚡</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Measure, don't guess. Identify bottlenecks first, then optimize."</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>The Optimization Process</summary>
+        <div class="toggle-content">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>DETECT</strong> — Find slow queries (logs, profilers)</p>
+                    <p>Use <strong>Django Debug Toolbar</strong> in dev or <strong>django-silk</strong> in production.</p>
+<pre><code><span class="kw">from</span> django.db <span class="kw">import</span> connection
+print(f<span class="str">"Queries: {len(connection.queries)}"</span>)</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>ANALYZE</strong> — Understand WHY it's slow (EXPLAIN ANALYZE)</p>
+<pre><code><span class="kw">EXPLAIN ANALYZE SELECT</span> * <span class="kw">FROM</span> applications <span class="kw">WHERE</span> status = <span class="str">'PENDING'</span>;</code></pre>
+                    <p><strong>Seq Scan</strong> = Full table scan = 🔴 Bad &nbsp;|&nbsp; <strong>Index Scan</strong> = Using an index = 🟢 Good</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>FIX N+1</strong> — First priority, biggest gains</p>
+                    <p>See Section 3 above. This is usually the <strong>biggest win</strong>.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>ADD INDEXES</strong> — Speed up filtering/sorting</p>
+                    <p>See Section 5 below for detailed indexing strategy.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>REFACTOR</strong> — Raw SQL if ORM is limiting</p>
+<pre><code><span class="cm"># Option 1: Limit columns</span>
+User.objects.only(<span class="str">'id'</span>, <span class="str">'email'</span>)
+
+<span class="cm"># Option 2: Exclude heavy fields</span>
+User.objects.defer(<span class="str">'profile_image'</span>)
+
+<span class="cm"># Option 3: Raw SQL</span>
+User.objects.raw(<span class="str">'SELECT id, name FROM users WHERE ...'</span>)
+
+<span class="cm"># Option 4: Database functions</span>
+<span class="kw">from</span> django.db.models <span class="kw">import</span> Count, Avg
+Company.objects.annotate(job_count=Count(<span class="str">'job'</span>))</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">6</div>
+                <div class="step-content">
+                    <p><strong>CACHE</strong> — For read-heavy, rarely-changing data</p>
+<pre><code><span class="kw">from</span> django.core.cache <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">get_dashboard_stats</span>():
+    stats = cache.get(<span class="str">'dashboard_stats'</span>)
+    <span class="kw">if</span> stats <span class="kw">is</span> <span class="num">None</span>:
+        stats = calculate_expensive_stats()
+        cache.set(<span class="str">'dashboard_stats'</span>, stats, timeout=<span class="num">300</span>)  <span class="cm"># 5 minutes</span>
+    <span class="kw">return</span> stats</code></pre>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I follow a 'Measure, Don't Guess' approach to query optimization. First, I identify slow queries using Django Debug Toolbar. Then I analyze the query plan with EXPLAIN ANALYZE. My priority order is: 1) Fix N+1 problems — usually the biggest win, 2) Add indexes on WHERE/ORDER BY/JOIN columns, 3) Refactor using .only(), .defer(), or raw SQL, 4) Cache for read-heavy, rarely-changing data. I focus on reducing the number of database hits first."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SECTION 5: Indexing ═══ -->
+    <h2 id="indexing">5. Indexing Strategy — Read vs Write Trade-offs 📊</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Index what you filter, sort, and join — but don't over-index."</p>
+        </div>
+    </div>
+
+    <p>👉 Dramatically speeds up query lookups</p>
+    <p>👉 Like the index at the back of a book — lets you find pages quickly</p>
+
+    <details>
+        <summary>When to Add Indexes</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Index When...</th><th>Example</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Filtering (WHERE)</strong></td><td><code>status</code>, <code>email</code>, <code>user_id</code></td></tr>
+                        <tr><td><strong>Sorting (ORDER BY)</strong></td><td><code>created_at</code>, <code>price</code></td></tr>
+                        <tr><td><strong>Joining (JOIN/FK)</strong></td><td>Foreign keys (auto-indexed in Django)</td></tr>
+                        <tr><td><strong>Uniqueness (UNIQUE)</strong></td><td><code>email</code>, <code>username</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>Django Index Examples</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  <span class="cm"># Auto-indexed</span>
+    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)   <span class="cm"># Manual index</span>
+    created_at = models.DateTimeField(db_index=<span class="num">True</span>)          <span class="cm"># Manual index</span>
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        indexes = [
+            <span class="cm"># Composite index for common query patterns</span>
+            models.Index(fields=[<span class="str">'status'</span>, <span class="str">'created_at'</span>]),
+            <span class="cm"># Partial index (PostgreSQL)</span>
+            models.Index(
+                fields=[<span class="str">'created_at'</span>],
+                name=<span class="str">'pending_apps_idx'</span>,
+                condition=Q(status=<span class="str">'PENDING'</span>)
+            ),
+        ]</code></pre>
+
+            <h4>Types of Indexes</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Type</th><th>Use Case</th><th>Django</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Single Column</strong></td><td>Filter/sort on one field</td><td><code>db_index=True</code></td></tr>
+                        <tr><td><strong>Composite</strong></td><td>Filter on multiple fields together</td><td><code>Meta.indexes</code></td></tr>
+                        <tr><td><strong>Unique</strong></td><td>Enforce uniqueness</td><td><code>unique=True</code></td></tr>
+                        <tr><td><strong>Partial</strong></td><td>Index only certain rows</td><td><code>condition=Q(...)</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>⚠️ The Trade-off: Read vs Write</summary>
+        <div class="toggle-content">
+            <p>Every index you add:</p>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Operation</th><th>Impact</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>SELECT (Read)</strong></td><td>✅ Faster</td></tr>
+                        <tr><td><strong>INSERT</strong></td><td>❌ Slower (must update index)</td></tr>
+                        <tr><td><strong>UPDATE</strong></td><td>❌ Slower (may update index)</td></tr>
+                        <tr><td><strong>DELETE</strong></td><td>❌ Slower (must update index)</td></tr>
+                        <tr><td><strong>Storage</strong></td><td>❌ Uses extra disk space</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>When NOT to Index</h4>
+            <ul>
+                <li>❌ <strong>Low-cardinality columns</strong> (e.g., <code>gender</code> with M/F values) — Database ignores them</li>
+                <li>❌ <strong>Rarely-queried columns</strong> — Index overhead without benefit</li>
+                <li>❌ <strong>Frequently-updated columns</strong> — Write penalty exceeds read benefit</li>
+                <li>❌ <strong>Small tables</strong> — Full scan is already fast</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Composite Index Example</summary>
+        <div class="toggle-content">
+            <p><strong>Query:</strong></p>
+<pre><code>Application.objects.filter(status=<span class="str">'PENDING'</span>).order_by(<span class="str">'-created_at'</span>)</code></pre>
+
+            <p><strong>Optimal Index:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">Meta</span>:
+    indexes = [
+        models.Index(fields=[<span class="str">'status'</span>, <span class="str">'created_at'</span>]),
+    ]</code></pre>
+
+            <p><strong>Why composite?</strong> Single column indexes on <code>status</code> and <code>created_at</code> separately would require the database to use one index to find matching status, then sort results by created_at. A composite index can do both in one operation.</p>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I don't index everything because indexes slow down write operations. My indexing strategy targets: 1) High-traffic columns used in WHERE clauses, 2) Sorting columns used in ORDER BY, 3) Foreign keys (auto-indexed by Django), 4) Composite indexes for queries that filter on multiple columns together. I avoid indexing low-cardinality columns since the database typically ignores them anyway. Indexing is always a trade-off between read performance and write cost — I design indexes based on real query patterns, not assumptions."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SECTION 6: Through Models ═══ -->
+    <h2 id="through-models">6. Many-to-Many Through Models — When Relationships Have Data 🔗</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Use through models when the relationship itself has attributes."</p>
+        </div>
+    </div>
+
+    <p>👉 Stores metadata about the relationship itself</p>
+    <p>👉 Enables queries on relationship properties</p>
+    <p>👉 More flexible than Django's default M2M table</p>
+
+    <details>
+        <summary>The Problem with Default M2M</summary>
+        <div class="toggle-content">
+            <p>Django's default <code>ManyToManyField</code> creates a hidden join table with only two columns:</p>
+<pre><code><span class="cm">-- Auto-generated table</span>
+<span class="kw">CREATE TABLE</span> student_courses (
+    student_id INTEGER,
+    course_id INTEGER
+);</code></pre>
+            <p><strong>What if you need:</strong> When did the student enroll? (<code>enrolled_date</code>) What grade did they get? (<code>grade</code>) Is the enrollment active? (<code>status</code>)</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>The Solution: Through Model</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">class</span> <span class="cls">Student</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    courses = models.ManyToManyField(<span class="str">'Course'</span>, through=<span class="str">'Enrollment'</span>)
+
+<span class="kw">class</span> <span class="cls">Course</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+
+<span class="kw">class</span> <span class="cls">Enrollment</span>(models.Model):
+    <span class="str">"""The through model - stores relationship metadata"""</span>
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    <span class="cm"># These fields are why we use a through model!</span>
+    enrolled_date = models.DateField(auto_now_add=<span class="num">True</span>)
+    grade = models.CharField(max_length=<span class="num">2</span>, blank=<span class="num">True</span>)
+    status = models.CharField(max_length=<span class="num">20</span>, default=<span class="str">'ACTIVE'</span>)
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        unique_together = [<span class="str">'student'</span>, <span class="str">'course'</span>]  <span class="cm"># Prevent duplicates</span></code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>When to Use Through Models</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Scenario</th><th>Use Through Model?</th></tr></thead>
+                    <tbody>
+                        <tr><td>Simple link between entities</td><td>No (default M2M is fine)</td></tr>
+                        <tr><td>Need timestamps on relationship</td><td>Yes</td></tr>
+                        <tr><td>Need status/metadata on relationship</td><td>Yes</td></tr>
+                        <tr><td>Need to query by relationship properties</td><td>Yes</td></tr>
+                        <tr><td>Relationship has its own business logic</td><td>Yes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Real-World Examples</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Domain</th><th>Through Model</th><th>Extra Fields</th></tr></thead>
+                    <tbody>
+                        <tr><td>E-commerce</td><td><code>OrderItem</code></td><td><code>quantity</code>, <code>price_at_time</code></td></tr>
+                        <tr><td>Social</td><td><code>Friendship</code></td><td><code>created_at</code>, <code>status</code></td></tr>
+                        <tr><td>Education</td><td><code>Enrollment</code></td><td><code>grade</code>, <code>enrolled_date</code></td></tr>
+                        <tr><td>Job Board</td><td><code>Application</code></td><td><code>status</code>, <code>applied_at</code>, <code>resume</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>Querying Through Models</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># Get all enrollments for a student</span>
+student.enrollment_set.all()
+
+<span class="cm"># Get students who enrolled after a date</span>
+Enrollment.objects.filter(
+    enrolled_date__gte=<span class="str">'2024-01-01'</span>
+).select_related(<span class="str">'student'</span>, <span class="str">'course'</span>)
+
+<span class="cm"># Get students with grade A in a specific course</span>
+Student.objects.filter(
+    enrollment__course__name=<span class="str">'Django 101'</span>,
+    enrollment__grade=<span class="str">'A'</span>
+)</code></pre>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I use through models when the relationship itself has attributes. For example, in an education system, the relationship between Student and Course isn't just a link — it has its own data like enrollment date, grade, and status. The through model (Enrollment) stores these relationship-specific fields, enabling queries like 'find all students who enrolled after January with grade A'. This is a senior-level pattern that shows you're thinking about the domain model, not just the database structure."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SUMMARY ═══ -->
+    <h2 id="summary">🎯 Session 3 Summary</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Topic</th><th>Key Point</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Schema Design</strong></td><td>Business requirements → Entities → Normalize → Optimize</td></tr>
+                <tr><td><strong>Normalization</strong></td><td>1NF (atomic), 2NF (full dependency), 3NF (no transitive)</td></tr>
+                <tr><td><strong>Denormalization</strong></td><td>Trade write speed for read performance in read-heavy systems</td></tr>
+                <tr><td><strong>N+1 Problem</strong></td><td>select_related (FK/O2O JOIN), prefetch_related (M2M/reverse)</td></tr>
+                <tr><td><strong>Query Optimization</strong></td><td>Detect → Analyze → Fix N+1 → Index → Refactor → Cache</td></tr>
+                <tr><td><strong>Indexing</strong></td><td>Filter/Sort/Join columns; trade-off read speed vs write cost</td></tr>
+                <tr><td><strong>Through Models</strong></td><td>When relationships have their own attributes</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🌱</span>
+        <div class="callout-content">
+            <p><strong>Senior Mindset:</strong></p>
+            <p>"Normalize first, denormalize when needed."</p>
+            <p>"Fix N+1 before touching indexes."</p>
+            <p>"Use select_related vs prefetch_related correctly."</p>
+            <p>"Index based on real query patterns, not assumptions."</p>
+            <p><span class="key-phrase">"Measure, don't guess."</span></p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

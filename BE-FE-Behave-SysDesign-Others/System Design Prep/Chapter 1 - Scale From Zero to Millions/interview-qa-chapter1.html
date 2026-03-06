@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1 Interview Q&A - System Design</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           GHIBLI DESIGN SYSTEM — Warm Earth Tones
+           ═══════════════════════════════════════════════ */
+        :root {
+            --parchment: #fef6e4;
+            --cloud-cream: #fdfaf2;
+            --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e;
+            --ink-warm: #4a3728;
+            --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b;
+            --sunset-rose: #c97b6b;
+            --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+
+            --bg-page: #f5efe0;
+            --bg-card: #fffdf7;
+            --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c;
+            --bg-highlight: #fff8e7;
+            --bg-sidebar: var(--parchment);
+
+            --text-primary: #3d2e1f;
+            --text-secondary: #6b5744;
+            --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+
+            --border-light: #e8dcc8;
+            --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74, 55, 40, 0.06);
+            --shadow-medium: 0 4px 20px rgba(74, 55, 40, 0.1);
+            --shadow-hover: 0 8px 30px rgba(74, 55, 40, 0.14);
+
+            --progress-height: 3px;
+        }
+
+        [data-theme="dark"] {
+            --parchment: #1a1a2e;
+            --cloud-cream: #16213e;
+            --sky-soft: #1a2332;
+            --forest-deep: #a8d5ba;
+            --ink-warm: #e8d5c4;
+            --water-teal: #7ec8cc;
+            --gold-accent: #e8c170;
+            --sunset-rose: #e8a090;
+            --moss-green: #a8d4a8;
+            --mist-lavender: #c8b8e0;
+
+            --bg-page: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-section: #16213e;
+            --bg-code: #0d1117;
+            --bg-highlight: #2a2520;
+            --bg-sidebar: #12121f;
+
+            --text-primary: #e8dcc8;
+            --text-secondary: #bfae98;
+            --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+
+            --border-light: #2a2a3e;
+            --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.8;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: var(--progress-height);
+            background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose));
+            z-index: 1000;
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ═══ Container ═══ */
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            background: transparent;
+        }
+
+        /* ═══ Header ═══ */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--gold-accent);
+            padding: 45px 40px 35px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 25px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+
+        [data-theme="dark"] .header::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2em;
+            font-weight: 700;
+            color: var(--ink-warm);
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 1.05em;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* ═══ Content ═══ */
+        .content {
+            padding: 40px 30px 60px;
+        }
+
+        /* ═══ Intro Box ═══ */
+        .intro-box {
+            background: var(--forest-deep);
+            color: var(--text-inverse);
+            padding: 28px;
+            border-radius: 12px;
+            margin-bottom: 35px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        [data-theme="dark"] .intro-box {
+            color: var(--text-primary);
+        }
+
+        .intro-box h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            margin-bottom: 12px;
+        }
+
+        /* ═══ Quiz Controls ═══ */
+        .quiz-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: var(--bg-card);
+            padding: 16px 22px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .quiz-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-medium);
+            background: var(--bg-section);
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .quiz-btn:hover {
+            background: var(--water-teal);
+            color: white;
+            border-color: var(--water-teal);
+        }
+
+        .quiz-btn.active {
+            background: var(--water-teal);
+            color: white;
+            border-color: var(--water-teal);
+        }
+
+        .quiz-progress {
+            font-size: 0.85em;
+            color: var(--text-muted);
+            margin-left: auto;
+        }
+
+        /* ═══ Q&A Section ═══ */
+        .qa-section {
+            margin-bottom: 40px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .qa-section:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* ═══ Question (Accordion Header) ═══ */
+        .question {
+            background: var(--parchment);
+            color: var(--text-primary);
+            padding: 20px 26px;
+            font-size: 1.2em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            cursor: pointer;
+            border-left: 4px solid var(--water-teal);
+            user-select: none;
+            transition: background 0.2s ease;
+        }
+
+        .question:hover {
+            background: rgba(91, 163, 168, 0.08);
+        }
+
+        .q-icon {
+            background: var(--water-teal);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75em;
+            flex-shrink: 0;
+        }
+
+        .q-text {
+            flex: 1;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .chevron {
+            font-size: 0.8em;
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .question.open .chevron {
+            transform: rotate(180deg);
+        }
+
+        /* ═══ Self-Assessment Indicator ═══ */
+        .assess-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--border-medium);
+            transition: background 0.3s ease;
+        }
+
+        .assess-dot.got-it { background: var(--moss-green); }
+        .assess-dot.review { background: var(--gold-accent); }
+
+        /* ═══ Answer (Accordion Body) ═══ */
+        .answer-wrapper {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .answer-wrapper.open {
+            max-height: 5000px;
+            transition: max-height 0.6s ease;
+        }
+
+        .answer {
+            padding: 24px 26px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .answer h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--water-teal);
+            font-size: 1.2em;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ═══ Self Assessment Buttons ═══ */
+        .self-assess {
+            display: flex;
+            gap: 10px;
+            padding: 14px 26px;
+            border-top: 1px solid var(--border-light);
+            background: var(--bg-section);
+        }
+
+        .assess-btn {
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border-medium);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.82em;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .assess-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .assess-btn.got-it {
+            border-color: var(--moss-green);
+            color: var(--moss-green);
+        }
+
+        .assess-btn.got-it.selected {
+            background: var(--moss-green);
+            color: white;
+        }
+
+        .assess-btn.review {
+            border-color: var(--gold-accent);
+            color: var(--gold-accent);
+        }
+
+        .assess-btn.review.selected {
+            background: var(--gold-accent);
+            color: white;
+        }
+
+        /* ═══ Answer Components ═══ */
+        .answer-point {
+            background: var(--bg-section);
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 14px 0;
+            border-left: 3px solid var(--water-teal);
+        }
+
+        .answer-point strong {
+            color: var(--sunset-rose);
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.02em;
+        }
+
+        .key-insight {
+            background: var(--bg-highlight);
+            border-left: 4px solid var(--gold-accent);
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 8px;
+        }
+
+        .key-insight strong {
+            color: var(--gold-accent);
+            font-size: 1.05em;
+        }
+
+        .example-box {
+            background: #f0f7f0;
+            padding: 18px;
+            border-radius: 8px;
+            margin: 18px 0;
+            border-left: 4px solid var(--moss-green);
+        }
+
+        [data-theme="dark"] .example-box {
+            background: #1a2e1a;
+        }
+
+        .example-box h4 {
+            color: var(--moss-green);
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 10px;
+            font-size: 1.05em;
+        }
+
+        .code-snippet {
+            background: var(--bg-code);
+            color: #c9d1d9;
+            padding: 18px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            overflow-x: auto;
+            margin: 14px 0;
+            font-size: 0.9em;
+            border: 1px solid var(--border-light);
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 18px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .comparison-table th {
+            background: var(--forest-deep);
+            color: white;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.92em;
+        }
+
+        [data-theme="dark"] .comparison-table th {
+            color: var(--text-inverse);
+        }
+
+        .comparison-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-light);
+            background: var(--bg-card);
+        }
+
+        .comparison-table tr:nth-child(even) td {
+            background: var(--bg-section);
+        }
+
+        .interview-tip {
+            background: var(--bg-highlight);
+            border-left: 4px solid var(--gold-accent);
+            padding: 22px;
+            margin: 22px 0;
+            border-radius: 10px;
+        }
+
+        .interview-tip h4 {
+            color: var(--gold-accent);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15em;
+            margin-bottom: 10px;
+        }
+
+        .visual-flow {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 18px 0;
+            justify-content: center;
+        }
+
+        .flow-box {
+            background: var(--water-teal);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9em;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .flow-arrow {
+            font-size: 1.5em;
+            color: var(--water-teal);
+            font-weight: bold;
+        }
+
+        .emphasis {
+            background: linear-gradient(135deg, var(--gold-accent), #c9963e);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        ul { margin-left: 24px; margin-top: 10px; }
+        li { margin: 8px 0; }
+
+        /* ═══ Floating Buttons ═══ */
+        .theme-toggle {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* ═══ Scroll Animation ═══ */
+        .animate-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.7em; }
+            .header { padding: 35px 20px 28px; }
+            .content { padding: 25px 16px 40px; }
+            .question { font-size: 1.05em; padding: 16px 18px; }
+            .answer { padding: 18px; }
+            .comparison-table { display: block; overflow-x: auto; }
+            .quiz-controls { padding: 12px 16px; }
+            .visual-flow { gap: 8px; }
+            .flow-box { padding: 8px 14px; font-size: 0.82em; }
+            .theme-toggle { right: 16px; bottom: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.4em; }
+            .question { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 1: Interview Q&A</h1>
+            <p>Master These Core Questions to Ace System Design Interviews</p>
+        </div>
+
+        <div class="content">
+            <div class="intro-box animate-in">
+                <h2>How to Use This Document</h2>
+                <p>These are the EXACT questions interviewers ask when testing your understanding of scaling basics. Each answer is structured to:</p>
+                <ul style="margin-top: 12px;">
+                    <li>Give a clear definition first</li>
+                    <li>Explain WHY it's needed (the problem it solves)</li>
+                    <li>Provide concrete examples</li>
+                    <li>Discuss trade-offs when relevant</li>
+                </ul>
+                <p style="margin-top: 12px;"><strong>Pro Tip:</strong> Practice answering these OUT LOUD. Explaining concepts verbally is VERY different from reading them!</p>
+            </div>
+
+            <!-- Quiz Controls -->
+            <div class="quiz-controls" id="quizControls">
+                <button class="quiz-btn" id="quizToggle">Quiz Mode</button>
+                <button class="quiz-btn" id="expandAll">Expand All</button>
+                <button class="quiz-btn" id="collapseAll">Collapse All</button>
+                <span class="quiz-progress" id="quizProgress"></span>
+            </div>
+
+            <!-- Question 1 -->
+            <div class="qa-section animate-in" data-q="1">
+                <div class="question" data-target="a1">
+                    <span class="q-icon">Q1</span>
+                    <span class="q-text">What is a load balancer and why do we need it?</span>
+                    <span class="assess-dot" data-q="1"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+
+                <div class="answer-wrapper" id="a1">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+
+                        <div class="answer-point">
+                            <strong>Definition:</strong>
+                            A load balancer is a component that <span class="emphasis">evenly distributes incoming traffic among multiple web servers</span> in a server pool. It sits between the users and your web servers, acting as a traffic director.
+                        </div>
+
+                        <div class="key-insight">
+                            <strong>Why We Need It - The Core Problem:</strong>
+                            <p style="margin-top: 10px;">Imagine you have a single web server handling all your traffic. Two critical problems arise:</p>
+                            <ol style="margin-top: 10px; margin-left: 20px;">
+                                <li><strong>Single Point of Failure (SPOF):</strong> If that one server goes down, your ENTIRE website goes offline. No redundancy, no backup.</li>
+                                <li><strong>Traffic Overload:</strong> When too many users access the server simultaneously and it reaches its load limit, users experience slower response times or complete failure to connect.</li>
+                            </ol>
+                            <p style="margin-top: 15px;"><strong>The load balancer solves both problems.</strong></p>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>How It Solves These Problems:</strong>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--water-teal);">1. Eliminates Single Point of Failure:</strong>
+                                <p style="margin-top: 8px;">If Server 1 goes offline, the load balancer automatically routes ALL traffic to Server 2. Your website stays online. You can then add a new healthy server to the pool to restore full capacity.</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--water-teal);">2. Handles Traffic Growth Gracefully:</strong>
+                                <p style="margin-top: 8px;">When traffic grows and 2 servers aren't enough, you simply add more servers to the pool. The load balancer automatically starts distributing requests to the new servers. No downtime, no complex reconfiguration.</p>
+                            </div>
+                        </div>
+
+                        <div class="visual-flow">
+                            <div class="flow-box">User</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box">DNS</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--moss-green);">Load Balancer<br><span style="font-size: 0.8em;">Public IP</span></div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--forest-deep);">Server 1 &middot; Server 2<br><span style="font-size: 0.8em;">Private IPs</span></div>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>Security Benefit:</strong>
+                            Users connect to the <span class="emphasis">public IP of the load balancer</span>, not the web servers directly. Web servers use <span class="emphasis">private IPs</span> (only reachable within the same network), making them unreachable from the internet. This adds a security layer by hiding your actual servers from direct access.
+                        </div>
+
+                        <div class="interview-tip">
+                            <h4>Interview Pro Tip:</h4>
+                            <p>When discussing load balancers, mention:</p>
+                            <ul>
+                                <li><strong>Algorithms:</strong> Round-robin (simplest), Least connections (server with fewest active connections), IP hash (same client &rarr; same server)</li>
+                                <li><strong>Health Checks:</strong> Load balancer regularly pings servers to ensure they're healthy before routing traffic</li>
+                                <li><strong>Layer 4 vs Layer 7:</strong> L4 (transport layer - faster, looks at IP/port), L7 (application layer - smarter, can route based on URL/headers)</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Example Interview Response:</h4>
+                            <p style="font-style: italic;">"A load balancer distributes incoming traffic across multiple servers to prevent any single server from becoming a bottleneck. This solves two critical problems: if one server fails, traffic is automatically rerouted to healthy servers, eliminating single points of failure. And when traffic grows, we can easily add more servers to handle the load. Users connect to the load balancer's public IP, while servers use private IPs for added security. Common algorithms include round-robin for simplicity or least-connections for better load distribution."</p>
+                        </div>
+                    </div>
+
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="1" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="1" data-val="review">Review Later</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="qa-section animate-in" data-q="2">
+                <div class="question" data-target="a2">
+                    <span class="q-icon">Q2</span>
+                    <span class="q-text">What's the difference between vertical and horizontal scaling?</span>
+                    <span class="assess-dot" data-q="2"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+
+                <div class="answer-wrapper" id="a2">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Aspect</th>
+                                    <th>Vertical Scaling (Scale Up)</th>
+                                    <th>Horizontal Scaling (Scale Out)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Definition</strong></td>
+                                    <td>Adding more power (CPU, RAM, disk) to your <span class="emphasis">existing server</span></td>
+                                    <td>Adding <span class="emphasis">more servers</span> to your pool of resources</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Visual</strong></td>
+                                    <td>1 powerful server &rarr; 1 MORE powerful server</td>
+                                    <td>2 servers &rarr; 4 servers &rarr; 8 servers</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Complexity</strong></td>
+                                    <td>Simple - no application changes needed</td>
+                                    <td>More complex - requires load balancer, state management</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Limits</strong></td>
+                                    <td><strong>Hardware limits</strong> - can't add unlimited CPU/RAM to a single machine</td>
+                                    <td>Virtually unlimited - can keep adding servers</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Failover</strong></td>
+                                    <td><strong>Single Point of Failure</strong> - if the server dies, everything goes down</td>
+                                    <td>Redundancy - if one server fails, others continue</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cost</strong></td>
+                                    <td>Expensive - powerful servers cost exponentially more</td>
+                                    <td>Cost-effective - use commodity hardware</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>When to Use</strong></td>
+                                    <td>Low traffic, quick fix, simple applications</td>
+                                    <td>Large-scale applications, need high availability</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="key-insight">
+                            <strong>The Critical Insight:</strong>
+                            <p style="margin-top: 10px;">Vertical scaling is like making one person stronger. There's a limit to how strong one person can get. Horizontal scaling is like adding more people to the team. You can keep adding people.</p>
+                            <p style="margin-top: 15px;"><strong>For large-scale applications, horizontal scaling is MORE desirable</strong> because:</p>
+                            <ol style="margin-top: 10px; margin-left: 20px;">
+                                <li>No single point of failure</li>
+                                <li>No hardware limits</li>
+                                <li>More cost-effective at scale</li>
+                            </ol>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>The Trade-off:</strong>
+                            <p style="margin-top: 8px;">Vertical scaling is SIMPLER (no code changes), but hits a wall quickly. Horizontal scaling requires more architecture work upfront (load balancers, stateless servers, distributed data), but scales infinitely.</p>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Real-World Example:</h4>
+                            <p><strong>Vertical Scaling:</strong> Amazon RDS lets you scale a database server up to 24 TB of RAM. That's massive, but eventually you hit the limit.</p>
+                            <p style="margin-top: 10px;"><strong>Horizontal Scaling:</strong> Netflix uses thousands of servers distributed globally. If traffic spikes or servers fail, they simply add more or reroute traffic. No single machine limit.</p>
+                        </div>
+
+                        <div class="interview-tip">
+                            <h4>Interview Pro Tip:</h4>
+                            <p>When asked about scaling, ALWAYS mention:</p>
+                            <ul>
+                                <li>"I'd start with vertical scaling for simplicity, but plan for horizontal scaling as we grow."</li>
+                                <li>"Horizontal scaling requires addressing state management - we'd move session data to Redis/Memcached."</li>
+                                <li>"For the database, we might vertically scale initially, but use read replicas and sharding for horizontal scaling."</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Example Interview Response:</h4>
+                            <p style="font-style: italic;">"Vertical scaling means adding more resources like CPU and RAM to your existing server, while horizontal scaling means adding more servers. Vertical is simpler but hits hardware limits and creates a single point of failure. For large-scale systems, horizontal scaling is preferred because it provides redundancy, has no theoretical limit, and is more cost-effective. The trade-off is increased complexity - you need load balancers and stateless architecture. In practice, I'd use vertical scaling for quick wins early on, but architect for horizontal scaling from the start."</p>
+                        </div>
+                    </div>
+
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="2" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="2" data-val="review">Review Later</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="qa-section animate-in" data-q="3">
+                <div class="question" data-target="a3">
+                    <span class="q-icon">Q3</span>
+                    <span class="q-text">When do we use read replicas?</span>
+                    <span class="assess-dot" data-q="3"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+
+                <div class="answer-wrapper" id="a3">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+
+                        <div class="answer-point">
+                            <strong>What Are Read Replicas (Database Replication)?</strong>
+                            <p style="margin-top: 10px;">Database replication is a <span class="emphasis">master-slave relationship</span> where:</p>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Master Database:</strong> Handles ALL write operations (INSERT, UPDATE, DELETE)</li>
+                                <li><strong>Slave Databases (Read Replicas):</strong> Receive copies of data from master and handle ONLY read operations (SELECT)</li>
+                            </ul>
+                        </div>
+
+                        <div class="visual-flow">
+                            <div style="text-align: center;">
+                                <div class="flow-box" style="background: var(--sunset-rose);">Master DB<br><span style="font-size: 0.8em;">WRITES ONLY</span></div>
+                                <div style="margin: 12px 0; color: var(--water-teal); font-weight: bold;">&rarr; Replicates Data &rarr;</div>
+                                <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                                    <div class="flow-box">Slave 1<br><span style="font-size: 0.8em;">READS</span></div>
+                                    <div class="flow-box">Slave 2<br><span style="font-size: 0.8em;">READS</span></div>
+                                    <div class="flow-box">Slave 3<br><span style="font-size: 0.8em;">READS</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="key-insight">
+                            <strong>When Do We Use Read Replicas?</strong>
+                            <p style="margin-top: 10px;">We use read replicas when we have a <span class="emphasis">read-heavy workload</span>. Here's the key insight:</p>
+                            <p style="margin-top: 10px;"><strong>Most applications have a MUCH higher ratio of reads to writes.</strong></p>
+                            <p style="margin-top: 10px;">Think about it:</p>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Social Media:</strong> Millions of people READ posts, only the author WRITES them</li>
+                                <li><strong>E-commerce:</strong> Thousands browse products (READ), only a fraction buy/update (WRITE)</li>
+                                <li><strong>News Sites:</strong> Millions of readers (READ), only journalists write (WRITE)</li>
+                            </ul>
+                            <p style="margin-top: 15px;"><strong>Typical ratio: 90% reads, 10% writes (or even higher read percentage!)</strong></p>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>Benefits of Read Replicas:</strong>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--water-teal);">1. Better Performance:</strong>
+                                <p style="margin-top: 8px;">All writes/updates go to master. Read operations are <span class="emphasis">distributed across multiple slave nodes</span>. This allows more queries to be processed in parallel. Instead of one database handling everything, you have 1 master + N slaves sharing the load.</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--water-teal);">2. Reliability:</strong>
+                                <p style="margin-top: 8px;">If one database server is destroyed (natural disaster, hardware failure), <span class="emphasis">data is still preserved because it's replicated across multiple locations</span>. You don't worry about data loss.</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--water-teal);">3. High Availability:</strong>
+                                <p style="margin-top: 8px;">If a database goes offline, your website remains operational. <span class="emphasis">You can access data stored in another database server.</span> Users don't experience downtime.</p>
+                            </div>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>Failover Scenarios:</strong>
+
+                            <div style="background: #fdf5f0; padding: 15px; border-radius: 8px; margin-top: 10px; border-left: 3px solid var(--sunset-rose);">
+                                <strong style="color: var(--sunset-rose);">If a Slave Goes Down:</strong>
+                                <p style="margin-top: 8px;">Read operations temporarily redirect to the master or other healthy slaves. A new slave is quickly added to replace the failed one. Minimal impact.</p>
+                            </div>
+
+                            <div style="background: #fdf5f0; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 3px solid var(--sunset-rose);">
+                                <strong style="color: var(--sunset-rose);">If the Master Goes Down:</strong>
+                                <p style="margin-top: 8px;">One slave is <span class="emphasis">promoted to be the new master</span>. All database operations temporarily execute on the new master. A new slave is added to restore replication. This is more complex because the promoted slave might not have the latest data (replication lag), so data recovery scripts may be needed.</p>
+                            </div>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Example Scenario:</h4>
+                            <p>Your e-commerce site has:</p>
+                            <ul>
+                                <li>1,000,000 product page views per hour (READ)</li>
+                                <li>10,000 purchases per hour (WRITE)</li>
+                            </ul>
+                            <p style="margin-top: 10px;"><strong>That's a 100:1 read-to-write ratio!</strong></p>
+                            <p style="margin-top: 10px;">With 1 master + 3 read replicas, you distribute the 1,000,000 reads across 3 slaves (~333,333 each), while the master handles only the 10,000 writes. Much better performance than one database handling 1,010,000 operations!</p>
+                        </div>
+
+                        <div class="interview-tip">
+                            <h4>Interview Pro Tip:</h4>
+                            <p>When discussing read replicas, mention:</p>
+                            <ul>
+                                <li><strong>Replication Lag:</strong> There's a slight delay between master write and slave update. For most apps this is acceptable (eventual consistency).</li>
+                                <li><strong>Scaling Reads:</strong> "We can add as many read replicas as needed to handle read traffic."</li>
+                                <li><strong>Geographic Distribution:</strong> "We could place read replicas in different regions to reduce latency for global users."</li>
+                                <li><strong>Read/Write Splitting:</strong> "The application layer routes writes to master and reads to replicas, often using a library or database proxy."</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Example Interview Response:</h4>
+                            <p style="font-style: italic;">"We use read replicas when we have a read-heavy workload, which is common in most applications - typically 80-90% reads versus writes. The master database handles all write operations while read replicas handle read queries. This improves performance by distributing the read load across multiple databases, provides reliability through data redundancy, and ensures high availability if a database fails. For example, in a social media feed, millions of users read posts but only a small fraction create new ones, making read replicas essential for scalability. We'd need to handle replication lag and implement proper read/write splitting in the application layer."</p>
+                        </div>
+                    </div>
+
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="3" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="3" data-val="review">Review Later</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="qa-section animate-in" data-q="4">
+                <div class="question" data-target="a4">
+                    <span class="q-icon">Q4</span>
+                    <span class="q-text">What goes in cache vs database?</span>
+                    <span class="assess-dot" data-q="4"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+
+                <div class="answer-wrapper" id="a4">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+
+                        <div class="answer-point">
+                            <strong>First, What Is Cache?</strong>
+                            <p style="margin-top: 10px;">A cache is a <span class="emphasis">temporary storage area that stores frequently accessed data in memory</span> (RAM) so that subsequent requests are served much faster. Think of it as a "shortcut" that avoids expensive database queries.</p>
+                        </div>
+
+                        <div class="key-insight">
+                            <strong>Speed Comparison:</strong>
+                            <ul style="margin-top: 10px;">
+                                <li><strong>Cache (RAM):</strong> ~1 microsecond access time</li>
+                                <li><strong>Database (Disk):</strong> ~10 milliseconds access time</li>
+                                <li><strong>That's 10,000x faster!</strong></li>
+                            </ul>
+                        </div>
+
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Criteria</th>
+                                    <th>Put in CACHE</th>
+                                    <th>Put in DATABASE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Access Pattern</strong></td>
+                                    <td><span class="emphasis">Read frequently, modified infrequently</span><br><br>Example: User profile info, product details, static content</td>
+                                    <td>Authoritative source of truth<br><br>All data, whether frequently accessed or not</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Data Volatility</strong></td>
+                                    <td>Data that can be <strong>regenerated or fetched</strong> if lost<br><br>Example: Computed values, aggregations</td>
+                                    <td><span class="emphasis">Critical data that CANNOT be lost</span><br><br>Example: User accounts, transactions, orders</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Storage Duration</strong></td>
+                                    <td><strong>Temporary</strong> - stored in volatile memory (RAM)<br><br>Data lost if cache server restarts</td>
+                                    <td><strong>Permanent</strong> - stored on disk<br><br>Data persists through restarts</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Data Size</strong></td>
+                                    <td>Small to medium datasets that fit in memory<br><br>Usually MB to few GB</td>
+                                    <td>Large datasets<br><br>Can be TB to PB</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Freshness Requirements</strong></td>
+                                    <td>Can tolerate <strong>slightly stale data</strong><br><br>Example: Product view count (ok if 5 minutes old)</td>
+                                    <td>Needs to be <strong>accurate and up-to-date</strong><br><br>Example: Account balance, inventory count</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Examples</strong></td>
+                                    <td>
+                                        &bull; User sessions<br>
+                                        &bull; API responses<br>
+                                        &bull; Database query results<br>
+                                        &bull; Computed values (trending posts)<br>
+                                        &bull; Static content metadata
+                                    </td>
+                                    <td>
+                                        &bull; User account data<br>
+                                        &bull; Transaction records<br>
+                                        &bull; Order history<br>
+                                        &bull; Financial data<br>
+                                        &bull; Audit logs
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="answer-point">
+                            <strong>The Golden Rule:</strong>
+                            <div style="background: var(--bg-highlight); padding: 18px; border-radius: 8px; margin-top: 12px; border-left: 4px solid var(--gold-accent);">
+                                <p style="font-size: 1.15em; font-weight: bold; color: var(--gold-accent);">
+                                    "Cache for SPEED, Database for SAFETY"
+                                </p>
+                                <p style="margin-top: 10px;">
+                                    <strong>Cache:</strong> Optimizes for performance, data can be lost without disaster<br>
+                                    <strong>Database:</strong> Source of truth, data MUST be durable and consistent
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>Decision Framework - Ask These Questions:</strong>
+
+                            <div style="background: var(--bg-section); padding: 14px; border-radius: 8px; margin-top: 10px;">
+                                <strong style="color: var(--water-teal);">1. Is it read frequently but modified rarely?</strong>
+                                <p style="margin-top: 5px;">YES &rarr; Good for cache | NO &rarr; Keep in database only</p>
+                            </div>
+
+                            <div style="background: var(--bg-section); padding: 14px; border-radius: 8px; margin-top: 10px;">
+                                <strong style="color: var(--water-teal);">2. Can you afford to lose this data temporarily?</strong>
+                                <p style="margin-top: 5px;">YES &rarr; Can cache (with database as source) | NO &rarr; Database only</p>
+                            </div>
+
+                            <div style="background: var(--bg-section); padding: 14px; border-radius: 8px; margin-top: 10px;">
+                                <strong style="color: var(--water-teal);">3. Is it expensive to compute or fetch?</strong>
+                                <p style="margin-top: 5px;">YES &rarr; Excellent cache candidate | NO &rarr; Caching might not help much</p>
+                            </div>
+
+                            <div style="background: var(--bg-section); padding: 14px; border-radius: 8px; margin-top: 10px;">
+                                <strong style="color: var(--water-teal);">4. Can you tolerate slightly stale data?</strong>
+                                <p style="margin-top: 5px;">YES &rarr; Cache with TTL | NO &rarr; Database with cache invalidation on writes</p>
+                            </div>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Real-World Examples:</h4>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--moss-green);">Good Cache Candidates</strong>
+                                <ul style="margin-top: 10px;">
+                                    <li><strong>User Profile Info:</strong> Read often (every page load), rarely changes</li>
+                                    <li><strong>Product Catalog:</strong> Thousands of users browse, products update occasionally</li>
+                                    <li><strong>API Responses:</strong> Same query, same result, can cache for minutes/hours</li>
+                                    <li><strong>Session Data:</strong> Accessed every request, temporary by nature</li>
+                                    <li><strong>Popular Posts/Trending Content:</strong> Read by millions, computed hourly</li>
+                                </ul>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <strong style="color: var(--sunset-rose);">Bad Cache Candidates</strong>
+                                <ul style="margin-top: 10px;">
+                                    <li><strong>Financial Transactions:</strong> Must be accurate, cannot lose</li>
+                                    <li><strong>Real-time Inventory:</strong> Needs to be exact (can't oversell)</li>
+                                    <li><strong>User Passwords:</strong> Critical security data, must persist</li>
+                                    <li><strong>Order Records:</strong> Legal/audit requirements, must be durable</li>
+                                    <li><strong>One-time Data:</strong> If it's only read once, caching provides no benefit</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="answer-point">
+                            <strong>Important Caching Considerations:</strong>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--sunset-rose);">1. Expiration Policy (TTL):</strong>
+                                <p style="margin-top: 8px;">Set a Time-To-Live so cached data doesn't become too stale. Not too short (frequent DB queries), not too long (stale data).</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--sunset-rose);">2. Cache Invalidation:</strong>
+                                <p style="margin-top: 8px;">When data changes in the database, update or remove it from cache. Otherwise users see outdated information.</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--sunset-rose);">3. Cache Warming:</strong>
+                                <p style="margin-top: 8px;">Pre-populate cache with commonly accessed data to avoid cold start problems.</p>
+                            </div>
+
+                            <div style="margin-top: 15px;">
+                                <strong style="color: var(--sunset-rose);">4. Eviction Policy:</strong>
+                                <p style="margin-top: 8px;">When cache is full, decide what to remove. LRU (Least Recently Used) is most common.</p>
+                            </div>
+                        </div>
+
+                        <div class="interview-tip">
+                            <h4>Interview Pro Tip:</h4>
+                            <p>When discussing caching strategy, mention:</p>
+                            <ul>
+                                <li><strong>Cache Hit Ratio:</strong> "We'd aim for 80-90% cache hit ratio for frequently accessed data."</li>
+                                <li><strong>Cache Aside Pattern:</strong> "Application checks cache first, if miss, fetch from DB and populate cache."</li>
+                                <li><strong>Write Through:</strong> "For critical data, write to both cache and DB simultaneously."</li>
+                                <li><strong>Cache Technologies:</strong> Redis (rich data structures), Memcached (simple key-value), CDN (static assets)</li>
+                            </ul>
+                        </div>
+
+                        <div class="example-box">
+                            <h4>Example Interview Response:</h4>
+                            <p style="font-style: italic;">"We cache data that's read frequently but modified infrequently, where temporary data loss is acceptable. For example, user profile information, product catalogs, and API responses are great cache candidates. The database remains the source of truth for all data, especially critical information like transactions and user accounts that cannot be lost. We'd use a cache-aside pattern where the application checks Redis first, and on a cache miss, fetches from the database and populates the cache with an appropriate TTL. For a social media feed, we might cache the rendered feed for 5 minutes, as perfect freshness isn't critical, but we'd never cache financial transactions."</p>
+                        </div>
+                    </div>
+
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="4" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="4" data-val="review">Review Later</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practice Section -->
+            <div class="intro-box animate-in" style="margin-top: 50px;">
+                <h2>How to Practice These Answers</h2>
+                <div style="margin-top: 20px;">
+                    <strong>1. Read Each Answer Out Loud</strong>
+                    <p style="margin-top: 8px;">Speaking is different from reading. Practice saying these answers naturally.</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>2. Use the "Example Interview Response" Sections</strong>
+                    <p style="margin-top: 8px;">These are polished, concise answers. Memorize the structure, not word-for-word.</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>3. Draw Diagrams While Explaining</strong>
+                    <p style="margin-top: 8px;">In real interviews, draw boxes and arrows. Practice this!</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>4. Add Real Numbers</strong>
+                    <p style="margin-top: 8px;">"With 1 million requests per second..." sounds more concrete than "with high traffic"</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>5. Practice Follow-Up Questions</strong>
+                    <p style="margin-top: 8px;">Interviewers will ask "What if...?" or "How would you handle...?" Think through edge cases.</p>
+                </div>
+                <div style="margin-top: 20px; padding: 18px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--gold-accent);">
+                    <strong style="color: var(--gold-accent); font-size: 1.1em;">Hadriel's Challenge:</strong>
+                    <p style="margin-top: 10px; color: var(--text-primary);">Set a timer for 2 minutes per question. Can you explain each answer clearly within that time? That's interview-level fluency!</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+    <script>
+        // ═══ Progress Bar ═══
+        const progressBar = document.getElementById('progressBar');
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // ═══ Accordion ═══
+        const questions = document.querySelectorAll('.question');
+        const totalQuestions = questions.length;
+
+        questions.forEach(q => {
+            q.addEventListener('click', () => {
+                const targetId = q.getAttribute('data-target');
+                const wrapper = document.getElementById(targetId);
+                const isOpen = wrapper.classList.contains('open');
+
+                // Toggle
+                wrapper.classList.toggle('open');
+                q.classList.toggle('open');
+            });
+        });
+
+        // ═══ Expand / Collapse All ═══
+        document.getElementById('expandAll').addEventListener('click', () => {
+            document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.add('open'));
+            questions.forEach(q => q.classList.add('open'));
+        });
+
+        document.getElementById('collapseAll').addEventListener('click', () => {
+            document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.remove('open'));
+            questions.forEach(q => q.classList.remove('open'));
+        });
+
+        // ═══ Quiz Mode ═══
+        let quizMode = false;
+        let revealedCount = 0;
+        const quizToggle = document.getElementById('quizToggle');
+        const quizProgress = document.getElementById('quizProgress');
+
+        function updateQuizProgress() {
+            if (quizMode) {
+                const revealed = document.querySelectorAll('.answer-wrapper.open').length;
+                quizProgress.textContent = `${revealed}/${totalQuestions} revealed`;
+            } else {
+                quizProgress.textContent = '';
+            }
+        }
+
+        quizToggle.addEventListener('click', () => {
+            quizMode = !quizMode;
+            quizToggle.classList.toggle('active', quizMode);
+            quizToggle.textContent = quizMode ? 'Exit Quiz' : 'Quiz Mode';
+
+            if (quizMode) {
+                // Collapse all answers
+                document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.remove('open'));
+                questions.forEach(q => q.classList.remove('open'));
+            }
+            updateQuizProgress();
+        });
+
+        // Track reveals for quiz progress
+        const answerObserver = new MutationObserver(updateQuizProgress);
+        document.querySelectorAll('.answer-wrapper').forEach(w => {
+            answerObserver.observe(w, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        // ═══ Self-Assessment ═══
+        const assessments = JSON.parse(localStorage.getItem('ch1-qa-assess') || '{}');
+
+        function applyAssessments() {
+            Object.entries(assessments).forEach(([q, val]) => {
+                // Update dots
+                document.querySelectorAll(`.assess-dot[data-q="${q}"]`).forEach(dot => {
+                    dot.className = 'assess-dot ' + val;
+                });
+                // Update buttons
+                document.querySelectorAll(`.assess-btn[data-q="${q}"]`).forEach(btn => {
+                    btn.classList.toggle('selected', btn.getAttribute('data-val') === val);
+                });
+            });
+        }
+
+        applyAssessments();
+
+        document.querySelectorAll('.assess-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.getAttribute('data-q');
+                const val = btn.getAttribute('data-val');
+
+                // Toggle: if already selected, deselect
+                if (assessments[q] === val) {
+                    delete assessments[q];
+                } else {
+                    assessments[q] = val;
+                }
+
+                localStorage.setItem('ch1-qa-assess', JSON.stringify(assessments));
+                applyAssessments();
+            });
+        });
+
+        // ═══ Dark Mode ═══
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('ch1-qa-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ch1-qa-theme', next);
+            themeToggleBtn.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        });
+
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            themeToggleBtn.textContent = '\u2600';
+        }
+
+        // ═══ Scroll-in Animations ═══
+        const animateObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 80);
+                    animateObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+
+        document.querySelectorAll('.animate-in').forEach(el => animateObserver.observe(el));
+    </script>
+</body>
+</html>

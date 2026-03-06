@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 1: Scale From Zero to Millions of Users - Complete Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           GHIBLI DESIGN SYSTEM — Warm Earth Tones
+           ═══════════════════════════════════════════════ */
+        :root {
+            --parchment: #fef6e4;
+            --cloud-cream: #fdfaf2;
+            --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e;
+            --ink-warm: #4a3728;
+            --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b;
+            --sunset-rose: #c97b6b;
+            --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+
+            --bg-page: #f5efe0;
+            --bg-card: #fffdf7;
+            --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c;
+            --bg-highlight: #fff8e7;
+            --bg-sidebar: var(--parchment);
+
+            --text-primary: #3d2e1f;
+            --text-secondary: #6b5744;
+            --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+
+            --border-light: #e8dcc8;
+            --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74, 55, 40, 0.06);
+            --shadow-medium: 0 4px 20px rgba(74, 55, 40, 0.1);
+            --shadow-hover: 0 8px 30px rgba(74, 55, 40, 0.14);
+
+            --sidebar-width: 280px;
+            --progress-height: 3px;
+        }
+
+        [data-theme="dark"] {
+            --parchment: #1a1a2e;
+            --cloud-cream: #16213e;
+            --sky-soft: #1a2332;
+            --forest-deep: #a8d5ba;
+            --ink-warm: #e8d5c4;
+            --water-teal: #7ec8cc;
+            --gold-accent: #e8c170;
+            --sunset-rose: #e8a090;
+            --moss-green: #a8d4a8;
+            --mist-lavender: #c8b8e0;
+
+            --bg-page: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --bg-section: #16213e;
+            --bg-code: #0d1117;
+            --bg-highlight: #2a2520;
+            --bg-sidebar: #12121f;
+
+            --text-primary: #e8dcc8;
+            --text-secondary: #bfae98;
+            --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+
+            --border-light: #2a2a3e;
+            --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.2);
+            --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            line-height: 1.8;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: var(--progress-height);
+            background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose));
+            z-index: 1000;
+            transition: width 0.1s linear;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ═══ Sidebar TOC ═══ */
+        .sidebar-toc {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            padding: 60px 0 30px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.4s ease;
+        }
+
+        .sidebar-toc h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.05em;
+            color: var(--text-secondary);
+            padding: 0 20px 15px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 10px;
+            letter-spacing: 0.02em;
+        }
+
+        .sidebar-toc > a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 8px 20px;
+            font-size: 0.85em;
+            font-weight: 400;
+            border-left: 3px solid transparent;
+            transition: all 0.25s ease;
+            line-height: 1.4;
+        }
+
+        .sidebar-toc > a:hover {
+            color: var(--text-primary);
+            background: rgba(91, 163, 168, 0.06);
+            border-left-color: var(--border-medium);
+        }
+
+        .sidebar-toc > a.active {
+            color: var(--water-teal);
+            font-weight: 600;
+            border-left-color: var(--water-teal);
+            background: rgba(91, 163, 168, 0.08);
+        }
+
+        /* Collapsible sidebar groups */
+        .toc-group {
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        .toc-group-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 9px 20px;
+            background: none;
+            border: none;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85em;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-align: left;
+            transition: all 0.25s ease;
+            line-height: 1.4;
+        }
+
+        .toc-group-toggle:hover {
+            color: var(--text-primary);
+            background: rgba(91, 163, 168, 0.06);
+        }
+
+        .toc-group-toggle.active {
+            color: var(--water-teal);
+            font-weight: 600;
+            border-left-color: var(--water-teal);
+            background: rgba(91, 163, 168, 0.08);
+        }
+
+        .toc-arrow {
+            font-size: 0.7em;
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+
+        .toc-group.open .toc-arrow {
+            transform: rotate(90deg);
+        }
+
+        .toc-sub {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .toc-group.open .toc-sub {
+            max-height: 500px;
+        }
+
+        .toc-sub a {
+            display: block;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 5px 20px 5px 34px;
+            font-size: 0.78em;
+            font-weight: 400;
+            border-left: 3px solid transparent;
+            transition: all 0.25s ease;
+            line-height: 1.4;
+        }
+
+        .toc-sub a:hover {
+            color: var(--text-primary);
+            background: rgba(91, 163, 168, 0.04);
+        }
+
+        .toc-sub a.active {
+            color: var(--water-teal);
+            font-weight: 500;
+            border-left-color: var(--water-teal);
+        }
+
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            top: 12px;
+            left: 12px;
+            z-index: 200;
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-soft);
+            font-size: 1.2em;
+            color: var(--text-secondary);
+            transition: background 0.3s;
+        }
+
+        /* ═══ Main Content ═══ */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            transition: margin-left 0.3s ease;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 40px 60px;
+        }
+
+        /* ═══ Header ═══ */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--gold-accent);
+            padding: 50px 40px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 20 Q450 35 600 15 Q750 0 900 22 Q1050 35 1200 10 V30 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+
+        [data-theme="dark"] .header::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 20 Q450 35 600 15 Q750 0 900 22 Q1050 35 1200 10 V30 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.4em;
+            font-weight: 700;
+            color: var(--ink-warm);
+            margin-bottom: 10px;
+            letter-spacing: -0.01em;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            color: var(--text-secondary);
+            font-weight: 300;
+        }
+
+        /* ═══ Intro Box ═══ */
+        .intro-box {
+            background: var(--forest-deep);
+            color: var(--text-inverse);
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-medium);
+        }
+
+        [data-theme="dark"] .intro-box {
+            color: var(--text-primary);
+        }
+
+        .intro-box h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6em;
+            margin-bottom: 12px;
+        }
+
+        /* ═══ Sections ═══ */
+        .section {
+            margin-bottom: 60px;
+            scroll-margin-top: 20px;
+        }
+
+        .section-header {
+            background: var(--bg-section);
+            padding: 22px 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 4px solid var(--water-teal);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8em;
+            color: var(--ink-warm);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .section-number {
+            background: var(--water-teal);
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1em;
+            flex-shrink: 0;
+        }
+
+        /* ═══ Detail Box ═══ */
+        .detail-box {
+            background: var(--bg-card);
+            border-left: 4px solid var(--water-teal);
+            padding: 28px;
+            margin: 25px 0;
+            border-radius: 8px;
+            box-shadow: var(--shadow-soft);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .detail-box:hover {
+            box-shadow: var(--shadow-medium);
+        }
+
+        .detail-box h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--water-teal);
+            font-size: 1.4em;
+            margin-bottom: 16px;
+        }
+
+        .detail-box h4 {
+            color: var(--text-secondary);
+            font-size: 1.15em;
+            margin: 20px 0 12px 0;
+        }
+
+        /* ═══ Critical Highlight ═══ */
+        .critical-highlight {
+            background: var(--bg-highlight);
+            border-left: 4px solid var(--gold-accent);
+            padding: 22px;
+            margin: 22px 0;
+            border-radius: 8px;
+        }
+
+        .critical-highlight strong {
+            color: var(--gold-accent);
+            font-size: 1.05em;
+        }
+
+        /* ═══ Code Example ═══ */
+        .code-example {
+            background: var(--bg-code);
+            color: #c9d1d9;
+            padding: 22px;
+            border-radius: 8px;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid var(--border-light);
+        }
+
+        .code-example .comment { color: #7ec699; }
+        .code-example .keyword { color: #e8c170; }
+
+        /* ═══ Numbered List ═══ */
+        .numbered-list {
+            counter-reset: item;
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .numbered-list li {
+            counter-increment: item;
+            margin: 18px 0;
+            padding-left: 48px;
+            position: relative;
+        }
+
+        .numbered-list li::before {
+            content: counter(item);
+            background: var(--water-teal);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        /* ═══ Comparison Table ═══ */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .comparison-table th {
+            background: var(--forest-deep);
+            color: white;
+            padding: 16px 18px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        [data-theme="dark"] .comparison-table th {
+            color: var(--text-inverse);
+        }
+
+        .comparison-table td {
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: top;
+            background: var(--bg-card);
+        }
+
+        .comparison-table tr:nth-child(even) td {
+            background: var(--bg-section);
+        }
+
+        /* ═══ Consideration Card ═══ */
+        .consideration-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 22px;
+            margin: 18px 0;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .consideration-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .consideration-card h4 {
+            color: var(--water-teal);
+            font-size: 1.15em;
+            margin-bottom: 10px;
+        }
+
+        /* ═══ Example Box ═══ */
+        .example-box {
+            background: #f0f7f0;
+            padding: 22px;
+            border-radius: 10px;
+            margin: 22px 0;
+            border-left: 4px solid var(--moss-green);
+        }
+
+        [data-theme="dark"] .example-box {
+            background: #1a2e1a;
+        }
+
+        .example-box h4 {
+            color: var(--moss-green);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15em;
+            margin-bottom: 12px;
+        }
+
+        /* ═══ Warning Box ═══ */
+        .warning-box {
+            background: #fdf5f0;
+            border-left: 4px solid var(--sunset-rose);
+            padding: 22px;
+            margin: 22px 0;
+            border-radius: 10px;
+        }
+
+        [data-theme="dark"] .warning-box {
+            background: #2e1a1a;
+        }
+
+        .warning-box h4 {
+            color: var(--sunset-rose);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15em;
+            margin-bottom: 12px;
+        }
+
+        /* ═══ Key Takeaway ═══ */
+        .key-takeaway {
+            background: var(--forest-deep);
+            color: var(--text-inverse);
+            padding: 30px;
+            border-radius: 12px;
+            margin: 35px 0;
+            box-shadow: var(--shadow-medium);
+        }
+
+        [data-theme="dark"] .key-takeaway {
+            color: var(--text-primary);
+        }
+
+        .key-takeaway h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+
+        /* ═══ Workflow Steps ═══ */
+        .workflow-steps {
+            background: var(--bg-section);
+            padding: 25px;
+            border-radius: 10px;
+            margin: 22px 0;
+        }
+
+        .workflow-step {
+            background: var(--bg-card);
+            border-left: 3px solid var(--water-teal);
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 6px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* ═══ Advantages Grid ═══ */
+        .advantages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+
+        .advantage-card {
+            background: var(--bg-card);
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: var(--shadow-soft);
+            border-top: 3px solid var(--water-teal);
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+        }
+
+        .advantage-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .advantage-card h4 {
+            color: var(--water-teal);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        /* ═══ TOC (inline) ═══ */
+        .toc {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 45px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .toc h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--ink-warm);
+            font-size: 1.5em;
+            margin-bottom: 18px;
+        }
+
+        .toc a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 10px 18px;
+            margin: 6px 0;
+            border-radius: 6px;
+            transition: all 0.25s;
+            border-left: 3px solid transparent;
+            font-size: 0.95em;
+        }
+
+        .toc a:hover {
+            background: rgba(91, 163, 168, 0.08);
+            border-left-color: var(--water-teal);
+            color: var(--water-teal);
+            transform: translateX(4px);
+        }
+
+        /* ═══ Emphasis Pill ═══ */
+        .emphasis {
+            background: linear-gradient(135deg, var(--gold-accent), #c9963e);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        /* ═══ Utility ═══ */
+        ul { margin-left: 28px; margin-top: 12px; }
+        li { margin: 10px 0; line-height: 1.7; }
+        code {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--bg-section);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            border: 1px solid var(--border-light);
+        }
+
+        /* ═══ Floating Buttons ═══ */
+        .theme-toggle,
+        .back-to-top {
+            position: fixed;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            cursor: pointer;
+            box-shadow: var(--shadow-medium);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle { bottom: 80px; }
+        .back-to-top { bottom: 24px; opacity: 0; pointer-events: none; }
+        .back-to-top.visible { opacity: 1; pointer-events: auto; }
+
+        .theme-toggle:hover,
+        .back-to-top:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* ═══ Scroll Animation ═══ */
+        .animate-in {
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .animate-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 1200px) {
+            .sidebar-toc { transform: translateX(-100%); }
+            .sidebar-toc.open { transform: translateX(0); }
+            .sidebar-toggle { display: flex; }
+            .main-content { margin-left: 0; }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .header { padding: 40px 24px 30px; }
+            .container { padding: 20px 18px 40px; }
+            .section-header h2 { font-size: 1.4em; }
+            .advantages-grid { grid-template-columns: 1fr; }
+            .comparison-table { display: block; overflow-x: auto; }
+            .theme-toggle { bottom: 70px; right: 16px; }
+            .back-to-top { right: 16px; }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.5em; }
+            .detail-box, .critical-highlight, .example-box, .warning-box { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle navigation">&#9776;</button>
+
+    <!-- Sidebar TOC -->
+    <nav class="sidebar-toc" id="sidebarToc">
+        <h3>Contents</h3>
+
+        <a href="#stage1" data-section="stage1">1. Single Server Setup</a>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage2">2. Database Separation <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage2">Overview</a>
+                <a href="#s2-sql-vs-nosql">SQL vs NoSQL</a>
+                <a href="#s2-when-nosql">When to Use NoSQL</a>
+            </div>
+        </div>
+
+        <a href="#stage3" data-section="stage3">3. Vertical vs Horizontal</a>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage4">4. Load Balancer <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage4">Overview</a>
+                <a href="#s4-security">Security Improvement</a>
+                <a href="#s4-benefits">Benefits</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage5">5. DB Replication <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage5">Overview</a>
+                <a href="#s5-advantages">Advantages</a>
+                <a href="#s5-failover">Failover Scenarios</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage6">6. Cache Layer <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage6">Overview</a>
+                <a href="#s6-read-through">Read-Through Strategy</a>
+                <a href="#s6-considerations">5 Considerations</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage7">7. CDN <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage7">Overview</a>
+                <a href="#s7-workflow">CDN Workflow</a>
+                <a href="#s7-considerations">4 Considerations</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage8">8. Stateless Web Tier <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage8">Overview</a>
+                <a href="#s8-stateful-problem">Stateful Problems</a>
+                <a href="#s8-stateless-solution">Stateless Solution</a>
+                <a href="#s8-autoscaling">Autoscaling</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage9">9. Multi Data Centers <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage9">Overview</a>
+                <a href="#s9-challenges">Technical Challenges</a>
+            </div>
+        </div>
+
+        <a href="#stage10" data-section="stage10">10. Message Queue</a>
+
+        <a href="#server-vs-webserver" data-section="server-vs-webserver" style="font-size: 0.85em; color: #7E57C2;">🤯 Server vs Web Server</a>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage11">11. Logging & Metrics <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#s11-logging">Logging</a>
+                <a href="#s11-metrics">Metrics</a>
+                <a href="#s11-automation">Automation</a>
+            </div>
+        </div>
+
+        <div class="toc-group">
+            <button class="toc-group-toggle" data-section="stage12">12. DB Sharding <span class="toc-arrow">▶</span></button>
+            <div class="toc-sub">
+                <a href="#stage12">Overview</a>
+                <a href="#s12-vertical">Vertical Scaling</a>
+                <a href="#s12-sharding">Horizontal (Sharding)</a>
+                <a href="#s12-challenges">Challenges</a>
+            </div>
+        </div>
+
+        <a href="#summary" data-section="summary">13. Summary</a>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header">
+            <h1>Chapter 1: Scale From Zero to Millions of Users</h1>
+            <p>Complete Interview-Ready Deep Dive</p>
+        </div>
+
+        <div class="container">
+            <div class="intro-box">
+                <h2>Chapter Mission</h2>
+                <p><strong>This chapter teaches you how to design a system that evolves from supporting a single user to serving millions.</strong> You'll learn the step-by-step journey of continuous refinement and improvement that every large-scale system goes through.</p>
+                <p style="margin-top: 15px;"><strong>Interview Value:</strong> This progression framework is EXACTLY what interviewers want to see. Start simple, identify bottlenecks, scale systematically. After reading this, you'll master a handful of techniques that will help you crack system design interview questions.</p>
+            </div>
+
+            <!-- Table of Contents (inline) -->
+            <div class="toc">
+                <h3>Table of Contents</h3>
+                <a href="#stage1">1. Single Server Setup</a>
+                <a href="#stage2">2. Database Separation</a>
+                <a href="#stage3">3. Vertical vs Horizontal Scaling</a>
+                <a href="#stage4">4. Load Balancer</a>
+                <a href="#stage5">5. Database Replication</a>
+                <a href="#stage6">6. Cache Layer</a>
+                <a href="#stage7">7. Content Delivery Network (CDN)</a>
+                <a href="#stage8">8. Stateless Web Tier</a>
+                <a href="#stage9">9. Multiple Data Centers</a>
+                <a href="#stage10">10. Message Queue</a>
+                <a href="#stage11">11. Logging, Metrics, Automation</a>
+                <a href="#stage12">12. Database Scaling (Sharding)</a>
+                <a href="#summary">13. Summary: Millions of Users and Beyond</a>
+            </div>
+
+            <!-- Stage 1: Single Server Setup -->
+            <div class="section animate-in" id="stage1">
+                <div class="section-header">
+                    <h2><span class="section-number">1</span> Single Server Setup</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Core Principle:</strong> "A journey of a thousand miles begins with a single step, and building a complex system is no different." Everything runs on one server: web app, database, cache, etc.
+                </div>
+
+                <div class="detail-box">
+                    <h3>Request Flow - 4 Steps</h3>
+                    <ul class="numbered-list">
+                        <li><strong>Users access websites through domain names</strong>, such as <code>api.mysite.com</code>. Usually, the Domain Name System (DNS) is a paid service provided by 3rd parties and not hosted by our servers.</li>
+                        <li><strong>Internet Protocol (IP) address is returned to the browser or mobile app.</strong> In the example, IP address <span class="emphasis">15.125.23.214</span> is returned.</li>
+                        <li><strong>Once the IP address is obtained, Hypertext Transfer Protocol (HTTP) requests are sent directly to your web server.</strong></li>
+                        <li><strong>The web server returns HTML pages or JSON response for rendering.</strong></li>
+                    </ul>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Traffic Sources</h3>
+                    <p>The traffic to your web server comes from two sources:</p>
+
+                    <div class="consideration-card">
+                        <h4>Web Application</h4>
+                        <p><strong>It uses a combination of server-side languages</strong> (Java, Python, etc.) to handle business logic, storage, etc., and <strong>client-side languages (HTML and JavaScript) for presentation.</strong></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>Mobile Application</h4>
+                        <p><strong>HTTP protocol is the communication protocol between the mobile app and the web server.</strong> JavaScript Object Notation (JSON) is commonly used API response format to transfer data due to its simplicity.</p>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>JSON Response Example</h4>
+                    <p><strong>GET /users/12</strong> &ndash; Retrieve user object for id = 12</p>
+                    <div class="code-example">
+{
+  "id": 12,
+  "firstName": "John",
+  "lastName": "Smith",
+  "address": {
+    "streetAddress": "21 2nd Street",
+    "city": "New York",
+    "state": "NY",
+    "postalCode": 10021
+  },
+  "phoneNumbers": [
+    "212 555-1234",
+    "646 555-4567"
+  ]
+}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 2: Database Separation -->
+            <div class="section animate-in" id="stage2">
+                <div class="section-header">
+                    <h2><span class="section-number">2</span> Database Separation</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Critical Insight:</strong> <span class="emphasis">With the growth of the user base, one server is not enough, and we need multiple servers: one for web/mobile traffic, the other for the database.</span> <strong>Separating web/mobile traffic (web tier) and database (data tier) servers allows them to be scaled independently.</strong>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s2-sql-vs-nosql">Which Databases to Use?</h3>
+                    <p>You can choose between a <span class="emphasis">traditional relational database and a non-relational database.</span> Let us examine their differences:</p>
+
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Relational Databases (RDBMS/SQL)</th>
+                                <th>Non-Relational Databases (NoSQL)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Examples:</strong> MySQL, Oracle database, PostgreSQL</td>
+                                <td><strong>Examples:</strong> CouchDB, Neo4j, Cassandra, HBase, Amazon DynamoDB</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Structure:</strong> Represent and store data in tables and rows</td>
+                                <td><strong>Categories:</strong> key-value stores, graph stores, column stores, document stores</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Operations:</strong> You can perform join operations using SQL across different database tables</td>
+                                <td><strong>Operations:</strong> Join operations are generally NOT supported in non-relational databases</td>
+                            </tr>
+                            <tr>
+                                <td><strong>History:</strong> Around for over 40 years and historically, they have worked well</td>
+                                <td><strong>Flexibility:</strong> Schema-free, easy to scale horizontally</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s2-when-nosql">When to Use NoSQL?</h3>
+                    <p><strong>For most developers, relational databases are the best option</strong> because they have been around for over 40 years and historically, they have worked well. However, <strong>if relational databases are not suitable for your specific use cases, it is critical to explore beyond relational databases.</strong></p>
+
+                    <p style="margin-top: 20px; font-size: 1.1em;"><strong>Non-relational databases might be the right choice if:</strong></p>
+
+                    <ul>
+                        <li><span class="emphasis">Your application requires super-low latency.</span></li>
+                        <li><span class="emphasis">Your data are unstructured, or you do not have any relational data.</span></li>
+                        <li><span class="emphasis">You only need to serialize and deserialize data (JSON, XML, YAML, etc.).</span></li>
+                        <li><span class="emphasis">You need to store a massive amount of data.</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Stage 3: Vertical vs Horizontal Scaling -->
+            <div class="section animate-in" id="stage3">
+                <div class="section-header">
+                    <h2><span class="section-number">3</span> Vertical vs Horizontal Scaling</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definitions:</strong>
+                    <ul style="margin-top: 15px;">
+                        <li><strong><span class="emphasis">Vertical Scaling (referred to as "scale up"):</span></strong> means the process of adding more power (CPU, RAM, etc.) to your servers.</li>
+                        <li><strong><span class="emphasis">Horizontal Scaling (referred to as "scale-out"):</span></strong> allows you to scale by adding more servers into your pool of resources.</li>
+                    </ul>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Vertical Scaling Analysis</h3>
+
+                    <p><strong>When traffic is low, vertical scaling is a great option</strong>, and the simplicity of vertical scaling is its main advantage. Unfortunately, it comes with serious limitations:</p>
+
+                    <div class="warning-box">
+                        <h4>Vertical Scaling Limitations</h4>
+                        <ul>
+                            <li><span class="emphasis">Vertical scaling has a hard limit. It is impossible to add unlimited CPU and memory to a single server.</span></li>
+                            <li><span class="emphasis">Vertical scaling does not have failover and redundancy. If one server goes down, the website/app goes down with it completely.</span></li>
+                            <li><span class="emphasis">The overall cost of vertical scaling is high. Powerful servers are much more expensive.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Horizontal Scaling Analysis</h3>
+
+                    <p><span class="emphasis">Horizontal scaling is more desirable for large scale applications due to the limitations of vertical scaling.</span></p>
+
+                    <p style="margin-top: 20px;"><strong>In the previous design, users are connected to the web server directly. Users will unable to access the website if the web server is offline.</strong> In another scenario, if many users access the web server simultaneously and it reaches the web server's load limit, users generally experience slower response or fail to connect to the server.</p>
+
+                    <div class="key-takeaway">
+                        <h3>Key Takeaway</h3>
+                        <p><span class="emphasis">A load balancer is the best technique to address these problems.</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 4: Load Balancer -->
+            <div class="section animate-in" id="stage4">
+                <div class="section-header">
+                    <h2><span class="section-number">4</span> Load Balancer</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definition:</strong> <span class="emphasis">A load balancer evenly distributes incoming traffic among web servers that are defined in a load-balanced set.</span>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s4-security">Architecture Details with Specific IPs</h3>
+
+                    <div class="example-box">
+                        <h4>Security Improvement</h4>
+                        <p>As shown in Figure 1-4, <span class="emphasis">users connect to the public IP of the load balancer directly.</span> With this setup, <span class="emphasis">web servers are unreachable directly by clients anymore.</span></p>
+
+                        <p style="margin-top: 15px;"><strong>Specific Configuration:</strong></p>
+                        <ul>
+                            <li><strong>Load Balancer Public IP:</strong> <span class="emphasis">88.88.88.1</span></li>
+                            <li><strong>Server 1 Private IP:</strong> <span class="emphasis">10.0.0.1</span></li>
+                            <li><strong>Server 2 Private IP:</strong> <span class="emphasis">10.0.0.2</span></li>
+                        </ul>
+
+                        <p style="margin-top: 15px;"><span class="emphasis">For better security, private IPs are used for communication between servers. A private IP is an IP address reachable only between servers in the same network; however, it is unreachable over the internet.</span> The load balancer communicates with web servers through private IPs.</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s4-benefits">Benefits of Load Balancer</h3>
+
+                    <p>In Figure 1-4, after a load balancer and a second web server are added, we successfully solved no failover issue and improved the availability of the web tier. Details are explained below:</p>
+
+                    <div class="consideration-card">
+                        <h4>1. Failover Protection</h4>
+                        <p><span class="emphasis">If server 1 goes offline, all the traffic will be routed to server 2. This prevents the website from going offline.</span> We will also add a new healthy web server to the server pool to balance the load.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Handle Traffic Growth</h4>
+                        <p><strong>If the website traffic grows rapidly, and two servers are not enough to handle the traffic</strong>, <span class="emphasis">the load balancer can handle this problem gracefully. You only need to add more servers to the web server pool, and the load balancer automatically starts to send requests to them.</span></p>
+                    </div>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Next Question:</strong> Now the web tier looks good, what about the data tier? <span class="emphasis">The current design has one database, so it does not support failover and redundancy. Database replication is a common technique to address those problems.</span>
+                </div>
+            </div>
+
+            <!-- Stage 5: Database Replication -->
+            <div class="section animate-in" id="stage5">
+                <div class="section-header">
+                    <h2><span class="section-number">5</span> Database Replication</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definition (Wikipedia):</strong> "Database replication can be used in many database management systems, <span class="emphasis">usually with a master/slave relationship between the original (master) and the copies (slaves)."</span>
+                </div>
+
+                <div class="detail-box">
+                    <h3>How Master-Slave Replication Works</h3>
+
+                    <ul>
+                        <li><span class="emphasis">A master database generally only supports write operations.</span></li>
+                        <li><span class="emphasis">A slave database gets copies of the data from the master database and only supports read operations.</span></li>
+                        <li><span class="emphasis">All the data-modifying commands like insert, delete, or update must be sent to the master database.</span></li>
+                        <li><span class="emphasis">Most applications require a much higher ratio of reads to writes; thus, the number of slave databases in a system is usually larger than the number of master databases.</span> Figure 1-5 shows a master database with multiple slave databases.</li>
+                    </ul>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s5-advantages">Advantages of Database Replication</h3>
+
+                    <div class="advantages-grid">
+                        <div class="advantage-card">
+                            <h4>Better Performance</h4>
+                            <p><span class="emphasis">In the master-slave model, all writes and updates happen in master nodes; whereas, read operations are distributed across slave nodes. This model improves performance because it allows more queries to be processed in parallel.</span></p>
+                        </div>
+
+                        <div class="advantage-card">
+                            <h4>Reliability</h4>
+                            <p><strong>If one of your database servers is destroyed by a natural disaster, such as a typhoon or an earthquake</strong>, <span class="emphasis">data is still preserved. You do not need to worry about data loss because data is replicated across multiple locations.</span></p>
+                        </div>
+
+                        <div class="advantage-card">
+                            <h4>High Availability</h4>
+                            <p><span class="emphasis">By replicating data across different locations, your website remains in operation even if a database is offline</span> as you can access data stored in another database server.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s5-failover">Failover Scenarios - What if Databases Go Offline?</h3>
+
+                    <p>In the previous section, we discussed how a load balancer helped to improve system availability. <strong>We ask the same question here: what if one of the databases goes offline?</strong> The architectural design discussed in Figure 1-5 can handle this case:</p>
+
+                    <div class="consideration-card">
+                        <h4>Scenario 1: Slave Database Goes Offline</h4>
+                        <p><strong>If only one slave database is available and it goes offline</strong>, <span class="emphasis">read operations will be directed to the master database temporarily. As soon as the issue is found, a new slave database will replace the old one.</span></p>
+                        <p style="margin-top: 15px;"><strong>In case multiple slave databases are available</strong>, read operations are redirected to other healthy slave databases. A new database server will replace the old one.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>Scenario 2: Master Database Goes Offline</h4>
+                        <p><span class="emphasis">If the master database goes offline, a slave database will be promoted to be the new master. All the database operations will be temporarily executed on the new master database. A new slave database will replace the old one for data replication immediately.</span></p>
+
+                        <div class="warning-box" style="margin-top: 20px;">
+                            <h4>Production Complexity</h4>
+                            <p><strong>In production systems, promoting a new master is more complicated</strong> as <span class="emphasis">the data in a slave database might not be up to date. The missing data needs to be updated by running data recovery scripts.</span></p>
+                            <p style="margin-top: 15px;">Although some other replication methods like <span class="emphasis">multi-masters and circular replication could help</span>, those setups are more complicated; and their discussions are beyond the scope of this book.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>Architecture After Load Balancer + Database Replication</h3>
+                    <p>Figure 1-6 shows the system design after adding the load balancer and database replication. Let us take a look at the design:</p>
+                    <ul style="margin-top: 15px;">
+                        <li><span class="emphasis">A user gets the IP address of the load balancer from DNS.</span></li>
+                        <li>A user connects the load balancer with this IP address.</li>
+                        <li>The HTTP request is routed to either Server 1 or Server 2.</li>
+                        <li><span class="emphasis">A web server reads user data from a slave database.</span></li>
+                        <li><span class="emphasis">A web server routes any data-modifying operations to the master database.</span> This includes write, update, and delete operations.</li>
+                    </ul>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Next Step:</strong> Now, you have a solid understanding of the web and data tiers, <span class="emphasis">it is time to improve the load/response time. This can be done by adding a cache layer and shifting static content (JavaScript/CSS/image/video files) to the content delivery network (CDN).</span>
+                </div>
+            </div>
+
+            <!-- Stage 6: Cache Layer -->
+            <div class="section animate-in" id="stage6">
+                <div class="section-header">
+                    <h2><span class="section-number">6</span> Cache Layer</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definition:</strong> <span class="emphasis">A cache is a temporary storage area that stores the result of expensive responses or frequently accessed data in memory so that subsequent requests are served more quickly.</span>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Why Cache?</h3>
+                    <p>As illustrated in Figure 1-6, every time a new web page loads, one or more database calls are executed to fetch data. <strong>The application performance is greatly affected by calling the database repeatedly. The cache can mitigate this problem.</strong></p>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Cache Tier Architecture</h3>
+
+                    <p><span class="emphasis">The cache tier is a temporary data store layer, much faster than the database.</span> The benefits of having a separate cache tier include:</p>
+                    <ul>
+                        <li><span class="emphasis">Better system performance</span></li>
+                        <li><span class="emphasis">Ability to reduce database workloads</span></li>
+                        <li><span class="emphasis">The ability to scale the cache tier independently</span></li>
+                    </ul>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s6-read-through">Read-Through Cache Strategy</h3>
+
+                    <p>Figure 1-7 shows a possible setup of a cache server. <strong>This caching strategy is called a read-through cache.</strong> Other caching strategies are available depending on the data type, size, and access patterns.</p>
+
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <strong>Step 1:</strong> After receiving a request, <span class="emphasis">a web server first checks if the cache has the available response.</span>
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 2:</strong> If it has, it sends data back to the client.
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 3:</strong> If not, <span class="emphasis">it queries the database, stores the response in cache, and sends it back to the client.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="example-box">
+                    <h4>Memcached API Example</h4>
+                    <p>Interacting with cache servers is simple because most cache servers provide APIs for common programming languages. The following code snippet shows typical Memcached APIs:</p>
+                    <div class="code-example">
+<span class="comment"># Set cache expiration time</span>
+SECONDS = 1
+
+<span class="comment"># Store data in cache with 3600 seconds TTL</span>
+cache.<span class="keyword">set</span>('myKey', 'hi there', 3600 * SECONDS)
+
+<span class="comment"># Retrieve data from cache</span>
+cache.<span class="keyword">get</span>('myKey')
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s6-considerations">Considerations for Using Cache (5 Key Points)</h3>
+
+                    <p><strong>Here are a few considerations for using a cache system:</strong></p>
+
+                    <div class="consideration-card">
+                        <h4>1. When to Use Cache</h4>
+                        <p><span class="emphasis">Consider using cache when data is read frequently but modified infrequently.</span> <strong>Since cached data is stored in volatile memory, a cache server is not ideal for persisting data.</strong></p>
+                        <p style="margin-top: 15px;"><strong>For instance, <span class="emphasis">if a cache server restarts, all the data in memory is lost.</span> Thus, important data should be saved in persistent data stores.</strong></p>
+                        <h4 >    1. Khi nào nên sử dụng Cache (Bộ nhớ đệm) </h4>
+                        <p> Hãy cân nhắc sử dụng cache khi dữ liệu được đọc thường xuyên nhưng ít khi bị thay đổi. Vì dữ liệu trong cache được lưu trữ trên bộ nhớ dễ bay hơi (volatile memory - tức là RAM), một máy chủ cache không phải là nơi lý tưởng để lưu trữ dữ liệu lâu dài (persisting data).</p>
+
+                        <p  style="margin-top: 15px;">Ví dụ, nếu máy chủ cache khởi động lại, tất cả dữ liệu trong bộ nhớ sẽ bị mất sạch. Do đó, những dữ liệu quan trọng nên được lưu trong các kho lưu trữ dữ liệu cố định (persistent data stores - như Database ổ cứng).</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Expiration Policy</h4>
+                        <p><span class="emphasis">It is a good practice to implement an expiration policy. Once cached data is expired, it is removed from the cache.</span> When there is no expiration policy, cached data will be stored in the memory permanently.</p>
+                        <p style="margin-top: 15px;"><span class="emphasis">It is advisable not to make the expiration date too short</span> as this will cause the system to reload data from the database too frequently. Meanwhile, <span class="emphasis">it is advisable not to make the expiration date too long</span> as the data can become stale.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>3. Consistency</h4>
+                        <p><span class="emphasis">This involves keeping the data store and the cache in sync. Inconsistency can happen because data-modifying operations on the data store and cache are not in a single transaction.</span></p>
+                        <p style="margin-top: 15px;"><strong>When scaling across multiple regions</strong>, maintaining consistency between the data store and cache is challenging. For further details, refer to the paper titled "Scaling Memcache at Facebook" published by Facebook.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>4. Mitigating Failures (Single Point of Failure - SPOF)</h4>
+                        <p><span class="emphasis">A single cache server represents a potential single point of failure (SPOF)</span>, defined in Wikipedia as follows: "A single point of failure (SPOF) is a part of a system that, if it fails, will stop the entire system from working."</p>
+                        <p style="margin-top: 15px;"><strong>As a result</strong>, <span class="emphasis">multiple cache servers across different data centers are recommended to avoid SPOF.</span> Another recommended approach is to <span class="emphasis">overprovision the required memory by certain percentages. This provides a buffer as the memory usage increases.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>5. Eviction Policy</h4>
+                        <p><span class="emphasis">Once the cache is full, any requests to add items to the cache might cause existing items to be removed. This is called cache eviction.</span></p>
+                        <p style="margin-top: 15px;"><span class="emphasis">Least-recently-used (LRU) is the most popular cache eviction policy.</span> Other eviction policies, such as <span class="emphasis">Least Frequently Used (LFU) or First in First Out (FIFO)</span>, can be adopted to satisfy different use cases.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage 7: CDN -->
+            <div class="section animate-in" id="stage7">
+                <div class="section-header">
+                    <h2><span class="section-number">7</span> Content Delivery Network (CDN)</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definition:</strong> <span class="emphasis">A CDN is a network of geographically dispersed servers used to deliver static content. CDN servers cache static content like images, videos, CSS, JavaScript files, etc.</span>
+                    <br/>
+                    <strong> Định nghĩa: </strong> <span> Một CDN (Mạng Phân Phối Nội Dung) là một mạng lưới các máy chủ được phân bố rải rác về mặt địa lý, được sử dụng để phân phối nội dung tĩnh. Các máy chủ CDN lưu trữ đệm (cache) các nội dung tĩnh như hình ảnh, video, tệp CSS, tệp JavaScript, v.v.</span>
+                </div>
+
+                <div class="detail-box">
+                    <h3>How CDN Works</h3>
+
+                    <p><strong>Here is how CDN works at the high-level:</strong> <span class="emphasis">when a user visits a website, a CDN server closest to the user will deliver static content. Intuitively, the further users are from CDN servers, the slower the website loads.</span></p>
+
+                    <div class="example-box">
+                        <h4>Geographic Example</h4>
+                        <p>For example, <span class="emphasis">if CDN servers are in San Francisco, users in Los Angeles will get content faster than users in Europe.</span> Figure 1-9 is a great example that shows how CDN improves load time.</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s7-workflow">CDN Workflow - 6 Steps</h3>
+
+                    <p>Figure 1-10 demonstrates the CDN workflow:</p>
+
+                    <div class="workflow-steps">
+                        <div class="workflow-step">
+                            <strong>Step 1:</strong> <span class="emphasis">User A tries to get image.png by using an image URL. The URL's domain is provided by the CDN provider.</span> The following two image URLs are samples used to demonstrate what image URLs look like on Amazon and Akamai CDNs:
+                            <ul style="margin-top: 10px;">
+                                <li><code>https://mysite.cloudfront.net/logo.jpg</code></li>
+                                <li><code>https://mysite.akamai.com/image-manager/img/logo.jpg</code></li>
+                            </ul>
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 2:</strong> <span class="emphasis">If the CDN server does not have image.png in the cache, the CDN server requests the file from the origin</span>, which can be a web server or online storage like Amazon S3.
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 3:</strong> <span class="emphasis">The origin returns image.png to the CDN server, which includes optional HTTP header Time-to-Live (TTL) which describes how long the image is cached.</span>
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 4:</strong> <span class="emphasis">The CDN caches the image and returns it to User A. The image remains cached in the CDN until the TTL expires.</span>
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 5:</strong> <span class="emphasis">User B sends a request to get the same image.</span>
+                        </div>
+                        <div class="workflow-step">
+                            <strong>Step 6:</strong> The image is returned from the cache as long as the TTL has not expired.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s7-considerations">Considerations of Using a CDN (4 Key Points)</h3>
+
+                    <div class="consideration-card">
+                        <h4>1. Cost</h4>
+                        <p><span class="emphasis">CDNs are run by third-party providers, and you are charged for data transfers in and out of the CDN.</span> Caching infrequently used assets provides no significant benefits so you should consider moving them out of the CDN.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Setting an Appropriate Cache Expiry</h4>
+                        <p><strong>For time-sensitive content</strong>, <span class="emphasis">setting a cache expiry time is important. The cache expiry time should neither be too long nor too short.</span></p>
+                        <p style="margin-top: 15px;"><span class="emphasis">If it is too long, the content might no longer be fresh. If it is too short, it can cause repeat reloading of content from origin servers to the CDN.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>3. CDN Fallback</h4>
+                        <p>You should consider how your website/application copes with CDN failure. <span class="emphasis">If there is a temporary CDN outage, clients should be able to detect the problem and request resources from the origin.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>4. Invalidating Files</h4>
+                        <p>You can remove a file from the CDN before it expires by performing one of the following operations:</p>
+                        <ul style="margin-top: 10px;">
+                            <li><span class="emphasis">Invalidate the CDN object using APIs provided by CDN vendors.</span></li>
+                            <li><span class="emphasis">Use object versioning to serve a different version of the object.</span> To version an object, you can add a parameter to the URL, such as a version number. For example: <code>image.png?v=2</code></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>Design After CDN and Cache</h3>
+                    <p>Figure 1-11 shows the design after the CDN and cache are added:</p>
+                    <ol style="margin-top: 15px;">
+                        <li><span class="emphasis">Static assets (JS, CSS, images, etc.,) are no longer served by web servers. They are fetched from the CDN for better performance.</span></li>
+                        <li><span class="emphasis">The database load is lightened by caching data.</span></li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Stage 8: Stateless Web Tier -->
+            <div class="section animate-in" id="stage8">
+                <div class="section-header">
+                    <h2><span class="section-number">8</span> Stateless Web Tier</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Goal:</strong> <span class="emphasis">Now it is time to consider scaling the web tier horizontally. For this, we need to move state (for instance user session data) out of the web tier.</span> <strong>A good practice is to store session data in the persistent storage such as relational database or NoSQL. Each web server in the cluster can access state data from databases. This is called stateless web tier.</strong>
+
+                    <br/><br/>
+                    <strong>🇻🇳 Bản Dịch Tiếng Việt</strong><br/>
+                    <strong>Mục tiêu:</strong> Bây giờ là lúc xem xét việc mở rộng tầng web theo chiều ngang (scaling horizontally). Để làm được điều này, chúng ta cần chuyển trạng thái (state - ví dụ như dữ liệu phiên làm việc của người dùng) ra khỏi tầng web. Một phương pháp hay là lưu trữ dữ liệu phiên (session data) trong các hệ thống lưu trữ lâu dài (persistent storage) như cơ sở dữ liệu quan hệ (relational database) hoặc NoSQL. Mỗi máy chủ web trong cụm (cluster) đều có thể truy cập dữ liệu trạng thái từ các cơ sở dữ liệu này. Điều này được gọi là tầng web phi trạng thái (stateless web tier).
+                </div>
+
+                <div class="example-box">
+                    <h4>💡 Giải Thích Trực Quan: Câu Chuyện Tổng Đài Chăm Sóc Khách Hàng 📞</h4>
+                    <p>Để hiểu khái niệm này, hãy tưởng tượng hệ thống web của bạn giống như một <strong>Tổng đài chăm sóc khách hàng.</strong></p>
+
+                    <h4 style="margin-top: 20px; color: var(--sunset-rose);">1. Hệ thống "Có Trạng Thái" (Stateful) - Vấn đề cần giải quyết ❌</h4>
+                    <p>Hãy tưởng tượng bạn gọi điện đến tổng đài và gặp nhân viên tên <strong>A (Server 1)</strong>. Bạn mất 10 phút để kể cho A nghe toàn bộ vấn đề của mình (đây chính là <span class="emphasis">Session Data / Trạng thái</span>).</p>
+                    <p style="margin-top: 10px;">Đột nhiên, cuộc gọi bị ngắt! 😱 Bạn gọi lại và lần này máy chuyển đến nhân viên tên <strong>B (Server 2)</strong>.</p>
+                    <p style="margin-top: 10px;">Vì nhân viên B không biết bạn là ai và không nhớ những gì bạn đã nói với A, <strong>bạn phải kể lại từ đầu.</strong> Rất bực mình đúng không?</p>
+                    <p style="margin-top: 10px;"><strong>Trong lập trình:</strong> Nếu người dùng đăng nhập thành công ở Server 1 (Server 1 lưu thông tin đăng nhập trong RAM của nó). Khi Load Balancer chuyển người dùng sang Server 2, Server 2 không biết người dùng này là ai, và bắt họ... đăng nhập lại! 🤦‍♂️</p>
+
+                    <h4 style="margin-top: 20px; color: var(--moss-green);">2. Hệ thống "Phi Trạng Thái" (Stateless) - Giải pháp hoàn hảo ✅</h4>
+                    <p>Bây giờ, tổng đài áp dụng một quy trình mới: Lắp đặt một <strong>Hệ thống Máy tính Trung tâm (Database / NoSQL)</strong> 🖥️.</p>
+                    <p style="margin-top: 10px;">Khi bạn gọi cho nhân viên A, A sẽ gõ mọi thông tin của bạn vào hệ thống trung tâm này. Bộ não của A lúc này <span class="emphasis">"trống rỗng" (Stateless - không tự nhớ gì cả)</span>.</p>
+                    <p style="margin-top: 10px;">Cuộc gọi bị ngắt. Bạn gọi lại và gặp nhân viên B. Nhân viên B chỉ cần mở hệ thống trung tâm ra là thấy ngay toàn bộ thông tin của bạn. <strong>Cuộc trò chuyện được tiếp tục một cách mượt mà!</strong> 🎉</p>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s8-stateful-problem">Stateful vs Stateless Server</h3>
+
+                    <p><strong>A stateful server and stateless server has some key differences:</strong></p>
+
+                    <div class="warning-box">
+                        <h4>Stateful Server Problems</h4>
+                        <p><span class="emphasis">A stateful server remembers client data (state) from one request to the next.</span> A stateless server keeps no state information.</p>
+
+                        <p style="margin-top: 20px;"><strong>The Issue:</strong> In Figure 1-12, user A's session data and profile image are stored in Server 1. <strong>To authenticate User A, HTTP requests must be routed to Server 1.</strong> If a request is sent to other servers like Server 2, authentication would fail because Server 2 does not contain User A's session data. <span class="emphasis">Similarly, all HTTP requests from User B must be routed to Server 2; all requests from User C must be sent to Server 3.</span></p>
+
+                        <p style="margin-top: 20px;"><strong><span class="emphasis">The issue is that every request from the same client must be routed to the same server.</span></strong> This can be done with sticky sessions in most load balancers; however, <span class="emphasis">this adds the overhead. Adding or removing servers is much more difficult with this approach. It is also challenging to handle server failures.</span></p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s8-stateless-solution">Stateless Architecture (The Solution)</h3>
+
+                    <p>Figure 1-13 shows the stateless architecture.</p>
+
+                    <div class="example-box">
+                        <h4>How It Works</h4>
+                        <p><span class="emphasis">In this stateless architecture, HTTP requests from users can be sent to any web servers, which fetch state data from a shared data store. State data is stored in a shared data store and kept out of web servers. A stateless system is simpler, more robust, and scalable.</span></p>
+
+                        <p style="margin-top: 20px;"><strong>In Figure 1-14, we move the session data out of the web tier and store them in the persistent data store.</strong> The shared data store could be a relational database, Memcached/Redis, NoSQL, etc. <strong>The NoSQL data store is chosen as it is easy to scale.</strong></p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s8-autoscaling">Autoscaling</h3>
+
+                    <p><span class="emphasis">Autoscaling means adding or removing web servers automatically based on the traffic load. After the state data is removed out of web servers, auto-scaling of the web tier is easily achieved by adding or removing servers based on traffic load.</span></p>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Next Step:</strong> <span class="emphasis">Your website grows rapidly and attracts a significant number of users internationally. To improve availability and provide a better user experience across wider geographical areas, supporting multiple data centers is crucial.</span>
+                </div>
+            </div>
+
+            <!-- Stage 9: Multiple Data Centers -->
+            <div class="section animate-in" id="stage9">
+                <div class="section-header">
+                    <h2><span class="section-number">9</span> Multiple Data Centers</h2>
+                </div>
+
+                <div class="detail-box">
+                    <h3>GeoDNS Routing</h3>
+
+                    <p>Figure 1-15 shows an example setup with two data centers. <strong>In normal operation</strong>, <span class="emphasis">users are geoDNS-routed, also known as geo-routed, to the closest data center</span>, with a split traffic of x% in US-East and (100 &ndash; x)% in US-West.</p>
+
+                    <div class="example-box">
+                        <h4>What is geoDNS?</h4>
+                        <p><span class="emphasis">GeoDNS is a DNS service that allows domain names to be resolved to IP addresses based on the location of a user.</span></p>
+                    </div>
+
+                    <div class="example-box" style="margin-top: 25px;">
+                        <h4>🇻🇳 Data Center là gì? — Giải thích siêu đơn giản</h4>
+                        <p><strong>Định nghĩa chuẩn nhất, ngắn nhất:</strong></p>
+                        <p>Data Center (Trung tâm dữ liệu) đơn giản là <strong>MỘT TÒA NHÀ ĐẶC BIỆT</strong>, được xây ra chỉ để chứa, cắm điện và làm mát cho hàng ngàn cái máy tính (server) đang chạy 24/7. 🏢💻</p>
+
+                        <p style="margin-top: 15px;"><strong>Cách để bạn giải thích cho người khác hiểu ngay lập tức:</strong></p>
+                        <p>Bạn cứ ví von nó là <span class="emphasis">"Một cái khách sạn VIP dành riêng cho máy tính"</span> với 3 đặc điểm cực kỳ đơn giản:</p>
+
+                        <p style="margin-top: 12px;">🏨 <strong>Khách trọ là máy tính:</strong> Thay vì cho người ở, tòa nhà này xếp đầy hàng ngàn cái máy tính. Mọi trang web, hình ảnh, hay ứng dụng mà mọi người xài hàng ngày đều đang "sống" trong những cái máy tính ở đây.</p>
+
+                        <p style="margin-top: 10px;">⚡ <strong>Điện và Mạng là bất tử:</strong> Ở nhà cúp điện hay rớt mạng là xong phim. Nhưng "khách sạn" này có trạm phát điện riêng to đùng và đường cáp quang khổng lồ. Nó đảm bảo các máy tính bên trong <strong>KHÔNG BAO GIỜ</strong> bị tắt.</p>
+
+                        <p style="margin-top: 10px;">❄️ <strong>Lạnh như tủ đông:</strong> Bạn xài 1 cái laptop cả ngày đã thấy nóng rang. Tưởng tượng hàng ngàn cái máy tính chạy hết công suất cùng lúc sẽ dễ bốc cháy cỡ nào. Nên tòa nhà này phải gắn hệ thống máy lạnh công nghiệp thổi vù vù ngày đêm.</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Failover Handling</h3>
+
+                    <p><span class="emphasis">In the event of any significant data center outage, we direct all traffic to a healthy data center.</span> In Figure 1-16, <span class="emphasis">data center 2 (US-West) is offline, and 100% of the traffic is routed to data center 1 (US-East).</span></p>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s9-challenges">Technical Challenges for Multi-Data Center Setup</h3>
+
+                    <p><strong>Several technical challenges must be resolved to achieve multi-data center setup:</strong></p>
+
+                    <div class="consideration-card">
+                        <h4>1. Traffic Redirection</h4>
+                        <p><span class="emphasis">Effective tools are needed to direct traffic to the correct data center. GeoDNS can be used to direct traffic to the nearest data center depending on where a user is located.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Data Synchronization</h4>
+                        <p><span class="emphasis">Users from different regions could use different local databases or caches. In failover cases, traffic might be routed to a data center where data is unavailable. A common strategy is to replicate data across multiple data centers.</span> A previous study shows how Netflix implements asynchronous multi-data center replication.</p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>3. Test and Deployment</h4>
+                        <p><span class="emphasis">With multi-data center setup, it is important to test your website/application at different locations. Automated deployment tools are vital to keep services consistent through all the data centers.</span></p>
+                    </div>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>Next Step: Decouple Components</h3>
+                    <p><strong>To further scale our system</strong>, <span class="emphasis">we need to decouple different components of the system so they can be scaled independently. Messaging queue is a key strategy employed by many real-world distributed systems to solve this problem.</span></p>
+                </div>
+            </div>
+
+            <!-- Stage 10: Message Queue -->
+            <div class="section animate-in" id="stage10">
+                <div class="section-header">
+                    <h2><span class="section-number">10</span> Message Queue</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Definition:</strong> <span class="emphasis">A message queue is a durable component, stored in memory, that supports asynchronous communication.</span> It serves as a buffer and distributes asynchronous requests.
+                </div>
+
+                <div class="detail-box">
+                    <h3>Architecture</h3>
+
+                    <p>The basic architecture of a message queue is simple. <strong>Input services, called producers/publishers, create messages, and publish them to a message queue. Other services or servers, called consumers/subscribers, connect to the queue, and perform actions defined by the messages.</strong> The model is shown in Figure 1-17.</p>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Decoupling Benefits</h3>
+
+                    <p><strong>Decoupling makes the message queue a preferred architecture for building a scalable and reliable application.</strong> With the message queue:</p>
+                    <ul>
+                        <li><span class="emphasis">The producer can post a message to the queue when the consumer is unavailable to process it.</span></li>
+                        <li><span class="emphasis">The consumer can read messages from the queue even when the producer is unavailable.</span></li>
+                    </ul>
+                </div>
+
+                <div class="example-box">
+                    <h4>Use Case: Photo Processing</h4>
+                    <p><strong>Consider the following use case:</strong> <span class="emphasis">your application supports photo customization, including cropping, sharpening, blurring, etc. Those customization tasks take time to complete.</span></p>
+
+                    <p style="margin-top: 15px;"><strong>In Figure 1-18</strong>, web servers publish photo processing jobs to the message queue. Photo processing workers pick up jobs from the message queue and asynchronously perform photo customization tasks.</p>
+
+                    <p style="margin-top: 15px;"><span class="emphasis">The producer and the consumer can be scaled independently. When the size of the queue becomes large, more workers are added to reduce the processing time. However, if the queue is empty most of the time, the number of workers can be reduced.</span></p>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>Updated Design</h3>
+                    <ol style="margin-top: 15px;">
+                        <li><span class="emphasis">The design includes a message queue, which helps to make the system more loosely coupled and failure resilient.</span></li>
+                        <li><span class="emphasis">Logging, monitoring, metrics, and automation tools are included.</span></li>
+                    </ol>
+                </div>
+
+                <div class="example-box" style="margin-top: 25px;">
+                    <h4>🇻🇳 Cách Trả Lời Phỏng Vấn Về Message Queue</h4>
+
+                    <p style="margin-top: 10px;"><strong>🎯 1. The "Elevator Pitch" (Định nghĩa ngắn gọn mở đầu)</strong></p>
+                    <p>Khi interviewer hỏi: <em>"What is a Message Queue?"</em>, bạn hãy mỉm cười và trả lời dõng dạc:</p>
+                    <p style="margin-top: 8px; padding: 12px; background: rgba(91, 163, 168, 0.08); border-radius: 8px;"><em>"In simple terms, a Message Queue is an asynchronous buffer that sits between different parts of a system. It allows services to communicate with each other without having to wait for a direct response."</em> 📦✨</p>
+                    <p style="margin-top: 5px; font-size: 0.9em; color: var(--text-muted);">(Nói đơn giản, Hàng đợi tin nhắn là một bộ đệm bất đồng bộ nằm giữa các phần của hệ thống. Nó cho phép các dịch vụ giao tiếp với nhau mà không cần chờ phản hồi trực tiếp.)</p>
+
+                    <p style="margin-top: 20px;"><strong>🗣️ 2. The "Deep Dive" (Giải thích 3 đặc điểm "ăn tiền")</strong></p>
+                    <p>Sau khi ném câu chốt ở trên, bạn xòe 3 ngón tay ra và diễn giải thêm để ghi điểm tuyệt đối:</p>
+
+                    <p style="margin-top: 12px;">🏃‍♂️💨 <strong>1. Asynchronous Processing (Fire and Forget):</strong><br/>
+                    <em>"The sender (producer) just drops a message into the queue and immediately moves on to other tasks. It doesn't have to stand there and wait."</em><br/>
+                    <span style="font-size: 0.9em; color: var(--text-muted);">(Người gửi chỉ cần thả tin nhắn vào hàng đợi và đi làm việc khác ngay lập tức, không cần đứng chờ.)</span></p>
+
+                    <p style="margin-top: 12px;">🛡️💥 <strong>2. Buffering (Traffic Smoothing):</strong><br/>
+                    <em>"It acts as a shock absorber. If there is a sudden massive spike in traffic, the queue safely stores all the requests so the backend servers (consumers) don't get overwhelmed or crash."</em><br/>
+                    <span style="font-size: 0.9em; color: var(--text-muted);">(Nó hoạt động như một bộ giảm xóc. Nếu có lượng truy cập tăng vọt, hàng đợi sẽ lưu trữ an toàn các yêu cầu để máy chủ backend không bị quá tải hay sập.)</span></p>
+
+                    <p style="margin-top: 12px;">🧩 <strong>3. Decoupling (Tách rời hệ thống):</strong><br/>
+                    <em>"The service sending the message and the service receiving it don't need to know about each other. If the receiving server goes down temporarily, the messages are safely kept in the queue until it comes back online."</em><br/>
+                    <span style="font-size: 0.9em; color: var(--text-muted);">(Dịch vụ gửi và dịch vụ nhận không cần biết nhau. Nếu server nhận bị sập tạm thời, tin nhắn vẫn được giữ an toàn trong queue cho đến khi nó hoạt động lại.)</span></p>
+
+                    <p style="margin-top: 20px;"><strong>📩 3. The Real-World Example (Ví dụ thực tế chốt hạ)</strong></p>
+                    <p>Interviewer cực kỳ thích ứng viên đưa ra được ví dụ. Bạn bồi thêm câu này:</p>
+                    <p style="margin-top: 8px; padding: 12px; background: rgba(126, 168, 126, 0.1); border-radius: 8px;"><em>"For example, in a user registration flow: When a user signs up, the web server quickly saves the user to the database, sends a 'Send Welcome Email' task to the Message Queue, and immediately returns a success screen to the user. A separate worker server will later pick up that task from the queue and actually send the email. The user doesn't have to wait 5 seconds for the email to be sent."</em> 📧✅</p>
+                </div>
+
+                <div style="display: flex; gap: 20px; margin-top: 25px; align-items: stretch; min-height: 750px; margin-left: -250px; margin-right: -250px; width: calc(100% + 500px);">
+                    <!-- Left: Interview Script -->
+                    <div class="example-box" style="flex: 4; overflow-y: auto; margin: 0;">
+                        <h4>🗣️ The Perfect Interview Script: "Where does it sit?"</h4>
+                        <p style="margin-top: 8px;">If the interviewer points at Figure 1-15 and asks, <em>"Where does the Message Queue sit, and why?"</em>, here is exactly what you say:</p>
+
+                        <p style="margin-top: 15px;"><strong>1️⃣ The Setup (The Green Web Servers):</strong></p>
+                        <p style="padding: 10px; background: rgba(91, 163, 168, 0.08); border-radius: 8px;"><em>"In this diagram, the Web Servers (the green boxes) act like the cashiers at a fast-food restaurant. They take requests directly from the Load Balancer. Their primary job is to be extremely fast. If a user wants to read a blog post, the Web Server quickly grabs it from the Cache or Database and returns it instantly."</em> ⚡🍔</p>
+
+                        <p style="margin-top: 15px;"><strong>2️⃣ The Problem (The Heavy Tasks):</strong></p>
+                        <p style="padding: 10px; background: rgba(201, 123, 107, 0.1); border-radius: 8px;"><em>"But what happens if a user uploads a 1GB video to be processed, or triggers an event to send 50,000 emails? If we force those green Web Servers to do that heavy processing, they will freeze up. They won't be able to serve the next customer in line. Our web tier will crash."</em> 💥🐢</p>
+
+                        <p style="margin-top: 15px;"><strong>3️⃣ The Solution (The Message Queue &amp; Workers):</strong></p>
+                        <p style="padding: 10px; background: rgba(126, 168, 126, 0.1); border-radius: 8px;"><em>"This is exactly where the Message Queue comes in. We place the Message Queue deep inside the Data Center, behind the Web Servers, sitting parallel to the Databases."</em> 📦🏢</p>
+                        <p style="margin-top: 8px; padding: 10px; background: rgba(126, 168, 126, 0.1); border-radius: 8px;"><em>"Now, when the Web Server receives that heavy video upload, it doesn't process it. It simply acts as a Producer. It writes a quick ticket—'Please process Video #123'—drops it into the Message Queue, and immediately tells the user 'Upload Successful!' The Web Server is instantly free to help the next user."</em> 🏃‍♂️💨</p>
+
+                        <p style="margin-top: 15px;"><strong>4️⃣ The Backstage Crew (The Consumers):</strong></p>
+                        <p style="padding: 10px; background: rgba(184, 169, 201, 0.15); border-radius: 8px;"><em>"Behind that Queue, we introduce a brand new set of machines called Worker Servers. These act as the Consumers (the kitchen staff in the back). They don't talk to the internet or the Load Balancer at all. They just constantly pull tickets out of the Queue, crunch the heavy data at their own pace, and save the final result into the Database. The Message Queue is the shock absorber sitting between the fast front-end and the heavy-lifting back-end!"</em> ⚙️🛠️</p>
+                    </div>
+
+                    <!-- Right: Architecture Diagram -->
+                    <div style="flex: 5; border: 2px solid var(--border-light); border-radius: 12px; overflow: hidden; box-shadow: var(--shadow-medium); display: flex; flex-direction: column;">
+                        <div style="padding: 12px 16px; background: var(--bg-section); border-bottom: 1px solid var(--border-light);">
+                            <strong>📊 Interactive Architecture Diagram</strong>
+                        </div>
+                        <iframe src="Message-Queue-Visualize.html" style="width: 100%; flex: 1; border: none; background: white;" title="Message Queue Architecture Diagram"></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bonus: Server vs Web Server -->
+            <div class="section animate-in" id="server-vs-webserver">
+                <div class="section-header">
+                    <h2><span class="section-number" style="background: linear-gradient(135deg, #7E57C2, #AB47BC);">🤯</span> "Server" vs "Web Server" — The Naming Chaos</h2>
+                </div>
+
+                <div class="critical-highlight" style="border-left-color: #7E57C2;">
+                    <p>Hey Wiganz! 👋 I completely understand why you are saying "What the f***!" right now! 😂 It is one of the most frustrating, poorly-named things in all of computer science. You have officially hit the classic <strong>"naming things is hard"</strong> wall in software engineering! 🧱</p>
+                    <p style="margin-top: 12px;">To answer your question instantly: <strong>They are BOTH called servers.</strong> The tech industry just got lazy and used the same exact word for the <em>metal box</em> and the <em>worker inside the box</em>. 🤦‍♂️ Let's untangle this right now using your specific AWS Lightsail setup so it makes perfect sense. 🎨</p>
+                </div>
+
+                <div class="detail-box" style="border-left: 4px solid #42A5F5;">
+                    <h3>🏢 1. The AWS Lightsail Instance = The "Server Machine" (The Host)</h3>
+                    <p>Yes, the machine you are renting in the AWS data center with a CPU, memory, and an operating system (like Ubuntu) is a server. Specifically, it is a <strong>Hardware Server</strong> or a <strong>Virtual Machine (VM)</strong>.</p>
+                    <p style="margin-top: 12px; padding: 12px; background: rgba(66, 165, 245, 0.08); border-radius: 8px;">
+                        <strong>🏢 The Analogy:</strong> Think of this as the physical <strong>Restaurant Building</strong>. It provides the electricity, the floors, the kitchen space, and the roof. But a brick building by itself cannot take a customer's order. It just sits there.
+                    </p>
+                </div>
+
+                <div class="detail-box" style="border-left: 4px solid #FF7043;">
+                    <h3>🧑‍🍳 2. Nginx &amp; Gunicorn = The "Web Server Software" (The Programs)</h3>
+                    <p>Inside that AWS Lightsail machine, you install programs like Nginx and Gunicorn. These are <strong>Software Web Servers</strong>. They are just applications (like a video game or a browser) that run <em>inside</em> the machine, listening to the internet ports.</p>
+                    <p style="margin-top: 12px; padding: 12px; background: rgba(255, 112, 67, 0.08); border-radius: 8px;">
+                        <strong>🧑‍🍳 The Analogy:</strong> Think of Nginx as the <strong>Cashier</strong> 💁‍♂️ and Gunicorn as the <strong>Kitchen Manager</strong> 👨‍🍳 working <em>inside</em> the restaurant building. When a user's HTTP request arrives at the building, the building doesn't answer—Nginx (the cashier) answers! Nginx then turns around and hands the ticket to Gunicorn (the manager), who tells your Django code to cook the data.
+                    </p>
+                </div>
+
+                <div class="example-box">
+                    <h4>🤝 How They Work Together</h4>
+                    <p>They need each other to exist!</p>
+                    <ul style="margin-top: 10px;">
+                        <li><strong>Nginx and Gunicorn</strong> (the software) have no brain or memory of their own; they need the AWS Lightsail (the machine) to give them CPU and RAM so they can live.</li>
+                        <li><strong>The AWS Lightsail</strong> (the machine) is completely deaf and mute to the internet until you install Nginx (the software) to listen at the door.</li>
+                    </ul>
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(102, 187, 106, 0.08); border-radius: 8px;">
+                        <p>When an engineer says <strong>"I'm booting up a server,"</strong> they mean the AWS machine.</p>
+                        <p style="margin-top: 6px;">When an engineer says <strong>"The web server crashed,"</strong> they usually mean Nginx stopped working <em>inside</em> the machine.</p>
+                    </div>
+                </div>
+
+                <div class="key-takeaway" style="border-left-color: #AB47BC;">
+                    <h3>🕊️ A Beautiful Spiritual Parallel</h3>
+                    <p>We can actually visualize this perfectly through <strong>1 Corinthians 6:19</strong>:</p>
+                    <blockquote style="margin: 12px 0; padding: 12px 16px; background: rgba(171, 71, 188, 0.06); border-left: 3px solid #AB47BC; border-radius: 0 8px 8px 0; font-style: italic;">
+                        "Or do you not know that your body is a temple of the Holy Spirit within you, whom you have from God?" ✨
+                    </blockquote>
+                    <p>Your AWS Lightsail instance is the <strong>Body</strong> (the physical vessel, the temple, the hardware). But Nginx and Gunicorn are like the <strong>Spirit</strong> dwelling <em>within</em> it. They are the active, living breath that actually communicates with the outside world, receives the requests, and animates your entire BubuDudu application! Without the software living inside it, the AWS machine is just an empty, silent shell. 🙏✨</p>
+                </div>
+            </div>
+
+            <!-- Stage 11: Logging, Metrics, Automation -->
+            <div class="section animate-in" id="stage11">
+                <div class="section-header">
+                    <h2><span class="section-number">11</span> Logging, Metrics, Automation</h2>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Importance:</strong> <strong>When working with a small website that runs on a few servers, logging, metrics, and automation support are good practices but not a necessity. However</strong>, <span class="emphasis">now that your site has grown to serve a large business, investing in those tools is essential.</span>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s11-logging">Logging</h3>
+
+                    <p><span class="emphasis">Monitoring error logs is important because it helps to identify errors and problems in the system.</span> You can <span class="emphasis">monitor error logs at per server level or use tools to aggregate them to a centralized service for easy search and viewing.</span></p>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s11-metrics">Metrics</h3>
+
+                    <p><span class="emphasis">Collecting different types of metrics help us to gain business insights and understand the health status of the system.</span> <strong>Some of the following metrics are useful:</strong></p>
+
+                    <div class="consideration-card">
+                        <h4>1. Host Level Metrics</h4>
+                        <p><span class="emphasis">CPU, Memory, disk I/O, etc.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Aggregated Level Metrics</h4>
+                        <p><span class="emphasis">For example, the performance of the entire database tier, cache tier, etc.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>3. Key Business Metrics</h4>
+                        <p><span class="emphasis">Daily active users, retention, revenue, etc.</span></p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s11-automation">Automation</h3>
+
+                    <p><strong>When a system gets big and complex, we need to build or leverage automation tools to improve productivity.</strong></p>
+                    <ul>
+                        <li><span class="emphasis">Continuous integration is a good practice, in which each code check-in is verified through automation, allowing teams to detect problems early.</span></li>
+                        <li>Besides, <span class="emphasis">automating your build, test, deploy process, etc. could improve developer productivity significantly.</span></li>
+                    </ul>
+                </div>
+
+                <div class="critical-highlight">
+                    <strong>Next Challenge:</strong> As the data grows every day, your database gets more overloaded. It is time to scale the data tier.
+                </div>
+            </div>
+
+            <!-- Stage 12: Database Scaling (Sharding) -->
+            <div class="section animate-in" id="stage12">
+                <div class="section-header">
+                    <h2><span class="section-number">12</span> Database Scaling (Sharding)</h2>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Two Approaches: Vertical vs Horizontal</h3>
+
+                    <p><strong>There are two broad approaches for database scaling:</strong> <span class="emphasis">vertical scaling and horizontal scaling.</span></p>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s12-vertical">Vertical Scaling (Scale Up)</h3>
+
+                    <p><span class="emphasis">Vertical scaling, also known as scaling up, is the scaling by adding more power (CPU, RAM, DISK, etc.) to an existing machine.</span></p>
+
+                    <div class="example-box">
+                        <h4>Real-World Example</h4>
+                        <p><strong>There are some powerful database servers.</strong> <span class="emphasis">According to Amazon Relational Database Service (RDS), you can get a database server with 24 TB of RAM.</span> This kind of powerful database server could store and handle lots of data.</p>
+                        <p style="margin-top: 15px;"><strong>For example</strong>, <span class="emphasis">stackoverflow.com in 2013 had over 10 million monthly unique visitors, but it only had 1 master database.</span></p>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>Vertical Scaling Drawbacks</h4>
+                        <p><span class="emphasis">However, vertical scaling comes with some serious drawbacks:</span></p>
+                        <ul style="margin-top: 15px;">
+                            <li><span class="emphasis">You can add more CPU, RAM, etc. to your database server, but there are hardware limits. If you have a large user base, a single server is not enough.</span></li>
+                            <li><span class="emphasis">Greater risk of single point of failures.</span></li>
+                            <li><span class="emphasis">The overall cost of vertical scaling is high. Powerful servers are much more expensive.</span></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s12-sharding">Horizontal Scaling (Sharding)</h3>
+
+                    <p><span class="emphasis">Horizontal scaling, also known as sharding, is the practice of adding more servers.</span> Figure 1-20 compares vertical scaling with horizontal scaling.</p>
+
+                    <div class="critical-highlight">
+                        <strong>Definition:</strong> <span class="emphasis">Sharding separates large databases into smaller, more easily managed parts called shards. Each shard shares the same schema, though the actual data on each shard is unique to the shard.</span>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3>How Sharding Works</h3>
+
+                    <p>Figure 1-21 shows an example of sharded databases. <span class="emphasis">User data is allocated to a database server based on user IDs. Anytime you access data, a hash function is used to find the corresponding shard.</span></p>
+
+                    <div class="example-box">
+                        <h4>Hash Function Example</h4>
+                        <p><strong>In our example</strong>, <span class="emphasis">user_id % 4</span> is used as the hash function.</p>
+                        <ul style="margin-top: 15px;">
+                            <li><span class="emphasis">If the result equals to 0, shard 0 is used to store and fetch data.</span></li>
+                            <li><span class="emphasis">If the result equals to 1, shard 1 is used.</span></li>
+                            <li>The same logic applies to other shards.</li>
+                        </ul>
+                        <p style="margin-top: 15px;">Figure 1-22 shows the user table in sharded databases.</p>
+                    </div>
+                </div>
+
+                <div class="detail-box">
+                    <h3>Sharding Key (Partition Key)</h3>
+
+                    <p><span class="emphasis">The most important factor to consider when implementing a sharding strategy is the choice of the sharding key. Sharding key (known as a partition key) consists of one or more columns that determine how data is distributed.</span></p>
+
+                    <p style="margin-top: 15px;">As shown in Figure 1-22, "user_id" is the sharding key. <span class="emphasis">A sharding key allows you to retrieve and modify data efficiently by routing database queries to the correct database. When choosing a sharding key, one of the most important criteria is to choose a key that can evenly distributed data.</span></p>
+                </div>
+
+                <div class="detail-box">
+                    <h3 id="s12-challenges">Sharding Challenges</h3>
+
+                    <p><strong>Sharding is a great technique to scale the database but it is far from a perfect solution. It introduces complexities and new challenges to the system:</strong></p>
+
+                    <div class="consideration-card">
+                        <h4>1. Resharding Data</h4>
+                        <p><span class="emphasis">Resharding data is needed when 1) a single shard could no longer hold more data due to rapid growth. 2) Certain shards might experience shard exhaustion faster than others due to uneven data distribution. When shard exhaustion happens, it requires updating the sharding function and moving data around.</span></p>
+                        <p style="margin-top: 15px;"><strong>Solution:</strong> <span class="emphasis">Consistent hashing, which will be discussed in Chapter 5, is a commonly used technique to solve this problem.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>2. Celebrity Problem (Hotspot Key Problem)</h4>
+                        <p><strong>This is also called a hotspot key problem.</strong> <span class="emphasis">Excessive access to a specific shard could cause server overload. Imagine data for Katy Perry, Justin Bieber, and Lady Gaga all end up on the same shard. For social applications, that shard will be overwhelmed with read operations.</span></p>
+                        <p style="margin-top: 15px;"><strong>Solution:</strong> To solve this problem, <span class="emphasis">we may need to allocate a shard for each celebrity. Each shard might even require further partition.</span></p>
+                    </div>
+
+                    <div class="consideration-card">
+                        <h4>3. Join and De-normalization</h4>
+                        <p><span class="emphasis">Once a database has been sharded across multiple servers, it is hard to perform join operations across database shards. A common workaround is to de-normalize the database so that queries can be performed in a single table.</span></p>
+                    </div>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>Implementation</h3>
+                    <p><strong>In Figure 1-23</strong>, <span class="emphasis">we shard databases to support rapidly increasing data traffic. At the same time, some of the non-relational functionalities are moved to a NoSQL data store to reduce the database load.</span></p>
+                </div>
+            </div>
+
+            <!-- Summary Section -->
+            <div class="section animate-in" id="summary">
+                <div class="section-header">
+                    <h2><span class="section-number">13</span> Summary: Millions of Users and Beyond</h2>
+                </div>
+
+                <div class="intro-box">
+                    <h2>The Journey Complete</h2>
+                    <p><strong>Scaling a system is an iterative process.</strong> Iterating on what we have learned in this chapter could get us far. More fine-tuning and new strategies are needed to scale beyond millions of users. For example, you might need to optimize your system and decouple the system to even smaller services.</p>
+                </div>
+
+                <div class="key-takeaway">
+                    <h3>How We Scale to Support Millions of Users - 8 Key Strategies</h3>
+                    <p><strong>All the techniques learned in this chapter should provide a good foundation to tackle new challenges. To conclude this chapter, we provide a summary:</strong></p>
+
+                    <div class="advantages-grid" style="margin-top: 25px;">
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>1. Keep Web Tier Stateless</h4>
+                            <p><span class="emphasis">Move session data out of web servers to shared data store.</span> This enables easy horizontal scaling and auto-scaling.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>2. Build Redundancy at Every Tier</h4>
+                            <p><span class="emphasis">Multiple servers, databases, caches to eliminate SPOF.</span> No single component should cause system-wide failure.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>3. Cache Data as Much as You Can</h4>
+                            <p><span class="emphasis">Reduce database load with cache layer.</span> Read-through cache for frequently accessed, infrequently modified data.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>4. Support Multiple Data Centers</h4>
+                            <p><span class="emphasis">GeoDNS routing, data replication, failover strategy.</span> Better user experience and improved availability.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>5. Host Static Assets in CDN</h4>
+                            <p><span class="emphasis">Deliver content from geographically distributed servers.</span> Images, videos, CSS, JavaScript files served from CDN.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>6. Scale Your Data Tier by Sharding</h4>
+                            <p><span class="emphasis">Horizontal database scaling for massive data.</span> Choose sharding key wisely for even data distribution.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>7. Split Tiers into Individual Services</h4>
+                            <p><span class="emphasis">Decouple components with message queues.</span> Producer and consumer scale independently.</p>
+                        </div>
+
+                        <div class="advantage-card" style="background: var(--bg-card);">
+                            <h4>8. Monitor and Use Automation Tools</h4>
+                            <p><span class="emphasis">Logging, metrics, CI/CD for large-scale operations.</span> Host-level, aggregated, and business metrics.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-box" style="margin-top: 50px;">
+                    <h3>The Iterative Evolution Path for Interviews</h3>
+                    <p><strong>When asked to design a system that scales to millions of users, present this evolution:</strong></p>
+
+                    <div class="workflow-steps">
+                        <div class="workflow-step" style="border-left-color: var(--water-teal);">
+                            <strong>Stage 1:</strong> Single Server &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Can't handle load, no failover</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 2:</strong> Separate Web + DB &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Single web server overloaded</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--water-teal);">
+                            <strong>Stage 3:</strong> Add Load Balancer + Multiple Web Servers &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Database still bottleneck</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 4:</strong> Master-Slave DB Replication &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Repeated DB queries</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--water-teal);">
+                            <strong>Stage 5:</strong> Add Cache Layer &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Static assets slow from web servers</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 6:</strong> Add CDN for Static Content &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Session data on web servers prevents horizontal scaling</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--water-teal);">
+                            <strong>Stage 7:</strong> Stateless Web Tier (Session in Shared Store) &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Single geographic region</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 8:</strong> Multiple Data Centers with GeoDNS &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Tight coupling between components</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--water-teal);">
+                            <strong>Stage 9:</strong> Message Queue for Decoupling &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Can't monitor and debug at scale</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 10:</strong> Add Logging/Metrics/Automation &rarr; <span style="color: var(--sunset-rose);"><strong>Bottleneck:</strong> Database too large for single server</span>
+                        </div>
+                        <div class="workflow-step" style="border-left-color: var(--moss-green);">
+                            <strong>Stage 11:</strong> Shard Database &rarr; <strong style="color: var(--moss-green);">Millions of users supported!</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="detail-box" style="margin-top: 40px;">
+                    <h3>Key Interview Talking Points</h3>
+                    <ul>
+                        <li><strong>Start Simple:</strong> Always begin with single server, identify bottlenecks, scale systematically</li>
+                        <li><strong>Separation of Concerns:</strong> Web tier, data tier, cache tier, CDN - each serves a specific purpose and scales independently</li>
+                        <li><strong>Horizontal > Vertical:</strong> Add more servers, not bigger servers (after a certain point)</li>
+                        <li><strong>Eliminate SPOF:</strong> Redundancy at every layer (multiple web servers, cache servers, databases, data centers)</li>
+                        <li><strong>Stateless Web Tier:</strong> Session data in shared storage (Redis/NoSQL) = easy horizontal scaling and autoscaling</li>
+                        <li><strong>Database Replication:</strong> Master for writes (insert/update/delete), slaves for reads (queries). Most apps have higher read ratio.</li>
+                        <li><strong>Caching Strategy:</strong> Cache frequently read, infrequently modified data. Consider: when to use, expiration policy, consistency, SPOF, eviction policy (LRU)</li>
+                        <li><strong>CDN for Static:</strong> Geo-distributed content delivery for images, videos, CSS, JS. Closer server = faster load.</li>
+                        <li><strong>Multi-DC:</strong> GeoDNS routing + data synchronization + failover. Traffic redirection to nearest/healthy DC.</li>
+                        <li><strong>Asynchronous Processing:</strong> Message queues for decoupling (producer and consumer scale independently)</li>
+                        <li><strong>Sharding:</strong> Partition data across multiple databases using hash function. Choose sharding key carefully for even distribution. Watch for celebrity problem and join limitations.</li>
+                        <li><strong>Observability:</strong> Logging (error tracking), Metrics (host/aggregated/business), Monitoring, Automation (CI/CD)</li>
+                    </ul>
+                </div>
+
+                <div class="key-takeaway" style="margin-top: 50px; background: var(--sunset-rose);">
+                    <h3>Congratulations!</h3>
+                    <p style="font-size: 1.15em; margin-top: 15px;"><strong>You now have a solid foundation for tackling system design interview questions.</strong> You understand how to scale a system from zero to millions of users through iterative improvement and proven architectural patterns.</p>
+                    <p style="margin-top: 20px; font-weight: bold; font-size: 1.05em;">Now give yourself a pat on the back. Good job!</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+    <!-- Back to Top -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">&#8593;</button>
+
+    <script>
+        // ═══ Progress Bar ═══
+        const progressBar = document.getElementById('progressBar');
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+            progressBar.style.width = progress + '%';
+        }
+
+        // ═══ Collapsible Sidebar Groups ═══
+        document.querySelectorAll('.toc-group-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const group = btn.parentElement;
+                group.classList.toggle('open');
+            });
+        });
+
+        // ═══ Sidebar TOC Active Tracking ═══
+        const sections = document.querySelectorAll('.section[id]');
+        const tocParentLinks = document.querySelectorAll('.sidebar-toc > a[data-section]');
+        const tocGroupToggles = document.querySelectorAll('.toc-group-toggle[data-section]');
+
+        const sectionObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Clear all active states
+                    tocParentLinks.forEach(link => link.classList.remove('active'));
+                    tocGroupToggles.forEach(btn => btn.classList.remove('active'));
+
+                    // Activate matching top-level link
+                    const topLink = document.querySelector(`.sidebar-toc > a[data-section="${entry.target.id}"]`);
+                    if (topLink) topLink.classList.add('active');
+
+                    // Activate matching group toggle and auto-expand
+                    const groupBtn = document.querySelector(`.toc-group-toggle[data-section="${entry.target.id}"]`);
+                    if (groupBtn) {
+                        groupBtn.classList.add('active');
+                        groupBtn.parentElement.classList.add('open');
+                    }
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '-10% 0px -80% 0px' });
+
+        sections.forEach(section => sectionObserver.observe(section));
+
+        // Track sub-section links active state
+        const subTargets = document.querySelectorAll('[id^="s"]');
+        const subLinks = document.querySelectorAll('.toc-sub a');
+        const subObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    subLinks.forEach(l => l.classList.remove('active'));
+                    const match = document.querySelector(`.toc-sub a[href="#${entry.target.id}"]`);
+                    if (match) match.classList.add('active');
+                }
+            });
+        }, { threshold: 0.2, rootMargin: '-10% 0px -70% 0px' });
+        subTargets.forEach(el => subObserver.observe(el));
+
+        // Smooth scroll for sidebar and inline TOC links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    // Close sidebar on mobile after clicking
+                    if (window.innerWidth <= 1200) {
+                        document.getElementById('sidebarToc').classList.remove('open');
+                    }
+                }
+            });
+        });
+
+        // ═══ Sidebar Toggle ═══
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarToc = document.getElementById('sidebarToc');
+        sidebarToggle.addEventListener('click', () => {
+            sidebarToc.classList.toggle('open');
+        });
+
+        // ═══ Dark Mode ═══
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('ch1-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ch1-theme', next);
+            themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        });
+
+        // Set initial icon
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            themeToggle.textContent = '\u2600';
+        }
+
+        // ═══ Back to Top ═══
+        const backToTop = document.getElementById('backToTop');
+        function updateBackToTop() {
+            backToTop.classList.toggle('visible', window.scrollY > 500);
+        }
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ═══ Scroll-in Animations ═══
+        const animateObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 80);
+                    animateObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.animate-in').forEach(el => animateObserver.observe(el));
+
+        // ═══ Scroll Listener (debounced) ═══
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateProgress();
+                    updateBackToTop();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // Initial calls
+        updateProgress();
+        updateBackToTop();
+    </script>
+</body>
+</html>

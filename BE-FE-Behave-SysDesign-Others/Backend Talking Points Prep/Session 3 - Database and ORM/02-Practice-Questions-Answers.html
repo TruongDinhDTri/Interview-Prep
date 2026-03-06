@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 3: Practice Questions & Answers — Database & ORM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f7f6f3; --bg-hover: #f1f1ef; --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f; --text-secondary: #787774; --text-muted: #9b9a97;
+            --border: #e3e2de; --border-light: #eeeeec;
+            --accent-blue: #2563eb; --accent-red: #eb5757; --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d; --accent-purple: #9065b0; --accent-orange: #e97f33;
+            --code-bg: #f7f6f3; --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe; --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8; --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0; --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8; --callout-purple-border: #9065b0;
+            --sidebar-width: 260px; --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #191919; --bg-secondary: #202020; --bg-hover: #2c2c2c; --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de; --text-secondary: #9b9a97; --text-muted: #6b6b6b;
+            --border: #333; --border-light: #2a2a2a;
+            --accent-blue: #529cca; --accent-red: #eb5757; --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d; --accent-purple: #b08fd8; --accent-orange: #e97f33;
+            --code-bg: #252525; --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a; --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a; --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28; --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a; --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; font-size: 15px; transition: background 0.3s, color 0.3s; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple)); z-index: 1001; transition: width 0.1s linear; }
+        .page-cover { height: var(--cover-height); background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        [data-theme="dark"] .page-cover { background: linear-gradient(135deg, #1a3a5c 0%, #0a3a4e 100%); }
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease, background 0.3s; }
+        .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
+        .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .sidebar a { display: block; color: var(--text-secondary); text-decoration: none; padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        .main-content { margin-left: var(--sidebar-width); max-width: 900px; padding: 0 60px 80px; }
+        .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
+        .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+        .page-title { font-size: 2.2em; font-weight: 700; margin: 16px 0 8px; line-height: 1.2; letter-spacing: -0.02em; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 32px; }
+        h2 { font-size: 1.5em; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-light); letter-spacing: -0.01em; }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 { font-size: 1.15em; font-weight: 600; margin: 28px 0 12px; }
+        h4 { font-size: 1em; font-weight: 600; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 32px 0; }
+        details { margin: 12px 0; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+        summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--bg-secondary); transition: background 0.2s; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none; font-size: 1em; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.65em; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content { padding: 16px; border-top: 1px solid var(--border-light); }
+        .callout { display: flex; gap: 12px; padding: 16px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; }
+        .callout-emoji { font-size: 1.2em; flex-shrink: 0; line-height: 1.5; }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+        .callout-yellow { background: var(--callout-yellow-bg); border-left-color: var(--callout-yellow-border); }
+        .callout-red { background: var(--callout-red-bg); border-left-color: var(--callout-red-border); }
+        .callout-green { background: var(--callout-green-bg); border-left-color: var(--callout-green-border); }
+        .callout-blue { background: var(--callout-blue-bg); border-left-color: var(--callout-blue-border); }
+        .callout-purple { background: var(--callout-purple-bg); border-left-color: var(--callout-purple-border); }
+        code { font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace; font-size: 0.88em; background: var(--code-inline-bg); padding: 2px 6px; border-radius: 3px; color: var(--accent-red); }
+        pre { background: var(--code-bg); border-radius: 6px; padding: 16px 20px; overflow-x: auto; margin: 12px 0; border: 1px solid var(--border-light); }
+        pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
+        .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .cls { color: #6f42c1; } .op { color: #d73a49; }
+        [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .cls { color: #d2a8ff; } [data-theme="dark"] .op { color: #ff7b72; }
+        .table-wrap { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        blockquote { border-left: 3px solid var(--border); padding: 8px 16px; margin: 12px 0; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 0 4px 4px 0; }
+        blockquote strong { color: var(--text-primary); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 500; margin: 2px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; } .tag-orange { background: #fed7aa; color: #9a3412; } .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; } [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; } [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; } [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; } [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+        .key-phrase { background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%); padding: 0 2px; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+        .step-card { display: flex; gap: 14px; padding: 14px; margin: 8px 0; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+        .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        strong { font-weight: 600; }
+        .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
+        .interview-answer strong { font-style: normal; }
+        .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-blue); margin-bottom: 4px; }
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; }
+            .columns { grid-template-columns: 1fr; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 3 — Practice Q&A</h3>
+    </div>
+    <a href="#q1">Q1: Schema Design</a>
+    <a href="#q2">Q2: Slow Queries</a>
+    <a href="#q3">Q3: Indexing Strategy</a>
+    <a href="#q4">Q4: N+1 Problem</a>
+    <a href="#q5">Q5: Normalization</a>
+    <a href="#q6">Q6: Through Models</a>
+    <a href="#q7">Q7: Migrations</a>
+    <a href="#q8">Q8: Debugging Tools</a>
+    <a href="#summary">Summary</a>
+    <a href="#optimization-hierarchy">Optimization Hierarchy</a>
+    <a href="#practice-strategy">Practice Strategy</a>
+</nav>
+
+<div class="page-cover"></div>
+
+<div class="main-content">
+
+    <div class="breadcrumbs">
+        <a href="../Session 1 - Django DRF Core Concepts/01-Key-Talking-Points.html">Session 1</a>
+        <span>/</span>
+        <a href="../Session 2 - Authentication and Security/01-Key-Talking-Points.html">Session 2</a>
+        <span>/</span>
+        <a href="01-Key-Talking-Points.html">Key Points</a>
+    </div>
+
+    <div class="section-label">Session 3 — Database & ORM</div>
+    <h1 class="page-title">🗣️ Practice Questions & Answers</h1>
+    <p class="page-subtitle"><strong>Instructions:</strong> 1. Read the question. 2. Answer out loud (record yourself if possible). 3. Compare with the "Strong Answer."</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-blue">Database</span>
+        <span class="tag tag-green">ORM</span>
+        <span class="tag tag-orange">Performance</span>
+        <span class="tag tag-purple">Interview</span>
+        <span class="tag tag-gray">Practice</span>
+    </div>
+
+    <!-- ═══ Q1 ═══ -->
+    <h2 id="q1">Q1 (Very Common): "How do you design a database schema?"</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🧠</span>
+        <div class="callout-content">
+            <p><strong>The Concept:</strong> They want to see your <strong>thought process</strong>, not just technical knowledge. Show that you think about business requirements before jumping to tables.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I create tables for each entity and add foreign keys."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer (Step-by-Step):</strong></p>
+            <p><strong>Step 1:</strong> "My process starts with business requirements first, not tables."</p>
+            <p><strong>Step 2:</strong> "First, I identify the core entities and their relationships — whether they're One-to-Many, Many-to-Many, or One-to-One. Then I normalize the schema to reduce redundancy, usually up to 3NF. I choose appropriate data types and constraints — enforcing uniqueness and not-null at the database level. Finally, I look at access patterns. If the system is read-heavy, I selectively denormalize certain fields."</p>
+            <p><strong>Step 3 (Concrete example):</strong> "For example, in a job application system, I would model Users, Companies, Jobs, and Applications as separate tables. Applications act as a join table between Users and Jobs, with its own fields like status and created_at."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>📌 Deep Dive: The Job Application Example</summary>
+        <div class="toggle-content">
+            <p><strong>Requirement:</strong> Users apply for jobs posted by companies.</p>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content"><p><strong>Understand requirements:</strong> User can apply to many jobs, Company posts many jobs, Each application belongs to 1 user + 1 job.</p></div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Identify entities:</strong></p>
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Entity</th><th>Key Fields</th></tr></thead>
+                            <tbody>
+                                <tr><td>User</td><td>id, name, email</td></tr>
+                                <tr><td>Company</td><td>id, name</td></tr>
+                                <tr><td>Job</td><td>id, title, company_id</td></tr>
+                                <tr><td>Application</td><td>id, user_id, job_id, status, created_at</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Design normalized tables:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    email = models.EmailField(unique=<span class="num">True</span>)
+
+<span class="kw">class</span> <span class="cls">Company</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+
+<span class="kw">class</span> <span class="cls">Job</span>(models.Model):
+    title = models.CharField(max_length=<span class="num">200</span>)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+
+<span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)
+    created_at = models.DateTimeField(auto_now_add=<span class="num">True</span>, db_index=<span class="num">True</span>)</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>Apply Normalization:</strong> 1NF: Each field is atomic. 2NF: Application fully depends on user + job combination. 3NF: Company name NOT stored in Application.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>Denormalize if needed:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    application_count = models.IntegerField(default=<span class="num">0</span>)  <span class="cm"># Denormalized</span></code></pre>
+                    <p>"For read-heavy dashboards, I may denormalize aggregated fields for performance."</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q2 ═══ -->
+    <h2 id="q2">Q2: "How do you optimize slow queries?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "I add indexes everywhere and hope it gets faster."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"I follow a 'Measure, Don't Guess' approach:</p>
+            <ol>
+                <li><strong>Identify Bottlenecks:</strong> I use Django Debug Toolbar in development or logging in production to spot slow queries.</li>
+                <li><strong>Analyze Query Plan:</strong> I use <code>EXPLAIN ANALYZE</code> to see if the database is doing full table scans or using indexes efficiently.</li>
+                <li><strong>Fix N+1 Problems:</strong> This is usually the biggest win. I check if loops are triggering multiple queries and fix them with <code>select_related</code> for ForeignKeys and <code>prefetch_related</code> for ManyToMany.</li>
+                <li><strong>Add Indexes:</strong> I ensure columns used in filtering and sorting are indexed.</li>
+                <li><strong>Refactor if Needed:</strong> If the ORM is generating inefficient SQL, I drop down to raw SQL or restructure the query.</li>
+            </ol>
+            <p>I focus on reducing the number of database hits first, because that usually gives the biggest performance improvement."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔍 Deep Dive: N+1 Example</summary>
+        <div class="toggle-content">
+            <p><strong>Scenario:</strong> Admin page displays 100 applications with user names.</p>
+
+            <div class="columns">
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>❌ BAD Code (N+1)</strong></p>
+<pre><code>applications = Application.objects.all()
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)
+    <span class="cm"># Hits DB every iteration!</span></code></pre>
+                        <p>1 + 100 = <strong>101 queries</strong> 💥</p>
+                    </div>
+                </div>
+                <div class="callout callout-green" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>✅ GOOD Code (Fixed)</strong></p>
+<pre><code>applications = Application.objects \
+    .select_related(<span class="str">'user'</span>).all()
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)
+    <span class="cm"># No extra queries!</span></code></pre>
+                        <p><strong>1 query</strong> with JOIN 🚀</p>
+                    </div>
+                </div>
+            </div>
+
+            <h4>🎯 The Optimization Checklist</h4>
+            <ol>
+                <li><strong>Detect</strong> — Log queries, use debug toolbar</li>
+                <li><strong>Reduce query count</strong> — Fix N+1 first</li>
+                <li><strong>Use ORM correctly</strong> — <code>select_related</code>, <code>prefetch_related</code></li>
+                <li><strong>Add indexes</strong> — WHERE / ORDER BY columns</li>
+                <li><strong>Cache if needed</strong> — For expensive, rarely-changing data</li>
+            </ol>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q3 ═══ -->
+    <h2 id="q3">Q3: "Explain your indexing strategy"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "I index all columns to make everything faster."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"I don't index everything because indexes slow down write operations like INSERT and UPDATE. My strategy targets specific columns:</p>
+            <ol>
+                <li><strong>Filtering columns</strong> — Fields frequently used in WHERE clauses, like status or email.</li>
+                <li><strong>Sorting columns</strong> — Fields used in ORDER BY, like created_at.</li>
+                <li><strong>Foreign Keys</strong> — Usually auto-indexed by Django, but I verify them.</li>
+                <li><strong>Composite Indexes</strong> — For queries filtering by multiple columns together.</li>
+            </ol>
+            <p>I avoid indexing low-cardinality columns like gender (M/F) since the database typically ignores them anyway. I design indexes based on real query patterns and usage, not assumptions."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔍 Deep Dive: Index Trade-offs</summary>
+        <div class="toggle-content">
+            <h4>📌 Example Query</h4>
+<pre><code>Application.objects.filter(status=<span class="str">"PENDING"</span>).order_by(<span class="str">"-created_at"</span>)</code></pre>
+
+            <h4>👉 Recommended indexes:</h4>
+<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)
+    created_at = models.DateTimeField(db_index=<span class="num">True</span>)</code></pre>
+
+            <h4>⚖️ Why Not Index Everything?</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Operation</th><th>With Index</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>SELECT (Read)</strong></td><td>✅ Faster</td></tr>
+                        <tr><td><strong>INSERT</strong></td><td>❌ Slower</td></tr>
+                        <tr><td><strong>UPDATE</strong></td><td>❌ Slower</td></tr>
+                        <tr><td><strong>DELETE</strong></td><td>❌ Slower</td></tr>
+                        <tr><td><strong>Storage</strong></td><td>❌ Uses extra space</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Strong Closing Line:</strong> <span class="key-phrase">"I design indexes based on real query patterns and usage, not assumptions."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q4 ═══ -->
+    <h2 id="q4">Q4: "What's the N+1 query problem and how do you solve it?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "It's when you have too many queries. I just cache everything."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"The N+1 problem happens when code fetches a list of parent objects (1 query), then iterates through them to fetch related child objects individually (N queries). For example, loading 100 applications and accessing each user's name would generate 101 queries.</p>
+            <p>I solve it using Django ORM optimizations:</p>
+            <ul>
+                <li><code>select_related()</code> for ForeignKey and OneToOne — creates a SQL JOIN</li>
+                <li><code>prefetch_related()</code> for ManyToMany and reverse FK — does two queries and joins in Python</li>
+            </ul>
+            <p>Fixing N+1 queries is often the fastest way to improve backend performance."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔍 Deep Dive: When to Use Which?</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Relationship Type</th><th>Use</th></tr></thead>
+                    <tbody>
+                        <tr><td>ForeignKey (forward)</td><td><code>select_related()</code></td></tr>
+                        <tr><td>OneToOne</td><td><code>select_related()</code></td></tr>
+                        <tr><td>ManyToMany</td><td><code>prefetch_related()</code></td></tr>
+                        <tr><td>Reverse FK (the "many" side)</td><td><code>prefetch_related()</code></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>✅ select_related Example</h4>
+<pre><code><span class="cm"># Following ForeignKey from Application to User</span>
+applications = Application.objects.select_related(<span class="str">'user'</span>).all()</code></pre>
+            <p><strong>Mechanism:</strong> SQL JOIN in one query</p>
+
+            <h4>✅ prefetch_related Example</h4>
+<pre><code><span class="cm"># Getting all applications for each company (reverse relationship)</span>
+companies = Company.objects.prefetch_related(<span class="str">'job_set__application_set'</span>).all()</code></pre>
+            <p><strong>Mechanism:</strong> 1) Get companies, 2) Get related jobs WHERE company_id IN (...), 3) Get related applications WHERE job_id IN (...), 4) Python joins them in memory.</p>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q5 ═══ -->
+    <h2 id="q5">Q5: "Explain normalization and when you would denormalize"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "Normalization is organizing data. I denormalize when I need speed."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"Normalization is the process of organizing data to reduce redundancy and improve data integrity. I typically normalize up to Third Normal Form:</p>
+            <ul>
+                <li><strong>1NF (Atomic Values):</strong> Each column contains a single value, not lists or arrays.</li>
+                <li><strong>2NF (Full Dependency):</strong> Non-key fields depend on the entire primary key.</li>
+                <li><strong>3NF (No Transitive Dependency):</strong> Non-key fields depend only on the primary key, not on other non-key fields.</li>
+            </ul>
+            <p>However, highly normalized databases can be slow because they require many JOINs. I denormalize selectively in read-heavy systems — for example, storing a <code>comment_count</code> on a Post model instead of running COUNT(*) on every page load. It's always a trade-off: normalization ensures data integrity, denormalization improves read performance but requires maintaining consistency manually."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔍 Deep Dive: Normalization Examples</summary>
+        <div class="toggle-content">
+            <h4>1️⃣ First Normal Form (1NF)</h4>
+            <div class="callout callout-red">
+                <span class="callout-emoji">❌</span>
+                <div class="callout-content">
+                    <p><strong>BAD:</strong></p>
+                    <table><thead><tr><th>user_id</th><th>skills</th></tr></thead><tbody><tr><td>1</td><td>"python,django,react"</td></tr></tbody></table>
+                </div>
+            </div>
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content"><p><strong>GOOD:</strong> Separate Skills table with M2M relationship</p></div>
+            </div>
+
+            <h4>2️⃣ Second Normal Form (2NF)</h4>
+            <div class="callout callout-red">
+                <span class="callout-emoji">❌</span>
+                <div class="callout-content">
+                    <p><strong>BAD (Composite Key Issue):</strong></p>
+                    <table><thead><tr><th>student_id</th><th>course_id</th><th>student_name</th><th>grade</th></tr></thead></table>
+                    <p><code>student_name</code> depends only on <code>student_id</code>, not the full key.</p>
+                </div>
+            </div>
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content"><p><strong>GOOD:</strong> Separate Students and Enrollments tables</p></div>
+            </div>
+
+            <h4>3️⃣ Third Normal Form (3NF)</h4>
+            <div class="callout callout-red">
+                <span class="callout-emoji">❌</span>
+                <div class="callout-content">
+                    <p><strong>BAD:</strong></p>
+                    <table><thead><tr><th>application_id</th><th>company_id</th><th>company_name</th></tr></thead></table>
+                    <p><code>company_name</code> depends on <code>company_id</code> (transitive dependency)</p>
+                </div>
+            </div>
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content"><p><strong>GOOD:</strong> Store <code>company_name</code> only in Company table</p></div>
+            </div>
+
+            <h4>🎯 When to Denormalize</h4>
+            <p><strong>Read-Heavy Systems:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    application_count = models.IntegerField(default=<span class="num">0</span>)  <span class="cm"># Denormalized</span></code></pre>
+
+<pre><code><span class="cm"># Update on write:</span>
+user.application_count = F(<span class="str">'application_count'</span>) + <span class="num">1</span>
+user.save(update_fields=[<span class="str">'application_count'</span>])</code></pre>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q6 ═══ -->
+    <h2 id="q6">Q6: "What are through models and when would you use them?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "Through models are for many-to-many relationships."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"I use through models when the relationship itself has attributes. Django's default ManyToManyField creates a simple join table with just two foreign keys. But often the relationship has its own data.</p>
+            <p>For example, in an education system: A Student enrolls in a Course. But the enrollment has its own properties: enrolled_date, grade, status. These fields don't belong to Student or Course — they describe the relationship.</p>
+            <p>The through model (Enrollment) stores these relationship-specific fields, enabling queries like 'find all students who enrolled after January with grade A'."</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔍 Deep Dive: Through Model Example</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">class</span> <span class="cls">Student</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">100</span>)
+    courses = models.ManyToManyField(<span class="str">'Course'</span>, through=<span class="str">'Enrollment'</span>)
+
+<span class="kw">class</span> <span class="cls">Course</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+
+<span class="kw">class</span> <span class="cls">Enrollment</span>(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+
+    <span class="cm"># These fields are why we need through model!</span>
+    enrolled_date = models.DateField()
+    grade = models.CharField(max_length=<span class="num">2</span>)
+    status = models.CharField(max_length=<span class="num">20</span>, default=<span class="str">'ACTIVE'</span>)
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        unique_together = [<span class="str">'student'</span>, <span class="str">'course'</span>]</code></pre>
+
+            <h4>🧠 When to Use Through Models</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Scenario</th><th>Through Model?</th></tr></thead>
+                    <tbody>
+                        <tr><td>Simple link (User ↔ Role)</td><td>❌ Default M2M is fine</td></tr>
+                        <tr><td>Need timestamps</td><td>✅ Yes</td></tr>
+                        <tr><td>Need status/metadata</td><td>✅ Yes</td></tr>
+                        <tr><td>Need to query by relationship properties</td><td>✅ Yes</td></tr>
+                        <tr><td>Relationship has business logic</td><td>✅ Yes</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══ Q7 ═══ -->
+    <h2 id="q7">Q7: "How do you handle database migrations in production?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "I just run migrate on the server."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"I handle migrations carefully because they can cause downtime or data loss. My process:</p>
+            <ol>
+                <li><strong>Review the migration file</strong> — Check what SQL will be generated</li>
+                <li><strong>Test on staging</strong> — Run migrations on a copy of production data</li>
+                <li><strong>Backwards compatibility</strong> — Ensure old code works with new schema during deployment</li>
+                <li><strong>Batch large changes</strong> — Split big migrations into smaller, safer steps</li>
+                <li><strong>Backup first</strong> — Always have a rollback plan</li>
+            </ol>
+            <p>For zero-downtime deployments, I follow the expand-contract pattern: First deploy: Add new column (expand). Second deploy: Migrate data and update code. Third deploy: Remove old column (contract)."</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══ Q8 ═══ -->
+    <h2 id="q8">Q8: "What tools do you use for database debugging?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content"><p><strong>Weak Answer:</strong> "I just print queries."</p></div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Strong Answer:</strong></p>
+            <p>"I use different tools for different environments:</p>
+            <p><strong>Development:</strong></p>
+            <ul>
+                <li><strong>Django Debug Toolbar</strong> — Shows all queries, timing, and duplicates per request</li>
+                <li><strong>django-extensions</strong> — <code>shell_plus --print-sql</code> shows queries as you work</li>
+            </ul>
+            <p><strong>Production:</strong></p>
+            <ul>
+                <li><strong>django-silk</strong> — Request profiling without impacting performance</li>
+                <li><strong>Database slow query logs</strong> — Identify queries taking too long</li>
+            </ul>
+            <p><strong>Query Analysis:</strong></p>
+            <ul>
+                <li><strong>EXPLAIN ANALYZE</strong> — See the query execution plan</li>
+                <li><strong>pg_stat_statements</strong> (PostgreSQL) — Track most expensive queries</li>
+            </ul>
+            <p><strong>Quick debugging:</strong></p>
+<pre><code><span class="kw">from</span> django.db <span class="kw">import</span> connection
+print(len(connection.queries))  <span class="cm"># Query count</span></code></pre>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══ SUMMARY ═══ -->
+    <h2 id="summary">Summary: Key Phrases to Remember</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Question</th><th>Key Phrase</th></tr></thead>
+            <tbody>
+                <tr><td>Schema design</td><td>"Business requirements first, then entities, then normalize, then optimize"</td></tr>
+                <tr><td>Slow queries</td><td>"Measure, don't guess. Fix N+1 first, then index"</td></tr>
+                <tr><td>Indexing</td><td>"Index what you filter, sort, and join — but don't over-index"</td></tr>
+                <tr><td>N+1 problem</td><td>"select_related for FK/O2O, prefetch_related for M2M/reverse"</td></tr>
+                <tr><td>Normalization</td><td>"Normalize first, denormalize when needed"</td></tr>
+                <tr><td>Through models</td><td>"Use when the relationship itself has attributes"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <!-- ═══ OPTIMIZATION HIERARCHY ═══ -->
+    <h2 id="optimization-hierarchy">🧠 Mental Model: The Database Optimization Hierarchy</h2>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content"><p><strong>Fix N+1 queries</strong> → Biggest impact, easiest win</p></div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content"><p><strong>Add strategic indexes</strong> → Target WHERE/ORDER BY/JOIN</p></div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content"><p><strong>Optimize queries</strong> → Use .only(), .defer(), annotations</p></div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content"><p><strong>Denormalize</strong> → Trade-off for read-heavy systems</p></div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content"><p><strong>Cache</strong> → Last resort for expensive operations</p></div>
+    </div>
+
+    <hr>
+
+    <!-- ═══ PRACTICE STRATEGY ═══ -->
+    <h2 id="practice-strategy">🎯 Practice Strategy</h2>
+
+    <details>
+        <summary>Phase 1: Read & Understand (Week 1)</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>Read each question and strong answer 3 times</li>
+                <li>Highlight key phrases</li>
+                <li>Understand the "why" behind each answer</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Phase 2: Practice Out Loud (Week 2)</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>Answer each question out loud without looking</li>
+                <li>Record yourself</li>
+                <li>Compare with strong answer</li>
+                <li>Identify gaps</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Phase 3: Drill Down (Week 3)</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>Practice the "deep dive" sections</li>
+                <li>Anticipate follow-up questions</li>
+                <li>Be ready to explain at any depth level</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>Phase 4: Mock Interviews (Week 4)</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>Have someone ask you these questions randomly</li>
+                <li>Practice transitioning between topics</li>
+                <li>Time yourself (aim for 2-3 min per answer)</li>
+            </ul>
+        </div>
+    </details>
+
+    <hr>
+
+    <h2>🔥 Final Tips</h2>
+
+    <ol>
+        <li><strong>Don't overtalk</strong> — Answer the question, then stop. Let them ask follow-ups.</li>
+        <li><strong>Use concrete examples</strong> — "In my project, I used..." makes it real.</li>
+        <li><strong>Show trade-offs</strong> — "I chose X over Y because..." shows you think deeply.</li>
+        <li><strong>Be honest</strong> — If you don't know something, say "I haven't worked with that yet, but I understand the concept is..."</li>
+        <li><strong>Connect to experience</strong> — "When I built my API, I had to solve this exact problem..."</li>
+    </ol>
+
+    <blockquote>
+        <p><em>"The plans of the diligent lead surely to abundance." — Proverbs 21:5</em> 🌿</p>
+    </blockquote>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">💪</span>
+        <div class="callout-content">
+            <p>Good luck! You're going to crush these interviews! 🔥</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

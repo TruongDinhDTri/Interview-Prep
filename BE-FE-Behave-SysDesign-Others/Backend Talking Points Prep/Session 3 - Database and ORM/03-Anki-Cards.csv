@@ -1,0 +1,85 @@
+Question,Answer
+What is the correct order for database schema design?,"1) Business Requirements → 2) Identify Entities & Relationships → 3) Normalize (1NF-3NF) → 4) Choose Data Types & Constraints → 5) Optimize/Denormalize if needed"
+What are the three types of entity relationships?,"One-to-One (User ↔ Profile), One-to-Many (Company → Jobs), Many-to-Many (Users ↔ Courses)"
+How do you implement One-to-Many in Django?,ForeignKey on the ""many"" side. Example: Job has ForeignKey to Company because one Company has many Jobs.
+What is the interview opening for schema design?,"""My process starts with business requirements first, not tables. I identify entities and relationships, normalize up to 3NF, then selectively denormalize for performance."""
+What is First Normal Form (1NF)?,"Each column should contain atomic (indivisible) values. No arrays, no lists, no comma-separated values in a single field."
+What is the violation of 1NF?,"Storing multiple values in one field. Example: skills = ""python,django,react"" is BAD. Use a separate Skill table with M2M relationship."
+What is Second Normal Form (2NF)?,"Non-key attributes must depend on the ENTIRE primary key. Relevant with composite primary keys. No partial dependencies."
+What is Third Normal Form (3NF)?,"Non-key attributes should depend ONLY on the primary key, not on other non-key fields. No transitive dependencies."
+Give an example of 3NF violation.,"Storing company_name in Application table when it depends on company_id. Solution: Store company_name only in Company table, join when needed."
+When should you denormalize?,"For read-heavy systems. Example: Adding application_count to User table instead of running COUNT(*) on every dashboard load."
+What is the trade-off of denormalization?,"Faster reads but slower writes. Must maintain data consistency manually. Example: update application_count whenever applications change."
+What is the N+1 query problem?,"1 query fetches a list of parent objects, then N additional queries fetch related data for each parent. Total = 1 + N queries."
+How many queries does N+1 generate for 100 items?,101 queries. 1 query for the list + 100 queries for related data.
+What is the code example of N+1 problem?,"""applications = Application.objects.all(); for app in applications: print(app.user.name)"" — hits DB every loop iteration."
+What is select_related() used for?,ForeignKey and OneToOne relationships. Creates a SQL JOIN to fetch related objects in a single query.
+What is the mechanism of select_related()?,SQL JOIN — combines tables in one database query. Example: SELECT applications.* users.* FROM applications INNER JOIN users...
+What is prefetch_related() used for?,ManyToMany and reverse ForeignKey relationships. Does 2 queries and joins results in Python.
+What is the mechanism of prefetch_related()?,2 queries: 1) Get parent objects, 2) Get children with WHERE id IN (...). Python joins them in memory.
+When to use select_related vs prefetch_related?,"select_related: Forward FK/O2O (following a ForeignKey). prefetch_related: M2M/Reverse FK (getting a list of related objects)."
+What is the interview one-liner for N+1?,"""The N+1 problem happens when code fetches a list then iterates to fetch related data. I fix it with select_related for FK and prefetch_related for M2M."""
+What is the key phrase for fixing performance?,"""Fixing N+1 queries is often the fastest way to improve backend performance."""
+What is the query optimization process?,"1) Detect (logs, toolbar) → 2) Analyze (EXPLAIN) → 3) Fix N+1 → 4) Add Indexes → 5) Refactor → 6) Cache"
+What tool shows queries in Django development?,Django Debug Toolbar — shows all queries per request with timing and duplicates.
+What SQL command shows query execution plan?,EXPLAIN ANALYZE — shows if database is doing full table scan or using indexes.
+What indicates a bad query plan in EXPLAIN?,"Sequential Scan (Seq Scan) = full table scan = slow. Index Scan = using index = fast."
+When should you add a database index?,"1) Fields in WHERE clauses (filtering), 2) Fields in ORDER BY (sorting), 3) Fields in JOIN conditions, 4) Fields that need uniqueness"
+How do you add an index in Django?,"db_index=True on the field. Example: status = models.CharField(max_length=20, db_index=True)"
+What is a composite index?,"An index on multiple columns together. Useful for queries filtering on multiple fields like status='active' AND created_at > date."
+What is the trade-off of indexes?,"Faster reads but slower writes. Each INSERT/UPDATE/DELETE must update the index. Uses extra storage."
+Why shouldn't you index low-cardinality columns?,"Columns with few unique values (like gender M/F) don't benefit from indexes — database ignores them because scanning is just as fast."
+What is the indexing strategy key phrase?,"""I index fields used in WHERE, ORDER BY, and JOIN. I design indexes based on real query patterns, not assumptions."""
+What is a through model?,"An explicit intermediate model for ManyToMany relationships that stores additional data about the relationship itself."
+When should you use a through model?,"When the relationship has its own attributes. Example: Enrollment stores enrolled_date and grade for Student ↔ Course relationship."
+What fields does a through model contain?,"ForeignKeys to both related models PLUS relationship-specific fields. Example: student_id, course_id, enrolled_date, grade, status."
+Give a real-world through model example.,"OrderItem: order_id, product_id, quantity, price_at_time. The quantity belongs to the relationship, not Product or Order."
+How do you define a through model in Django?,"ManyToManyField with through parameter: courses = models.ManyToManyField('Course', through='Enrollment')"
+What is the through model interview phrase?,"""I use through models when the relationship itself has attributes like timestamps, status, or metadata."""
+What does .only() do in Django ORM?,Fetches only specified columns. Example: User.objects.only('id', 'email') — doesn't load other fields.
+What does .defer() do in Django ORM?,Excludes specified columns from the query. Example: User.objects.defer('profile_image') — excludes heavy fields.
+What does .values() do in Django ORM?,Returns dictionaries instead of model instances with only specified fields. More memory efficient for read-only operations.
+What is the annotate() method used for?,"Adding computed fields. Example: Company.objects.annotate(job_count=Count('job')) adds job_count to each Company."
+What is F() expression used for?,Reference model field values in queries. Example: F('application_count') + 1 for atomic updates without race conditions.
+What is the database optimization hierarchy?,"1) Fix N+1 (biggest impact) → 2) Add indexes → 3) Optimize queries → 4) Denormalize → 5) Cache (last resort)"
+What are Django's automatic indexes?,ForeignKey fields are automatically indexed. unique=True fields are automatically indexed.
+How do you create a composite index in Django Meta?,"class Meta: indexes = [models.Index(fields=['status', 'created_at'])]"
+What is a partial index?,"An index that only includes rows matching a condition. Example: Index only PENDING applications, not all applications."
+How do you create a partial index in Django?,"models.Index(fields=['created_at'], condition=Q(status='PENDING'))"
+What is unique_together in Django Meta?,"Ensures combination of fields is unique. Example: unique_together = ['student', 'course'] prevents duplicate enrollments."
+What replaced unique_together in newer Django?,UniqueConstraint in Meta.constraints. Example: UniqueConstraint(fields=['student', 'course'], name='unique_enrollment')
+How do you handle migrations in production?,"1) Review migration file, 2) Test on staging, 3) Ensure backwards compatibility, 4) Backup first, 5) Use expand-contract pattern"
+What is the expand-contract migration pattern?,"Deploy 1: Add new column (expand). Deploy 2: Migrate data + update code. Deploy 3: Remove old column (contract). Enables zero-downtime."
+What does on_delete=models.CASCADE mean?,When the referenced object is deleted, also delete the objects that have references to it.
+What does on_delete=models.SET_NULL mean?,When the referenced object is deleted, set the foreign key to NULL. Field must have null=True.
+What does on_delete=models.PROTECT mean?,Prevent deletion of the referenced object if there are related objects. Raises ProtectedError.
+What is the mental model for normalization?,"""Normalize first, denormalize when needed"" — start with data integrity, optimize for reads only when necessary."
+What is the mental model for query optimization?,"""Measure, don't guess"" — use tools to identify actual bottlenecks before optimizing."
+What is the senior signal for indexing?,"""Indexing is a trade-off between read performance and write cost. I design indexes based on real query patterns, not assumptions."""
+What query count check can you do in Django?,"from django.db import connection; print(len(connection.queries)) — shows total queries executed."
+What is django-silk used for?,Request profiling in production. Shows queries and performance without impacting application significantly.
+What is pg_stat_statements?,PostgreSQL extension that tracks execution statistics of SQL statements. Identifies most expensive queries.
+How does select_related handle nested relationships?,"Use double underscore: select_related('job__company') follows Job → Company in one JOIN."
+How does prefetch_related handle nested relationships?,"Use double underscore: prefetch_related('job_set__application_set') prefetches multiple levels."
+What is Prefetch object used for?,Custom prefetch queries with filtering/ordering. Example: Prefetch('applications', queryset=Application.objects.filter(status='PENDING'))
+What does select_related return for missing FK?,Returns None for the related field if the ForeignKey is null. No error.
+What's the difference between null=True and blank=True?,"null=True: Database allows NULL. blank=True: Form validation allows empty. For strings, use only blank=True (empty string vs NULL)."
+What is the key phrase for database debugging?,"""I use Django Debug Toolbar in development, EXPLAIN ANALYZE for query plans, and django-silk for production profiling."""
+What is database connection pooling?,Reusing database connections instead of creating new ones. Reduces overhead. Use django-db-connection-pool or PgBouncer.
+What is the interview answer for schema design with example?,"""For example, in a job application system, I model Users, Companies, Jobs, and Applications as separate tables. Applications act as a join table with its own fields like status and created_at. I normalize to avoid duplication and denormalize aggregated fields when needed."""
+What are the 3 questions to ask when designing schema?,1) What data needs to be stored? 2) How will the data be accessed? 3) What are the relationships between entities?
+What is referential integrity?,Database enforces that ForeignKey values must exist in the referenced table. Prevents orphan records.
+Why use DecimalField for money instead of FloatField?,FloatField has precision issues with decimal operations. DecimalField stores exact decimal values. Use max_digits and decimal_places.
+What is auto_now_add vs auto_now?,"auto_now_add: Set timestamp on creation only. auto_now: Update timestamp on every save."
+What is the default ordering in Django?,"Unordered (database order). Set class Meta: ordering = ['-created_at'] for consistent default ordering."
+How do you make a field required at database level?,"Set null=False (default) and blank=False. The field must have a value."
+What is database-level validation vs Django validation?,"Database constraints (unique, not null) are enforced by DB engine. Django validation happens in Python. Both layers are important."
+What ORM method forces evaluation of a queryset?,"list(), len(), bool(), iteration, slicing with step, repr(), or calling .count()/.exists()"
+What is queryset lazy evaluation?,Querysets don't hit the database until evaluated. Allows chaining filters efficiently without multiple DB hits.
+What is the exists() method used for?,Efficiently checks if any records match. Returns boolean. More efficient than bool(queryset) or queryset.count() > 0.
+What is bulk_create() used for?,Insert multiple objects efficiently in a single query. Example: Model.objects.bulk_create([obj1, obj2, obj3])
+What is bulk_update() used for?,Update multiple objects efficiently. Example: Model.objects.bulk_update(objects_list, ['field1', 'field2'])
+What is the downside of bulk operations?,Signals and custom save() methods are NOT called. Use when you need raw performance and don't need those features.
+What is database transaction in Django?,Atomic operation where all queries succeed or all fail. Use @transaction.atomic decorator or with transaction.atomic(): block.
+When should you use select_for_update()?,When you need to lock rows to prevent race conditions. Used inside a transaction for critical updates.
+What is the closing phrase for query optimization?,"""I focus on reducing the number of database hits first, because that usually gives the biggest performance improvement."""

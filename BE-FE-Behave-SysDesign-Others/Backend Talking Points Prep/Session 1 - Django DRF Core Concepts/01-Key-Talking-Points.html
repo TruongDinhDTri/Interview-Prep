@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 1: Key Talking Points — Django/DRF Core Concepts</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           NOTION-STYLE CLEAN DESIGN SYSTEM
+           ═══════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-muted: #9b9a97;
+            --border: #e3e2de;
+            --border-light: #eeeeec;
+            --accent-blue: #2563eb;
+            --accent-red: #eb5757;
+            --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0;
+            --accent-orange: #e97f33;
+            --code-bg: #f7f6f3;
+            --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe;
+            --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0;
+            --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8;
+            --callout-purple-border: #9065b0;
+            --sidebar-width: 260px;
+            --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #191919;
+            --bg-secondary: #202020;
+            --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de;
+            --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b;
+            --border: #333;
+            --border-light: #2a2a2a;
+            --accent-blue: #529cca;
+            --accent-red: #eb5757;
+            --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8;
+            --accent-orange: #e97f33;
+            --code-bg: #252525;
+            --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a;
+            --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28;
+            --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a;
+            --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            z-index: 1001;
+            transition: width 0.1s linear;
+        }
+
+        /* ═══ Page Cover ═══ */
+        .page-cover {
+            height: var(--cover-height);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+        [data-theme="dark"] .page-cover {
+            background: linear-gradient(135deg, #2d3561 0%, #3d2b5a 100%);
+        }
+
+        /* ═══ Sidebar ═══ */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .sidebar-header {
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 8px;
+        }
+        .sidebar-header h3 {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        .sidebar a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 16px 6px 20px;
+            font-size: 0.82em;
+            font-weight: 400;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .sidebar a:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        .sidebar a.active {
+            color: var(--accent-blue);
+            font-weight: 500;
+            border-left-color: var(--accent-blue);
+            background: rgba(37,99,235,0.04);
+        }
+
+        /* ═══ Main Content ═══ */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            max-width: 900px;
+            padding: 0 60px 80px;
+        }
+
+        /* ═══ Breadcrumbs ═══ */
+        .breadcrumbs {
+            padding: 16px 0 8px;
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+        .breadcrumbs a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+
+        /* ═══ Page Title ═══ */
+        .page-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 16px 0 8px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05em;
+            margin-bottom: 32px;
+        }
+
+        /* ═══ Headings ═══ */
+        h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 48px 0 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            letter-spacing: -0.01em;
+        }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            color: var(--text-primary);
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        /* ═══ Paragraph & Lists ═══ */
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+
+        /* ═══ Divider ═══ */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 32px 0;
+        }
+
+        /* ═══ Toggle Blocks (details/summary) ═══ */
+        details {
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        summary {
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            transition: background 0.2s;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            font-size: 1em;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: '▶';
+            font-size: 0.65em;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* ═══ Callout Boxes ═══ */
+        .callout {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid;
+        }
+        .callout-emoji {
+            font-size: 1.2em;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+
+        .callout-yellow {
+            background: var(--callout-yellow-bg);
+            border-left-color: var(--callout-yellow-border);
+        }
+        .callout-red {
+            background: var(--callout-red-bg);
+            border-left-color: var(--callout-red-border);
+        }
+        .callout-green {
+            background: var(--callout-green-bg);
+            border-left-color: var(--callout-green-border);
+        }
+        .callout-blue {
+            background: var(--callout-blue-bg);
+            border-left-color: var(--callout-blue-border);
+        }
+        .callout-purple {
+            background: var(--callout-purple-bg);
+            border-left-color: var(--callout-purple-border);
+        }
+
+        /* ═══ Inline Code ═══ */
+        code {
+            font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-red);
+        }
+
+        /* ═══ Code Blocks ═══ */
+        pre {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* Syntax highlighting */
+        .kw { color: #d73a49; } /* keyword */
+        .fn { color: #6f42c1; } /* function */
+        .str { color: #032f62; } /* string */
+        .cm { color: #6a737d; font-style: italic; } /* comment */
+        .num { color: #005cc5; } /* number */
+        .dec { color: #e36209; } /* decorator */
+        .cls { color: #6f42c1; } /* class */
+        .op { color: #d73a49; } /* operator */
+        [data-theme="dark"] .kw { color: #ff7b72; }
+        [data-theme="dark"] .fn { color: #d2a8ff; }
+        [data-theme="dark"] .str { color: #a5d6ff; }
+        [data-theme="dark"] .cm { color: #8b949e; }
+        [data-theme="dark"] .num { color: #79c0ff; }
+        [data-theme="dark"] .dec { color: #ffa657; }
+        [data-theme="dark"] .cls { color: #d2a8ff; }
+        [data-theme="dark"] .op { color: #ff7b72; }
+
+        /* ═══ Tables ═══ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ═══ Quote Block ═══ */
+        blockquote {
+            border-left: 3px solid var(--border);
+            padding: 8px 16px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong { color: var(--text-primary); }
+
+        /* ═══ Tag Pills ═══ */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.78em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+        .tag-green { background: #d1fae5; color: #065f46; }
+        .tag-purple { background: #ede9fe; color: #5b21b6; }
+        .tag-orange { background: #fed7aa; color: #9a3412; }
+        .tag-red { background: #fecaca; color: #991b1b; }
+        .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; }
+        [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; }
+        [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+
+        /* ═══ Key Phrase Highlight ═══ */
+        .key-phrase {
+            background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%);
+            padding: 0 2px;
+        }
+
+        /* ═══ Side-by-Side Columns ═══ */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 12px 0;
+        }
+
+        /* ═══ Numbered Step Cards ═══ */
+        .step-card {
+            display: flex;
+            gap: 14px;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+
+        /* ═══ Dark Mode Toggle ═══ */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+
+        /* ═══ Mobile Menu Toggle ═══ */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ═══ Strong/Bold ═══ */
+        strong { font-weight: 600; }
+
+        /* ═══ Interview Answer ═══ */
+        .interview-answer {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-style: italic;
+        }
+        .interview-answer strong { font-style: normal; }
+
+        /* ═══ Section Label ═══ */
+        .section-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 0 24px 60px; }
+            .menu-toggle { display: flex; }
+            .columns { grid-template-columns: 1fr; }
+        }
+
+        /* ═══ Scrollbar ═══ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ═══ Print ═══ */
+        @media print {
+            .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
+            .main-content { margin-left: 0; max-width: 100%; }
+            details { break-inside: avoid; }
+            details[open] > .toggle-content { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- Sidebar TOC -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 1 — Key Talking Points</h3>
+    </div>
+    <a href="#project-structure">1. Project Structure</a>
+    <a href="#viewsets-vs-apiviews">2. ViewSets vs APIViews</a>
+    <a href="#serializers">3. Serializers & Data Layer</a>
+    <a href="#authentication">4. Authentication Methods</a>
+    <a href="#permissions">5. Permissions</a>
+    <a href="#django-vs-flask">6. Django vs Flask/FastAPI</a>
+    <a href="#architect-flow">7. The Architect's 4-Step Flow</a>
+    <a href="#summary">Summary</a>
+</nav>
+
+<!-- Page Cover -->
+<div class="page-cover"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="../Session 1 - Django DRF Core Concepts/02-Practice-Questions-Answers.html">Session 1</a>
+        <span>/</span>
+        <a href="../Session 2 - Authentication and Security/01-Key-Talking-Points.html">Session 2</a>
+        <span>/</span>
+        <a href="../Session 3 - Database and ORM/01-Key-Talking-Points.html">Session 3</a>
+    </div>
+
+    <div class="section-label">Session 1 — Django/DRF Core Concepts</div>
+    <h1 class="page-title">📝 Key Talking Points</h1>
+    <p class="page-subtitle"><strong>Goal:</strong> Speak like an Architect. Move beyond "how to code" to "how to design."</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-blue">DRF</span>
+        <span class="tag tag-green">Django</span>
+        <span class="tag tag-purple">Architecture</span>
+        <span class="tag tag-orange">Interview</span>
+        <span class="tag tag-gray">REST API</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 1: Project Structure
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="project-structure">1. Project Structure — XƯƠNG SỐNG CỦA PROJECT 🏗️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Modular apps, configuration, routing."</p>
+        </div>
+    </div>
+
+    <p>Django <strong>không phải 1 app</strong>, mà là <strong>nhiều app ghép lại</strong>.</p>
+
+    <details open>
+        <summary>🗂️ Production-Ready Structure</summary>
+        <div class="toggle-content">
+<pre><code>my_project/
+├── apps/
+│   ├── users/      <span class="cm"># Auth, profile, roles</span>
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   ├── tests.py
+│   ├── core/       <span class="cm"># Common logic (utils, base models)</span>
+│   ├── api/        <span class="cm"># API-specific logic (optional)</span>
+│   ├── payments/   <span class="cm"># Payment domain</span>
+│
+├── settings/
+│   ├── base.py     <span class="cm"># Shared config</span>
+│   ├── dev.py      <span class="cm"># Debug=True, Local DB</span>
+│   ├── prod.py     <span class="cm"># Debug=False, S3, Sentry, strict security</span>
+│
+├── urls.py         <span class="cm"># Global URL routing (dispatcher)</span>
+├── wsgi.py         <span class="cm"># Server entry point</span>
+└── asgi.py         <span class="cm"># Async server entry point</span></code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>🗂️ <code>apps/</code> Folder (Modular Apps)</summary>
+        <div class="toggle-content">
+            <p><strong>Ý nghĩa:</strong> Thay vì để các folder <code>users</code>, <code>products</code>, <code>orders</code> nằm lăn lóc ở thư mục gốc (root), ta gom hết vào folder <code>apps</code>.</p>
+            <p><strong>Architect Mindset:</strong> Giúp dự án gọn gàng. Khi nhìn vào root folder, ta chỉ thấy cấu hình hệ thống. Muốn tìm logic nghiệp vụ? Vào <code>apps/</code>.</p>
+            <p><strong>Core Principles:</strong></p>
+            <ul>
+                <li>Mỗi app = <strong>1 domain</strong> (One app, one responsibility)</li>
+                <li>Có <code>models</code>, <code>serializers</code>, <code>views</code>, <code>urls</code> riêng</li>
+                <li>Dễ maintain, dễ scale</li>
+                <li>Apps độc lập, dễ test, dễ scale</li>
+                <li>DRF-friendly</li>
+            </ul>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Key Principle:</strong> <span class="key-phrase">"One app, one responsibility"</span> (domain-driven architecture)</p>
+                    <p><strong>Interviewer rất thích câu:</strong> <span class="key-phrase">"Each app owns its own business logic."</span></p>
+                </div>
+            </div>
+
+            <p><strong>Why this matters:</strong></p>
+            <ul>
+                <li><strong>Scalability:</strong> Khi project lớn, có thể tách app thành microservice riêng</li>
+                <li><strong>Testing:</strong> Mỗi app test độc lập</li>
+                <li><strong>Team work:</strong> Nhiều người làm nhiều app không conflict</li>
+                <li><strong>Clear boundaries:</strong> Ranh giới rõ ràng giữa các domain</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>⚙️ Settings Splitting (<code>settings/</code>)</summary>
+        <div class="toggle-content">
+            <p><strong>Ý nghĩa:</strong> Trung tâm điều khiển (Database config, Secret keys, Installed apps).</p>
+            <p><strong>Never use a single <code>settings.py</code>. Use a package:</strong></p>
+
+<pre><code><span class="cm"># settings/dev.py</span>
+<span class="kw">from</span> .base <span class="kw">import</span> *
+
+DEBUG = <span class="num">True</span>
+ALLOWED_HOSTS = [<span class="str">'localhost'</span>, <span class="str">'127.0.0.1'</span>]
+
+DATABASES = {
+    <span class="str">'default'</span>: {
+        <span class="str">'ENGINE'</span>: <span class="str">'django.db.backends.sqlite3'</span>,
+        <span class="str">'NAME'</span>: BASE_DIR / <span class="str">'db.sqlite3'</span>,
+    }
+}</code></pre>
+
+<pre><code><span class="cm"># settings/prod.py</span>
+<span class="kw">from</span> .base <span class="kw">import</span> *
+
+DEBUG = <span class="num">False</span>
+ALLOWED_HOSTS = [<span class="str">'myapp.com'</span>]
+
+DATABASES = {
+    <span class="str">'default'</span>: {
+        <span class="str">'ENGINE'</span>: <span class="str">'django.db.backends.postgresql'</span>,
+        <span class="str">'NAME'</span>: os.environ.get(<span class="str">'DB_NAME'</span>),
+        <span class="str">'USER'</span>: os.environ.get(<span class="str">'DB_USER'</span>),
+        <span class="str">'PASSWORD'</span>: os.environ.get(<span class="str">'DB_PASSWORD'</span>),
+        <span class="str">'HOST'</span>: os.environ.get(<span class="str">'DB_HOST'</span>),
+        <span class="str">'PORT'</span>: <span class="str">'5432'</span>,
+    }
+}
+
+<span class="cm"># Security</span>
+SECURE_SSL_REDIRECT = <span class="num">True</span>
+SESSION_COOKIE_SECURE = <span class="num">True</span>
+CSRF_COOKIE_SECURE = <span class="num">True</span></code></pre>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p><strong>Security mindset:</strong> Tách settings theo môi trường để tránh lộ bí mật.</p>
+                    <p><strong>Why:</strong> Security (Secrets never committed to git), Flexibility (Different configs per environment), Clarity (Easy to diff dev/prod).</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🌐 <code>urls.py</code> (Global Routing)</summary>
+        <div class="toggle-content">
+            <p><strong>The entry point</strong> — should delegate to app-specific <code>urls.py</code>.</p>
+            <p>Gom toàn bộ route. Mỗi app tự quản <code>urls.py</code> của nó.</p>
+
+<pre><code><span class="cm"># Global urls.py</span>
+<span class="kw">from</span> django.contrib <span class="kw">import</span> admin
+<span class="kw">from</span> django.urls <span class="kw">import</span> path, include
+
+urlpatterns = [
+    path(<span class="str">'admin/'</span>, admin.site.urls),
+    path(<span class="str">'api/users/'</span>, include(<span class="str">'apps.users.urls'</span>)),
+    path(<span class="str">'api/payments/'</span>, include(<span class="str">'apps.payments.urls'</span>)),
+    path(<span class="str">'api/'</span>, include(<span class="str">'apps.api.urls'</span>)),
+]</code></pre>
+
+            <p><strong>Why this pattern:</strong></p>
+            <ul>
+                <li><strong>Separation of concerns:</strong> Each app controls its own routing</li>
+                <li><strong>Readability:</strong> Easy to see all top-level routes</li>
+                <li><strong>Scalability:</strong> Adding new app = adding one line</li>
+            </ul>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔌 <code>wsgi.py</code> / <code>asgi.py</code> (Web Server Gateway Interface)</summary>
+        <div class="toggle-content">
+            <p><strong>Ý nghĩa:</strong> Viết tắt của <em>Web Server Gateway Interface</em>. Đây là cái "cầu dao" để nối code Python của bạn với Server chạy web (như Gunicorn, Nginx).</p>
+            <p><strong>The "bridge" between Python code and web servers.</strong></p>
+            <ul>
+                <li><strong>WSGI:</strong> Synchronous (traditional)</li>
+                <li><strong>ASGI:</strong> Asynchronous (WebSockets, async views)</li>
+            </ul>
+            <p>Bạn ít khi phải sửa file này, nhưng phải biết nó tồn tại để deploy. Rarely modified, but critical for deployment understanding.</p>
+            <p><strong>Why you should know this:</strong></p>
+            <ul>
+                <li><strong>Deployment:</strong> You need to point Gunicorn to this file</li>
+                <li><strong>Async support:</strong> ASGI enables WebSockets and async views</li>
+                <li><strong>Production readiness:</strong> Shows you understand the full stack</li>
+            </ul>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I structure Django projects in a modular app-based way, where each app encapsulates its own models, views, serializers, and URLs. This makes the codebase easier to scale and maintain."</p>
+        <p>"I organize projects with an <code>apps/</code> folder for all business logic, split <code>settings/</code> into <code>base.py</code>, <code>dev.py</code>, and <code>prod.py</code> for environment-specific configs, and use <code>urls.py</code> as a dispatcher that delegates to app-level routing."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Key phrase to drop:</strong> <span class="key-phrase">"One app, one responsibility"</span> — this shows domain-driven thinking.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 2: ViewSets vs APIViews
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="viewsets-vs-apiviews">2. ViewSets vs. APIViews — The "When to use what" Check ⚔️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "ViewSets for CRUD, APIViews for custom logic."</p>
+            <p>Câu này test xem bạn hiểu sâu về công cụ mình dùng hay chỉ "copy paste".</p>
+        </div>
+    </div>
+
+    <h3>🧠 Mental Models (Automation vs. Control)</h3>
+    <p>Hãy tưởng tượng lái xe:</p>
+
+    <div class="columns">
+        <div class="callout callout-green" style="margin:0">
+            <div class="callout-content">
+                <p><strong>ViewSet = Automatic Car 🚗</strong></p>
+                <p>"Convention over configuration"</p>
+                <p>Bạn chỉ cần đạp ga (khai báo Model), xe tự sang số (tự tạo URL, tự tạo CRUD).</p>
+                <p><strong>Dùng khi:</strong> CRUD tiêu chuẩn, không có logic quái dị.</p>
+            </div>
+        </div>
+        <div class="callout callout-purple" style="margin:0">
+            <div class="callout-content">
+                <p><strong>APIView = Manual Car 🏎️</strong></p>
+                <p>"Full control, full responsibility"</p>
+                <p>Bạn phải tự sang số (tự viết hàm get, post, tự define URL). Nhưng bạn kiểm soát được từng tí một.</p>
+                <p><strong>Dùng khi:</strong> Logic phức tạp (Login, OTP, report).</p>
+            </div>
+        </div>
+    </div>
+
+    <details>
+        <summary>⚔️ Quick Comparison Table</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Aspect</th><th>ViewSets</th><th>APIViews</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Use Case</td><td>CRUD chuẩn</td><td>Custom logic</td></tr>
+                        <tr><td>Code Amount</td><td>Ít code (3 lines)</td><td>Nhiều code (manual methods)</td></tr>
+                        <tr><td>URL Generation</td><td>Router tự gen URL</td><td>Tự viết URL</td></tr>
+                        <tr><td>Usage</td><td>80-90% use cases</td><td>10-20% special cases</td></tr>
+                        <tr><td>Flexibility</td><td>Structured</td><td>Total freedom</td></tr>
+                        <tr><td>Best For</td><td>REST resources</td><td>Non-REST endpoints</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>📘 ViewSets (<code>ModelViewSet</code>) — DRF LÀM GIÙM BẠN 80% 🚀</summary>
+        <div class="toggle-content">
+            <p><strong>Use when:</strong> Standard CRUD on a database model (90% of use cases)</p>
+            <p><strong>Router Magic:</strong> <code>DefaultRouter</code> auto-generates 5 endpoints:</p>
+
+<pre><code>GET     /posts/        → list all
+POST    /posts/        → create new
+GET     /posts/{id}/   → retrieve one
+PUT     /posts/{id}/   → update one
+PATCH   /posts/{id}/   → partial update
+DELETE  /posts/{id}/   → delete one</code></pre>
+
+            <h4>Complete Code Example (ViewSet)</h4>
+
+<pre><code><span class="cm"># models.py</span>
+<span class="kw">class</span> <span class="cls">Post</span>(models.Model):
+    title = models.CharField(max_length=<span class="num">255</span>)
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=<span class="num">True</span>)</code></pre>
+
+<pre><code><span class="cm"># serializers.py</span>
+<span class="kw">class</span> <span class="cls">PostSerializer</span>(serializers.ModelSerializer):
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = Post
+        fields = [<span class="str">'id'</span>, <span class="str">'title'</span>, <span class="str">'content'</span>, <span class="str">'author'</span>, <span class="str">'created_at'</span>]</code></pre>
+
+<pre><code><span class="cm"># views.py — chỉ 3 dòng!</span>
+<span class="kw">class</span> <span class="cls">PostViewSet</span>(ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer</code></pre>
+
+<pre><code><span class="cm"># urls.py (Router auto magic ✨)</span>
+router = DefaultRouter()
+router.register(r<span class="str">"posts"</span>, PostViewSet)
+urlpatterns = router.urls</code></pre>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🎯</span>
+                <div class="callout-content">
+                    <p><strong>What you get automatically:</strong> <code>GET /posts/</code> → List, <code>POST /posts/</code> → Create, <code>GET /posts/1/</code> → Get, <code>PUT /posts/1/</code> → Update, <code>PATCH /posts/1/</code> → Partial Update, <code>DELETE /posts/1/</code> → Delete</p>
+                </div>
+            </div>
+
+            <p><strong>When ViewSet wins:</strong> Users, Products, Orders, Posts, Comments — any standard REST resource.</p>
+            <p>👉 <strong>CRUD 90% use-case</strong></p>
+        </div>
+    </details>
+
+    <details>
+        <summary>📘 APIViews (<code>APIView</code>) — TỰ TAY LÀM MỌI THỨ 🛠️</summary>
+        <div class="toggle-content">
+            <p><strong>Use when:</strong> Non-CRUD endpoints or complex custom logic</p>
+            <p><strong>Examples of when to use:</strong></p>
+            <ul>
+                <li><code>/api/users/</code> → ViewSet (CRUD resource)</li>
+                <li><code>/api/stats/</code> → APIView (custom analytics, no model)</li>
+                <li><code>/api/trigger-report/</code> → APIView (action, not resource)</li>
+                <li><code>/api/upload-file/</code> → APIView (complex custom logic)</li>
+                <li><code>/api/login/</code> → APIView (custom authentication flow)</li>
+            </ul>
+
+<pre><code><span class="cm"># views.py</span>
+<span class="kw">class</span> <span class="cls">PostAPIView</span>(APIView):
+    <span class="kw">def</span> <span class="fn">get</span>(self, request):
+        posts = Post.objects.all()
+        serializer = PostSerializer(posts, many=<span class="num">True</span>)
+        <span class="kw">return</span> Response(serializer.data)
+
+    <span class="kw">def</span> <span class="fn">post</span>(self, request):
+        serializer = PostSerializer(data=request.data)
+        <span class="kw">if</span> serializer.is_valid():
+            serializer.save()
+            <span class="kw">return</span> Response(serializer.data, status=status.HTTP_201_CREATED)
+        <span class="kw">return</span> Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)</code></pre>
+
+            <h4>When APIView Wins — Non-CRUD Examples 🥊</h4>
+
+<pre><code><span class="cm"># Example 1: Stats Endpoint (No underlying model)</span>
+<span class="kw">class</span> <span class="cls">PostStatsAPIView</span>(APIView):
+    <span class="kw">def</span> <span class="fn">get</span>(self, request):
+        total_posts = Post.objects.count()
+        recent_posts = Post.objects.filter(
+            created_at__gte=timezone.now() - timedelta(days=<span class="num">7</span>)
+        ).count()
+        <span class="kw">return</span> Response({
+            <span class="str">"total_posts"</span>: total_posts,
+            <span class="str">"recent_posts"</span>: recent_posts,
+            <span class="str">"average_per_day"</span>: recent_posts / <span class="num">7</span>
+        })</code></pre>
+
+<pre><code><span class="cm"># Example 2: Custom Action Endpoint</span>
+<span class="kw">class</span> <span class="cls">TriggerReportAPIView</span>(APIView):
+    permission_classes = [IsAdminUser]
+
+    <span class="kw">def</span> <span class="fn">post</span>(self, request):
+        generate_report_task.delay()
+        <span class="kw">return</span> Response({
+            <span class="str">"message"</span>: <span class="str">"Report generation started"</span>
+        }, status=status.HTTP_202_ACCEPTED)</code></pre>
+
+<pre><code><span class="cm"># Example 3: Complex Upload Logic</span>
+<span class="kw">class</span> <span class="cls">FileUploadAPIView</span>(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    <span class="kw">def</span> <span class="fn">post</span>(self, request):
+        file_obj = request.FILES.get(<span class="str">'file'</span>)
+        <span class="kw">if</span> file_obj.size > <span class="num">10</span> * <span class="num">1024</span> * <span class="num">1024</span>:  <span class="cm"># 10MB</span>
+            <span class="kw">return</span> Response(
+                {<span class="str">"error"</span>: <span class="str">"File too large"</span>},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        process_file(file_obj)
+        <span class="kw">return</span> Response({<span class="str">"message"</span>: <span class="str">"File uploaded successfully"</span>})</code></pre>
+
+            <p>👉 ViewSet <strong>không hợp</strong> cho các case này vì chúng không phải REST resource với CRUD operations.</p>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"The difference comes down to <strong>abstraction level</strong> and <strong>control</strong>:</p>
+        <p><strong>ViewSets:</strong> I use ViewSets for standard CRUD operations because they reduce boilerplate and integrate well with routers. Combined with <code>DefaultRouter</code>, it auto-generates routing and all five REST operations. I use this for about 80-90% of my endpoints.</p>
+        <p><strong>APIViews:</strong> I use APIView when I need custom behavior that doesn't fit REST resource patterns. Examples include analytics endpoints, action triggers, complex file uploads, or authentication flows."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📌</span>
+        <div class="callout-content">
+            <p><strong>Golden example to drop:</strong> <code>/api/users/</code> → ViewSet (standard CRUD) &nbsp;|&nbsp; <code>/api/stats/</code> → APIView (custom analytics)</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 3: Serializers
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="serializers">3. Serializers & Data Layer — Bộ Chuyển Đổi & Kiểm Soát 🔄</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Serializers act as the validation and transformation layer."</p>
+            <p>Đây là "Người phiên dịch" và "Bảo vệ" của hệ thống.</p>
+        </div>
+    </div>
+
+    <h3>The Flow</h3>
+    <p><strong>Incoming:</strong> Frontend gửi JSON → Serializer kiểm tra (Validate) → Python Object → Saved to DB</p>
+    <p><strong>Outgoing:</strong> DB returns Python Object → Serializer chuyển thành JSON → Sent to Frontend</p>
+
+    <p>👉 Serializer = <strong>gatekeeper</strong> 🚪</p>
+    <p><strong>Three Critical Jobs:</strong></p>
+    <ol>
+        <li><strong>Validates incoming data</strong> (POST/PUT requests)</li>
+        <li><strong>Transforms Python objects → JSON</strong> (outgoing responses)</li>
+        <li><strong>Controls what fields are exposed</strong> to the client</li>
+    </ol>
+
+    <details>
+        <summary>📋 ModelSerializer — "Máy Photocopy"</summary>
+        <div class="toggle-content">
+            <p><strong>Concept:</strong> Là "máy photocopy". Nó copy y nguyên cấu trúc của Model trong Database ra JSON. Nhanh, gọn, lẹ.</p>
+            <p><strong>Use for:</strong> Standard CRUD operations (90% of cases)</p>
+
+<pre><code><span class="kw">class</span> <span class="cls">UserSerializer</span>(serializers.ModelSerializer):
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = User
+        fields = [<span class="str">"id"</span>, <span class="str">"username"</span>, <span class="str">"email"</span>]</code></pre>
+
+            <p><strong>✅ Advantages:</strong> Auto map field từ model, Nhanh – gọn – sạch, Automatic validation, Built-in <code>create()</code> and <code>update()</code> methods.</p>
+
+            <h4>Advanced — Controlling Fields</h4>
+<pre><code><span class="kw">class</span> <span class="cls">UserSerializer</span>(serializers.ModelSerializer):
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = User
+        fields = [<span class="str">'id'</span>, <span class="str">'username'</span>, <span class="str">'email'</span>, <span class="str">'first_name'</span>, <span class="str">'last_name'</span>]
+        <span class="cm"># Read-only fields (can't be modified via API)</span>
+        read_only_fields = [<span class="str">'id'</span>, <span class="str">'created_at'</span>]</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>⭐ SerializerMethodField — Computed Fields (Cực hay dùng!)</summary>
+        <div class="toggle-content">
+            <p><strong>CRITICAL FEATURE.</strong> Computed fields that don't exist in the database.</p>
+            <p><strong>Ý nghĩa:</strong> Tạo ra một trường dữ liệu <strong>không có thật</strong> trong Database, mà được tính toán (compute) ra khi chạy.</p>
+
+<pre><code><span class="kw">class</span> <span class="cls">UserSerializer</span>(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    post_count = serializers.SerializerMethodField()
+    is_premium = serializers.SerializerMethodField()
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = User
+        fields = [
+            <span class="str">'id'</span>, <span class="str">'first_name'</span>, <span class="str">'last_name'</span>,
+            <span class="str">'full_name'</span>,      <span class="cm"># Computed</span>
+            <span class="str">'post_count'</span>,     <span class="cm"># Computed</span>
+            <span class="str">'is_premium'</span>      <span class="cm"># Computed</span>
+        ]
+
+    <span class="kw">def</span> <span class="fn">get_full_name</span>(self, obj):
+        <span class="kw">return</span> f<span class="str">"{obj.first_name} {obj.last_name}"</span>
+
+    <span class="kw">def</span> <span class="fn">get_post_count</span>(self, obj):
+        <span class="kw">return</span> obj.posts.count()
+
+    <span class="kw">def</span> <span class="fn">get_is_premium</span>(self, obj):
+        <span class="kw">return</span> obj.subscription_end_date > timezone.now()</code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">📌</span>
+                <div class="callout-content">
+                    <p><strong>Pattern:</strong> Method name MUST be <code>get_&lt;field_name&gt;</code></p>
+                </div>
+            </div>
+
+            <p><strong>Why this is powerful:</strong> Frontend gets exactly what it needs, no extra API calls needed, logic centralized, database stays clean.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>📝 Custom Serializer — Non-Model-Bound</summary>
+        <div class="toggle-content">
+            <p>Use when data doesn't map to a model. 👉 <strong>Không gắn với model</strong></p>
+            <p><strong>Dùng cho:</strong> Login forms, OTP verification, Search input, Aggregation queries, Multi-step form data.</p>
+
+<pre><code><span class="cm"># Login Serializer</span>
+<span class="kw">class</span> <span class="cls">LoginSerializer</span>(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=<span class="num">True</span>)
+
+    <span class="kw">def</span> <span class="fn">validate_email</span>(self, value):
+        <span class="kw">if not</span> User.objects.filter(email=value).exists():
+            <span class="kw">raise</span> serializers.ValidationError(<span class="str">"User not found"</span>)
+        <span class="kw">return</span> value</code></pre>
+
+<pre><code><span class="cm"># OTP Verification</span>
+<span class="kw">class</span> <span class="cls">OTPVerifySerializer</span>(serializers.Serializer):
+    phone_number = serializers.CharField(max_length=<span class="num">15</span>)
+    otp_code = serializers.CharField(max_length=<span class="num">6</span>)
+
+    <span class="kw">def</span> <span class="fn">validate_otp_code</span>(self, value):
+        <span class="kw">if</span> len(value) != <span class="num">6</span> <span class="kw">or not</span> value.isdigit():
+            <span class="kw">raise</span> serializers.ValidationError(<span class="str">"OTP must be 6 digits"</span>)
+        <span class="kw">return</span> value</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>🛡️ Validation — The Gatekeeper Logic</summary>
+        <div class="toggle-content">
+            <p>Keep business logic validation in <code>validate_&lt;field&gt;</code> or object-level <code>validate()</code>.</p>
+
+<pre><code><span class="cm"># Field-level validation</span>
+<span class="kw">class</span> <span class="cls">UserSerializer</span>(serializers.ModelSerializer):
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = User
+        fields = [<span class="str">'username'</span>, <span class="str">'email'</span>, <span class="str">'age'</span>]
+
+    <span class="kw">def</span> <span class="fn">validate_age</span>(self, value):
+        <span class="kw">if</span> value < <span class="num">18</span>:
+            <span class="kw">raise</span> serializers.ValidationError(<span class="str">"Must be 18 or older"</span>)
+        <span class="kw">return</span> value</code></pre>
+
+<pre><code><span class="cm"># Object-level validation</span>
+<span class="kw">class</span> <span class="cls">BookingSerializer</span>(serializers.ModelSerializer):
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = Booking
+        fields = [<span class="str">'start_date'</span>, <span class="str">'end_date'</span>, <span class="str">'room'</span>]
+
+    <span class="kw">def</span> <span class="fn">validate</span>(self, data):
+        <span class="kw">if</span> data[<span class="str">'start_date'</span>] >= data[<span class="str">'end_date'</span>]:
+            <span class="kw">raise</span> serializers.ValidationError(
+                <span class="str">"End date must be after start date"</span>)
+        <span class="kw">return</span> data</code></pre>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I think of serializers as the gatekeeper of my API. They validate incoming data, transform database objects to JSON, and control exactly what fields are exposed to the client. I use <code>ModelSerializer</code> for 80% of cases, <code>SerializerMethodField</code> for computed fields, and custom <code>Serializer</code> classes for non-model-bound data like login forms or search inputs."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Key phrase:</strong> <span class="key-phrase">"Serializers = validation + transformation + access control"</span></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 4: Authentication
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="authentication">4. Authentication Methods — AI VÀO ĐÂY RẤT THÍCH HỎI 🔐</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "JWT vs Session vs Token."</p>
+            <p>Là một Frontend Engineer hoặc API Developer, bạn sẽ yêu thích JWT nhất.</p>
+        </div>
+    </div>
+
+    <h3>Authentication (Who are you?) — Three Approaches</h3>
+
+    <details>
+        <summary>🍪 Session-based Auth — The Traditional Way</summary>
+        <div class="toggle-content">
+            <p><strong>Cơ chế:</strong> Server tạo ra session ID, lưu vào Cookie của trình duyệt.</p>
+            <p><strong>How it works:</strong></p>
+            <ol>
+                <li>User logs in with credentials</li>
+                <li>Server creates session ID, stores it in database</li>
+                <li>Session ID sent to browser as cookie</li>
+                <li>Browser automatically sends cookie with every request</li>
+                <li>Server looks up session in database to identify user</li>
+            </ol>
+            <p><strong>Type:</strong> <span class="tag tag-red">Stateful</span> (Server remembers you via database)</p>
+            <p><strong>Nhược điểm:</strong></p>
+            <ul>
+                <li>Server phải tốn RAM/Database để nhớ session</li>
+                <li>Khó scale (nếu có 1 triệu user login cùng lúc thì server mệt)</li>
+                <li>Database lookup required for every request</li>
+                <li>Harder to scale horizontally</li>
+            </ul>
+            <p><strong>Dùng khi:</strong> Web truyền thống (Django render HTML), Admin page, Monolithic applications.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔑 Token Auth — Simple Token-Based</summary>
+        <div class="toggle-content">
+            <p><strong>Cơ chế:</strong> Mỗi user có 1 chuỗi ký tự cố định (như API Key). Gửi kèm mỗi request header.</p>
+            <p><strong>Example header:</strong></p>
+            <pre><code>Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b</code></pre>
+            <p><strong>Dùng khi:</strong> API nội bộ, Script/Bot chạy ngầm, Long-lived API access, Service-to-service communication.</p>
+            <p><strong>Limitations:</strong> Still requires database lookup, No expiration built-in, Less secure than JWT.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔐 JWT (JSON Web Tokens) — The Architect's Choice ⭐</summary>
+        <div class="toggle-content">
+            <p><strong>Best for React/Mobile. Stateless (server doesn't store anything). Highly scalable.</strong></p>
+            <p><strong>Stateless (Không trạng thái):</strong> Server <strong>không lưu</strong> gì cả. Mọi thông tin (User ID, Expire time) được mã hóa nén thẳng vào cái token. Server chỉ cần giải mã token là biết user là ai. → <strong>Scalable cực tốt</strong>.</p>
+
+            <h4>How JWT Works (Step-by-Step)</h4>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>User Login</strong></p>
+                    <pre><code><span class="cm"># POST /api/token/</span>
+{ <span class="str">"username"</span>: <span class="str">"user@example.com"</span>, <span class="str">"password"</span>: <span class="str">"password123"</span> }</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Server Generates TWO Tokens</strong></p>
+                    <pre><code>{
+    <span class="str">"access"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>,  <span class="cm"># 15 min</span>
+    <span class="str">"refresh"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span>  <span class="cm"># 7 days</span>
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Client Stores Tokens</strong></p>
+                    <pre><code>localStorage.setItem(<span class="str">'access_token'</span>, response.data.access);
+localStorage.setItem(<span class="str">'refresh_token'</span>, response.data.refresh);</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>Client Sends Access Token with Every Request</strong></p>
+                    <pre><code>Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code></pre>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>Token Refresh Flow (when access expires)</strong></p>
+                    <pre><code><span class="cm"># POST /api/token/refresh/</span>
+{ <span class="str">"refresh"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."</span> }
+<span class="cm"># Server responds with NEW access token</span></code></pre>
+                </div>
+            </div>
+
+            <h4>The Two Token Types</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Token</th><th>Lifespan</th><th>Purpose</th><th>Why</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Access Token</strong></td><td>15 min</td><td>Chìa khóa vào nhà. Used for API requests.</td><td>Hết hạn nhanh — lỡ bị hack thì chỉ 15p</td></tr>
+                        <tr><td><strong>Refresh Token</strong></td><td>7 days</td><td>Chìa khóa dự phòng để xin cấp lại Access Token</td><td>Better UX — user stays logged in</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Why JWT is Superior for APIs</h4>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">⚡</span>
+                <div class="callout-content">
+                    <p><strong>Stateless = Scalable:</strong></p>
+                    <p>Session: Request → Server checks database → Response (DB hit on EVERY request)</p>
+                    <p>JWT: Request → Server verifies signature → Response (NO database hit!)</p>
+                </div>
+            </div>
+
+            <ul>
+                <li><strong>Distributed Systems:</strong> Multiple servers can verify tokens without sharing state</li>
+                <li><strong>Mobile/SPA Friendly:</strong> Works seamlessly with React, Vue, React Native, Flutter</li>
+                <li><strong>Contains User Info:</strong> <code>user_id</code>, <code>username</code>, <code>exp</code>, <code>iat</code> encoded in payload</li>
+            </ul>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I prefer JWT for API authentication because it's stateless and highly scalable. The server doesn't need to store any session data — all user information is encoded in the token itself, and the server just verifies the signature. I use the two-token approach: short-lived access tokens (15 minutes) for API requests, and long-lived refresh tokens (7 days) for obtaining new access tokens."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Key comparison to mention:</strong> "Session-based auth requires a database lookup on every request, while JWT just verifies a signature. For high-traffic APIs, this difference is massive."</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 5: Permissions
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="permissions">5. Permissions — AI ĐƯỢC VÀO HAY KHÔNG? 🚪</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "IsAuthenticated, IsAdminUser, Custom logic."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🧠</span>
+        <div class="callout-content">
+            <p><strong>Critical distinction:</strong></p>
+            <p>👉 <strong>Auth = <em>who you are</em></strong> (Identity)</p>
+            <p>👉 <strong>Permission = <em>what you can do</em></strong> (Authorization)</p>
+            <p>Sau khi biết "Bạn là ai" (Auth), hệ thống sẽ check "Bạn được phép làm gì" (Perm).</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>🔹 Built-in Permissions</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Permission</th><th>Use Case</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>AllowAny</code></td><td>Public endpoints</td><td>Anyone can access, no auth required</td></tr>
+                        <tr><td><code>IsAuthenticated</code></td><td>User-specific data</td><td>Có đăng nhập mới được xem. Most common permission.</td></tr>
+                        <tr><td><code>IsAdminUser</code></td><td>Admin operations</td><td>Phải là Staff/Superuser. Checks <code>user.is_staff == True</code></td></tr>
+                        <tr><td><code>IsAuthenticatedOrReadOnly</code></td><td>Blog posts, comments</td><td>Anyone can read (GET), must be authed to modify</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+<pre><code><span class="kw">class</span> <span class="cls">ProfileView</span>(APIView):
+    permission_classes = [IsAuthenticated]
+
+    <span class="kw">def</span> <span class="fn">get</span>(self, request):
+        <span class="kw">return</span> Response({<span class="str">"user"</span>: request.user.username})</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>✨ Custom Permissions — Critical for Interviews 🌟</summary>
+        <div class="toggle-content">
+            <p><strong>Override <code>has_object_permission</code></strong> — Cái này quan trọng nhất để thể hiện trình độ.</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">❓</span>
+                <div class="callout-content">
+                    <p><strong>Bài toán:</strong> Ai cũng xem được bài đăng (Post), nhưng chỉ <strong>tác giả</strong> bài đăng mới được <strong>Sửa/Xóa</strong>.</p>
+                </div>
+            </div>
+
+            <h4>The Solution: IsOwnerOrReadOnly</h4>
+<pre><code><span class="kw">from</span> rest_framework <span class="kw">import</span> permissions
+
+<span class="kw">class</span> <span class="cls">IsOwnerOrReadOnly</span>(permissions.BasePermission):
+    <span class="str">"""
+    Custom permission to only allow owners of an object to edit it.
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">has_object_permission</span>(self, request, view, obj):
+        <span class="cm"># 1. Nếu chỉ xem (GET, HEAD, OPTIONS) -> OK cho qua</span>
+        <span class="kw">if</span> request.method <span class="kw">in</span> permissions.SAFE_METHODS:
+            <span class="kw">return</span> <span class="num">True</span>
+
+        <span class="cm"># 2. Nếu muốn Sửa/Xóa (PUT, DELETE) -> Check ownership</span>
+        <span class="kw">return</span> obj.owner == request.user</code></pre>
+
+            <p><strong>Usage:</strong></p>
+<pre><code><span class="kw">class</span> <span class="cls">PostViewSet</span>(ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]</code></pre>
+
+            <p><strong>What happens:</strong></p>
+            <ul>
+                <li><code>GET /posts/</code> → ✅ Anyone authenticated can view</li>
+                <li><code>PUT /posts/1/</code> → ✅ Only if <code>request.user == post.owner</code></li>
+                <li><code>DELETE /posts/1/</code> → ✅ Only if <code>request.user == post.owner</code></li>
+            </ul>
+
+            <h4>Advanced: IsOwnerOrAdmin</h4>
+<pre><code><span class="kw">class</span> <span class="cls">IsOwnerOrAdmin</span>(permissions.BasePermission):
+    <span class="kw">def</span> <span class="fn">has_object_permission</span>(self, request, view, obj):
+        <span class="kw">if</span> request.method <span class="kw">in</span> permissions.SAFE_METHODS:
+            <span class="kw">return</span> <span class="num">True</span>
+        <span class="kw">if</span> request.user.is_staff:
+            <span class="kw">return</span> <span class="num">True</span>
+        <span class="kw">return</span> obj.owner == request.user</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>📌 Permissions Use Cases Summary</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Permission</th><th>Use Case</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>AllowAny</code></td><td>Public data, landing pages</td></tr>
+                        <tr><td><code>IsAuthenticated</code></td><td>User-specific data, protected endpoints</td></tr>
+                        <tr><td><code>IsAdminUser</code></td><td>Admin operations, user management</td></tr>
+                        <tr><td><code>IsAuthenticatedOrReadOnly</code></td><td>Blog posts, comments</td></tr>
+                        <tr><td><code>IsOwnerOrReadOnly</code></td><td>User can only edit their own data</td></tr>
+                        <tr><td><code>IsOwnerOrAdmin</code></td><td>Owner OR admin can modify</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I distinguish between authentication — who you are — and permissions — what you can do. For most endpoints, I use built-in classes like <code>IsAuthenticated</code> or <code>IsAdminUser</code>. For object-level permissions like 'only the post author can edit this post', I create custom permission classes that override <code>has_object_permission</code>. This keeps the logic reusable and my views clean."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Key phrase:</strong> <span class="key-phrase">"Auth = who you are, Permissions = what you can do"</span></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 6: Django vs Flask/FastAPI
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="django-vs-flask">6. Django vs. Flask/FastAPI — When to Choose What 🏗️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Batteries Included vs. Build it Yourself."</p>
+            <p>Đây không phải là câu hỏi "cái nào mạnh hơn", mà là "cái nào phù hợp hơn".</p>
+        </div>
+    </div>
+
+    <h3>🏗️ The Metaphor</h3>
+
+    <div class="columns">
+        <div class="callout callout-purple" style="margin:0">
+            <div class="callout-content">
+                <p><strong>Flask/FastAPI = Building from Bricks 🧱</strong></p>
+                <p>Giống như bạn mua gạch, xi măng, gỗ về để tự xây nhà.</p>
+                <ul>
+                    <li>Total control, wire everything manually</li>
+                    <li>Must build: ORM, Migrations, Auth, Admin, Security, Validation</li>
+                    <li>Best for: Microservices nhỏ, nhanh, Lightweight APIs</li>
+                </ul>
+            </div>
+        </div>
+        <div class="callout callout-green" style="margin:0">
+            <div class="callout-content">
+                <p><strong>Django = Fully Furnished Apartment 🏠</strong></p>
+                <p>Giống như bạn mua một căn hộ cao cấp đầy đủ nội thất. Vào là ở ngay.</p>
+                <ul>
+                    <li>Bếp (ORM), Cửa khóa (Security), Quản lý tòa nhà (Admin Panel)</li>
+                    <li>Move in and start coding business logic immediately</li>
+                    <li>Best for: Medium-to-large systems, Rapid development</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <details>
+        <summary>Quick Comparison Table</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Aspect</th><th>Django</th><th>Flask / FastAPI</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Type</strong></td><td>Full-stack</td><td>Lightweight</td></tr>
+                        <tr><td><strong>ORM</strong></td><td>Built-in (powerful)</td><td>Tự chọn (SQLAlchemy)</td></tr>
+                        <tr><td><strong>Admin</strong></td><td>Built-in (beautiful)</td><td>None (build yourself)</td></tr>
+                        <tr><td><strong>Philosophy</strong></td><td>Opinionated (Convention)</td><td>Flexible (Freedom)</td></tr>
+                        <tr><td><strong>Learning Curve</strong></td><td>Steeper (more features)</td><td>Easier (minimal)</td></tr>
+                        <tr><td><strong>Development Speed</strong></td><td>Faster (batteries included)</td><td>Slower (build from scratch)</td></tr>
+                        <tr><td><strong>Best For</strong></td><td>Full apps, MVPs, teams</td><td>Microservices, small APIs</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>When to Choose Django ⭐</summary>
+        <div class="toggle-content">
+            <ul>
+                <li><strong>Time-to-market is critical</strong> (startup environment)</li>
+                <li><strong>Need standard features:</strong> User management, Admin dashboard, Complex DB relationships</li>
+                <li><strong>Team consistency matters:</strong> Opinionated structure prevents chaos</li>
+                <li><strong>Long-term maintainability</strong> over flexibility</li>
+            </ul>
+            <p><strong>Django-perfect projects:</strong> SaaS applications, E-commerce platforms, Content management systems, Social networks, Enterprise applications.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>When to Choose Flask/FastAPI</summary>
+        <div class="toggle-content">
+            <ul>
+                <li><strong>Microservices architecture:</strong> Small, focused services</li>
+                <li><strong>Performance is critical:</strong> FastAPI is async-first</li>
+                <li><strong>You want full control:</strong> Choose exactly what you need</li>
+                <li><strong>Learning/Experimentation:</strong> Understand how frameworks work</li>
+            </ul>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"The choice depends on the project context. For a full-stack application with user management, admin needs, and complex business logic, I choose Django because it provides everything out of the box. This lets me focus on building features, not infrastructure. For a lightweight microservice or when I need maximum performance, I'd choose FastAPI. It comes down to <strong>'Batteries Included' vs. 'Build it Yourself'</strong>."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📌</span>
+        <div class="callout-content">
+            <p><strong>Key words cần nhấn trong interview:</strong> <span class="key-phrase">Opinionated</span> – <span class="key-phrase">Scalable</span> – <span class="key-phrase">Maintainable</span> – <span class="key-phrase">Time-to-market</span> – <span class="key-phrase">Batteries Included</span></p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 7: The Architect's 4-Step Flow
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="architect-flow">7. The Architect's 4-Step Flow — Models → Serializers → Views → URLs 🧠</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "The layered approach to building Django REST APIs."</p>
+            <p>Hãy hình dung quy trình như một dây chuyền sản xuất:</p>
+            <p><strong>Database (Models)</strong> ➡️ <strong>Máy chuyển đổi (Serializers)</strong> ➡️ <strong>Bộ điều khiển (Views/ViewSets)</strong> ➡️ <strong>Cổng giao tiếp (URLs)</strong></p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>Models First — Database Schema Design 🗄️</strong></p>
+            <p>Thiết kế Database Schema trong <code>models.py</code>, đảm bảo các quan hệ (Foreign Keys) chính xác.</p>
+<pre><code><span class="kw">class</span> <span class="cls">Post</span>(models.Model):
+    title = models.CharField(max_length=<span class="num">200</span>)
+    content = models.TextField()
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name=<span class="str">'posts'</span>)
+    created_at = models.DateTimeField(auto_now_add=<span class="num">True</span>)
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        ordering = [<span class="str">'-created_at'</span>]
+        indexes = [models.Index(fields=[<span class="str">'author'</span>, <span class="str">'-created_at'</span>])]</code></pre>
+            <p><strong>Why first:</strong> Data structure drives everything else. Get relationships right from the start.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>Serialization — The Critical Layer 🔄</strong></p>
+            <p>Validate dữ liệu đầu vào và format dữ liệu đầu ra (JSON) sao cho Frontend dễ consume nhất.</p>
+<pre><code><span class="kw">class</span> <span class="cls">PostSerializer</span>(serializers.ModelSerializer):
+    author_name = serializers.CharField(source=<span class="str">'author.username'</span>, read_only=<span class="num">True</span>)
+    comment_count = serializers.SerializerMethodField()
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        model = Post
+        fields = [<span class="str">'id'</span>, <span class="str">'title'</span>, <span class="str">'content'</span>, <span class="str">'author'</span>, <span class="str">'author_name'</span>,
+                  <span class="str">'comment_count'</span>, <span class="str">'created_at'</span>, <span class="str">'updated_at'</span>]
+
+    <span class="kw">def</span> <span class="fn">get_comment_count</span>(self, obj):
+        <span class="kw">return</span> obj.comments.count()</code></pre>
+            <p><strong>Why critical:</strong> Controls what Frontend sees. Single source of truth for API structure.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>Logic Layer (Views) — Business Logic 🎯</strong></p>
+            <p>Tùy vào nghiệp vụ, chọn ViewSets cho CRUD nhanh, hoặc APIView cho logic phức tạp.</p>
+<pre><code><span class="kw">class</span> <span class="cls">PostViewSet</span>(ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+
+    <span class="kw">def</span> <span class="fn">perform_create</span>(self, serializer):
+        serializer.save(author=self.request.user)
+
+    <span class="dec">@action</span>(detail=<span class="num">True</span>, methods=[<span class="str">'post'</span>])
+    <span class="kw">def</span> <span class="fn">like</span>(self, request, pk=<span class="num">None</span>):
+        post = self.get_object()
+        post.likes.add(request.user)
+        <span class="kw">return</span> Response({<span class="str">'status'</span>: <span class="str">'post liked'</span>})</code></pre>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>Routing — Exposing Endpoints 🌐</strong></p>
+            <p>Cuối cùng là cấu hình <code>urls.py</code> để expose endpoints.</p>
+<pre><code><span class="cm"># urls.py (app level)</span>
+router = DefaultRouter()
+router.register(r<span class="str">'posts'</span>, PostViewSet, basename=<span class="str">'post'</span>)
+urlpatterns = router.urls
+
+<span class="cm"># Auto-generates:</span>
+<span class="cm"># GET    /posts/          → list</span>
+<span class="cm"># POST   /posts/          → create</span>
+<span class="cm"># GET    /posts/1/        → retrieve</span>
+<span class="cm"># PUT    /posts/1/        → update</span>
+<span class="cm"># DELETE /posts/1/        → destroy</span>
+<span class="cm"># POST   /posts/1/like/   → custom action</span></code></pre>
+        </div>
+    </div>
+
+    <details>
+        <summary>The Complete Request Flow Visualized</summary>
+        <div class="toggle-content">
+<pre><code>1. Request: GET /api/posts/1/
+              ↓
+2. URL Router: "This goes to PostViewSet.retrieve()"
+              ↓
+3. View:
+   - Check permissions (IsAuthenticated?)
+   - Get Post object from database
+   - Pass to serializer
+              ↓
+4. Serializer:
+   - Convert Post model to Python dict
+   - Add computed fields (author_name, comment_count)
+   - Format dates
+              ↓
+5. Response:
+   {
+     "id": 1,
+     "title": "My Post",
+     "content": "...",
+     "author_name": "john_doe",
+     "comment_count": 5,
+     "created_at": "2024-01-20T10:30:00Z"
+   }</code></pre>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I follow a four-layer approach when building Django REST APIs. First, I design the database schema in Models, ensuring relationships are correct. Second, I create Serializers to define what data the API exposes and how it's validated. Third, I implement the business logic in Views — choosing ViewSets for standard CRUD or APIViews for custom logic. Finally, I configure URLs to expose the endpoints. This layered approach keeps each component focused on its responsibility."</p>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💎</span>
+        <div class="callout-content">
+            <p><strong>Key insight to drop:</strong> "The serializer layer is the most critical because it's the contract between your database and your frontend. Getting it right prevents a lot of issues down the line."</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SUMMARY
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="summary">🎯 Tổng Kết Session 1</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Topic</th><th>Key Points</th></tr></thead>
+            <tbody>
+                <tr><td><strong>Structure</strong></td><td>Gọn gàng với <code>apps/</code>. Modular apps. "One app, one responsibility". Settings split (base/dev/prod)</td></tr>
+                <tr><td><strong>Views</strong></td><td>ViewSet = CRUD automation (80-90%), APIView = full control (10-20%). Know when to use each.</td></tr>
+                <tr><td><strong>Serializers</strong></td><td>Gatekeeper: validation + transformation. <code>ModelSerializer</code> (CRUD), Custom (complex), <code>SerializerMethodField</code> (computed)</td></tr>
+                <tr><td><strong>Auth</strong></td><td>JWT (stateless, scalable, perfect for APIs), Session (traditional web), Token (service-to-service)</td></tr>
+                <tr><td><strong>Permissions</strong></td><td>Auth = who, Permission = what. Built-in classes + Custom (<code>IsOwnerOrReadOnly</code>) for object-level security</td></tr>
+                <tr><td><strong>Django vs Flask</strong></td><td>Batteries Included vs Build Yourself. Django = speed + consistency, Flask/FastAPI = flexibility + control</td></tr>
+                <tr><td><strong>Flow</strong></td><td>Models → Serializers → Views → URLs. Layered architecture with clear responsibilities.</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🌱</span>
+        <div class="callout-content">
+            <p><strong>Senior Mindset (cực quan trọng):</strong></p>
+            <p>Django không mạnh vì code ít. Django mạnh vì <strong>structure rõ + rule rõ</strong>.</p>
+            <p>"Choose the right tool for the job. Django for full apps, Flask/FastAPI for microservices, but know WHY you're choosing."</p>
+            <p>"The mark of a senior developer is knowing when NOT to use Django, not just when to use it."</p>
+        </div>
+    </div>
+
+    <h3>📌 Quick Reference: Key Phrases for Interview</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Concept</th><th>Key Phrase</th></tr></thead>
+            <tbody>
+                <tr><td>Project Structure</td><td>"One app, one responsibility"</td></tr>
+                <tr><td>ViewSets</td><td>"Convention over configuration — 80% of my endpoints"</td></tr>
+                <tr><td>APIViews</td><td>"Full control for custom logic that doesn't fit REST"</td></tr>
+                <tr><td>Serializers</td><td>"The gatekeeper: validation, transformation, access control"</td></tr>
+                <tr><td>Authentication</td><td>"JWT for stateless, scalable API auth"</td></tr>
+                <tr><td>Permissions</td><td>"Auth = who you are, Permissions = what you can do"</td></tr>
+                <tr><td>Django Philosophy</td><td>"Batteries included — focus on business logic, not infrastructure"</td></tr>
+                <tr><td>Architecture</td><td>"Models → Serializers → Views → URLs — layered responsibilities"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div><!-- end main-content -->
+
+<script>
+    // ═══ Dark Mode Toggle ═══
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ═══ Mobile Menu Toggle ═══
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // ═══ Progress Bar ═══
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+
+    // ═══ Active Sidebar Link on Scroll ═══
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

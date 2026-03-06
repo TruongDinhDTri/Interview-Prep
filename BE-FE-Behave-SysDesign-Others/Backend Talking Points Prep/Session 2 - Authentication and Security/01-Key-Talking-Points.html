@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 2: Key Talking Points — Authentication & Security</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           NOTION-STYLE CLEAN DESIGN SYSTEM
+           ═══════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-muted: #9b9a97;
+            --border: #e3e2de;
+            --border-light: #eeeeec;
+            --accent-blue: #2563eb;
+            --accent-red: #eb5757;
+            --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0;
+            --accent-orange: #e97f33;
+            --code-bg: #f7f6f3;
+            --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe;
+            --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0;
+            --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8;
+            --callout-purple-border: #9065b0;
+            --sidebar-width: 260px;
+            --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #191919;
+            --bg-secondary: #202020;
+            --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de;
+            --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b;
+            --border: #333;
+            --border-light: #2a2a2a;
+            --accent-blue: #529cca;
+            --accent-red: #eb5757;
+            --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8;
+            --accent-orange: #e97f33;
+            --code-bg: #252525;
+            --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a;
+            --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28;
+            --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a;
+            --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            z-index: 1001;
+            transition: width 0.1s linear;
+        }
+
+        /* ═══ Page Cover ═══ */
+        .page-cover {
+            height: var(--cover-height);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            position: relative;
+        }
+        [data-theme="dark"] .page-cover {
+            background: linear-gradient(135deg, #3d1f4e 0%, #4a1c2e 100%);
+        }
+
+        /* ═══ Sidebar ═══ */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .sidebar-header {
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 8px;
+        }
+        .sidebar-header h3 {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        .sidebar a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 16px 6px 20px;
+            font-size: 0.82em;
+            font-weight: 400;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .sidebar a:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        .sidebar a.active {
+            color: var(--accent-blue);
+            font-weight: 500;
+            border-left-color: var(--accent-blue);
+            background: rgba(37,99,235,0.04);
+        }
+
+        /* ═══ Main Content ═══ */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            max-width: 900px;
+            padding: 0 60px 80px;
+        }
+
+        /* ═══ Breadcrumbs ═══ */
+        .breadcrumbs {
+            padding: 16px 0 8px;
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+        .breadcrumbs a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+
+        /* ═══ Page Title ═══ */
+        .page-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 16px 0 8px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05em;
+            margin-bottom: 32px;
+        }
+
+        /* ═══ Headings ═══ */
+        h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 48px 0 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            letter-spacing: -0.01em;
+        }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            color: var(--text-primary);
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        /* ═══ Paragraph & Lists ═══ */
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+
+        /* ═══ Divider ═══ */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 32px 0;
+        }
+
+        /* ═══ Toggle Blocks (details/summary) ═══ */
+        details {
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        summary {
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            transition: background 0.2s;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            font-size: 1em;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: '▶';
+            font-size: 0.65em;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* ═══ Callout Boxes ═══ */
+        .callout {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid;
+        }
+        .callout-emoji {
+            font-size: 1.2em;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+
+        .callout-yellow {
+            background: var(--callout-yellow-bg);
+            border-left-color: var(--callout-yellow-border);
+        }
+        .callout-red {
+            background: var(--callout-red-bg);
+            border-left-color: var(--callout-red-border);
+        }
+        .callout-green {
+            background: var(--callout-green-bg);
+            border-left-color: var(--callout-green-border);
+        }
+        .callout-blue {
+            background: var(--callout-blue-bg);
+            border-left-color: var(--callout-blue-border);
+        }
+        .callout-purple {
+            background: var(--callout-purple-bg);
+            border-left-color: var(--callout-purple-border);
+        }
+
+        /* ═══ Inline Code ═══ */
+        code {
+            font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-red);
+        }
+
+        /* ═══ Code Blocks ═══ */
+        pre {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* Syntax highlighting */
+        .kw { color: #d73a49; } /* keyword */
+        .fn { color: #6f42c1; } /* function */
+        .str { color: #032f62; } /* string */
+        .cm { color: #6a737d; font-style: italic; } /* comment */
+        .num { color: #005cc5; } /* number */
+        .dec { color: #e36209; } /* decorator */
+        .cls { color: #6f42c1; } /* class */
+        .op { color: #d73a49; } /* operator */
+        [data-theme="dark"] .kw { color: #ff7b72; }
+        [data-theme="dark"] .fn { color: #d2a8ff; }
+        [data-theme="dark"] .str { color: #a5d6ff; }
+        [data-theme="dark"] .cm { color: #8b949e; }
+        [data-theme="dark"] .num { color: #79c0ff; }
+        [data-theme="dark"] .dec { color: #ffa657; }
+        [data-theme="dark"] .cls { color: #d2a8ff; }
+        [data-theme="dark"] .op { color: #ff7b72; }
+
+        /* ═══ Tables ═══ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ═══ Quote Block ═══ */
+        blockquote {
+            border-left: 3px solid var(--border);
+            padding: 8px 16px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong { color: var(--text-primary); }
+
+        /* ═══ Tag Pills ═══ */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.78em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+        .tag-green { background: #d1fae5; color: #065f46; }
+        .tag-purple { background: #ede9fe; color: #5b21b6; }
+        .tag-orange { background: #fed7aa; color: #9a3412; }
+        .tag-red { background: #fecaca; color: #991b1b; }
+        .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; }
+        [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; }
+        [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+
+        /* ═══ Key Phrase Highlight ═══ */
+        .key-phrase {
+            background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%);
+            padding: 0 2px;
+        }
+
+        /* ═══ Side-by-Side Columns ═══ */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 12px 0;
+        }
+
+        /* ═══ Numbered Step Cards ═══ */
+        .step-card {
+            display: flex;
+            gap: 14px;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+
+        /* ═══ Dark Mode Toggle ═══ */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+
+        /* ═══ Mobile Menu Toggle ═══ */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ═══ Strong/Bold ═══ */
+        strong { font-weight: 600; }
+
+        /* ═══ Interview Answer ═══ */
+        .interview-answer {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-style: italic;
+        }
+        .interview-answer strong { font-style: normal; }
+
+        /* ═══ Section Label ═══ */
+        .section-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-blue);
+            margin-bottom: 4px;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 0 24px 60px; }
+            .menu-toggle { display: flex; }
+            .columns { grid-template-columns: 1fr; }
+        }
+
+        /* ═══ Scrollbar ═══ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ═══ Print ═══ */
+        @media print {
+            .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
+            .main-content { margin-left: 0; max-width: 100%; }
+            details { break-inside: avoid; }
+            details[open] > .toggle-content { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- Sidebar TOC -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 2 — Key Talking Points</h3>
+    </div>
+    <a href="#jwt-token-flow">1. JWT Token Flow</a>
+    <a href="#jwt-vs-session">2. JWT vs Session</a>
+    <a href="#security-layers">3. Security Layers</a>
+    <a href="#cors">4. CORS Configuration</a>
+    <a href="#cors-vs-csrf">5. CORS vs CSRF</a>
+    <a href="#oauth">6. OAuth 2.0</a>
+    <a href="#summary">Summary</a>
+</nav>
+
+<!-- Page Cover -->
+<div class="page-cover"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="../Session 1 - Django DRF Core Concepts/01-Key-Talking-Points.html">Session 1</a>
+        <span>/</span>
+        <strong>Session 2</strong>
+        <span>/</span>
+        <a href="../Session 3 - Database and ORM/01-Key-Talking-Points.html">Session 3</a>
+    </div>
+
+    <div class="section-label">Session 2 — Authentication & Security</div>
+    <h1 class="page-title">📝 Key Talking Points</h1>
+    <p class="page-subtitle"><strong>Goal:</strong> Understand the "why" behind security decisions. Show you think like a security-conscious architect.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-blue">JWT</span>
+        <span class="tag tag-red">Security</span>
+        <span class="tag tag-green">CORS</span>
+        <span class="tag tag-orange">CSRF</span>
+        <span class="tag tag-purple">OAuth</span>
+        <span class="tag tag-gray">Authentication</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 1: JWT Token Flow
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="jwt-token-flow">1. JWT Token Flow — The Heartbeat of API Authentication 🔐</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Stateless authentication using access and refresh tokens."</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>🎯 What Problem It Solves</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>👉 Stateless authentication for APIs</li>
+                <li>👉 Perfect for React / mobile / SPA apps</li>
+                <li>👉 Server doesn't remember you — it gives you an ID card (Token) that proves who you are</li>
+            </ul>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔄 The Complete Flow (Step-by-Step)</summary>
+        <div class="toggle-content">
+            <p>Participants: <strong>👤 Client (React)</strong> → <strong>⚙️ Server (Django)</strong> → <strong>🗄️ Database</strong></p>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>Login</strong></p>
+                    <p>User sends credentials → <code>POST /api/token/</code> (username, password)</p>
+                    <p>Server checks credentials against database → Valid!</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Server Returns Tokens</strong></p>
+                    <p>Server responds: <code>200 OK { "access": "...", "refresh": "..." }</code></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Storage</strong></p>
+                    <p>Client stores tokens in <code>localStorage</code> (or <code>HttpOnly Cookie</code>)</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>Authenticated Request</strong></p>
+                    <p>Client sends: <code>GET /api/profile/</code> with header <code>Authorization: Bearer &lt;access_token&gt;</code></p>
+                    <p>Server responds: <code>200 OK</code> (Profile Data)</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>Token Expired? Refresh!</strong></p>
+                    <p>Client sends: <code>POST /api/token/refresh/</code> (send "refresh" token)</p>
+                    <p>Server returns: NEW "access" token</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>📋 Step-by-Step Breakdown (Quick Reference)</summary>
+        <div class="toggle-content">
+<pre><code><span class="num">1.</span> <span class="kw">Login</span>      → User sends credentials (POST /api/token/)
+<span class="num">2.</span> <span class="kw">Verify</span>     → Server checks user exists + password matches hash
+<span class="num">3.</span> <span class="kw">Issue</span>      → Server returns access token + refresh token
+<span class="num">4.</span> <span class="kw">Store</span>      → Client saves tokens (localStorage or HttpOnly cookies)
+<span class="num">5.</span> <span class="kw">Request</span>    → Client sends "Authorization: Bearer &lt;token&gt;" header
+<span class="num">6.</span> <span class="kw">Refresh</span>    → When access expires, use refresh token to get new access token</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>⏱️ Token Types & Lifespans</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Token</th><th>Lifespan</th><th>Purpose</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Access Token</strong></td><td>Short (5-15 min)</td><td>Used for API calls</td></tr>
+                        <tr><td><strong>Refresh Token</strong></td><td>Long (24h - 7 days)</td><td>Used ONLY to get new access tokens</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Why two tokens?</strong></p>
+                    <ul>
+                        <li>Short-lived access token = Less damage if stolen</li>
+                        <li>Long-lived refresh token = Better UX, no forced re-login</li>
+                        <li>Refresh token can be revoked on the server side</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔐 What "Valid Credentials" Means (Backend Deep Dive)</summary>
+        <div class="toggle-content">
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🐍</span>
+                <div class="callout-content">
+                    <p><strong>Concretely, on the backend (Django mindset), what does "if valid" mean?</strong></p>
+                </div>
+            </div>
+
+            <h4>1️⃣ User sends credentials</h4>
+            <p>Usually: username / email + password (plain text over <strong>HTTPS</strong>)</p>
+
+            <h4>2️⃣ Server checks the user exists</h4>
+            <p>Django does something like: Look up the user in the database</p>
+            <p>Example: <code>User.objects.get(email=...)</code></p>
+            <p>❌ If no user → invalid</p>
+
+            <h4>3️⃣ Server verifies the password</h4>
+            <div class="callout callout-red">
+                <span class="callout-emoji">🔐</span>
+                <div class="callout-content">
+                    <p><strong>This is the MOST IMPORTANT part</strong></p>
+                    <ul>
+                        <li>Passwords are <strong>never stored in plain text</strong></li>
+                        <li>Django stores <strong>hashed passwords</strong></li>
+                        <li>It hashes the incoming password and compares it with the stored hash</li>
+                    </ul>
+                    <p>👉 If hashes match → ✅ valid</p>
+                    <p>👉 If not → ❌ invalid</p>
+                </div>
+            </div>
+
+            <h4>4️⃣ Only THEN tokens are created</h4>
+            <p>If <strong>both</strong> are true: user exists + password matches</p>
+            <p>➡️ Server generates: access token + refresh token</p>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💎</span>
+                <div class="callout-content">
+                    <p><strong>One-sentence Interview Explanation:</strong></p>
+                    <p>If they ask <em>"what do you mean by valid?"</em>, say:</p>
+                    <p><span class="key-phrase">"It means the server verifies that the user exists and that the provided password matches the stored hashed password."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>💾 Token Storage Best Practice</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Storage</th><th>Security</th><th>Note</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>localStorage</code></td><td>⚠️ Vulnerable to XSS</td><td>Easy but risky — JavaScript can access it</td></tr>
+                        <tr><td><code>HttpOnly Cookie</code></td><td>✅ Safer</td><td>Browser can't access via JS, prevents XSS token theft</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p><strong>Pro-tip:</strong> <code>HttpOnly</code> cookies are safer than <code>localStorage</code> to prevent XSS attacks.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p><strong>"JWT allows stateless authentication by issuing short-lived access tokens and refresh tokens, which the client uses to authenticate API requests."</strong></p>
+        <p><strong>"The user logs in with their credentials, and the server verifies them by checking that the user exists and that the provided password matches the stored hashed password. If valid, the server returns an access token and a refresh token."</strong></p>
+        <p><strong>"The client stores these tokens and includes the access token in the Authorization header (Bearer) for every protected request. When the access token expires, the client uses the refresh token to request a new access token without forcing the user to log in again."</strong></p>
+        <p><strong>"This keeps the API stateless, scalable, and works well for frontend apps like React or mobile clients."</strong></p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 2: JWT vs Session
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="jwt-vs-session">2. JWT vs Session-based Auth — Stateless vs Stateful ⚖️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "The main difference is WHERE the user's state is stored."</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>⚖️ The Core Difference</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Feature</th><th>🍪 Session-Based</th><th>🔑 JWT (Token-Based)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>State</strong></td><td><strong>Stateful:</strong> Server remembers the session</td><td><strong>Stateless:</strong> Server just verifies the signature</td></tr>
+                        <tr><td><strong>Storage</strong></td><td>Server Database + Client Cookie</td><td>Client Storage (LocalStorage/Cookie)</td></tr>
+                        <tr><td><strong>Scalability</strong></td><td>Harder (Need to share sessions across servers)</td><td>Easier (No server storage needed)</td></tr>
+                        <tr><td><strong>Best For</strong></td><td>Traditional server-rendered websites</td><td><strong>APIs, Mobile Apps, SPAs (React)</strong></td></tr>
+                        <tr><td><strong>Database Lookup</strong></td><td>Required on every request</td><td>Not needed for auth</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🧠 Mental Models</summary>
+        <div class="toggle-content">
+            <div class="columns">
+                <div class="callout callout-purple" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>Session = Server Remembers (Stateful)</strong></p>
+                        <ul>
+                            <li><strong>The Old Way/Traditional Django</strong></li>
+                            <li>Server keeps a record (a session ID) in its database</li>
+                            <li>User carries a "key" (cookie) to that record</li>
+                            <li><strong>Session = Server remembers (Stateful)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="callout callout-green" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>JWT = Token Contains the Data (Stateless)</strong></p>
+                        <ul>
+                            <li><strong>The API Way</strong></li>
+                            <li>Server signs a "badge" (the token) and gives it to user</li>
+                            <li>Server stores <em>nothing</em></li>
+                            <li>User carries the whole badge</li>
+                            <li><strong>Token = Token contains the data (Stateless)</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"The main difference is where the user's state is stored:</p>
+        <p><strong>Session-based auth is stateful.</strong> The server creates a session ID and <strong>stores it in the database</strong>. The client just holds the ID. This requires the server to check the database on every request.</p>
+        <p><strong>JWT is stateless.</strong> The server generates a signed token that <strong>contains the user's data</strong>. The server does <em>not</em> need to store this token in the database; it simply validates the signature.</p>
+        <p>I choose JWT for my APIs because it scales better (no database lookups for auth) and is easier to use across different platforms like mobile apps and React."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 3: Security Layers
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="security-layers">3. Django Security Layers — Defense in Depth 🛡️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Auth → Data → Requests → Transport"</p>
+            <p>Django security = <strong>layers</strong> 🛡️ — Think: <strong>Auth → Data → Requests → Transport</strong> (guides your answer)</p>
+        </div>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🧩</span>
+        <div class="callout-content">
+            <p><strong>Strong Opening Sentence:</strong></p>
+            <p><span class="key-phrase">"I secure my Django applications by combining Django's built-in security features with proper configuration and API-level protections."</span></p>
+            <p>This sounds mature and calm 😌</p>
+        </div>
+    </div>
+
+    <h3>The 5 Key Security Areas</h3>
+
+    <!-- SQL Injection -->
+    <details open>
+        <summary>1️⃣ SQL Injection Protection</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚨</span>
+                <div class="callout-content">
+                    <p><strong>What it is:</strong> Attackers trying to steal data by typing SQL commands into input fields to steal/modify data.</p>
+                </div>
+            </div>
+
+            <h4>🧠 First: What the code is TRYING to do</h4>
+            <p>The developer wants to check: <em>"Does a user exist with <strong>this username AND this password</strong>?"</em></p>
+            <p>So the SQL is:</p>
+<pre><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">'input'</span> <span class="kw">AND</span> password = <span class="str">'input'</span>;</code></pre>
+            <p>Meaning in English: <em>"Give me users whose username is X <strong>and</strong> password is Y."</em></p>
+
+            <h4>🚨 The mistake (this is the key)</h4>
+            <p>The mistake is: 👉 <strong>user input is directly glued into the SQL string</strong></p>
+            <p>The database cannot tell: what is <strong>data</strong> vs what is <strong>SQL logic</strong></p>
+
+            <h4>🎭 Now the attacker enters something sneaky</h4>
+            <p>Instead of a normal username, attacker types:</p>
+<pre><code>' OR 1=1 --</code></pre>
+
+            <h4>🧩 Step-by-step substitution</h4>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p>Username part becomes: <code>username = '' OR 1=1 --</code></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p>Full query becomes:</p>
+<pre><code><span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> username = <span class="str">''</span> <span class="kw">OR</span> <span class="num">1</span>=<span class="num">1</span> <span class="cm">--' AND password = 'anything';</span></code></pre>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>🧠 Read this like the database does:</strong></p>
+                    <ul>
+                        <li><code>username = ''</code> → Probably false (empty username)</li>
+                        <li><code>OR 1=1</code> → ⚠️ <strong>This is always TRUE</strong></li>
+                        <li>So now the condition is: <code>(FALSE OR TRUE)</code> → Which equals <strong>TRUE</strong></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>What does <code>--</code> mean?</strong></p>
+                    <p><code>--</code> is a <strong>comment</strong> in SQL. Everything after it is ignored.</p>
+                    <p>So <code>AND password = 'anything';</code> is ignored. 💥 Password check is gone.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>🎯 Final meaning to the database:</strong></p>
+                    <p>"Give me ANY user where the condition is TRUE."</p>
+                    <p>➡️ It returns the first user → App thinks: "Login success" → Attacker is in 😱</p>
+                </div>
+            </div>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">😱</span>
+                <div class="callout-content">
+                    <p><strong>Why this is dangerous:</strong></p>
+                    <ul>
+                        <li>Bypass login</li>
+                        <li>Read all data</li>
+                        <li>Delete tables</li>
+                        <li>Modify records</li>
+                    </ul>
+                    <p>This is <strong>game over</strong> level 🚨</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p><strong>Why Django ORM saves you</strong></p>
+                    <p>Django uses <strong>parameterized queries</strong>.</p>
+                    <p>When you do <code>User.objects.get(username=username)</code>, Django sends: <code>WHERE username = %s</code></p>
+                    <p>The input is treated as <strong>data</strong>, not executable SQL.</p>
+                    <p>So <code>' OR 1=1 --</code> becomes just a string — not executable SQL.</p>
+                    <p>👉 Injection becomes impossible.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🧠</span>
+                <div class="callout-content">
+                    <p><strong>One-sentence summary (lock this in):</strong></p>
+                    <p><span class="key-phrase">"SQL injection works because user input is treated as SQL code instead of data."</span></p>
+                </div>
+            </div>
+
+            <p><strong>Django's Protection:</strong></p>
+<pre><code><span class="cm"># Parameterized queries</span>
+User.objects.<span class="fn">get</span>(username<span class="op">=</span>username)
+<span class="cm"># Sends: WHERE username = %s</span>
+<span class="cm"># Input treated as DATA, not executable SQL</span></code></pre>
+
+            <p><strong>One-liner:</strong> "I rely on the Django ORM, which uses parameterized queries by default. This ensures that user input is never executed as code in the database."</p>
+        </div>
+    </details>
+
+    <!-- XSS -->
+    <details>
+        <summary>2️⃣ XSS (Cross-Site Scripting) Protection</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚨</span>
+                <div class="callout-content">
+                    <p><strong>What it is:</strong> Attackers injecting JavaScript that runs on OTHER users' browsers.</p>
+                    <p><strong>XSS = Attackers trying to run JavaScript on other users' screens. <em>Django Templates block this.</em></strong></p>
+                </div>
+            </div>
+
+            <p>Not your server. <strong>The victim is your user.</strong></p>
+
+            <h4>🎭 Simple story</h4>
+            <p>Imagine your app lets users post comments:</p>
+<pre><code>Hello everyone!</code></pre>
+            <p>Now an attacker posts:</p>
+<pre><code><span class="op">&lt;</span>script<span class="op">&gt;</span><span class="fn">alert</span>(<span class="str">'Hacked'</span>)<span class="op">&lt;</span>/script<span class="op">&gt;</span></code></pre>
+            <p>If your app <strong>renders this directly</strong> → 💥 the browser executes the script.</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">😱</span>
+                <div class="callout-content">
+                    <p><strong>Why this is dangerous — That injected JS can:</strong></p>
+                    <ul>
+                        <li>Steal JWT tokens from <code>localStorage</code></li>
+                        <li>Steal cookies</li>
+                        <li>Redirect users</li>
+                        <li>Act <strong>as the user</strong></li>
+                    </ul>
+                    <p>👉 This is how accounts get hijacked.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p><strong>Why Django is strong here</strong></p>
+                    <p>Django templates <strong>auto-escape HTML</strong>:</p>
+                    <p><code>&lt;script&gt;alert(1)&lt;/script&gt;</code> becomes <code>&amp;lt;script&amp;gt;alert(1)&amp;lt;/script&amp;gt;</code></p>
+                    <p>Browser sees <strong>text</strong>, not code ✅</p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🎤</span>
+                <div class="callout-content">
+                    <p><strong>Interview one-liner:</strong></p>
+                    <p><span class="key-phrase">"XSS is when malicious JavaScript is injected into a page and executed in the user's browser. Django prevents it by auto-escaping output in templates."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- CSRF -->
+    <details>
+        <summary>3️⃣ CSRF (Cross-Site Request Forgery) Protection</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚨</span>
+                <div class="callout-content">
+                    <p><strong>What it is:</strong> Attackers tricking a user's browser into making unwanted requests. <em>Django Tokens block this.</em></p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">⚠️</span>
+                <div class="callout-content">
+                    <p><strong>The Core Rule:</strong> If your browser has a cookie for <code>bank.com</code>, it will attach that cookie to ANY request going to <code>bank.com</code>, no matter where that request started.</p>
+                    <p>It doesn't matter if the request started from <code>bank.com</code> (good) or <code>evil-hacker.com</code> (bad). If the destination is the Bank, the browser slaps the cookie on it.</p>
+                </div>
+            </div>
+
+            <h4>The Attack (Step-by-Step)</h4>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>The Setup:</strong> You log in to your bank. Your browser saves a <strong>Session Cookie</strong>.</p>
+                    <p><em>Browser thinks:</em> "Okay, whenever I talk to the Bank, I must show this Cookie so they know it's me."</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>The Trap:</strong> You visit <code>evil-hacker.com</code>.</p>
+                    <p>Inside the code of this website, there is a hidden invisible form.</p>
+                    <p>The form says: <code>&lt;form action="https://bank.com/transfer" method="POST"&gt;</code></p>
+                    <p>JavaScript on the page automatically submits this form.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>The Betrayal (This is the "Note in Pocket" part):</strong></p>
+                    <p>The browser sees a request going to <code>bank.com</code>.</p>
+                    <p>The browser follows its one rule: <strong>"Oh! A request for the Bank? I have a cookie for that! I'll attach it."</strong></p>
+                    <p>The browser sends the malicious request <strong>WITH your valid Session Cookie</strong>.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>The Server's Mistake:</strong></p>
+                    <p>The Bank receives the request: "Transfer $1,000."</p>
+                    <p>It checks the Cookie: "The Cookie is valid. This must be the real user."</p>
+                    <p><strong>It processes the transfer.</strong></p>
+                </div>
+            </div>
+
+            <h4>How to Fix It (The CSRF Token)</h4>
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p>Since the browser automatically sends Cookies (which we can't stop), we need a <strong>second check</strong> that the browser <em>doesn't</em> do automatically.</p>
+                    <ul>
+                        <li><strong>The Fix:</strong> We force every form to include a random secret code (Token) that is <strong>NOT</strong> a cookie.</li>
+                        <li><code>evil-hacker.com</code> can trigger the request.</li>
+                        <li>The Browser adds the Cookie (ID).</li>
+                        <li><strong>BUT</strong>, the Hacker doesn't know the secret Token.</li>
+                        <li>The Bank checks: "Valid Cookie? Yes. Valid Token? <strong>NO.</strong> Blocked!"</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🎤</span>
+                <div class="callout-content">
+                    <p><strong>Interview stance:</strong></p>
+                    <p>"For session-based views, I strictly use the <code>@csrf_protect</code> decorator. However, since my API uses JWTs, CSRF is generally less of a concern for those specific endpoints, but I keep it enabled for the admin panel."</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- HTTPS -->
+    <details>
+        <summary>4️⃣ HTTPS Enforcement</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># In production settings</span>
+SECURE_SSL_REDIRECT <span class="op">=</span> <span class="num">True</span></code></pre>
+            <p>All traffic encrypted, prevents man-in-the-middle attacks.</p>
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🎤</span>
+                <div class="callout-content">
+                    <p><strong>Interview phrase:</strong></p>
+                    <p>"In production, I always enforce SSL by setting <code>SECURE_SSL_REDIRECT = True</code> to encrypt all traffic."</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- Rate Limiting -->
+    <details>
+        <summary>5️⃣ Rate Limiting</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># Using django-ratelimit or API gateway</span>
+<span class="cm"># Prevents abuse, DDoS attempts</span></code></pre>
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🎤</span>
+                <div class="callout-content">
+                    <p><strong>Interview phrase:</strong></p>
+                    <p>"To prevent abuse or DDoS attempts, I implement rate limiting using libraries like <code>django-ratelimit</code> or at the API gateway level."</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer (Complete)</h3>
+    <div class="interview-answer">
+        <p>"I secure my applications by leveraging Django's built-in defenses and following production best practices. Specifically, I focus on five key areas:</p>
+        <p><strong>1. SQL Injection:</strong> I rely on the <strong>Django ORM</strong>, which uses parameterized queries by default. This ensures that user input is never executed as code in the database.</p>
+        <p><strong>2. XSS (Cross-Site Scripting):</strong> I use Django's templating engine, which <strong>auto-escapes HTML</strong> characters, preventing malicious scripts from running in the browser.</p>
+        <p><strong>3. CSRF (Cross-Site Request Forgery):</strong> For session-based views, I strictly use the <code>@csrf_protect</code> decorator. However, since my API uses JWTs, CSRF is generally less of a concern for those specific endpoints, but I keep it enabled for the admin panel.</p>
+        <p><strong>4. HTTPS:</strong> In production, I always enforce SSL by setting <code>SECURE_SSL_REDIRECT = True</code> to encrypt all traffic.</p>
+        <p><strong>5. Rate Limiting:</strong> To prevent abuse or DDoS attempts, I implement rate limiting using libraries like <code>django-ratelimit</code> or at the API gateway level."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 4: CORS
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="cors">4. CORS Configuration — The VIP Guest List 🌐</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Whitelisting origins, allowing credentials."</p>
+            <p><strong>The Concept:</strong> Browsers are paranoid by default. They block your frontend (e.g., React on port 3000) from talking to your backend (e.g., Django on port 8000) because they are on different "origins" (different ports or domains).</p>
+            <p><strong>CORS (Cross-Origin Resource Sharing)</strong> is the way your backend tells the browser: <em>"It's okay, I know this guy. Let him in."</em></p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>🛡️ The Core Concept: Same-Origin Policy (SOP)</summary>
+        <div class="toggle-content">
+            <p>Before we talk about CORS (the solution), we must understand the problem: <strong>The Same-Origin Policy (SOP).</strong></p>
+            <p>This is a fundamental security rule built into every modern web browser (Chrome, Firefox, Safari).</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚫</span>
+                <div class="callout-content">
+                    <p><strong>The Rule:</strong> By default, a script running on <strong>Site A</strong> is <strong>forbidden</strong> from reading data from <strong>Site B</strong>.</p>
+                </div>
+            </div>
+
+            <h4>What defines an "Origin"?</h4>
+            <p>Two URLs have the same origin <em>only</em> if they have the exact same:</p>
+            <ol>
+                <li><strong>Protocol</strong> (e.g., <code>https</code>)</li>
+                <li><strong>Domain</strong> (e.g., <code>google.com</code>)</li>
+                <li><strong>Port</strong> (e.g., <code>:443</code> or <code>:3000</code>)</li>
+            </ol>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">📐</span>
+                <div class="callout-content">
+                    <p><strong>Origin = Protocol + Domain + Port</strong></p>
+                    <p>If <strong>even one</strong> of these differs, the browser considers them strangers and blocks the interaction.</p>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>URL 1</th><th>URL 2</th><th>Outcome</th><th>Reason</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><code>https://myapp.com</code></td><td><code>https://myapp.com/api</code></td><td>✅ <strong>Allowed</strong></td><td>Same Origin</td></tr>
+                        <tr><td><code>http://myapp.com</code></td><td><code>https://myapp.com</code></td><td>❌ <strong>Blocked</strong></td><td>Different Protocol (http vs https)</td></tr>
+                        <tr><td><code>https://myapp.com</code></td><td><code>https://api.myapp.com</code></td><td>❌ <strong>Blocked</strong></td><td>Different Subdomain</td></tr>
+                        <tr><td><code>http://localhost:3000</code></td><td><code>http://localhost:8000</code></td><td>❌ <strong>Blocked</strong></td><td>Different Port (The React vs Django issue!)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔓 Enter CORS: The "VIP Guest List"</summary>
+        <div class="toggle-content">
+            <p>SOP is great for security. But it breaks modern web apps because <strong>React (localhost:3000)</strong> and <strong>Django (localhost:8000)</strong> are technically "strangers" (different ports).</p>
+            <p><strong>CORS (Cross-Origin Resource Sharing)</strong> is the standard way for the <em>Server</em> to tell the <em>Browser</em>: "Relax, I know this guy."</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>✈️ The Preflight Flow ("The Preflight Check")</summary>
+        <div class="toggle-content">
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>The Knock:</strong> When React tries to send a request (like a POST with a JWT) to Django, the browser pauses. It doesn't send the real data yet.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>The Question (Preflight):</strong> The browser sends a tiny test request (method: <code>OPTIONS</code>) to Django essentially asking: <em>"Hey, <code>localhost:3000</code> is trying to talk to you. Is that okay?"</em></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>The Answer:</strong> Your Django server (via <code>django-cors-headers</code>) looks at its whitelist (<code>CORS_ALLOWED_ORIGINS</code>).</p>
+                    <p>If <code>localhost:3000</code> is on the list, it replies: <em>"Yes, allow <code>localhost:3000</code> and allow these headers."</em></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>The Action:</strong> The browser receives this permission, smiles, and finally sends the <em>real</em> POST request.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>⚙️ The Configuration</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># 1. The Whitelist (Who can knock?)</span>
+CORS_ALLOWED_ORIGINS <span class="op">=</span> [
+    <span class="str">"http://localhost:3000"</span>,  <span class="cm"># Your local React app</span>
+    <span class="str">"https://myapp.com"</span>,      <span class="cm"># Your real website</span>
+]
+
+<span class="cm"># 2. The ID Card Rule (Can they bring cookies?)</span>
+CORS_ALLOW_CREDENTIALS <span class="op">=</span> <span class="num">True</span></code></pre>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Setting</th><th>Your Code</th><th>Why?</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Who is allowed?</strong></td><td><code>CORS_ALLOWED_ORIGINS</code></td><td>To strict whitelist only <em>your</em> frontend (React), keeping hackers out.</td></tr>
+                        <tr><td><strong>Can we send Auth?</strong></td><td><code>CORS_ALLOW_CREDENTIALS = True</code></td><td>To let the browser send tokens/cookies across different ports.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Talking Points Breakdown</h4>
+            <ul>
+                <li><strong><code>CORS_ALLOWED_ORIGINS</code>:</strong> This is the most critical setting. It tells Django exactly which domains are allowed to make cross-origin requests.
+                    <ul><li><em>Interview Note:</em> "I never use <code>CORS_ORIGIN_ALLOW_ALL = True</code> in production because it is insecure. I explicitly whitelist my frontend domains."</li></ul>
+                </li>
+                <li><strong><code>CORS_ALLOW_CREDENTIALS = True</code>:</strong> This is required if your frontend needs to send <strong>cookies</strong> or <strong>HTTP Authentication headers</strong> (like your JWT Bearer token) in the cross-origin request.</li>
+            </ul>
+        </div>
+    </details>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🚨</span>
+        <div class="callout-content">
+            <p><strong>One important rule (senior signal):</strong></p>
+            <p>If you say this, you score points:</p>
+            <p><span class="key-phrase">"I avoid using <code>CORS_ALLOW_ALL_ORIGINS</code> in production for security reasons."</span></p>
+            <p>🔥 That's a green flag sentence.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><strong>Key truth about CORS:</strong></p>
+            <ul>
+                <li>CORS is <strong>NOT about security against hackers</strong></li>
+                <li>It is about <strong>browser rules</strong></li>
+                <li>It controls <strong>which frontend websites</strong> can call your API</li>
+                <li><strong>CORS = frontend → backend permission</strong></li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p>"I handle CORS using the <code>django-cors-headers</code> library. My setup focuses on two key configurations:</p>
+        <p><strong>1. Whitelisting Origins:</strong> I explicitly define <code>CORS_ALLOWED_ORIGINS</code>. I add <code>http://localhost:3000</code> for my local React development server and my production domain, <code>https://myapp.com</code>. This prevents random, unauthorized websites from using my API.</p>
+        <p><strong>2. Allowing Credentials:</strong> I set <code>CORS_ALLOW_CREDENTIALS = True</code>. This is crucial because it allows the frontend to send HTTP cookies and authentication headers (like the JWT Bearer token) with the request."</p>
+        <p>I avoid using <code>CORS_ALLOW_ALL_ORIGINS</code> in production for security reasons.</p>
+    </div>
+
+    <details>
+        <summary>🎤 Summary for the Interview (Why CORS)</summary>
+        <div class="toggle-content">
+            <div class="interview-answer">
+                <p>"We need CORS because browsers enforce the <strong>Same-Origin Policy</strong> to prevent malicious sites from stealing user data or executing unauthorized actions on other sites.</p>
+                <p>However, since my frontend (React) and backend (Django) run on different ports, the browser considers them different origins and blocks the connection by default.</p>
+                <p><strong>CORS</strong> allows me to safely relax this rule. It lets my backend explicitly 'whitelist' my frontend domain so they can communicate, while still blocking everyone else."</p>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 5: CORS vs CSRF
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="cors-vs-csrf">5. CORS vs CSRF — Don't Confuse Them! ⚔️</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "CORS = who can READ my data. CSRF = is this REALLY the user?"</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>📊 The Key Differences</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Aspect</th><th>CORS</th><th>CSRF</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Question</strong></td><td>"Who is allowed to talk to me?"</td><td>"Is this really the user, or am I being tricked?"</td></tr>
+                        <tr><td><strong>Protects Against</strong></td><td>Unauthorized sites READING your data</td><td>Attackers making requests AS the user</td></tr>
+                        <tr><td><strong>Direction</strong></td><td>Frontend → Backend permission</td><td>Protecting logged-in users</td></tr>
+                        <tr><td><strong>Mechanism</strong></td><td>Browser blocks reading response</td><td>Server validates secret token</td></tr>
+                        <tr><td><strong>Security Focus</strong></td><td>Browser rules, not hacker protection</td><td>User intent validation</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🧠 Mental Models (Side-by-Side)</summary>
+        <div class="toggle-content">
+            <div class="columns">
+                <div>
+                    <h4>CORS Mental Model: "Tinted Window" (Privacy)</h4>
+
+                    <div class="callout callout-blue" style="margin:0 0 12px 0">
+                        <div class="callout-content">
+                            <p><strong>The Problem:</strong> Can a stranger <strong>look</strong> at your money?</p>
+                            <ul>
+                                <li><strong>The Scenario:</strong> You drive your Car (Browser) to the Bank Teller (API).</li>
+                                <li><strong>The Rule (Same-Origin Policy):</strong> To protect your privacy, the Car has <strong>blacked-out windows</strong>.</li>
+                                <li><strong>The Situation:</strong> You try to ask the Teller: "How much money do I have?" (A <code>GET</code> Request).</li>
+                                <li><strong>The Block:</strong> The Teller shouts the answer back, "You have $1,000!"... <strong>BUT</strong>, because the windows are blacked out, <strong>you cannot see or hear the answer.</strong> The Car protects you from seeing data unless the Bank explicitly says it's okay.</li>
+                                <li><strong>The Fix (CORS):</strong> The Bank Teller gives your specific Car a special pass that rolls down the window.</li>
+                            </ul>
+                            <p><em>Without CORS:</em> The request happens, but you <strong>can't see the result</strong>.</p>
+                            <p><em>With CORS:</em> The window rolls down, and you can read the data.</p>
+                            <blockquote><strong>CORS prevents unauthorized sites from READING your data.</strong></blockquote>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">🔑</span>
+                        <div class="callout-content">
+                            <p><strong>CORS Key Truths:</strong></p>
+                            <ul>
+                                <li>NOT about security against hackers</li>
+                                <li>About <strong>browser rules</strong></li>
+                                <li>Controls <strong>which frontend websites</strong> can call your API</li>
+                                <li><strong>CORS = frontend → backend permission</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h4>CSRF Mental Model: "The Automatic Cookie"</h4>
+
+                    <div class="callout callout-red" style="margin:0 0 12px 0">
+                        <div class="callout-content">
+                            <p><strong>The Problem:</strong> Is this really the user, or am I being tricked?</p>
+                            <p><strong>Characters:</strong></p>
+                            <ul>
+                                <li>🧑 You (already logged in)</li>
+                                <li>🍪 Browser cookies</li>
+                                <li>🏦 Backend (bank.com)</li>
+                                <li>😈 Malicious site (evil.com)</li>
+                            </ul>
+                            <p><strong>The Core Rule: "Cookies are Automatic"</strong></p>
+                            <p>If your browser has a cookie for <code>bank.com</code>, it will attach that cookie to ANY request going to <code>bank.com</code>, no matter where that request started.</p>
+                            <p>It doesn't matter if the request started from <code>bank.com</code> (good) or <code>evil-hacker.com</code> (bad). If the destination is the Bank, the browser slaps the cookie on it.</p>
+                            <p><strong>Why CSRF Token Fixes It:</strong></p>
+                            <ul>
+                                <li>Force every form to include a random secret code (Token) that is <strong>NOT</strong> a cookie</li>
+                                <li>Hacker can trigger the request, Browser adds Cookie</li>
+                                <li><strong>BUT</strong> Hacker doesn't know the secret Token</li>
+                                <li>Bank checks: "Valid Cookie? Yes. Valid Token? <strong>NO.</strong> Blocked!"</li>
+                            </ul>
+                            <blockquote><strong>CSRF protects logged-in users from forged requests.</strong></blockquote>
+                        </div>
+                    </div>
+
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">🔑</span>
+                        <div class="callout-content">
+                            <p><strong>CSRF Key Truths:</strong></p>
+                            <ul>
+                                <li>Cookies are sent <strong>automatically</strong></li>
+                                <li>Backend cannot tell <strong>who initiated the request</strong></li>
+                                <li>CSRF tokens prove <strong>user intent</strong></li>
+                                <li><strong>CSRF = protecting logged-in users</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 6: OAuth 2.0
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="oauth">6. OAuth 2.0 — Third-Party Login 🔑</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Talking Point:</strong> "Authorization Code flow keeps tokens off the browser."</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>🎯 What Problem It Solves</summary>
+        <div class="toggle-content">
+            <ul>
+                <li>👉 "Login with Google / GitHub"</li>
+                <li>👉 You <strong>don't</strong> handle passwords</li>
+                <li>👉 Browser is NOT a safe place for tokens</li>
+            </ul>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔄 The Authorization Code Flow</summary>
+        <div class="toggle-content">
+            <p>Participants: <strong>👤 User (Browser)</strong> → <strong>🖥️ Client (React)</strong> → <strong>⚙️ Server (Django)</strong> → <strong>🌐 Google</strong></p>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>STEP 1 — The Visit (Front Door)</strong></p>
+                    <p>User clicks "Login with Google" → App redirects user to Google Login Page</p>
+                    <p>User enters password safely on Google.com</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>STEP 2 — The Hand-Off (The "Note")</strong></p>
+                    <p>Google redirects back with <code>?code=xyz123</code></p>
+                    <p>Google says: <em>"Here is a NOTE (Code). It is NOT the key."</em></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>STEP 3 — The Secret Call (Back Door)</strong></p>
+                    <p>React sends <code>xyz123</code> to Django</p>
+                    <p>Django calls Google on a <strong>PRIVATE LINE</strong>: "I have Note 'xyz123'. Give me the Keys."</p>
+                    <p>Google replies: <em>"Verified. Here is the ACCESS TOKEN."</em></p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>STEP 4 — Login Complete</strong></p>
+                    <p>Server logs user in (Issues JWT)</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>📖 The Flow (Simple, Human, Precise)</summary>
+        <div class="toggle-content">
+            <h4>Step 1 — The Visit (Front Door)</h4>
+            <ul>
+                <li>The user clicks <strong>"Login with Google"</strong>.</li>
+                <li>Your app redirects the user to <strong>Google's login page</strong>.</li>
+                <li>The user enters their credentials <strong>on Google</strong>, not your app.</li>
+            </ul>
+            <blockquote>Google says: <em>"I trust this user. But I won't give tokens to the browser."</em></blockquote>
+
+            <h4>Step 2 — The Hand-off (The Note)</h4>
+            <ul>
+                <li>Google redirects the user back to your app with a <strong>temporary Authorization Code</strong>.</li>
+                <li>This code is <strong>short-lived</strong> and <strong>not a token</strong>.</li>
+            </ul>
+            <blockquote>Google says: <em>"Take this Note back to your backend."</em></blockquote>
+
+            <h4>Step 3 — The Secret Call (Back Door)</h4>
+            <ul>
+                <li>Your React app sends the <strong>Authorization Code</strong> to your Django backend.</li>
+                <li>Your backend makes a <strong>server-to-server request</strong> to Google.</li>
+                <li>It exchanges the code <strong>plus a Client Secret</strong> for an <strong>Access Token</strong>.</li>
+            </ul>
+            <blockquote>Google says: <em>"You're calling from a trusted server. Here's the token."</em></blockquote>
+
+            <p><strong>The OAuth Exchange requires:</strong></p>
+            <p>When Django calls Google, it sends:</p>
+            <ol>
+                <li><strong>Authorization Code</strong> (from the browser)</li>
+                <li><strong>Client ID</strong> (public)</li>
+                <li><strong>Client Secret</strong> (private)</li>
+                <li>Redirect URI (must match exactly)</li>
+            </ol>
+
+            <p>Example (simplified):</p>
+<pre><code>POST https://oauth2.googleapis.com/token
+
+{
+  <span class="str">"code"</span>: <span class="str">"xyz123"</span>,
+  <span class="str">"client_id"</span>: <span class="str">"abc.apps.googleusercontent.com"</span>,
+  <span class="str">"client_secret"</span>: <span class="str">"SUPER_SECRET_VALUE"</span>,
+  <span class="str">"redirect_uri"</span>: <span class="str">"https://yourapp.com/oauth/callback"</span>,
+  <span class="str">"grant_type"</span>: <span class="str">"authorization_code"</span>
+}</code></pre>
+
+            <h4>Step 4 — Login Complete</h4>
+            <ul>
+                <li>Your backend: creates or finds the user, issues <strong>your own JWT/session</strong></li>
+                <li>The frontend is now logged in.</li>
+            </ul>
+
+            <hr style="margin: 2em 0; border-top: 2px dashed var(--border);">
+            <details style="background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(251,191,36,0.06)); border-left: 3px solid rgba(245,158,11,0.5); border-radius: 8px; padding: 0.75em 1em;">
+                <summary>🔬 Under the Hood: The Raw Code Logic After Step 4 (Start to Finish)</summary>
+                <div class="toggle-content" style="background: transparent; border-left: none; border-radius: 0; padding: 1em 0 0 0;">
+            <div class="callout callout-blue">
+                <span class="callout-emoji">📖</span>
+                <div class="callout-content">
+                    <p>As Habakkuk 2:2 says, <em>"Write the vision and make it plain..."</em> ✍🏽</p>
+                    <p>So let's make this perfectly plain. Here is the raw, step-by-step technical breakdown of exactly what your Django backend and React frontend are doing under the hood during the final phases of authentication.</p>
+                </div>
+            </div>
+
+            <!-- Sub-step 1: Two-Step Google Exchange -->
+            <h4>🔄 1. The Two-Step Google Exchange (Inside Django)</h4>
+            <p>Before Django can check your database, it has to securely trade the one-time code from React for the user's actual profile. This happens in two rapid-fire API calls:</p>
+
+            <div class="step-card">
+                <div class="step-num">A</div>
+                <div class="step-content">
+                    <p><strong>🎟️ Code ➡️ Token:</strong> Django takes the <code>authorization_code</code> (from React) and the <code>client_secret</code> (hidden in your backend) and sends them to Google.</p>
+                    <p>Google replies: <em>"Checks out! Here is your temporary <code>access_token</code>."</em></p>
+                    <p>Think of this as a <strong>temporary hotel keycard</strong> that only unlocks the door to the user's basic info.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">B</div>
+                <div class="step-content">
+                    <p><strong>👤 Token ➡️ Data:</strong> Django immediately makes a <em>second</em> API call to Google's UserInfo API, saying: <em>"Here is my <code>access_token</code>, let me read this user's profile."</em></p>
+                </div>
+            </div>
+
+            <!-- Sub-step 2: Extract Google Data -->
+            <h4>⚙️ 2. Django Extracts the Google Data</h4>
+            <p>Thanks to that second API call, Google replies with a JSON payload containing the user's profile:</p>
+<pre><code>{
+  <span class="str">"sub"</span>: <span class="str">"1039485739847593"</span>,  <span class="cm">// Google's unique ID for the user</span>
+  <span class="str">"email"</span>: <span class="str">"wiganz@example.com"</span>,
+  <span class="str">"email_verified"</span>: <span class="num">true</span>,
+  <span class="str">"name"</span>: <span class="str">"Wiganz"</span>,
+  <span class="str">"picture"</span>: <span class="str">"https://lh3.googleusercontent.com/a/..."</span>
+}</code></pre>
+
+            <!-- Sub-step 3: Database Hit -->
+            <h4>💾 3. Django Hits Your Database</h4>
+            <p>Now Django takes that <code>email</code> and looks at your PostgreSQL/SQLite database. In your views, the logic is usually a simple <code>get_or_create</code> query:</p>
+<pre><code>User.objects.get_or_create(email=<span class="str">"wiganz@example.com"</span>)</code></pre>
+
+            <div class="step-card">
+                <div class="step-num">✓</div>
+                <div class="step-content">
+                    <p><strong>If user exists:</strong> Django fetches your existing user object.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">+</div>
+                <div class="step-content">
+                    <p><strong>If user doesn't exist:</strong> Django creates a new row in your <code>User</code> table. It might also save your <code>name</code> and <code>picture</code> to a <code>UserProfile</code> model so your app can display your avatar later.</p>
+                </div>
+            </div>
+
+            <!-- Sub-step 4: JWT Minting -->
+            <h4>🗝️ 4. Django Mints the JWT (JSON Web Token)</h4>
+            <p>This is where the magic happens and your app <strong>takes total control</strong>. Your backend uses a library (like <code>djangorestframework-simplejwt</code>). It takes your Django <code>User</code> object and mathematically signs a token using your <code>SECRET_KEY</code> from <code>settings.py</code>.</p>
+            <p>It creates <strong>two</strong> tokens so you never have to rely on Google again for this session:</p>
+
+            <div class="step-card">
+                <div class="step-num">🟢</div>
+                <div class="step-content">
+                    <p><strong>Access Token:</strong> Short-lived (e.g., 15 minutes). React uses this for every single API call to prove the user is logged in.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">🟡</div>
+                <div class="step-content">
+                    <p><strong>Refresh Token:</strong> Long-lived (e.g., 7 days). React uses this to silently get a new Access Token when the old one expires, so the user doesn't get kicked out abruptly.</p>
+                </div>
+            </div>
+
+            <!-- Sub-step 5: Django Sends Payload -->
+            <h4>📦 5. Django Sends the Payload to React</h4>
+            <p>Django packages those freshly minted tokens up and sends a <code>200 OK</code> HTTP response back to your React app:</p>
+<pre><code>{
+  <span class="str">"access"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR..."</span>,
+  <span class="str">"refresh"</span>: <span class="str">"eyJhbGciOiJIUzI1NiIsInR..."</span>,
+  <span class="str">"user"</span>: {
+    <span class="str">"id"</span>: <span class="num">1</span>,
+    <span class="str">"email"</span>: <span class="str">"wiganz@example.com"</span>,
+    <span class="str">"name"</span>: <span class="str">"Wiganz"</span>
+  }
+}</code></pre>
+
+            <!-- Sub-step 6: React Takes Over -->
+            <h4>🌐 6. React Takes Over (Frontend State)</h4>
+            <p>Your React app intercepts this response and does three final things to finish the job:</p>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>Saves the Tokens:</strong> Stores the <code>access</code> and <code>refresh</code> tokens somewhere safe (usually securely in <code>localStorage</code> or <code>HttpOnly Cookies</code>).</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>Updates Global State:</strong> Updates your Context API or Redux store to set <code>isAuthenticated: true</code> and sets the <code>currentUser</code> data so your navigation bar can update.</p>
+                </div>
+            </div>
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Redirects the User:</strong> React Router pushes the user away from the <code>/login</code> page and into the <code>/dashboard</code> or home page of your app! 🚀</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">✅</span>
+                <div class="callout-content">
+                    <p><strong>That's the complete, unbroken chain</strong> — from the moment Django gets the authorization code to the moment React logs the user in! 💻✨</p>
+                </div>
+            </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔐 Why This Flow Is Secure (This Is the Money Part 💰)</summary>
+        <div class="toggle-content">
+            <h4>The browser is not a safe place</h4>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚨</span>
+                <div class="callout-content">
+                    <p><strong>Browser is not safe because:</strong></p>
+                </div>
+            </div>
+
+            <h4>A. URLs are visible and logged</h4>
+            <p>If a token appears in a URL:</p>
+            <ul>
+                <li>Browser history</li>
+                <li>Server logs</li>
+                <li>Analytics tools</li>
+                <li>Referrer headers</li>
+                <li>Screenshots</li>
+            </ul>
+            <p>👉 <strong>You can't control where it goes.</strong></p>
+
+            <h4>B. JavaScript is not trustworthy</h4>
+            <p>Anything accessible to JS can be stolen via:</p>
+            <ul>
+                <li>XSS attacks</li>
+                <li>Malicious dependencies</li>
+                <li>Browser extensions</li>
+            </ul>
+            <p>If an Access Token lives in JS:</p>
+            <blockquote>Assume it will eventually leak.</blockquote>
+
+            <h4>C. Browsers talk too much</h4>
+            <p>Browsers automatically: attach headers, follow redirects, send referrers.</p>
+            <p>Tokens don't belong in a place that <strong>auto-shares context</strong>.</p>
+
+            <h4>D. The browser cannot keep secrets</h4>
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p>This is the key OAuth assumption:</p>
+                    <p><strong>A browser is a public environment. A server is a private environment.</strong></p>
+                    <p>Browsers <strong>cannot safely store secrets</strong>. Servers can.</p>
+                </div>
+            </div>
+
+            <h4>🔐 What OAuth designers decided</h4>
+            <ul>
+                <li>Browsers get <strong>temporary, useless things</strong> (Auth Code)</li>
+                <li>Servers get <strong>powerful things</strong> (Access Token)</li>
+            </ul>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🛡️</span>
+                <div class="callout-content">
+                    <p><strong>So:</strong></p>
+                    <ul>
+                        <li><strong>The browser only ever sees a temporary Code</strong> (useless alone)</li>
+                        <li><strong>Real Token never touches</strong> the URL or frontend</li>
+                        <li>Even if an attacker steals the Code:
+                            <ul>
+                                <li>It's useless without the <strong>Client Secret</strong></li>
+                                <li>Only your backend can exchange it</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔑 Client Secret Explained</summary>
+        <div class="toggle-content">
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🔐</span>
+                <div class="callout-content">
+                    <p><strong>The Client Secret proves to Google:</strong></p>
+                    <p><em>"This request is coming from the real backend, not a browser or attacker."</em></p>
+                </div>
+            </div>
+
+            <h4>Start with this truth (foundational)</h4>
+            <blockquote><strong>OAuth is not just about users. It's also about verifying the application itself.</strong></blockquote>
+
+            <p>Google is asking <strong>two questions</strong>, not one:</p>
+            <ol>
+                <li>1️⃣ <em>Is this user really who they say they are?</em></li>
+                <li>2️⃣ <em>Is this app really the app that registered with me?</em></li>
+            </ol>
+            <p>The <strong>Client Secret answers question #2</strong>.</p>
+
+            <p>It is:</p>
+            <ul>
+                <li>Issued by Google when you register your app</li>
+                <li>Stored <strong>only on the backend</strong></li>
+                <li>Never exposed to users</li>
+            </ul>
+
+            <p>When you go to Google Cloud Console and create OAuth credentials, Google gives you:</p>
+            <ul>
+                <li><strong>Client ID</strong> → public identity of your app</li>
+                <li><strong>Client Secret</strong> → private proof of your app</li>
+            </ul>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr><th>Thing</th><th>Meaning</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td><strong>Client ID</strong></td><td>"Hi, I am App X" (public)</td></tr>
+                        <tr><td><strong>Client Secret</strong></td><td>"Here is proof that I am REALLY App X" (private)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Anyone can say the first. Only <strong>your backend</strong> can say the second.</p>
+
+            <h4>🧠 What Google is protecting against</h4>
+            <p>Imagine this scenario without a Client Secret:</p>
+            <ul>
+                <li>Attacker creates a fake app</li>
+                <li>Steals an Authorization Code from a user's browser</li>
+                <li>Calls Google and says: <em>"Hey, I'm your app. Give me the token."</em></li>
+            </ul>
+            <p>Without a Client Secret, <strong>Google has no way to tell</strong> if that call is your real backend or a random attacker.</p>
+            <p>So Google says: <em>"Show me the secret I gave only to the real app."</em></p>
+
+            <h4>🔐 Why the Client Secret must stay on the backend</h4>
+            <p><strong>Because it is shared trust</strong></p>
+            <ul>
+                <li>Google trusts <strong>your backend</strong></li>
+                <li>Your backend proves itself using the Client Secret</li>
+            </ul>
+            <p>If the Client Secret leaks:</p>
+            <ul>
+                <li>Anyone can impersonate your app</li>
+                <li>Anyone can exchange stolen codes for tokens</li>
+                <li>Google can no longer trust requests claiming to be "you"</li>
+            </ul>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">🚫</span>
+                <div class="callout-content">
+                    <p>That's why:</p>
+                    <ul>
+                        <li>❌ Never in frontend code</li>
+                        <li>❌ Never in JavaScript</li>
+                        <li>❌ Never in mobile apps</li>
+                        <li>✅ Only in backend environment variables</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>🗣️ Interview-ready Answer</h3>
+    <div class="interview-answer">
+        <p><strong>"I use the OAuth 2.0 Authorization Code flow because the browser isn't secure.</strong></p>
+        <p><strong>Google gives the browser a temporary authorization code, not the access token.</strong></p>
+        <p><strong>My backend then exchanges that code for the real token using a secure server-to-server call with a client secret.</strong></p>
+        <p><strong>This ensures the access token is never exposed in the browser or URL."</strong></p>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p>Stop there. Don't overtalk.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SUMMARY
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="summary">🎯 Session 2 Summary</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Topic</th><th>Key Point</th></tr></thead>
+            <tbody>
+                <tr><td><strong>JWT Flow</strong></td><td>Stateless auth: access token (short) + refresh token (long)</td></tr>
+                <tr><td><strong>JWT vs Session</strong></td><td>JWT = stateless/scalable, Session = stateful/database</td></tr>
+                <tr><td><strong>Security</strong></td><td>ORM (SQL Injection), Templates (XSS), Tokens (CSRF), HTTPS, Rate Limiting</td></tr>
+                <tr><td><strong>CORS</strong></td><td>Whitelist origins, allow credentials, NEVER allow all in production</td></tr>
+                <tr><td><strong>CORS vs CSRF</strong></td><td>CORS = reading data, CSRF = user intent</td></tr>
+                <tr><td><strong>OAuth 2.0</strong></td><td>Authorization Code flow keeps tokens server-side</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🌱</span>
+        <div class="callout-content">
+            <p><strong>Senior Mindset:</strong></p>
+            <p><strong>Security is layers, not a single solution.</strong></p>
+            <p><strong>Auth → Data → Requests → Transport</strong></p>
+        </div>
+    </div>
+
+    <h3>📌 Quick Reference: Key Phrases for Interview</h3>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Concept</th><th>Key Phrase</th></tr></thead>
+            <tbody>
+                <tr><td>JWT Flow</td><td>"Stateless authentication using access and refresh tokens"</td></tr>
+                <tr><td>JWT vs Session</td><td>"The main difference is WHERE the user's state is stored"</td></tr>
+                <tr><td>Security Layers</td><td>"Auth → Data → Requests → Transport"</td></tr>
+                <tr><td>CORS</td><td>"Whitelisting origins, allowing credentials"</td></tr>
+                <tr><td>CORS vs CSRF</td><td>"CORS = who can READ my data. CSRF = is this REALLY the user?"</td></tr>
+                <tr><td>OAuth 2.0</td><td>"Authorization Code flow keeps tokens off the browser"</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+</div><!-- end main-content -->
+
+<script>
+    // ═══ Dark Mode Toggle ═══
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ═══ Mobile Menu Toggle ═══
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // ═══ Progress Bar ═══
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+
+    // ═══ Active Sidebar Link on Scroll ═══
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Figure 1-15 with Message Queue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .flow-line {
+            background: repeating-linear-gradient(to bottom, #9CA3AF 0, #9CA3AF 5px, transparent 5px, transparent 10px);
+            background-size: 100% 200%;
+            animation: moveLines 1s linear infinite;
+        }
+        .flow-line-async {
+            background: repeating-linear-gradient(to bottom, #8B5CF6 0, #8B5CF6 5px, transparent 5px, transparent 10px);
+            background-size: 100% 200%;
+            animation: moveLinesAsync 0.8s linear infinite;
+        }
+        @keyframes moveLines { 0% { background-position: 0 100%; } 100% { background-position: 0 0; } }
+        @keyframes moveLinesAsync { 0% { background-position: 0 100%; } 100% { background-position: 0 0; } }
+        .pulse { animation: pulseAnim 2s infinite; }
+        @keyframes pulseAnim { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body class="bg-white p-4 font-sans text-gray-800 flex justify-center">
+
+    <div class="max-w-6xl w-full">
+        <!-- TOP TIER: DNS, User, CDN -->
+        <div class="flex justify-between items-center mb-6 px-10">
+            <div class="flex flex-col items-center">
+                <i class="fas fa-globe text-4xl text-gray-600 mb-2"></i>
+                <span class="font-bold border-2 border-gray-600 rounded-full px-3 py-1">DNS</span>
+            </div>
+            
+            <div class="border-2 border-blue-400 rounded-2xl p-4 flex flex-col items-center w-1/3 bg-blue-50">
+                <span class="absolute -mt-8 bg-white px-2 font-semibold text-gray-600">User</span>
+                <div class="flex gap-8 text-3xl text-gray-700">
+                    <div class="flex flex-col items-center"><i class="fas fa-laptop"></i><span class="text-xs mt-1">Web browser</span></div>
+                    <div class="flex flex-col items-center"><i class="fas fa-mobile-alt"></i><span class="text-xs mt-1">Mobile app</span></div>
+                </div>
+            </div>
+
+            <div class="flex flex-col items-center">
+                <i class="fas fa-cloud text-5xl text-blue-400 mb-2"></i>
+                <span class="font-bold">CDN</span>
+            </div>
+        </div>
+
+        <!-- LOAD BALANCER -->
+        <div class="flex flex-col items-center mb-6 relative">
+            <div class="flex w-1/3 justify-between px-10 text-xs text-gray-500 absolute top-0 mt-[-15px]">
+                <span>www.mysite.com</span>
+                <span>api.mysite.com</span>
+            </div>
+            <div class="flex gap-20">
+                <div class="w-1 h-12 flow-line"></div>
+                <div class="w-1 h-12 flow-line"></div>
+            </div>
+            <div class="bg-blue-600 text-white px-6 py-2 rounded shadow-md font-bold flex items-center gap-2 z-10">
+                <i class="fas fa-network-wired"></i> Load balancer
+            </div>
+            <!-- Split to DCs -->
+            <div class="flex w-2/3 justify-between mt-2">
+                <div class="flex flex-col items-center w-1/2 -ml-10">
+                    <span class="text-xs text-gray-500 bg-white px-1 relative top-4">Geo-routed</span>
+                    <div class="w-[2px] h-16 bg-blue-600 rotate-[30deg] origin-top"></div>
+                </div>
+                <div class="flex flex-col items-center w-1/2 -mr-10">
+                    <span class="text-xs text-gray-500 bg-white px-1 relative top-4">Geo-routed</span>
+                    <div class="w-[2px] h-16 bg-blue-600 -rotate-[30deg] origin-top"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA CENTERS -->
+        <div class="grid grid-cols-2 gap-8 relative z-0">
+            
+            <!-- DC1 US-East -->
+            <div class="bg-gray-100 border-2 border-dashed border-teal-400 rounded-3xl p-6 relative">
+                <span class="absolute top-4 left-4 font-bold text-gray-600">DC1<br>US-East</span>
+                
+                <!-- Web Servers -->
+                <div class="flex justify-center mt-8 relative z-10">
+                    <div class="border-2 border-dashed border-teal-500 rounded-xl p-4 bg-white flex flex-col items-center w-3/4 shadow-sm">
+                        <div class="flex gap-2 mb-2 text-green-500 text-4xl">
+                            <i class="fas fa-server"></i><i class="fas fa-server"></i><i class="fas fa-server"></i>
+                        </div>
+                        <span class="font-semibold text-gray-700">Web servers</span>
+                        <span class="text-xs text-green-600 bg-green-50 px-2 rounded-full mt-1 border border-green-200">The Producers</span>
+                    </div>
+                </div>
+
+                <!-- Splitting flows inside DC -->
+                <div class="flex justify-center mt-4">
+                    <!-- Flow to Data -->
+                    <div class="w-1/3 flex flex-col items-center border-r border-gray-300">
+                        <span class="text-[10px] text-gray-500 bg-gray-100 px-1 z-10">Fast I/O</span>
+                        <div class="w-[2px] h-10 flow-line"></div>
+                    </div>
+                    <!-- Flow to Queue -->
+                    <div class="w-1/3 flex flex-col items-center">
+                        <span class="text-[10px] text-purple-600 font-bold bg-gray-100 px-1 z-10">Slow Tasks</span>
+                        <div class="w-[2px] h-10 flow-line-async"></div>
+                    </div>
+                </div>
+
+                <!-- Backends (DB, Cache, Queue) -->
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <!-- Standard Data (From Fig 1-15) -->
+                    <div class="flex gap-2">
+                        <div class="bg-blue-500 text-white rounded-lg p-3 flex flex-col items-center shadow-md w-1/2">
+                            <i class="fas fa-database text-2xl mb-1"></i>
+                            <span class="text-xs font-semibold">Databases</span>
+                        </div>
+                        <div class="bg-blue-500 text-white rounded-lg p-3 flex flex-col items-center shadow-md w-1/2 relative">
+                             <div class="absolute top-1 left-2 text-[8px] bg-blue-700 px-1 rounded">CACHE</div>
+                             <div class="absolute top-3 left-4 text-[8px] bg-blue-700 px-1 rounded">CACHE</div>
+                            <i class="fas fa-memory text-xl mt-3 mb-1"></i>
+                            <span class="text-xs font-semibold">Caches</span>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Message Queue & Workers -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-2 flex flex-col items-center shadow-inner">
+                        <div class="bg-purple-600 text-white w-full text-center py-2 rounded-lg shadow-md pulse">
+                            <i class="fas fa-boxes text-lg"></i>
+                            <div class="text-[10px] font-bold mt-1">Message Queue</div>
+                        </div>
+                        <div class="w-1 h-6 flow-line-async my-1"></div>
+                        <div class="bg-orange-500 text-white w-full text-center py-2 rounded-lg shadow-md">
+                            <i class="fas fa-cogs text-lg"></i>
+                            <div class="text-[10px] font-bold mt-1">Worker Servers</div>
+                            <div class="text-[8px] text-orange-100 mt-1">The Consumers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DC2 US-West -->
+            <div class="bg-gray-100 border-2 border-dashed border-teal-400 rounded-3xl p-6 relative">
+                 <span class="absolute top-4 left-4 font-bold text-gray-600">DC2<br>US-West</span>
+                
+                <!-- Web Servers -->
+                <div class="flex justify-center mt-8 relative z-10">
+                    <div class="border-2 border-dashed border-teal-500 rounded-xl p-4 bg-white flex flex-col items-center w-3/4 shadow-sm">
+                        <div class="flex gap-2 mb-2 text-green-500 text-4xl">
+                            <i class="fas fa-server"></i><i class="fas fa-server"></i><i class="fas fa-server"></i>
+                        </div>
+                        <span class="font-semibold text-gray-700">Web servers</span>
+                        <span class="text-xs text-green-600 bg-green-50 px-2 rounded-full mt-1 border border-green-200">The Producers</span>
+                    </div>
+                </div>
+
+                <!-- Splitting flows inside DC -->
+                <div class="flex justify-center mt-4">
+                    <!-- Flow to Data -->
+                    <div class="w-1/3 flex flex-col items-center border-r border-gray-300">
+                        <span class="text-[10px] text-gray-500 bg-gray-100 px-1 z-10">Fast I/O</span>
+                        <div class="w-[2px] h-10 flow-line"></div>
+                    </div>
+                    <!-- Flow to Queue -->
+                    <div class="w-1/3 flex flex-col items-center">
+                        <span class="text-[10px] text-purple-600 font-bold bg-gray-100 px-1 z-10">Slow Tasks</span>
+                        <div class="w-[2px] h-10 flow-line-async"></div>
+                    </div>
+                </div>
+
+                <!-- Backends (DB, Cache, Queue) -->
+                <div class="grid grid-cols-2 gap-4 mt-2">
+                    <!-- Standard Data (From Fig 1-15) -->
+                    <div class="flex gap-2">
+                        <div class="bg-blue-500 text-white rounded-lg p-3 flex flex-col items-center shadow-md w-1/2">
+                            <i class="fas fa-database text-2xl mb-1"></i>
+                            <span class="text-xs font-semibold">Databases</span>
+                        </div>
+                        <div class="bg-blue-500 text-white rounded-lg p-3 flex flex-col items-center shadow-md w-1/2 relative">
+                             <div class="absolute top-1 left-2 text-[8px] bg-blue-700 px-1 rounded">CACHE</div>
+                             <div class="absolute top-3 left-4 text-[8px] bg-blue-700 px-1 rounded">CACHE</div>
+                            <i class="fas fa-memory text-xl mt-3 mb-1"></i>
+                            <span class="text-xs font-semibold">Caches</span>
+                        </div>
+                    </div>
+
+                    <!-- NEW: Message Queue & Workers -->
+                    <div class="bg-purple-50 border border-purple-200 rounded-xl p-2 flex flex-col items-center shadow-inner">
+                        <div class="bg-purple-600 text-white w-full text-center py-2 rounded-lg shadow-md pulse">
+                            <i class="fas fa-boxes text-lg"></i>
+                            <div class="text-[10px] font-bold mt-1">Message Queue</div>
+                        </div>
+                        <div class="w-1 h-6 flow-line-async my-1"></div>
+                        <div class="bg-orange-500 text-white w-full text-center py-2 rounded-lg shadow-md">
+                            <i class="fas fa-cogs text-lg"></i>
+                            <div class="text-[10px] font-bold mt-1">Worker Servers</div>
+                            <div class="text-[8px] text-orange-100 mt-1">The Consumers</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NoSQL (Shared outside) -->
+        <div class="mt-8 flex justify-center relative">
+            <svg class="absolute w-full h-full -top-16 left-0 z-0 pointer-events-none" style="min-height: 150px;">
+                <path d="M 300 0 Q 350 80 500 100" fill="transparent" stroke="#6B21A8" stroke-width="2" stroke-dasharray="5,5"/>
+                <path d="M 800 0 Q 750 80 560 100" fill="transparent" stroke="#6B21A8" stroke-width="2" stroke-dasharray="5,5"/>
+            </svg>
+            <div class="bg-blue-800 text-white rounded-xl px-8 py-4 flex flex-col items-center shadow-lg relative z-10 border-4 border-white">
+                <i class="fas fa-database text-3xl mb-2"></i>
+                <span class="font-bold">NoSQL</span>
+                <span class="text-[10px] opacity-75 mt-1">(Shared Data)</span>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
