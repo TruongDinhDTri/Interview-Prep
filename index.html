@@ -58,6 +58,7 @@
             position: relative;
             overflow-x: hidden;
             padding: 0;
+            scroll-behavior: smooth;
         }
 
         /* Watercolor paper grain texture */
@@ -349,6 +350,7 @@
             border-radius: 20px;
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
             overflow: visible;
+            scroll-margin-top: 40px;
         }
 
         .realm-landscape:hover {
@@ -884,6 +886,193 @@
                 font-size: 1.05rem;
             }
         }
+
+        /* ===== Ghibli Navigation ===== */
+        .ghibli-nav {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 999;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
+        .ghibli-nav-backdrop {
+            position: absolute;
+            inset: -14px -12px;
+            background:
+                linear-gradient(135deg,
+                    rgba(253, 248, 239, 0.75) 0%,
+                    rgba(250, 245, 232, 0.7) 100%
+                );
+            border-radius: 28px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow:
+                0 8px 32px rgba(74, 55, 40, 0.12),
+                0 2px 8px rgba(74, 55, 40, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(122, 92, 66, 0.15);
+        }
+
+        .ghibli-nav-backdrop::before {
+            content: '';
+            position: absolute;
+            inset: -3px;
+            border-radius: 30px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M 3,2 Q 25,0 50,2 T 97,1 Q 100,25 98,50 T 100,98 Q 75,100 50,98 T 3,100 Q 0,75 2,50 T 3,2' fill='none' stroke='%237a5c42' stroke-width='0.5' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/100% 100%;
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-decoration: none;
+            font-size: 1.2rem;
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
+            z-index: 1;
+            background: transparent;
+            border: none;
+        }
+
+        .nav-item:hover {
+            transform: scale(1.25);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 15px rgba(74, 55, 40, 0.15);
+        }
+
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow:
+                0 4px 18px rgba(74, 55, 40, 0.18),
+                inset 0 0 0 2px rgba(122, 92, 66, 0.25);
+            transform: scale(1.15);
+        }
+
+        /* Tooltip */
+        .nav-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            right: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%) translateX(8px);
+            white-space: nowrap;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            color: var(--ink-warm);
+            background:
+                linear-gradient(135deg,
+                    rgba(253, 248, 239, 0.95) 0%,
+                    rgba(250, 245, 232, 0.92) 100%
+                );
+            padding: 6px 14px;
+            border-radius: 10px;
+            box-shadow:
+                0 4px 16px rgba(74, 55, 40, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(122, 92, 66, 0.12);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s ease;
+            letter-spacing: 0.3px;
+        }
+
+        .nav-item:hover::after {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        /* Scroll-to-top */
+        .nav-top-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            z-index: 1;
+            margin-top: 4px;
+            background: linear-gradient(135deg, var(--sunset-warm) 0%, var(--sunset-orange) 100%);
+            color: white;
+            font-size: 0.9rem;
+            box-shadow: 0 3px 10px rgba(212, 132, 95, 0.3);
+            transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            opacity: 0;
+            transform: scale(0.6);
+            pointer-events: none;
+        }
+
+        .nav-top-btn.visible {
+            opacity: 1;
+            transform: scale(1);
+            pointer-events: auto;
+        }
+
+        .nav-top-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 5px 18px rgba(212, 132, 95, 0.4);
+        }
+
+        /* Mobile: bottom horizontal nav */
+        @media (max-width: 768px) {
+            .ghibli-nav {
+                right: auto;
+                left: 50%;
+                top: auto;
+                bottom: 16px;
+                transform: translateX(-50%);
+                flex-direction: row;
+                gap: 2px;
+            }
+
+            .ghibli-nav-backdrop {
+                inset: -10px -10px;
+                border-radius: 24px;
+            }
+
+            .nav-item {
+                width: 36px;
+                height: 36px;
+                font-size: 1.05rem;
+            }
+
+            .nav-item::after {
+                right: auto;
+                left: 50%;
+                top: auto;
+                bottom: calc(100% + 10px);
+                transform: translateX(-50%) translateY(6px);
+            }
+
+            .nav-item:hover::after {
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .nav-top-btn {
+                width: 30px;
+                height: 30px;
+                font-size: 0.75rem;
+                margin-top: 0;
+                margin-left: 2px;
+            }
+
+            .storybook-scroll {
+                padding-bottom: 6rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -895,6 +1084,20 @@
 
     <!-- Animated grass at bottom -->
     <div class="grass-container" id="grassContainer"></div>
+
+    <!-- Ghibli Navigation -->
+    <nav class="ghibli-nav" id="ghibliNav">
+        <div class="ghibli-nav-backdrop"></div>
+        <a href="#forest" class="nav-item" data-tooltip="Forest of Fundamentals">🌲</a>
+        <a href="#river" class="nav-item" data-tooltip="River of Linked Paths">🌊</a>
+        <a href="#mountain" class="nav-item" data-tooltip="Mountain of Structures">⛰️</a>
+        <a href="#sky" class="nav-item" data-tooltip="Sky Castle of Mastery">☁️</a>
+        <a href="#castle" class="nav-item" data-tooltip="Architect's Castle">🏰</a>
+        <a href="#workshop" class="nav-item" data-tooltip="Backend Workshop">🔧</a>
+        <a href="#library" class="nav-item" data-tooltip="Library of Wisdom">📚</a>
+        <button class="nav-top-btn" id="scrollTopBtn" title="Back to top">↑</button>
+    </nav>
+
 
     <!-- Floating Ghibli clouds - hand-drawn fluffy style -->
     <svg class="ghibli-cloud cloud-1" viewBox="0 0 300 100" width="300">
@@ -965,7 +1168,7 @@
 
         <div class="journey-trail">
             <!-- Week 1: Forest Realm -->
-            <section class="realm-landscape forest-landscape">
+            <section id="forest" class="realm-landscape forest-landscape">
                 <div class="realm-icon">🌲</div>
                 <h2 class="realm-heading">Week 1: The Forest of Fundamentals</h2>
                 <p class="realm-story">
@@ -1001,7 +1204,7 @@
             </section>
 
             <!-- Week 2: River Realm -->
-            <section class="realm-landscape river-landscape">
+            <section id="river" class="realm-landscape river-landscape">
                 <div class="realm-icon">🌊</div>
                 <h2 class="realm-heading">Week 2: The River of Linked Paths</h2>
                 <p class="realm-story">
@@ -1057,7 +1260,7 @@
             </section>
 
             <!-- Week 3: Mountain Realm -->
-            <section class="realm-landscape mountain-landscape">
+            <section id="mountain" class="realm-landscape mountain-landscape">
                 <div class="realm-icon">⛰️</div>
                 <h2 class="realm-heading">Week 3: The Mountain of Structures</h2>
                 <p class="realm-story">
@@ -1135,7 +1338,7 @@
             </section>
 
             <!-- Week 4: Sky Realm -->
-            <section class="realm-landscape sky-landscape">
+            <section id="sky" class="realm-landscape sky-landscape">
                 <div class="realm-icon">☁️</div>
                 <h2 class="realm-heading">Week 4: The Sky Castle of Mastery</h2>
                 <p class="realm-story">
@@ -1167,7 +1370,7 @@
             </section>
 
             <!-- System Design Realm -->
-            <section class="realm-landscape castle-landscape">
+            <section id="castle" class="realm-landscape castle-landscape">
                 <div class="realm-icon">🏰</div>
                 <h2 class="realm-heading">The Architect's Castle</h2>
                 <p class="realm-story">
@@ -1195,7 +1398,7 @@
             </section>
 
             <!-- Backend Workshop Realm -->
-            <section class="realm-landscape workshop-landscape">
+            <section id="workshop" class="realm-landscape workshop-landscape">
                 <div class="realm-icon">🔧</div>
                 <h2 class="realm-heading">The Backend Workshop</h2>
                 <p class="realm-story">
@@ -1234,13 +1437,14 @@
                         <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1rem;">
                             <a href="BE-FE-Behave-SysDesign-Others/Backend Talking Points Prep/Session 3 - Database and ORM/01-Key-Talking-Points.html" class="hand-badge workshop-seal" style="text-decoration: none; color: white;">📖 Key Points</a>
                             <a href="BE-FE-Behave-SysDesign-Others/Backend Talking Points Prep/Session 3 - Database and ORM/02-Practice-Questions-Answers.html" class="hand-badge workshop-seal" style="text-decoration: none; color: white;">❓ Practice Q&amp;A</a>
+                            <a href="BE-FE-Behave-SysDesign-Others/Backend Talking Points Prep/Session 3 - Database and ORM/Database-Schema-Design/00-Master-Schema-Design-Process.html" class="hand-badge workshop-seal" style="text-decoration: none; color: white;">🗂️ Schema Design</a>
                         </div>
                     </div>
                 </div>
             </section>
 
             <!-- Library Realm -->
-            <section class="realm-landscape library-landscape">
+            <section id="library" class="realm-landscape library-landscape">
                 <div class="realm-icon">📚</div>
                 <h2 class="realm-heading">The Library of Wisdom</h2>
                 <p class="realm-story">
@@ -1333,10 +1537,44 @@
         }
 
         // Initialize on load
+        // Navigation: active section tracking + scroll-to-top
+        function initNav() {
+            const sections = document.querySelectorAll('.realm-landscape[id]');
+            const navItems = document.querySelectorAll('.nav-item');
+            const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+            scrollTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+
+            // Scroll-based active section: find section whose top is closest to (and above) the viewport top
+            function updateActiveSection() {
+                let currentId = '';
+                const offset = 120; // px below viewport top to consider "active"
+
+                sections.forEach(section => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= offset) {
+                        currentId = section.id;
+                    }
+                });
+
+                navItems.forEach(item => {
+                    item.classList.toggle('active', item.getAttribute('href') === '#' + currentId);
+                });
+
+                scrollTopBtn.classList.toggle('visible', window.scrollY > 600);
+            }
+
+            window.addEventListener('scroll', updateActiveSection, { passive: true });
+            updateActiveSection();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             createDustMotes();
             createFireflies();
             createGrass();
+            initNav();
         });
     </script>
 </body>
