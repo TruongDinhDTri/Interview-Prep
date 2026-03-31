@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consistent Hashing — Interactive Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --forest-deep: #2d4a3e; --ink-warm: #4a3728;
+            --water-teal: #5ba3a8; --gold-accent: #d4a84b; --sunset-rose: #c97b6b;
+            --moss-green: #7ea87e; --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --forest-deep: #a8d5ba; --ink-warm: #e8d5c4;
+            --water-teal: #7ec8cc; --gold-accent: #e8c170; --sunset-rose: #e8a090;
+            --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --bg-code: #0d1117; --bg-highlight: #2a2520;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+            --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif; background: var(--bg-page);
+            color: var(--text-primary); min-height: 100vh;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+
+        .header {
+            background: var(--bg-card); border-bottom: 2px solid var(--gold-accent);
+            padding: 32px 40px 28px; text-align: center; position: relative; overflow: hidden;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 22px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        [data-theme="dark"] .header::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2em; color: var(--ink-warm); margin-bottom: 6px; }
+        .header p { color: var(--text-secondary); font-size: 0.95em; }
+
+        /* Nav */
+        .resources-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; padding: 16px 20px; }
+        .resource-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            color: var(--text-secondary); text-decoration: none;
+            padding: 7px 14px; border-radius: 8px; font-size: 0.85em; font-weight: 500;
+            box-shadow: var(--shadow-soft); transition: all 0.25s ease;
+        }
+        .resource-link:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 0; justify-content: center; padding: 24px 20px 0; flex-wrap: wrap; }
+        .tab-btn {
+            padding: 12px 28px; border: none; background: var(--bg-section);
+            color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.95em;
+            font-weight: 500; cursor: pointer; transition: all 0.25s ease;
+            border-bottom: 3px solid transparent; border-radius: 8px 8px 0 0;
+        }
+        .tab-btn:hover { color: var(--text-primary); background: var(--bg-card); }
+        .tab-btn.active {
+            background: var(--bg-card); color: var(--water-teal); font-weight: 600;
+            border-bottom-color: var(--water-teal);
+        }
+
+        .tab-panel { display: none; padding: 0 20px 40px; }
+        .tab-panel.active { display: block; }
+
+        .panel-inner { max-width: 960px; margin: 0 auto; }
+
+        /* Panel Header */
+        .panel-header {
+            background: var(--bg-card); border-left: 4px solid var(--water-teal);
+            padding: 20px 24px; border-radius: 8px; margin: 24px 0 20px;
+            box-shadow: var(--shadow-soft);
+        }
+        .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5em; color: var(--ink-warm); margin-bottom: 6px; }
+        .panel-header p { color: var(--text-secondary); font-size: 0.95em; }
+
+        /* Controls */
+        .controls {
+            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
+            background: var(--bg-card); padding: 16px 20px; border-radius: 10px;
+            margin-bottom: 20px; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+        }
+        .ctrl-btn {
+            padding: 9px 20px; border-radius: 8px; border: 1px solid var(--border-medium);
+            background: var(--bg-section); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .ctrl-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .ctrl-btn.danger:hover { background: var(--sunset-rose); color: white; border-color: var(--sunset-rose); }
+        .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .ctrl-label { font-size: 0.85em; color: var(--text-muted); }
+
+        /* Canvas Wrapper */
+        .canvas-wrapper {
+            display: flex; justify-content: center; align-items: flex-start; gap: 24px;
+            flex-wrap: wrap;
+        }
+        canvas {
+            border-radius: 12px; box-shadow: var(--shadow-medium);
+            background: var(--bg-card);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 10px; padding: 18px; min-width: 220px; max-width: 260px;
+            box-shadow: var(--shadow-soft);
+        }
+        .info-panel h3 { font-family: 'Playfair Display', serif; font-size: 1.1em; color: var(--water-teal); margin-bottom: 12px; }
+        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); font-size: 0.88em; }
+        .info-row:last-child { border-bottom: none; }
+        .info-val { font-weight: 600; color: var(--text-primary); }
+        .info-log { margin-top: 14px; }
+        .log-entry {
+            font-size: 0.8em; padding: 5px 8px; margin: 4px 0; border-radius: 5px;
+            background: var(--bg-section); color: var(--text-secondary);
+            border-left: 3px solid var(--border-medium); line-height: 1.4;
+        }
+        .log-entry.moved { border-left-color: var(--sunset-rose); color: var(--sunset-rose); }
+        .log-entry.added { border-left-color: var(--moss-green); color: var(--moss-green); }
+        .log-entry.removed { border-left-color: var(--gold-accent); color: var(--gold-accent); }
+
+        /* Stats Bar */
+        .stats-bar {
+            display: flex; gap: 16px; flex-wrap: wrap;
+            background: var(--bg-card); padding: 14px 20px; border-radius: 8px;
+            margin: 16px 0; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+        }
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 1.6em; font-weight: 700; color: var(--water-teal); display: block; line-height: 1.2; }
+        .stat-label { font-size: 0.75em; color: var(--text-muted); }
+
+        /* Insight Box */
+        .insight-box {
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4f8 100%);
+            border: 1px solid var(--mist-lavender); border-left: 4px solid var(--mist-lavender);
+            padding: 16px 20px; border-radius: 8px; margin: 16px 0;
+        }
+        [data-theme="dark"] .insight-box { background: linear-gradient(135deg, #1a1a3e 0%, #1a2332 100%); }
+        .insight-box .insight-label { font-size: 0.7em; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist-lavender); margin-bottom: 6px; }
+        .insight-box p { font-size: 0.9em; color: var(--text-secondary); font-style: italic; line-height: 1.6; }
+
+        /* Slider */
+        .slider-group { display: flex; align-items: center; gap: 10px; }
+        .slider-group label { font-size: 0.85em; color: var(--text-secondary); white-space: nowrap; }
+        input[type="range"] { width: 120px; accent-color: var(--water-teal); }
+        .slider-val { font-size: 0.85em; font-weight: 600; color: var(--water-teal); min-width: 28px; }
+
+        /* Floating Buttons */
+        .theme-toggle {
+            position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--bg-card); border: 1px solid var(--border-medium);
+            cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-medium); transition: all 0.3s ease; z-index: 150;
+            color: var(--text-secondary);
+        }
+        .theme-toggle:hover { background: var(--gold-accent); color: white; }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.5em; }
+            .tab-btn { padding: 10px 16px; font-size: 0.85em; }
+            canvas { width: 100% !important; height: auto !important; }
+            .info-panel { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⭕ Consistent Hashing — Interactive</h1>
+        <p>Chapter 5 · Three interactive simulations of the ring algorithm</p>
+    </div>
+
+    <div class="resources-nav">
+        <a href="chapter-5-complete.html" class="resource-link">📖 Study Guide</a>
+        <a href="interview-qa-chapter5.html" class="resource-link">🎯 Interview Q&amp;A</a>
+        <a href="Anki-Cards/05_Design_Consistent_Hashing.csv" class="resource-link" download>📇 Anki Cards</a>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="t1">1. Rehashing Problem</button>
+        <button class="tab-btn" data-tab="t2">2. Consistent Hash Ring</button>
+        <button class="tab-btn" data-tab="t3">3. Virtual Nodes</button>
+    </div>
+
+    <!-- ════ TAB 1: Rehashing Problem ════ -->
+    <div id="t1" class="tab-panel active">
+        <div class="panel-inner">
+            <div class="panel-header">
+                <h2>The Rehashing Problem</h2>
+                <p>Watch what happens to key→server assignments when a server is added or removed. Red = cache miss (key moved to different server).</p>
+            </div>
+
+            <div class="controls">
+                <button class="ctrl-btn" id="t1-reset">↺ Reset (4 Servers)</button>
+                <button class="ctrl-btn danger" id="t1-remove">− Remove Server</button>
+                <button class="ctrl-btn" id="t1-add">+ Add Server</button>
+                <span class="ctrl-label" id="t1-status">N = 4 servers | Click Remove/Add to see redistribution</span>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item"><span class="stat-val" id="t1-total">8</span><span class="stat-label">Total Keys</span></div>
+                <div class="stat-item"><span class="stat-val" id="t1-moved" style="color: var(--sunset-rose);">0</span><span class="stat-label">Keys Moved (Cache Misses)</span></div>
+                <div class="stat-item"><span class="stat-val" id="t1-pct" style="color: var(--sunset-rose);">0%</span><span class="stat-label">Miss Rate</span></div>
+                <div class="stat-item"><span class="stat-val" id="t1-n">4</span><span class="stat-label">Servers (N)</span></div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="t1-canvas" width="560" height="340"></canvas>
+                <div class="info-panel">
+                    <h3>Key Assignments</h3>
+                    <div id="t1-assignments"></div>
+                    <div class="info-log" id="t1-log"></div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-label">🎓 What You're Seeing</div>
+                <p>With <code>hash(key) % N</code>, changing N by just 1 causes nearly every key to recalculate to a different server. This is the "musical chairs" problem — remove one chair and everyone scrambles to find a new seat.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ TAB 2: Consistent Hash Ring ════ -->
+    <div id="t2" class="tab-panel">
+        <div class="panel-inner">
+            <div class="panel-header">
+                <h2>Consistent Hash Ring</h2>
+                <p>Add and remove servers on the ring. Only keys in the adjacent arc are affected. Click a key to see which server it routes to (clockwise walk).</p>
+            </div>
+
+            <div class="controls">
+                <button class="ctrl-btn" id="t2-reset">↺ Reset</button>
+                <button class="ctrl-btn" id="t2-add-server">+ Add Server</button>
+                <button class="ctrl-btn danger" id="t2-remove-server">− Remove Server</button>
+                <button class="ctrl-btn" id="t2-add-key">+ Add Key</button>
+                <span class="ctrl-label" id="t2-status">4 servers, 6 keys on ring</span>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item"><span class="stat-val" id="t2-servers">4</span><span class="stat-label">Servers</span></div>
+                <div class="stat-item"><span class="stat-val" id="t2-keys">6</span><span class="stat-label">Keys</span></div>
+                <div class="stat-item"><span class="stat-val" id="t2-moved" style="color: var(--sunset-rose);">0</span><span class="stat-label">Last Moved</span></div>
+                <div class="stat-item"><span class="stat-val" id="t2-pct" style="color: var(--moss-green);">0%</span><span class="stat-label">% Redistributed</span></div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="t2-canvas" width="480" height="480"></canvas>
+                <div class="info-panel">
+                    <h3>Ring State</h3>
+                    <div id="t2-info"></div>
+                    <div class="info-log" id="t2-log"></div>
+                </div>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-label">🎓 What You're Seeing</div>
+                <p>Only the keys between the new/removed server and its predecessor (counterclockwise) are affected. All other keys stay exactly where they are. This is O(k/n) redistribution vs O(k) for naive hashing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════ TAB 3: Virtual Nodes ════ -->
+    <div id="t3" class="tab-panel">
+        <div class="panel-inner">
+            <div class="panel-header">
+                <h2>Virtual Nodes Distribution</h2>
+                <p>See how increasing virtual nodes per server creates more uniform load distribution. The bar chart shows how many keys each physical server owns.</p>
+            </div>
+
+            <div class="controls">
+                <div class="slider-group">
+                    <label>VNodes/Server:</label>
+                    <input type="range" id="t3-vnode-slider" min="1" max="20" value="1">
+                    <span class="slider-val" id="t3-vnode-val">1</span>
+                </div>
+                <div class="slider-group">
+                    <label>Keys:</label>
+                    <input type="range" id="t3-keys-slider" min="20" max="200" step="10" value="100">
+                    <span class="slider-val" id="t3-keys-val">100</span>
+                </div>
+                <button class="ctrl-btn" id="t3-randomize">↺ Randomize</button>
+            </div>
+
+            <div class="stats-bar">
+                <div class="stat-item"><span class="stat-val" id="t3-total-vnodes">4</span><span class="stat-label">Total VNodes on Ring</span></div>
+                <div class="stat-item"><span class="stat-val" id="t3-stddev">—</span><span class="stat-label">Std Dev (Load)</span></div>
+                <div class="stat-item"><span class="stat-val" id="t3-max-server">—</span><span class="stat-label">Max Server Load</span></div>
+                <div class="stat-item"><span class="stat-val" id="t3-min-server">—</span><span class="stat-label">Min Server Load</span></div>
+            </div>
+
+            <div class="canvas-wrapper">
+                <canvas id="t3-ring" width="400" height="400"></canvas>
+                <canvas id="t3-bar" width="400" height="400"></canvas>
+            </div>
+
+            <div class="insight-box">
+                <div class="insight-label">🎓 What You're Seeing</div>
+                <p>With 1 vnode per server, one server may own 60% of keys while another owns 5%. As you increase vnodes, distribution approaches uniform. At 200 vnodes: ~5% std dev. At 100 vnodes: ~10% std dev. More vnodes = better balance, but higher memory cost.</p>
+            </div>
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+    <script>
+    // ════════════════════════════════════════════
+    //  UTILITIES
+    // ════════════════════════════════════════════
+    function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+
+    // Simple hash function (djb2-like, returns 0-1)
+    function hashStr(str) {
+        let h = 5381;
+        for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
+        return Math.abs(h) / 2147483647;
+    }
+
+    // ════════════════════════════════════════════
+    //  TAB 1: REHASHING PROBLEM
+    // ════════════════════════════════════════════
+    const t1Canvas = document.getElementById('t1-canvas');
+    const t1Ctx = t1Canvas.getContext('2d');
+    const t1Keys = ['key0','key1','key2','key3','key4','key5','key6','key7'];
+    let t1N = 4;
+    let t1Prev = {};
+    let t1Moved = [];
+
+    function t1HashKey(key, N) { return Math.floor(hashStr(key + '-v1') * 1000) % N; }
+
+    function t1GetAssignments(N) {
+        const a = {};
+        t1Keys.forEach(k => a[k] = t1HashKey(k, N));
+        return a;
+    }
+
+    function t1Draw() {
+        const ctx = t1Ctx;
+        const W = t1Canvas.width, H = t1Canvas.height;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        ctx.clearRect(0, 0, W, H);
+
+        const bg = isDark ? '#1a1a2e' : '#fffdf7';
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        const serverColors = ['#5ba3a8','#d4a84b','#7ea87e','#c97b6b','#b8a9c9','#a0c4d8'];
+        const servers = Array.from({length: t1N}, (_, i) => `s${i}`);
+
+        // Draw columns
+        const colW = W / (t1N + 1);
+        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
+        const mutedColor = isDark ? '#8a7a6a' : '#8a7a6a';
+
+        // Header row
+        ctx.font = 'bold 13px Inter';
+        ctx.fillStyle = mutedColor;
+        ctx.textAlign = 'center';
+        ctx.fillText('Key', colW * 0.5, 30);
+        servers.forEach((s, i) => {
+            ctx.fillStyle = serverColors[i];
+            ctx.fillText(s, colW * (i + 1) + colW * 0.5, 30);
+        });
+
+        // Draw divider
+        ctx.strokeStyle = isDark ? '#2a2a3e' : '#e8dcc8';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, 40); ctx.lineTo(W, 40); ctx.stroke();
+
+        // Draw keys
+        const rowH = (H - 60) / t1Keys.length;
+        t1Keys.forEach((key, row) => {
+            const y = 50 + row * rowH + rowH * 0.5;
+            const si = t1HashKey(key, t1N);
+            const moved = t1Moved.includes(key);
+
+            // Key label
+            ctx.font = '13px JetBrains Mono';
+            ctx.fillStyle = moved ? '#c97b6b' : textColor;
+            ctx.textAlign = 'center';
+            ctx.fillText(key, colW * 0.5, y + 4);
+
+            // Dot in server column
+            const cx = colW * (si + 1) + colW * 0.5;
+            ctx.beginPath();
+            ctx.arc(cx, y, 10, 0, Math.PI * 2);
+            ctx.fillStyle = moved ? '#c97b6b' : serverColors[si];
+            ctx.fill();
+
+            if (moved) {
+                // Draw red X
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(cx-5, y-5); ctx.lineTo(cx+5, y+5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(cx+5, y-5); ctx.lineTo(cx-5, y+5); ctx.stroke();
+            } else {
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 8px Inter';
+                ctx.fillText('✓', cx, y + 3);
+            }
+
+            // hash formula
+            ctx.fillStyle = mutedColor;
+            ctx.font = '10px JetBrains Mono';
+            ctx.textAlign = 'left';
+            const hVal = Math.floor(hashStr(key + '-v1') * 1000);
+            ctx.fillText(`hash=${hVal}%${t1N}=${si}`, 4, y + 4);
+        });
+
+        // Update stats
+        document.getElementById('t1-n').textContent = t1N;
+        document.getElementById('t1-moved').textContent = t1Moved.length;
+        document.getElementById('t1-pct').textContent = Math.round(t1Moved.length / t1Keys.length * 100) + '%';
+
+        // Update assignments list
+        const aEl = document.getElementById('t1-assignments');
+        aEl.innerHTML = '';
+        t1Keys.forEach(k => {
+            const si = t1HashKey(k, t1N);
+            const moved = t1Moved.includes(k);
+            const div = document.createElement('div');
+            div.className = 'info-row';
+            div.innerHTML = `<span style="font-family:monospace;font-size:0.85em">${k}</span><span class="info-val" style="color:${moved?'#c97b6b':serverColors[si]}">${moved?'⚠ ':''}s${si}</span>`;
+            aEl.appendChild(div);
+        });
+    }
+
+    document.getElementById('t1-reset').addEventListener('click', () => {
+        t1N = 4; t1Moved = [];
+        t1Prev = t1GetAssignments(t1N);
+        document.getElementById('t1-status').textContent = 'N = 4 servers | Baseline set';
+        document.getElementById('t1-log').innerHTML = '';
+        t1Draw();
+    });
+
+    document.getElementById('t1-remove').addEventListener('click', () => {
+        if (t1N <= 1) return;
+        const before = t1GetAssignments(t1N);
+        t1N--;
+        const after = t1GetAssignments(t1N);
+        t1Moved = t1Keys.filter(k => before[k] !== after[k] || before[k] >= t1N);
+        t1Prev = before;
+        document.getElementById('t1-status').textContent = `N: ${t1N+1} → ${t1N} | ${t1Moved.length} keys remapped`;
+        const log = document.getElementById('t1-log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry removed';
+        entry.textContent = `−Server removed: ${t1Moved.length}/${t1Keys.length} keys moved (${Math.round(t1Moved.length/t1Keys.length*100)}%)`;
+        log.prepend(entry);
+        t1Draw();
+    });
+
+    document.getElementById('t1-add').addEventListener('click', () => {
+        if (t1N >= 6) return;
+        const before = t1GetAssignments(t1N);
+        t1N++;
+        const after = t1GetAssignments(t1N);
+        t1Moved = t1Keys.filter(k => before[k] !== after[k]);
+        t1Prev = before;
+        document.getElementById('t1-status').textContent = `N: ${t1N-1} → ${t1N} | ${t1Moved.length} keys remapped`;
+        const log = document.getElementById('t1-log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry added';
+        entry.textContent = `+Server added: ${t1Moved.length}/${t1Keys.length} keys moved (${Math.round(t1Moved.length/t1Keys.length*100)}%)`;
+        log.prepend(entry);
+        t1Draw();
+    });
+
+    t1Prev = t1GetAssignments(t1N);
+    t1Draw();
+
+    // ════════════════════════════════════════════
+    //  TAB 2: CONSISTENT HASH RING
+    // ════════════════════════════════════════════
+    const t2Canvas = document.getElementById('t2-canvas');
+    const t2Ctx = t2Canvas.getContext('2d');
+    const CX = 240, CY = 240, R = 185;
+    const serverColors = ['#5ba3a8','#d4a84b','#7ea87e','#c97b6b','#b8a9c9','#a0c4d8','#e8a050'];
+    let t2ServerCount = 0, t2KeyCount = 0;
+    let t2Servers = [], t2Keys = [], t2TotalMoved = 0, t2LastMoved = 0;
+
+    function angleToXY(angle, r) {
+        return {
+            x: CX + r * Math.cos(angle - Math.PI/2),
+            y: CY + r * Math.sin(angle - Math.PI/2)
+        };
+    }
+
+    function posToAngle(pos) { return pos * 2 * Math.PI; }
+
+    function findServer(pos, servers) {
+        if (servers.length === 0) return null;
+        const sorted = [...servers].sort((a, b) => a.pos - b.pos);
+        for (const s of sorted) {
+            if (s.pos >= pos) return s;
+        }
+        return sorted[0]; // wrap around
+    }
+
+    function t2Draw(highlight = null) {
+        const ctx = t2Ctx;
+        const W = t2Canvas.width, H = t2Canvas.height;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+
+        ctx.clearRect(0, 0, W, H);
+        const bg = isDark ? '#1a1a2e' : '#fffdf7';
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Draw ring
+        ctx.beginPath();
+        ctx.arc(CX, CY, R, 0, Math.PI * 2);
+        ctx.strokeStyle = isDark ? '#3a3a50' : '#d4c5a9';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        // Draw server arcs
+        const sorted = [...t2Servers].sort((a, b) => a.pos - b.pos);
+        sorted.forEach((s, i) => {
+            const prevS = sorted[(i - 1 + sorted.length) % sorted.length];
+            const startA = posToAngle(prevS ? prevS.pos : 0) - Math.PI/2;
+            const endA = posToAngle(s.pos) - Math.PI/2;
+            const actualStart = sorted.length === 1 ? 0 : startA;
+
+            ctx.beginPath();
+            ctx.arc(CX, CY, R, actualStart, endA);
+            ctx.strokeStyle = serverColors[s.id % serverColors.length] + '50';
+            ctx.lineWidth = 12;
+            ctx.stroke();
+        });
+
+        // Draw keys with routing arrows
+        t2Keys.forEach(k => {
+            const server = findServer(k.pos, t2Servers);
+            const kPt = angleToXY(posToAngle(k.pos), R * 0.75);
+            const isHighlighted = highlight && highlight.key === k.id;
+
+            // Draw routing arrow to server if highlighted
+            if (server && isHighlighted) {
+                const sPt = angleToXY(posToAngle(server.pos), R);
+                ctx.strokeStyle = '#d4a84b80';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 4]);
+                ctx.beginPath();
+                ctx.moveTo(kPt.x, kPt.y);
+                ctx.lineTo(sPt.x, sPt.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Key dot
+            ctx.beginPath();
+            ctx.arc(kPt.x, kPt.y, isHighlighted ? 9 : 7, 0, Math.PI * 2);
+            ctx.fillStyle = server ? serverColors[server.id % serverColors.length] + 'aa' : '#8a7a6a55';
+            ctx.fill();
+            ctx.strokeStyle = server ? serverColors[server.id % serverColors.length] : '#8a7a6a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Key label
+            const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
+            ctx.fillStyle = textColor;
+            ctx.font = '9px JetBrains Mono';
+            ctx.textAlign = 'center';
+            ctx.fillText(k.name, kPt.x, kPt.y + 3);
+        });
+
+        // Draw servers
+        t2Servers.forEach(s => {
+            const pt = angleToXY(posToAngle(s.pos), R);
+            const color = serverColors[s.id % serverColors.length];
+
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 16, 0, Math.PI * 2);
+            ctx.fillStyle = color;
+            ctx.fill();
+            ctx.strokeStyle = isDark ? '#1a1a2e' : 'white';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 10px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText('S' + s.id, pt.x, pt.y + 4);
+        });
+
+        // Update info
+        const servers2 = t2Servers.map(s => {
+            const count = t2Keys.filter(k => {
+                const srv = findServer(k.pos, t2Servers);
+                return srv && srv.id === s.id;
+            }).length;
+            return {s, count};
+        });
+
+        const infoEl = document.getElementById('t2-info');
+        infoEl.innerHTML = '';
+        servers2.sort((a,b) => a.s.id - b.s.id).forEach(({s, count}) => {
+            const div = document.createElement('div');
+            div.className = 'info-row';
+            div.innerHTML = `<span style="color:${serverColors[s.id%serverColors.length]};font-weight:600">Server ${s.id}</span><span class="info-val">${count} keys (pos ${Math.round(s.pos*100)})</span>`;
+            infoEl.appendChild(div);
+        });
+
+        document.getElementById('t2-servers').textContent = t2Servers.length;
+        document.getElementById('t2-keys').textContent = t2Keys.length;
+        document.getElementById('t2-moved').textContent = t2LastMoved;
+        document.getElementById('t2-pct').textContent = t2Keys.length > 0 ? Math.round(t2LastMoved/t2Keys.length*100)+'%' : '0%';
+        document.getElementById('t2-status').textContent = `${t2Servers.length} server${t2Servers.length!==1?'s':''}, ${t2Keys.length} key${t2Keys.length!==1?'s':''} on ring`;
+    }
+
+    function t2AddServer() {
+        if (t2Servers.length >= 6) return;
+        // Get previous assignment for all keys
+        const prevAssign = {};
+        t2Keys.forEach(k => {
+            const s = findServer(k.pos, t2Servers);
+            prevAssign[k.id] = s ? s.id : -1;
+        });
+
+        const pos = Math.random();
+        t2Servers.push({id: t2ServerCount++, pos});
+
+        // Count moved keys
+        let moved = 0;
+        t2Keys.forEach(k => {
+            const s = findServer(k.pos, t2Servers);
+            if (s && s.id !== prevAssign[k.id]) moved++;
+        });
+        t2LastMoved = moved;
+
+        const log = document.getElementById('t2-log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry added';
+        entry.textContent = `+S${t2ServerCount-1} added at pos ${Math.round(pos*100)} — ${moved} key(s) moved`;
+        log.prepend(entry);
+        while (log.children.length > 6) log.removeChild(log.lastChild);
+        t2Draw();
+    }
+
+    function t2RemoveServer() {
+        if (t2Servers.length === 0) return;
+        const prevAssign = {};
+        t2Keys.forEach(k => {
+            const s = findServer(k.pos, t2Servers);
+            prevAssign[k.id] = s ? s.id : -1;
+        });
+
+        const idx = Math.floor(Math.random() * t2Servers.length);
+        const removed = t2Servers.splice(idx, 1)[0];
+
+        let moved = 0;
+        t2Keys.forEach(k => {
+            const s = findServer(k.pos, t2Servers);
+            const newId = s ? s.id : -1;
+            if (newId !== prevAssign[k.id]) moved++;
+        });
+        t2LastMoved = moved;
+
+        const log = document.getElementById('t2-log');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry removed';
+        entry.textContent = `−S${removed.id} removed — ${moved} key(s) moved`;
+        log.prepend(entry);
+        while (log.children.length > 6) log.removeChild(log.lastChild);
+        t2Draw();
+    }
+
+    function t2AddKey() {
+        if (t2Keys.length >= 20) return;
+        const pos = Math.random();
+        t2Keys.push({id: t2KeyCount, name: 'k'+t2KeyCount, pos});
+        t2KeyCount++;
+        t2LastMoved = 0;
+        t2Draw();
+    }
+
+    function t2Reset() {
+        t2Servers = []; t2Keys = []; t2ServerCount = 0; t2KeyCount = 0; t2LastMoved = 0;
+        document.getElementById('t2-log').innerHTML = '';
+        // Add 4 servers and 6 keys
+        for (let i = 0; i < 4; i++) {
+            t2Servers.push({id: t2ServerCount++, pos: (i/4) + Math.random()*0.08});
+        }
+        for (let i = 0; i < 6; i++) {
+            t2Keys.push({id: t2KeyCount, name: 'k'+t2KeyCount, pos: Math.random()});
+            t2KeyCount++;
+        }
+        t2Draw();
+    }
+
+    document.getElementById('t2-add-server').addEventListener('click', t2AddServer);
+    document.getElementById('t2-remove-server').addEventListener('click', t2RemoveServer);
+    document.getElementById('t2-add-key').addEventListener('click', t2AddKey);
+    document.getElementById('t2-reset').addEventListener('click', t2Reset);
+    t2Reset();
+
+    // ════════════════════════════════════════════
+    //  TAB 3: VIRTUAL NODES
+    // ════════════════════════════════════════════
+    const t3Ring = document.getElementById('t3-ring');
+    const t3Bar = document.getElementById('t3-bar');
+    const t3RCtx = t3Ring.getContext('2d');
+    const t3BCtx = t3Bar.getContext('2d');
+    const PHYSICAL_SERVERS = 4;
+    const T3CX = 200, T3CY = 200, T3R = 170;
+    let t3VNodes = 1, t3NumKeys = 100;
+    let t3ServerSeeds = []; // random seeds per server for vnode placement
+
+    function t3Init() {
+        t3ServerSeeds = Array.from({length: PHYSICAL_SERVERS}, (_, i) => i * 137.508 + 42);
+    }
+
+    function t3GetVNodePositions(vnodeCount) {
+        const positions = []; // {server, pos}
+        for (let s = 0; s < PHYSICAL_SERVERS; s++) {
+            for (let v = 0; v < vnodeCount; v++) {
+                const seed = t3ServerSeeds[s] + v * 73.1;
+                const pos = hashStr('s' + s + '#' + v + '@' + seed);
+                positions.push({server: s, pos});
+            }
+        }
+        return positions.sort((a, b) => a.pos - b.pos);
+    }
+
+    function t3Distribute(vnodeCount, numKeys) {
+        const ring = t3GetVNodePositions(vnodeCount);
+        const counts = new Array(PHYSICAL_SERVERS).fill(0);
+        for (let i = 0; i < numKeys; i++) {
+            const pos = hashStr('key' + i + t3NumKeys);
+            // find first vnode >= pos
+            let found = ring.find(v => v.pos >= pos);
+            if (!found) found = ring[0];
+            counts[found.server]++;
+        }
+        return counts;
+    }
+
+    function t3DrawRing() {
+        const ctx = t3RCtx;
+        const W = t3Ring.width, H = t3Ring.height;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = isDark ? '#1a1a2e' : '#fffdf7';
+        ctx.fillRect(0, 0, W, H);
+
+        // Draw base ring
+        ctx.beginPath();
+        ctx.arc(T3CX, T3CY, T3R, 0, Math.PI * 2);
+        ctx.strokeStyle = isDark ? '#3a3a50' : '#d4c5a9';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const ring = t3GetVNodePositions(t3VNodes);
+
+        // Draw vnode ticks
+        ring.forEach(v => {
+            const angle = v.pos * 2 * Math.PI - Math.PI/2;
+            const color = serverColors[v.server % serverColors.length];
+            const ix = T3CX + (T3R - 12) * Math.cos(angle);
+            const iy = T3CY + (T3R - 12) * Math.sin(angle);
+            const ox = T3CX + (T3R + 8) * Math.cos(angle);
+            const oy = T3CY + (T3R + 8) * Math.sin(angle);
+
+            ctx.beginPath();
+            ctx.moveTo(ix, iy);
+            ctx.lineTo(ox, oy);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = t3VNodes > 5 ? 2 : 3;
+            ctx.stroke();
+
+            if (t3VNodes <= 5) {
+                ctx.beginPath();
+                ctx.arc(ox, oy, 5, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.fill();
+            }
+        });
+
+        // Legend
+        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
+        for (let s = 0; s < PHYSICAL_SERVERS; s++) {
+            ctx.beginPath();
+            ctx.arc(16, 12 + s * 20, 7, 0, Math.PI * 2);
+            ctx.fillStyle = serverColors[s];
+            ctx.fill();
+            ctx.fillStyle = textColor;
+            ctx.font = '11px Inter';
+            ctx.textAlign = 'left';
+            ctx.fillText(`Server ${s}`, 28, 16 + s * 20);
+        }
+
+        // Center label
+        ctx.fillStyle = isDark ? '#8a7a6a' : '#8a7a6a';
+        ctx.font = 'bold 13px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${ring.length} vnodes`, T3CX, T3CY - 8);
+        ctx.font = '11px Inter';
+        ctx.fillText(`${t3VNodes}/server`, T3CX, T3CY + 10);
+    }
+
+    function t3DrawBar(counts) {
+        const ctx = t3BCtx;
+        const W = t3Bar.width, H = t3Bar.height;
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = isDark ? '#1a1a2e' : '#fffdf7';
+        ctx.fillRect(0, 0, W, H);
+
+        const maxCount = Math.max(...counts, 1);
+        const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
+        const barW = 60, gap = 20, startX = 30, topPad = 40, botPad = 60;
+        const barH = H - topPad - botPad;
+        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
+        const mutedColor = '#8a7a6a';
+
+        // Title
+        ctx.fillStyle = textColor;
+        ctx.font = 'bold 13px Inter';
+        ctx.textAlign = 'center';
+        ctx.fillText('Key Distribution by Server', W/2, 24);
+
+        // Avg line
+        const avgY = topPad + barH - (avg / maxCount * barH);
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = '#d4a84b80';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(startX, avgY);
+        ctx.lineTo(W - 10, avgY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = '#d4a84b';
+        ctx.font = '10px Inter';
+        ctx.textAlign = 'right';
+        ctx.fillText(`avg ${Math.round(avg)}`, W - 12, avgY - 4);
+
+        // Bars
+        counts.forEach((count, i) => {
+            const x = startX + i * (barW + gap);
+            const bH = (count / maxCount) * barH;
+            const y = topPad + barH - bH;
+
+            // Bar
+            const color = serverColors[i];
+            ctx.fillStyle = color + 'cc';
+            ctx.fillRect(x, y, barW, bH);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, barW, bH);
+
+            // Count above bar
+            ctx.fillStyle = textColor;
+            ctx.font = 'bold 13px Inter';
+            ctx.textAlign = 'center';
+            ctx.fillText(count, x + barW/2, y - 8);
+
+            // Server label below
+            ctx.font = '11px Inter';
+            ctx.fillStyle = color;
+            ctx.fillText('S' + i, x + barW/2, H - botPad + 20);
+
+            const pct = Math.round(count / t3NumKeys * 100);
+            ctx.fillStyle = mutedColor;
+            ctx.font = '10px Inter';
+            ctx.fillText(pct + '%', x + barW/2, H - botPad + 36);
+        });
+
+        // Std dev
+        const mean = avg;
+        const variance = counts.reduce((sum, c) => sum + Math.pow(c - mean, 2), 0) / counts.length;
+        const stddev = Math.sqrt(variance);
+        const stddevPct = Math.round(stddev / mean * 100);
+
+        document.getElementById('t3-stddev').textContent = stddevPct + '%';
+        document.getElementById('t3-max-server').textContent = Math.max(...counts);
+        document.getElementById('t3-min-server').textContent = Math.min(...counts);
+        document.getElementById('t3-total-vnodes').textContent = t3VNodes * PHYSICAL_SERVERS;
+    }
+
+    function t3Update() {
+        const counts = t3Distribute(t3VNodes, t3NumKeys);
+        t3DrawRing();
+        t3DrawBar(counts);
+    }
+
+    const vnodeSlider = document.getElementById('t3-vnode-slider');
+    const keysSlider = document.getElementById('t3-keys-slider');
+    vnodeSlider.addEventListener('input', () => {
+        t3VNodes = parseInt(vnodeSlider.value);
+        document.getElementById('t3-vnode-val').textContent = t3VNodes;
+        t3Update();
+    });
+    keysSlider.addEventListener('input', () => {
+        t3NumKeys = parseInt(keysSlider.value);
+        document.getElementById('t3-keys-val').textContent = t3NumKeys;
+        t3Update();
+    });
+    document.getElementById('t3-randomize').addEventListener('click', () => {
+        t3Init();
+        t3Update();
+    });
+    t3Init();
+    t3Update();
+
+    // ════════════════════════════════════════════
+    //  TABS
+    // ════════════════════════════════════════════
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+            // Redraw when tab becomes visible
+            if (btn.dataset.tab === 't1') t1Draw();
+            if (btn.dataset.tab === 't2') t2Draw();
+            if (btn.dataset.tab === 't3') t3Update();
+        });
+    });
+
+    // ════════════════════════════════════════════
+    //  DARK MODE
+    // ════════════════════════════════════════════
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('ch5-viz-theme');
+    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('ch5-viz-theme', next);
+        themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        // Redraw active tab
+        const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
+        if (activeTab === 't1') t1Draw();
+        if (activeTab === 't2') t2Draw();
+        if (activeTab === 't3') t3Update();
+    });
+    if (document.documentElement.getAttribute('data-theme') === 'dark') themeToggle.textContent = '\u2600';
+    </script>
+</body>
+</html>

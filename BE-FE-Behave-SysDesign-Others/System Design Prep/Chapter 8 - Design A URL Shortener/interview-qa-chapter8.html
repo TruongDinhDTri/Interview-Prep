@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 8 Interview Q&A — URL Shortener</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --cloud-cream: #fdfaf2; --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e; --ink-warm: #4a3728; --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b; --sunset-rose: #c97b6b; --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744;
+            --text-muted: #8a7a6a; --text-inverse: #fef6e4;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --shadow-hover: 0 8px 30px rgba(74,55,40,0.14);
+            --progress-height: 3px;
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --cloud-cream: #16213e; --sky-soft: #1a2332;
+            --forest-deep: #a8d5ba; --ink-warm: #e8d5c4; --water-teal: #7ec8cc;
+            --gold-accent: #e8c170; --sunset-rose: #e8a090; --moss-green: #a8d4a8;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --bg-code: #0d1117; --bg-highlight: #2a2520;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e; --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); line-height: 1.8; transition: background 0.4s, color 0.4s; }
+
+        .progress-bar { position: fixed; top: 0; left: 0; height: var(--progress-height); background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose)); z-index: 1000; transition: width 0.1s; border-radius: 0 2px 2px 0; }
+
+        .container { max-width: 860px; margin: 0 auto; }
+
+        .header { background: var(--bg-card); border-bottom: 2px solid var(--gold-accent); padding: 45px 40px 35px; text-align: center; position: relative; overflow: hidden; }
+        .header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 30px; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 20 Q450 35 600 15 Q750 0 900 22 Q1050 35 1200 10 V30 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom; background-size: cover; }
+        [data-theme="dark"] .header::after { background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 30 Q150 0 300 20 Q450 35 600 15 Q750 0 900 22 Q1050 35 1200 10 V30 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom; background-size: cover; }
+        .header .badge { display: inline-block; background: var(--sunset-rose); color: white; padding: 4px 14px; border-radius: 20px; font-size: 0.8em; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 14px; text-transform: uppercase; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 700; color: var(--ink-warm); margin-bottom: 10px; }
+        .header p { font-size: 1.05em; color: var(--text-secondary); font-weight: 300; }
+
+        .theme-toggle { position: fixed; top: 14px; right: 20px; z-index: 200; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 20px; padding: 6px 14px; cursor: pointer; font-size: 0.82em; color: var(--text-secondary); font-family: 'Inter', sans-serif; box-shadow: var(--shadow-soft); transition: all 0.25s; }
+        .theme-toggle:hover { border-color: var(--water-teal); color: var(--water-teal); }
+
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; z-index: 100; background: var(--water-teal); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; cursor: pointer; font-size: 1.3em; box-shadow: var(--shadow-medium); opacity: 0; transition: all 0.3s; pointer-events: none; }
+        .back-to-top.visible { opacity: 1; pointer-events: all; }
+
+        /* ═══ Main Q&A Area ═══ */
+        .main { padding: 40px 40px 80px; }
+
+        .intro-banner {
+            background: var(--forest-deep); color: var(--text-inverse); padding: 24px 30px;
+            border-radius: 12px; margin-bottom: 36px; box-shadow: var(--shadow-medium);
+        }
+        [data-theme="dark"] .intro-banner { color: var(--text-primary); }
+        .intro-banner p { font-size: 0.95em; line-height: 1.7; }
+
+        /* Category groups */
+        .category {
+            margin-bottom: 40px;
+        }
+        .category-title {
+            font-family: 'Playfair Display', serif; font-size: 1.35em; color: var(--ink-warm);
+            padding: 14px 20px; background: var(--bg-section); border-radius: 10px;
+            border-left: 4px solid var(--water-teal); margin-bottom: 16px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Q&A accordion */
+        .qa-item {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 10px; margin-bottom: 12px; overflow: hidden;
+            box-shadow: var(--shadow-soft); transition: box-shadow 0.2s;
+        }
+        .qa-item:hover { box-shadow: var(--shadow-medium); }
+
+        .qa-question {
+            width: 100%; padding: 16px 20px; background: none; border: none;
+            text-align: left; cursor: pointer; display: flex; align-items: flex-start; gap: 14px;
+            font-family: 'Inter', sans-serif; transition: background 0.2s;
+        }
+        .qa-question:hover { background: rgba(91,163,168,0.04); }
+        .qa-question.open { background: rgba(91,163,168,0.06); }
+
+        .qa-q-icon {
+            width: 28px; height: 28px; border-radius: 50%; background: var(--water-teal);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 0.75em; font-weight: 700; flex-shrink: 0; margin-top: 2px;
+        }
+        .qa-item.trap .qa-q-icon { background: var(--sunset-rose); }
+        .qa-item.bloom .qa-q-icon { background: var(--mist-lavender); }
+        .qa-item.scale .qa-q-icon { background: var(--moss-green); }
+
+        .qa-q-text {
+            flex: 1; font-size: 0.95em; font-weight: 600; color: var(--text-primary);
+            line-height: 1.5; padding-top: 2px;
+        }
+        .qa-arrow { font-size: 0.75em; color: var(--text-muted); flex-shrink: 0; margin-top: 6px; transition: transform 0.25s; }
+        .qa-question.open .qa-arrow { transform: rotate(90deg); }
+
+        .qa-answer {
+            max-height: 0; overflow: hidden; transition: max-height 0.4s ease;
+        }
+        .qa-answer.open { max-height: 2000px; }
+
+        .qa-answer-inner {
+            padding: 0 20px 20px 62px; font-size: 0.91em;
+            color: var(--text-secondary); line-height: 1.75;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .answer-section { margin-top: 14px; }
+        .answer-section h4 { font-size: 0.88em; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+
+        .tag {
+            display: inline-block; padding: 2px 8px; border-radius: 10px;
+            font-size: 0.72em; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.06em; margin-right: 6px; margin-bottom: 10px;
+        }
+        .tag.trap { background: rgba(201,123,107,0.12); color: var(--sunset-rose); }
+        .tag.core { background: rgba(91,163,168,0.12); color: var(--water-teal); }
+        .tag.advanced { background: rgba(184,169,201,0.15); color: var(--mist-lavender); }
+        .tag.scale { background: rgba(126,168,126,0.12); color: var(--moss-green); }
+
+        .code-block { background: var(--bg-code); border-radius: 8px; padding: 14px 18px; margin: 12px 0; overflow-x: auto; }
+        .code-block pre { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; color: #e8e0d0; line-height: 1.65; }
+
+        .answer-table { width: 100%; border-collapse: collapse; font-size: 0.88em; margin: 12px 0; }
+        .answer-table th { background: var(--forest-deep); color: white; padding: 8px 12px; text-align: left; font-weight: 600; font-size: 0.82em; }
+        .answer-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+        .answer-table tr:last-child td { border-bottom: none; }
+
+        .verdict { background: rgba(91,163,168,0.08); border-left: 3px solid var(--water-teal); padding: 10px 14px; border-radius: 0 8px 8px 0; margin-top: 12px; font-size: 0.88em; }
+        .verdict.trap { background: rgba(201,123,107,0.08); border-left-color: var(--sunset-rose); }
+
+        .reveal { opacity: 0; transform: translateY(16px); transition: opacity 0.5s, transform 0.5s; }
+        .reveal.visible { opacity: 1; transform: translateY(0); }
+
+        /* Stats row */
+        .stats-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 16px 0; }
+        .stat-pill { background: var(--bg-highlight); border: 1px solid var(--gold-accent); border-radius: 20px; padding: 6px 14px; font-size: 0.82em; font-weight: 600; color: var(--text-secondary); }
+
+        @media (max-width: 640px) {
+            .main { padding: 24px 20px 60px; }
+            .header { padding: 36px 24px 28px; }
+            .header h1 { font-size: 1.7em; }
+            .qa-answer-inner { padding-left: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+<button class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<div class="container">
+    <div class="header">
+        <div class="badge">Chapter 8 · Interview Practice</div>
+        <h1>URL Shortener — Interview Q&A</h1>
+        <p>10 high-signal questions with model answers, tradeoffs &amp; traps</p>
+    </div>
+
+    <div class="main">
+        <div class="intro-banner">
+            <p>These questions are the ones that separate senior engineers from mid-level engineers in URL shortener design interviews. Each answer includes the core response, deeper context, and the common mistakes interviewers watch for. Click any question to reveal the answer.</p>
+        </div>
+
+        <!-- ════════════════════════════════
+             CATEGORY 1: Core Design
+             ════════════════════════════════ -->
+        <div class="category reveal">
+            <div class="category-title">🔗 Core Design Decisions</div>
+
+            <!-- Q1 -->
+            <div class="qa-item trap">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">1</div>
+                    <div class="qa-q-text">301 vs 302 redirect — when do you use each and why?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag trap">Interview Trap</span><span class="tag core">Core</span>
+                        <div class="answer-section">
+                            <h4>Direct Answer</h4>
+                            <p><strong>301 (Permanent):</strong> Browser caches the redirect, bypasses your server on subsequent requests. Use when server load reduction is the priority and analytics are not needed.</p>
+                            <p style="margin-top:8px"><strong>302 (Temporary/Found):</strong> Browser always hits your server. Use when you need to track every click for analytics.</p>
+                        </div>
+                        <table class="answer-table" style="margin-top:12px">
+                            <thead><tr><th>Aspect</th><th>301</th><th>302</th></tr></thead>
+                            <tbody>
+                                <tr><td>Browser caches?</td><td>Yes — permanently</td><td>No — every request hits server</td></tr>
+                                <tr><td>Server load</td><td>Low (cached requests bypass)</td><td>High (every click counted)</td></tr>
+                                <tr><td>Analytics possible?</td><td>No</td><td>Yes</td></tr>
+                                <tr><td>Can change destination?</td><td>No (cached indefinitely)</td><td>Yes</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="verdict trap">
+                            <strong>The Trap:</strong> Many candidates say "301 to reduce load" without acknowledging analytics. The correct answer must say "it depends." If the product has click analytics (like Bit.ly), 302 is mandatory. This is a product requirements question disguised as a networking question.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="qa-item">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">2</div>
+                    <div class="qa-q-text">Why Base 62 over Base 64? Why not just use MD5?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag core">Core</span>
+                        <div class="answer-section">
+                            <h4>Base 62 vs Base 64</h4>
+                            <p>Base 64 uses characters <code>+</code>, <code>/</code>, and <code>=</code> (padding). These are URL-unsafe: <code>+</code> means space in query strings, <code>/</code> is a path separator. They'd need percent-encoding (<code>%2B</code>, <code>%2F</code>), which defeats the "short" purpose.</p>
+                            <p style="margin-top:8px">Base 62 uses only <code>[0-9a-zA-Z]</code> — all URL-safe, no encoding needed.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Base 62 vs MD5</h4>
+                            <p>MD5 is a <em>hash function</em> — it can produce collisions when truncated. Base 62 is an <em>encoding scheme</em> — it converts a unique ID to a unique string. No collision is mathematically possible if the underlying ID is unique.</p>
+                            <p style="margin-top:8px">The tradeoff: Base 62 requires a distributed unique ID generator (added complexity), while MD5 just needs a hash function but requires collision detection logic.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="qa-item trap">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">3</div>
+                    <div class="qa-q-text">What if the same longURL is submitted twice?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag trap">Interview Trap</span>
+                        <div class="answer-section">
+                            <h4>The Problem</h4>
+                            <p>Should the same longURL get the same shortURL or a different one each time? This is an idempotency decision with UX and storage implications.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Option A: Return existing shortURL (Idempotent)</h4>
+                            <p>Check <code>long_url</code> index first. If exists, return existing shortURL. Requires an index on the <code>long_url</code> column. Saves storage. Most users expect this behavior (sharing the same link should produce the same short URL).</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Option B: Create new shortURL always</h4>
+                            <p>Simpler logic — no dedup check. The same longURL gets multiple short aliases. Wastes storage; confusing user experience.</p>
+                        </div>
+                        <div class="verdict">
+                            <strong>Recommended:</strong> Option A for known users (require login). Index on <code>long_url</code> makes this a single additional query. Race condition on concurrent creates: use a DB UNIQUE constraint on <code>long_url</code> and handle the constraint violation by returning the existing record.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════
+             CATEGORY 2: Hashing & Collisions
+             ════════════════════════════════ -->
+        <div class="category reveal">
+            <div class="category-title">🔐 Hashing & Collisions</div>
+
+            <!-- Q4 -->
+            <div class="qa-item">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">4</div>
+                    <div class="qa-q-text">How do you handle hash collisions?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag core">Core</span>
+                        <div class="answer-section">
+                            <h4>The Problem</h4>
+                            <p>When truncating MD5/SHA-1 to 7 chars, two different longURLs can produce the same 7-char prefix. With 365B URLs, this is not theoretical.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Algorithm</h4>
+                            <div class="code-block"><pre>def shorten(long_url):
+    url = long_url
+    while True:
+        short = md5(url)[:7]
+        if not bloom_filter.might_contain(short):
+            # Definitely new — safe to insert
+            bloom_filter.add(short)
+            db.save(short, long_url)
+            return short
+        if db.get(short).long_url == long_url:
+            return short  # duplicate submission
+        # True collision: different URL, same hash
+        url = long_url + predefined_salt</pre></div>
+                        </div>
+                        <div class="verdict">
+                            <strong>Key insight:</strong> The Bloom filter eliminates DB reads for new URLs (true negatives are impossible in Bloom filters). Only when the filter says "might exist" do you query the DB. This keeps the hot path fast.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="qa-item bloom">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">5</div>
+                    <div class="qa-q-text">What's a Bloom filter and why use it here?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag advanced">Advanced</span>
+                        <div class="answer-section">
+                            <h4>What It Is</h4>
+                            <p>A Bloom filter is a space-efficient probabilistic data structure. It can answer "is X in this set?" with two outcomes:</p>
+                            <ul style="padding-left:18px; margin-top:8px">
+                                <li><strong>Definitely NOT in set</strong> — 100% accurate; no false negatives</li>
+                                <li><strong>Probably in set</strong> — May produce false positives (says "exists" when it doesn't)</li>
+                            </ul>
+                        </div>
+                        <div class="answer-section">
+                            <h4>How It Works</h4>
+                            <p>Uses k hash functions over a bit array. To add an element: hash it k times → set k bits. To check: hash k times → if any bit is 0 → definitely not in set; all bits 1 → probably in set.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Why It's Perfect Here</h4>
+                            <p>For collision detection, we only need "definitely not exists" to be correct. A false positive (Bloom says "exists" when it doesn't) just causes one unnecessary DB read — acceptable. This eliminates DB reads for the majority of new URL creations.</p>
+                        </div>
+                        <div class="verdict">
+                            <strong>Real-world uses:</strong> Cassandra (SSTable existence), Bitcoin (wallet lookup), Chrome Safe Browsing, PostgreSQL (join optimization). Knowing these examples impresses interviewers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════
+             CATEGORY 3: Scaling
+             ════════════════════════════════ -->
+        <div class="category reveal">
+            <div class="category-title">📈 Scaling & Performance</div>
+
+            <!-- Q6 -->
+            <div class="qa-item scale">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">6</div>
+                    <div class="qa-q-text">How does the unique ID generator work at scale?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag scale">Scaling</span><span class="tag advanced">Advanced</span>
+                        <div class="answer-section">
+                            <h4>Options (from simplest to most complex)</h4>
+                            <table class="answer-table">
+                                <thead><tr><th>Approach</th><th>Pros</th><th>Cons</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Single DB auto-increment</td><td>Simple</td><td>SPOF, bottleneck at scale</td></tr>
+                                    <tr><td>Multi-master (N servers, stride N)</td><td>No SPOF</td><td>Hard to add servers, not time-sorted</td></tr>
+                                    <tr><td>Twitter Snowflake</td><td>Distributed, time-sorted, no coordination</td><td>Requires machine ID assignment</td></tr>
+                                    <tr><td>Redis INCR</td><td>Simple, fast</td><td>Redis becomes SPOF unless clustered</td></tr>
+                                    <tr><td>Pre-allocated ID ranges</td><td>No coordinator needed per request</td><td>IDs wasted on server crash</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="verdict">
+                            <strong>Recommended for production:</strong> Twitter Snowflake. 64-bit = 41-bit timestamp + 10-bit machine ID + 12-bit sequence. Generates 4096 unique IDs/ms per machine. No central coordinator needed. See Chapter 7 for full design.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="qa-item scale">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">7</div>
+                    <div class="qa-q-text">Why cache shortURL → longURL mappings? How would you size it?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag core">Core</span><span class="tag scale">Scaling</span>
+                        <div class="answer-section">
+                            <h4>Why Cache?</h4>
+                            <p>URL redirecting is read-heavy (10:1 ratio). Popular short URLs get hit millions of times. Without cache, every redirect hits the DB — 11,600 reads/sec to DB is manageable today but unsustainable at 10× growth.</p>
+                            <p style="margin-top:8px">Pareto principle: top 20% of URLs get 80% of traffic. Caching just the hot 10% eliminates ~80% of DB reads.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Cache Sizing Calculation</h4>
+                            <div class="stats-row">
+                                <div class="stat-pill">100M URLs/day</div>
+                                <div class="stat-pill">Cache top 10% = 10M entries</div>
+                                <div class="stat-pill">~500 bytes/entry</div>
+                                <div class="stat-pill">Total: 5 GB</div>
+                            </div>
+                            <p>5 GB fits comfortably in a single Redis node (typical 64GB). Use LRU eviction — least recently accessed URLs get evicted first.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="qa-item scale">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">8</div>
+                    <div class="qa-q-text">How would you handle 100M writes/day at the database level?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag scale">Scaling</span>
+                        <div class="answer-section">
+                            <h4>Write Volume Analysis</h4>
+                            <p>100M/day = ~1,160 writes/sec. A well-tuned MySQL instance can handle ~5,000-10,000 writes/sec. So initially, a single DB write node is sufficient. The real scaling challenge is the 10-year growth to 365TB.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Scaling Strategy (Progressive)</h4>
+                            <ol style="padding-left:18px">
+                                <li style="margin-bottom:8px"><strong>Read replicas first:</strong> Route all redirect reads to replicas. Reduces load on primary dramatically.</li>
+                                <li style="margin-bottom:8px"><strong>Vertical scaling:</strong> More RAM/CPU on write primary. Buys time cheaply.</li>
+                                <li style="margin-bottom:8px"><strong>Horizontal sharding:</strong> Shard by shortURL prefix (a-z, A-Z) or consistent hashing. Each shard handles a subset of URLs.</li>
+                                <li><strong>NoSQL migration:</strong> DynamoDB / Cassandra with shortURL as partition key. Native horizontal scaling, simpler than sharding MySQL.</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════
+             CATEGORY 4: Abuse & Edge Cases
+             ════════════════════════════════ -->
+        <div class="category reveal">
+            <div class="category-title">🛡️ Abuse Prevention & Edge Cases</div>
+
+            <!-- Q9 -->
+            <div class="qa-item trap">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">9</div>
+                    <div class="qa-q-text">How do you prevent abuse / rate limiting?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag trap">Interview Trap</span><span class="tag scale">Scaling</span>
+                        <div class="answer-section">
+                            <h4>Threat Model</h4>
+                            <ul style="padding-left:18px">
+                                <li style="margin-bottom:6px"><strong>Spam creation:</strong> Attacker POSTs millions of URLs, filling storage</li>
+                                <li style="margin-bottom:6px"><strong>Phishing:</strong> Short URL hides malicious destination</li>
+                                <li style="margin-bottom:6px"><strong>Enumeration:</strong> Sequential IDs allow crawling all URLs</li>
+                                <li><strong>DDoS:</strong> Flood redirects endpoint</li>
+                            </ul>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Mitigations</h4>
+                            <table class="answer-table">
+                                <thead><tr><th>Threat</th><th>Solution</th></tr></thead>
+                                <tbody>
+                                    <tr><td>Spam creation</td><td>API key + token bucket rate limiting (e.g., 100 creates/min/key)</td></tr>
+                                    <tr><td>Phishing</td><td>Scan with Google Safe Browsing API on creation; maintain blocklist</td></tr>
+                                    <tr><td>Enumeration</td><td>Hash-based approach (not sequential); add random salt to IDs</td></tr>
+                                    <tr><td>DDoS</td><td>CDN + WAF in front; 301 redirects for most popular links (CDN caches)</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="qa-item scale">
+                <button class="qa-question" onclick="toggleQA(this)">
+                    <div class="qa-q-icon">10</div>
+                    <div class="qa-q-text">How do you scale the database beyond a single machine?</div>
+                    <div class="qa-arrow">▶</div>
+                </button>
+                <div class="qa-answer">
+                    <div class="qa-answer-inner">
+                        <span class="tag scale">Scaling</span><span class="tag advanced">Advanced</span>
+                        <div class="answer-section">
+                            <h4>The Access Pattern</h4>
+                            <p>URL shortener has a pure key-value access pattern: <code>shortURL → longURL</code>. No joins, no complex queries. This makes NoSQL a natural fit.</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Option 1: MySQL Sharding</h4>
+                            <p>Shard by shortURL hash. Each shard handles 1/N of the keyspace. Challenge: resharding when adding nodes requires remapping keys. Solution: consistent hashing (see Chapter 5).</p>
+                        </div>
+                        <div class="answer-section">
+                            <h4>Option 2: DynamoDB / Cassandra</h4>
+                            <p>Use shortURL as partition key. Built-in horizontal scaling. DynamoDB: pay-per-request, auto-scaling. Cassandra: tunable consistency, excellent for high write throughput.</p>
+                        </div>
+                        <div class="verdict">
+                            <strong>Interview insight:</strong> Mention that consistency requirements differ between reads and writes. For redirects (reads), eventual consistency is acceptable — a stale cache entry for a few seconds is fine. For URL creation (writes), you need strong consistency to prevent duplicate shortURLs.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /category -->
+
+    </div><!-- /main -->
+</div><!-- /container -->
+
+<script>
+    window.addEventListener('scroll', () => {
+        const scrolled = window.scrollY;
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        document.getElementById('progressBar').style.width = (scrolled / total * 100) + '%';
+        document.getElementById('backToTop').classList.toggle('visible', scrolled > 300);
+    });
+
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.querySelector('.theme-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    }
+
+    function toggleQA(btn) {
+        const answer = btn.nextElementSibling;
+        const isOpen = btn.classList.contains('open');
+        btn.classList.toggle('open', !isOpen);
+        answer.classList.toggle('open', !isOpen);
+    }
+
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+</script>
+</body>
+</html>

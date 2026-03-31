@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rate Limiter Algorithms — Interactive Visualization</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --cloud-cream: #fdfaf2; --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e; --ink-warm: #4a3728; --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b; --sunset-rose: #c97b6b; --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --shadow-hover: 0 8px 30px rgba(74,55,40,0.14);
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --cloud-cream: #16213e; --forest-deep: #a8d5ba;
+            --ink-warm: #e8d5c4; --water-teal: #7ec8cc; --gold-accent: #e8c170;
+            --sunset-rose: #e8a090; --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --bg-code: #0d1117; --bg-highlight: #2a2520;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+            --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page);
+            color: var(--text-primary); line-height: 1.7;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 0 24px 60px; }
+        .header {
+            background: var(--bg-card); border-bottom: 2px solid var(--gold-accent);
+            padding: 40px 30px 32px; text-align: center; margin-bottom: 30px;
+        }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2em; color: var(--ink-warm); margin-bottom: 6px; }
+        .header p { color: var(--text-secondary); font-size: 1em; font-weight: 300; }
+
+        /* ═══ Tab Switcher ═══ */
+        .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; }
+        .tab-btn {
+            padding: 10px 18px; border-radius: 8px; border: 1px solid var(--border-medium);
+            background: var(--bg-section); color: var(--text-secondary);
+            font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .tab-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .tab-btn.active { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+
+        /* ═══ Panels ═══ */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .algo-card {
+            background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft); padding: 30px; margin-bottom: 20px;
+        }
+        .algo-card h2 { font-family: 'Playfair Display', serif; color: var(--water-teal); font-size: 1.5em; margin-bottom: 12px; }
+        .algo-card h3 { color: var(--text-secondary); font-size: 1.1em; margin: 18px 0 10px; }
+        .algo-desc { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.95em; }
+
+        /* ═══ Visualization Area ═══ */
+        .viz-area {
+            background: var(--bg-section); border-radius: 10px; padding: 24px;
+            min-height: 220px; position: relative; border: 1px solid var(--border-light);
+        }
+
+        /* ═══ Controls ═══ */
+        .controls { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+        .ctrl-btn {
+            padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border-medium);
+            background: var(--bg-card); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500;
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .ctrl-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .ctrl-btn.send { background: var(--moss-green); color: white; border-color: var(--moss-green); }
+        .ctrl-btn.send:hover { background: #6b966b; }
+        .ctrl-btn.reset { background: var(--sunset-rose); color: white; border-color: var(--sunset-rose); }
+        .ctrl-btn.reset:hover { background: #b06a5c; }
+
+        /* ═══ Token Bucket viz ═══ */
+        .bucket-container { display: flex; align-items: flex-end; justify-content: center; gap: 30px; }
+        .bucket-viz {
+            width: 160px; min-height: 120px; border: 3px solid var(--water-teal);
+            border-top: none; border-radius: 0 0 16px 16px; display: flex;
+            flex-wrap: wrap; gap: 6px; padding: 10px; justify-content: center;
+            align-content: flex-end; position: relative; background: rgba(91,163,168,0.03);
+        }
+        .token-dot {
+            width: 28px; height: 28px; border-radius: 50%; background: var(--gold-accent);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .token-dot.consumed { transform: scale(0); opacity: 0; }
+        .bucket-info { text-align: center; font-size: 0.9em; }
+        .bucket-info .count { font-size: 2em; font-weight: 700; color: var(--water-teal); }
+
+        /* ═══ Queue viz (Leaking Bucket) ═══ */
+        .queue-container { display: flex; align-items: center; justify-content: center; gap: 16px; }
+        .queue-viz {
+            display: flex; gap: 6px; border: 3px solid var(--mist-lavender);
+            border-radius: 10px; padding: 10px; min-width: 200px; min-height: 50px;
+            background: rgba(184,169,201,0.05);
+        }
+        .queue-item {
+            width: 40px; height: 40px; border-radius: 8px; background: var(--water-teal);
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 0.75em; font-weight: 600;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+        .queue-item.exiting { transform: translateX(20px); opacity: 0; }
+
+        /* ═══ Counter viz (Fixed Window) ═══ */
+        .window-viz { display: flex; gap: 20px; justify-content: center; align-items: flex-end; flex-wrap: wrap; }
+        .window-box {
+            border: 2px solid var(--water-teal); border-radius: 10px;
+            padding: 16px; min-width: 140px; text-align: center;
+            background: rgba(91,163,168,0.05);
+        }
+        .window-box .win-label { font-size: 0.8em; color: var(--text-muted); margin-bottom: 6px; }
+        .window-box .win-count { font-size: 2.2em; font-weight: 700; color: var(--water-teal); }
+        .window-box .win-limit { font-size: 0.8em; color: var(--text-muted); }
+        .window-box.overflow { border-color: var(--sunset-rose); }
+        .window-box.overflow .win-count { color: var(--sunset-rose); }
+
+        /* ═══ Log viz (Sliding Window Log) ═══ */
+        .log-viz { display: flex; flex-direction: column; gap: 6px; }
+        .log-entry {
+            display: flex; align-items: center; gap: 12px; padding: 8px 14px;
+            border-radius: 6px; font-size: 0.85em; font-family: 'JetBrains Mono', monospace;
+            transition: opacity 0.3s ease;
+        }
+        .log-entry.accept { background: rgba(126,168,126,0.12); border-left: 3px solid var(--moss-green); }
+        .log-entry.reject { background: rgba(201,123,107,0.12); border-left: 3px solid var(--sunset-rose); }
+        .log-entry.expired { opacity: 0.35; text-decoration: line-through; }
+
+        /* ═══ Slider viz (Sliding Window Counter) ═══ */
+        .slider-viz { text-align: center; }
+        .formula-box {
+            background: var(--bg-highlight); padding: 18px; border-radius: 10px;
+            border-left: 4px solid var(--gold-accent); font-family: 'JetBrains Mono', monospace;
+            font-size: 1em; display: inline-block; margin: 15px 0;
+        }
+
+        /* ═══ Event Log ═══ */
+        .event-log {
+            margin-top: 18px; max-height: 150px; overflow-y: auto;
+            background: var(--bg-code); border-radius: 8px; padding: 12px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.82em; color: #c9d1d9;
+        }
+        .event-log .accepted { color: #7ec699; }
+        .event-log .rejected { color: #e8a090; }
+        .event-log .info { color: #e8c170; }
+
+        /* ═══ Theme Toggle ═══ */
+        .theme-toggle {
+            position: fixed; right: 24px; bottom: 24px; width: 44px; height: 44px;
+            border-radius: 50%; border: 1px solid var(--border-light);
+            background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+            box-shadow: var(--shadow-medium); display: flex; align-items: center;
+            justify-content: center; font-size: 1.2em; z-index: 100;
+            transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.6em; }
+            .header { padding: 30px 20px 24px; }
+            .algo-card { padding: 20px; }
+            .tabs { gap: 4px; }
+            .tab-btn { padding: 8px 12px; font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rate Limiter Algorithms</h1>
+        <p>Interactive Step-Through Visualizations</p>
+    </div>
+
+    <div class="container">
+        <!-- Tab Switcher -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="token-bucket">Token Bucket</button>
+            <button class="tab-btn" data-tab="leaking-bucket">Leaking Bucket</button>
+            <button class="tab-btn" data-tab="fixed-window">Fixed Window</button>
+            <button class="tab-btn" data-tab="sliding-log">Sliding Window Log</button>
+            <button class="tab-btn" data-tab="sliding-counter">Sliding Window Counter</button>
+        </div>
+
+        <!-- ═══ Panel 1: Token Bucket ═══ -->
+        <div class="panel active" id="token-bucket">
+            <div class="algo-card">
+                <h2>Token Bucket</h2>
+                <p class="algo-desc">Tokens are added at a fixed refill rate. Each request consumes one token. If the bucket is empty, the request is rejected. Click "Send Request" to see it in action.</p>
+
+                <div class="viz-area">
+                    <div class="bucket-container">
+                        <div>
+                            <div style="text-align: center; margin-bottom: 8px; font-size: 0.85em; color: var(--text-muted);">Refill: 1 token/click (Refill btn)</div>
+                            <div class="bucket-viz" id="tbBucket"></div>
+                            <div style="text-align: center; margin-top: 6px; font-size: 0.8em; color: var(--text-muted);">Capacity: 4</div>
+                        </div>
+                        <div class="bucket-info">
+                            <div class="count" id="tbCount">4</div>
+                            <div>tokens</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="ctrl-btn send" onclick="tbSendRequest()">Send Request</button>
+                    <button class="ctrl-btn" onclick="tbRefill()">Refill (+1)</button>
+                    <button class="ctrl-btn reset" onclick="tbReset()">Reset</button>
+                </div>
+                <div class="event-log" id="tbLog"></div>
+            </div>
+        </div>
+
+        <!-- ═══ Panel 2: Leaking Bucket ═══ -->
+        <div class="panel" id="leaking-bucket">
+            <div class="algo-card">
+                <h2>Leaking Bucket</h2>
+                <p class="algo-desc">Requests enter a FIFO queue. They are processed (leaked) at a fixed rate. If the queue is full, new requests are dropped. Queue size: 4.</p>
+
+                <div class="viz-area">
+                    <div class="queue-container">
+                        <div style="text-align: center; font-size: 0.85em; color: var(--text-muted);">Incoming</div>
+                        <div style="font-size: 1.5em; color: var(--water-teal);">&rarr;</div>
+                        <div>
+                            <div class="queue-viz" id="lbQueue"></div>
+                            <div style="text-align: center; font-size: 0.8em; color: var(--text-muted); margin-top: 4px;">Queue (max: 4)</div>
+                        </div>
+                        <div style="font-size: 1.5em; color: var(--moss-green);">&rarr;</div>
+                        <div style="text-align: center; font-size: 0.85em; color: var(--moss-green); font-weight: 600;">Processed<br><span id="lbProcessed">0</span></div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button class="ctrl-btn send" onclick="lbSendRequest()">Add to Queue</button>
+                    <button class="ctrl-btn" onclick="lbProcess()">Process (Leak 1)</button>
+                    <button class="ctrl-btn reset" onclick="lbReset()">Reset</button>
+                </div>
+                <div class="event-log" id="lbLog"></div>
+            </div>
+        </div>
+
+        <!-- ═══ Panel 3: Fixed Window ═══ -->
+        <div class="panel" id="fixed-window">
+            <div class="algo-card">
+                <h2>Fixed Window Counter</h2>
+                <p class="algo-desc">Timeline is divided into fixed windows. Each window has a counter. Limit: 3 requests per window. Click "Next Window" to move to a new time window.</p>
+
+                <div class="viz-area">
+                    <div class="window-viz" id="fwWindows"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="ctrl-btn send" onclick="fwSendRequest()">Send Request</button>
+                    <button class="ctrl-btn" onclick="fwNextWindow()">Next Window</button>
+                    <button class="ctrl-btn reset" onclick="fwReset()">Reset</button>
+                </div>
+                <div class="event-log" id="fwLog"></div>
+            </div>
+        </div>
+
+        <!-- ═══ Panel 4: Sliding Window Log ═══ -->
+        <div class="panel" id="sliding-log">
+            <div class="algo-card">
+                <h2>Sliding Window Log</h2>
+                <p class="algo-desc">Keeps timestamps of all requests. Window: 60 seconds. Limit: 3 requests per window. Old timestamps are purged when they fall outside the window.</p>
+
+                <div class="viz-area">
+                    <div style="margin-bottom: 10px; font-size: 0.9em;">
+                        <strong>Current time:</strong> <span id="slTime">0</span>s &nbsp;|&nbsp;
+                        <strong>Window:</strong> [<span id="slWinStart">0</span>s - <span id="slWinEnd">60</span>s] &nbsp;|&nbsp;
+                        <strong>Active entries:</strong> <span id="slActive">0</span>/3
+                    </div>
+                    <div class="log-viz" id="slLog"></div>
+                </div>
+
+                <div class="controls">
+                    <button class="ctrl-btn send" onclick="slSendRequest()">Send Request</button>
+                    <button class="ctrl-btn" onclick="slAdvanceTime(15)">+15 sec</button>
+                    <button class="ctrl-btn" onclick="slAdvanceTime(30)">+30 sec</button>
+                    <button class="ctrl-btn reset" onclick="slReset()">Reset</button>
+                </div>
+                <div class="event-log" id="slEventLog"></div>
+            </div>
+        </div>
+
+        <!-- ═══ Panel 5: Sliding Window Counter ═══ -->
+        <div class="panel" id="sliding-counter">
+            <div class="algo-card">
+                <h2>Sliding Window Counter</h2>
+                <p class="algo-desc">Hybrid: combines fixed window counts with overlap weighting. Limit: 7 per window. Adjust the slider to see how the rolling position affects the weighted count.</p>
+
+                <div class="viz-area">
+                    <div class="slider-viz">
+                        <div style="display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">Previous window</div>
+                                <input type="number" id="scPrev" value="5" min="0" max="20" style="width: 60px; text-align: center; font-size: 1.3em; font-weight: 700; padding: 6px; border-radius: 6px; border: 2px solid var(--water-teal); background: var(--bg-card); color: var(--text-primary);">
+                            </div>
+                            <div>
+                                <div style="font-size: 0.85em; color: var(--text-muted);">Current window</div>
+                                <input type="number" id="scCurr" value="3" min="0" max="20" style="width: 60px; text-align: center; font-size: 1.3em; font-weight: 700; padding: 6px; border-radius: 6px; border: 2px solid var(--moss-green); background: var(--bg-card); color: var(--text-primary);">
+                            </div>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <label style="font-size: 0.85em; color: var(--text-muted);">Position in current window: <strong id="scPctLabel">70%</strong></label><br>
+                            <input type="range" id="scSlider" min="0" max="100" value="70" style="width: 80%; margin-top: 8px;">
+                        </div>
+                        <div class="formula-box" id="scFormula">
+                            5 &times; 30% + 3 &times; 70% = 1.5 + 2.1 = <strong>3.6</strong>
+                        </div>
+                        <div id="scResult" style="margin-top: 12px; font-size: 1.1em; font-weight: 600; color: var(--moss-green);">
+                            3.6 &le; 7 &mdash; ACCEPTED
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+    <script>
+        // ═══ Tab Switching ═══
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // ═══ Token Bucket ═══
+        let tbTokens = 4;
+        const TB_CAP = 4;
+        let tbReqNum = 0;
+
+        function tbRender() {
+            const bucket = document.getElementById('tbBucket');
+            bucket.innerHTML = '';
+            for (let i = 0; i < tbTokens; i++) {
+                const t = document.createElement('div');
+                t.className = 'token-dot';
+                bucket.appendChild(t);
+            }
+            document.getElementById('tbCount').textContent = tbTokens;
+        }
+
+        function tbLog(msg, cls) {
+            const log = document.getElementById('tbLog');
+            log.innerHTML += `<div class="${cls}">${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function tbSendRequest() {
+            tbReqNum++;
+            if (tbTokens > 0) {
+                tbTokens--;
+                tbRender();
+                tbLog(`[Req #${tbReqNum}] Token consumed. Remaining: ${tbTokens}`, 'accepted');
+            } else {
+                tbLog(`[Req #${tbReqNum}] REJECTED — no tokens available`, 'rejected');
+            }
+        }
+
+        function tbRefill() {
+            if (tbTokens < TB_CAP) {
+                tbTokens++;
+                tbRender();
+                tbLog(`[Refill] +1 token. Total: ${tbTokens}`, 'info');
+            } else {
+                tbLog(`[Refill] Bucket full — token overflows (discarded)`, 'info');
+            }
+        }
+
+        function tbReset() {
+            tbTokens = TB_CAP; tbReqNum = 0;
+            tbRender();
+            document.getElementById('tbLog').innerHTML = '';
+            tbLog('[Reset] Bucket refilled to capacity 4', 'info');
+        }
+
+        tbRender();
+
+        // ═══ Leaking Bucket ═══
+        let lbQueue = [];
+        const LB_CAP = 4;
+        let lbReqNum = 0;
+        let lbProcessedCount = 0;
+
+        function lbRender() {
+            const q = document.getElementById('lbQueue');
+            q.innerHTML = '';
+            lbQueue.forEach((item) => {
+                const el = document.createElement('div');
+                el.className = 'queue-item';
+                el.textContent = item;
+                q.appendChild(el);
+            });
+            document.getElementById('lbProcessed').textContent = lbProcessedCount;
+        }
+
+        function lbLog(msg, cls) {
+            const log = document.getElementById('lbLog');
+            log.innerHTML += `<div class="${cls}">${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function lbSendRequest() {
+            lbReqNum++;
+            if (lbQueue.length < LB_CAP) {
+                lbQueue.push(`R${lbReqNum}`);
+                lbRender();
+                lbLog(`[R${lbReqNum}] Added to queue. Queue size: ${lbQueue.length}/${LB_CAP}`, 'accepted');
+            } else {
+                lbLog(`[R${lbReqNum}] DROPPED — queue is full (${LB_CAP}/${LB_CAP})`, 'rejected');
+            }
+        }
+
+        function lbProcess() {
+            if (lbQueue.length > 0) {
+                const item = lbQueue.shift();
+                lbProcessedCount++;
+                lbRender();
+                lbLog(`[Process] ${item} processed. Queue size: ${lbQueue.length}/${LB_CAP}`, 'accepted');
+            } else {
+                lbLog(`[Process] Nothing to process — queue empty`, 'info');
+            }
+        }
+
+        function lbReset() {
+            lbQueue = []; lbReqNum = 0; lbProcessedCount = 0;
+            lbRender();
+            document.getElementById('lbLog').innerHTML = '';
+            lbLog('[Reset] Queue cleared', 'info');
+        }
+
+        lbRender();
+
+        // ═══ Fixed Window ═══
+        let fwWindows = [{ label: 'Window 1', count: 0 }];
+        const FW_LIMIT = 3;
+        let fwReqNum = 0;
+
+        function fwRender() {
+            const el = document.getElementById('fwWindows');
+            el.innerHTML = '';
+            fwWindows.forEach(w => {
+                const div = document.createElement('div');
+                div.className = 'window-box' + (w.count >= FW_LIMIT ? ' overflow' : '');
+                div.innerHTML = `<div class="win-label">${w.label}</div><div class="win-count">${w.count}</div><div class="win-limit">limit: ${FW_LIMIT}</div>`;
+                el.appendChild(div);
+            });
+        }
+
+        function fwLog(msg, cls) {
+            const log = document.getElementById('fwLog');
+            log.innerHTML += `<div class="${cls}">${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function fwSendRequest() {
+            fwReqNum++;
+            const current = fwWindows[fwWindows.length - 1];
+            if (current.count < FW_LIMIT) {
+                current.count++;
+                fwRender();
+                fwLog(`[Req #${fwReqNum}] Accepted in ${current.label}. Counter: ${current.count}/${FW_LIMIT}`, 'accepted');
+            } else {
+                fwLog(`[Req #${fwReqNum}] REJECTED — ${current.label} limit reached (${FW_LIMIT}/${FW_LIMIT})`, 'rejected');
+            }
+        }
+
+        function fwNextWindow() {
+            const n = fwWindows.length + 1;
+            fwWindows.push({ label: `Window ${n}`, count: 0 });
+            if (fwWindows.length > 4) fwWindows.shift();
+            fwRender();
+            fwLog(`[New Window] Window ${n} started — counter reset to 0`, 'info');
+        }
+
+        function fwReset() {
+            fwWindows = [{ label: 'Window 1', count: 0 }]; fwReqNum = 0;
+            fwRender();
+            document.getElementById('fwLog').innerHTML = '';
+            fwLog('[Reset] Windows cleared', 'info');
+        }
+
+        fwRender();
+
+        // ═══ Sliding Window Log ═══
+        let slTime = 0;
+        let slEntries = [];
+        const SL_WINDOW = 60;
+        const SL_LIMIT = 3;
+        let slReqNum = 0;
+
+        function slRender() {
+            const winStart = Math.max(0, slTime - SL_WINDOW);
+            document.getElementById('slTime').textContent = slTime;
+            document.getElementById('slWinStart').textContent = winStart;
+            document.getElementById('slWinEnd').textContent = slTime;
+
+            const active = slEntries.filter(e => e.time > winStart);
+            document.getElementById('slActive').textContent = active.length;
+
+            const logEl = document.getElementById('slLog');
+            logEl.innerHTML = '';
+            slEntries.forEach(e => {
+                const isExpired = e.time <= winStart;
+                const div = document.createElement('div');
+                div.className = `log-entry ${e.accepted ? 'accept' : 'reject'}${isExpired ? ' expired' : ''}`;
+                div.innerHTML = `<span style="min-width:50px;">${e.time}s</span> <span>${e.accepted ? '✓ Accept' : '✗ Reject'}</span>${isExpired ? ' <span style="color:var(--text-muted);">(expired)</span>' : ''}`;
+                logEl.appendChild(div);
+            });
+        }
+
+        function slLog(msg, cls) {
+            const log = document.getElementById('slEventLog');
+            log.innerHTML += `<div class="${cls}">${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function slSendRequest() {
+            slReqNum++;
+            const winStart = Math.max(0, slTime - SL_WINDOW);
+            const activeCount = slEntries.filter(e => e.time > winStart).length;
+
+            if (activeCount < SL_LIMIT) {
+                slEntries.push({ time: slTime, accepted: true });
+                slRender();
+                slLog(`[t=${slTime}s] Req #${slReqNum} ACCEPTED (${activeCount + 1}/${SL_LIMIT} in window)`, 'accepted');
+            } else {
+                slEntries.push({ time: slTime, accepted: false });
+                slRender();
+                slLog(`[t=${slTime}s] Req #${slReqNum} REJECTED (${activeCount}/${SL_LIMIT} — window full)`, 'rejected');
+            }
+        }
+
+        function slAdvanceTime(secs) {
+            slTime += secs;
+            slRender();
+            const winStart = Math.max(0, slTime - SL_WINDOW);
+            const expired = slEntries.filter(e => e.time <= winStart).length;
+            slLog(`[Time +${secs}s] Now at ${slTime}s. ${expired} entries expired.`, 'info');
+        }
+
+        function slReset() {
+            slTime = 0; slEntries = []; slReqNum = 0;
+            slRender();
+            document.getElementById('slEventLog').innerHTML = '';
+            slLog('[Reset] Log cleared, time reset to 0', 'info');
+        }
+
+        slRender();
+
+        // ═══ Sliding Window Counter ═══
+        function scUpdate() {
+            const prev = parseInt(document.getElementById('scPrev').value) || 0;
+            const curr = parseInt(document.getElementById('scCurr').value) || 0;
+            const pct = parseInt(document.getElementById('scSlider').value);
+            const overlap = (100 - pct) / 100;
+            const currWeight = pct / 100;
+
+            document.getElementById('scPctLabel').textContent = pct + '%';
+
+            const weighted = prev * overlap + curr * currWeight;
+            const rounded = Math.round(weighted * 100) / 100;
+
+            document.getElementById('scFormula').innerHTML =
+                `${prev} &times; ${Math.round(overlap * 100)}% + ${curr} &times; ${pct}% = ${(prev * overlap).toFixed(1)} + ${(curr * currWeight).toFixed(1)} = <strong>${rounded}</strong>`;
+
+            const limit = 7;
+            if (rounded <= limit) {
+                document.getElementById('scResult').innerHTML = `<span style="color: var(--moss-green);">${rounded} &le; ${limit} — ACCEPTED</span>`;
+            } else {
+                document.getElementById('scResult').innerHTML = `<span style="color: var(--sunset-rose);">${rounded} &gt; ${limit} — REJECTED</span>`;
+            }
+        }
+
+        document.getElementById('scSlider').addEventListener('input', scUpdate);
+        document.getElementById('scPrev').addEventListener('input', scUpdate);
+        document.getElementById('scCurr').addEventListener('input', scUpdate);
+        scUpdate();
+
+        // ═══ Dark Mode ═══
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('ch4-viz-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ch4-viz-theme', next);
+            themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        });
+
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            themeToggle.textContent = '\u2600';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 5 Interview Q&A — Design Consistent Hashing</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --cloud-cream: #fdfaf2; --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e; --ink-warm: #4a3728; --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b; --sunset-rose: #c97b6b; --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --shadow-hover: 0 8px 30px rgba(74,55,40,0.14);
+            --progress-height: 3px;
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --cloud-cream: #16213e; --forest-deep: #a8d5ba;
+            --ink-warm: #e8d5c4; --water-teal: #7ec8cc; --gold-accent: #e8c170;
+            --sunset-rose: #e8a090; --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --bg-code: #0d1117; --bg-highlight: #2a2520;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+            --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page);
+            color: var(--text-primary); line-height: 1.8;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: var(--progress-height);
+            background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose));
+            z-index: 1000; transition: width 0.1s linear; border-radius: 0 2px 2px 0;
+        }
+        .container { max-width: 860px; margin: 0 auto; background: transparent; }
+        .header {
+            background: var(--bg-card); border-bottom: 2px solid var(--gold-accent);
+            padding: 45px 40px 35px; text-align: center; position: relative; overflow: hidden;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 25px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        [data-theme="dark"] .header::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 700; color: var(--ink-warm); margin-bottom: 8px; }
+        .header p { font-size: 1.05em; color: var(--text-secondary); font-weight: 300; }
+        .content { padding: 40px 30px 60px; }
+
+        .intro-box {
+            background: var(--forest-deep); color: var(--text-inverse);
+            padding: 28px; border-radius: 12px; margin-bottom: 35px; box-shadow: var(--shadow-medium);
+        }
+        [data-theme="dark"] .intro-box { color: var(--text-primary); }
+        .intro-box h2 { font-family: 'Playfair Display', serif; font-size: 1.5em; margin-bottom: 12px; }
+
+        /* ═══ Resources Nav ═══ */
+        .resources-nav {
+            display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 30px;
+        }
+        .resource-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            color: var(--text-secondary); text-decoration: none;
+            padding: 9px 16px; border-radius: 8px; font-size: 0.88em; font-weight: 500;
+            box-shadow: var(--shadow-soft); transition: all 0.25s ease;
+        }
+        .resource-link:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); transform: translateY(-1px); }
+
+        /* ═══ Quiz Controls ═══ */
+        .quiz-controls {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            background: var(--bg-card); padding: 16px 22px; border-radius: 10px;
+            margin-bottom: 30px; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+        }
+        .quiz-btn {
+            padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border-medium);
+            background: var(--bg-section); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 500;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .quiz-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .quiz-btn.active { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .quiz-progress { font-size: 0.85em; color: var(--text-muted); margin-left: auto; }
+        .score-badge {
+            background: var(--bg-highlight); border: 1px solid var(--gold-accent);
+            color: var(--gold-accent); padding: 4px 14px; border-radius: 20px;
+            font-size: 0.82em; font-weight: 600;
+        }
+
+        /* ═══ Category Filter ═══ */
+        .category-filter {
+            display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+        }
+        .cat-btn {
+            padding: 5px 14px; border-radius: 20px; border: 1px solid var(--border-medium);
+            background: var(--bg-section); color: var(--text-muted);
+            font-size: 0.8em; font-weight: 500; cursor: pointer; transition: all 0.2s ease;
+        }
+        .cat-btn:hover, .cat-btn.active { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+
+        /* ═══ Q&A Section ═══ */
+        .qa-section {
+            margin-bottom: 18px; background: var(--bg-card); border-radius: 12px;
+            border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+            overflow: hidden; transition: box-shadow 0.3s ease;
+        }
+        .qa-section:hover { box-shadow: var(--shadow-medium); }
+        .qa-section.hidden { display: none; }
+
+        .question {
+            background: var(--parchment); color: var(--text-primary);
+            padding: 18px 24px; font-size: 1.1em; font-weight: 600;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer; border-left: 4px solid var(--water-teal);
+            user-select: none; transition: background 0.2s ease;
+        }
+        .question:hover { background: rgba(91,163,168,0.08); }
+
+        .q-icon {
+            background: var(--water-teal); color: white;
+            width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.72em; flex-shrink: 0;
+        }
+        .q-text { flex: 1; font-family: 'Playfair Display', serif; line-height: 1.4; }
+        .chevron { font-size: 0.8em; transition: transform 0.3s ease; color: var(--text-muted); flex-shrink: 0; }
+        .question.open .chevron { transform: rotate(180deg); }
+
+        .assess-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+            background: var(--border-medium); transition: background 0.3s ease;
+        }
+        .assess-dot.got-it { background: var(--moss-green); }
+        .assess-dot.review { background: var(--gold-accent); }
+
+        .answer-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .answer-wrapper.open { max-height: 6000px; transition: max-height 0.7s ease; }
+
+        .answer { padding: 24px 26px; border-top: 1px solid var(--border-light); }
+        .answer h3 {
+            font-family: 'Playfair Display', serif; color: var(--water-teal);
+            font-size: 1.15em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+
+        .self-assess { display: flex; gap: 10px; padding: 14px 26px; border-top: 1px solid var(--border-light); background: var(--bg-section); }
+        .assess-btn {
+            padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border-medium);
+            background: var(--bg-card); color: var(--text-secondary);
+            font-family: 'Inter', sans-serif; font-size: 0.82em; cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .assess-btn:hover { transform: translateY(-1px); }
+        .assess-btn.got-it { border-color: var(--moss-green); color: var(--moss-green); }
+        .assess-btn.got-it.selected { background: var(--moss-green); color: white; }
+        .assess-btn.review { border-color: var(--gold-accent); color: var(--gold-accent); }
+        .assess-btn.review.selected { background: var(--gold-accent); color: white; }
+        .assess-label { font-size: 0.8em; color: var(--text-muted); margin: auto 0 auto auto; }
+
+        .answer-point {
+            background: var(--bg-section); padding: 16px 20px; border-radius: 8px;
+            margin: 14px 0; border-left: 3px solid var(--water-teal);
+        }
+        .answer-point strong { color: var(--sunset-rose); display: block; margin-bottom: 6px; font-size: 1.02em; }
+
+        .code-block {
+            background: var(--bg-code); color: #c9d1d9; padding: 16px 20px; border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace; font-size: 0.87em;
+            overflow-x: auto; margin: 14px 0; line-height: 1.6;
+        }
+        .code-block .comment { color: #7ec699; }
+
+        .key-formula {
+            background: var(--bg-highlight); border: 2px solid var(--gold-accent);
+            padding: 14px 18px; border-radius: 8px; margin: 14px 0; text-align: center;
+            font-family: 'JetBrains Mono', monospace; font-size: 1.1em;
+            color: var(--ink-warm); font-weight: 600;
+        }
+        [data-theme="dark"] .key-formula { color: var(--gold-accent); }
+
+        .quiz-question-text {
+            display: none; padding: 20px 24px;
+            background: var(--bg-highlight); border-left: 4px solid var(--gold-accent);
+            font-size: 1.05em; color: var(--text-primary);
+        }
+        .quiz-mode .quiz-question-text { display: block; }
+        .quiz-mode .answer-wrapper { display: none; }
+        .quiz-mode .answer-wrapper.revealed { display: block; }
+        .quiz-mode .self-assess { display: none; }
+        .quiz-mode .answer-wrapper.revealed + .self-assess { display: flex; }
+
+        .reveal-btn {
+            padding: 8px 20px; border-radius: 8px;
+            background: var(--water-teal); color: white; border: none;
+            font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 600;
+            cursor: pointer; margin: 0 24px 16px; transition: all 0.25s ease;
+        }
+        .reveal-btn:hover { background: var(--forest-deep); }
+        .reveal-btn.hidden { display: none; }
+
+        .category-tag {
+            font-size: 0.7em; padding: 2px 8px; border-radius: 10px;
+            background: var(--bg-section); border: 1px solid var(--border-light);
+            color: var(--text-muted); font-weight: 500; flex-shrink: 0;
+        }
+
+        /* Floating buttons */
+        .theme-toggle, .back-to-top {
+            position: fixed; width: 44px; height: 44px; border-radius: 50%;
+            background: var(--bg-card); border: 1px solid var(--border-medium);
+            cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-medium); transition: all 0.3s ease; z-index: 150;
+            color: var(--text-secondary);
+        }
+        .theme-toggle { bottom: 80px; right: 20px; }
+        .theme-toggle:hover { background: var(--gold-accent); color: white; }
+        .back-to-top { bottom: 20px; right: 20px; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .back-to-top.visible { opacity: 1; pointer-events: all; }
+        .back-to-top:hover { background: var(--water-teal); color: white; }
+
+        @media (max-width: 768px) {
+            .header { padding: 30px 20px 25px; }
+            .header h1 { font-size: 1.7em; }
+            .content { padding: 25px 16px 40px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎯 Interview Q&amp;A</h1>
+            <p>Chapter 5: Design Consistent Hashing · 16 Questions</p>
+        </div>
+
+        <div class="content">
+            <!-- Resources -->
+            <div class="resources-nav">
+                <a href="chapter-5-complete.html" class="resource-link">📖 Study Guide</a>
+                <a href="Consistent-Hashing-Visualize.html" class="resource-link">⭕ Interactive Ring</a>
+                <a href="Anki-Cards/05_Design_Consistent_Hashing.csv" class="resource-link" download>📇 Anki Flashcards</a>
+            </div>
+
+            <!-- Intro -->
+            <div class="intro-box">
+                <h2>How to Use This Guide</h2>
+                <p><strong>Study Mode:</strong> Click any question to expand the full answer. Use self-assessment buttons to track confidence. <strong>Quiz Mode:</strong> Questions hide the answers — try to recall before revealing. Your assessments persist across reloads.</p>
+            </div>
+
+            <!-- Quiz Controls -->
+            <div class="quiz-controls">
+                <button class="quiz-btn" id="studyModeBtn">📖 Study Mode</button>
+                <button class="quiz-btn" id="quizModeBtn">🎯 Quiz Mode</button>
+                <button class="quiz-btn" id="expandAllBtn">↕ Expand All</button>
+                <button class="quiz-btn" id="collapseAllBtn">↕ Collapse All</button>
+                <span class="quiz-progress" id="quizProgress">0 of 16 assessed</span>
+                <span class="score-badge" id="scoreBadge">0 Got It</span>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button class="cat-btn active" data-cat="all">All (16)</button>
+                <button class="cat-btn" data-cat="core">Core Concepts (6)</button>
+                <button class="cat-btn" data-cat="operations">Ring Operations (4)</button>
+                <button class="cat-btn" data-cat="advanced">Advanced (4)</button>
+                <button class="cat-btn" data-cat="realworld">Real World (2)</button>
+            </div>
+
+            <!-- Q1 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q1">
+                    <span class="q-icon">Q1</span>
+                    <span class="q-text">What problem does consistent hashing solve?</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q1"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q1">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>The Rehashing Problem</strong>
+                            Naive hashing uses <code>serverIndex = hash(key) % N</code>. When N (server count) changes, most keys must be remapped to different servers, causing a <strong>cache miss storm</strong>.
+                        </div>
+                        <div class="answer-point">
+                            <strong>The Solution</strong>
+                            Consistent hashing ensures that when a server is added or removed, only <strong>k/n keys on average</strong> need to be remapped (where k = total keys, n = number of servers). This is O(k/n) vs O(k) for naive hashing.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Why It Matters</strong>
+                            In a distributed cache with millions of keys, a naive server removal could force nearly all requests to bypass the cache and hit the database — potentially causing a cascading failure. Consistent hashing prevents this.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q1" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q1" data-val="review">↺ Need Review</button>
+                        <span class="assess-label">Self-assessment persists on reload</span>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q1">Reveal Answer</button>
+            </div>
+
+            <!-- Q2 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q2">
+                    <span class="q-icon">Q2</span>
+                    <span class="q-text">What happens with simple modular hashing when a server is added or removed?</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q2"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q2">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Mathematical Root Cause</strong>
+                            With <code>hash(key) % N</code>, every key's server assignment depends on N. Changing N (adding/removing 1 server) causes the modular result to change for most keys.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Concrete Example</strong>
+                            With N=4: key3 → hash(key3) % 4 = 3 → server3<br>
+                            With N=3 (server removed): key3 → hash(key3) % 3 = 0 → server0 ← different server!<br>
+                            In practice, ~75% of keys may need to be remapped when going from 4→3 servers.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Real Impact</strong>
+                            All remapped keys become cache misses. The underlying database receives a sudden spike in traffic (thundering herd), potentially causing a system outage.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q2" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q2" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q2">Reveal Answer</button>
+            </div>
+
+            <!-- Q3 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q3">
+                    <span class="q-icon">Q3</span>
+                    <span class="q-text">How does a consistent hash ring work?</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q3"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q3">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>The Ring Concept</strong>
+                            Take the SHA-1 hash space (0 to 2¹⁶⁰ - 1) and connect the two ends, forming a circular ring. Both servers and keys get hashed to positions on this ring.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Key Lookup Rule</strong>
+                            To find which server owns a key: start at the key's ring position and walk <strong>clockwise</strong> until you hit a server node. That server owns the key.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Why the Ring Is Stable</strong>
+                            Server and key positions are absolute on the ring (no modulus). Adding/removing a server only affects keys in the adjacent arc — everything else stays exactly where it was.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q3" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q3" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q3">Reveal Answer</button>
+            </div>
+
+            <!-- Q4 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q4">
+                    <span class="q-icon">Q4</span>
+                    <span class="q-text">How are servers and keys mapped onto the ring?</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q4"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q4">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Servers</strong>
+                            Each server is hashed using its IP address or hostname: <code>position = hash(server_IP)</code>. This places the server at a specific point on the ring.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Keys</strong>
+                            Each key is hashed using the same hash function: <code>position = hash(key)</code>. No modular operation — the result directly maps to a ring position.
+                        </div>
+                        <div class="key-formula">serverIndex = hash(server_IP) [no % N]</div>
+                        <div class="answer-point">
+                            <strong>Critical Difference</strong>
+                            Unlike naive hashing, there's <strong>no % N</strong>. This means the position is absolute and independent of the total server count. When N changes, existing positions don't change.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q4" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q4" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q4">Reveal Answer</button>
+            </div>
+
+            <!-- Q5 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q5">
+                    <span class="q-icon">Q5</span>
+                    <span class="q-text">How do you determine which server stores a given key?</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q5"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q5">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>The Clockwise Walk Algorithm</strong>
+                            1. Hash the key to find its position on the ring<br>
+                            2. Walk clockwise from that position<br>
+                            3. The first server node encountered owns the key
+                        </div>
+                        <div class="code-block">
+<span class="comment"># Pseudocode for key lookup</span>
+def find_server(key):
+    key_pos = hash(key)
+    <span class="comment"># Walk clockwise through sorted server positions</span>
+    for server_pos in sorted_server_positions:
+        if server_pos >= key_pos:
+            return server_at(server_pos)
+    <span class="comment"># Wrap around: if no server found, use the first one</span>
+    return server_at(sorted_server_positions[0])
+                        </div>
+                        <div class="answer-point">
+                            <strong>Implementation Note</strong>
+                            In practice, server positions are stored in a sorted structure (e.g., TreeMap in Java, sorted list with bisect in Python) for O(log n) lookup efficiency.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q5" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q5" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q5">Reveal Answer</button>
+            </div>
+
+            <!-- Q6 -->
+            <div class="qa-section" data-cat="operations">
+                <div class="question" data-q="q6">
+                    <span class="q-icon">Q6</span>
+                    <span class="q-text">What happens when a server is added to the consistent hash ring?</span>
+                    <span class="category-tag">Operations</span>
+                    <span class="assess-dot" id="dot-q6"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q6">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>What Changes</strong>
+                            The new server S_new is hashed onto the ring. It takes ownership of all keys in the arc from S_new's predecessor (counterclockwise) up to S_new's position.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Example</strong>
+                            Before: key0 (pos 5) → s0 (pos 12)<br>
+                            After server4 added at pos 8: key0 (pos 5) → s4 (pos 8) ← now routes to new server<br>
+                            key1, key2, key3 remain unchanged.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Redistribution Cost</strong>
+                            Only ~1/n of all keys are redistributed (where n = new server count). With 5 servers, only ~20% of keys need to move.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q6" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q6" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q6">Reveal Answer</button>
+            </div>
+
+            <!-- Q7 -->
+            <div class="qa-section" data-cat="operations">
+                <div class="question" data-q="q7">
+                    <span class="q-icon">Q7</span>
+                    <span class="q-text">What happens when a server is removed from the ring?</span>
+                    <span class="category-tag">Operations</span>
+                    <span class="assess-dot" id="dot-q7"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q7">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>What Changes</strong>
+                            Only the keys that were owned by the removed server need to move. They fall through to the next clockwise server.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Example</strong>
+                            s1 (pos 28) is removed. key1 (pos 15) previously routed to s1. Now key1 continues clockwise past pos 28 → hits s2 (pos 54). key1 is now stored on server2. No other keys are affected.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Graceful Degradation</strong>
+                            Even sudden server failure is handled cleanly: affected keys automatically reroute to the next server, giving remaining servers only slightly more load.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q7" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q7" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q7">Reveal Answer</button>
+            </div>
+
+            <!-- Q8 -->
+            <div class="qa-section" data-cat="advanced">
+                <div class="question" data-q="q8">
+                    <span class="q-icon">Q8</span>
+                    <span class="q-text">What are the two main issues with basic consistent hashing?</span>
+                    <span class="category-tag">Advanced</span>
+                    <span class="assess-dot" id="dot-q8"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q8">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Problem 1: Unequal Partition Sizes</strong>
+                            Servers hash to random positions. With only a few servers, some may end up with huge arcs (owning most of the key space) while others have tiny arcs. One server might handle 60% of keys while another handles 5%.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Problem 2: Non-Uniform Key Distribution (Hotspots)</strong>
+                            Even with equal arc sizes, keys don't hash uniformly. Some servers may receive disproportionately more traffic. A viral piece of content (celebrity key) could overwhelm a single server.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Historical Note</strong>
+                            This was described by Karger et al. at MIT in 1997 in "Consistent Hashing and Random Trees." They also proposed virtual nodes as the solution.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q8" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q8" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q8">Reveal Answer</button>
+            </div>
+
+            <!-- Q9 -->
+            <div class="qa-section" data-cat="advanced">
+                <div class="question" data-q="q9">
+                    <span class="q-icon">Q9</span>
+                    <span class="q-text">What are virtual nodes and how do they solve the partition problem?</span>
+                    <span class="category-tag">Advanced</span>
+                    <span class="assess-dot" id="dot-q9"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q9">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Definition</strong>
+                            Instead of each physical server occupying one position on the ring, each server gets multiple positions (virtual nodes or vnodes). Server s0 might appear as s0_0, s0_1, s0_2 at different ring positions.
+                        </div>
+                        <div class="answer-point">
+                            <strong>How It Solves Partition Imbalance</strong>
+                            With many vnodes spread around the ring, each physical server's arc becomes the sum of many small arcs distributed throughout the ring. These small arcs average out, producing much more uniform distribution.
+                        </div>
+                        <div class="answer-point">
+                            <strong>How It Solves Hotspots</strong>
+                            Popular keys that hash to a hotspot region are now spread across multiple physical servers (via their vnodes), distributing the load.
+                        </div>
+                        <div class="code-block">
+<span class="comment"># Virtual node placement example</span>
+s0_0 = hash("s0#0") → pos 5
+s0_1 = hash("s0#1") → pos 42
+s0_2 = hash("s0#2") → pos 78
+<span class="comment"># All 3 vnodes serve server0</span>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q9" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q9" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q9">Reveal Answer</button>
+            </div>
+
+            <!-- Q10 -->
+            <div class="qa-section" data-cat="advanced">
+                <div class="question" data-q="q10">
+                    <span class="q-icon">Q10</span>
+                    <span class="q-text">What is the tradeoff with increasing the number of virtual nodes?</span>
+                    <span class="category-tag">Advanced</span>
+                    <span class="assess-dot" id="dot-q10"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q10">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Benefits of More VNodes</strong>
+                            Better distribution uniformity. At 100 vnodes: ~10% std dev in key distribution. At 200 vnodes: ~5% std dev. Better hotspot prevention and more even load during scale events.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Costs of More VNodes</strong>
+                            More entries in the ring's sorted data structure → higher memory consumption. More metadata to store and replicate. Slightly slower lookups as the sorted structure grows.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Production Benchmarks</strong>
+                            Amazon Dynamo: 150 vnodes/physical node<br>
+                            Apache Cassandra: 256 vnodes/physical node (default)<br>
+                            The right number depends on cluster size and available memory per node.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q10" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q10" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q10">Reveal Answer</button>
+            </div>
+
+            <!-- Q11 -->
+            <div class="qa-section" data-cat="operations">
+                <div class="question" data-q="q11">
+                    <span class="q-icon">Q11</span>
+                    <span class="q-text">How do you find the affected key range when adding or removing a server?</span>
+                    <span class="category-tag">Operations</span>
+                    <span class="assess-dot" id="dot-q11"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q11">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>The Counterclockwise Walk</strong>
+                            For both adding and removing, the technique is the same: from the new/removed server's position, walk <strong>counterclockwise</strong> until you reach another server node. The range between that predecessor and the target node is the affected key range.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Adding Server S_new</strong>
+                            Affected range: (predecessor_of_S_new, S_new]<br>
+                            Keys in this range move FROM their current server TO S_new.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Removing Server S_old</strong>
+                            Affected range: (predecessor_of_S_old, S_old]<br>
+                            Keys in this range move FROM S_old TO the next clockwise server after S_old.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q11" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q11" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q11">Reveal Answer</button>
+            </div>
+
+            <!-- Q12 -->
+            <div class="qa-section" data-cat="realworld">
+                <div class="question" data-q="q12">
+                    <span class="q-icon">Q12</span>
+                    <span class="q-text">Name real-world systems that use consistent hashing and explain how.</span>
+                    <span class="category-tag">Real World</span>
+                    <span class="assess-dot" id="dot-q12"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q12">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Amazon Dynamo / DynamoDB</strong>
+                            Uses consistent hashing with virtual nodes (called "tokens") to partition data across nodes. Basis for the eventual-consistency model described in the Dynamo paper (2007).
+                        </div>
+                        <div class="answer-point">
+                            <strong>Apache Cassandra</strong>
+                            Each node owns multiple token ranges. 256 vnodes per node by default. Gossip protocol propagates ring membership. Data is replicated to the next N-1 clockwise nodes.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Discord</strong>
+                            Routes WebSocket connections to gateway servers. Users in the same channel need to route to the same server for real-time consistency. Consistent hashing ensures graceful re-routing during server restarts.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Akamai CDN</strong>
+                            Routes HTTP requests to edge cache nodes. When a CDN node fails or is added, only the keys in its arc need cache invalidation — dramatically reducing cache churn.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Google Maglev</strong>
+                            Network load balancer that uses consistent hashing to route packets to backend servers. Minimizes connection disruption when backends are added or removed.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q12" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q12" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q12">Reveal Answer</button>
+            </div>
+
+            <!-- Q13 -->
+            <div class="qa-section" data-cat="core">
+                <div class="question" data-q="q13">
+                    <span class="q-icon">Q13</span>
+                    <span class="q-text">Compare consistent hashing vs modular hashing for key redistribution.</span>
+                    <span class="category-tag">Core</span>
+                    <span class="assess-dot" id="dot-q13"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q13">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <table style="width:100%; border-collapse: collapse; margin: 10px 0;">
+                            <thead>
+                                <tr style="background: var(--forest-deep); color: white;">
+                                    <th style="padding: 10px 14px; text-align: left;">Metric</th>
+                                    <th style="padding: 10px 14px; text-align: left;">Modular Hashing</th>
+                                    <th style="padding: 10px 14px; text-align: left;">Consistent Hashing</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="background: var(--bg-card);">
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light);">Redistribution on change</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--sunset-rose);">O(k) — almost all keys</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--moss-green);">O(k/n) — only adjacent keys</td>
+                                </tr>
+                                <tr style="background: var(--bg-section);">
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light);">Cache miss on removal</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--sunset-rose);">Catastrophic (~75%+ miss)</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--moss-green);">Minimal (~1/n miss)</td>
+                                </tr>
+                                <tr style="background: var(--bg-card);">
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light);">Lookup time</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light);">O(1)</td>
+                                    <td style="padding: 10px 14px; border-bottom: 1px solid var(--border-light);">O(log n) with sorted structure</td>
+                                </tr>
+                                <tr style="background: var(--bg-section);">
+                                    <td style="padding: 10px 14px;">Horizontal scaling</td>
+                                    <td style="padding: 10px 14px); color: var(--sunset-rose);">Requires full rebuild</td>
+                                    <td style="padding: 10px 14px; color: var(--moss-green);">Online, incremental</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q13" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q13" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q13">Reveal Answer</button>
+            </div>
+
+            <!-- Q14 -->
+            <div class="qa-section" data-cat="advanced">
+                <div class="question" data-q="q14">
+                    <span class="q-icon">Q14</span>
+                    <span class="q-text">What hash functions are commonly used in consistent hashing, and why SHA-1?</span>
+                    <span class="category-tag">Advanced</span>
+                    <span class="assess-dot" id="dot-q14"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q14">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>SHA-1 (Cited in the Book)</strong>
+                            Produces a 160-bit output (0 to 2¹⁶⁰ - 1). Cryptographically strong (though now broken for security use), excellent uniform distribution. The large space minimizes collision probability.
+                        </div>
+                        <div class="answer-point">
+                            <strong>MD5</strong>
+                            128-bit output. Widely used in early consistent hashing implementations (including Ketama, used in Memcached). No longer cryptographically secure but fine for distribution purposes.
+                        </div>
+                        <div class="answer-point">
+                            <strong>MurmurHash / xxHash</strong>
+                            Non-cryptographic, extremely fast, excellent distribution. Preferred in modern systems (Cassandra, Redis Cluster) for performance. xxHash is ~10x faster than MD5.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Key Requirement</strong>
+                            The hash function must produce uniform distribution across the ring space. Non-uniform distribution defeats the purpose of consistent hashing.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q14" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q14" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q14">Reveal Answer</button>
+            </div>
+
+            <!-- Q15 -->
+            <div class="qa-section" data-cat="operations">
+                <div class="question" data-q="q15">
+                    <span class="q-icon">Q15</span>
+                    <span class="q-text">How does consistent hashing enable horizontal scaling?</span>
+                    <span class="category-tag">Operations</span>
+                    <span class="assess-dot" id="dot-q15"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q15">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>Online Scaling Without Downtime</strong>
+                            Adding a new server is a live operation: hash it onto the ring, transfer only the affected key range from the adjacent server, and it's immediately available. No need to stop the cluster or do a full data migration.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Graceful Scale-Down</strong>
+                            Removing a server (planned or unplanned) only affects keys in its arc. Those keys automatically reroute to the next clockwise server. With virtual nodes, the lost server's keys are spread across multiple remaining servers rather than piling onto one.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Auto-Rebalancing</strong>
+                            In systems like Cassandra, adding a node with 256 vnodes automatically splits load with ~256 existing vnodes across the ring, achieving near-perfect rebalancing without manual partition assignment.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q15" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q15" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q15">Reveal Answer</button>
+            </div>
+
+            <!-- Q16 -->
+            <div class="qa-section" data-cat="realworld">
+                <div class="question" data-q="q16">
+                    <span class="q-icon">Q16</span>
+                    <span class="q-text">How does consistent hashing mitigate the hotspot / celebrity problem?</span>
+                    <span class="category-tag">Real World</span>
+                    <span class="assess-dot" id="dot-q16"></span>
+                    <span class="chevron">▼</span>
+                </div>
+                <div class="answer-wrapper" id="aw-q16">
+                    <div class="answer">
+                        <h3>📋 Answer</h3>
+                        <div class="answer-point">
+                            <strong>The Hotspot Problem</strong>
+                            Without consistent hashing, a viral celebrity post (say, a tweet by Katy Perry) might hash to server3. Server3 receives 10x normal traffic and collapses. All other servers are idle.
+                        </div>
+                        <div class="answer-point">
+                            <strong>How Virtual Nodes Help</strong>
+                            With many virtual nodes, what appears to be "server3's territory" is actually many small arcs spread across the ring. Very popular content still routes to a single physical server for any specific key — but the overall load from many popular keys is spread across multiple machines via their different vnode positions.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Complementary Strategies</strong>
+                            For extreme hotspots (e.g., a single key receiving millions of requests/sec), consistent hashing alone isn't enough. Common additions: adding random suffixes to keys to scatter reads across multiple cache nodes, or explicitly replicating hot keys to multiple servers.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Interview Note</strong>
+                            This topic connects to Chapter 12 (Design a Notification System) and Chapter 13 (Design a News Feed System) — both face similar hotspot challenges.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="q16" data-val="got-it">✓ Got it</button>
+                        <button class="assess-btn review" data-q="q16" data-val="review">↺ Need Review</button>
+                    </div>
+                </div>
+                <button class="reveal-btn hidden" id="reveal-q16">Reveal Answer</button>
+            </div>
+
+        </div>
+    </div>
+
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">&#8593;</button>
+
+    <script>
+        // ═══ Progress Bar ═══
+        const progressBar = document.getElementById('progressBar');
+        function updateProgress() {
+            const s = window.scrollY, d = document.documentElement.scrollHeight - window.innerHeight;
+            progressBar.style.width = (d > 0 ? (s / d) * 100 : 0) + '%';
+        }
+
+        // ═══ Dark Mode ═══
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('ch5-qa-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+        themeToggle.addEventListener('click', () => {
+            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ch5-qa-theme', next);
+            themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        });
+        if (document.documentElement.getAttribute('data-theme') === 'dark') themeToggle.textContent = '\u2600';
+
+        // ═══ Back to Top ═══
+        const backToTop = document.getElementById('backToTop');
+        backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+        // ═══ Accordion ═══
+        const QS = 16;
+        let quizMode = false;
+
+        document.querySelectorAll('.question').forEach(q => {
+            q.addEventListener('click', () => {
+                const qId = q.dataset.q;
+                const aw = document.getElementById('aw-' + qId);
+                const isOpen = aw.classList.contains('open');
+                q.classList.toggle('open', !isOpen);
+                aw.classList.toggle('open', !isOpen);
+            });
+        });
+
+        // ═══ Expand / Collapse All ═══
+        document.getElementById('expandAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.question').forEach(q => q.classList.add('open'));
+            document.querySelectorAll('.answer-wrapper').forEach(aw => aw.classList.add('open'));
+        });
+        document.getElementById('collapseAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('open'));
+            document.querySelectorAll('.answer-wrapper').forEach(aw => aw.classList.remove('open'));
+        });
+
+        // ═══ Quiz Mode ═══
+        document.getElementById('studyModeBtn').addEventListener('click', () => {
+            quizMode = false;
+            document.querySelector('.container').classList.remove('quiz-mode');
+            document.getElementById('studyModeBtn').classList.add('active');
+            document.getElementById('quizModeBtn').classList.remove('active');
+            document.querySelectorAll('.reveal-btn').forEach(b => b.classList.add('hidden'));
+            document.querySelectorAll('.answer-wrapper').forEach(aw => aw.classList.remove('revealed'));
+        });
+
+        document.getElementById('quizModeBtn').addEventListener('click', () => {
+            quizMode = true;
+            document.querySelector('.container').classList.add('quiz-mode');
+            document.getElementById('quizModeBtn').classList.add('active');
+            document.getElementById('studyModeBtn').classList.remove('active');
+            document.querySelectorAll('.question').forEach(q => q.classList.remove('open'));
+            document.querySelectorAll('.answer-wrapper').forEach(aw => {
+                aw.classList.remove('open', 'revealed');
+            });
+            document.querySelectorAll('.reveal-btn').forEach(b => b.classList.remove('hidden'));
+        });
+
+        document.querySelectorAll('.reveal-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const qId = btn.id.replace('reveal-', '');
+                const aw = document.getElementById('aw-' + qId);
+                aw.classList.add('open', 'revealed');
+                btn.classList.add('hidden');
+            });
+        });
+
+        // ═══ Self Assessment ═══
+        const STORAGE_KEY = 'ch5-qa-assess';
+        const assessments = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+
+        function updateScoreboard() {
+            const total = Object.keys(assessments).length;
+            const gotIt = Object.values(assessments).filter(v => v === 'got-it').length;
+            document.getElementById('quizProgress').textContent = `${total} of ${QS} assessed`;
+            document.getElementById('scoreBadge').textContent = `${gotIt} Got It`;
+        }
+
+        function restoreAssessments() {
+            Object.entries(assessments).forEach(([qId, val]) => {
+                const dot = document.getElementById('dot-' + qId);
+                if (dot) {
+                    dot.className = 'assess-dot ' + val;
+                }
+                document.querySelectorAll(`.assess-btn[data-q="${qId}"]`).forEach(b => {
+                    b.classList.toggle('selected', b.dataset.val === val);
+                });
+            });
+            updateScoreboard();
+        }
+
+        document.querySelectorAll('.assess-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const qId = btn.dataset.q;
+                const val = btn.dataset.val;
+                assessments[qId] = val;
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(assessments));
+
+                const dot = document.getElementById('dot-' + qId);
+                if (dot) dot.className = 'assess-dot ' + val;
+
+                document.querySelectorAll(`.assess-btn[data-q="${qId}"]`).forEach(b => {
+                    b.classList.toggle('selected', b.dataset.val === val);
+                });
+                updateScoreboard();
+            });
+        });
+
+        restoreAssessments();
+
+        // ═══ Category Filter ═══
+        document.querySelectorAll('.cat-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                const cat = btn.dataset.cat;
+                document.querySelectorAll('.qa-section').forEach(s => {
+                    s.classList.toggle('hidden', cat !== 'all' && s.dataset.cat !== cat);
+                });
+            });
+        });
+
+        // ═══ Scroll Listener ═══
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateProgress();
+                    backToTop.classList.toggle('visible', window.scrollY > 400);
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        updateProgress();
+    </script>
+</body>
+</html>

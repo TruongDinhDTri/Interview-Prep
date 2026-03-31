@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chapter 4 Interview Q&A — Design A Rate Limiter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --cloud-cream: #fdfaf2; --sky-soft: #e8f4f8;
+            --forest-deep: #2d4a3e; --ink-warm: #4a3728; --water-teal: #5ba3a8;
+            --gold-accent: #d4a84b; --sunset-rose: #c97b6b; --moss-green: #7ea87e;
+            --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --text-inverse: #fef6e4;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --shadow-hover: 0 8px 30px rgba(74,55,40,0.14);
+            --progress-height: 3px;
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --cloud-cream: #16213e; --forest-deep: #a8d5ba;
+            --ink-warm: #e8d5c4; --water-teal: #7ec8cc; --gold-accent: #e8c170;
+            --sunset-rose: #e8a090; --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --bg-code: #0d1117; --bg-highlight: #2a2520;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --text-inverse: #1a1a2e;
+            --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-page);
+            color: var(--text-primary); line-height: 1.8;
+            transition: background 0.4s ease, color 0.4s ease;
+        }
+        .progress-bar {
+            position: fixed; top: 0; left: 0; height: var(--progress-height);
+            background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose));
+            z-index: 1000; transition: width 0.1s linear; border-radius: 0 2px 2px 0;
+        }
+        .container { max-width: 860px; margin: 0 auto; background: transparent; }
+        .header {
+            background: var(--bg-card); border-bottom: 2px solid var(--gold-accent);
+            padding: 45px 40px 35px; text-align: center; position: relative; overflow: hidden;
+        }
+        .header::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 25px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        [data-theme="dark"] .header::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 25' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 25 Q150 0 300 18 Q450 30 600 12 Q750 0 900 20 Q1050 30 1200 8 V25 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 2.2em; font-weight: 700; color: var(--ink-warm); margin-bottom: 8px; }
+        .header p { font-size: 1.05em; color: var(--text-secondary); font-weight: 300; }
+        .content { padding: 40px 30px 60px; }
+
+        /* ═══ Intro ═══ */
+        .intro-box {
+            background: var(--forest-deep); color: var(--text-inverse);
+            padding: 28px; border-radius: 12px; margin-bottom: 35px; box-shadow: var(--shadow-medium);
+        }
+        [data-theme="dark"] .intro-box { color: var(--text-primary); }
+        .intro-box h2 { font-family: 'Playfair Display', serif; font-size: 1.5em; margin-bottom: 12px; }
+
+        /* ═══ Quiz Controls ═══ */
+        .quiz-controls {
+            display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+            background: var(--bg-card); padding: 16px 22px; border-radius: 10px;
+            margin-bottom: 30px; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+        }
+        .quiz-btn {
+            padding: 8px 20px; border-radius: 8px; border: 1px solid var(--border-medium);
+            background: var(--bg-section); color: var(--text-primary);
+            font-family: 'Inter', sans-serif; font-size: 0.9em; font-weight: 500;
+            cursor: pointer; transition: all 0.25s ease;
+        }
+        .quiz-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .quiz-btn.active { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .quiz-progress { font-size: 0.85em; color: var(--text-muted); margin-left: auto; }
+
+        /* ═══ Q&A Section ═══ */
+        .qa-section {
+            margin-bottom: 24px; background: var(--bg-card); border-radius: 12px;
+            border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+            overflow: hidden; transition: box-shadow 0.3s ease;
+        }
+        .qa-section:hover { box-shadow: var(--shadow-medium); }
+
+        .question {
+            background: var(--parchment); color: var(--text-primary);
+            padding: 20px 26px; font-size: 1.15em; font-weight: 600;
+            display: flex; align-items: center; gap: 14px;
+            cursor: pointer; border-left: 4px solid var(--water-teal);
+            user-select: none; transition: background 0.2s ease;
+        }
+        .question:hover { background: rgba(91,163,168,0.08); }
+
+        .q-icon {
+            background: var(--water-teal); color: white;
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; font-size: 0.75em; flex-shrink: 0;
+        }
+        .q-text { flex: 1; font-family: 'Playfair Display', serif; }
+        .chevron { font-size: 0.8em; transition: transform 0.3s ease; color: var(--text-muted); flex-shrink: 0; }
+        .question.open .chevron { transform: rotate(180deg); }
+
+        .assess-dot {
+            width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+            background: var(--border-medium); transition: background 0.3s ease;
+        }
+        .assess-dot.got-it { background: var(--moss-green); }
+        .assess-dot.review { background: var(--gold-accent); }
+
+        .answer-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .answer-wrapper.open { max-height: 5000px; transition: max-height 0.6s ease; }
+
+        .answer { padding: 24px 26px; border-top: 1px solid var(--border-light); }
+        .answer h3 {
+            font-family: 'Playfair Display', serif; color: var(--water-teal);
+            font-size: 1.2em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+        }
+
+        .self-assess { display: flex; gap: 10px; padding: 14px 26px; border-top: 1px solid var(--border-light); background: var(--bg-section); }
+        .assess-btn {
+            padding: 6px 16px; border-radius: 6px; border: 1px solid var(--border-medium);
+            background: var(--bg-card); color: var(--text-secondary);
+            font-family: 'Inter', sans-serif; font-size: 0.82em; cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .assess-btn:hover { transform: translateY(-1px); }
+        .assess-btn.got-it { border-color: var(--moss-green); color: var(--moss-green); }
+        .assess-btn.got-it.selected { background: var(--moss-green); color: white; }
+        .assess-btn.review { border-color: var(--gold-accent); color: var(--gold-accent); }
+        .assess-btn.review.selected { background: var(--gold-accent); color: white; }
+
+        .answer-point {
+            background: var(--bg-section); padding: 16px 20px; border-radius: 8px;
+            margin: 14px 0; border-left: 3px solid var(--water-teal);
+        }
+        .answer-point strong { color: var(--sunset-rose); display: block; margin-bottom: 6px; font-size: 1.02em; }
+
+        .key-insight {
+            background: var(--bg-highlight); border-left: 4px solid var(--gold-accent);
+            padding: 18px; margin: 18px 0; border-radius: 8px;
+        }
+        .key-insight strong { color: var(--gold-accent); font-size: 1.05em; }
+
+        .example-box {
+            background: #f0f7f0; padding: 18px; border-radius: 8px;
+            margin: 18px 0; border-left: 4px solid var(--moss-green);
+        }
+        [data-theme="dark"] .example-box { background: #1a2e1a; }
+        .example-box h4 { color: var(--moss-green); font-family: 'Playfair Display', serif; margin-bottom: 10px; font-size: 1.05em; }
+
+        .code-snippet {
+            background: var(--bg-code); color: #c9d1d9; padding: 18px; border-radius: 8px;
+            font-family: 'JetBrains Mono', monospace; overflow-x: auto; margin: 14px 0;
+            font-size: 0.9em; border: 1px solid var(--border-light);
+        }
+
+        .comparison-table {
+            width: 100%; border-collapse: collapse; margin: 18px 0;
+            border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-soft);
+        }
+        .comparison-table th {
+            background: var(--forest-deep); color: white;
+            padding: 14px 16px; text-align: left; font-weight: 600; font-size: 0.92em;
+        }
+        [data-theme="dark"] .comparison-table th { color: var(--text-inverse); }
+        .comparison-table td {
+            padding: 14px 16px; border-bottom: 1px solid var(--border-light); background: var(--bg-card);
+        }
+        .comparison-table tr:nth-child(even) td { background: var(--bg-section); }
+
+        .visual-flow { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 18px 0; justify-content: center; }
+        .flow-box { background: var(--water-teal); color: white; padding: 12px 20px; border-radius: 8px; font-weight: 600; font-size: 0.9em; box-shadow: var(--shadow-soft); }
+        .flow-arrow { font-size: 1.5em; color: var(--water-teal); font-weight: bold; }
+
+        .emphasis {
+            background: linear-gradient(135deg, var(--gold-accent), #c9963e);
+            color: white; padding: 2px 8px; border-radius: 4px; font-weight: 600; font-size: 0.95em;
+        }
+
+        ul { margin-left: 24px; margin-top: 10px; }
+        li { margin: 8px 0; }
+        code {
+            font-family: 'JetBrains Mono', monospace; background: var(--bg-section);
+            padding: 2px 6px; border-radius: 4px; font-size: 0.9em; border: 1px solid var(--border-light);
+        }
+
+        .theme-toggle {
+            position: fixed; right: 24px; bottom: 24px; width: 44px; height: 44px;
+            border-radius: 50%; border: 1px solid var(--border-light);
+            background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+            box-shadow: var(--shadow-medium); display: flex; align-items: center;
+            justify-content: center; font-size: 1.2em; z-index: 100; transition: all 0.3s ease;
+        }
+        .theme-toggle:hover { transform: scale(1.1); box-shadow: var(--shadow-hover); }
+
+        .animate-in { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+        .animate-in.visible { opacity: 1; transform: translateY(0); }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.7em; }
+            .header { padding: 35px 20px 28px; }
+            .content { padding: 25px 16px 40px; }
+            .question { font-size: 1.05em; padding: 16px 18px; }
+            .answer { padding: 18px; }
+            .comparison-table { display: block; overflow-x: auto; }
+            .quiz-controls { padding: 12px 16px; }
+            .theme-toggle { right: 16px; bottom: 16px; }
+        }
+        @media (max-width: 480px) {
+            .header h1 { font-size: 1.4em; }
+            .question { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Chapter 4: Interview Q&A</h1>
+            <p>Master Rate Limiter Design for System Design Interviews</p>
+        </div>
+
+        <div class="content">
+            <div class="intro-box animate-in">
+                <h2>How to Use This Document</h2>
+                <p>These questions cover everything an interviewer might ask about rate limiter design. Each answer follows a structured format:</p>
+                <ul style="margin-top: 12px;">
+                    <li>Clear definition first</li>
+                    <li>Why it matters (the problem it solves)</li>
+                    <li>Concrete examples and trade-offs</li>
+                    <li>Key numbers and implementation details</li>
+                </ul>
+                <p style="margin-top: 12px;"><strong>Pro Tip:</strong> Practice explaining each algorithm with a whiteboard drawing. Interviewers LOVE when you visualize your answer!</p>
+            </div>
+
+            <div class="quiz-controls" id="quizControls">
+                <button class="quiz-btn" id="quizToggle">Quiz Mode</button>
+                <button class="quiz-btn" id="expandAll">Expand All</button>
+                <button class="quiz-btn" id="collapseAll">Collapse All</button>
+                <span class="quiz-progress" id="quizProgress"></span>
+            </div>
+
+            <!-- Q1 -->
+            <div class="qa-section animate-in" data-q="1">
+                <div class="question" data-target="a1">
+                    <span class="q-icon">Q1</span>
+                    <span class="q-text">What is a rate limiter and why do we need one?</span>
+                    <span class="assess-dot" data-q="1"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a1">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Definition:</strong>
+                            A rate limiter controls the rate of traffic sent by a client or service. It limits the number of client requests allowed over a specified period. If the API request count exceeds the threshold, excess calls are blocked.
+                        </div>
+                        <div class="key-insight">
+                            <strong>Three Key Benefits:</strong>
+                            <ol style="margin-top: 10px; margin-left: 20px;">
+                                <li><strong>Prevent DoS attacks:</strong> Twitter limits 300 tweets/3 hours; Google Docs limits 300 read requests/user/60 seconds.</li>
+                                <li><strong>Reduce cost:</strong> Limits calls to expensive third-party APIs (payments, health records).</li>
+                                <li><strong>Prevent server overload:</strong> Filters out excess requests from bots or misbehaving users.</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="1" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="1" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="qa-section animate-in" data-q="2">
+                <div class="question" data-target="a2">
+                    <span class="q-icon">Q2</span>
+                    <span class="q-text">Where should you place a rate limiter?</span>
+                    <span class="assess-dot" data-q="2"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a2">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Three Options:</strong>
+                            <ul>
+                                <li><strong>Client-side:</strong> Unreliable &mdash; client requests can be forged by malicious actors. We may not control client implementation.</li>
+                                <li><strong>Server-side:</strong> Rate limiter lives inside the API server itself.</li>
+                                <li><strong>Middleware:</strong> Rate limiter sits between client and API servers. This is the most common approach.</li>
+                            </ul>
+                        </div>
+                        <div class="visual-flow">
+                            <div class="flow-box">Client</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--sunset-rose);">Rate Limiter Middleware</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box">API Servers</div>
+                        </div>
+                        <div class="key-insight">
+                            <strong>API Gateway:</strong> In cloud microservices, rate limiting is often implemented in an API gateway &mdash; a fully managed service that also handles SSL termination, authentication, and IP whitelisting.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="2" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="2" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="qa-section animate-in" data-q="3">
+                <div class="question" data-target="a3">
+                    <span class="q-icon">Q3</span>
+                    <span class="q-text">How does the Token Bucket algorithm work?</span>
+                    <span class="assess-dot" data-q="3"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a3">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Mechanism:</strong>
+                            A bucket holds tokens up to a maximum capacity. Tokens are added at a fixed <strong>refill rate</strong>. Each request consumes one token. If tokens are available, the request passes. If not, it's dropped. Extra tokens overflow when the bucket is full.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Two Parameters:</strong>
+                            <ul>
+                                <li><strong>Bucket size:</strong> Maximum number of tokens the bucket can hold</li>
+                                <li><strong>Refill rate:</strong> Number of tokens added per second</li>
+                            </ul>
+                        </div>
+                        <div class="key-insight">
+                            <strong>Who uses it?</strong> Both <span class="emphasis">Amazon</span> and <span class="emphasis">Stripe</span> use token bucket for API throttling. It allows short <strong>bursts of traffic</strong> as long as tokens are available.
+                        </div>
+                        <div class="example-box">
+                            <h4>How many buckets?</h4>
+                            <ul>
+                                <li>Different API endpoints = different buckets per user</li>
+                                <li>IP-based throttling = one bucket per IP</li>
+                                <li>Global limit = one shared bucket for all requests</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="3" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="3" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="qa-section animate-in" data-q="4">
+                <div class="question" data-target="a4">
+                    <span class="q-icon">Q4</span>
+                    <span class="q-text">How does the Leaking Bucket algorithm work?</span>
+                    <span class="assess-dot" data-q="4"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a4">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Mechanism:</strong>
+                            Similar to token bucket, but uses a <strong>FIFO queue</strong>. Requests are added to the queue if not full. They are processed (leaked) at a <strong>fixed outflow rate</strong>. If the queue is full, new requests are dropped.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Two Parameters:</strong>
+                            <ul>
+                                <li><strong>Bucket size (queue size):</strong> How many requests the queue can hold</li>
+                                <li><strong>Outflow rate:</strong> How many requests are processed per second</li>
+                            </ul>
+                        </div>
+                        <div class="key-insight">
+                            <strong>Key difference from Token Bucket:</strong> Leaking bucket processes requests at a <strong>stable, fixed rate</strong> &mdash; no bursts allowed. Good for use cases needing uniform processing speed. The downside: a burst of traffic fills the queue with old requests, and <strong>newer requests get rate limited</strong>.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="4" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="4" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="qa-section animate-in" data-q="5">
+                <div class="question" data-target="a5">
+                    <span class="q-icon">Q5</span>
+                    <span class="q-text">How does the Fixed Window Counter work and what's its main flaw?</span>
+                    <span class="assess-dot" data-q="5"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a5">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Mechanism:</strong>
+                            Divides the timeline into fixed-size windows. Each window has a counter. Every request increments the counter. When the counter reaches the threshold, new requests are dropped until the next window.
+                        </div>
+                        <div class="key-insight">
+                            <strong>The Edge Burst Problem:</strong>
+                            <p style="margin-top: 10px;">With a limit of 5 req/min: if 5 requests come at 2:59 and 5 more at 3:01, that's <strong>10 requests in 2 seconds</strong> &mdash; double the intended rate! Each window individually passes (5/5), but the boundary burst is the critical flaw.</p>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="5" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="5" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q6 -->
+            <div class="qa-section animate-in" data-q="6">
+                <div class="question" data-target="a6">
+                    <span class="q-icon">Q6</span>
+                    <span class="q-text">How does the Sliding Window Log algorithm work?</span>
+                    <span class="assess-dot" data-q="6"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a6">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Mechanism:</strong>
+                            Tracks individual <strong>request timestamps</strong> in a sorted set (Redis). On each new request: (1) Remove outdated timestamps outside the current window, (2) Add the new timestamp, (3) If log size &le; limit, accept; otherwise reject.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Pros:</strong> Very accurate &mdash; no boundary burst problem. In any rolling window, requests will not exceed the rate limit.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Cons:</strong> Consumes a lot of memory because even rejected requests may have their timestamps stored.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="6" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="6" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q7 -->
+            <div class="qa-section animate-in" data-q="7">
+                <div class="question" data-target="a7">
+                    <span class="q-icon">Q7</span>
+                    <span class="q-text">How does the Sliding Window Counter algorithm work?</span>
+                    <span class="assess-dot" data-q="7"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a7">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Mechanism:</strong>
+                            A hybrid of fixed window + sliding window log. Uses a weighted formula:
+                        </div>
+                        <div class="code-snippet">
+Requests = (prev_window_count × overlap%) + (current_window_count × position%)
+
+Example: prev=5, curr=3, 70% into current window
+= 5 × 30% + 3 × 70% = 1.5 + 2.1 = 3.6
+                        </div>
+                        <div class="key-insight">
+                            <strong>Key insight:</strong> It's an approximation (assumes previous window requests are evenly distributed), but Cloudflare's experiments show only <strong>0.003% of requests are wrongly handled</strong> among 400 million requests. Best balance of accuracy and memory efficiency.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="7" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="7" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q8 -->
+            <div class="qa-section animate-in" data-q="8">
+                <div class="question" data-target="a8">
+                    <span class="q-icon">Q8</span>
+                    <span class="q-text">Compare all 5 rate limiting algorithms</span>
+                    <span class="assess-dot" data-q="8"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a8">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <table class="comparison-table">
+                            <thead><tr><th>Algorithm</th><th>Memory</th><th>Burst</th><th>Accuracy</th><th>Best For</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>Token Bucket</strong></td><td>Low</td><td>Yes</td><td>Good</td><td>API throttling (Amazon, Stripe)</td></tr>
+                                <tr><td><strong>Leaking Bucket</strong></td><td>Low</td><td>No</td><td>Good</td><td>Stable outflow rate</td></tr>
+                                <tr><td><strong>Fixed Window</strong></td><td>Low</td><td>Edge burst</td><td>Low</td><td>Simple cases</td></tr>
+                                <tr><td><strong>Sliding Window Log</strong></td><td>High</td><td>No</td><td>Very High</td><td>Strict limiting</td></tr>
+                                <tr><td><strong>Sliding Window Counter</strong></td><td>Low</td><td>Smoothed</td><td>High</td><td>Best balance (Cloudflare)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="8" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="8" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q9 -->
+            <div class="qa-section animate-in" data-q="9">
+                <div class="question" data-target="a9">
+                    <span class="q-icon">Q9</span>
+                    <span class="q-text">Why use Redis for rate limiting? What commands?</span>
+                    <span class="assess-dot" data-q="9"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a9">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Why Redis?</strong>
+                            We need fast counter access. Database is too slow (disk access). Redis is an in-memory cache that is fast and supports <strong>time-based expiration</strong>.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Two Key Commands:</strong>
+                            <ul>
+                                <li><code>INCR</code> &mdash; Atomically increases the stored counter by 1</li>
+                                <li><code>EXPIRE</code> &mdash; Sets a timeout for the counter (auto-delete after window expires)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="9" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="9" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q10 -->
+            <div class="qa-section animate-in" data-q="10">
+                <div class="question" data-target="a10">
+                    <span class="q-icon">Q10</span>
+                    <span class="q-text">What HTTP headers does a rate limiter return?</span>
+                    <span class="assess-dot" data-q="10"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a10">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <table class="comparison-table">
+                            <thead><tr><th>Header</th><th>Purpose</th></tr></thead>
+                            <tbody>
+                                <tr><td><code>X-Ratelimit-Remaining</code></td><td>Remaining allowed requests in the current window</td></tr>
+                                <tr><td><code>X-Ratelimit-Limit</code></td><td>Total calls allowed per time window</td></tr>
+                                <tr><td><code>X-Ratelimit-Retry-After</code></td><td>Seconds to wait before retrying</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="key-insight">
+                            <strong>When throttled:</strong> Client receives <span class="emphasis">HTTP 429 (Too Many Requests)</span> along with the <code>X-Ratelimit-Retry-After</code> header.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="10" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="10" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q11 -->
+            <div class="qa-section animate-in" data-q="11">
+                <div class="question" data-target="a11">
+                    <span class="q-icon">Q11</span>
+                    <span class="q-text">Explain the detailed design of a rate limiter system</span>
+                    <span class="assess-dot" data-q="11"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a11">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="visual-flow">
+                            <div class="flow-box" style="background: #8a7a6a;">Rules (disk)</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--moss-green);">Workers</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--gold-accent);">Rules Cache</div>
+                        </div>
+                        <div class="visual-flow">
+                            <div class="flow-box" style="background: var(--mist-lavender); color: #3d2e1f;">Client</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--sunset-rose);">Rate Limiter Middleware</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: #d94f4f;">Redis (counters)</div>
+                        </div>
+                        <div class="answer-point">
+                            <strong>Flow:</strong>
+                            <ol style="margin-left: 20px; margin-top: 8px;">
+                                <li>Rules stored on disk, workers pull them into cache periodically</li>
+                                <li>Client request hits rate limiter middleware first</li>
+                                <li>Middleware loads rules from cache, fetches counter from Redis</li>
+                                <li>If under limit &rarr; forward to API servers. If over &rarr; return 429 or enqueue</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="11" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="11" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q12 -->
+            <div class="qa-section animate-in" data-q="12">
+                <div class="question" data-target="a12">
+                    <span class="q-icon">Q12</span>
+                    <span class="q-text">What is the race condition problem in distributed rate limiting?</span>
+                    <span class="assess-dot" data-q="12"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a12">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>The Problem:</strong>
+                            In highly concurrent environments, two threads can read the same counter value (e.g., 3) simultaneously. Both increment to 4 and write back. Expected result: 5. Actual result: 4. The counter is wrong.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Solutions (3 approaches):</strong>
+                            <ul>
+                                <li><strong>Locks:</strong> Simple but significantly slows down the system</li>
+                                <li><strong>Lua scripts:</strong> Redis executes Lua scripts atomically &mdash; preferred solution</li>
+                                <li><strong>Redis sorted sets:</strong> Atomic operations that avoid the read-modify-write race</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="12" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="12" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q13 -->
+            <div class="qa-section animate-in" data-q="13">
+                <div class="question" data-target="a13">
+                    <span class="q-icon">Q13</span>
+                    <span class="q-text">How do you solve the synchronization problem with multiple rate limiters?</span>
+                    <span class="assess-dot" data-q="13"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a13">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>The Problem:</strong>
+                            With multiple rate limiter servers, a client's requests may go to different servers. If each server maintains its own counter, the rate limit won't work correctly (e.g., a client sends 3 requests to Server A and 3 to Server B, bypassing a limit of 5).
+                        </div>
+                        <div class="answer-point">
+                            <strong>Solution:</strong>
+                            Use a <strong>centralized Redis data store</strong>. All rate limiter servers read/write to the same Redis instance. This ensures a single, consistent view of each client's request count.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="13" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="13" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q14 -->
+            <div class="qa-section animate-in" data-q="14">
+                <div class="question" data-target="a14">
+                    <span class="q-icon">Q14</span>
+                    <span class="q-text">How do you optimize rate limiter performance for multiple data centers?</span>
+                    <span class="assess-dot" data-q="14"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a14">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Multi-data center:</strong>
+                            Deploy edge servers so traffic is automatically routed to the closest server, reducing latency.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Eventual consistency:</strong>
+                            Synchronize data across data centers using an eventual consistency model. This is acceptable for rate limiting because perfect accuracy isn't required &mdash; a few extra or missed requests are tolerable.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="14" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="14" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q15 -->
+            <div class="qa-section animate-in" data-q="15">
+                <div class="question" data-target="a15">
+                    <span class="q-icon">Q15</span>
+                    <span class="q-text">What is the Lyft rate limiting rule format?</span>
+                    <span class="assess-dot" data-q="15"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a15">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>YAML Configuration:</strong>
+                            Lyft open-sourced their rate-limiting component. Rules are written in config files stored on disk.
+                        </div>
+                        <div class="code-snippet">
+domain: messaging
+descriptors:
+  - key: message_type
+    value: marketing
+    rate_limit:
+      unit: day
+      requests_per_unit: 5
+                        </div>
+                        <p style="margin-top: 10px;">This allows max 5 marketing messages per day. Another example limits login attempts to 5 per minute under the <code>auth</code> domain.</p>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="15" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="15" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q16 -->
+            <div class="qa-section animate-in" data-q="16">
+                <div class="question" data-target="a16">
+                    <span class="q-icon">Q16</span>
+                    <span class="q-text">What happens when a request exceeds the rate limit?</span>
+                    <span class="assess-dot" data-q="16"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a16">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Two Options:</strong>
+                            <ol style="margin-left: 20px; margin-top: 8px;">
+                                <li><strong>Drop the request:</strong> Return HTTP 429 (Too Many Requests) immediately</li>
+                                <li><strong>Enqueue:</strong> Put the request in a message queue to be processed later (depending on use case)</li>
+                            </ol>
+                        </div>
+                        <div class="key-insight">
+                            <strong>Response includes:</strong> HTTP 429 status code + <code>X-Ratelimit-Retry-After</code> header telling the client how long to wait before retrying.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="16" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="16" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q17 -->
+            <div class="qa-section animate-in" data-q="17">
+                <div class="question" data-target="a17">
+                    <span class="q-icon">Q17</span>
+                    <span class="q-text">What is hard vs soft rate limiting?</span>
+                    <span class="assess-dot" data-q="17"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a17">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Hard rate limiting:</strong> The number of requests <strong>cannot exceed the threshold</strong>. Strict enforcement.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Soft rate limiting:</strong> Requests <strong>can exceed the threshold for a short period</strong>. More flexible, allows temporary bursts.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="17" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="17" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q18 -->
+            <div class="qa-section animate-in" data-q="18">
+                <div class="question" data-target="a18">
+                    <span class="q-icon">Q18</span>
+                    <span class="q-text">At which OSI layer can rate limiting be applied?</span>
+                    <span class="assess-dot" data-q="18"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a18">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Layer 7 (Application):</strong> HTTP-based rate limiting &mdash; what we focused on in this chapter.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Layer 3 (Network):</strong> IP-based rate limiting using tools like <code>iptables</code>. Blocks traffic at the network level before it reaches the application.
+                        </div>
+                        <div class="key-insight">
+                            <strong>OSI Model reminder:</strong> Layer 1 (Physical) → Layer 2 (Data Link) → Layer 3 (Network) → Layer 4 (Transport) → Layer 5 (Session) → Layer 6 (Presentation) → Layer 7 (Application)
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="18" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="18" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q19 -->
+            <div class="qa-section animate-in" data-q="19">
+                <div class="question" data-target="a19">
+                    <span class="q-icon">Q19</span>
+                    <span class="q-text">How can a client avoid being rate limited?</span>
+                    <span class="assess-dot" data-q="19"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a19">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Client Best Practices:</strong>
+                            <ul>
+                                <li>Use <strong>client-side cache</strong> to avoid frequent API calls</li>
+                                <li>Understand the limit and <strong>don't send too many requests</strong> in a short time</li>
+                                <li>Include code to <strong>catch exceptions</strong> for graceful recovery</li>
+                                <li>Add sufficient <strong>back-off time</strong> to retry logic (exponential backoff)</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="19" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="19" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q20 -->
+            <div class="qa-section animate-in" data-q="20">
+                <div class="question" data-target="a20">
+                    <span class="q-icon">Q20</span>
+                    <span class="q-text">What questions should you ask the interviewer when designing a rate limiter?</span>
+                    <span class="assess-dot" data-q="20"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a20">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Key Clarifying Questions:</strong>
+                            <ol style="margin-left: 20px; margin-top: 8px;">
+                                <li>Client-side or <strong>server-side</strong> rate limiter?</li>
+                                <li>Throttle based on <strong>IP, user ID, or other properties</strong>?</li>
+                                <li>What is the <strong>scale</strong> of the system?</li>
+                                <li>Will it work in a <strong>distributed environment</strong>?</li>
+                                <li>Is it a <strong>separate service or in application code</strong>?</li>
+                                <li>Do we need to <strong>inform throttled users</strong>?</li>
+                            </ol>
+                        </div>
+                        <div class="key-insight">
+                            <strong>Why this matters:</strong> These questions show the interviewer you think about requirements before jumping into design. It demonstrates maturity and systematic thinking.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="20" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="20" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q21 -->
+            <div class="qa-section animate-in" data-q="21">
+                <div class="question" data-target="a21">
+                    <span class="q-icon">Q21</span>
+                    <span class="q-text">Why is monitoring important for a rate limiter?</span>
+                    <span class="assess-dot" data-q="21"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a21">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Two things to verify:</strong>
+                            <ul>
+                                <li>The rate limiting <strong>algorithm</strong> is effective</li>
+                                <li>The rate limiting <strong>rules</strong> are effective</li>
+                            </ul>
+                        </div>
+                        <div class="key-insight">
+                            <strong>Example adjustments:</strong>
+                            <p style="margin-top: 8px;">If rules are too strict → relax them. If a flash sale causes spikes → switch to token bucket (supports bursts). Monitoring drives continuous improvement.</p>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="21" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="21" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q22 -->
+            <div class="qa-section animate-in" data-q="22">
+                <div class="question" data-target="a22">
+                    <span class="q-icon">Q22</span>
+                    <span class="q-text">What are the 6 key requirements for a rate limiter?</span>
+                    <span class="assess-dot" data-q="22"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a22">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Requirements:</strong>
+                            <ol style="margin-left: 20px; margin-top: 8px;">
+                                <li><strong>Accurately limit</strong> excessive requests</li>
+                                <li><strong>Low latency</strong> &mdash; must not slow down HTTP response time</li>
+                                <li><strong>Memory efficient</strong> &mdash; use as little memory as possible</li>
+                                <li><strong>Distributed</strong> &mdash; sharable across multiple servers/processes</li>
+                                <li><strong>Exception handling</strong> &mdash; clear exceptions when throttled</li>
+                                <li><strong>High fault tolerance</strong> &mdash; if rate limiter fails, the system still works</li>
+                            </ol>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="22" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="22" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q23 -->
+            <div class="qa-section animate-in" data-q="23">
+                <div class="question" data-target="a23">
+                    <span class="q-icon">Q23</span>
+                    <span class="q-text">When would you choose Token Bucket over Leaking Bucket?</span>
+                    <span class="assess-dot" data-q="23"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a23">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Token Bucket:</strong> When you need to allow <strong>bursts of traffic</strong>. A user might not send any requests for a while, then send many at once (e.g., uploading multiple photos). Token bucket accommodates this because accumulated tokens allow temporary bursts.
+                        </div>
+                        <div class="answer-point">
+                            <strong>Leaking Bucket:</strong> When you need a <strong>stable, uniform outflow rate</strong>. For example, processing payments at a fixed rate to avoid overwhelming a downstream service.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="23" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="23" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q24 -->
+            <div class="qa-section animate-in" data-q="24">
+                <div class="question" data-target="a24">
+                    <span class="q-icon">Q24</span>
+                    <span class="q-text">What is an API Gateway and how does it relate to rate limiting?</span>
+                    <span class="assess-dot" data-q="24"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a24">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Definition:</strong>
+                            An API Gateway is a <strong>fully managed service</strong> that supports: rate limiting, SSL termination, authentication, IP whitelisting, and serving static content. It acts as a single entry point for all API requests.
+                        </div>
+                        <div class="key-insight">
+                            <strong>When to use:</strong> If you already use <strong>microservice architecture</strong> and have an API gateway, adding rate limiting to it is the natural choice. Building your own takes engineering time &mdash; a commercial API gateway may be more practical.
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="24" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="24" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Q25 -->
+            <div class="qa-section animate-in" data-q="25">
+                <div class="question" data-target="a25">
+                    <span class="q-icon">Q25</span>
+                    <span class="q-text">Walk through the high-level architecture of a rate limiter</span>
+                    <span class="assess-dot" data-q="25"></span>
+                    <span class="chevron">&#9660;</span>
+                </div>
+                <div class="answer-wrapper" id="a25">
+                    <div class="answer">
+                        <h3>Complete Answer:</h3>
+                        <div class="answer-point">
+                            <strong>Step-by-step flow:</strong>
+                            <ol style="margin-left: 20px; margin-top: 8px;">
+                                <li>Client sends request to <strong>rate limiting middleware</strong></li>
+                                <li>Middleware fetches the counter from <strong>Redis</strong></li>
+                                <li>Checks if limit is reached</li>
+                                <li>If <strong>not reached</strong>: forward to API servers, increment counter in Redis</li>
+                                <li>If <strong>reached</strong>: return HTTP 429, optionally enqueue the request</li>
+                            </ol>
+                        </div>
+                        <div class="visual-flow">
+                            <div class="flow-box" style="background: var(--mist-lavender); color: #3d2e1f;">Client</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box" style="background: var(--sunset-rose);">Middleware</div>
+                            <span class="flow-arrow">&harr;</span>
+                            <div class="flow-box" style="background: #d94f4f;">Redis</div>
+                            <span class="flow-arrow">&rarr;</span>
+                            <div class="flow-box">API</div>
+                        </div>
+                    </div>
+                    <div class="self-assess">
+                        <button class="assess-btn got-it" data-q="25" data-val="got-it">Got it</button>
+                        <button class="assess-btn review" data-q="25" data-val="review">Review</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How to study tips -->
+            <div class="intro-box animate-in" style="margin-top: 40px;">
+                <h2>Study Tips from Hadriel</h2>
+                <div style="margin-top: 15px;">
+                    <strong>1. Draw the Diagrams</strong>
+                    <p style="margin-top: 8px;">Practice drawing the token bucket, leaking bucket queue, and the high-level architecture on a whiteboard. Interviewers love visual thinkers.</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>2. Know the Algorithm Comparison Table by Heart</strong>
+                    <p style="margin-top: 8px;">This is the most frequently tested aspect. Be ready to explain pros/cons of each algorithm and when to use which.</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>3. Don't Forget Distributed Challenges</strong>
+                    <p style="margin-top: 8px;">Race conditions + synchronization &mdash; these show you think about real-world scale. Mention Lua scripts and centralized Redis.</p>
+                </div>
+                <div style="margin-top: 15px;">
+                    <strong>4. Use Real Numbers</strong>
+                    <p style="margin-top: 8px;">"Twitter limits 300 tweets per 3 hours" sounds much more credible than "some number of requests."</p>
+                </div>
+                <div style="margin-top: 20px; padding: 18px; background: var(--bg-card); border-radius: 10px; border-left: 4px solid var(--gold-accent);">
+                    <strong style="color: var(--gold-accent); font-size: 1.1em;">Hadriel's Challenge:</strong>
+                    <p style="margin-top: 10px; color: var(--text-primary);">Set a timer for 2 minutes per question. Can you explain each answer clearly within that time? That's interview-level fluency!</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+    <script>
+        // ═══ Progress Bar ═══
+        const progressBar = document.getElementById('progressBar');
+        let ticking = false;
+        window.addEventListener('scroll', () => {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    const scrollTop = window.scrollY;
+                    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+                    progressBar.style.width = (docHeight > 0 ? (scrollTop / docHeight) * 100 : 0) + '%';
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+
+        // ═══ Accordion ═══
+        const questions = document.querySelectorAll('.question');
+        const totalQuestions = questions.length;
+
+        questions.forEach(q => {
+            q.addEventListener('click', () => {
+                const targetId = q.getAttribute('data-target');
+                const wrapper = document.getElementById(targetId);
+                wrapper.classList.toggle('open');
+                q.classList.toggle('open');
+            });
+        });
+
+        // ═══ Expand / Collapse All ═══
+        document.getElementById('expandAll').addEventListener('click', () => {
+            document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.add('open'));
+            questions.forEach(q => q.classList.add('open'));
+        });
+
+        document.getElementById('collapseAll').addEventListener('click', () => {
+            document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.remove('open'));
+            questions.forEach(q => q.classList.remove('open'));
+        });
+
+        // ═══ Quiz Mode ═══
+        let quizMode = false;
+        const quizToggle = document.getElementById('quizToggle');
+        const quizProgress = document.getElementById('quizProgress');
+
+        function updateQuizProgress() {
+            if (quizMode) {
+                const revealed = document.querySelectorAll('.answer-wrapper.open').length;
+                quizProgress.textContent = `${revealed}/${totalQuestions} revealed`;
+            } else {
+                quizProgress.textContent = '';
+            }
+        }
+
+        quizToggle.addEventListener('click', () => {
+            quizMode = !quizMode;
+            quizToggle.classList.toggle('active', quizMode);
+            quizToggle.textContent = quizMode ? 'Exit Quiz' : 'Quiz Mode';
+            if (quizMode) {
+                document.querySelectorAll('.answer-wrapper').forEach(w => w.classList.remove('open'));
+                questions.forEach(q => q.classList.remove('open'));
+            }
+            updateQuizProgress();
+        });
+
+        const answerObserver = new MutationObserver(updateQuizProgress);
+        document.querySelectorAll('.answer-wrapper').forEach(w => {
+            answerObserver.observe(w, { attributes: true, attributeFilter: ['class'] });
+        });
+
+        // ═══ Self-Assessment ═══
+        const assessments = JSON.parse(localStorage.getItem('ch4-qa-assess') || '{}');
+
+        function applyAssessments() {
+            Object.entries(assessments).forEach(([q, val]) => {
+                document.querySelectorAll(`.assess-dot[data-q="${q}"]`).forEach(dot => {
+                    dot.className = 'assess-dot ' + val;
+                });
+                document.querySelectorAll(`.assess-btn[data-q="${q}"]`).forEach(btn => {
+                    btn.classList.toggle('selected', btn.getAttribute('data-val') === val);
+                });
+            });
+        }
+
+        applyAssessments();
+
+        document.querySelectorAll('.assess-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const q = btn.getAttribute('data-q');
+                const val = btn.getAttribute('data-val');
+                if (assessments[q] === val) {
+                    delete assessments[q];
+                } else {
+                    assessments[q] = val;
+                }
+                localStorage.setItem('ch4-qa-assess', JSON.stringify(assessments));
+                applyAssessments();
+            });
+        });
+
+        // ═══ Dark Mode ═══
+        const themeToggleBtn = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('ch4-qa-theme');
+        if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+
+        themeToggleBtn.addEventListener('click', () => {
+            const current = document.documentElement.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('ch4-qa-theme', next);
+            themeToggleBtn.textContent = next === 'dark' ? '\u2600' : '\u263D';
+        });
+
+        if (document.documentElement.getAttribute('data-theme') === 'dark') {
+            themeToggleBtn.textContent = '\u2600';
+        }
+
+        // ═══ Scroll-in Animations ═══
+        const animateObserver = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => entry.target.classList.add('visible'), i * 80);
+                    animateObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.05, rootMargin: '0px 0px -30px 0px' });
+
+        document.querySelectorAll('.animate-in').forEach(el => animateObserver.observe(el));
+    </script>
+</body>
+</html>

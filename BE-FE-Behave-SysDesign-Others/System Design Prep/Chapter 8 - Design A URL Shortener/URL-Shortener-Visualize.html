@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener — System Architecture Visualizer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --forest-deep: #2d4a3e; --ink-warm: #4a3728;
+            --water-teal: #5ba3a8; --gold-accent: #d4a84b; --sunset-rose: #c97b6b;
+            --moss-green: #7ea87e; --mist-lavender: #b8a9c9;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --border-light: #e8dcc8; --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --forest-deep: #a8d5ba; --ink-warm: #e8d5c4;
+            --water-teal: #7ec8cc; --gold-accent: #e8c170; --sunset-rose: #e8a090;
+            --moss-green: #a8d4a8;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --border-light: #2a2a3e;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-page); color: var(--text-primary); min-height: 100vh; transition: background 0.4s, color 0.4s; }
+
+        .header { background: var(--bg-card); border-bottom: 2px solid var(--gold-accent); padding: 32px 40px 24px; text-align: center; position: relative; overflow: hidden; }
+        .header::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 24px; background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 24 Q150 0 300 16 Q450 28 600 12 Q750 0 900 18 Q1050 28 1200 8 V24 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom; background-size: cover; }
+        [data-theme="dark"] .header::after { background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 24 Q150 0 300 16 Q450 28 600 12 Q750 0 900 18 Q1050 28 1200 8 V24 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom; background-size: cover; }
+        .header .badge { display: inline-block; background: var(--water-teal); color: white; padding: 3px 12px; border-radius: 16px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 12px; }
+        .header h1 { font-family: 'Playfair Display', serif; font-size: 1.9em; color: var(--ink-warm); margin-bottom: 6px; }
+        .header p { font-size: 0.9em; color: var(--text-muted); }
+
+        .theme-toggle { position: fixed; top: 14px; right: 20px; z-index: 200; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 20px; padding: 5px 12px; cursor: pointer; font-size: 0.78em; color: var(--text-secondary); font-family: 'Inter', sans-serif; box-shadow: var(--shadow-soft); }
+
+        /* ═══ Controls ═══ */
+        .controls { display: flex; gap: 12px; justify-content: center; padding: 24px 20px 0; flex-wrap: wrap; }
+        .btn {
+            padding: 9px 20px; border-radius: 20px; border: 2px solid var(--border-light);
+            background: var(--bg-card); color: var(--text-secondary); cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.85em; font-weight: 600;
+            transition: all 0.25s; box-shadow: var(--shadow-soft);
+        }
+        .btn:hover { border-color: var(--water-teal); color: var(--water-teal); }
+        .btn.active { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        .btn.shorten-btn.active { background: var(--moss-green); border-color: var(--moss-green); }
+        .btn.redirect-btn.active { background: var(--sunset-rose); border-color: var(--sunset-rose); }
+
+        /* ═══ Diagram Area ═══ */
+        .diagram-area { padding: 30px 20px 20px; max-width: 1100px; margin: 0 auto; }
+
+        /* ═══ Diagram SVG Container ═══ */
+        .diagram-svg-wrap { position: relative; width: 100%; overflow: hidden; }
+        .diagram-svg-wrap svg { width: 100%; height: auto; display: block; }
+
+        /* ═══ Legend ═══ */
+        .legend { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; padding: 16px 20px; }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.8em; color: var(--text-secondary); }
+        .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+
+        /* ═══ Step Explanation Panel ═══ */
+        .step-panel {
+            max-width: 780px; margin: 20px auto 0;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 12px; padding: 0; overflow: hidden; box-shadow: var(--shadow-soft);
+        }
+        .step-panel-header {
+            padding: 14px 20px; background: var(--bg-section);
+            border-bottom: 1px solid var(--border-light); font-weight: 600; font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        .steps-list { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+        .step-entry {
+            display: flex; gap: 12px; padding: 10px 14px; border-radius: 8px;
+            border: 1px solid var(--border-light); background: var(--bg-page);
+            transition: all 0.3s; opacity: 0.4;
+        }
+        .step-entry.active { opacity: 1; background: var(--bg-card); box-shadow: var(--shadow-soft); }
+        .step-entry.done { opacity: 0.75; }
+        .step-num {
+            width: 24px; height: 24px; border-radius: 50%; background: var(--border-light);
+            color: var(--text-muted); display: flex; align-items: center; justify-content: center;
+            font-size: 0.75em; font-weight: 700; flex-shrink: 0; transition: background 0.3s;
+        }
+        .step-entry.active .step-num { background: var(--water-teal); color: white; }
+        .step-entry.active.shorten .step-num { background: var(--moss-green); color: white; }
+        .step-entry.active.redirect .step-num { background: var(--sunset-rose); color: white; }
+        .step-text { font-size: 0.88em; color: var(--text-secondary); line-height: 1.5; }
+        .step-text strong { color: var(--text-primary); }
+
+        /* ═══ Animation state ═══ */
+        .node-highlight { transition: all 0.4s ease; }
+        .flow-packet {
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            background: var(--gold-accent); box-shadow: 0 0 8px rgba(212,168,75,0.6);
+            pointer-events: none; transition: left 0.4s ease, top 0.4s ease;
+        }
+
+        /* ═══ Info cards below diagram ═══ */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 20px 20px 40px; max-width: 1100px; margin: 0 auto; }
+        .info-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 10px; padding: 18px; box-shadow: var(--shadow-soft); }
+        .info-card h3 { font-size: 0.95em; font-weight: 700; color: var(--ink-warm); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .info-card ul { padding-left: 18px; font-size: 0.85em; color: var(--text-secondary); }
+        .info-card ul li { margin-bottom: 6px; }
+
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.4em; }
+            .controls { gap: 8px; }
+            .btn { padding: 7px 14px; font-size: 0.8em; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+
+<div class="header">
+    <div class="badge">Chapter 8 · Visual</div>
+    <h1>URL Shortener — System Architecture</h1>
+    <p>Interactive flow diagrams for URL shortening and redirecting</p>
+</div>
+
+<div class="controls">
+    <button class="btn active" id="btn-overview" onclick="showMode('overview')">🗺 Overview</button>
+    <button class="btn shorten-btn" id="btn-shorten" onclick="showMode('shorten')">✂️ Shortening Flow</button>
+    <button class="btn redirect-btn" id="btn-redirect" onclick="showMode('redirect')">↗️ Redirecting Flow</button>
+</div>
+
+<div class="diagram-area">
+    <div class="diagram-svg-wrap">
+        <!-- SVG Architecture Diagram -->
+        <svg id="main-svg" viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" style="font-family:'Inter',sans-serif">
+            <defs>
+                <!-- Arrow markers -->
+                <marker id="arrow-teal" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#5ba3a8"/>
+                </marker>
+                <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#7ea87e"/>
+                </marker>
+                <marker id="arrow-rose" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#c97b6b"/>
+                </marker>
+                <marker id="arrow-gold" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#d4a84b"/>
+                </marker>
+                <marker id="arrow-mist" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#b8a9c9"/>
+                </marker>
+                <!-- Glow filter -->
+                <filter id="glow">
+                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+                <!-- Shadow -->
+                <filter id="dropshadow" x="-10%" y="-10%" width="120%" height="130%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(74,55,40,0.1)"/>
+                </filter>
+            </defs>
+
+            <!-- ═══ Background lane labels ═══ -->
+            <rect x="0" y="0" width="900" height="520" fill="none"/>
+
+            <!-- ═══ NODES ═══ -->
+
+            <!-- Client -->
+            <g id="node-client" class="node-highlight" transform="translate(40, 220)">
+                <rect x="0" y="0" width="100" height="60" rx="10" fill="#5ba3a8" filter="url(#dropshadow)"/>
+                <text x="50" y="24" text-anchor="middle" fill="white" font-size="18">🌐</text>
+                <text x="50" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Client</text>
+                <text x="50" y="56" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="9">Browser / App</text>
+            </g>
+
+            <!-- Load Balancer -->
+            <g id="node-lb" class="node-highlight" transform="translate(210, 220)">
+                <rect x="0" y="0" width="100" height="60" rx="10" fill="#d4a84b" filter="url(#dropshadow)"/>
+                <text x="50" y="24" text-anchor="middle" fill="white" font-size="18">⚖️</text>
+                <text x="50" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Load</text>
+                <text x="50" y="56" text-anchor="middle" fill="white" font-size="11" font-weight="600">Balancer</text>
+            </g>
+
+            <!-- Web Servers -->
+            <g id="node-web" class="node-highlight" transform="translate(390, 180)">
+                <rect x="0" y="0" width="120" height="70" rx="10" fill="#2d4a3e" filter="url(#dropshadow)"/>
+                <text x="60" y="24" text-anchor="middle" fill="white" font-size="18">🖥️</text>
+                <text x="60" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Web Servers</text>
+                <text x="60" y="57" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">(Stateless)</text>
+                <text x="60" y="67" text-anchor="middle" fill="rgba(255,255,255,0.7)" font-size="9">Horizontal scale</text>
+            </g>
+
+            <!-- Cache -->
+            <g id="node-cache" class="node-highlight" transform="translate(600, 100)">
+                <rect x="0" y="0" width="110" height="65" rx="10" fill="#c97b6b" filter="url(#dropshadow)"/>
+                <text x="55" y="24" text-anchor="middle" fill="white" font-size="18">⚡</text>
+                <text x="55" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Redis Cache</text>
+                <text x="55" y="56" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="9">LRU · ~5GB</text>
+            </g>
+
+            <!-- Database -->
+            <g id="node-db" class="node-highlight" transform="translate(600, 250)">
+                <rect x="0" y="0" width="110" height="65" rx="10" fill="#7ea87e" filter="url(#dropshadow)"/>
+                <text x="55" y="24" text-anchor="middle" fill="white" font-size="18">🗄️</text>
+                <text x="55" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Database</text>
+                <text x="55" y="56" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="9">MySQL / DynamoDB</text>
+            </g>
+
+            <!-- ID Generator -->
+            <g id="node-idgen" class="node-highlight" transform="translate(390, 380)">
+                <rect x="0" y="0" width="120" height="60" rx="10" fill="#b8a9c9" filter="url(#dropshadow)"/>
+                <text x="60" y="24" text-anchor="middle" fill="white" font-size="18">🔢</text>
+                <text x="60" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">ID Generator</text>
+                <text x="60" y="56" text-anchor="middle" fill="rgba(255,255,255,0.8)" font-size="9">Snowflake / Auto-inc</text>
+            </g>
+
+            <!-- Read Replicas -->
+            <g id="node-replica" class="node-highlight" transform="translate(760, 250)">
+                <rect x="0" y="0" width="110" height="65" rx="10" fill="#7ea87e" opacity="0.75" filter="url(#dropshadow)" stroke="#7ea87e" stroke-width="1.5" stroke-dasharray="5,3"/>
+                <text x="55" y="24" text-anchor="middle" fill="white" font-size="18">📋</text>
+                <text x="55" y="42" text-anchor="middle" fill="white" font-size="11" font-weight="600">Read Replicas</text>
+                <text x="55" y="56" text-anchor="middle" fill="rgba(255,255,255,0.75)" font-size="9">Redirect reads</text>
+            </g>
+
+            <!-- ═══ CONNECTIONS ═══ -->
+
+            <!-- Client → LB -->
+            <g id="edge-client-lb">
+                <line x1="140" y1="250" x2="208" y2="250" stroke="#5ba3a8" stroke-width="2" marker-end="url(#arrow-teal)"/>
+                <text x="174" y="243" text-anchor="middle" fill="#5ba3a8" font-size="9">HTTP</text>
+            </g>
+
+            <!-- LB → Web -->
+            <g id="edge-lb-web">
+                <line x1="310" y1="250" x2="388" y2="225" stroke="#d4a84b" stroke-width="2" marker-end="url(#arrow-gold)"/>
+            </g>
+
+            <!-- Web → Cache -->
+            <g id="edge-web-cache">
+                <line x1="510" y1="200" x2="598" y2="145" stroke="#c97b6b" stroke-width="2" marker-end="url(#arrow-rose)"/>
+                <text x="558" y="162" text-anchor="middle" fill="#c97b6b" font-size="9">GET shortURL</text>
+            </g>
+
+            <!-- Cache → Web (return) -->
+            <g id="edge-cache-web">
+                <line x1="600" y1="155" x2="512" y2="207" stroke="#c97b6b" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-rose)"/>
+                <text x="540" y="198" text-anchor="middle" fill="#c97b6b" font-size="9">HIT → longURL</text>
+            </g>
+
+            <!-- Web → DB (write) -->
+            <g id="edge-web-db">
+                <line x1="510" y1="220" x2="598" y2="270" stroke="#7ea87e" stroke-width="2" marker-end="url(#arrow-green)"/>
+                <text x="548" y="262" text-anchor="middle" fill="#7ea87e" font-size="9">WRITE / READ</text>
+            </g>
+
+            <!-- Web → ID Gen (shortening only) -->
+            <g id="edge-web-idgen">
+                <line x1="450" y1="250" x2="450" y2="378" stroke="#b8a9c9" stroke-width="2" marker-end="url(#arrow-mist)"/>
+                <text x="438" y="316" text-anchor="middle" fill="#b8a9c9" font-size="9" transform="rotate(-90,438,316)">get ID</text>
+            </g>
+
+            <!-- ID Gen → Web (return) -->
+            <g id="edge-idgen-web">
+                <line x1="460" y1="378" x2="460" y2="252" stroke="#b8a9c9" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-mist)"/>
+            </g>
+
+            <!-- DB → Read Replicas -->
+            <g id="edge-db-replica">
+                <line x1="710" y1="282" x2="758" y2="282" stroke="#7ea87e" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-green)"/>
+                <text x="734" y="275" text-anchor="middle" fill="#7ea87e" font-size="9">replicate</text>
+            </g>
+
+            <!-- ═══ FLOW PACKET (animated dot) ═══ -->
+            <circle id="flow-dot" cx="-20" cy="-20" r="6" fill="#d4a84b" filter="url(#glow)" opacity="0"/>
+
+            <!-- ═══ Labels / annotations ═══ -->
+            <text x="450" y="30" text-anchor="middle" fill="#8a7a6a" font-size="11" font-style="italic">Chapter 8 — URL Shortener Architecture</text>
+
+            <!-- Step highlight overlays (invisible by default) -->
+            <rect id="hl-client" x="38" y="218" width="104" height="64" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+            <rect id="hl-lb" x="208" y="218" width="104" height="64" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+            <rect id="hl-web" x="388" y="178" width="124" height="74" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+            <rect id="hl-cache" x="598" y="98" width="114" height="69" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+            <rect id="hl-db" x="598" y="248" width="114" height="69" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+            <rect id="hl-idgen" x="388" y="378" width="124" height="64" rx="12" fill="none" stroke="#d4a84b" stroke-width="3" opacity="0"/>
+        </svg>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#5ba3a8"></div> Client Layer</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#d4a84b"></div> Load Balancer</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2d4a3e"></div> Web Servers</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#c97b6b"></div> Cache (Redis)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#7ea87e"></div> Database</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#b8a9c9"></div> ID Generator</div>
+    </div>
+
+    <!-- Step explanation panel -->
+    <div class="step-panel" id="step-panel" style="display:none">
+        <div class="step-panel-header" id="panel-title">Flow Steps</div>
+        <div class="steps-list" id="steps-list"></div>
+    </div>
+</div>
+
+<!-- Info cards -->
+<div class="info-grid">
+    <div class="info-card">
+        <h3>✂️ URL Shortening Path</h3>
+        <ul>
+            <li>Client POSTs longURL</li>
+            <li>Web server checks DB for existing (idempotency)</li>
+            <li>If new: ID Generator → unique ID</li>
+            <li>Base62 encode ID → 7-char shortURL</li>
+            <li>Save to DB + cache</li>
+            <li>Return shortURL to client</li>
+        </ul>
+    </div>
+    <div class="info-card">
+        <h3>↗️ URL Redirecting Path</h3>
+        <ul>
+            <li>Client GETs shortURL</li>
+            <li>Load Balancer routes to web server</li>
+            <li>Web server checks Redis cache first</li>
+            <li>Cache HIT: 301/302 redirect immediately</li>
+            <li>Cache MISS: query DB, populate cache, redirect</li>
+            <li>~80% of requests served from cache</li>
+        </ul>
+    </div>
+    <div class="info-card">
+        <h3>⚡ Performance Numbers</h3>
+        <ul>
+            <li>1,160 writes/sec (URL creation)</li>
+            <li>11,600 reads/sec (redirects)</li>
+            <li>~80% cache hit rate</li>
+            <li>~2,320 DB reads/sec (cache misses)</li>
+            <li>365 TB storage over 10 years</li>
+            <li>5 GB Redis for hot URLs</li>
+        </ul>
+    </div>
+    <div class="info-card">
+        <h3>🔑 Key Design Decisions</h3>
+        <ul>
+            <li>301 vs 302: analytics vs performance</li>
+            <li>Base62 over Base64: URL-safe chars</li>
+            <li>n=7 chars: covers 3.5T URLs (10yr)</li>
+            <li>Bloom filter: avoids DB read per create</li>
+            <li>Snowflake ID gen: distributed, no SPOF</li>
+            <li>LRU cache: serves 80% reads</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Theme
+    function toggleTheme() {
+        const html = document.documentElement;
+        const isDark = html.getAttribute('data-theme') === 'dark';
+        html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        document.querySelector('.theme-toggle').textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    }
+
+    // Current mode
+    let currentMode = 'overview';
+    let animInterval = null;
+    let currentStep = 0;
+
+    const shortenSteps = [
+        { nodes: ['client'], text: '<strong>Step 1:</strong> Client sends <code>POST /api/v1/data/shorten</code> with longURL in body.', cls: 'shorten' },
+        { nodes: ['lb'], text: '<strong>Step 2:</strong> Load Balancer distributes request to available web server.', cls: 'shorten' },
+        { nodes: ['web'], text: '<strong>Step 3:</strong> Web server checks DB — does this longURL already exist? (Idempotency check)', cls: 'shorten' },
+        { nodes: ['db'], text: '<strong>Step 4:</strong> DB query: <code>SELECT short_url WHERE long_url = ?</code> — if found, skip to step 7.', cls: 'shorten' },
+        { nodes: ['idgen'], text: '<strong>Step 5:</strong> Not found — request unique ID from ID Generator (Snowflake / auto-increment).', cls: 'shorten' },
+        { nodes: ['web'], text: '<strong>Step 6:</strong> Web server converts ID to Base62 7-char shortURL. E.g., ID 11157 → "00002Td"', cls: 'shorten' },
+        { nodes: ['db', 'cache'], text: '<strong>Step 7:</strong> Save {id, shortURL, longURL} to DB and populate Redis cache entry.', cls: 'shorten' },
+        { nodes: ['client'], text: '<strong>Step 8:</strong> Return shortURL to client. E.g., <code>https://tinyurl.com/00002Td</code>', cls: 'shorten' },
+    ];
+
+    const redirectSteps = [
+        { nodes: ['client'], text: '<strong>Step 1:</strong> User clicks short link — browser sends <code>GET /api/v1/zn9edcu</code>.', cls: 'redirect' },
+        { nodes: ['lb'], text: '<strong>Step 2:</strong> Load Balancer routes to least-loaded web server.', cls: 'redirect' },
+        { nodes: ['web'], text: '<strong>Step 3:</strong> Web server extracts shortURL and queries Redis cache.', cls: 'redirect' },
+        { nodes: ['cache'], text: '<strong>Step 4:</strong> Cache HIT (~80% of requests) — return longURL immediately. Go to step 7.', cls: 'redirect' },
+        { nodes: ['db'], text: '<strong>Step 5:</strong> Cache MISS — query database: <code>SELECT long_url WHERE short_url = ?</code>', cls: 'redirect' },
+        { nodes: ['cache'], text: '<strong>Step 6:</strong> Populate cache with result. Future requests will hit cache.', cls: 'redirect' },
+        { nodes: ['client'], text: '<strong>Step 7:</strong> Web server returns <strong>302 Found</strong> with Location header pointing to longURL. Browser follows redirect.', cls: 'redirect' },
+    ];
+
+    const hlMap = {
+        client: 'hl-client', lb: 'hl-lb', web: 'hl-web',
+        cache: 'hl-cache', db: 'hl-db', idgen: 'hl-idgen'
+    };
+
+    function clearHighlights() {
+        Object.values(hlMap).forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.setAttribute('opacity', '0');
+        });
+    }
+
+    function highlightNodes(nodeNames) {
+        clearHighlights();
+        nodeNames.forEach(name => {
+            const el = document.getElementById(hlMap[name]);
+            if (el) el.setAttribute('opacity', '1');
+        });
+    }
+
+    function renderStepsPanel(steps) {
+        const panel = document.getElementById('step-panel');
+        const list = document.getElementById('steps-list');
+        panel.style.display = 'block';
+        list.innerHTML = steps.map((s, i) =>
+            `<div class="step-entry ${s.cls}" id="step-entry-${i}">
+                <div class="step-num">${i + 1}</div>
+                <div class="step-text">${s.text}</div>
+            </div>`
+        ).join('');
+    }
+
+    function updateStepHighlight(steps, stepIdx) {
+        steps.forEach((_, i) => {
+            const el = document.getElementById('step-entry-' + i);
+            if (!el) return;
+            el.classList.remove('active', 'done');
+            if (i === stepIdx) el.classList.add('active');
+            else if (i < stepIdx) el.classList.add('done');
+        });
+        highlightNodes(steps[stepIdx].nodes);
+    }
+
+    function startAnimation(steps, title) {
+        if (animInterval) clearInterval(animInterval);
+        document.getElementById('panel-title').textContent = title;
+        renderStepsPanel(steps);
+        currentStep = 0;
+        updateStepHighlight(steps, currentStep);
+        animInterval = setInterval(() => {
+            currentStep = (currentStep + 1) % steps.length;
+            updateStepHighlight(steps, currentStep);
+        }, 2200);
+    }
+
+    function showMode(mode) {
+        currentMode = mode;
+        ['overview', 'shorten', 'redirect'].forEach(m => {
+            document.getElementById('btn-' + m)?.classList.remove('active');
+        });
+        document.getElementById('btn-' + mode)?.classList.add('active');
+
+        if (animInterval) clearInterval(animInterval);
+        clearHighlights();
+
+        if (mode === 'overview') {
+            document.getElementById('step-panel').style.display = 'none';
+        } else if (mode === 'shorten') {
+            startAnimation(shortenSteps, '✂️ URL Shortening — Step by Step');
+        } else if (mode === 'redirect') {
+            startAnimation(redirectSteps, '↗️ URL Redirecting — Step by Step');
+        }
+    }
+</script>
+</body>
+</html>
