@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE BATTLE — Mock Interview Timer ⚔️</title>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --lavender: #B8A4E8;
+  --lavender-light: #D4C7F0;
+  --lavender-soft: #E8E0F5;
+  --mint: #9FE2BF;
+  --mint-light: #C4F0DB;
+  --mint-soft: #E0F7EC;
+  --peach: #FFB5A7;
+  --peach-light: #FFD7CD;
+  --peach-soft: #FFEEE8;
+  --sky-blue: #A8D8EA;
+  --sky-blue-light: #C9E7F2;
+  --sky-blue-soft: #E4F4F9;
+  --rose-pink: #F4B4D3;
+  --rose-pink-light: #F9D7E5;
+  --cloud-white: #FEFEFE;
+  --cloud-cream: #FFF9F5;
+  --text-soft: #6B5B8C;
+  --text-gentle: #8A7A9E;
+  --shadow-dreamy: 0 8px 32px rgba(184, 164, 232, 0.15);
+  --shadow-soft: 0 4px 16px rgba(184, 164, 232, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Quicksand', sans-serif;
+  background: linear-gradient(135deg, var(--cloud-cream) 0%, var(--lavender-soft) 50%, var(--mint-soft) 100%);
+  min-height: 100vh;
+  color: var(--text-soft);
+  overflow-x: hidden;
+}
+
+/* Floating clouds */
+.cloud {
+  position: fixed;
+  opacity: 0.15;
+  font-size: 4rem;
+  animation: floatCloud 25s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
+.cloud:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+.cloud:nth-child(2) { top: 60%; right: 8%; animation-delay: -8s; font-size: 3rem; }
+.cloud:nth-child(3) { top: 30%; right: 20%; animation-delay: -15s; font-size: 5rem; }
+
+@keyframes floatCloud {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  25% { transform: translateY(-15px) translateX(10px); }
+  50% { transform: translateY(-5px) translateX(-8px); }
+  75% { transform: translateY(-20px) translateX(5px); }
+}
+
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+h1 {
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 1rem;
+  color: var(--text-gentle);
+  margin-bottom: 2rem;
+  font-weight: 400;
+}
+
+/* Cards */
+.card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: var(--shadow-dreamy);
+  border: 1px solid rgba(184, 164, 232, 0.1);
+  transition: transform 0.3s ease;
+}
+
+/* Format Selector */
+.format-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.format-btn {
+  padding: 1.2rem;
+  border: 2px solid var(--lavender-light);
+  border-radius: 16px;
+  background: var(--cloud-white);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+}
+
+.format-btn:hover {
+  border-color: var(--lavender);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.format-btn.active {
+  border-color: var(--lavender);
+  background: var(--lavender-soft);
+  font-weight: 600;
+}
+
+.format-btn .emoji { font-size: 1.8rem; display: block; margin-bottom: 0.5rem; }
+.format-btn .label { font-weight: 600; display: block; }
+.format-btn .desc { font-size: 0.8rem; color: var(--text-gentle); margin-top: 0.3rem; display: block; }
+
+/* Week selector */
+.week-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.2rem;
+}
+
+.week-row label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  white-space: nowrap;
+}
+
+.week-select {
+  flex: 1;
+  padding: 0.7rem 1rem;
+  border: 2px solid var(--lavender-light);
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95rem;
+  color: var(--text-soft);
+  background: var(--cloud-white);
+  cursor: pointer;
+  outline: none;
+}
+
+.week-select:focus { border-color: var(--lavender); }
+
+.start-btn {
+  padding: 0.8rem 2.5rem;
+  background: linear-gradient(135deg, var(--lavender) 0%, var(--rose-pink) 100%);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: block;
+  margin: 1.5rem auto 0;
+  letter-spacing: 0.5px;
+}
+
+.start-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(184, 164, 232, 0.35);
+}
+
+.start-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Timer Display */
+#timer-section { display: none; }
+
+.timer-display {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.timer-phase-name {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-soft);
+  margin-bottom: 0.3rem;
+}
+
+.timer-step-name {
+  font-size: 0.95rem;
+  color: var(--text-gentle);
+  margin-bottom: 1rem;
+}
+
+.timer-clock {
+  font-family: 'Fira Code', monospace;
+  font-size: 4.5rem;
+  font-weight: 500;
+  color: var(--text-soft);
+  letter-spacing: 2px;
+  line-height: 1;
+}
+
+.timer-clock.warning { color: var(--peach); }
+.timer-clock.danger { color: #e07070; animation: pulse 1s ease-in-out infinite; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.timer-total {
+  font-size: 0.85rem;
+  color: var(--text-gentle);
+  margin-top: 0.8rem;
+}
+
+.timer-controls {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.ctrl-btn {
+  padding: 0.6rem 1.8rem;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid;
+}
+
+.ctrl-btn.primary {
+  background: var(--lavender);
+  color: white;
+  border-color: var(--lavender);
+}
+.ctrl-btn.secondary {
+  background: transparent;
+  color: var(--text-soft);
+  border-color: var(--lavender-light);
+}
+.ctrl-btn.danger-btn {
+  background: transparent;
+  color: var(--peach);
+  border-color: var(--peach-light);
+}
+.ctrl-btn:hover { transform: translateY(-1px); }
+
+/* Phase progress bar */
+.phase-progress {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.phase-dot {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--lavender-light);
+  transition: background 0.5s ease;
+}
+
+.phase-dot.completed { background: var(--mint); }
+.phase-dot.active { background: var(--lavender); }
+
+/* Step list */
+.step-list {
+  margin-top: 1rem;
+  border-top: 1px solid var(--lavender-soft);
+  padding-top: 1rem;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: var(--text-gentle);
+  gap: 0.6rem;
+}
+
+.step-item.active { color: var(--text-soft); font-weight: 600; }
+.step-item.completed { color: var(--mint); text-decoration: line-through; opacity: 0.7; }
+.step-icon { width: 20px; text-align: center; }
+
+/* Scoring Form */
+#scoring-section { display: none; }
+
+.score-grid {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.score-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.score-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  min-width: 160px;
+}
+
+.score-buttons {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.score-btn {
+  width: 48px;
+  height: 40px;
+  border: 2px solid var(--lavender-light);
+  border-radius: 10px;
+  background: var(--cloud-white);
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.score-btn:hover { border-color: var(--lavender); }
+.score-btn.selected {
+  background: var(--lavender);
+  color: white;
+  border-color: var(--lavender);
+}
+.score-btn.selected[data-score="4"] { background: var(--mint); border-color: var(--mint); }
+.score-btn.selected[data-score="3"] { background: var(--sky-blue); border-color: var(--sky-blue); }
+.score-btn.selected[data-score="2"] { background: var(--peach); border-color: var(--peach); }
+.score-btn.selected[data-score="1"] { background: #e07070; border-color: #e07070; }
+
+.score-note {
+  flex: 1;
+  min-width: 200px;
+  padding: 0.5rem 0.8rem;
+  border: 2px solid var(--lavender-light);
+  border-radius: 10px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-soft);
+  outline: none;
+  background: var(--cloud-white);
+}
+
+.score-note:focus { border-color: var(--lavender); }
+.score-note::placeholder { color: var(--text-gentle); opacity: 0.6; }
+
+.submit-scores-btn {
+  padding: 0.7rem 2rem;
+  background: linear-gradient(135deg, var(--mint) 0%, var(--sky-blue) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.submit-scores-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(159, 226, 191, 0.35); }
+
+/* Summary */
+#summary-section { display: none; }
+
+.summary-round {
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+  background: var(--lavender-soft);
+  border-radius: 14px;
+}
+
+.summary-round h3 {
+  font-size: 1.05rem;
+  margin-bottom: 0.8rem;
+  color: var(--text-soft);
+}
+
+.summary-dim {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.35rem 0;
+  font-size: 0.9rem;
+}
+
+.summary-dim .dim-score { font-weight: 700; font-family: 'Fira Code', monospace; }
+.summary-dim .dim-note { color: var(--text-gentle); font-size: 0.8rem; margin-left: 0.5rem; }
+
+.summary-avg {
+  margin-top: 0.6rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(184, 164, 232, 0.3);
+  font-weight: 700;
+  text-align: right;
+}
+
+.overall-card {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--lavender-soft), var(--mint-soft));
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+}
+
+.overall-score {
+  font-family: 'Fira Code', monospace;
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--text-soft);
+}
+
+.overall-label { font-size: 0.9rem; color: var(--text-gentle); margin-top: 0.3rem; }
+
+.target-indicator {
+  font-size: 0.85rem;
+  margin-top: 0.5rem;
+  padding: 0.4rem 1rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+.target-indicator.met { background: var(--mint-soft); color: #4a9; }
+.target-indicator.not-met { background: var(--peach-soft); color: #c77; }
+
+textarea.debrief-notes {
+  width: 100%;
+  min-height: 100px;
+  padding: 1rem;
+  border: 2px solid var(--lavender-light);
+  border-radius: 14px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  resize: vertical;
+  outline: none;
+  background: var(--cloud-white);
+  margin-top: 0.5rem;
+}
+
+textarea.debrief-notes:focus { border-color: var(--lavender); }
+
+.export-btn {
+  padding: 0.7rem 2rem;
+  background: linear-gradient(135deg, var(--lavender) 0%, var(--sky-blue) 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.export-btn:hover { transform: translateY(-2px); }
+
+.copy-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--text-soft);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border-radius: 12px;
+  font-weight: 600;
+  transition: transform 0.4s ease;
+  z-index: 100;
+}
+.copy-toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Responsive */
+@media (max-width: 600px) {
+  .format-grid { grid-template-columns: 1fr; }
+  .timer-clock { font-size: 3.5rem; }
+  .score-row { flex-direction: column; align-items: flex-start; }
+  .score-note { min-width: unset; width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="cloud">☁️</div>
+<div class="cloud">☁️</div>
+<div class="cloud">☁️</div>
+
+<div class="container">
+  <h1>⚔️ THE BATTLE ⚔️</h1>
+  <p class="subtitle">Mock Interview Timer & Scoring</p>
+
+  <!-- FORMAT SELECTION -->
+  <div id="setup-section" class="card">
+    <h2 style="font-size:1.1rem; margin-bottom:0.3rem;">Choose Your Battle</h2>
+    <p style="font-size:0.85rem; color:var(--text-gentle);">Select format and week to begin.</p>
+
+    <div class="format-grid">
+      <button class="format-btn" data-format="A" onclick="selectFormat('A')">
+        <span class="emoji">🎯</span>
+        <span class="label">Format A</span>
+        <span class="desc">Technical Battle<br/>Coding + SD/Backend</span>
+      </button>
+      <button class="format-btn" data-format="B" onclick="selectFormat('B')">
+        <span class="emoji">🗣️</span>
+        <span class="label">Format B</span>
+        <span class="desc">People Battle<br/>Behavioral + Coding</span>
+      </button>
+      <button class="format-btn" data-format="Full" onclick="selectFormat('Full')">
+        <span class="emoji">👑</span>
+        <span class="label">Full Dress</span>
+        <span class="desc">Week 12 Only<br/>All Rounds</span>
+      </button>
+    </div>
+
+    <div class="week-row">
+      <label>Week:</label>
+      <select class="week-select" id="week-select">
+        <option value="">Select week...</option>
+        <option value="4">Week 4</option>
+        <option value="5">Week 5</option>
+        <option value="6">Week 6</option>
+        <option value="7">Week 7</option>
+        <option value="8">Week 8</option>
+        <option value="9">Week 9</option>
+        <option value="10">Week 10</option>
+        <option value="11">Week 11</option>
+        <option value="12">Week 12</option>
+      </select>
+    </div>
+
+    <button class="start-btn" id="start-btn" disabled onclick="startBattle()">
+      Begin the Battle ⚔️
+    </button>
+  </div>
+
+  <!-- TIMER -->
+  <div id="timer-section" class="card">
+    <div class="phase-progress" id="phase-progress"></div>
+
+    <div class="timer-display">
+      <div class="timer-phase-name" id="phase-name">—</div>
+      <div class="timer-step-name" id="step-name">—</div>
+      <div class="timer-clock" id="timer-clock">00:00</div>
+      <div class="timer-total" id="timer-total">Total: 00:00 elapsed</div>
+    </div>
+
+    <div class="timer-controls">
+      <button class="ctrl-btn primary" id="pause-btn" onclick="togglePause()">Pause</button>
+      <button class="ctrl-btn secondary" onclick="skipStep()">Skip Step →</button>
+      <button class="ctrl-btn secondary" onclick="skipPhase()">Skip Phase →→</button>
+      <button class="ctrl-btn danger-btn" onclick="endBattle()">End Battle</button>
+    </div>
+
+    <div class="step-list" id="step-list"></div>
+  </div>
+
+  <!-- SCORING -->
+  <div id="scoring-section" class="card">
+    <h2 style="font-size:1.1rem; margin-bottom:0.2rem;" id="scoring-title">Score This Round</h2>
+    <p style="font-size:0.85rem; color:var(--text-gentle);" id="scoring-subtitle">Rate each dimension 1-4</p>
+    <div class="score-grid" id="score-grid"></div>
+    <button class="submit-scores-btn" onclick="submitScores()">Save Scores & Continue →</button>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="summary-section" class="card">
+    <h2 style="font-size:1.2rem; text-align:center; margin-bottom:1rem;">Battle Complete ⚔️</h2>
+
+    <div class="overall-card">
+      <div class="overall-score" id="overall-score">0.0</div>
+      <div class="overall-label">Overall Average</div>
+      <div class="target-indicator" id="target-indicator"></div>
+    </div>
+
+    <div id="summary-rounds"></div>
+
+    <h3 style="font-size:1rem; margin-top:1.5rem;">Debrief Notes</h3>
+    <textarea class="debrief-notes" id="debrief-strengths" placeholder="Top strengths..."></textarea>
+    <textarea class="debrief-notes" id="debrief-improvements" placeholder="Areas for improvement..."></textarea>
+    <textarea class="debrief-notes" id="debrief-drills" placeholder="Drills for next week..."></textarea>
+
+    <div style="display:flex; gap:0.8rem; margin-top:1rem; flex-wrap:wrap;">
+      <button class="export-btn" onclick="exportJSON()">Export as JSON 📋</button>
+      <button class="export-btn" style="background:linear-gradient(135deg, var(--mint), var(--lavender));" onclick="resetAll()">New Battle ⚔️</button>
+    </div>
+  </div>
+</div>
+
+<div class="copy-toast" id="copy-toast">Copied to clipboard!</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let selectedFormat = null;
+let selectedWeek = null;
+let phases = [];
+let currentPhaseIdx = 0;
+let currentStepIdx = 0;
+let secondsLeft = 0;
+let totalElapsed = 0;
+let timerInterval = null;
+let isPaused = false;
+let allScores = {};
+let scoringQueue = [];
+
+// Audio context for chimes
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playChime(type) {
+  initAudio();
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+
+  if (type === 'warning') {
+    osc.frequency.setValueAtTime(523, audioCtx.currentTime); // C5
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.8);
+  } else if (type === 'transition') {
+    osc.frequency.setValueAtTime(659, audioCtx.currentTime); // E5
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    osc.start();
+    setTimeout(() => {
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.connect(gain2); gain2.connect(audioCtx.destination);
+      osc2.frequency.setValueAtTime(784, audioCtx.currentTime); // G5
+      gain2.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain2.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+      osc2.start(); osc2.stop(audioCtx.currentTime + 0.6);
+    }, 200);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+    osc.stop(audioCtx.currentTime + 0.5);
+  } else if (type === 'complete') {
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      setTimeout(() => {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        g.gain.setValueAtTime(0.12, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+        o.start(); o.stop(audioCtx.currentTime + 0.6);
+      }, i * 180);
+    });
+  }
+}
+
+// ═══════════════════════════════════════════════
+// FORMAT DEFINITIONS
+// ═══════════════════════════════════════════════
+function getPhases(format, week) {
+  const codingSteps = [
+    { name: 'Intro + Problem Statement', minutes: 3 },
+    { name: 'Clarifying Questions', minutes: 5 },
+    { name: 'Solution Design + Approach', minutes: 7 },
+    { name: 'Code Implementation (talk aloud!)', minutes: 25 },
+    { name: 'Testing + Edge Cases', minutes: 10 },
+    { name: 'Follow-up / Optimization', minutes: 5 },
+  ];
+
+  const codingDims = ['Communication', 'Problem Solving', 'Technical Competency', 'Testing'];
+
+  const sysDesignSteps = [
+    { name: 'Requirements Gathering', minutes: 8 },
+    { name: 'High-Level Architecture', minutes: 15 },
+    { name: 'Deep Dive — One Component', minutes: 12 },
+    { name: 'Trade-offs + Scaling', minutes: 10 },
+  ];
+  const sysDesignDims = ['Requirements', 'Architecture', 'Deep Dive', 'Trade-offs'];
+
+  const backendSteps = [
+    { name: 'Django/DRF Architecture Q&A', minutes: 15 },
+    { name: 'Database/ORM + Schema Design', minutes: 15 },
+    { name: 'Security/Auth Scenario', minutes: 10 },
+    { name: 'Debug Scenario', minutes: 5 },
+  ];
+  const backendDims = ['Conceptual Depth', 'Practical Knowledge', 'Problem Diagnosis', 'Communication'];
+
+  const behavioralSteps = [
+    { name: '"Tell me about yourself"', minutes: 3 },
+    { name: 'STAR Question #1 + Follow-ups', minutes: 12 },
+    { name: 'STAR Question #2 + Follow-ups', minutes: 12 },
+    { name: 'STAR Question #3 + Follow-ups', minutes: 10 },
+    { name: '"Why this company?" / Culture Fit', minutes: 5 },
+    { name: '"Questions for us?"', minutes: 5 },
+    { name: 'Curveball Question', minutes: 3 },
+  ];
+  const behavioralDims = ['Motivation', 'Proactivity', 'Unstructured Env', 'Perseverance', 'Conflict Resolution', 'Growth Mindset', 'Communication'];
+
+  const codingPressureSteps = [
+    { name: 'Problem Statement', minutes: 2 },
+    { name: 'Clarifying Questions', minutes: 4 },
+    { name: 'Solution Design', minutes: 6 },
+    { name: 'Code Implementation (talk aloud!)', minutes: 25 },
+    { name: 'Testing + Edge Cases', minutes: 8 },
+    { name: 'Follow-up / Optimization', minutes: 5 },
+  ];
+
+  const debrief = { name: 'Debrief', steps: [{ name: 'Review scores, strengths, improvements, drills', minutes: 20 }], dims: [] };
+
+  const w = parseInt(week);
+
+  if (format === 'A') {
+    const isSD = (w === 4 || w === 8);
+    return [
+      { name: 'Phase 1: Coding Round', steps: codingSteps, dims: codingDims, scoreKey: 'coding' },
+      isSD
+        ? { name: 'Phase 2: System Design', steps: sysDesignSteps, dims: sysDesignDims, scoreKey: 'system_design' }
+        : { name: 'Phase 2: Backend Deep Dive', steps: backendSteps, dims: backendDims, scoreKey: 'backend' },
+      debrief,
+    ];
+  } else if (format === 'B') {
+    return [
+      { name: 'Phase 1: Behavioral Interview', steps: behavioralSteps, dims: behavioralDims, scoreKey: 'behavioral' },
+      { name: 'Phase 2: Coding Under Pressure', steps: codingPressureSteps, dims: codingDims, scoreKey: 'coding' },
+      debrief,
+    ];
+  } else {
+    return [
+      { name: 'Coding Round', steps: codingSteps, dims: codingDims, scoreKey: 'coding' },
+      { name: 'Break', steps: [{ name: 'Rest & Reset', minutes: 5 }], dims: [] },
+      { name: 'Behavioral Round', steps: behavioralSteps, dims: behavioralDims, scoreKey: 'behavioral' },
+      { name: 'Break', steps: [{ name: 'Rest & Reset', minutes: 5 }], dims: [] },
+      { name: 'System Design Round', steps: sysDesignSteps, dims: sysDesignDims, scoreKey: 'system_design' },
+      debrief,
+    ];
+  }
+}
+
+// ═══════════════════════════════════════════════
+// UI HANDLERS
+// ═══════════════════════════════════════════════
+function selectFormat(fmt) {
+  selectedFormat = fmt;
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-format="${fmt}"]`).classList.add('active');
+  checkReady();
+}
+
+document.getElementById('week-select').addEventListener('change', (e) => {
+  selectedWeek = e.target.value;
+  checkReady();
+});
+
+function checkReady() {
+  document.getElementById('start-btn').disabled = !(selectedFormat && selectedWeek);
+}
+
+function startBattle() {
+  initAudio();
+  phases = getPhases(selectedFormat, selectedWeek);
+  currentPhaseIdx = 0;
+  currentStepIdx = 0;
+  totalElapsed = 0;
+  allScores = {};
+  scoringQueue = [];
+
+  document.getElementById('setup-section').style.display = 'none';
+  document.getElementById('timer-section').style.display = 'block';
+  document.getElementById('scoring-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'none';
+
+  renderPhaseProgress();
+  startStep();
+}
+
+function renderPhaseProgress() {
+  const container = document.getElementById('phase-progress');
+  container.innerHTML = '';
+  phases.forEach((p, i) => {
+    const dot = document.createElement('div');
+    dot.className = 'phase-dot' + (i < currentPhaseIdx ? ' completed' : '') + (i === currentPhaseIdx ? ' active' : '');
+    container.appendChild(dot);
+  });
+}
+
+function renderStepList() {
+  const container = document.getElementById('step-list');
+  const phase = phases[currentPhaseIdx];
+  container.innerHTML = '<div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem;color:var(--text-gentle);">Steps in this phase:</div>';
+  phase.steps.forEach((s, i) => {
+    const cls = i < currentStepIdx ? 'completed' : (i === currentStepIdx ? 'active' : '');
+    const icon = i < currentStepIdx ? '✓' : (i === currentStepIdx ? '▸' : '○');
+    container.innerHTML += `<div class="step-item ${cls}"><span class="step-icon">${icon}</span>${s.name} (${s.minutes}m)</div>`;
+  });
+}
+
+function startStep() {
+  const phase = phases[currentPhaseIdx];
+  if (!phase) { endPhaseScoring(); return; }
+  const step = phase.steps[currentStepIdx];
+  if (!step) { endPhaseScoring(); return; }
+
+  secondsLeft = step.minutes * 60;
+  isPaused = false;
+  document.getElementById('pause-btn').textContent = 'Pause';
+
+  document.getElementById('phase-name').textContent = phase.name;
+  document.getElementById('step-name').textContent = step.name;
+  renderPhaseProgress();
+  renderStepList();
+  updateClockDisplay();
+
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  if (isPaused) return;
+  secondsLeft--;
+  totalElapsed++;
+  updateClockDisplay();
+
+  if (secondsLeft === 120) { playChime('warning'); }
+  if (secondsLeft <= 0) { advanceStep(); }
+}
+
+function updateClockDisplay() {
+  const m = Math.floor(Math.abs(secondsLeft) / 60);
+  const s = Math.abs(secondsLeft) % 60;
+  const prefix = secondsLeft < 0 ? '-' : '';
+  const clock = document.getElementById('timer-clock');
+  clock.textContent = `${prefix}${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  clock.className = 'timer-clock' + (secondsLeft <= 120 && secondsLeft > 0 ? ' warning' : '') + (secondsLeft <= 0 ? ' danger' : '');
+
+  const tm = Math.floor(totalElapsed / 60);
+  const ts = totalElapsed % 60;
+  document.getElementById('timer-total').textContent = `Total: ${String(tm).padStart(2, '0')}:${String(ts).padStart(2, '0')} elapsed`;
+}
+
+function advanceStep() {
+  playChime('transition');
+  currentStepIdx++;
+  const phase = phases[currentPhaseIdx];
+  if (currentStepIdx >= phase.steps.length) {
+    endPhaseScoring();
+  } else {
+    startStep();
+  }
+}
+
+function skipStep() { advanceStep(); }
+
+function skipPhase() {
+  if (timerInterval) clearInterval(timerInterval);
+  endPhaseScoring();
+}
+
+function togglePause() {
+  isPaused = !isPaused;
+  document.getElementById('pause-btn').textContent = isPaused ? 'Resume' : 'Pause';
+}
+
+function endPhaseScoring() {
+  if (timerInterval) clearInterval(timerInterval);
+  const phase = phases[currentPhaseIdx];
+
+  if (phase && phase.dims && phase.dims.length > 0) {
+    showScoringForm(phase);
+  } else {
+    moveToNextPhase();
+  }
+}
+
+function showScoringForm(phase) {
+  document.getElementById('timer-section').style.display = 'none';
+  document.getElementById('scoring-section').style.display = 'block';
+  document.getElementById('scoring-title').textContent = `Score: ${phase.name}`;
+  document.getElementById('scoring-subtitle').textContent = 'Rate each dimension 1-4, add notes';
+
+  const grid = document.getElementById('score-grid');
+  grid.innerHTML = '';
+
+  phase.dims.forEach(dim => {
+    const row = document.createElement('div');
+    row.className = 'score-row';
+    row.innerHTML = `
+      <span class="score-label">${dim}</span>
+      <div class="score-buttons">
+        ${[1,2,3,4].map(n => `<button class="score-btn" data-dim="${dim}" data-score="${n}" onclick="pickScore(this)">${n}</button>`).join('')}
+      </div>
+      <input class="score-note" type="text" placeholder="Notes..." data-dim="${dim}">
+    `;
+    grid.appendChild(row);
+  });
+
+  // Store which phase we're scoring
+  grid.dataset.scoreKey = phase.scoreKey;
+  grid.dataset.phaseName = phase.name;
+}
+
+function pickScore(btn) {
+  const dim = btn.dataset.dim;
+  btn.parentElement.querySelectorAll('.score-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function submitScores() {
+  const grid = document.getElementById('score-grid');
+  const key = grid.dataset.scoreKey;
+  const phaseName = grid.dataset.phaseName;
+  const scores = {};
+  let allFilled = true;
+
+  grid.querySelectorAll('.score-row').forEach(row => {
+    const dim = row.querySelector('.score-label').textContent;
+    const selected = row.querySelector('.score-btn.selected');
+    const note = row.querySelector('.score-note').value;
+    if (!selected) { allFilled = false; return; }
+    scores[dim] = { score: parseInt(selected.dataset.score), note: note };
+  });
+
+  if (!allFilled) {
+    alert('Please score all dimensions before continuing.');
+    return;
+  }
+
+  allScores[key] = { name: phaseName, scores: scores };
+  document.getElementById('scoring-section').style.display = 'none';
+  moveToNextPhase();
+}
+
+function moveToNextPhase() {
+  currentPhaseIdx++;
+  currentStepIdx = 0;
+
+  if (currentPhaseIdx >= phases.length) {
+    showSummary();
+  } else {
+    document.getElementById('timer-section').style.display = 'block';
+    playChime('transition');
+    startStep();
+  }
+}
+
+function endBattle() {
+  if (timerInterval) clearInterval(timerInterval);
+  if (confirm('End the battle early? You can still score completed rounds.')) {
+    showSummary();
+  }
+}
+
+// ═══════════════════════════════════════════════
+// SUMMARY
+// ═══════════════════════════════════════════════
+function showSummary() {
+  playChime('complete');
+  document.getElementById('timer-section').style.display = 'none';
+  document.getElementById('scoring-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'block';
+
+  const roundsContainer = document.getElementById('summary-rounds');
+  roundsContainer.innerHTML = '';
+
+  let totalSum = 0;
+  let totalCount = 0;
+
+  Object.entries(allScores).forEach(([key, round]) => {
+    const div = document.createElement('div');
+    div.className = 'summary-round';
+
+    let html = `<h3>${round.name}</h3>`;
+    let roundSum = 0;
+    let roundCount = 0;
+
+    Object.entries(round.scores).forEach(([dim, data]) => {
+      html += `<div class="summary-dim">
+        <span>${dim}</span>
+        <span><span class="dim-score">${data.score}</span>${data.note ? `<span class="dim-note">— ${data.note}</span>` : ''}</span>
+      </div>`;
+      roundSum += data.score;
+      roundCount++;
+    });
+
+    const avg = (roundSum / roundCount).toFixed(1);
+    html += `<div class="summary-avg">Average: ${avg}</div>`;
+    div.innerHTML = html;
+    roundsContainer.appendChild(div);
+
+    totalSum += roundSum;
+    totalCount += roundCount;
+  });
+
+  const overall = totalCount > 0 ? (totalSum / totalCount).toFixed(1) : '0.0';
+  document.getElementById('overall-score').textContent = overall;
+
+  const w = parseInt(selectedWeek);
+  let target = 2.0;
+  if (w >= 6 && w <= 7) target = 2.5;
+  else if (w >= 8 && w <= 9) target = 3.0;
+  else if (w >= 10) target = 3.5;
+
+  const indicator = document.getElementById('target-indicator');
+  const met = parseFloat(overall) >= target;
+  indicator.className = 'target-indicator ' + (met ? 'met' : 'not-met');
+  indicator.textContent = met ? `Target ${target}+ met!` : `Target: ${target}+ (keep pushing!)`;
+}
+
+function exportJSON() {
+  const data = {
+    date: new Date().toISOString().split('T')[0],
+    week: parseInt(selectedWeek),
+    format: selectedFormat,
+    total_elapsed_minutes: Math.round(totalElapsed / 60),
+    rounds: {},
+    debrief: {
+      strengths: document.getElementById('debrief-strengths').value,
+      improvements: document.getElementById('debrief-improvements').value,
+      drills: document.getElementById('debrief-drills').value,
+    }
+  };
+
+  Object.entries(allScores).forEach(([key, round]) => {
+    const scores = {};
+    Object.entries(round.scores).forEach(([dim, d]) => {
+      const dimKey = dim.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      scores[dimKey] = d.score;
+    });
+    const notes = {};
+    Object.entries(round.scores).forEach(([dim, d]) => {
+      if (d.note) {
+        const dimKey = dim.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        notes[dimKey] = d.note;
+      }
+    });
+    const vals = Object.values(round.scores).map(d => d.score);
+    data.rounds[key] = {
+      name: round.name,
+      scores: scores,
+      notes: notes,
+      average: (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1),
+    };
+  });
+
+  const allVals = Object.values(allScores).flatMap(r => Object.values(r.scores).map(d => d.score));
+  data.overall_average = allVals.length > 0 ? (allVals.reduce((a, b) => a + b, 0) / allVals.length).toFixed(1) : '0.0';
+
+  const json = JSON.stringify(data, null, 2);
+  navigator.clipboard.writeText(json).then(() => {
+    const toast = document.getElementById('copy-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }).catch(() => {
+    // Fallback: prompt
+    prompt('Copy this JSON:', json);
+  });
+}
+
+function resetAll() {
+  if (!confirm('Start a new battle? Current data will be lost unless you exported.')) return;
+  selectedFormat = null;
+  selectedWeek = null;
+  document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('week-select').value = '';
+  document.getElementById('start-btn').disabled = true;
+  document.getElementById('setup-section').style.display = 'block';
+  document.getElementById('timer-section').style.display = 'none';
+  document.getElementById('scoring-section').style.display = 'none';
+  document.getElementById('summary-section').style.display = 'none';
+  document.getElementById('debrief-strengths').value = '';
+  document.getElementById('debrief-improvements').value = '';
+  document.getElementById('debrief-drills').value = '';
+}
+</script>
+</body>
+</html>
