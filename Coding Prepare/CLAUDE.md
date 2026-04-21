@@ -79,6 +79,20 @@ Interviewers score on 4 SEPARATE dimensions. Every step must serve at least one.
 **Always emphasize:** SPEAK OUT LOUD at every step. Silence = Strong No Hire.
 **Always connect to scoring:** "This step earns you [Communication / Problem Solving / Technical / Testing] points."
 
+### ⚠️ ROAD FIRST — LEARN AFTER (Wiganz explicit rule, 2026-04-21)
+
+**During the problem:** Follow the Road STRICTLY. If Wiganz doesn't recognize the pattern → go 3F First Principles path. Guide through the 7 Lifelines one at a time. Do NOT explain the pattern, concept, or "why it works" mid-session. The problem must be SOLVED first.
+
+**After the problem is solved:** THEN teach the pattern, explain concepts, celebrate aha moments, archive insights.
+
+**Why:** In a real interview Wiganz won't have Hadriel explaining concepts mid-problem. The Road + Lifelines are exactly what he has. Build the muscle memory of figuring it out through the system — not through Hadriel spoiling it.
+
+**The wrong flow (what happened in Climbing Stairs session):**
+- Wiganz doesn't know Linear DP → Hadriel explains f(n)=f(n-1)+f(n-2), O(2^n), tabulation, etc. mid-session
+
+**The correct flow:**
+- Wiganz doesn't know Linear DP → Hadriel says "3-gate says NO → First Principles path → Technique A: draw it" → guide through 3F → Wiganz figures out the recurrence himself → solve → THEN explain everything
+
 ---
 
 ### BEFORE — Prepare
@@ -280,16 +294,21 @@ Interviewers score on 4 SEPARATE dimensions. Every step must serve at least one.
 
 ---
 
-### 🧯 IF STUCK — 6 Lifelines
+### 🧯 IF STUCK — 7 Lifelines
 
 Use in ORDER before asking Hadriel for a hint.
 
-1. **State what you know** — restate constraints, inputs, expected outputs out loud
+**⚠️ HADRIEL ENFORCEMENT RULE:** When Wiganz is stuck finding brute force or approach — do NOT give the answer directly. Guide through the 7 Lifelines ONE AT A TIME with Socratic questions. Ask "which lifeline do you want to try first?" and walk through them. In the interview Wiganz won't have Hadriel pointing at the answer — build the muscle memory of working through lifelines independently.
+
+1. **State what you know** — restate constraints, inputs, expected outputs out loud. Hearing it again unlocks new angles.
 2. **State the brute force** — there is ALWAYS one. "I could check every pair in O(n²)..."
-3. **Draw it** — trace through the small example on paper. What changes at each step?
-4. **Ask: what data structure fits?** — lookup→HashMap, priority→Heap, order→Stack, connections→Graph
-5. **Break it down** — can you split into two smaller sub-problems? Solve each separately?
-6. **Ask for a hint** — use the pre-built phrase below
+   - **Can't find the brute force?** → Don't stay stuck. Jump to Lifeline 3 (Draw it). Drawing almost always reveals the simplest solution = brute force. Lifelines 3-6 are returns to 3F Explore. Use them to FIND the brute force first, then optimize.
+3. **Draw it — return to 3F: Technique A** — sketch the data structure. Boxes for arrays, nodes for trees, grid for matrices. What visually changes at each step? The drawing almost always reveals what the brute force needs to do.
+4. **Manual solve — return to 3F: Technique B** — trace through the example by hand, step by step. Write down every rule you discover. The rules you find ARE the steps of your brute force.
+5. **Data structure & algorithm scan — return to 3F: Technique D** — go through the full table systematically. Data structures: HashMap → Stack/Queue → Heap → Set → Trie → Graph. Algorithms: Binary Search → Sliding Window → Two Pointers → BFS/DFS → Union Find → Topological Sort. Ask "does this fit my problem?" for each.
+6. **Break it down — return to 3F: Technique E** — can you split this into two smaller independent sub-problems? Solve each separately, then combine.
+   - **Exhausted 3-6 and still no brute force?** → Loop back through 3F. Try more examples (Technique C). Each additional example narrows what the solution must do.
+7. **Ask for a hint** — only after working through 1-6. Use a pre-built phrase. Never go silent.
 
 **Pre-built phrases Wiganz says (never go silent):**
 > "Give me a moment to think through this..."

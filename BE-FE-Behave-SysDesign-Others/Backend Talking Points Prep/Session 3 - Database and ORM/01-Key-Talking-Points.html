@@ -209,12 +209,13 @@
         <h3>Session 3 — Key Talking Points</h3>
     </div>
     <a href="#schema-design">1. Schema Design</a>
+    <a style="padding-left: 40px;" href="./Database-Schema-Design/00-Master-Schema-Design-Process.html">1.1 Schema Design Flow →</a>
     <a href="#normalization">2. Normalization</a>
     <a href="#n-plus-1">3. N+1 Query Problem</a>
-    <a href="#query-optimization">4. Query Optimization</a>
+    <a href="#query-optimization">4. select_related vs prefetch</a>
     <a href="#indexing">5. Indexing Strategy</a>
     <a href="#through-models">6. Through Models</a>
-    <a href="#summary">Summary</a>
+    <a href="#summary-quickfire">7. Quick-Fire Summary</a>
 </nav>
 
 <div class="page-cover"></div>
@@ -231,7 +232,7 @@
 
     <div class="section-label">Session 3 — Database & ORM</div>
     <h1 class="page-title">📝 Key Talking Points</h1>
-    <p class="page-subtitle"><strong>Goal:</strong> Demonstrate deep understanding of database design principles, query optimization, and ORM best practices. Show you think like a performance-conscious engineer.</p>
+    <p class="page-subtitle"><strong>Goal:</strong> Demonstrate deep understanding of database design principles, query optimization, and ORM best practices. Every section has the WHY, the metaphor, and the interview-ready answer.</p>
 
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
         <span class="tag tag-blue">Database</span>
@@ -261,26 +262,25 @@
 <pre><code>1. Business Requirements  → Understand what the system needs to do
 2. Identify Entities      → Map out objects (Users, Products, Orders)
 3. Define Relationships   → One-to-Many, Many-to-Many, One-to-One
-4. Normalize (1NF-3NF)    → Remove redundancy, ensure data integrity
+4. Normalize (1NF→3NF)    → Remove redundancy, ensure data integrity
 5. Denormalize (if needed)→ Trade write speed for read performance</code></pre>
         </div>
     </details>
 
     <details>
-        <summary>Step-by-Step Schema Design</summary>
+        <summary>Step-by-Step: Entities & Relationships</summary>
         <div class="toggle-content">
             <div class="step-card">
                 <div class="step-num">1</div>
                 <div class="step-content">
                     <p><strong>Understand Business Requirements</strong></p>
-                    <p>Always start by asking: What data needs to be stored? How will the data be accessed? What are the relationships between entities?</p>
+                    <p>Always start by asking: What data needs to be stored? How will the data be accessed? What are the relationships?</p>
                 </div>
             </div>
-
             <div class="step-card">
                 <div class="step-num">2</div>
                 <div class="step-content">
-                    <p><strong>Identify Entities & Relationships</strong></p>
+                    <p><strong>Identify Entities &amp; Relationships</strong></p>
                     <div class="table-wrap">
                         <table>
                             <thead><tr><th>Relationship</th><th>Example</th><th>Implementation</th></tr></thead>
@@ -293,22 +293,14 @@
                     </div>
                 </div>
             </div>
-
             <div class="step-card">
                 <div class="step-num">3</div>
                 <div class="step-content">
-                    <p><strong>Choose Data Types & Constraints</strong></p>
+                    <p><strong>Choose Data Types &amp; Constraints</strong></p>
 <pre><code><span class="cm"># Good practices</span>
 email = models.EmailField(unique=<span class="num">True</span>)  <span class="cm"># Enforce uniqueness at DB level</span>
 status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)  <span class="cm"># Index for filtering</span>
 price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_places=<span class="num">2</span>)  <span class="cm"># Precision for money</span></code></pre>
-                    <p><strong>Key Constraints:</strong></p>
-                    <ul>
-                        <li><code>unique=True</code> → Prevents duplicates</li>
-                        <li><code>null=False</code> (default) → Ensures data presence</li>
-                        <li><code>db_index=True</code> → Speeds up lookups</li>
-                        <li><code>ForeignKey</code> → Maintains referential integrity</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -327,7 +319,6 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
 └─────────────┘       └─────────────┘       └─────────────┘
        │                     │
        │    ┌────────────────┘
-       │    │
        ▼    ▼
 ┌─────────────────────┐
 │    Application      │
@@ -335,30 +326,18 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
 │ id                  │
 │ user_id      (FK)   │
 │ job_id       (FK)   │
-│ status             │
-│ created_at         │
+│ status              │
+│ created_at          │
 └─────────────────────┘</code></pre>
-
-            <h4>Django Models</h4>
-<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">100</span>)
-    email = models.EmailField(unique=<span class="num">True</span>)
-
-<span class="kw">class</span> <span class="cls">Company</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">200</span>)
-    location = models.CharField(max_length=<span class="num">100</span>)
-
-<span class="kw">class</span> <span class="cls">Job</span>(models.Model):
-    title = models.CharField(max_length=<span class="num">200</span>)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-
-<span class="kw">class</span> <span class="cls">Application</span>(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    job = models.ForeignKey(Job, on_delete=models.CASCADE)
-    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)
-    created_at = models.DateTimeField(auto_now_add=<span class="num">True</span>, db_index=<span class="num">True</span>)</code></pre>
         </div>
     </details>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🧱</span>
+        <div class="callout-content">
+            <p><strong>5 Schema Patterns (Lego Blocks)</strong> — Most systems are combinations of 5 patterns: Core Entity, One-to-Many, Many-to-Many, Activity/Event, Ownership. Deep dive + composition examples in <a href="./Database-Schema-Design/00-Master-Schema-Design-Process.html" style="color:var(--accent-blue);">00-Master-Schema-Design-Process.html →</a></p>
+        </div>
+    </div>
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
@@ -373,116 +352,246 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Talking Point:</strong> "Normalize first, denormalize when needed."</p>
+            <p><strong>Talking Point:</strong> "Normalize first, denormalize when needed. Each normal form eliminates a different class of data anomaly."</p>
         </div>
     </div>
 
-    <p>👉 Eliminates data redundancy (storing the same data in multiple places)</p>
-    <p>👉 Prevents update anomalies (changing data in one place but not another)</p>
-    <p>👉 Ensures data consistency across the system</p>
+    <p>👉 1NF: atomic values — no arrays, no lists</p>
+    <p>👉 2NF: eliminate partial dependency (composite PK problem)</p>
+    <p>👉 3NF: eliminate transitive dependency (non-key describes another entity)</p>
 
     <details>
         <summary>1️⃣ First Normal Form (1NF) — Atomic Values</summary>
         <div class="toggle-content">
             <p><strong>Rule:</strong> Each column should contain a <strong>single, indivisible value</strong>. No arrays, no lists, no comma-separated values.</p>
-
             <div class="columns">
                 <div class="callout callout-red" style="margin:0">
                     <div class="callout-content">
-                        <p><strong>❌ BAD Example:</strong></p>
+                        <p><strong>❌ Violates 1NF:</strong></p>
                         <table><thead><tr><th>id</th><th>name</th><th>skills</th></tr></thead>
-                        <tbody><tr><td>1</td><td>John</td><td>"python,django,react"</td></tr></tbody></table>
+                        <tbody><tr><td>1</td><td>Wiganz</td><td>"python,django,react"</td></tr></tbody></table>
                     </div>
                 </div>
                 <div class="callout callout-green" style="margin:0">
                     <div class="callout-content">
-                        <p><strong>✅ GOOD Approach:</strong></p>
-                        <p>Create a separate <code>Skill</code> table with M2M relationship</p>
+                        <p><strong>✅ Fix:</strong></p>
+                        <p>Create a separate <code>Skill</code> table with M2M relationship.</p>
                     </div>
                 </div>
             </div>
-
-<pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">100</span>)
-    skills = models.ManyToManyField(<span class="str">'Skill'</span>)
-
-<span class="kw">class</span> <span class="cls">Skill</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">50</span>, unique=<span class="num">True</span>)</code></pre>
-
             <div class="callout callout-yellow">
                 <span class="callout-emoji">💡</span>
                 <div class="callout-content">
-                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"In 1NF, every column should store a single value, not arrays or lists."</span></p>
+                    <p><strong>One-liner:</strong> <span class="key-phrase">"1NF: every column stores a single value — no arrays or lists."</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>2️⃣ Second Normal Form (2NF) — No Partial Dependency</summary>
+        <div class="toggle-content">
+            <div class="callout callout-blue">
+                <span class="callout-emoji">📌</span>
+                <div class="callout-content">
+                    <p><strong>Rule:</strong> Non-key columns must depend on the <strong>ENTIRE composite PK</strong> — not just part of it.</p>
+                    <p>Only relevant when the table has a <strong>composite primary key</strong>.</p>
+                </div>
+            </div>
+
+            <h4>🔍 Discovery — The iPhone Table</h4>
+            <p>Primary Key here is <strong>composite</strong>: <code>(order_id, product_id)</code> — need BOTH to identify 1 row.</p>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>order_id</th><th>product_id</th><th>product_name</th><th>quantity</th><th>customer_name</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>101</td><td>iPhone</td><td>2</td><td>Wiganz</td></tr>
+                        <tr><td>1</td><td>102</td><td>AirPods</td><td>1</td><td>Wiganz</td></tr>
+                        <tr><td>2</td><td>101</td><td>iPhone</td><td>1</td><td>Triết</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Ask: "<strong>Does <code>product_name</code> depend on BOTH <code>order_id</code> + <code>product_id</code>? Or just one?</strong>"</p>
+            <div class="callout callout-purple">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>AHA #1 — Partial Dependency:</strong> <code>product_name</code> only needs <code>product_id</code> — doesn't care about <code>order_id</code>. iPhone is always "iPhone" regardless of which order.</p>
+                    <p><strong>AHA #2 — Full Dependency:</strong> <code>quantity</code> needs BOTH — Order 1 bought 2 iPhones, Order 2 bought 1 iPhone. Same product, different quantity per order.</p>
+                </div>
+            </div>
+
+            <h4>💀 Why Partial Dependency is Bad — 3 Anomalies</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Anomaly</th><th>The Problem</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Update</strong></td><td>iPhone renamed → must update 10,000 rows. Miss 1 → data inconsistency 💀</td></tr>
+                        <tr><td><strong>Delete</strong></td><td>Delete last order of iPhone → lose all product info forever</td></tr>
+                        <tr><td><strong>Insert</strong></td><td>Can't add new product without creating a fake order first</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>✅ Fix: Split the Table</h4>
+<pre><code>❌ BEFORE (violates 2NF):
+OrderItems: (order_id, product_id, product_name, quantity, customer_name)
+
+✅ AFTER (achieves 2NF):
+OrderItems: (order_id, product_id, quantity)      ← only full-dep columns
+Products:   (product_id, product_name)             ← product_name lives here
+Orders:     (order_id, customer_name)              ← customer_name lives here</code></pre>
+
+            <p>Now rename iPhone → update <strong>1 row</strong> in <code>Products</code>. Done. ✅</p>
+
+            <h4>🐍 Django Connection: ForeignKey = 2NF in Practice</h4>
+<pre><code><span class="cm"># ❌ Violates 2NF — copying product_name directly</span>
+<span class="kw">class</span> <span class="cls">OrderItem</span>(models.Model):
+    product_id = ...
+    product_name = <span class="str">"iPhone"</span>  <span class="cm"># WRONG: copy into every row!</span>
+    quantity = models.IntegerField()
+
+<span class="cm"># ✅ 2NF correct — ForeignKey is the address, not a copy</span>
+<span class="kw">class</span> <span class="cls">Product</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)  <span class="cm"># name lives HERE</span>
+
+<span class="kw">class</span> <span class="cls">OrderItem</span>(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+<span class="cm"># Django auto-JOINs: ForeignKey = store the address, not copy the data</span>
+order_item.product.name  <span class="cm"># Django fetches from Product table</span></code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🏠</span>
+                <div class="callout-content">
+                    <p><strong>Metaphor:</strong> ForeignKey = lưu "địa chỉ nhà" thay vì copy toàn bộ nội thất vào chỗ mình. Khi hỏi <code>order_item.product.name</code> — Django đến địa chỉ đó lấy tên về.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>One-liner (Wiganz's own words):</strong> <span class="key-phrase">"2NF: non-key must fully depend on the entire composite PK — no partial dependency."</span></p>
+                    <p><strong>Bonus:</strong> Tables with a single auto-increment <code>id</code> PK are automatically in 2NF — partial dependency only exists with composite keys.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>3️⃣ Third Normal Form (3NF) — No Transitive Dependency</summary>
+        <div class="toggle-content">
+            <div class="callout callout-blue">
+                <span class="callout-emoji">📌</span>
+                <div class="callout-content">
+                    <p><strong>Rule:</strong> Non-key columns must depend <strong>DIRECTLY on the PK</strong> — not on another non-key column.</p>
+                    <p>Transitive dependency = A→B→C where B is a non-key "middleman."</p>
+                </div>
+            </div>
+
+            <h4>🔍 Discovery — The Customer City Table</h4>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>order_id (PK)</th><th>customer_id</th><th>customer_name</th><th>customer_city</th><th>quantity</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>501</td><td>Wiganz</td><td>HCMC</td><td>2</td></tr>
+                        <tr><td>2</td><td>502</td><td>Triết</td><td>Hanoi</td><td>1</td></tr>
+                        <tr><td>3</td><td>501</td><td>Wiganz</td><td>HCMC</td><td>5</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Ask: "<strong>Does <code>customer_city</code> depend on <code>order_id</code> (PK)? Or on <code>customer_id</code>?</strong>"</p>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>AHA — Transitive Dependency:</strong> <code>customer_city</code> depends on <code>customer_id</code>, not on <code>order_id</code>. But <code>customer_id</code> is NOT the PK — it's a non-key column!</p>
+<pre><code>order_id ──→ customer_id ──→ customer_city
+   PK          non-key            non-key
+              (middleman)</code></pre>
+                    <p><code>customer_city</code> reaches PK only <strong>indirectly</strong> — through <code>customer_id</code> as a middleman.</p>
+                </div>
+            </div>
+
+            <h4>💀 Why Transitive Dependency is Bad</h4>
+            <p>Wiganz moves from HCMC to Hanoi → must update <strong>every order row</strong> (Order 1 and Order 3 both have <code>customer_city = HCMC</code>). Miss one:</p>
+<pre><code>order 1    | Wiganz | Hanoi  ← updated
+order 500  | Wiganz | HCMC   ← missed! 💀
+order 3000 | Wiganz | Hanoi  ← updated</code></pre>
+            <p>Wiganz lives in 2 cities simultaneously in the DB. 💀 Data inconsistency.</p>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🏠</span>
+                <div class="callout-content">
+                    <p><strong>Metaphor — Căn nhà cho thuê:</strong> Order table là căn nhà. <code>order_id</code> là chủ nhà. <code>customer_id</code> là người thuê. <code>customer_city</code> là vợ của người thuê — không phải "vợ của căn nhà"! Người thuê dọn đi thì vợ đi theo, không ở lại căn nhà.</p>
+                    <p>→ <code>customer_city</code> không quan tâm <code>order_id</code>. Nó chỉ "đi ké" <code>customer_id</code> vào ở trọ trong bảng Orders.</p>
+                </div>
+            </div>
+
+            <h4>✅ Fix: Split the Table</h4>
+<pre><code>❌ BEFORE (violates 3NF):
+Orders: (order_id, customer_id, customer_name, customer_city, quantity)
+
+✅ AFTER (achieves 3NF):
+Orders:    (order_id, customer_id, quantity)
+Customers: (customer_id, customer_name, customer_city)</code></pre>
+
+            <p>Wiganz moves to Hanoi → update <strong>1 row</strong> in <code>Customers</code>. Done. ✅</p>
+
+            <h4>🐍 Django Connection</h4>
+<pre><code><span class="cm"># ❌ Violates 3NF — customer info stuck inside Orders</span>
+<span class="kw">class</span> <span class="cls">Order</span>(models.Model):
+    customer_id = models.IntegerField()
+    customer_name = models.CharField(...)  <span class="cm"># belongs to Customer!</span>
+    customer_city = models.CharField(...)  <span class="cm"># belongs to Customer!</span>
+
+<span class="cm"># ✅ 3NF correct — ForeignKey, city lives in its own table</span>
+<span class="kw">class</span> <span class="cls">Customer</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+    city = models.CharField(max_length=<span class="num">100</span>)
+
+<span class="kw">class</span> <span class="cls">Order</span>(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+order.customer.city  <span class="cm"># Django JOINs to get the city</span></code></pre>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>One-liner (Wiganz's own words):</strong> <span class="key-phrase">"3NF: non-key must depend DIRECTLY on PK — no transitive dependency through another non-key."</span></p>
+                    <p><strong>Quick rule:</strong> One table = one entity. Only store attributes OF that entity + foreign keys. Don't store attributes of other entities.</p>
                 </div>
             </div>
         </div>
     </details>
 
     <details>
-        <summary>2️⃣ Second Normal Form (2NF) — Full Dependency</summary>
+        <summary>📊 2NF vs 3NF — Side-by-Side</summary>
         <div class="toggle-content">
-            <p><strong>Rule:</strong> Non-key attributes must depend on the <strong>entire</strong> primary key. (Mostly relevant with composite primary keys)</p>
+<pre><code>2NF = non-key depends on the FULL composite PK
+      → no PARTIAL dependency
+      → happens when there IS a composite PK
 
-            <div class="callout callout-red">
-                <span class="callout-emoji">❌</span>
-                <div class="callout-content">
-                    <p><strong>BAD Example (Composite Key Issue):</strong></p>
-                    <table><thead><tr><th>student_id</th><th>course_id</th><th>student_name</th><th>grade</th></tr></thead>
-                    <tbody><tr><td>1</td><td>101</td><td>John</td><td>A</td></tr></tbody></table>
-                    <p><code>student_name</code> depends only on <code>student_id</code>, not the full composite key.</p>
-                </div>
-            </div>
+3NF = non-key depends DIRECTLY on the PK
+      → no TRANSITIVE dependency
+      → happens when non-key depends on another non-key</code></pre>
 
-            <div class="callout callout-green">
-                <span class="callout-emoji">✅</span>
-                <div class="callout-content">
-                    <p><strong>GOOD Approach:</strong> Split into separate tables:</p>
-<pre><code>Students Table: student_id, student_name
-Enrollments Table: student_id, course_id, grade</code></pre>
-                </div>
-            </div>
-
-            <div class="callout callout-yellow">
-                <span class="callout-emoji">💡</span>
-                <div class="callout-content">
-                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"2NF ensures that non-key fields fully depend on the whole primary key."</span></p>
-                </div>
-            </div>
-        </div>
-    </details>
-
-    <details>
-        <summary>3️⃣ Third Normal Form (3NF) — No Transitive Dependencies</summary>
-        <div class="toggle-content">
-            <p><strong>Rule:</strong> Non-key attributes should depend <strong>only on the primary key</strong>, not on other non-key fields.</p>
-
-            <div class="callout callout-red">
-                <span class="callout-emoji">❌</span>
-                <div class="callout-content">
-                    <p><strong>BAD Example:</strong></p>
-                    <table><thead><tr><th>application_id</th><th>company_id</th><th>company_name</th><th>status</th></tr></thead></table>
-                    <p><code>company_name</code> depends on <code>company_id</code>, which depends on <code>application_id</code>. This is a <strong>transitive dependency</strong>.</p>
-                </div>
-            </div>
-
-            <div class="callout callout-green">
-                <span class="callout-emoji">✅</span>
-                <div class="callout-content">
-                    <p><strong>GOOD Approach:</strong> Store <code>company_name</code> only in the <code>Company</code> table:</p>
-<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    status = models.CharField(max_length=<span class="num">20</span>)
-
-<span class="kw">class</span> <span class="cls">Company</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">200</span>)  <span class="cm"># Only stored here</span></code></pre>
-                </div>
-            </div>
-
-            <div class="callout callout-yellow">
-                <span class="callout-emoji">💡</span>
-                <div class="callout-content">
-                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"3NF removes transitive dependencies to improve data integrity."</span></p>
-                </div>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th></th><th>2NF</th><th>3NF</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>Enemy</strong></td><td>Partial dependency</td><td>Transitive dependency</td></tr>
+                        <tr><td><strong>Troublemaker</strong></td><td>Non-key depends on 1 part of composite PK</td><td>Non-key depends on another non-key</td></tr>
+                        <tr><td><strong>Fix</strong></td><td>Split by the partial PK part</td><td>Split by the non-key middleman</td></tr>
+                        <tr><td><strong>Django</strong></td><td>ForeignKey</td><td>ForeignKey</td></tr>
+                        <tr><td><strong>Example</strong></td><td><code>product_name</code> only needs <code>product_id</code></td><td><code>customer_city</code> depends on <code>customer_id</code> not <code>order_id</code></td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </details>
@@ -491,15 +600,13 @@ Enrollments Table: student_id, course_id, grade</code></pre>
         <summary>⚡ When to Denormalize</summary>
         <div class="toggle-content">
             <p><strong>Keyword:</strong> Read-Heavy Systems</p>
-            <p><strong>The Problem:</strong> Highly normalized databases require many JOINs, which can be slow.</p>
-            <p><strong>Example Scenario:</strong> A dashboard needs to show "Number of applications per user". With normalization: <code>SELECT COUNT(*) FROM applications WHERE user_id = X</code> every time. This is expensive at scale.</p>
-
-            <p><strong>Denormalized Solution:</strong></p>
+            <p><strong>Problem:</strong> Highly normalized databases require many JOINs at query time → slow for dashboards/analytics.</p>
+            <p><strong>Solution:</strong> Pre-compute and store aggregates as denormalized fields.</p>
 <pre><code><span class="kw">class</span> <span class="cls">User</span>(models.Model):
     name = models.CharField(max_length=<span class="num">100</span>)
-    application_count = models.IntegerField(default=<span class="num">0</span>)  <span class="cm"># Denormalized field</span></code></pre>
+    application_count = models.IntegerField(default=<span class="num">0</span>)  <span class="cm"># denormalized</span>
 
-<pre><code><span class="cm"># When creating an application</span>
+<span class="cm"># Keep in sync on write</span>
 user.application_count = F(<span class="str">'application_count'</span>) + <span class="num">1</span>
 user.save(update_fields=[<span class="str">'application_count'</span>])</code></pre>
 
@@ -507,25 +614,18 @@ user.save(update_fields=[<span class="str">'application_count'</span>])</code></
                 <table>
                     <thead><tr><th>Aspect</th><th>Normalized</th><th>Denormalized</th></tr></thead>
                     <tbody>
-                        <tr><td>Reads</td><td>Slower (need JOINs or COUNTs)</td><td>Faster (pre-computed)</td></tr>
+                        <tr><td>Reads</td><td>Slower (JOINs or COUNTs)</td><td>Faster (pre-computed)</td></tr>
                         <tr><td>Writes</td><td>Faster</td><td>Slower (must update aggregates)</td></tr>
                         <tr><td>Data Integrity</td><td>Guaranteed</td><td>Must maintain manually</td></tr>
                     </tbody>
                 </table>
-            </div>
-
-            <div class="callout callout-yellow">
-                <span class="callout-emoji">💡</span>
-                <div class="callout-content">
-                    <p><strong>Interview one-liner:</strong> <span class="key-phrase">"For read-heavy dashboards, I may denormalize aggregated fields for performance."</span></p>
-                </div>
             </div>
         </div>
     </details>
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"I always normalize first to ensure data integrity — applying 1NF for atomic values, 2NF for full key dependency, and 3NF to remove transitive dependencies. However, for read-heavy systems like dashboards, I selectively denormalize specific aggregated fields (like counts or totals) to avoid expensive queries at runtime. It's always a trade-off: normalization ensures data integrity, denormalization improves read performance."</p>
+        <p>"I always normalize first. 1NF for atomic values. 2NF removes partial dependency — non-key columns must depend on the ENTIRE composite primary key, not just part of it. 3NF removes transitive dependency — non-key columns must not describe another entity, they belong in that entity's table via ForeignKey. Both normal forms are fixed the same way: split into separate tables, reference with ForeignKey. For read-heavy dashboards, I selectively denormalize aggregated fields for performance — it's always a trade-off."</p>
     </div>
 
     <hr>
@@ -540,120 +640,101 @@ user.save(update_fields=[<span class="str">'application_count'</span>])</code></
         </div>
     </div>
 
-    <p>👉 Eliminates unnecessary database queries</p>
-    <p>👉 Can reduce 101 queries to 1 query</p>
-    <p>👉 Dramatically improves page load times</p>
+    <p>👉 N+1 = 1 query to get list + N queries for each item = scales terribly</p>
+    <p>👉 It's a <strong>silent bug</strong> — code looks correct, results are correct, but it dies under load</p>
+    <p>👉 Fix: <code>select_related()</code> for FK/OneToOne → SQL JOIN</p>
 
-    <h3>Understanding N+1</h3>
-    <p>The N+1 problem happens when:</p>
-    <ol>
-        <li><strong>1 query</strong> fetches a list of parent objects</li>
-        <li><strong>N queries</strong> fetch related child data for each parent</li>
-    </ol>
-    <p><strong>Total queries = 1 + N</strong> (where N = number of parent objects)</p>
-
-    <div class="columns">
-        <div class="callout callout-red" style="margin:0">
-            <div class="callout-content">
-                <p><strong>🔴 BAD: N+1 Queries</strong></p>
-<pre><code><span class="cm"># Loading 100 applications</span>
-applications = Application.objects.all()
-
-<span class="kw">for</span> app <span class="kw">in</span> applications:
-    print(app.user.name)
-    <span class="cm"># 💥 Hits DB EVERY loop iteration</span></code></pre>
-                <p>1 query + 100 queries = <strong>101 queries!</strong></p>
-            </div>
-        </div>
-        <div class="callout callout-green" style="margin:0">
-            <div class="callout-content">
-                <p><strong>🟢 GOOD: Fixed with select_related</strong></p>
-<pre><code><span class="cm"># Using select_related for FK</span>
-applications = Application.objects \
-    .select_related(<span class="str">'user'</span>).all()
-
-<span class="kw">for</span> app <span class="kw">in</span> applications:
-    print(app.user.name)
-    <span class="cm"># ✅ No extra queries!</span></code></pre>
-                <p>Single query with JOIN = <strong>1 query!</strong></p>
-            </div>
-        </div>
-    </div>
-
-    <details>
-        <summary>SQL Generated — Before vs After</summary>
+    <details open>
+        <summary>🔍 Discovery — How N+1 Happens (The "Gõ Cửa" Metaphor)</summary>
         <div class="toggle-content">
-            <h4>❌ BAD — N+1 SQL</h4>
-<pre><code><span class="cm">-- Query 1</span>
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> applications;
+            <h4>The Code</h4>
+<pre><code>orders = Order.objects.all()
+<span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)</code></pre>
 
-<span class="cm">-- Query 2 (N times!)</span>
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">1</span>;
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">2</span>;
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> users <span class="kw">WHERE</span> id = <span class="num">3</span>;
-... (<span class="num">97</span> more times)</code></pre>
+            <p>If there are 100 orders, how many SQL queries run?</p>
+<pre><code>Query 1: SELECT * FROM orders              → fetches all 100 orders
+Query 2: SELECT * FROM customers WHERE id=1  → for order 1
+Query 3: SELECT * FROM customers WHERE id=2  → for order 2
+... × 100 times
+──────────────────────────────────────────
+TOTAL: 101 queries  ← this is N+1!</code></pre>
 
-            <h4>✅ GOOD — Single JOIN</h4>
-<pre><code><span class="cm">-- Single query with JOIN</span>
-<span class="kw">SELECT</span> applications.*, users.*
-<span class="kw">FROM</span> applications
-<span class="kw">INNER JOIN</span> users <span class="kw">ON</span> applications.user_id = users.id;</code></pre>
+            <p><strong>Why does <code>order.customer.name</code> trigger a query?</strong><br>
+            Django doesn't know ahead of time that you'll access <code>.customer</code> — so it <strong>lazy loads</strong>: asks the DB every single time you touch that attribute in the loop.</p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">💀</span>
+                <div class="callout-content">
+                    <p><strong>The silent killer:</strong> Code looks identical. Results are correct. But each <code>order.customer.name</code> is secretly firing a SQL query. 10 orders? Fine. 10,000 orders? Server dies.</p>
+                    <p><strong>Metaphor:</strong> Going to the market for 100 items — making <strong>100 separate trips</strong> vs. one trip with a big bag. Each round trip to DB costs network + IO overhead.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>✅ Fix — select_related() Makes it 1 Query</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># ❌ N+1 — 101 queries</span>
+orders = Order.objects.all()
+<span class="cm"># SQL: SELECT * FROM orders</span>
+<span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)
+    <span class="cm"># SQL: SELECT * FROM customers WHERE id = X  (×100!)</span>
+
+<span class="cm"># ✅ select_related — 1 query with JOIN</span>
+orders = Order.objects.select_related(<span class="str">'customer'</span>).all()
+<span class="cm"># SQL: SELECT orders.*, customers.*</span>
+<span class="cm">#      FROM orders JOIN customers ON orders.customer_id = customers.id</span>
+<span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)
+    <span class="cm"># 0 extra queries — data already in RAM!</span></code></pre>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>The key insight:</strong> The code in the <code>for</code> loop looks IDENTICAL. The entire difference is in what SQL Django generates <em>before</em> the loop. <code>select_related</code> changes <strong>how Django fetches</strong>, not how you write the loop.</p>
+                </div>
+            </div>
+
+            <h4>What the JOIN Result Looks Like in RAM:</h4>
+<pre><code>| order_id | quantity | customer_id | customer_name | customer_city |
+|----------|----------|-------------|---------------|---------------|
+| 1        | 2        | 501         | Wiganz        | HCMC          |
+| 2        | 1        | 502         | Triết         | Hanoi         |
+| 3        | 5        | 501         | Wiganz        | HCMC          |</code></pre>
+            <p>Django loads this merged table once → <code>order.customer.name</code> reads from RAM. Zero DB calls in the loop.</p>
         </div>
     </details>
 
     <details>
-        <summary>The Two ORM Tools</summary>
+        <summary>📊 N+1 vs select_related — Full Comparison</summary>
         <div class="toggle-content">
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Method</th><th>Use For</th><th>Mechanism</th></tr></thead>
+                    <thead><tr><th></th><th>N+1 (broken)</th><th>select_related (fixed)</th></tr></thead>
                     <tbody>
-                        <tr><td><code>select_related()</code></td><td>ForeignKey, OneToOne</td><td>SQL JOIN</td></tr>
-                        <tr><td><code>prefetch_related()</code></td><td>ManyToMany, Reverse FK</td><td>2 queries + Python join</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h4>select_related() — For Forward Relationships</h4>
-            <p><strong>Use for:</strong> ForeignKey and OneToOneField</p>
-            <p><strong>How it works:</strong> Creates a SQL <code>JOIN</code> to fetch related objects in a single query.</p>
-<pre><code><span class="cm"># ✅ GOOD - Single query with JOIN</span>
-applications = Application.objects.select_related(<span class="str">'user'</span>, <span class="str">'job__company'</span>).all()
-
-<span class="kw">for</span> app <span class="kw">in</span> applications:
-    print(app.user.name)         <span class="cm"># No extra query</span>
-    print(app.job.company.name)  <span class="cm"># No extra query (followed the chain)</span></code></pre>
-
-            <h4>prefetch_related() — For Reverse & M2M Relationships</h4>
-            <p><strong>Use for:</strong> ManyToManyField and Reverse ForeignKey (the "many" side)</p>
-            <p><strong>How it works:</strong> 1) Fetch parent objects, 2) Fetch all related objects with <code>WHERE id IN (...)</code>, 3) Python joins them in memory.</p>
-<pre><code><span class="cm"># ❌ BAD - N+1 Queries</span>
-companies = Company.objects.all()
-<span class="kw">for</span> company <span class="kw">in</span> companies:
-    print(company.job_set.count())  <span class="cm"># 💥 Hits DB each time</span>
-
-<span class="cm"># ✅ GOOD - Optimized with prefetch_related</span>
-companies = Company.objects.prefetch_related(<span class="str">'job_set'</span>).all()
-<span class="kw">for</span> company <span class="kw">in</span> companies:
-    print(company.job_set.count())  <span class="cm"># ✅ No extra queries</span></code></pre>
-
-            <h4>When to Use Which?</h4>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Relationship Type</th><th>Direction</th><th>Use</th></tr></thead>
-                    <tbody>
-                        <tr><td>ForeignKey</td><td>Forward (child → parent)</td><td><code>select_related()</code></td></tr>
-                        <tr><td>OneToOne</td><td>Either direction</td><td><code>select_related()</code></td></tr>
-                        <tr><td>ManyToMany</td><td>Either direction</td><td><code>prefetch_related()</code></td></tr>
-                        <tr><td>Reverse FK</td><td>Backward (parent → children)</td><td><code>prefetch_related()</code></td></tr>
+                        <tr><td><strong>Queries</strong></td><td>1 + N</td><td>1</td></tr>
+                        <tr><td><strong>Mechanism</strong></td><td>Lazy load: asks DB each time</td><td>Eager load: JOIN before the loop</td></tr>
+                        <tr><td><strong>Code in loop</strong></td><td>Identical 👀</td><td>Identical 👀</td></tr>
+                        <tr><td><strong>RAM</strong></td><td>Load per item</td><td>Load everything once</td></tr>
+                        <tr><td><strong>Scales to 10k rows</strong></td><td>💀 Server dies</td><td>✅ Fine</td></tr>
                     </tbody>
                 </table>
             </div>
 
             <div class="callout callout-yellow">
-                <span class="callout-emoji">📌</span>
+                <span class="callout-emoji">⚠️</span>
                 <div class="callout-content">
-                    <p><strong>Rule of thumb:</strong> Following a ForeignKey? → <code>select_related()</code>. Getting a list of related objects? → <code>prefetch_related()</code></p>
+                    <p><strong>Always JOIN on IDs, not names!</strong></p>
+<pre><code><span class="cm">-- ✅ Correct JOIN — by foreign key (ID)</span>
+<span class="kw">SELECT</span> orders.*, customers.name
+<span class="kw">FROM</span> orders
+<span class="kw">JOIN</span> customers <span class="kw">ON</span> orders.customer_id = customers.id
+
+<span class="cm">-- ❌ Wrong — names can duplicate!</span>
+<span class="kw">WHERE</span> customer.name = order.customer_name</code></pre>
                 </div>
             </div>
         </div>
@@ -661,98 +742,152 @@ companies = Company.objects.prefetch_related(<span class="str">'job_set'</span>)
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"The N+1 query problem happens when the application runs one query to fetch a list of objects, then N additional queries to fetch related data. I solve it using ORM optimizations: <code>select_related()</code> for ForeignKey and OneToOne — creates a SQL JOIN, and <code>prefetch_related()</code> for ManyToMany and reverse FK — does two queries and joins in Python. Fixing N+1 queries is often the fastest way to improve backend performance."</p>
+        <p>"The N+1 problem is when you run 1 query to fetch a list, then N separate queries for each item — usually caused by accessing a ForeignKey attribute inside a loop. Django lazy-loads by default: every <code>order.customer.name</code> fires a SQL query. Fix it with <code>select_related()</code> which does a SQL JOIN and loads everything in one query. It's a silent bug — code runs correctly but degrades catastrophically as data grows."</p>
     </div>
 
     <hr>
 
-    <!-- ═══ SECTION 4: Query Optimization ═══ -->
-    <h2 id="query-optimization">4. Query Optimization — The Complete Toolkit ⚡</h2>
+    <!-- ═══ SECTION 4: Query Optimization / select vs prefetch ═══ -->
+    <h2 id="query-optimization">4. select_related vs prefetch_related — Choosing the Right Tool ⚡</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Talking Point:</strong> "Measure, don't guess. Identify bottlenecks first, then optimize."</p>
+            <p><strong>Talking Point:</strong> "Following a FK to 1 parent? → select_related (JOIN). Getting a list of N children? → prefetch_related (2 queries, Python join)."</p>
         </div>
     </div>
 
+    <p>👉 <code>select_related</code> = SQL JOIN — best for ForeignKey, OneToOne (1→1)</p>
+    <p>👉 <code>prefetch_related</code> = 2 separate queries — best for ManyToMany, reverse FK (1→N)</p>
+
     <details open>
-        <summary>The Optimization Process</summary>
+        <summary>🔍 Why select_related FAILS for 1→N (RAM Duplication Problem)</summary>
         <div class="toggle-content">
-            <div class="step-card">
-                <div class="step-num">1</div>
-                <div class="step-content">
-                    <p><strong>DETECT</strong> — Find slow queries (logs, profilers)</p>
-                    <p>Use <strong>Django Debug Toolbar</strong> in dev or <strong>django-silk</strong> in production.</p>
-<pre><code><span class="kw">from</span> django.db <span class="kw">import</span> connection
-print(f<span class="str">"Queries: {len(connection.queries)}"</span>)</code></pre>
-                </div>
-            </div>
+            <p>Scenario: Get all customers and their orders. Wiganz has 1000 orders.</p>
 
-            <div class="step-card">
-                <div class="step-num">2</div>
-                <div class="step-content">
-                    <p><strong>ANALYZE</strong> — Understand WHY it's slow (EXPLAIN ANALYZE)</p>
-<pre><code><span class="kw">EXPLAIN ANALYZE SELECT</span> * <span class="kw">FROM</span> applications <span class="kw">WHERE</span> status = <span class="str">'PENDING'</span>;</code></pre>
-                    <p><strong>Seq Scan</strong> = Full table scan = 🔴 Bad &nbsp;|&nbsp; <strong>Index Scan</strong> = Using an index = 🟢 Good</p>
-                </div>
-            </div>
+            <p>If we use <code>select_related</code> (JOIN) on a 1→N relationship:</p>
+<pre><code>| customer_name | customer_city | order_id | quantity |
+|---------------|---------------|----------|----------|
+| Wiganz        | HCMC          | 1        | 2        |  ← Wiganz × 1
+| Wiganz        | HCMC          | 2        | 5        |  ← Wiganz × 2
+| Wiganz        | HCMC          | 3        | 1        |  ← Wiganz × 3
+... × 1000 times  ← "Wiganz", "HCMC" copied 1000 times in RAM! 💀</code></pre>
 
-            <div class="step-card">
-                <div class="step-num">3</div>
-                <div class="step-content">
-                    <p><strong>FIX N+1</strong> — First priority, biggest gains</p>
-                    <p>See Section 3 above. This is usually the <strong>biggest win</strong>.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <div class="step-num">4</div>
-                <div class="step-content">
-                    <p><strong>ADD INDEXES</strong> — Speed up filtering/sorting</p>
-                    <p>See Section 5 below for detailed indexing strategy.</p>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <div class="step-num">5</div>
-                <div class="step-content">
-                    <p><strong>REFACTOR</strong> — Raw SQL if ORM is limiting</p>
-<pre><code><span class="cm"># Option 1: Limit columns</span>
-User.objects.only(<span class="str">'id'</span>, <span class="str">'email'</span>)
-
-<span class="cm"># Option 2: Exclude heavy fields</span>
-User.objects.defer(<span class="str">'profile_image'</span>)
-
-<span class="cm"># Option 3: Raw SQL</span>
-User.objects.raw(<span class="str">'SELECT id, name FROM users WHERE ...'</span>)
-
-<span class="cm"># Option 4: Database functions</span>
-<span class="kw">from</span> django.db.models <span class="kw">import</span> Count, Avg
-Company.objects.annotate(job_count=Count(<span class="str">'job'</span>))</code></pre>
-                </div>
-            </div>
-
-            <div class="step-card">
-                <div class="step-num">6</div>
-                <div class="step-content">
-                    <p><strong>CACHE</strong> — For read-heavy, rarely-changing data</p>
-<pre><code><span class="kw">from</span> django.core.cache <span class="kw">import</span> cache
-
-<span class="kw">def</span> <span class="fn">get_dashboard_stats</span>():
-    stats = cache.get(<span class="str">'dashboard_stats'</span>)
-    <span class="kw">if</span> stats <span class="kw">is</span> <span class="num">None</span>:
-        stats = calculate_expensive_stats()
-        cache.set(<span class="str">'dashboard_stats'</span>, stats, timeout=<span class="num">300</span>)  <span class="cm"># 5 minutes</span>
-    <span class="kw">return</span> stats</code></pre>
+            <div class="callout callout-red">
+                <span class="callout-emoji">💀</span>
+                <div class="callout-content">
+                    <p><strong>RAM explosion:</strong> Every customer field (<code>name</code>, <code>city</code>, <code>email</code>...) gets duplicated into every order row. 1000 orders = waste RAM × 1000. For M2M this gets even worse.</p>
                 </div>
             </div>
         </div>
     </details>
 
+    <details open>
+        <summary>✅ prefetch_related — The "2 Tờ Giấy" Solution</summary>
+        <div class="toggle-content">
+            <p><code>prefetch_related</code> runs <strong>2 separate queries</strong>, stores <strong>2 separate lists in RAM</strong>:</p>
+<pre><code><span class="cm">-- Query 1: fetch all customers</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> customers
+
+<span class="cm">-- Query 2: fetch all their orders in one shot</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> customer_id <span class="kw">IN</span> (<span class="num">501</span>, <span class="num">502</span>, ...)</code></pre>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">📄</span>
+                <div class="callout-content">
+                    <p><strong>Metaphor — 2 Tờ Giấy (2 Sheets of Paper):</strong></p>
+<pre><code>📄 Sheet 1 — CUSTOMER LIST (Query 1):
+┌───────────────────────────────────┐
+│ 501 | Wiganz | HCMC | ...        │  ← full info, 1 time only!
+│ 502 | Triết  | Hanoi | ...       │  ← full info, 1 time only!
+└───────────────────────────────────┘
+
+📄 Sheet 2 — ORDER LIST (Query 2):
+┌──────────────────────────────┐
+│ order 1 | 501 | qty: 2      │  ← just the NUMBER 501 (tiny integer)
+│ order 2 | 502 | qty: 1      │  ← just the NUMBER 502
+│ order 3 | 501 | qty: 5      │  ← just the NUMBER 501 again (tiny!)
+└──────────────────────────────┘</code></pre>
+                    <p>Sheet 2 has <code>501</code> twice — but <code>501</code> is just one small integer! Wiganz's full data (<code>name</code>, <code>city</code>, <code>email</code>...) lives exactly ONCE on Sheet 1.</p>
+                </div>
+            </div>
+
+            <h4>Django stores 2 lists in RAM:</h4>
+<pre><code><span class="cm"># List 1 — from Query 1:</span>
+customers_in_ram = [
+    Customer(id=<span class="num">501</span>, name=<span class="str">"Wiganz"</span>, city=<span class="str">"HCMC"</span>),
+    Customer(id=<span class="num">502</span>, name=<span class="str">"Triết"</span>,  city=<span class="str">"Hanoi"</span>),
+]
+
+<span class="cm"># List 2 — from Query 2:</span>
+orders_in_ram = [
+    Order(id=<span class="num">1</span>, customer_id=<span class="num">501</span>, quantity=<span class="num">2</span>),
+    Order(id=<span class="num">2</span>, customer_id=<span class="num">502</span>, quantity=<span class="num">1</span>),
+    Order(id=<span class="num">3</span>, customer_id=<span class="num">501</span>, quantity=<span class="num">5</span>),
+]</code></pre>
+
+            <h4>In the for loop — filter in Python, NOT in DB:</h4>
+<pre><code><span class="kw">for</span> customer <span class="kw">in</span> customers:
+    customer.orders.all()
+    <span class="cm"># Django does: filter orders_in_ram WHERE customer_id == customer.id</span>
+    <span class="cm"># Same as WHERE clause — but in Python list, NO DB query!</span>
+    <span class="cm"># customer = Wiganz (501) → [Order(id=1), Order(id=3)]  ✅ from RAM</span></code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>📊 Full Comparison — select_related vs prefetch_related</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th></th><th>select_related</th><th>prefetch_related</th></tr></thead>
+                    <tbody>
+                        <tr><td><strong>SQL</strong></td><td>1 JOIN query</td><td>2 separate queries</td></tr>
+                        <tr><td><strong>RAM</strong></td><td>1 merged list (duplicates)</td><td>2 separate lists (no duplicate)</td></tr>
+                        <tr><td><strong>Customer data</strong></td><td>Copied into every order row</td><td>Exists exactly once</td></tr>
+                        <tr><td><strong>In-loop behavior</strong></td><td>Read from merged RAM</td><td>Filter Python list by customer_id</td></tr>
+                        <tr><td><strong>Best for</strong></td><td>ForeignKey / OneToOne (1→1)</td><td>ManyToMany / reverse FK (1→N)</td></tr>
+                        <tr><td><strong>Wrong use</strong></td><td>RAM explosion with 1→N</td><td>Slightly inefficient for 1→1 (2 queries instead of 1)</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>🎯 Decision Rule — 1 sentence to remember:</h4>
+<pre><code>1 order → 1 customer  (ForeignKey, forward)    →  select_related
+1 customer → N orders (reverse FK, backward)   →  prefetch_related
+Book ↔ Author         (ManyToMany)              →  prefetch_related</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>🐍 Code — Both Tools in Action</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># ForeignKey — order belongs to 1 customer → select_related</span>
+orders = Order.objects.select_related(<span class="str">'customer'</span>)
+<span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)  <span class="cm"># 0 extra queries</span>
+
+<span class="cm"># Reverse FK — customer has many orders → prefetch_related</span>
+customers = Customer.objects.prefetch_related(<span class="str">'orders'</span>)
+<span class="kw">for</span> customer <span class="kw">in</span> customers:
+    print(customer.orders.all())  <span class="cm"># 0 extra queries, filters RAM list</span>
+
+<span class="cm"># ManyToMany → prefetch_related</span>
+books = Book.objects.prefetch_related(<span class="str">'authors'</span>)
+<span class="kw">for</span> book <span class="kw">in</span> books:
+    print(book.authors.all())  <span class="cm"># 0 extra queries</span>
+
+<span class="cm"># Chaining — follow FK + get reverse collection</span>
+applications = Application.objects.select_related(<span class="str">'user'</span>, <span class="str">'job__company'</span>).all()
+<span class="kw">for</span> app <span class="kw">in</span> applications:
+    print(app.user.name)         <span class="cm"># no extra query</span>
+    print(app.job.company.name)  <span class="cm"># no extra query (chained FK)</span></code></pre>
+        </div>
+    </details>
+
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"I follow a 'Measure, Don't Guess' approach to query optimization. First, I identify slow queries using Django Debug Toolbar. Then I analyze the query plan with EXPLAIN ANALYZE. My priority order is: 1) Fix N+1 problems — usually the biggest win, 2) Add indexes on WHERE/ORDER BY/JOIN columns, 3) Refactor using .only(), .defer(), or raw SQL, 4) Cache for read-heavy, rarely-changing data. I focus on reducing the number of database hits first."</p>
+        <p>"Both fix the N+1 problem by loading related data into RAM before the loop. <code>select_related</code> uses a SQL JOIN — best for ForeignKey and OneToOne because it's 1 query and customer data is a single row. <code>prefetch_related</code> fires two separate queries then stitches results in Python — best for ManyToMany and reverse ForeignKey, avoiding RAM duplication when one customer has thousands of orders. The rule of thumb: following a ForeignKey to one parent → <code>select_related</code>. Getting a collection of many children → <code>prefetch_related</code>."</p>
     </div>
 
     <hr>
@@ -763,111 +898,196 @@ Company.objects.annotate(job_count=Count(<span class="str">'job'</span>))</code>
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Talking Point:</strong> "Index what you filter, sort, and join — but don't over-index."</p>
+            <p><strong>Talking Point:</strong> "Index what you filter, sort, and join — but don't over-index. Every index slows down writes."</p>
         </div>
     </div>
 
-    <p>👉 Dramatically speeds up query lookups</p>
-    <p>👉 Like the index at the back of a book — lets you find pages quickly</p>
+    <p>👉 Index = B-Tree structure → find rows in O(log n) instead of O(n) full scan</p>
+    <p>👉 Trade-off: READ faster, WRITE slower (must update index on every change)</p>
+    <p>👉 Rule: index if you read much more than you write on that column</p>
+
+    <details open>
+        <summary>📚 Metaphor — Phụ Lục Sách (Book Index)</summary>
+        <div class="toggle-content">
+            <p>You have a 1000-page book. Find "Django":</p>
+            <ul>
+                <li><strong>No index:</strong> Scan every page 1 → 1000 = Full Table Scan 💀</li>
+                <li><strong>With index:</strong> Check appendix → "Django: pages 347, 521, 890" → jump straight there ✅</li>
+            </ul>
+<pre><code>Book appendix:          DB Index (B-Tree):
+Django → page 347       "Wiganz" → row 347
+React  → page 521       "Triết"  → row 521
+Python → page 890       "Nam"    → row 890</code></pre>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p>When you add a new page to the book (INSERT row), you must <strong>rewrite the appendix</strong>. That's why indexes slow down writes — every INSERT/UPDATE/DELETE must update the B-Tree.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🌳 How B-Tree Works — O(log n)</summary>
+        <div class="toggle-content">
+            <p>B-Tree index on <code>name</code> column (sorted alphabetically — A=1, B=2... W=23):</p>
+<pre><code>                      [Minh→id:1]
+                     /            \
+          [Bình→id:4]              [Triết→id:5]
+         /            \            /            \
+    [An→id:3]      [Huy→id:6]  [Lan→id:7]   [Wiganz→id:2]</code></pre>
+
+            <p><strong>Query <code>WHERE name = "Wiganz"</code>:</strong></p>
+<pre><code>Minh  → "Wiganz" > "Minh"   → go RIGHT  (W=23 > M=13)
+Triết → "Wiganz" > "Triết"  → go RIGHT  (W=23 > T=20)
+Wiganz → FOUND! → row id=2  ✅  — only 3 steps!</code></pre>
+
+<pre><code>Without index: scan 7 rows → 7 steps
+With B-Tree:  3 steps
+At 1 million rows:
+  Full scan → 1,000,000 steps 💀
+  B-Tree    → ~20 steps      ✅  (log₂ 1,000,000 ≈ 20)</code></pre>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>Complexity:</strong> Full Table Scan = O(n). B-Tree Index = O(log n). At 1M rows, that's 1,000,000 vs 20 steps. This is why indexes matter.</p>
+                </div>
+            </div>
+        </div>
+    </details>
 
     <details>
-        <summary>When to Add Indexes</summary>
+        <summary>⚖️ The Trade-off Table — Read vs Write</summary>
         <div class="toggle-content">
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Index When...</th><th>Example</th></tr></thead>
+                    <thead><tr><th>Operation</th><th>With Index</th><th>Without Index</th></tr></thead>
                     <tbody>
-                        <tr><td><strong>Filtering (WHERE)</strong></td><td><code>status</code>, <code>email</code>, <code>user_id</code></td></tr>
-                        <tr><td><strong>Sorting (ORDER BY)</strong></td><td><code>created_at</code>, <code>price</code></td></tr>
-                        <tr><td><strong>Joining (JOIN/FK)</strong></td><td>Foreign keys (auto-indexed in Django)</td></tr>
-                        <tr><td><strong>Uniqueness (UNIQUE)</strong></td><td><code>email</code>, <code>username</code></td></tr>
+                        <tr><td><strong>SELECT / READ</strong></td><td>✅ O(log n) — fast</td><td>❌ O(n) — full scan</td></tr>
+                        <tr><td><strong>INSERT</strong></td><td>❌ Slower (rebuild B-Tree)</td><td>✅ Fast</td></tr>
+                        <tr><td><strong>UPDATE</strong></td><td>❌ Slower (may rebuild)</td><td>✅ Fast</td></tr>
+                        <tr><td><strong>DELETE</strong></td><td>❌ Slower (must update index)</td><td>✅ Fast</td></tr>
+                        <tr><td><strong>Storage</strong></td><td>❌ Extra disk space</td><td>✅ No overhead</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>App Type</th><th>Read/Write ratio</th><th>Index?</th></tr></thead>
+                    <tbody>
+                        <tr><td>Blog (many readers)</td><td>Read-heavy</td><td>✅ Index title, created_at</td></tr>
+                        <tr><td>Log system (writes every second)</td><td>Write-heavy</td><td>⚠️ Index sparingly</td></tr>
+                        <tr><td>E-commerce (search products)</td><td>Read-heavy</td><td>✅ Index name, price, category</td></tr>
+                        <tr><td>Analytics (insert per click)</td><td>Write-heavy</td><td>⚠️ Be careful</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </details>
 
-    <details>
-        <summary>Django Index Examples</summary>
+    <details open>
+        <summary>🔥 Composite Index — Leftmost Prefix Rule</summary>
         <div class="toggle-content">
-<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  <span class="cm"># Auto-indexed</span>
-    status = models.CharField(max_length=<span class="num">20</span>, db_index=<span class="num">True</span>)   <span class="cm"># Manual index</span>
-    created_at = models.DateTimeField(db_index=<span class="num">True</span>)          <span class="cm"># Manual index</span>
+            <p>Composite index <code>['category', 'price']</code> — B-Tree sorts by <strong>category first, then price</strong>:</p>
+<pre><code>B-Tree layout:
+Electronics/100
+Electronics/200
+Electronics/500   ← sorted by category FIRST, then price within
+Clothing/50
+Clothing/150
+Clothing/300</code></pre>
+
+            <div class="columns">
+                <div class="callout callout-green" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>✅ Works:</strong></p>
+<pre><code>WHERE category='Electronics'
+  AND price=200</code></pre>
+                        <p>Knows to jump into "Electronics" section → find 200. Uses index!</p>
+                    </div>
+                </div>
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>❌ Fails:</strong></p>
+<pre><code>WHERE price=200
+  -- (no category)</code></pre>
+                        <p>Doesn't know which category section to enter → must scan everything. Index useless!</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">📖</span>
+                <div class="callout-content">
+                    <p><strong>Metaphor — Danh Bạ Điện Thoại (sorted by Họ → Tên):</strong></p>
+<pre><code>Nguyễn An
+Nguyễn Bình
+Trần An
+Trần Bình</code></pre>
+                    <p>Find "Nguyễn Bình" → jump to "Nguyễn" → find "Bình" ✅<br>
+                    Find "Bình" (without knowing the last name) → read every name from the start 💀<br>
+                    <strong>Leftmost Prefix Rule: skip the first column → index is useless.</strong></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🤖 What Django Auto-Indexes</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Field</th><th>Auto-indexed?</th><th>Why</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>ForeignKey</code></td><td>✅ Yes</td><td>Always used in JOINs and filters</td></tr>
+                        <tr><td><code>OneToOneField</code></td><td>✅ Yes</td><td>Same as ForeignKey</td></tr>
+                        <tr><td><code>primary_key</code></td><td>✅ Yes</td><td>PK is always indexed</td></tr>
+                        <tr><td><code>unique=True</code></td><td>✅ Yes (free!)</td><td>Must check for duplicates on INSERT → needs B-Tree to do it fast</td></tr>
+                        <tr><td><code>CharField</code> (normal)</td><td>❌ Manual</td><td>Django doesn't know if you'll filter by it</td></tr>
+                        <tr><td><code>IntegerField</code> (normal)</td><td>❌ Manual</td><td>Same</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="callout callout-purple">
+                <span class="callout-emoji">🎁</span>
+                <div class="callout-content">
+                    <p><strong><code>unique=True</code> gives you a free index!</strong> When inserting a new email, DB must check "does this email already exist?" — without an index, that's a full table scan on every INSERT. So <code>unique=True</code> requires an index, and Django creates it automatically.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🐍 Django Index Syntax</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># Option 1 — single field index</span>
+<span class="kw">class</span> <span class="cls">Product</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>, db_index=<span class="num">True</span>)
+
+<span class="cm"># Option 2 — Meta.indexes (composite, partial)</span>
+<span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  <span class="cm"># auto-indexed</span>
+    status = models.CharField(max_length=<span class="num">20</span>)
+    created_at = models.DateTimeField()
 
     <span class="kw">class</span> <span class="cls">Meta</span>:
         indexes = [
-            <span class="cm"># Composite index for common query patterns</span>
-            models.Index(fields=[<span class="str">'status'</span>, <span class="str">'created_at'</span>]),
-            <span class="cm"># Partial index (PostgreSQL)</span>
-            models.Index(
+            models.Index(fields=[<span class="str">'status'</span>, <span class="str">'created_at'</span>]),  <span class="cm"># composite</span>
+            models.Index(                                              <span class="cm"># partial (PostgreSQL)</span>
                 fields=[<span class="str">'created_at'</span>],
                 name=<span class="str">'pending_apps_idx'</span>,
                 condition=Q(status=<span class="str">'PENDING'</span>)
             ),
         ]</code></pre>
-
-            <h4>Types of Indexes</h4>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Type</th><th>Use Case</th><th>Django</th></tr></thead>
-                    <tbody>
-                        <tr><td><strong>Single Column</strong></td><td>Filter/sort on one field</td><td><code>db_index=True</code></td></tr>
-                        <tr><td><strong>Composite</strong></td><td>Filter on multiple fields together</td><td><code>Meta.indexes</code></td></tr>
-                        <tr><td><strong>Unique</strong></td><td>Enforce uniqueness</td><td><code>unique=True</code></td></tr>
-                        <tr><td><strong>Partial</strong></td><td>Index only certain rows</td><td><code>condition=Q(...)</code></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </details>
-
-    <details>
-        <summary>⚠️ The Trade-off: Read vs Write</summary>
-        <div class="toggle-content">
-            <p>Every index you add:</p>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Operation</th><th>Impact</th></tr></thead>
-                    <tbody>
-                        <tr><td><strong>SELECT (Read)</strong></td><td>✅ Faster</td></tr>
-                        <tr><td><strong>INSERT</strong></td><td>❌ Slower (must update index)</td></tr>
-                        <tr><td><strong>UPDATE</strong></td><td>❌ Slower (may update index)</td></tr>
-                        <tr><td><strong>DELETE</strong></td><td>❌ Slower (must update index)</td></tr>
-                        <tr><td><strong>Storage</strong></td><td>❌ Uses extra disk space</td></tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <h4>When NOT to Index</h4>
-            <ul>
-                <li>❌ <strong>Low-cardinality columns</strong> (e.g., <code>gender</code> with M/F values) — Database ignores them</li>
-                <li>❌ <strong>Rarely-queried columns</strong> — Index overhead without benefit</li>
-                <li>❌ <strong>Frequently-updated columns</strong> — Write penalty exceeds read benefit</li>
-                <li>❌ <strong>Small tables</strong> — Full scan is already fast</li>
-            </ul>
-        </div>
-    </details>
-
-    <details>
-        <summary>Composite Index Example</summary>
-        <div class="toggle-content">
-            <p><strong>Query:</strong></p>
-<pre><code>Application.objects.filter(status=<span class="str">'PENDING'</span>).order_by(<span class="str">'-created_at'</span>)</code></pre>
-
-            <p><strong>Optimal Index:</strong></p>
-<pre><code><span class="kw">class</span> <span class="cls">Meta</span>:
-    indexes = [
-        models.Index(fields=[<span class="str">'status'</span>, <span class="str">'created_at'</span>]),
-    ]</code></pre>
-
-            <p><strong>Why composite?</strong> Single column indexes on <code>status</code> and <code>created_at</code> separately would require the database to use one index to find matching status, then sort results by created_at. A composite index can do both in one operation.</p>
         </div>
     </details>
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"I don't index everything because indexes slow down write operations. My indexing strategy targets: 1) High-traffic columns used in WHERE clauses, 2) Sorting columns used in ORDER BY, 3) Foreign keys (auto-indexed by Django), 4) Composite indexes for queries that filter on multiple columns together. I avoid indexing low-cardinality columns since the database typically ignores them anyway. Indexing is always a trade-off between read performance and write cost — I design indexes based on real query patterns, not assumptions."</p>
+        <p>"A database index is a B-Tree data structure that lets the database find rows in O(log n) instead of a full O(n) table scan — like the appendix in a book. The trade-off: writes become slower because every INSERT, UPDATE, and DELETE must also update the B-Tree. My indexing strategy: target high-traffic WHERE and ORDER BY columns, foreign keys (auto-indexed in Django), and composite indexes matching common multi-column query patterns. I avoid indexing low-cardinality columns and write-heavy columns. And <code>unique=True</code> gives you a free index — worth remembering."</p>
     </div>
 
     <hr>
@@ -878,134 +1098,269 @@ Company.objects.annotate(job_count=Count(<span class="str">'job'</span>))</code>
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Talking Point:</strong> "Use through models when the relationship itself has attributes."</p>
+            <p><strong>Talking Point:</strong> "Use through models when the relationship itself has attributes — when data is neither A's nor B's, but belongs to the connection between them."</p>
         </div>
     </div>
 
-    <p>👉 Stores metadata about the relationship itself</p>
-    <p>👉 Enables queries on relationship properties</p>
-    <p>👉 More flexible than Django's default M2M table</p>
+    <p>👉 Default M2M only stores two IDs — can't add extra columns</p>
+    <p>👉 Through model = self-defined junction table with full control</p>
+    <p>👉 Key signal: data produces "???" when placed in either A or B alone</p>
 
-    <details>
-        <summary>The Problem with Default M2M</summary>
+    <details open>
+        <summary>🔍 Discovery — When Does Data "Belong to the Relationship"?</summary>
         <div class="toggle-content">
-            <p>Django's default <code>ManyToManyField</code> creates a hidden join table with only two columns:</p>
-<pre><code><span class="cm">-- Auto-generated table</span>
-<span class="kw">CREATE TABLE</span> student_courses (
-    student_id INTEGER,
-    course_id INTEGER
-);</code></pre>
-            <p><strong>What if you need:</strong> When did the student enroll? (<code>enrolled_date</code>) What grade did they get? (<code>grade</code>) Is the enrollment active? (<code>status</code>)</p>
+            <h4>The Question: Where does "grade" live in Student ↔ Course?</h4>
+            <p>Wiganz enrolls in Python course and gets grade 9.5. Where to store it?</p>
+
+            <div class="columns">
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>Student table?</strong></p>
+<pre><code>Student: grade = ???</code></pre>
+                        <p>Wiganz takes 5 courses → which course's grade? 💀</p>
+                    </div>
+                </div>
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>Course table?</strong></p>
+<pre><code>Course: grade = ???</code></pre>
+                        <p>100 students → which student's grade? 💀</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>AHA — "???" in both tables = belongs to the RELATIONSHIP:</strong> <code>grade</code> only has meaning when you know BOTH the student AND the course. It lives in the connection, not in either side.</p>
+<pre><code>Student    ←→    Enrollment    ←→    Course
+Wiganz          grade: 9.5           Python
+                enrolled: 15/01</code></pre>
+                </div>
+            </div>
         </div>
     </details>
 
     <details open>
-        <summary>The Solution: Through Model</summary>
+        <summary>🔍 The E-commerce Example — Order ↔ Product (quantity)</summary>
         <div class="toggle-content">
-<pre><code><span class="kw">class</span> <span class="cls">Student</span>(models.Model):
-    name = models.CharField(max_length=<span class="num">100</span>)
+            <p>Order #1: Wiganz buys iPhone × 2 + AirPods × 1. Where does <code>quantity</code> live?</p>
+
+            <div class="columns">
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>In Order table?</strong></p>
+<pre><code>Order: quantity = ???</code></pre>
+                        <p>Order has 2 products → quantity 2? or 1? 💀</p>
+                    </div>
+                </div>
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>In Product table?</strong></p>
+<pre><code>Product: quantity = ???</code></pre>
+                        <p>iPhone in Order 1 → qty=2, in Order 2 → qty=5. Which one? 💀</p>
+                    </div>
+                </div>
+            </div>
+
+            <p>Only makes sense when you know <strong>BOTH</strong>: "iPhone IN Order #1" → quantity = 2 ✅</p>
+
+            <h4>Why not just add product_id to Order table?</h4>
+<pre><code>| order_id | order_date | quantity | product_id |
+|----------|------------|----------|------------|
+| 1        | 15/01      | 2        | 1 (iPhone) |
+| 1        | 15/01      | 1        | 2 (AirPods)| ← order_date duplicated!</code></pre>
+            <p>Change order date → must update 2 rows. Miss one → data inconsistency. This IS a through model structure already! Just formalize it properly.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>✅ Checklist — When Do You Need a Through Model?</summary>
+        <div class="toggle-content">
+            <h4>Step 1: Is it ManyToMany?</h4>
+<pre><code>A has many B  AND  B has many A?  → ManyToMany!
+
+Student ↔ Course   ✅
+Order ↔ Product    ✅
+User ↔ User (follow) ✅</code></pre>
+
+            <h4>Step 2: Does the relationship have its own data?</h4>
+<pre><code>Try placing data in A:
+→ Gets "???" or duplicates? ❌ → doesn't belong to A
+
+Try placing data in B:
+→ Gets "???" or duplicates? ❌ → doesn't belong to B
+
+Only makes sense knowing BOTH A + B? ✅
+→ THROUGH MODEL!</code></pre>
+
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>Data</th><th>Try in A</th><th>Try in B</th><th>Through?</th></tr></thead>
+                    <tbody>
+                        <tr><td><code>enrolled_date</code></td><td>Student → which course's date? 💀</td><td>Course → which student's date? 💀</td><td>✅ Yes</td></tr>
+                        <tr><td><code>grade</code></td><td>Student → which course's grade? 💀</td><td>Course → which student's grade? 💀</td><td>✅ Yes</td></tr>
+                        <tr><td><code>quantity</code></td><td>Order → which product's qty? 💀</td><td>Product → which order's qty? 💀</td><td>✅ Yes</td></tr>
+                        <tr><td><code>followed_at</code></td><td>User → which follow's date? 💀</td><td>User → which follow's date? 💀</td><td>✅ Yes</td></tr>
+                        <tr><td><code>student_name</code></td><td>Student → 1 name, unique ✅</td><td>—</td><td>❌ No, belongs to Student</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🐍 Django Code — Through Model</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># Default M2M — Django auto-creates junction (can't add columns)</span>
+<span class="kw">class</span> <span class="cls">Student</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
+    courses = models.ManyToManyField(<span class="cls">Course</span>)  <span class="cm"># can't store grade here!</span>
+
+<span class="cm"># ─────────────────────────────────────────</span>
+
+<span class="cm"># Through model — self-defined junction table</span>
+<span class="kw">class</span> <span class="cls">Student</span>(models.Model):
+    name = models.CharField(max_length=<span class="num">200</span>)
     courses = models.ManyToManyField(<span class="str">'Course'</span>, through=<span class="str">'Enrollment'</span>)
 
 <span class="kw">class</span> <span class="cls">Course</span>(models.Model):
     name = models.CharField(max_length=<span class="num">200</span>)
 
-<span class="kw">class</span> <span class="cls">Enrollment</span>(models.Model):
-    <span class="str">"""The through model - stores relationship metadata"""</span>
+<span class="kw">class</span> <span class="cls">Enrollment</span>(models.Model):   <span class="cm"># Through model</span>
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-
-    <span class="cm"># These fields are why we use a through model!</span>
-    enrolled_date = models.DateField(auto_now_add=<span class="num">True</span>)
-    grade = models.CharField(max_length=<span class="num">2</span>, blank=<span class="num">True</span>)
-    status = models.CharField(max_length=<span class="num">20</span>, default=<span class="str">'ACTIVE'</span>)
+    course  = models.ForeignKey(Course,  on_delete=models.CASCADE)
+    enrolled_date = models.DateField()    <span class="cm"># belongs to relationship!</span>
+    grade         = models.FloatField()   <span class="cm"># belongs to relationship!</span>
 
     <span class="kw">class</span> <span class="cls">Meta</span>:
-        unique_together = [<span class="str">'student'</span>, <span class="str">'course'</span>]  <span class="cm"># Prevent duplicates</span></code></pre>
+        unique_together = [<span class="str">'student'</span>, <span class="str">'course'</span>]  <span class="cm"># prevent duplicates</span>
+
+<span class="cm"># ─────────────────────────────────────────</span>
+
+<span class="cm"># E-commerce example</span>
+<span class="kw">class</span> <span class="cls">OrderItem</span>(models.Model):        <span class="cm"># Through model for Order ↔ Product</span>
+    order   = models.ForeignKey(Order,   on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity   = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_places=<span class="num">2</span>)
+
+<span class="cm"># Querying through models</span>
+enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span class="str">'course'</span>)
+<span class="kw">for</span> e <span class="kw">in</span> enrollments:
+    print(f<span class="str">"{e.course.name}: {e.grade} — {e.enrolled_date}"</span>)</code></pre>
         </div>
     </details>
 
     <details>
-        <summary>When to Use Through Models</summary>
+        <summary>🆚 Default M2M vs Through Model</summary>
         <div class="toggle-content">
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Scenario</th><th>Use Through Model?</th></tr></thead>
+                    <thead><tr><th></th><th>ManyToMany (default)</th><th>Through Model</th></tr></thead>
                     <tbody>
-                        <tr><td>Simple link between entities</td><td>No (default M2M is fine)</td></tr>
-                        <tr><td>Need timestamps on relationship</td><td>Yes</td></tr>
-                        <tr><td>Need status/metadata on relationship</td><td>Yes</td></tr>
-                        <tr><td>Need to query by relationship properties</td><td>Yes</td></tr>
-                        <tr><td>Relationship has its own business logic</td><td>Yes</td></tr>
+                        <tr><td><strong>When</strong></td><td>Just "has/doesn't have" — no extra data</td><td>Relationship carries its own data</td></tr>
+                        <tr><td><strong>Junction table</strong></td><td>Django auto-creates, no control</td><td>Self-defined, add any columns</td></tr>
+                        <tr><td><strong>Example</strong></td><td>User ↔ Group (just membership)</td><td>Student ↔ Course + grade + date</td></tr>
+                        <tr><td><strong>Django</strong></td><td><code>ManyToManyField(Course)</code></td><td><code>ManyToManyField(Course, through='Enrollment')</code></td></tr>
                     </tbody>
                 </table>
             </div>
-
-            <h4>Real-World Examples</h4>
-            <div class="table-wrap">
-                <table>
-                    <thead><tr><th>Domain</th><th>Through Model</th><th>Extra Fields</th></tr></thead>
-                    <tbody>
-                        <tr><td>E-commerce</td><td><code>OrderItem</code></td><td><code>quantity</code>, <code>price_at_time</code></td></tr>
-                        <tr><td>Social</td><td><code>Friendship</code></td><td><code>created_at</code>, <code>status</code></td></tr>
-                        <tr><td>Education</td><td><code>Enrollment</code></td><td><code>grade</code>, <code>enrolled_date</code></td></tr>
-                        <tr><td>Job Board</td><td><code>Application</code></td><td><code>status</code>, <code>applied_at</code>, <code>resume</code></td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </details>
-
-    <details>
-        <summary>Querying Through Models</summary>
-        <div class="toggle-content">
-<pre><code><span class="cm"># Get all enrollments for a student</span>
-student.enrollment_set.all()
-
-<span class="cm"># Get students who enrolled after a date</span>
-Enrollment.objects.filter(
-    enrolled_date__gte=<span class="str">'2024-01-01'</span>
-).select_related(<span class="str">'student'</span>, <span class="str">'course'</span>)
-
-<span class="cm"># Get students with grade A in a specific course</span>
-Student.objects.filter(
-    enrollment__course__name=<span class="str">'Django 101'</span>,
-    enrollment__grade=<span class="str">'A'</span>
-)</code></pre>
         </div>
     </details>
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"I use through models when the relationship itself has attributes. For example, in an education system, the relationship between Student and Course isn't just a link — it has its own data like enrollment date, grade, and status. The through model (Enrollment) stores these relationship-specific fields, enabling queries like 'find all students who enrolled after January with grade A'. This is a senior-level pattern that shows you're thinking about the domain model, not just the database structure."</p>
+        <p>"I use through models when the ManyToMany relationship itself has data. The signal is: if you try to place a field in either table and get '???', it belongs to the relationship. For example, <code>quantity</code> in an Order-Product relationship: Order doesn't know which product's quantity, and Product doesn't know which order's quantity — it only makes sense together. The through model (OrderItem) stores both ForeignKeys plus the relationship's own fields. This is also how you avoid data duplication: without a through model, <code>order_date</code> would be repeated on every product row in the order."</p>
     </div>
 
     <hr>
 
-    <!-- ═══ SUMMARY ═══ -->
-    <h2 id="summary">🎯 Session 3 Summary</h2>
+    <!-- ═══ SECTION 7: Quick-Fire Summary ═══ -->
+    <h2 id="summary-quickfire">7. 🎯 Interview Quick-Fire Summary</h2>
+
+    <p>One-liner answers — Wiganz's own words forged from discovery sessions. Use these for rapid review before interviews.</p>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">📐</span>
+        <div class="callout-content">
+            <p><strong>1NF:</strong> <span class="key-phrase">"Every column stores a single atomic value — no arrays, no lists."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">📐</span>
+        <div class="callout-content">
+            <p><strong>2NF:</strong> <span class="key-phrase">"Non-key must depend on the ENTIRE composite PK — no partial dependency. ForeignKey is how Django implements this."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">📐</span>
+        <div class="callout-content">
+            <p><strong>3NF:</strong> <span class="key-phrase">"Non-key must depend DIRECTLY on PK — no transitive dependency through another non-key. One table = one entity."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">💀</span>
+        <div class="callout-content">
+            <p><strong>N+1:</strong> <span class="key-phrase">"1 query for list + N queries for each item = scales terribly. Fix: select_related() → SQL JOIN, 1 query total."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>select_related vs prefetch_related:</strong> <span class="key-phrase">"select_related = JOIN (1 query, 1→1/FK). prefetch_related = 2 queries + Python filter (1→N/M2M). Wrong choice → RAM explosion."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">📊</span>
+        <div class="callout-content">
+            <p><strong>Index:</strong> <span class="key-phrase">"B-Tree: O(log n) reads, but writes slower. Index when read >> write. Composite index: leftmost prefix must match query columns."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔗</span>
+        <div class="callout-content">
+            <p><strong>Through Model:</strong> <span class="key-phrase">"If data gets '???' in both A and B → it belongs to the RELATIONSHIP → through model. Checklist: try A, try B, if both fail → through model."</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🧱</span>
+        <div class="callout-content">
+            <p><strong>5 Schema Patterns (Lego Blocks):</strong> Core Entity → One-to-Many → Many-to-Many → Activity/Event → Ownership. <br>Social Media = 1+2+3+4. E-commerce = 1+2+3+4. LMS = 1+3. <br>→ Deep dive: <a href="./Database-Schema-Design/00-Master-Schema-Design-Process.html" style="color:var(--accent-blue);">00-Master-Schema-Design-Process.html</a></p>
+        </div>
+    </div>
 
     <div class="table-wrap">
         <table>
-            <thead><tr><th>Topic</th><th>Key Point</th></tr></thead>
+            <thead><tr><th>Topic</th><th>Key Signal</th><th>Fix / Tool</th></tr></thead>
             <tbody>
-                <tr><td><strong>Schema Design</strong></td><td>Business requirements → Entities → Normalize → Optimize</td></tr>
-                <tr><td><strong>Normalization</strong></td><td>1NF (atomic), 2NF (full dependency), 3NF (no transitive)</td></tr>
-                <tr><td><strong>Denormalization</strong></td><td>Trade write speed for read performance in read-heavy systems</td></tr>
-                <tr><td><strong>N+1 Problem</strong></td><td>select_related (FK/O2O JOIN), prefetch_related (M2M/reverse)</td></tr>
-                <tr><td><strong>Query Optimization</strong></td><td>Detect → Analyze → Fix N+1 → Index → Refactor → Cache</td></tr>
-                <tr><td><strong>Indexing</strong></td><td>Filter/Sort/Join columns; trade-off read speed vs write cost</td></tr>
-                <tr><td><strong>Through Models</strong></td><td>When relationships have their own attributes</td></tr>
+                <tr><td><strong>Schema Design</strong></td><td>Business requirements → entities first</td><td>Normalize → denormalize selectively</td></tr>
+                <tr><td><strong>1NF</strong></td><td>Array/list in a column</td><td>Separate table + M2M</td></tr>
+                <tr><td><strong>2NF</strong></td><td>Non-key depends on partial composite PK</td><td>Split table by that PK part → ForeignKey</td></tr>
+                <tr><td><strong>3NF</strong></td><td>Non-key depends on another non-key</td><td>Split that entity out → ForeignKey</td></tr>
+                <tr><td><strong>N+1</strong></td><td>FK attribute accessed inside for loop</td><td><code>select_related()</code> → 1 JOIN query</td></tr>
+                <tr><td><strong>select_related</strong></td><td>1→1, FK (forward)</td><td>JOIN — load parent into RAM once</td></tr>
+                <tr><td><strong>prefetch_related</strong></td><td>1→N, M2M (reverse)</td><td>2 queries → 2 lists → Python filter</td></tr>
+                <tr><td><strong>Indexing</strong></td><td>Slow WHERE/ORDER BY</td><td>B-Tree index on filter columns; respect leftmost prefix for composite</td></tr>
+                <tr><td><strong>Through Model</strong></td><td>Relationship data gets "???" in A or B</td><td>Explicit junction model with FKs + extra fields</td></tr>
             </tbody>
         </table>
     </div>
 
-    <div class="callout callout-green">
+    <div class="callout callout-blue">
         <span class="callout-emoji">🌱</span>
         <div class="callout-content">
             <p><strong>Senior Mindset:</strong></p>
             <p>"Normalize first, denormalize when needed."</p>
-            <p>"Fix N+1 before touching indexes."</p>
-            <p>"Use select_related vs prefetch_related correctly."</p>
+            <p>"Fix N+1 before touching indexes — it's usually the fastest win."</p>
+            <p>"select_related for FKs, prefetch_related for collections."</p>
             <p>"Index based on real query patterns, not assumptions."</p>
             <p><span class="key-phrase">"Measure, don't guess."</span></p>
         </div>

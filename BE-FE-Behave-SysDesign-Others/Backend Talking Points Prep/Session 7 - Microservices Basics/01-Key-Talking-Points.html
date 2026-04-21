@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 7: Key Talking Points — Microservices Basics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f7f6f3; --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa; --text-primary: #37352f; --text-secondary: #787774;
+            --text-muted: #9b9a97; --border: #e3e2de; --border-light: #eeeeec;
+            --accent-blue: #2563eb; --accent-red: #eb5757; --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #7c3aed; --accent-orange: #e97f33;
+            --code-bg: #f7f6f3; --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe; --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8; --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0; --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8; --callout-purple-border: #7c3aed;
+            --sidebar-width: 260px; --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #191919; --bg-secondary: #202020; --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e; --text-primary: #e3e2de; --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b; --border: #333; --border-light: #2a2a2a;
+            --accent-blue: #529cca; --accent-red: #eb5757; --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #a78bfa; --accent-orange: #e97f33;
+            --code-bg: #252525; --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a; --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a; --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28; --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a; --callout-purple-border: #a78bfa;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; font-size: 15px; transition: background 0.3s, color 0.3s; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #7c3aed, #4f46e5); z-index: 1001; transition: width 0.1s linear; }
+        .page-cover { height: var(--cover-height); background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%); }
+        [data-theme="dark"] .page-cover { background: linear-gradient(135deg, #3b1f8c 0%, #2a1d7a 100%); }
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease, background 0.3s; }
+        .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
+        .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .sidebar a { display: block; color: var(--text-secondary); text-decoration: none; padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar a.active { color: var(--accent-purple); font-weight: 500; border-left-color: var(--accent-purple); background: rgba(124,58,237,0.04); }
+        .main-content { max-width: calc(900px + var(--sidebar-width)); margin: 0 auto; padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
+        .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
+        .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-purple); }
+        .breadcrumbs span { margin: 0 6px; }
+        .page-title { font-size: 2.2em; font-weight: 700; margin: 16px 0 8px; line-height: 1.2; letter-spacing: -0.02em; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 32px; }
+        h2 { font-size: 1.5em; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-light); letter-spacing: -0.01em; }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 { font-size: 1.15em; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+        h4 { font-size: 1em; font-weight: 600; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 32px 0; }
+        details { margin: 12px 0; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+        summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--bg-secondary); transition: background 0.2s; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none; font-size: 1em; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.65em; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content { padding: 16px; border-top: 1px solid var(--border-light); }
+        .callout { display: flex; gap: 12px; padding: 16px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; }
+        .callout-emoji { font-size: 1.2em; flex-shrink: 0; line-height: 1.5; }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+        .callout-yellow { background: var(--callout-yellow-bg); border-left-color: var(--callout-yellow-border); }
+        .callout-red { background: var(--callout-red-bg); border-left-color: var(--callout-red-border); }
+        .callout-green { background: var(--callout-green-bg); border-left-color: var(--callout-green-border); }
+        .callout-blue { background: var(--callout-blue-bg); border-left-color: var(--callout-blue-border); }
+        .callout-purple { background: var(--callout-purple-bg); border-left-color: var(--callout-purple-border); }
+        code { font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace; font-size: 0.88em; background: var(--code-inline-bg); padding: 2px 6px; border-radius: 3px; color: var(--accent-red); }
+        pre { background: var(--code-bg); border-radius: 6px; padding: 16px 20px; overflow-x: auto; margin: 12px 0; border: 1px solid var(--border-light); position: relative; }
+        pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
+        .code-label { position: absolute; top: 8px; right: 12px; font-size: 0.7em; color: var(--text-muted); font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+        .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .dec { color: #e36209; } .cls { color: #6f42c1; }
+        [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .dec { color: #ffa657; } [data-theme="dark"] .cls { color: #d2a8ff; }
+        .table-wrap { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        blockquote { border-left: 3px solid var(--border); padding: 8px 16px; margin: 12px 0; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 0 4px 4px 0; }
+        blockquote strong { color: var(--text-primary); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 500; margin: 2px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; } .tag-orange { background: #fed7aa; color: #9a3412; } .tag-red { background: #fecaca; color: #991b1b; } .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; } [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; } [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; } [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; } [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; } [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+        .key-phrase { background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%); padding: 0 2px; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+        .step-card { display: flex; gap: 14px; padding: 14px; margin: 8px 0; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-purple); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+        .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        strong { font-weight: 600; }
+        .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-purple); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
+        .interview-answer strong { font-style: normal; }
+        .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-purple); margin-bottom: 4px; }
+        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns { grid-template-columns: 1fr; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 7 — Key Points</h3>
+    </div>
+    <a href="#monolith">Monolith — The Pizza Shop</a>
+    <a href="#microservices">Microservices Architecture</a>
+    <a href="#when-to-use">When to USE Microservices</a>
+    <a href="#when-not">When NOT to Use</a>
+    <a href="#api-gateway">API Gateway &amp; BFF</a>
+    <a href="#db-per-service">Database Per Service</a>
+    <a href="#saga">Saga Pattern</a>
+    <a href="#communication">Sync vs Async Communication</a>
+    <a href="#service-discovery">Service Discovery</a>
+    <a href="#tracing">Distributed Tracing</a>
+</nav>
+
+<div class="page-cover"></div>
+
+<div class="main-content">
+    <div class="breadcrumbs">
+        <a href="../Session 6 - DevOps and Deployment/02-Practice-Questions-Answers.html">Session 6</a>
+        <span>/</span>
+        <a href="02-Practice-Questions-Answers.html">Practice Q&amp;A</a>
+    </div>
+
+    <div class="section-label">Session 7 — Microservices Basics</div>
+    <h1 class="page-title">🏗️ Key Talking Points</h1>
+    <p class="page-subtitle">Not just "what microservices are" — but <em>why</em>, <em>when</em>, and the real trade-offs.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-purple">Microservices</span>
+        <span class="tag tag-blue">Saga Pattern</span>
+        <span class="tag tag-green">API Gateway</span>
+        <span class="tag tag-orange">Conway's Law</span>
+        <span class="tag tag-gray">Architecture</span>
+    </div>
+
+    <!-- Section 1: Monolith -->
+    <h2 id="monolith">🍕 Monolith — "The Single Chef Pizza Shop"</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>The Story:</strong> Imagine a small pizza shop with one chef who does everything: knead dough, spread sauce, add toppings, bake, cut, deliver. With 5 orders/day → perfect. With 500 orders/day → chaos.</p>
+            <p>One problem in any step → ALL steps blocked. Want to upgrade the oven (one part)? Shut down the entire restaurant.</p>
+            <p><span class="key-phrase">This is monolith. Perfect at small scale. Reveals weakness at scale.</span></p>
+        </div>
+    </div>
+
+    <h3>💪 Strengths of Monolith — Don't Forget These!</h3>
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Interviewers bait candidates who only say negatives about monolith:</strong></p>
+            <ul>
+                <li>Simple local function calls — no network overhead (nanoseconds vs milliseconds)</li>
+                <li>ACID transactions across ALL modules trivially</li>
+                <li>Easy to debug — one process, one log stream</li>
+                <li>Simple deployment — one artifact, one CI/CD pipeline</li>
+                <li>No distributed systems complexity</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3>❌ When Monolith Breaks Down</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Problem</th><th>What Happens</th></tr>
+            <tr><td>50+ engineers, one codebase</td><td>Merge conflicts, deployment bottlenecks every Friday</td></tr>
+            <tr><td>One module needs 10x resources</td><td>Must scale ENTIRE app — wasteful and expensive</td></tr>
+            <tr><td>Payment team wants to deploy 2am</td><td>Requires redeploying whole app — high risk</td></tr>
+            <tr><td>Buggy Search deploy</td><td>Crashes Payment service too — same process</td></tr>
+        </table>
+    </div>
+
+    <!-- Section 2: Microservices -->
+    <h2 id="microservices">⚙️ Microservices — "Each Chef Has Their Own Kitchen"</h2>
+
+    <pre><code>[Auth Service]      → Auth DB (Postgres)
+       ↕ REST/gRPC
+[User Service]      → User DB (Postgres)
+       ↕
+[Order Service]     → Order DB (Postgres)
+       ↕ async via Kafka
+[Payment Service]   → Payment DB (Postgres)
+       ↕
+[Notification Svc]  → (stateless — no DB needed)
+
+Each box = independent process, independent DB, independent deployment</code></pre>
+
+    <h3>Conway's Law — "Architecture = Org Chart"</h3>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🏢</span>
+        <div class="callout-content">
+            <p><em>"Any organization that designs a system will inevitably produce a design whose structure is a copy of the organization's communication structure."</em> — Melvin Conway, 1967</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Team Structure</th><th>Resulting Architecture</th></tr>
+            <tr><td>1 team</td><td>Monolith (natural)</td></tr>
+            <tr><td>Teams organized by function (Frontend / Backend / Data)</td><td>N-tier architecture (3 monolithic layers)</td></tr>
+            <tr><td>Teams organized by domain (Amazon model: Checkout / Search / Reviews)</td><td>Microservices naturally</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">📦</span>
+        <div class="callout-content">
+            <p><strong>Jeff Bezos's famous mandate:</strong> Every team must expose functionality via a service API. No direct DB access. No shared memory. Teams communicate ONLY via APIs. This forced Conway's Law → architecture mirrored autonomous team structure.</p>
+            <p><strong>Two-pizza rule:</strong> If a team can't be fed with two pizzas, it's too big (≈ 6-8 people). Each microservice owned by one two-pizza team.</p>
+        </div>
+    </div>
+
+    <!-- Section 3: When to Use -->
+    <h2 id="when-to-use">✅ When to USE Microservices — The 4 Signals</h2>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>Independent Scaling Requirements</strong></p>
+            <p>Black Friday: Search needs 100x, Order needs 50x, User Profile needs 2x. Monolith solution: scale ENTIRE app 100x → wasteful. Microservices: scale each independently → 60-70% cost reduction.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>Multiple Teams Working Simultaneously</strong></p>
+            <p>50 engineers × 1 codebase → merge conflict hell, "why is main broken?", deployment bottleneck. 50 engineers × 8 services → each team deploys independently, no cross-team conflicts.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>Different Technology Requirements</strong></p>
+            <p>ML Recommendation: Python + PyTorch + GPUs. Payments: Java + Kafka + compliance. Real-time Chat: Node.js + WebSockets. In monolith: stuck with one language/framework. Microservices: each team picks what fits.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>Fault Isolation Requirements</strong></p>
+            <p>Without: Recommendation service memory leak → OOMKilled → ENTIRE app down → Payments can't process. With: Recommendation crashes → homepage shows no recommendations → Checkout, Payments, Search continue working. Blast radius: degraded UX on homepage only.</p>
+        </div>
+    </div>
+
+    <!-- Section 4: When NOT to Use -->
+    <h2 id="when-not">❌ When NOT to Use Microservices — The 4 Anti-Signals</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">⚠️</span>
+        <div class="callout-content">
+            <p><strong>"Small team, early stage, unclear boundaries, no DevOps maturity → monolith is the right answer."</strong></p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Anti-Signal</th><th>Why It Kills You</th></tr>
+            <tr><td><strong>Small team (&lt;10 engineers)</strong></td><td>2 weeks setting up Kubernetes/service discovery → 0 features shipped. Monolith: 10+ features in 2 weeks.</td></tr>
+            <tr><td><strong>Unclear domain boundaries</strong></td><td>Wrong service boundaries = expensive refactoring 6 months later when you understand the domain.</td></tr>
+            <tr><td><strong>No DevOps maturity</strong></td><td>Need: Kubernetes, service discovery, centralized logging, distributed tracing, health monitoring, N CI/CD pipelines. Without: can't debug anything.</td></tr>
+            <tr><td><strong>Complex cross-service transactions</strong></td><td>Business logic requiring atomic ops across 5 services → must implement Saga. 10x harder than a single ACID transaction.</td></tr>
+        </table>
+    </div>
+
+    <h3>🌳 Strangler Fig — How to Migrate Safely</h3>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Never do a Big Bang rewrite</strong> — historically fatal. Use the Strangler Fig: new features → build as separate services. Existing features → extract one-by-one, starting with clearest boundaries. Route through API Gateway to either monolith or new service. Over 12-18 months, strangle the monolith.</p>
+        </div>
+    </div>
+
+    <pre><code>Month 0:   [Monolith handles 100% of requests]
+Month 3:   [API Gateway] → Search Service (new)
+                         → Monolith (everything else)
+Month 9:   [API Gateway] → Search Service + User Service (extracted)
+                         → Monolith (remaining modules)
+Month 18:  [API Gateway] → All services
+                         → Monolith deprecated ✅</code></pre>
+
+    <!-- Section 5: API Gateway -->
+    <h2 id="api-gateway">🚪 API Gateway &amp; BFF Pattern</h2>
+
+    <h3>What Problem It Solves</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Without Gateway</strong></p>
+                <p>Mobile app must know: User Service = port 3001, Orders = port 3002, ML = port 3003. Separate auth, CORS, rate limit per service. Client config breaks when services move.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>With Gateway</strong></p>
+                <p>All requests → <code>gateway.api.company.com</code>. Gateway handles: routing, auth, rate limiting, CORS. Internal services hidden behind it.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>What API Gateway Does</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Responsibility</th><th>Detail</th></tr>
+            <tr><td><strong>Routing</strong></td><td><code>/api/users/*</code> → User Service, <code>/api/orders/*</code> → Order Service</td></tr>
+            <tr><td><strong>Authentication (centralized)</strong></td><td>Verify JWT once → forward user context headers. Invalid → 401 immediately, never reaches downstream.</td></tr>
+            <tr><td><strong>Rate Limiting (centralized)</strong></td><td>100 req/min per IP — not implemented in every service separately.</td></tr>
+            <tr><td><strong>Protocol Translation</strong></td><td>Client speaks REST → internal services speak gRPC → Gateway translates.</td></tr>
+            <tr><td><strong>Aggregation (BFF)</strong></td><td>Single client request → call multiple services → aggregate → one response.</td></tr>
+        </table>
+    </div>
+
+    <h3>BFF Pattern — Backend for Frontend</h3>
+    <pre><code>               ┌──────────────────┐
+iOS/Android ──→│   Mobile BFF     │──→ User Service
+               └──────────────────┘──→ Order Service
+                                   (lean response — no analytics)
+
+               ┌──────────────────┐
+Web Browser ──→│    Web BFF       │──→ User Service + Order Service
+               └──────────────────┘──→ Analytics Service
+                                   (full response)</code></pre>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🚨</span>
+        <div class="callout-content">
+            <p><strong>Anti-pattern:</strong> Don't put business logic in the API Gateway. It should be a dumb router + authenticator. Gateway knows <em>WHERE</em> to send requests, not <em>WHAT</em> to do with the data.</p>
+        </div>
+    </div>
+
+    <!-- Section 6: DB Per Service -->
+    <h2 id="db-per-service">🗄️ Database Per Service</h2>
+
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>WRONG: Shared Database</strong></p>
+                <p>User/Order/Product Services all access same DB. Order Service adds column to users table → breaks User Service. User Service migration → must coordinate ALL teams. "Loosely coupled" in theory, tightly coupled via shared DB.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>RIGHT: Each Service Owns Its Data</strong></p>
+                <p>User Service → users_db (Postgres). Order Service → orders_db (Postgres). Search → Elasticsearch. Cart → Redis. Changes to users_db: User Service team's decision alone.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>Cross-Service Data Access (The Hard Part)</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Option</th><th>How</th><th>Pro</th><th>Con</th></tr>
+            <tr><td><strong>Sync API call</strong></td><td><code>GET /users/{id}/email</code></td><td>Always fresh data</td><td>Order depends on User Service being up</td></tr>
+            <tr><td><strong>Event-driven replication</strong></td><td>User publishes <code>UserEmailChanged</code> → Order caches copy</td><td>Order is fully autonomous</td><td>Eventual consistency (1-2s stale)</td></tr>
+        </table>
+    </div>
+
+    <!-- Section 7: Saga Pattern -->
+    <h2 id="saga">🔄 Saga Pattern — Distributed Transactions</h2>
+
+    <h3>The Problem: Why Monolith Transactions Don't Work in Microservices</h3>
+    <div class="columns">
+        <div>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-green);margin-bottom:8px;">✅ Monolith — Trivial ACID Transaction</p>
+            <pre><code><span class="kw">with</span> db.<span class="fn">transaction</span>():
+    order = Order.<span class="fn">create</span>(...)
+    payment = Payment.<span class="fn">charge</span>(...)
+    inventory.<span class="fn">reduce</span>(...)
+    notification.<span class="fn">send</span>(...)
+<span class="cm"># ANY failure → entire rollback atomically</span></code></pre>
+        </div>
+        <div>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-red);margin-bottom:8px;">❌ Microservices — Cannot Span 4 DBs</p>
+            <pre><code><span class="cm"># Order created ✅</span>
+<span class="cm"># Payment charged ✅</span>
+<span class="cm"># Inventory update FAILS ❌</span>
+<span class="cm"># → User paid for out-of-stock item</span>
+<span class="cm"># → Inconsistent state</span></code></pre>
+        </div>
+    </div>
+
+    <h3>Saga: Choreography vs Orchestration</h3>
+
+    <details>
+        <summary>🎭 Choreography-based Saga (Event-driven)</summary>
+        <div class="toggle-content">
+            <p>Services communicate via events — no central coordinator.</p>
+            <pre><code>Order Svc: creates order → publishes "OrderCreated"
+Payment Svc: listens → charges card → publishes "PaymentSucceeded"
+Inventory Svc: listens → reserves item → publishes "ItemReserved"
+Notification Svc: listens → sends "Order Confirmed" email
+
+FAILURE CASE: Inventory out of stock
+Inventory Svc: publishes "InventoryFailed"
+Payment Svc: listens → refunds → publishes "PaymentRefunded"
+Order Svc: listens → cancels → publishes "OrderCancelled"</code></pre>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>✅ Pros</th><th>❌ Cons</th></tr>
+                    <tr><td>Fully decoupled</td><td>Hard to track overall saga state</td></tr>
+                    <tr><td>No single point of failure</td><td>Risk of cyclic dependencies</td></tr>
+                    <tr><td>Maximum autonomy</td><td>Debugging events across 5 services = pain</td></tr>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🎯 Orchestration-based Saga (Command-driven)</summary>
+        <div class="toggle-content">
+            <p>A central Saga Orchestrator service coordinates the flow.</p>
+            <pre><code>[Order Orchestrator] → "PaymentService.charge(123, 999)"
+[Payment Service]    → returns success/failure
+[Order Orchestrator] → "InventoryService.reserve(456, 1)"
+[Inventory Service]  → FAILS
+[Order Orchestrator] → "PaymentService.refund(123, 999)"  ← compensating tx
+[Order Orchestrator] → "NotificationService.send('out-of-stock')"</code></pre>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>✅ Pros</th><th>❌ Cons</th></tr>
+                    <tr><td>Single place to see entire flow</td><td>Orchestrator = single point of failure</td></tr>
+                    <tr><td>Easier to add/modify steps</td><td>Creates coupling to Orchestrator</td></tr>
+                    <tr><td>Clear error handling</td><td>Can become a bottleneck</td></tr>
+                </table>
+            </div>
+        </div>
+    </details>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>When to use each:</strong><br>
+            Choreography → Simple flows, 2-3 services, want maximum decoupling<br>
+            Orchestration → Complex flows, many steps, need visibility, business-critical</p>
+        </div>
+    </div>
+
+    <!-- Section 8: Communication -->
+    <h2 id="communication">📡 Sync vs Async Communication</h2>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th></th><th>REST (HTTP/1.1 + JSON)</th><th>gRPC (HTTP/2 + Protobuf)</th></tr>
+            <tr><td><strong>Format</strong></td><td>JSON (human-readable, larger)</td><td>Binary (smaller, faster)</td></tr>
+            <tr><td><strong>Speed</strong></td><td>Baseline</td><td>5-10x faster serialization</td></tr>
+            <tr><td><strong>Schema</strong></td><td>Optional (OpenAPI)</td><td>Required (.proto files)</td></tr>
+            <tr><td><strong>Browser support</strong></td><td>Native</td><td>Needs grpc-web proxy</td></tr>
+            <tr><td><strong>Best for</strong></td><td>Public APIs, external clients</td><td>Internal service-to-service</td></tr>
+        </table>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Pattern</th><th>Use When</th></tr>
+            <tr><td><strong>Synchronous (REST/gRPC)</strong></td><td>Payment confirmation, authentication, reads — need immediate answer</td></tr>
+            <tr><td><strong>Asynchronous (Kafka/RabbitMQ)</strong></td><td>Email notifications, fan-out (1 event → many consumers), different processing speeds, resilience</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Rule of thumb:</strong><br>
+            Synchronous = "I need the answer before I can continue"<br>
+            Asynchronous = "I just need to say it happened, you handle it whenever"</p>
+        </div>
+    </div>
+
+    <!-- Section 9: Service Discovery -->
+    <h2 id="service-discovery">🔍 Service Discovery</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🤔</span>
+        <div class="callout-content">
+            <p><strong>The problem:</strong> Order Service needs to call Payment Service. In Kubernetes, Payment Service might be at 10.0.1.42:8080 (Pod 1), 10.0.1.87:8080 (Pod 2 just spun up), and Pod 1 just crashed → 10.0.1.42 is gone. How does Order Service know the current addresses?</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Approach</th><th>How</th><th>Best For</th></tr>
+            <tr><td><strong>Client-Side (Consul/Eureka)</strong></td><td>Services register on startup → caller queries registry → load balances</td><td>Non-Kubernetes, full control over LB logic</td></tr>
+            <tr><td><strong>Server-Side (Kubernetes DNS)</strong></td><td>Stable DNS: <code>payment-service.default.svc.cluster.local</code> → kube-proxy LBs automatically</td><td>Kubernetes-native, language-agnostic</td></tr>
+        </table>
+    </div>
+
+    <!-- Section 10: Distributed Tracing -->
+    <h2 id="tracing">🔎 Distributed Tracing</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">😱</span>
+        <div class="callout-content">
+            <p><strong>The nightmare without tracing:</strong> User reports "My order failed." Every service logs look OK individually. WHERE did it fail? Without distributed tracing: 2 hours of grepping through 5 log files.</p>
+        </div>
+    </div>
+
+    <h3>Correlation ID Pattern</h3>
+    <pre><code><span class="cm"># API Gateway: generate correlation ID for every request</span>
+<span class="kw">import</span> uuid
+
+<span class="kw">def</span> <span class="fn">handle_request</span>(request):
+    correlation_id = request.headers.<span class="fn">get</span>(<span class="str">'X-Correlation-ID'</span>) <span class="kw">or</span> str(uuid.<span class="fn">uuid4</span>())
+    logger.<span class="fn">info</span>(<span class="str">f"[{correlation_id}] Processing order for user {user_id}"</span>)
+    <span class="cm"># Forward to downstream with same header</span>
+    requests.<span class="fn">post</span>(<span class="str">'http://payment-service/charge'</span>,
+                  headers={<span class="str">'X-Correlation-ID'</span>: correlation_id}, ...)</code></pre>
+
+    <p>Query all logs by <code>X-Correlation-ID = "abc-123"</code> → see ALL log lines across ALL services → timeline showing exactly where and when the failure occurred.</p>
+
+    <h3>Jaeger/Zipkin Visualization</h3>
+    <pre><code>Trace for request "abc-123-xyz":
+
+Order Svc (0-100ms)
+  ├── Payment Svc call (10-60ms) ✅
+  └── Inventory Svc call (60-100ms)
+        └── DB query (60-90ms) ✅
+        └── Redis lock (90-100ms) ❌ TIMEOUT ← root cause visible instantly</code></pre>
+
+    <!-- Quick Reference -->
+    <h2 id="quick-ref" style="display:none;">Quick Reference</h2>
+    <div class="callout callout-purple" style="margin-top:32px;">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Interview Master Line — "Would you use microservices?"</strong></p>
+            <p>"It depends on team size and whether services need to scale independently. For &lt;10 engineers: strongly recommend a well-structured monolith — microservices overhead would consume most capacity just keeping infrastructure working. For 50+ engineers with clear domain boundaries and independent scaling needs — yes. And I'd migrate using the <strong>Strangler Fig pattern</strong> — never a Big Bang rewrite."</p>
+        </div>
+    </div>
+
+    <div class="table-wrap" style="margin-top:16px;">
+        <table>
+            <tr><th>Concept</th><th>One-Line Definition</th></tr>
+            <tr><td>Conway's Law</td><td>Architecture mirrors org chart — structure follows communication structure</td></tr>
+            <tr><td>Strangler Fig</td><td>Incremental migration from monolith — never a Big Bang rewrite</td></tr>
+            <tr><td>API Gateway</td><td>Single entry point, centralized auth/routing — dumb pipe, smart routing</td></tr>
+            <tr><td>BFF Pattern</td><td>Separate gateway per client type (mobile needs lean, web needs full)</td></tr>
+            <tr><td>DB per service</td><td>No shared DBs — coupling at data layer defeats microservices' purpose</td></tr>
+            <tr><td>Saga Pattern</td><td>Distributed transactions via local commits + compensating transactions</td></tr>
+            <tr><td>Choreography</td><td>Services communicate via events — decoupled, no central coordinator</td></tr>
+            <tr><td>Orchestration</td><td>Central coordinator commands each step — visible state, clearer control</td></tr>
+            <tr><td>Service Discovery</td><td>Kubernetes DNS (server-side) or Consul/Eureka (client-side)</td></tr>
+            <tr><td>Distributed Tracing</td><td>Correlation ID propagated through all services → unified timeline</td></tr>
+        </table>
+    </div>
+
+</div>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const saved = localStorage.getItem('theme');
+    if (saved) { html.setAttribute('data-theme', saved); themeToggle.textContent = saved === 'dark' ? '☀️' : '🌙'; }
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', next);
+    });
+
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = (scrollTop / docHeight * 100) + '%';
+    });
+
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+</script>
+</body>
+</html>

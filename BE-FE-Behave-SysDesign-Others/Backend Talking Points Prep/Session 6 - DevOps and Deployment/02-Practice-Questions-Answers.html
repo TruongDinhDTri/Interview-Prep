@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 6: Practice Q&A — DevOps & Deployment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f7f6f3; --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa; --text-primary: #37352f; --text-secondary: #787774;
+            --text-muted: #9b9a97; --border: #e3e2de; --border-light: #eeeeec;
+            --accent-blue: #2563eb; --accent-red: #eb5757; --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0; --accent-orange: #ea580c;
+            --code-bg: #f7f6f3; --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe; --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8; --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0; --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8; --callout-purple-border: #9065b0;
+            --sidebar-width: 260px; --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #191919; --bg-secondary: #202020; --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e; --text-primary: #e3e2de; --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b; --border: #333; --border-light: #2a2a2a;
+            --accent-blue: #529cca; --accent-red: #eb5757; --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8; --accent-orange: #f97316;
+            --code-bg: #252525; --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a; --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a; --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28; --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a; --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; font-size: 15px; transition: background 0.3s, color 0.3s; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, #ea580c, #dc2626); z-index: 1001; transition: width 0.1s linear; }
+        .page-cover { height: var(--cover-height); background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); }
+        [data-theme="dark"] .page-cover { background: linear-gradient(135deg, #7c2d12 0%, #7f1d1d 100%); }
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease, background 0.3s; }
+        .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
+        .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .sidebar a { display: block; color: var(--text-secondary); text-decoration: none; padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar a.active { color: var(--accent-orange); font-weight: 500; border-left-color: var(--accent-orange); background: rgba(234,88,12,0.04); }
+        .main-content { max-width: calc(900px + var(--sidebar-width)); margin: 0 auto; padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
+        .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
+        .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-orange); }
+        .breadcrumbs span { margin: 0 6px; }
+        .page-title { font-size: 2.2em; font-weight: 700; margin: 16px 0 8px; line-height: 1.2; letter-spacing: -0.02em; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 32px; }
+        h2 { font-size: 1.5em; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-light); letter-spacing: -0.01em; }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 { font-size: 1.15em; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+        h4 { font-size: 1em; font-weight: 600; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 32px 0; }
+        details { margin: 12px 0; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+        summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--bg-secondary); transition: background 0.2s; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none; font-size: 1em; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.65em; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content { padding: 16px; border-top: 1px solid var(--border-light); }
+        .callout { display: flex; gap: 12px; padding: 16px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; }
+        .callout-emoji { font-size: 1.2em; flex-shrink: 0; line-height: 1.5; }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+        .callout-yellow { background: var(--callout-yellow-bg); border-left-color: var(--callout-yellow-border); }
+        .callout-red { background: var(--callout-red-bg); border-left-color: var(--callout-red-border); }
+        .callout-green { background: var(--callout-green-bg); border-left-color: var(--callout-green-border); }
+        .callout-blue { background: var(--callout-blue-bg); border-left-color: var(--callout-blue-border); }
+        .callout-purple { background: var(--callout-purple-bg); border-left-color: var(--callout-purple-border); }
+        code { font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace; font-size: 0.88em; background: var(--code-inline-bg); padding: 2px 6px; border-radius: 3px; color: var(--accent-red); }
+        pre { background: var(--code-bg); border-radius: 6px; padding: 16px 20px; overflow-x: auto; margin: 12px 0; border: 1px solid var(--border-light); position: relative; }
+        pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
+        .code-label { position: absolute; top: 8px; right: 12px; font-size: 0.7em; color: var(--text-muted); font-family: 'Inter', sans-serif; text-transform: uppercase; letter-spacing: 0.05em; }
+        .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .dec { color: #e36209; } .cls { color: #6f42c1; }
+        [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .dec { color: #ffa657; } [data-theme="dark"] .cls { color: #d2a8ff; }
+        .table-wrap { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        blockquote { border-left: 3px solid var(--border); padding: 8px 16px; margin: 12px 0; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 0 4px 4px 0; }
+        blockquote strong { color: var(--text-primary); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 500; margin: 2px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; } .tag-orange { background: #fed7aa; color: #9a3412; } .tag-red { background: #fecaca; color: #991b1b; } .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; } [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; } [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; } [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; } [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; } [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+        .key-phrase { background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%); padding: 0 2px; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+        .step-card { display: flex; gap: 14px; padding: 14px; margin: 8px 0; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-orange); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+        .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        strong { font-weight: 600; }
+        .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-orange); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
+        .interview-answer strong { font-style: normal; }
+        .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-orange); margin-bottom: 4px; }
+        .weak-answer { background: var(--callout-red-bg); border-left: 3px solid var(--callout-red-border); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 8px 0; }
+        .strong-answer { background: var(--callout-green-bg); border-left: 3px solid var(--callout-green-border); padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 8px 0; }
+        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns { grid-template-columns: 1fr; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+        @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 6 — Practice Q&amp;A</h3>
+    </div>
+    <a href="#q1">Q1: Deploy Django Applications</a>
+    <a href="#q2">Q2: CI/CD Process</a>
+    <a href="#q3">Q3: Environment Configs</a>
+    <a href="#q4">Q4: Production Setup</a>
+    <a href="#key-phrases">Key Phrases</a>
+</nav>
+
+<div class="page-cover"></div>
+
+<div class="main-content">
+    <div class="breadcrumbs">
+        <a href="01-Key-Talking-Points.html">Key Points</a>
+        <span>/</span>
+        <a href="../Session 7 - Microservices Basics/01-Key-Talking-Points.html">Session 7</a>
+    </div>
+
+    <div class="section-label">Session 6 — DevOps &amp; Deployment</div>
+    <h1 class="page-title">❓ Practice Questions &amp; Answers</h1>
+    <p class="page-subtitle">Read the question → close the file → answer out loud for 2 minutes → compare.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-orange">Docker</span>
+        <span class="tag tag-red">CI/CD</span>
+        <span class="tag tag-blue">Deployment</span>
+        <span class="tag tag-green">Production</span>
+        <span class="tag tag-gray">Interview</span>
+    </div>
+
+    <!-- Q1 -->
+    <h2 id="q1">Q1: "How do you deploy Django applications?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use Docker and deploy to a cloud platform, configuring environment variables and running migrations."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Strong One-Line Mental Model:</strong></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I know how to take an app from local development → to a <strong>secure, scalable, monitored</strong> production system."</p>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I typically deploy Django using <strong>Docker</strong> for environment consistency. I containerize the app with <strong>Gunicorn</strong> as the application server and use <strong>environment variables</strong> for all configuration. In production: <code>DEBUG=False</code>, secure cookies, configured allowed hosts. Static files go via <strong>WhiteNoise</strong> or S3 + CloudFront. I deploy to <strong>AWS</strong> or <strong>Railway</strong> depending on scale. Before deploying, I run migrations carefully — tested in staging first for <strong>zero downtime</strong>. And I always set up <strong>Sentry</strong> for error tracking."</p>
+    </div>
+
+    <h3>🧩 7-Step Breakdown — Say Each One</h3>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>🐳 Docker — The Foundation</strong></p>
+            <p>"I use Docker to ensure consistency between dev, staging, and production." No "it works on my machine." Same environment everywhere → <strong>portable runtime box</strong> 📦</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>🔐 Environment Variables — Secrets &amp; Config</strong></p>
+            <p>"I manage configs using environment variables via <code>.env</code> or cloud secrets." Never hardcode secrets. Different envs → different configs. Config is <strong>external</strong>, not baked into code.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>🛡️ Production Settings — Security Mode ON</strong></p>
+            <p>"I harden Django settings for production." <code>DEBUG=False</code>, <code>SECURE_SSL_REDIRECT=True</code>, <code>SESSION_COOKIE_SECURE=True</code>, HSTS enabled. Protect users. Enforce HTTPS. Prevent leaks. 🔒</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>🧬 Database Migrations — Handle with Wisdom</strong></p>
+            <p>"I run migrations carefully — after backups and staging validation." Backup → Test in staging → Additive changes → Run <code>migrate</code>. DB is sacred. Don't rush. ⚠️</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content">
+            <p><strong>📦 Static Files — Frontend Delivery</strong></p>
+            <p>"For static files I use WhiteNoise for small apps, or S3 + CloudFront for scalability." The backend should <strong>never</strong> serve static files in production. 🚫</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-content">
+            <p><strong>📊 Logging &amp; Monitoring — Eyes of the System</strong></p>
+            <p>"I set up logging and use Sentry for error tracking." You can't fix what you can't see. 👀 Production errors are <strong>inevitable</strong> — be ready with observability.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">7</div>
+        <div class="step-content">
+            <p><strong>☁️ Deployment Platform — Choose Wisely</strong></p>
+            <p>"I choose platforms based on complexity and control needed." Railway = fast &amp; simple 🚀. DigitalOcean = balanced ⚖️. AWS EC2 + RDS = full control 🔥.</p>
+        </div>
+    </div>
+
+    <h3>🎤 Closing Line — Drop This</h3>
+    <div class="interview-answer">
+        <p>"My focus is to make deployments <strong>reproducible, secure, and observable</strong>."</p>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Concrete Example:</strong> "For my recent projects, I wrote a <code>Dockerfile</code> using <code>python:3.11</code>, installed dependencies, and set the entrypoint to Gunicorn. I managed environment variables via <code>.env</code> files and hosted on Railway — everything reproducible and secure."</p>
+        </div>
+    </div>
+
+    <!-- Q2 -->
+    <h2 id="q2">Q2: "Walk me through your CI/CD process."</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use GitHub Actions to run tests and deploy automatically when I push to main."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Strong One-Line Mental Model:</strong></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"A robot that tests and ships your code safely every time you push — <strong>zero human intervention</strong>."</p>
+    </div>
+
+    <div class="interview-answer">
+        <p>"My CI/CD pipeline is fully automated using <strong>GitHub Actions</strong>. The <strong>CI phase</strong>: whenever code is pushed to main, it triggers automated tests with <code>pytest</code>. If tests pass, the <strong>CD phase</strong> builds a new Docker image, pushes to a container registry, deploys to production, runs database migrations, and performs a health check to verify success."</p>
+    </div>
+
+    <h3>🔁 The 7-Step Pipeline Flow</h3>
+
+    <pre><code>── CI PHASE ──────────────────────────────
+1. Push to main       →  Trigger 🔀
+2. Run tests (pytest) →  Gatekeeper 🧪
+         ↓
+   ✅ PASS → CD unlocks
+   ❌ FAIL → everything stops, Slack alert fires
+
+── CD PHASE ──────────────────────────────
+3. Build Docker image →  Package 🐳
+4. Push to registry   →  Store 📦
+5. Deploy to prod     →  Ship 🌍
+6. Run migrations     →  Sync DB 🗄️
+7. Health check       →  Verify ❤️
+         ↓
+   ✅ 200 OK → "Deploy successful!" 🎉
+   ❌ Fails  → abort + Slack alert 🚨</code></pre>
+
+    <h3>💻 GitHub Actions YAML</h3>
+    <pre><code><span class="cm"># .github/workflows/deploy.yml</span>
+name: Django CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      <span class="cm"># CI PHASE</span>
+      - name: Run Tests
+        run: pytest
+
+      <span class="cm"># CD PHASE</span>
+      - name: Build Docker Image
+        run: docker build -t myapp:latest .
+
+      - name: Push to Registry
+        run: docker push myregistry/myapp:latest
+
+      - name: Deploy + Migrate + Health Check
+        run: |
+          ssh user@server "
+            docker pull myregistry/myapp:latest &&
+            docker-compose up -d &&
+            docker exec web python manage.py migrate --noinput &&
+            curl -f https://myapp.com/api/health/
+          "</code></pre>
+
+    <h3>🎤 Strong Closing Line</h3>
+    <div class="interview-answer">
+        <p>"My CI/CD pipeline ensures every change is <strong>tested, reproducible, and safely deployed</strong> with minimal manual intervention — eliminating human error during releases entirely."</p>
+    </div>
+
+    <details>
+        <summary>❓ If They Push: "What if tests fail?"</summary>
+        <div class="toggle-content">
+            <p>"The pipeline stops immediately and the deployment is blocked. Only stable, tested code ever reaches production. The team gets notified on Slack so the issue can be fixed before the next merge."</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>❓ If They Push: "Why run migrations after deploy, not before?"</summary>
+        <div class="toggle-content">
+            <p>"Because the new code and the migration need to be in sync. Running migrations before deploy means the DB has columns that old code doesn't know about — which can cause errors. Running after means the new code and the DB schema are consistent from the first request."</p>
+        </div>
+    </details>
+
+    <!-- Q3 -->
+    <h2 id="q3">Q3: "How do you handle environment configs?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use environment variables and a <code>.env</code> file so secrets aren't hardcoded."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Strong One-Line Mental Model:</strong></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"Config should live <strong>outside</strong> the code — never hardcoded, never committed, never exposed."</p>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I strictly separate code from configuration using <strong>environment variables</strong>. In Django, I use <code>python-dotenv</code> to load variables from a <code>.env</code> file during local development. Sensitive data like <code>SECRET_KEY</code>, database credentials, and API keys are <strong>never hardcoded or committed</strong> to version control. In production, I set variables directly in the hosting platform's environment settings — not a <code>.env</code> file. Same codebase. Different config. Zero changes between environments."</p>
+    </div>
+
+    <h3>🪤 The String Trap — THIS is the Senior Signal</h3>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🔴</span>
+        <div class="callout-content">
+            <p><strong>The trap most juniors fall into:</strong></p>
+            <p><code>os.getenv()</code> always returns a <strong>string</strong>, never a boolean. If you write <code>DEBUG = os.getenv('DEBUG')</code> and set <code>DEBUG=False</code> on the server... Python reads <code>'False'</code> — a non-empty string → <strong>always evaluates as <code>True</code></strong>. Result: <code>DEBUG = True</code> in production → full source code + env vars exposed to every user on error pages. 😬</p>
+        </div>
+    </div>
+
+    <h3>Bad vs Good Code</h3>
+    <div class="columns">
+        <div>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-red);margin-bottom:8px;">❌ NEVER DO THIS</p>
+            <pre><code><span class="cm"># settings.py</span>
+SECRET_KEY = <span class="str">'hardcoded-secret'</span>
+DEBUG = <span class="kw">True</span>
+DATABASE_URL = <span class="str">'postgres://user:pass@...'</span></code></pre>
+        </div>
+        <div>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-green);margin-bottom:8px;">✅ ALWAYS DO THIS</p>
+            <pre><code><span class="kw">import</span> os
+<span class="kw">from</span> dotenv <span class="kw">import</span> <span class="fn">load_dotenv</span>
+
+<span class="fn">load_dotenv</span>()
+
+SECRET_KEY = os.<span class="fn">getenv</span>(<span class="str">'SECRET_KEY'</span>)
+<span class="cm"># Critical trick ↓ — the senior signal</span>
+DEBUG = os.<span class="fn">getenv</span>(<span class="str">'DEBUG'</span>, <span class="str">'False'</span>) == <span class="str">'True'</span>
+DATABASE_URL = os.<span class="fn">getenv</span>(<span class="str">'DATABASE_URL'</span>)</code></pre>
+        </div>
+    </div>
+
+    <h3>🌍 Local vs Production Config Strategy</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Environment</th><th>How Config Is Loaded</th></tr>
+            <tr><td><strong>Local Dev</strong></td><td><code>python-dotenv</code> reads from <code>.env</code> file</td></tr>
+            <tr><td><strong>Staging</strong></td><td>Platform env vars (staging values)</td></tr>
+            <tr><td><strong>Production</strong></td><td>Platform injects vars directly — no <code>.env</code> file</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Bonus Senior Signal:</strong> "I also separate settings files per environment — <code>settings/dev.py</code>, <code>settings/prod.py</code> — for finer control over environment-specific behaviours beyond just secret values."</p>
+        </div>
+    </div>
+
+    <h3>🎤 Strong Closing Line</h3>
+    <div class="interview-answer">
+        <p>"I keep configuration fully externalized using environment variables to ensure <strong>security, flexibility, and clean separation</strong> from application code."</p>
+    </div>
+
+    <!-- Q4 -->
+    <h2 id="q4">Q4: "Describe your production setup."</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I deploy to AWS with Docker, configure security settings, and set up monitoring."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Strong One-Line Mental Model:</strong></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"Production is not just code running — it's a <strong>living system</strong> with layers of security, observability, and automation protecting it."</p>
+    </div>
+
+    <div class="interview-answer">
+        <p>"My production setup focuses on <strong>security, stability, and observability</strong>. I run Dockerized Django with Gunicorn behind Nginx, deployed on AWS EC2 with PostgreSQL on RDS. Static files through CDN (S3 + CloudFront). All configs via environment variables — no hardcoded secrets. <code>DEBUG=False</code>, configured <code>ALLOWED_HOSTS</code>, HTTPS enforced, secure cookie flags on. Migrations always preceded by backups and designed for <strong>zero downtime</strong>. Sentry for errors, Datadog for performance. Deployment fully automated through CI/CD."</p>
+    </div>
+
+    <h3>🧠 Full System Architecture</h3>
+
+    <pre><code>🌍 User Request
+    ↓
+🌐 Nginx (Reverse Proxy — SSL termination, routing)
+    ↓
+🐳 Django + Gunicorn (inside Docker container)
+    ↓
+🗄️ PostgreSQL (RDS — managed database)
+
++──────────────────────────────────────────+
+│ 📦 Static & Media  →  CDN (S3 + CF)     │
+│ 🔐 Secrets         →  Env Vars          │
+│ 📊 Errors          →  Sentry            │
+│ 📈 Performance     →  Datadog           │
+│ 🔁 Deployment      →  GitHub Actions    │
++──────────────────────────────────────────+</code></pre>
+
+    <h3>🧩 The 3 Pillars — What the Interviewer Wants to Hear</h3>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Pillar</th><th>What You Demonstrate</th><th>Key Examples</th></tr>
+            <tr><td><strong>🔐 Security</strong></td><td>You protect the system and users</td><td><code>DEBUG=False</code>, HTTPS, secure cookies, ALLOWED_HOSTS</td></tr>
+            <tr><td><strong>🏗️ Stability</strong></td><td>You plan for zero downtime</td><td>Zero-downtime migrations, staging tests, Docker</td></tr>
+            <tr><td><strong>👀 Observability</strong></td><td>You know when things break before users do</td><td>Sentry alerts, Datadog performance, file logging</td></tr>
+        </table>
+    </div>
+
+    <h3>Layer-by-Layer Breakdown</h3>
+
+    <details>
+        <summary>🐳 Layer 1 — App Layer (Docker + Gunicorn + Nginx)</summary>
+        <div class="toggle-content">
+            <p>"I run Django inside Docker using Gunicorn as the WSGI server. Nginx sits in front as a reverse proxy — handles SSL, routing, and static files."</p>
+            <div class="callout callout-red">
+                <span class="callout-emoji">🛑</span>
+                <div class="callout-content"><p><strong>Never</strong> run <code>python manage.py runserver</code> in production. It's single-threaded and not built for real traffic.</p></div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔐 Layer 2 — Config Layer (Environment Variables)</summary>
+        <div class="toggle-content">
+            <p>"All configuration is managed via environment variables — nothing hardcoded." <code>SECRET_KEY</code>, <code>DATABASE_URL</code>, <code>API_KEYS</code> → all from env vars. Same codebase. Different config. Zero changes needed between environments.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>🛡️ Layer 3 — Security Layer (Production Settings)</summary>
+        <div class="toggle-content">
+            <pre><code>DEBUG = <span class="kw">False</span>
+ALLOWED_HOSTS = [<span class="str">'myapp.com'</span>, <span class="str">'www.myapp.com'</span>]
+SECURE_SSL_REDIRECT = <span class="kw">True</span>
+SECURE_HSTS_SECONDS = <span class="num">31536000</span>  <span class="cm"># 1 year</span>
+SESSION_COOKIE_SECURE = <span class="kw">True</span>
+CSRF_COOKIE_SECURE = <span class="kw">True</span></code></pre>
+            <p><code>DEBUG=True</code> in production = showing your underwear to the internet 😬</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>🗄️ Layer 4 — Database Layer (PostgreSQL + Zero-Downtime Migrations)</summary>
+        <div class="toggle-content">
+            <p><strong>Zero-Downtime Migration Ritual (renaming a column):</strong></p>
+            <ol>
+                <li>💾 Backup DB (<code>pg_dump</code>)</li>
+                <li>🧪 Test in staging first</li>
+                <li>➕ Phase 1: Add new column, write to both</li>
+                <li>🔄 Phase 2: Backfill data from old to new</li>
+                <li>🚀 Phase 3: Switch code to read new column, drop old</li>
+            </ol>
+            <p>Customers keep using the app — they never know you replaced the DB underneath them. ✅</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>📦 Layer 5 — Static Files (WhiteNoise vs S3 + CloudFront)</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Option</th><th>When</th></tr>
+                    <tr><td><strong>WhiteNoise</strong></td><td>MVPs, small apps — minimal setup</td></tr>
+                    <tr><td><strong>S3 + CloudFront</strong></td><td>Global users, high traffic, scalable production</td></tr>
+                </table>
+            </div>
+            <p>Django/Gunicorn should <strong>never</strong> serve static files in production. Offload it. 🚫</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>📊 Layer 6 — Observability (Logging + Sentry + Datadog)</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Tool</th><th>What It Catches</th><th>Mental Model</th></tr>
+                    <tr><td><strong>File Logging</strong></td><td>Historical record of events</td><td>📜 The memory</td></tr>
+                    <tr><td><strong>Sentry</strong></td><td>Real-time exceptions → Slack alert</td><td>🚨 The alarm</td></tr>
+                    <tr><td><strong>Datadog</strong></td><td>Slow APIs, N+1 queries, CPU/RAM</td><td>📊 The dashboard</td></tr>
+                </table>
+            </div>
+            <p>"If Sentry isn't set up, users find bugs before you do." 👀</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>🔁 Layer 7 — Deployment (CI/CD GitHub Actions)</summary>
+        <div class="toggle-content">
+            <pre><code>Push → Tests → Build Docker → Push to Registry → Deploy → Migrate → Health Check ✅</code></pre>
+            <p>Zero-touch deployment = zero human error during releases.</p>
+        </div>
+    </details>
+
+    <h3>🎤 Strong Closing Line</h3>
+    <div class="interview-answer">
+        <p>"My production setup focuses on <strong>scalability, security, and observability</strong> — ensuring the system is reliable, easy to maintain, and proactive about failures rather than reactive."</p>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Concrete Example:</strong> "My first priority is security: <code>DEBUG</code> is off, <code>ALLOWED_HOSTS</code> is locked, all SSL and cookie flags enabled. Static files go through CloudFront. Before any deployment, I back up the database and write backward-compatible migrations. And I always plug in Sentry — if a 500 error happens, I want Slack to ping me <strong>before</strong> a customer even realizes there's an issue."</p>
+        </div>
+    </div>
+
+    <!-- Key Phrases -->
+    <h2 id="key-phrases">Key Phrases to Remember</h2>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Situation</th><th>What to Say</th></tr>
+            <tr><td>Starting deployment answer</td><td>"My focus is reproducible, secure, and observable deployments"</td></tr>
+            <tr><td>Environment variables</td><td>"Config is external — never hardcoded, never committed"</td></tr>
+            <tr><td>String trap (senior signal)</td><td>"<code>os.getenv('DEBUG', 'False') == 'True'</code> — strings are always truthy"</td></tr>
+            <tr><td>CI/CD pipeline</td><td>"Push → Tests → Build → Push → Deploy → Migrate → Health check"</td></tr>
+            <tr><td>Zero-downtime migrations</td><td>"Add new column → backfill → switch code → drop old column"</td></tr>
+            <tr><td>Static files</td><td>"WhiteNoise for small apps, S3 + CloudFront for scale — Gunicorn never serves files"</td></tr>
+            <tr><td>Observability stack</td><td>"File logs = history, Sentry = real-time alarm, Datadog = performance dashboard"</td></tr>
+            <tr><td>Production 3 pillars</td><td>"Security, stability, observability — proactive, not reactive"</td></tr>
+            <tr><td>Platform choice</td><td>"Railway for MVPs, AWS for enterprise — it depends on stage and scale"</td></tr>
+            <tr><td>Health check</td><td>"A deployment isn't done until the health check passes — 200 OK or abort"</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">⏱️</span>
+        <div class="callout-content">
+            <p><strong>Timing Drill:</strong> Say the full Q1 answer in under 90 seconds. Hit all 7 steps: Docker → Env Vars → Security → Migrations → Static Files → Monitoring → Platform. Then add the closing line.</p>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const saved = localStorage.getItem('theme');
+    if (saved) { html.setAttribute('data-theme', saved); themeToggle.textContent = saved === 'dark' ? '☀️' : '🌙'; }
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+        localStorage.setItem('theme', next);
+    });
+
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        progressBar.style.width = (scrollTop / docHeight * 100) + '%';
+    });
+
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+</script>
+</body>
+</html>

@@ -1,200 +1,215 @@
-# 3NF - Third Normal Form
+# 3NF — Third Normal Form 📐
+> Session ghi lại: Q&A flow, click moments, aha moments, examples đầy đủ
 
 ---
 
-## "Phụ thuộc" (Depends on) nghĩa là gì?
+## 🧱 Bước 1 — Nền tảng: 2NF trước
 
-Đừng hiểu "phụ thuộc" là "nô lệ" hay "cần ai đó để sống."
+Trước khi 3NF, phải nắm 2NF:
+> **2NF** = non-key phải phụ thuộc hoàn toàn vào composite PK — không được partial dependency.
 
-Trong Database, nó chỉ có nghĩa:
-
-    "Đưa tôi thông tin A, tôi tra ra được CHÍNH XÁC thông tin B."
-
-Ví dụ:
-
-```
-Đưa customer_id (C01) -> tra ra customer_name ("Nguyễn Văn A")
--> Tên "phụ thuộc" vào Mã KH.
-
-Đưa order_id (#123) -> tra ra order_date (07/03/2026)
--> Ngày mua "phụ thuộc" vào Mã hoá đơn.
-```
-
-Đơn giản: biết A -> biết B. Vậy B phụ thuộc vào A.
+3NF **xây dựng trên nền** 2NF. Nhưng 3NF attack một loại vấn đề khác.
 
 ---
 
-## Tại sao customer_id lại phụ thuộc vào order_id?
+## 🔍 Bước 2 — "Phụ thuộc" nghĩa là gì?
 
-Tưởng tượng bạn là thu ngân, cầm trên tay 1 tờ hoá đơn.
+**Hadriel hỏi:** "Tại sao `customer_id` lại phụ thuộc vào `order_id`? Phụ thuộc là sao?"
 
-Hoá đơn số #123 -> gõ vào hệ thống -> hệ thống nhả ra: "Khách hàng C01 mua đơn này."
+**Định nghĩa đơn giản:**
+> **"A phụ thuộc vào B" = biết B → xác định được A**
 
-Biết order_id -> tra ra customer_id.
--> customer_id phụ thuộc vào order_id.
+```
+Biết order_id = 1 → xác định được customer_id = 501  ✅
+Biết order_id = 2 → xác định được customer_id = 502  ✅
+```
 
-Đơn giản: tờ hoá đơn đó PHẢI thuộc về một khách hàng cụ thể.
+Mỗi order thuộc về **đúng 1 customer** → biết order nào là biết customer nào.
 
 ---
 
-## Một bảng đại diện cho MỘT entity
+**Wiganz hỏi ngược lại:** *"Thế ngược lại thì sao? Biết customer_id có xác định được order_id không?"*
+
+**Câu trả lời:** ❌ KHÔNG! Nhìn vào data:
+
+| **order_id** | **customer_id** | **customer_name** | **customer_city** | **quantity** |
+|---|---|---|---|---|
+| 1 | 501 | Wiganz | HCMC | 2 |
+| 2 | 502 | Triết | Hanoi | 1 |
+| 3 | 501 | Wiganz | HCMC | 5 |
+
+Wiganz (customer_id = 501) có **2 orders** (order 1 và order 3). Biết `customer_id = 501` → không biết order nào là order 1 hay order 3!
+
+> **💡 AHA MOMENT #1 — Wiganz tự khám phá:** *"Do 1 customer_id ra tới 2 order_id thế thì làm sao biết được cái order_id nào là cái nào. Để xác định được chính xác 1 record thì tiên quyết nhất là order_id vì chỉ nó mới có thể xác định đúng record."*
+
+✅ **Dependency là một chiều!** Biết B xác định được A → A phụ thuộc B. Chiều ngược lại không tính.
+
+---
+
+## ⚡ Bước 3 — Transitive Dependency là gì?
+
+**Hadriel hỏi:** "`customer_city` phụ thuộc vào `order_id`, hay phụ thuộc vào `customer_id`?"
+
+**Wiganz trả lời:** *"customer_city phụ thuộc vào customer_id chớ"*
+
+✅ **ĐÚNG! AHA MOMENT #2** — `customer_city` chỉ cần `customer_id`, không cần `order_id`.
+
+Nhưng chú ý: `customer_id` bản thân nó **không phải PK**, nó là non-key column!
+
+Vậy ta có chuỗi:
 
 ```
-Orders     -> đại diện cho Order
-Customers  -> đại diện cho Customer
-Products   -> đại diện cho Product
+order_id ──→ customer_id ──→ customer_city
+   PK           non-key          non-key
+               (trung gian)
+```
+
+`customer_city` phụ thuộc vào PK một cách **GIÁN TIẾP** — đi qua `customer_id` làm trung gian.
+
+> **Đây là Transitive Dependency — phụ thuộc bắc cầu qua non-key trung gian.**
+
+---
+
+## 💀 Bước 4 — Tại sao Transitive Dependency lại tệ?
+
+**Hadriel hỏi:** "Nếu Wiganz chuyển từ HCMC sang Hanoi — phải update bao nhiêu rows?"
+
+**Wiganz trả lời:** *"2 rows hả?"*
+
+✅ **ĐÚNG!** Order 1 và Order 3 đều có `customer_city = HCMC`. Và nếu 10,000 orders của Wiganz → update 10,000 rows. Miss 1 row:
+
+```
+order 1    | Wiganz | Hanoi  ← updated
+order 500  | Wiganz | HCMC   ← missed!
+order 3000 | Wiganz | Hanoi  ← updated
+```
+
+**Data inconsistency!** Wiganz sống ở 2 thành phố cùng lúc trong DB. 💀
+
+---
+
+## 🏠 Metaphor: Căn nhà cho thuê
+
+Bảng Order giống như một **căn nhà cho thuê**:
+- **Chủ nhà (PK):** `order_id`
+- **Người thuê trọ:** `customer_id`
+- **Vợ của người thuê:** `customer_name`, `customer_city`
+
+Bạn gõ cửa nhà #123 → thấy cô vợ (`customer_name`) ngồi xem tivi.
+- Về hiện tượng: gõ cửa nhà #123 là thấy cô vợ — cảm giác "trực tiếp."
+- Về bản chất: cô vợ là vợ của anh chồng (`customer_id`), **không phải vợ của căn nhà**.
+
+Nếu anh chồng dọn đi chỗ khác → cô vợ đi theo, không ở lại với căn nhà #123.
+
+> → `customer_name` KHÔNG quan tâm tới `order_id`. Nó chỉ "đi ké" anh chồng vào ở trọ.
+
+---
+
+## ✅ Bước 5 — Fix: Tách bảng
+
+**Hadriel hỏi:** "`customer_city` phụ thuộc vào `customer_id` → nó nên sống ở đâu?"
+
+**Wiganz trả lời:** *"nó nên sống ở bảng customer hả?"*
+
+✅ **ĐÚNG! AHA MOMENT #3** — tách ra bảng riêng!
+
+```
+❌ BEFORE (vi phạm 3NF):
+Orders: (order_id, customer_id, customer_name, customer_city, quantity)
+
+✅ AFTER (đạt 3NF):
+Orders:    (order_id, customer_id, quantity)
+Customers: (customer_id, customer_name, customer_city)
+```
+
+Wiganz chuyển nhà → update **1 row** trong `Customers`. Done. ✅
+
+---
+
+## 🎯 Bước 6 — Wiganz tự rút ra định nghĩa 3NF
+
+**Wiganz tự phát biểu:** *"3NF cũng vậy, non-key phải phụ thuộc hoàn toàn vào PK key, không được transitive dependency hả?"*
+
+✅ **PERFECT! Đây là lúc 3NF thực sự được forge vào não.** 🔥
+
+---
+
+## 🆚 So sánh 2NF vs 3NF
+
+```
+2NF = non-key phụ thuộc hoàn toàn vào composite PK
+      → không được partial dependency
+      → xảy ra khi có COMPOSITE PK
+
+3NF = non-key phụ thuộc THẲNG vào PK
+      → không được transitive dependency
+      → xảy ra khi non-key phụ thuộc vào non-key khác
+```
+
+| | **2NF** | **3NF** |
+|---|---|---|
+| **Vấn đề** | Partial dependency | Transitive dependency |
+| **Kẻ gây rối** | Non-key phụ thuộc vào *1 phần* composite PK | Non-key phụ thuộc vào *non-key khác* |
+| **Fix** | Tách bảng theo partial PK | Tách bảng theo non-key trung gian |
+| **Django** | ForeignKey | ForeignKey |
+
+---
+
+## 🐍 Django Connection
+
+```python
+# ❌ Vi phạm 3NF — nhét customer info vào Orders
+class Order(models.Model):
+    customer_id = models.IntegerField()
+    customer_name = models.CharField(...)   # thuộc về Customer, không phải Order!
+    customer_city = models.CharField(...)   # thuộc về Customer, không phải Order!
+    quantity = models.IntegerField()
+
+# ✅ 3NF đúng — tách bảng, dùng ForeignKey
+class Customer(models.Model):
+    name = models.CharField(max_length=200)
+    city = models.CharField(max_length=100)
+
+class Order(models.Model):
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
+    quantity = models.IntegerField()
+
+# Lấy city — Django tự JOIN
+order.customer.city
 ```
 
 ---
 
-## Trong bảng chỉ có 2 loại cột hợp lệ
+## 💡 Tất cả Click Moments tổng hợp
 
-### 1. Thuộc tính của entity đó
-
-Mô tả chính entity đó.
-
-```
-Orders
-----------
-order_id        -> mô tả order
-order_date      -> mô tả order
-status          -> mô tả order
-```
-
-### 2. Foreign Key (chỉ để liên kết)
-
-Chỉ nói: "entity này liên quan tới entity nào"
-
-```
-Orders
-----------
-order_id
-order_date
-customer_id     -> order này thuộc về customer nào (chỉ là pointer)
-```
+| # | Click Moment | Nội dung |
+|---|---|---|
+| 1 | Dependency là một chiều | Biết order_id → biết customer_id ✅ nhưng ngược lại ❌ vì 1 customer có nhiều orders |
+| 2 | `customer_city` transitive dep | Phụ thuộc vào `customer_id` (non-key), không phải thẳng vào PK |
+| 3 | Fix = tách bảng | `customer_city` sống trong bảng Customers riêng |
 
 ---
 
-## Điều KHÔNG được phép (vi phạm 3NF)
-
-Không được đặt THUỘC TÍNH CỦA ENTITY KHÁC trong bảng.
-
-SAI:
+## 📋 Quy tắc nhớ nhanh
 
 ```
-Orders
-----------
-order_id
-order_date
-customer_id
-customer_name       <- thuộc về Customer, không phải Order
-customer_email      <- thuộc về Customer, không phải Order
-```
-
----
-
-## Tại sao sai? - Ví dụ "Căn nhà cho thuê"
-
-Bảng Order giống như một CĂN NHÀ CHO THUÊ.
-
-- Chủ nhà (Khoá chính): order_id
-- Người thuê trọ: customer_id
-- Vợ của người thuê: customer_name
-
-Bạn gõ cửa nhà #123. Cánh cửa mở ra, thấy cô vợ (customer_name) ngồi xem tivi.
-
-- VỀ HIỆN TƯỢNG: gõ cửa nhà #123 là thấy cô vợ. Cảm giác rất "trực tiếp."
-- VỀ BẢN CHẤT: cô vợ là vợ của anh chồng (customer_id), không phải vợ của căn nhà.
-
-Nếu anh chồng dọn đi chỗ khác -> cô vợ đi theo anh chồng, không ở lại với căn nhà #123.
-
--> customer_name KHÔNG QUAN TÂM tới order_id. Nó chỉ "đi ké" anh chồng vào ở trọ.
-
----
-
-## Chuỗi bắc cầu (Transitive Dependency)
-
-Khi nhét customer_name vào bảng Order, mối quan hệ đi theo chuỗi:
-
-```
-order_id -> customer_id -> customer_name
-```
-
-3NF ghét nhất là bọn "ăn theo bắc cầu."
-
-customer_name nằm trong bảng Order, nhưng nó chẳng thèm quan tâm tới order_id.
-Tên khách hàng là do customer_id quyết định, chứ mã hoá đơn số mấy
-làm sao quyết định được tên của người ta!
-
-Luật 3NF: Nếu một cột không chơi trực tiếp với chủ nhà (PK),
-mà lại phụ thuộc vào một đứa khác trong nhà -> TÁCH NÓ RA Ở RIÊNG.
-
----
-
-## Cách sửa
-
-Đập ra làm 2 bảng:
-
-```
-Orders                      Customers
-----------                  ----------
-order_id                    customer_id
-order_date                  customer_name
-customer_id (FK)            customer_email
-```
-
-- Order chỉ giữ customer_id (pointer) để biết hoá đơn này của ai.
-- Tên và email nằm bên bảng Customer, sửa 1 chỗ là xong.
-
----
-
-## Bài test thực tế
-
-Ông "Nguyễn Văn A" (mã C01) mua 100 đơn hàng.
-
-NẾU nhét customer_name vào bảng Order:
-
-```
-Order #1:   C01 - Nguyễn Văn A
-Order #2:   C01 - Nguyễn Văn A
-...
-Order #100: C01 - Nguyễn Văn A
-```
-
-Ông A đổi tên thành "Nguyễn Văn B" -> phải sửa 100 dòng. Quên 1 dòng = database nói dối.
-
-NẾU tách đúng 3NF:
-
-```
-Customers: C01 -> "Nguyễn Văn B"  (sửa 1 chỗ duy nhất)
-Orders: chỉ lưu customer_id = C01 (không cần sửa gì)
-```
-
----
-
-## Quy tắc nhớ nhanh
-
-```
-Table = 1 entity
+Một table = 1 entity
 
 Trong bảng chỉ nên có:
-    - Thuộc tính của entity đó
-    + Foreign keys (pointer)
+  ✅ Thuộc tính của entity đó
+  ✅ Foreign keys (pointer sang entity khác)
 
 KHÔNG chứa thuộc tính của entity khác.
 ```
 
 ---
 
-## Tóm lại một câu
+## 🎯 Tóm tắt 1 câu (Wiganz's own words)
 
-> Một bảng chỉ nên chứa dữ liệu của MỘT loại object,
-> còn object khác chỉ được THAM CHIẾU bằng ID (foreign key).
+> **"3NF: non-key phải phụ thuộc hoàn toàn vào PK — không được transitive dependency."**
 
 ---
 
-## Câu trả lời phỏng vấn (English)
+## 💬 Câu trả lời phỏng vấn (English)
 
-> "Every field in a table should describe that table's entity,
-> not another table's entity. If it describes another entity,
-> it belongs in that other table — just reference it with a foreign key."
+> "Every non-key field must depend directly on the primary key, not on another non-key field. If a column describes another entity rather than this table's entity, it belongs in that other table — reference it with a foreign key."

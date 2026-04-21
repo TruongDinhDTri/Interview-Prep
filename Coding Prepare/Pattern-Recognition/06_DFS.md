@@ -7,8 +7,13 @@
 | "connected components" / "islands" | ✓ |
 | "tree traversal" / "validate BST" | ✓ |
 | "cycle detection" / "topological sort" | ✓ |
+| **"tree height"** / **"depth"** / **"balanced"** | ✓ — post-order, report up |
+| **"every node must satisfy condition"** | ✓ — check on the way back up |
+| **"need children's info before processing parent"** | ✓ — post-order DFS |
 
 **NOT DFS**: "shortest path" / "minimum steps" → Use **BFS**
+
+**Key sentence (3P Match):** "I see [tree height / every node] which tells me DFS (post-order) because each node needs its children's values FIRST before it can do its own work."
 
 ---
 
@@ -35,6 +40,10 @@ def dfs(node):
 | Max Depth | 0 | 1 + max(L, R) |
 | Path Sum | check leaf | subtract, recurse |
 | Validate BST | True | pass min/max bounds down |
+| **Balanced Binary Tree** | **0 (None→0)** | **-1 if unbalanced, else 1+max(L,R)** |
+
+**-1 Sentinel trick:** when you need to return height (int) AND validity (bool), use -1 as impossible height signal.
+Parent checks: `if left == -1 or right == -1: return -1`. Outer wrapper converts: `return dfs(root) != -1`.
 
 ---
 

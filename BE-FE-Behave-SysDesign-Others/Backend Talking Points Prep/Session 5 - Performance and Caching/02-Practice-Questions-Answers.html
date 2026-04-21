@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 5: Practice Q&A — Performance &amp; Caching</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #ffffff; --bg-secondary: #f7f6f3; --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa; --text-primary: #37352f; --text-secondary: #787774;
+            --text-muted: #9b9a97; --border: #e3e2de; --border-light: #eeeeec;
+            --accent-blue: #2563eb; --accent-red: #eb5757; --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0; --accent-orange: #e97f33;
+            --code-bg: #f7f6f3; --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe; --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8; --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0; --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8; --callout-purple-border: #9065b0;
+            --sidebar-width: 260px; --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        [data-theme="dark"] {
+            --bg-primary: #191919; --bg-secondary: #202020; --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e; --text-primary: #e3e2de; --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b; --border: #333; --border-light: #2a2a2a;
+            --accent-blue: #529cca; --accent-red: #eb5757; --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1; --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8; --accent-orange: #e97f33;
+            --code-bg: #252525; --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a; --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a; --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28; --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a; --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a; --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2); --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.7; font-size: 15px; transition: background 0.3s, color 0.3s; }
+        .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent-green), var(--accent-blue)); z-index: 1001; transition: width 0.1s linear; }
+        .page-cover { height: var(--cover-height); background: linear-gradient(135deg, #0f7b6c 0%, #059669 100%); }
+        [data-theme="dark"] .page-cover { background: linear-gradient(135deg, #0a4a40 0%, #064e35 100%); }
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease, background 0.3s; }
+        .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
+        .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
+        .sidebar a { display: block; color: var(--text-secondary); text-decoration: none; padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        .main-content { max-width: calc(900px + var(--sidebar-width)); margin: 0 auto; padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
+        .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
+        .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+        .page-title { font-size: 2.2em; font-weight: 700; margin: 16px 0 8px; line-height: 1.2; letter-spacing: -0.02em; }
+        .page-subtitle { color: var(--text-secondary); font-size: 1.05em; margin-bottom: 32px; }
+        h2 { font-size: 1.5em; font-weight: 700; margin: 48px 0 16px; padding-top: 24px; border-top: 1px solid var(--border-light); letter-spacing: -0.01em; }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 { font-size: 1.15em; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+        h4 { font-size: 1em; font-weight: 600; margin: 20px 0 8px; }
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+        hr { border: none; border-top: 1px solid var(--border-light); margin: 32px 0; }
+        details { margin: 12px 0; border: 1px solid var(--border-light); border-radius: 4px; overflow: hidden; }
+        summary { padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--bg-secondary); transition: background 0.2s; list-style: none; display: flex; align-items: center; gap: 8px; user-select: none; font-size: 1em; }
+        summary::-webkit-details-marker { display: none; }
+        summary::before { content: '▶'; font-size: 0.65em; color: var(--text-muted); transition: transform 0.2s; flex-shrink: 0; }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content { padding: 16px; border-top: 1px solid var(--border-light); }
+        .callout { display: flex; gap: 12px; padding: 16px; border-radius: 4px; margin: 12px 0; border-left: 3px solid; }
+        .callout-emoji { font-size: 1.2em; flex-shrink: 0; line-height: 1.5; }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+        .callout-yellow { background: var(--callout-yellow-bg); border-left-color: var(--callout-yellow-border); }
+        .callout-red { background: var(--callout-red-bg); border-left-color: var(--callout-red-border); }
+        .callout-green { background: var(--callout-green-bg); border-left-color: var(--callout-green-border); }
+        .callout-blue { background: var(--callout-blue-bg); border-left-color: var(--callout-blue-border); }
+        .callout-purple { background: var(--callout-purple-bg); border-left-color: var(--callout-purple-border); }
+        code { font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace; font-size: 0.88em; background: var(--code-inline-bg); padding: 2px 6px; border-radius: 3px; color: var(--accent-red); }
+        pre { background: var(--code-bg); border-radius: 6px; padding: 16px 20px; overflow-x: auto; margin: 12px 0; border: 1px solid var(--border-light); position: relative; }
+        pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
+        .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .dec { color: #e36209; } .cls { color: #6f42c1; }
+        [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .dec { color: #ffa657; } [data-theme="dark"] .cls { color: #d2a8ff; }
+        .table-wrap { overflow-x: auto; margin: 12px 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+        th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
+        td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+        blockquote { border-left: 3px solid var(--border); padding: 8px 16px; margin: 12px 0; color: var(--text-secondary); background: var(--bg-secondary); border-radius: 0 4px 4px 0; }
+        blockquote strong { color: var(--text-primary); }
+        .tag { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 0.78em; font-weight: 500; margin: 2px; }
+        .tag-blue { background: #dbeafe; color: #1e40af; } .tag-green { background: #d1fae5; color: #065f46; } .tag-purple { background: #ede9fe; color: #5b21b6; } .tag-orange { background: #fed7aa; color: #9a3412; } .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; } [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; } [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; } [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; } [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+        .key-phrase { background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%); padding: 0 2px; }
+        .columns { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+        .step-card { display: flex; gap: 14px; padding: 14px; margin: 8px 0; border: 1px solid var(--border-light); border-radius: 6px; background: var(--bg-primary); }
+        .step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-green); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: 700; flex-shrink: 0; }
+        .step-content { flex: 1; }
+        .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
+        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        strong { font-weight: 600; }
+        .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
+        .interview-answer strong { font-style: normal; }
+        .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-green); margin-bottom: 4px; }
+        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns { grid-template-columns: 1fr; } }
+        ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 5 — Practice Q&amp;A</h3>
+    </div>
+    <a href="#q1">Q1: Optimize Django Performance</a>
+    <a href="#q2">Q2: When Would You Use Caching</a>
+    <a href="#q3">Q3: Explain Your Caching Strategy</a>
+    <a href="#q4">Q4: Handle Background Tasks</a>
+    <a href="#key-phrases">Key Phrases</a>
+</nav>
+
+<div class="page-cover"></div>
+
+<div class="main-content">
+    <div class="breadcrumbs">
+        <a href="01-Key-Talking-Points.html">Key Points</a>
+        <span>/</span>
+        <a href="../Session 6 - DevOps and Deployment/01-Key-Talking-Points.html">Session 6</a>
+    </div>
+
+    <div class="section-label">Session 5 — Performance &amp; Caching</div>
+    <h1 class="page-title">❓ Practice Questions &amp; Answers</h1>
+    <p class="page-subtitle">Read the question → close the file → answer out loud for 2 minutes → compare.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-green">Redis</span>
+        <span class="tag tag-blue">Caching</span>
+        <span class="tag tag-purple">N+1</span>
+        <span class="tag tag-orange">Celery</span>
+        <span class="tag tag-gray">Interview</span>
+    </div>
+
+    <!-- Q1 -->
+    <h2 id="q1">Q1: "How do you optimize Django performance?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use caching and optimize database queries."</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I approach Django performance <strong>systematically, starting from the database up to the infrastructure</strong>. First, I optimize database queries by fixing N+1 issues and fetching only necessary fields. Then, I implement caching with Redis for read-heavy data. I offload long-running tasks to Celery background workers. Finally, I look at infrastructure improvements like CDN for static files and connection pooling."</p>
+    </div>
+
+    <h3>🪜 The 4-Layer Optimization Stack</h3>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>🔍 Measure First (Golden Rule)</strong></p>
+            <p>Use <strong>Django Debug Toolbar</strong> in dev, logs/APM tools in prod. Find slow queries, high request times, N+1 problems. <span class="key-phrase">"I always measure before optimizing to avoid guessing."</span></p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>🐘 Database Query Optimization</strong> — 80% of Django performance issues live here</p>
+            <ul>
+                <li>Fix N+1 with <code>select_related()</code> and <code>prefetch_related()</code></li>
+                <li>Use <code>.only('id', 'name')</code> or <code>.values()</code> to avoid loading unused columns</li>
+                <li>Never put queries inside loops 🛑</li>
+                <li>Add database indexes on frequently queried columns</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>⚡ Caching with Redis</strong> — reduce load for read-heavy data</p>
+            <p>Cache dashboard stats, user profiles, external API responses. Use <code>@cache_page</code> for public endpoints, Cache-Aside pattern for user-specific data.</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>🚀 Async &amp; Background Tasks</strong> — don't block the user</p>
+            <p>Use <strong>Celery</strong> for CPU-bound/long tasks (email, PDF, image processing). Use <strong>async views</strong> for I/O-bound tasks (external API calls).</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num" style="background: var(--accent-orange);">+</div>
+        <div class="step-content">
+            <p><strong>🌍 Infrastructure Level</strong></p>
+            <p><strong>CDN</strong> (Cloudflare/S3+CloudFront) for static assets. <strong>PgBouncer</strong> for database connection pooling to reduce PostgreSQL overhead.</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p><strong>Gold closing line:</strong> "Before applying any of these, my golden rule is: <span class="key-phrase">Measure, don't guess</span>. I always profile first to find the actual bottleneck before optimizing."</p>
+    </div>
+
+    <!-- Q2 -->
+    <h2 id="q2">Q2: "When would you use caching?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use caching when the data is slow to load."</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I use caching primarily for <strong>read-heavy operations</strong> where the data is <strong>expensive to compute</strong> but <strong>doesn't change frequently</strong> — for example, aggregating dashboard statistics or caching external API responses. However, I strictly <strong>avoid caching rapidly changing data</strong> like real-time notifications, or highly sensitive user data without proper isolation."</p>
+    </div>
+
+    <h3>✅ WHEN TO Cache — The Green Light</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>#</th><th>Scenario</th><th>Example</th></tr>
+            <tr><td>1️⃣</td><td>📊 <strong>Expensive computations</strong></td><td>Dashboard stats, COUNT, SUM, AVG aggregations</td></tr>
+            <tr><td>2️⃣</td><td>👤 <strong>Frequently accessed data</strong></td><td>User profiles, product listings — rarely change</td></tr>
+            <tr><td>3️⃣</td><td>🌐 <strong>Slow external API calls</strong></td><td>Country lists, currency rates, weather data</td></tr>
+            <tr><td>4️⃣</td><td>🍪 <strong>Session data</strong></td><td>Login state without DB hit on every request</td></tr>
+        </table>
+    </div>
+
+    <h3>🚫 WHEN NOT TO Cache — The Red Light</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>❌ Scenario</th><th>Why Not</th></tr>
+            <tr><td>📡 <strong>Real-time / rapidly changing data</strong></td><td>Live chat, stock prices — cache becomes stale instantly</td></tr>
+            <tr><td>🔒 <strong>Sensitive user data (without isolation)</strong></td><td>Cross-user data leaks — security disaster</td></tr>
+            <tr><td>⚡ <strong>Already fast DB queries</strong></td><td>Cache adds complexity with zero benefit</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🏅</span>
+        <div class="callout-content">
+            <p><strong>Gold Line:</strong> "Cache is a temporary band-aid, not a cure. I only introduce caching <em>after</em> I've already optimized my DB queries — like fixing N+1 issues — and the system still needs a boost."</p>
+        </div>
+    </div>
+
+    <!-- Q3 -->
+    <h2 id="q3">Q3: "Explain your caching strategy"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I cache frequently accessed data using Redis with TTL expiration."</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"My strategy relies on <strong>Redis</strong> for caching hot data, using the <strong>Cache-Aside pattern</strong>. For completely static data, I use <strong>View-level caching</strong> to cache the entire response. For dynamic pages where only certain parts are expensive, I use <strong>Low-level caching</strong> to cache specific data fragments with unique cache keys and a 5-minute timeout."</p>
+    </div>
+
+    <h3>The Two Caching Levels</h3>
+
+    <details open>
+        <summary>🧊 Level 1: View-Level Caching — Cache the entire endpoint</summary>
+        <div class="toggle-content">
+            <p><strong>When to use:</strong> Response is <em>identical for all users</em> — public stats page, homepage feed.</p>
+<pre><code><span class="kw">from</span> django.views.decorators.cache <span class="kw">import</span> cache_page
+
+<span class="dec">@cache_page(60 * 5)</span>  <span class="cm"># 300 seconds = 5 minutes</span>
+<span class="kw">def</span> <span class="fn">stats_view</span>(request):
+    <span class="cm"># Expensive aggregation happens here</span>
+    <span class="kw">return</span> JsonResponse(stats)</code></pre>
+            <p>Django returns the cached response straight from Redis — bypasses view logic entirely. ⚡</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔑 Level 2: Low-Level Cache-Aside — Cache specific data fragments</summary>
+        <div class="toggle-content">
+            <p><strong>When to use:</strong> View is user-specific, but only <em>one expensive piece</em> needs caching.</p>
+<pre><code><span class="kw">from</span> django.core.cache <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">get_user_stats</span>(user_id):
+    <span class="cm"># 1. Unique key per user (prevents cross-user data leaks 🔐)</span>
+    cache_key = <span class="fn">f</span><span class="str">'user_stats_{user_id}'</span>
+
+    <span class="cm"># 2. Try Redis first</span>
+    stats = cache.get(cache_key)
+
+    <span class="cm"># 3. Cache Miss → hit the DB, then store</span>
+    <span class="kw">if</span> stats <span class="kw">is</span> <span class="num">None</span>:
+        stats = expensive_calculation(user_id)
+        cache.set(cache_key, stats, timeout=<span class="num">300</span>)  <span class="cm"># 5 min TTL</span>
+
+    <span class="cm"># 4. Return (from cache or fresh)</span>
+    <span class="kw">return</span> stats</code></pre>
+        </div>
+    </details>
+
+    <h3>⚠️ Cache Invalidation — The Senior Signal</h3>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🏆</span>
+        <div class="callout-content">
+            <p>"There are only two hard things in Computer Science: cache invalidation and naming things." — Phil Karlton</p>
+        </div>
+    </div>
+
+<pre><code><span class="cm"># When user updates their profile → nuke the cache immediately</span>
+cache.<span class="fn">delete</span>(<span class="fn">f</span><span class="str">'user_stats_{user_id}'</span>)</code></pre>
+
+    <h3>🔐 Key Isolation — Advanced Senior Signal</h3>
+    <div class="callout callout-red">
+        <span class="callout-emoji">🚨</span>
+        <div class="callout-content">
+            <p><strong>Never share cache keys across users!</strong><br>
+            ✅ <code>user_1_profile</code> → Only user 1's data<br>
+            ✅ <code>user_2_profile</code> → Only user 2's data<br>
+            ❌ <code>user_profile</code> → Could leak user 1's data to user 2 🔴</p>
+        </div>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">✨</span>
+        <div class="callout-content">
+            <p><strong>Real Example for Interview:</strong> "In my Job Seeker App, I cache per-user dashboard statistics using a unique key like <code>user_stats_{user_id}</code> with a 5-minute TTL in Redis. When a user submits a new application, I manually call <code>cache.delete()</code> so the next page load reflects the fresh count."</p>
+        </div>
+    </div>
+
+    <!-- Q4 -->
+    <h2 id="q4">Q4: "How do you handle background tasks?"</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">❌</span>
+        <div class="callout-content">
+            <p><strong>Weak Answer:</strong> "I use Celery for background tasks."</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <p>"I handle background tasks by <strong>offloading long-running or CPU-bound operations to Celery</strong>, using <strong>Redis</strong> as a message broker. This ensures the main Django application stays fast and non-blocking. For simpler, strictly I/O-bound tasks, in Django 4.1+, I also utilize <strong>Async Views</strong> to efficiently manage concurrent requests without spinning up a full task queue."</p>
+    </div>
+
+    <h3>❌ The Problem vs ✅ The Fix</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Without Background Tasks</strong></p>
+                <p><code>User Request → send email (30 seconds...) → finally return response 😵</code></p>
+                <p>User stares at a loading spinner. Server is locked.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>With Celery</strong></p>
+                <p><code>User Request → push task to queue → return response immediately ⚡</code></p>
+                <p>User gets instant response. Worker handles it quietly.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>The Architecture Flow</h3>
+<pre><code>Django View
+    │
+    └──► Redis (Message Broker) ──► Celery Worker ──► Execute Task
+              (queue)                  (process)</code></pre>
+
+    <h3>The Code</h3>
+<pre><code><span class="cm"># tasks.py — define the task</span>
+<span class="kw">from</span> celery <span class="kw">import</span> shared_task
+
+<span class="dec">@shared_task</span>
+<span class="kw">def</span> <span class="fn">send_email</span>(user_id):
+    <span class="cm"># Long-running task: call SendGrid / SES</span>
+    <span class="kw">return</span> <span class="fn">f</span><span class="str">"Email sent to {user_id}"</span>
+
+<span class="cm"># views.py — fire and forget</span>
+<span class="kw">def</span> <span class="fn">register_user</span>(request):
+    user = User.objects.<span class="fn">create</span>(...)
+    send_email.<span class="fn">delay</span>(user.id)  <span class="cm"># non-blocking ⚡</span>
+    <span class="kw">return</span> JsonResponse({<span class="str">"message"</span>: <span class="str">"Check your inbox soon!"</span>})</code></pre>
+
+    <h3>Async vs Celery — They Love This Question</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Scenario</th><th>Tool</th><th>Why</th></tr>
+            <tr><td>User needs result now, waiting on I/O</td><td><code>async def</code> ⚡</td><td>Server multitasks while waiting</td></tr>
+            <tr><td>Heavy/long task, user doesn't wait</td><td>Celery 🚀</td><td>Completely offloaded to worker</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Senior Signal:</strong> "In production, simply using Celery isn't enough. I implement <strong>retry mechanisms</strong> for transient failures using <code>bind=True</code> and <code>self.retry</code>. I monitor queues and workers with <strong>Flower</strong> to catch silent failures."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">✨</span>
+        <div class="callout-content">
+            <p><strong>Real Example:</strong> "When a user signs up, I save the user immediately and call <code>send_email.delay(user.id)</code>. The response returns instantly — the email goes out a second later. The user experience is seamless."</p>
+        </div>
+    </div>
+
+    <!-- Key Phrases -->
+    <h2 id="key-phrases">⚡ Key Phrases to Remember</h2>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Situation</th><th>What to Say</th></tr>
+            <tr><td>Performance optimization</td><td>"I optimize from DB → Cache → Async → Infra — system thinking, not just code tweaks"</td></tr>
+            <tr><td>N+1 problem</td><td>"select_related for ForeignKey (SQL JOIN), prefetch_related for ManyToMany (2 queries + Python join)"</td></tr>
+            <tr><td>Cache decision</td><td>"Read-heavy + expensive + rarely changing → cache. Real-time + sensitive → no cache"</td></tr>
+            <tr><td>Cache invalidation</td><td>"TTL for tolerable staleness, manual delete for critical data freshness"</td></tr>
+            <tr><td>Async vs Celery</td><td>"Async = I'll come back when it's ready (still in request). Celery = someone else handle it entirely (fire and forget)"</td></tr>
+            <tr><td>Closing performance Q</td><td>"Measure first, optimize the whole orchestra — DB, cache, async, infra"</td></tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('open');
+    });
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+</script>
+</body>
+</html>
