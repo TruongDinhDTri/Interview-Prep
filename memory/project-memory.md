@@ -136,20 +136,42 @@
 
 ## Current Session State
 
-### Where We Are
-(Updated after each session)
+### Where We Are — Updated 2026-04-23
+- **Roadmap:** Week 6 of Follow-Guide-Roadmap
+- **Total Problems Solved:** 38 / 120 (31.7%)
+- **Patterns Mastered:** 1 (linked_list)
+- **Patterns Competent:** 12 (hash_maps, sliding_window, two_pointers, prefix_sum, binary_search, fast_slow, bfs, dfs, stacks, monotonic_stack, top_k, trie, matrix)
+- **Patterns Beginner:** 4 (merge_intervals, cyclic_sort, subsets/backtracking, two_heaps, knapsack/DP)
+- **First Hard Cleared:** Merged K LinkedList ✅
 
-### Immediate Next Step
-(What to work on next)
+### Immediate Next Priorities
+1. **REDO** — Binary Search + Search in Rotated Array (have redo dates from Jan 2026)
+2. **REDO** — Fruits into Baskets (Sliding Window)
+3. **REDO** — Linked List Cycle + Middle of LinkedList
+4. **REDO** — Merge Intervals → then do Insert Intervals
+5. **START** — Cyclic Sort (0/6 done, completely untouched)
+6. **START** — Subsets/Backtracking (0/8 done)
+7. **CONTINUE** — DP/Knapsack (only Climbing Stairs done)
 
 ### Recent Wins
-(Patterns mastered, stories completed, insights gained)
+- 38 problems confirmed solved (was incorrectly tracked as 2!)
+- First HARD problem: Merged K LinkedList (Nov 19, 2025)
+- Monotonic Stack aha moment (Jan 22, 2026)
+- BFS level separation mastered (Jan 20, 2026)
+- Week 6 roadmap: Climbing Stairs, Longest Palindrome, Majority Element
 
 ### Current Struggles
-(What's causing difficulty right now)
+- Binary Search variants (rotated arrays, boundary finding) — has redo dates
+- DP problems — only 1 problem solved (Climbing Stairs), difficult
+- "Forgetting" previously solved patterns → redo queue building up
+- Cyclic Sort and Subsets not yet touched
 
 ### Open Tasks
-- [ ] (Track what needs to be done)
+- [ ] Redo 8 flagged problems (see problems_needing_redo in coding-progress.json)
+- [ ] Complete Cyclic Sort pattern (0/6 problems)
+- [ ] Complete Subsets/Backtracking pattern (0/8 problems)
+- [ ] Continue DP / Knapsack beyond Climbing Stairs
+- [ ] Insert Intervals (#38 in Notion — not yet completed)
 
 ---
 

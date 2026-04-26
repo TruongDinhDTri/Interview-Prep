@@ -3,959 +3,1092 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consistent Hashing — Interactive Visualization</title>
+    <title>Consistent Hashing — Interactive (Chapter 5)</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --parchment: #fef6e4; --forest-deep: #2d4a3e; --ink-warm: #4a3728;
-            --water-teal: #5ba3a8; --gold-accent: #d4a84b; --sunset-rose: #c97b6b;
-            --moss-green: #7ea87e; --mist-lavender: #b8a9c9;
-            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
-            --bg-code: #2c2c2c; --bg-highlight: #fff8e7;
-            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
-            --text-inverse: #fef6e4;
-            --border-light: #e8dcc8; --border-medium: #d4c5a9;
-            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
-            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --parchment:#fef6e4;--forest-deep:#2d4a3e;--ink-warm:#4a3728;
+            --water-teal:#5ba3a8;--gold-accent:#d4a84b;--sunset-rose:#c97b6b;
+            --moss-green:#7ea87e;--mist-lavender:#b8a9c9;
+            --bg-page:#f5efe0;--bg-card:#fffdf7;--bg-section:#fdfaf2;
+            --bg-code:#2c2c2c;--bg-highlight:#fff8e7;
+            --text-primary:#3d2e1f;--text-secondary:#6b5744;--text-muted:#8a7a6a;
+            --border-light:#e8dcc8;--border-medium:#d4c5a9;
+            --shadow-soft:0 2px 12px rgba(74,55,40,.06);
+            --shadow-medium:0 4px 20px rgba(74,55,40,.1);
         }
-        [data-theme="dark"] {
-            --parchment: #1a1a2e; --forest-deep: #a8d5ba; --ink-warm: #e8d5c4;
-            --water-teal: #7ec8cc; --gold-accent: #e8c170; --sunset-rose: #e8a090;
-            --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
-            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
-            --bg-code: #0d1117; --bg-highlight: #2a2520;
-            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
-            --text-inverse: #1a1a2e;
-            --border-light: #2a2a3e; --border-medium: #3a3a50;
-            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
-            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+        [data-theme="dark"]{
+            --parchment:#1a1a2e;--forest-deep:#a8d5ba;--ink-warm:#e8d5c4;
+            --water-teal:#7ec8cc;--gold-accent:#e8c170;--sunset-rose:#e8a090;
+            --moss-green:#a8d4a8;--mist-lavender:#c8b8e0;
+            --bg-page:#0f0f1a;--bg-card:#1a1a2e;--bg-section:#16213e;
+            --bg-code:#0d1117;--bg-highlight:#2a2520;
+            --text-primary:#e8dcc8;--text-secondary:#bfae98;--text-muted:#8a7a6a;
+            --border-light:#2a2a3e;--border-medium:#3a3a50;
+            --shadow-soft:0 2px 12px rgba(0,0,0,.2);
+            --shadow-medium:0 4px 20px rgba(0,0,0,.3);
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Inter', sans-serif; background: var(--bg-page);
-            color: var(--text-primary); min-height: 100vh;
-            transition: background 0.4s ease, color 0.4s ease;
-        }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;background:var(--bg-page);color:var(--text-primary);min-height:100vh;transition:background .4s,color .4s;}
 
-        .header {
-            background: var(--bg-card); border-bottom: 2px solid var(--gold-accent);
-            padding: 32px 40px 28px; text-align: center; position: relative; overflow: hidden;
-        }
-        .header::after {
-            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 22px;
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
-            background-size: cover;
-        }
-        [data-theme="dark"] .header::after {
-            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
-            background-size: cover;
-        }
-        .header h1 { font-family: 'Playfair Display', serif; font-size: 2em; color: var(--ink-warm); margin-bottom: 6px; }
-        .header p { color: var(--text-secondary); font-size: 0.95em; }
+        /* ─── Header ─── */
+        .header{background:var(--bg-card);border-bottom:2px solid var(--gold-accent);padding:28px 40px 24px;text-align:center;position:relative;overflow:hidden;}
+        .header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:20px;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 Q300 0 600 12 Q900 22 1200 4 V20 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;background-size:cover;}
+        [data-theme="dark"] .header::after{background:url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 20 Q300 0 600 12 Q900 22 1200 4 V20 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;background-size:cover;}
+        .header h1{font-family:'Playfair Display',serif;font-size:1.9em;color:var(--ink-warm);margin-bottom:5px;}
+        .header p{color:var(--text-secondary);font-size:.92em;}
+        .nav-links{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;padding:14px 20px;}
+        .nav-link{display:inline-flex;align-items:center;gap:5px;background:var(--bg-card);border:1px solid var(--border-light);color:var(--text-secondary);text-decoration:none;padding:6px 14px;border-radius:8px;font-size:.83em;font-weight:500;box-shadow:var(--shadow-soft);transition:all .2s;}
+        .nav-link:hover{background:var(--water-teal);color:white;border-color:var(--water-teal);}
 
-        /* Nav */
-        .resources-nav { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; padding: 16px 20px; }
-        .resource-link {
-            display: inline-flex; align-items: center; gap: 6px;
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            color: var(--text-secondary); text-decoration: none;
-            padding: 7px 14px; border-radius: 8px; font-size: 0.85em; font-weight: 500;
-            box-shadow: var(--shadow-soft); transition: all 0.25s ease;
-        }
-        .resource-link:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
+        /* ─── Tabs ─── */
+        .tabs{display:flex;justify-content:center;padding:20px 20px 0;flex-wrap:wrap;gap:4px;}
+        .tab-btn{padding:11px 22px;border:none;background:var(--bg-section);color:var(--text-secondary);font-family:'Inter',sans-serif;font-size:.9em;font-weight:500;cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;}
+        .tab-btn:hover{color:var(--text-primary);background:var(--bg-card);}
+        .tab-btn.active{background:var(--bg-card);color:var(--water-teal);font-weight:600;border-bottom-color:var(--water-teal);}
+        .tab-panel{display:none;padding:0 20px 40px;}
+        .tab-panel.active{display:block;}
+        .panel-inner{max-width:980px;margin:0 auto;}
 
-        /* Tabs */
-        .tabs { display: flex; gap: 0; justify-content: center; padding: 24px 20px 0; flex-wrap: wrap; }
-        .tab-btn {
-            padding: 12px 28px; border: none; background: var(--bg-section);
-            color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.95em;
-            font-weight: 500; cursor: pointer; transition: all 0.25s ease;
-            border-bottom: 3px solid transparent; border-radius: 8px 8px 0 0;
-        }
-        .tab-btn:hover { color: var(--text-primary); background: var(--bg-card); }
-        .tab-btn.active {
-            background: var(--bg-card); color: var(--water-teal); font-weight: 600;
-            border-bottom-color: var(--water-teal);
-        }
+        /* ─── Panel Components ─── */
+        .panel-header{background:var(--bg-card);border-left:4px solid var(--water-teal);padding:18px 22px;border-radius:8px;margin:22px 0 18px;box-shadow:var(--shadow-soft);}
+        .panel-header h2{font-family:'Playfair Display',serif;font-size:1.4em;color:var(--ink-warm);margin-bottom:5px;}
+        .panel-header p{color:var(--text-secondary);font-size:.9em;line-height:1.6;}
+        .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--bg-card);padding:14px 18px;border-radius:10px;margin-bottom:18px;border:1px solid var(--border-light);box-shadow:var(--shadow-soft);}
+        .ctrl-btn{padding:8px 18px;border-radius:8px;border:1px solid var(--border-medium);background:var(--bg-section);color:var(--text-primary);font-family:'Inter',sans-serif;font-size:.85em;font-weight:500;cursor:pointer;transition:all .2s;}
+        .ctrl-btn:hover{background:var(--water-teal);color:white;border-color:var(--water-teal);}
+        .ctrl-btn.active{background:var(--water-teal);color:white;border-color:var(--water-teal);}
+        .ctrl-btn.danger:hover,.ctrl-btn.danger.active{background:var(--sunset-rose);color:white;border-color:var(--sunset-rose);}
+        .ctrl-btn.success:hover,.ctrl-btn.success.active{background:var(--moss-green);color:white;border-color:var(--moss-green);}
+        .ctrl-btn:disabled{opacity:.4;cursor:not-allowed;}
+        .ctrl-divider{width:1px;height:28px;background:var(--border-medium);}
+        .ctrl-label{font-size:.82em;color:var(--text-muted);}
+        .stats-bar{display:flex;gap:14px;flex-wrap:wrap;background:var(--bg-card);padding:12px 18px;border-radius:8px;margin:14px 0;border:1px solid var(--border-light);box-shadow:var(--shadow-soft);}
+        .stat-item{text-align:center;}
+        .stat-val{font-size:1.5em;font-weight:700;color:var(--water-teal);display:block;line-height:1.2;}
+        .stat-label{font-size:.72em;color:var(--text-muted);}
+        .canvas-wrap{display:flex;justify-content:center;align-items:flex-start;gap:20px;flex-wrap:wrap;}
+        canvas{border-radius:12px;box-shadow:var(--shadow-medium);background:var(--bg-card);}
+        .info-panel{background:var(--bg-card);border:1px solid var(--border-light);border-radius:10px;padding:16px;min-width:200px;max-width:240px;box-shadow:var(--shadow-soft);}
+        .info-panel h3{font-family:'Playfair Display',serif;font-size:1em;color:var(--water-teal);margin-bottom:10px;}
+        .info-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--border-light);font-size:.85em;}
+        .info-row:last-child{border-bottom:none;}
+        .info-val{font-weight:600;color:var(--text-primary);}
+        .log-entry{font-size:.78em;padding:4px 8px;margin:3px 0;border-radius:4px;background:var(--bg-section);color:var(--text-secondary);border-left:3px solid var(--border-medium);line-height:1.4;}
+        .log-entry.added{border-left-color:var(--moss-green);color:var(--moss-green);}
+        .log-entry.removed{border-left-color:var(--sunset-rose);color:var(--sunset-rose);}
+        .log-entry.moved{border-left-color:var(--gold-accent);color:var(--gold-accent);}
+        .log-entry.info{border-left-color:var(--water-teal);color:var(--water-teal);}
+        .insight-box{background:linear-gradient(135deg,#f0f7ff,#e8f4f8);border:1px solid var(--mist-lavender);border-left:4px solid var(--mist-lavender);padding:14px 18px;border-radius:8px;margin:14px 0;}
+        [data-theme="dark"] .insight-box{background:linear-gradient(135deg,#1a1a3e,#1a2332);}
+        .insight-box .ilabel{font-size:.68em;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mist-lavender);margin-bottom:5px;}
+        .insight-box p{font-size:.87em;color:var(--text-secondary);font-style:italic;line-height:1.6;}
+        .slider-group{display:flex;align-items:center;gap:8px;}
+        .slider-group label{font-size:.83em;color:var(--text-secondary);white-space:nowrap;}
+        input[type="range"]{width:100px;accent-color:var(--water-teal);}
+        .slider-val{font-size:.83em;font-weight:600;color:var(--water-teal);min-width:24px;}
+        .theme-toggle{position:fixed;bottom:20px;right:20px;width:42px;height:42px;border-radius:50%;background:var(--bg-card);border:1px solid var(--border-medium);cursor:pointer;font-size:1.1em;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-medium);z-index:150;color:var(--text-secondary);transition:all .3s;}
+        .theme-toggle:hover{background:var(--gold-accent);color:white;}
 
-        .tab-panel { display: none; padding: 0 20px 40px; }
-        .tab-panel.active { display: block; }
+        /* ─── Tab 1 Table ─── */
+        .hash-table-wrap{overflow-x:auto;margin:16px 0;}
+        .hash-table{width:100%;border-collapse:collapse;background:var(--bg-card);border-radius:10px;overflow:hidden;box-shadow:var(--shadow-soft);font-size:.88em;}
+        .hash-table thead{background:linear-gradient(90deg,var(--water-teal),var(--moss-green));}
+        .hash-table th{color:white;padding:10px 14px;text-align:left;font-weight:600;font-size:.85em;}
+        .hash-table tbody tr{border-bottom:1px solid var(--border-light);transition:background .15s;}
+        .hash-table tbody tr:last-child{border-bottom:none;}
+        .hash-table td{padding:9px 14px;font-family:'JetBrains Mono',monospace;font-size:.85em;}
+        .hash-table td.key-col{font-weight:600;color:var(--text-primary);}
+        .hash-table td.hash-col{color:var(--text-muted);}
+        .row-moved td{background:rgba(201,123,107,.12);}
+        .row-moved td.status-col{color:var(--sunset-rose);font-weight:700;}
+        .row-same td.status-col{color:var(--moss-green);font-weight:600;}
+        .server-dot{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:5px;}
+        .mode-toggle{display:flex;gap:0;margin-bottom:16px;border-radius:8px;overflow:hidden;border:1px solid var(--border-medium);width:fit-content;}
+        .mode-btn{padding:9px 22px;border:none;background:var(--bg-section);color:var(--text-secondary);font-family:'Inter',sans-serif;font-size:.88em;font-weight:500;cursor:pointer;transition:all .2s;}
+        .mode-btn.active{background:var(--water-teal);color:white;}
+        .removed-server-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(201,123,107,.12);border:1px solid var(--sunset-rose);color:var(--sunset-rose);padding:3px 10px;border-radius:6px;font-size:.8em;font-weight:600;}
 
-        .panel-inner { max-width: 960px; margin: 0 auto; }
-
-        /* Panel Header */
-        .panel-header {
-            background: var(--bg-card); border-left: 4px solid var(--water-teal);
-            padding: 20px 24px; border-radius: 8px; margin: 24px 0 20px;
-            box-shadow: var(--shadow-soft);
-        }
-        .panel-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5em; color: var(--ink-warm); margin-bottom: 6px; }
-        .panel-header p { color: var(--text-secondary); font-size: 0.95em; }
-
-        /* Controls */
-        .controls {
-            display: flex; gap: 12px; flex-wrap: wrap; align-items: center;
-            background: var(--bg-card); padding: 16px 20px; border-radius: 10px;
-            margin-bottom: 20px; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
-        }
-        .ctrl-btn {
-            padding: 9px 20px; border-radius: 8px; border: 1px solid var(--border-medium);
-            background: var(--bg-section); color: var(--text-primary);
-            font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500;
-            cursor: pointer; transition: all 0.25s ease;
-        }
-        .ctrl-btn:hover { background: var(--water-teal); color: white; border-color: var(--water-teal); }
-        .ctrl-btn.danger:hover { background: var(--sunset-rose); color: white; border-color: var(--sunset-rose); }
-        .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-        .ctrl-label { font-size: 0.85em; color: var(--text-muted); }
-
-        /* Canvas Wrapper */
-        .canvas-wrapper {
-            display: flex; justify-content: center; align-items: flex-start; gap: 24px;
-            flex-wrap: wrap;
-        }
-        canvas {
-            border-radius: 12px; box-shadow: var(--shadow-medium);
-            background: var(--bg-card);
-        }
-
-        /* Info Panel */
-        .info-panel {
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: 10px; padding: 18px; min-width: 220px; max-width: 260px;
-            box-shadow: var(--shadow-soft);
-        }
-        .info-panel h3 { font-family: 'Playfair Display', serif; font-size: 1.1em; color: var(--water-teal); margin-bottom: 12px; }
-        .info-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-light); font-size: 0.88em; }
-        .info-row:last-child { border-bottom: none; }
-        .info-val { font-weight: 600; color: var(--text-primary); }
-        .info-log { margin-top: 14px; }
-        .log-entry {
-            font-size: 0.8em; padding: 5px 8px; margin: 4px 0; border-radius: 5px;
-            background: var(--bg-section); color: var(--text-secondary);
-            border-left: 3px solid var(--border-medium); line-height: 1.4;
-        }
-        .log-entry.moved { border-left-color: var(--sunset-rose); color: var(--sunset-rose); }
-        .log-entry.added { border-left-color: var(--moss-green); color: var(--moss-green); }
-        .log-entry.removed { border-left-color: var(--gold-accent); color: var(--gold-accent); }
-
-        /* Stats Bar */
-        .stats-bar {
-            display: flex; gap: 16px; flex-wrap: wrap;
-            background: var(--bg-card); padding: 14px 20px; border-radius: 8px;
-            margin: 16px 0; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
-        }
-        .stat-item { text-align: center; }
-        .stat-val { font-size: 1.6em; font-weight: 700; color: var(--water-teal); display: block; line-height: 1.2; }
-        .stat-label { font-size: 0.75em; color: var(--text-muted); }
-
-        /* Insight Box */
-        .insight-box {
-            background: linear-gradient(135deg, #f0f7ff 0%, #e8f4f8 100%);
-            border: 1px solid var(--mist-lavender); border-left: 4px solid var(--mist-lavender);
-            padding: 16px 20px; border-radius: 8px; margin: 16px 0;
-        }
-        [data-theme="dark"] .insight-box { background: linear-gradient(135deg, #1a1a3e 0%, #1a2332 100%); }
-        .insight-box .insight-label { font-size: 0.7em; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mist-lavender); margin-bottom: 6px; }
-        .insight-box p { font-size: 0.9em; color: var(--text-secondary); font-style: italic; line-height: 1.6; }
-
-        /* Slider */
-        .slider-group { display: flex; align-items: center; gap: 10px; }
-        .slider-group label { font-size: 0.85em; color: var(--text-secondary); white-space: nowrap; }
-        input[type="range"] { width: 120px; accent-color: var(--water-teal); }
-        .slider-val { font-size: 0.85em; font-weight: 600; color: var(--water-teal); min-width: 28px; }
-
-        /* Floating Buttons */
-        .theme-toggle {
-            position: fixed; bottom: 20px; right: 20px; width: 44px; height: 44px; border-radius: 50%;
-            background: var(--bg-card); border: 1px solid var(--border-medium);
-            cursor: pointer; font-size: 1.2em; display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--shadow-medium); transition: all 0.3s ease; z-index: 150;
-            color: var(--text-secondary);
-        }
-        .theme-toggle:hover { background: var(--gold-accent); color: white; }
-
-        @media (max-width: 768px) {
-            .header h1 { font-size: 1.5em; }
-            .tab-btn { padding: 10px 16px; font-size: 0.85em; }
-            canvas { width: 100% !important; height: auto !important; }
-            .info-panel { max-width: 100%; }
+        @media(max-width:768px){
+            .header h1{font-size:1.4em;}
+            .tab-btn{padding:9px 14px;font-size:.82em;}
+            canvas{width:100%!important;height:auto!important;}
+            .info-panel{max-width:100%;}
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1>⭕ Consistent Hashing — Interactive</h1>
-        <p>Chapter 5 · Three interactive simulations of the ring algorithm</p>
+<div class="header">
+    <h1>⭕ Consistent Hashing — Interactive</h1>
+    <p>Chapter 5 · Alex Xu's System Design Interview · Four simulations faithful to the book</p>
+</div>
+<div class="nav-links">
+    <a href="../index.html" class="nav-link">🏠 Hub</a>
+    <a href="chapter-5-complete.html" class="nav-link">📖 Study Guide</a>
+    <a href="interview-qa-chapter5.html" class="nav-link">🎯 Interview Q&amp;A</a>
+    <a href="Anki-Cards/05_Design_Consistent_Hashing.csv" class="nav-link" download>📇 Anki Cards</a>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active" data-tab="t1">1. Rehashing Problem</button>
+    <button class="tab-btn" data-tab="t2">2. Consistent Hash Ring</button>
+    <button class="tab-btn" data-tab="t3">3. Virtual Nodes</button>
+    <button class="tab-btn" data-tab="t4">4. Find Affected Keys</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 1: THE REHASHING PROBLEM (exact PDF values)
+     ══════════════════════════════════════════════════ -->
+<div id="t1" class="tab-panel active">
+<div class="panel-inner">
+    <div class="panel-header">
+        <h2>The Rehashing Problem</h2>
+        <p>With <code>serverIndex = hash(key) % N</code>, changing N by even 1 causes most keys to remap. The table below uses the <strong>exact hash values from Alex Xu Table 5-1 and Table 5-2</strong>. See how 6 out of 8 keys move when server 1 goes offline.</p>
     </div>
 
-    <div class="resources-nav">
-        <a href="chapter-5-complete.html" class="resource-link">📖 Study Guide</a>
-        <a href="interview-qa-chapter5.html" class="resource-link">🎯 Interview Q&amp;A</a>
-        <a href="Anki-Cards/05_Design_Consistent_Hashing.csv" class="resource-link" download>📇 Anki Cards</a>
+    <div class="controls">
+        <div class="mode-toggle">
+            <button class="mode-btn active" id="t1-mode4">N = 4 Servers (Normal)</button>
+            <button class="mode-btn" id="t1-mode3">N = 3 (Server 1 Removed)</button>
+        </div>
+        <span class="ctrl-label" id="t1-status">Baseline: 4 servers, 8 keys</span>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="t1">1. Rehashing Problem</button>
-        <button class="tab-btn" data-tab="t2">2. Consistent Hash Ring</button>
-        <button class="tab-btn" data-tab="t3">3. Virtual Nodes</button>
+    <div id="t1-removed-badge" style="display:none;margin-bottom:12px;">
+        <span class="removed-server-badge">✕ server 1 is offline — hash(key) % 3 applied</span>
     </div>
 
-    <!-- ════ TAB 1: Rehashing Problem ════ -->
-    <div id="t1" class="tab-panel active">
-        <div class="panel-inner">
-            <div class="panel-header">
-                <h2>The Rehashing Problem</h2>
-                <p>Watch what happens to key→server assignments when a server is added or removed. Red = cache miss (key moved to different server).</p>
-            </div>
+    <div class="hash-table-wrap">
+        <table class="hash-table" id="t1-table">
+            <thead>
+                <tr>
+                    <th>Key</th>
+                    <th>Hash Value</th>
+                    <th id="t1-mod-header">hash % 4</th>
+                    <th id="t1-server-header">Server</th>
+                    <th id="t1-status-header" style="display:none">Status</th>
+                </tr>
+            </thead>
+            <tbody id="t1-tbody"></tbody>
+        </table>
+    </div>
 
-            <div class="controls">
-                <button class="ctrl-btn" id="t1-reset">↺ Reset (4 Servers)</button>
-                <button class="ctrl-btn danger" id="t1-remove">− Remove Server</button>
-                <button class="ctrl-btn" id="t1-add">+ Add Server</button>
-                <span class="ctrl-label" id="t1-status">N = 4 servers | Click Remove/Add to see redistribution</span>
-            </div>
+    <div class="stats-bar" id="t1-stats" style="display:none;">
+        <div class="stat-item"><span class="stat-val" id="t1-moved-count" style="color:var(--sunset-rose)">0</span><span class="stat-label">Keys Moved (Cache Misses)</span></div>
+        <div class="stat-item"><span class="stat-val" id="t1-same-count" style="color:var(--moss-green)">0</span><span class="stat-label">Keys Unchanged</span></div>
+        <div class="stat-item"><span class="stat-val" id="t1-miss-rate" style="color:var(--sunset-rose)">0%</span><span class="stat-label">Cache Miss Rate</span></div>
+    </div>
 
-            <div class="stats-bar">
-                <div class="stat-item"><span class="stat-val" id="t1-total">8</span><span class="stat-label">Total Keys</span></div>
-                <div class="stat-item"><span class="stat-val" id="t1-moved" style="color: var(--sunset-rose);">0</span><span class="stat-label">Keys Moved (Cache Misses)</span></div>
-                <div class="stat-item"><span class="stat-val" id="t1-pct" style="color: var(--sunset-rose);">0%</span><span class="stat-label">Miss Rate</span></div>
-                <div class="stat-item"><span class="stat-val" id="t1-n">4</span><span class="stat-label">Servers (N)</span></div>
-            </div>
+    <div class="insight-box">
+        <div class="ilabel">🎓 Why This Matters</div>
+        <p>When server 1 goes offline (N: 4→3), the formula <code>hash(key) % 3</code> produces completely different server assignments. Most keys that were NOT on server 1 also get remapped — causing a <strong>storm of cache misses</strong> across the entire cluster. This is the problem consistent hashing solves.</p>
+    </div>
+</div>
+</div>
 
-            <div class="canvas-wrapper">
-                <canvas id="t1-canvas" width="560" height="340"></canvas>
-                <div class="info-panel">
-                    <h3>Key Assignments</h3>
-                    <div id="t1-assignments"></div>
-                    <div class="info-log" id="t1-log"></div>
-                </div>
-            </div>
+<!-- ══════════════════════════════════════════════════
+     TAB 2: CONSISTENT HASH RING (fixed positions from PDF)
+     ══════════════════════════════════════════════════ -->
+<div id="t2" class="tab-panel">
+<div class="panel-inner">
+    <div class="panel-header">
+        <h2>Consistent Hash Ring</h2>
+        <p>Servers and keys are placed on a ring via a hash function (no modular operation). To find which server stores a key: <strong>go clockwise until you hit a server</strong>. When a server is added or removed, only keys in the adjacent arc are affected.</p>
+    </div>
 
-            <div class="insight-box">
-                <div class="insight-label">🎓 What You're Seeing</div>
-                <p>With <code>hash(key) % N</code>, changing N by just 1 causes nearly every key to recalculate to a different server. This is the "musical chairs" problem — remove one chair and everyone scrambles to find a new seat.</p>
+    <div class="controls">
+        <span class="ctrl-label">Trace key:</span>
+        <button class="ctrl-btn" id="t2-trace0">k0 → ?</button>
+        <button class="ctrl-btn" id="t2-trace1">k1 → ?</button>
+        <button class="ctrl-btn" id="t2-trace2">k2 → ?</button>
+        <button class="ctrl-btn" id="t2-trace3">k3 → ?</button>
+        <div class="ctrl-divider"></div>
+        <button class="ctrl-btn success" id="t2-add-s4">+ Add s4</button>
+        <button class="ctrl-btn danger" id="t2-remove-s1">− Remove s1</button>
+        <button class="ctrl-btn" id="t2-reset2">↺ Reset</button>
+    </div>
+
+    <div class="canvas-wrap">
+        <canvas id="t2-canvas" width="460" height="460"></canvas>
+        <div>
+            <div class="info-panel">
+                <h3>Ring State</h3>
+                <div id="t2-info"></div>
+            </div>
+            <div class="info-panel" style="margin-top:12px;">
+                <h3>Event Log</h3>
+                <div id="t2-log"></div>
             </div>
         </div>
     </div>
 
-    <!-- ════ TAB 2: Consistent Hash Ring ════ -->
-    <div id="t2" class="tab-panel">
-        <div class="panel-inner">
-            <div class="panel-header">
-                <h2>Consistent Hash Ring</h2>
-                <p>Add and remove servers on the ring. Only keys in the adjacent arc are affected. Click a key to see which server it routes to (clockwise walk).</p>
-            </div>
+    <div class="insight-box">
+        <div class="ilabel">🎓 Key Insight (Fig 5-8)</div>
+        <p>When <strong>s4 is added</strong> between s3 and s0: only k0 moves (from s0 → s4). k1, k2, k3 are unaffected. When <strong>s1 is removed</strong>: only k1 moves (from s1 → s2). This is O(k/n) redistribution, vs O(k) for naive hashing.</p>
+    </div>
+</div>
+</div>
 
-            <div class="controls">
-                <button class="ctrl-btn" id="t2-reset">↺ Reset</button>
-                <button class="ctrl-btn" id="t2-add-server">+ Add Server</button>
-                <button class="ctrl-btn danger" id="t2-remove-server">− Remove Server</button>
-                <button class="ctrl-btn" id="t2-add-key">+ Add Key</button>
-                <span class="ctrl-label" id="t2-status">4 servers, 6 keys on ring</span>
-            </div>
+<!-- ══════════════════════════════════════════════════
+     TAB 3: VIRTUAL NODES (s0_0, s0_1... naming from Fig 5-12)
+     ══════════════════════════════════════════════════ -->
+<div id="t3" class="tab-panel">
+<div class="panel-inner">
+    <div class="panel-header">
+        <h2>Virtual Nodes</h2>
+        <p>Instead of one ring position per server, each physical server is represented by multiple <strong>virtual nodes</strong> (e.g., s0_0, s0_1, s0_2). This creates more even load distribution. At 100 vnodes/server: ~10% std dev. At 200: ~5% std dev.</p>
+    </div>
 
-            <div class="stats-bar">
-                <div class="stat-item"><span class="stat-val" id="t2-servers">4</span><span class="stat-label">Servers</span></div>
-                <div class="stat-item"><span class="stat-val" id="t2-keys">6</span><span class="stat-label">Keys</span></div>
-                <div class="stat-item"><span class="stat-val" id="t2-moved" style="color: var(--sunset-rose);">0</span><span class="stat-label">Last Moved</span></div>
-                <div class="stat-item"><span class="stat-val" id="t2-pct" style="color: var(--moss-green);">0%</span><span class="stat-label">% Redistributed</span></div>
-            </div>
+    <div class="controls">
+        <div class="slider-group">
+            <label>Vnodes/server:</label>
+            <input type="range" id="t3-slider" min="1" max="15" value="3">
+            <span class="slider-val" id="t3-vval">3</span>
+        </div>
+        <div class="slider-group">
+            <label>Keys:</label>
+            <input type="range" id="t3-kslider" min="20" max="200" step="10" value="100">
+            <span class="slider-val" id="t3-kval">100</span>
+        </div>
+        <button class="ctrl-btn" id="t3-randomize">↺ Reseed</button>
+        <button class="ctrl-btn" id="t3-trace-k0">Trace k0</button>
+    </div>
 
-            <div class="canvas-wrapper">
-                <canvas id="t2-canvas" width="480" height="480"></canvas>
-                <div class="info-panel">
-                    <h3>Ring State</h3>
-                    <div id="t2-info"></div>
-                    <div class="info-log" id="t2-log"></div>
-                </div>
-            </div>
+    <div class="stats-bar">
+        <div class="stat-item"><span class="stat-val" id="t3-total-vn">12</span><span class="stat-label">Total VNodes on Ring</span></div>
+        <div class="stat-item"><span class="stat-val" id="t3-stddev">—</span><span class="stat-label">Load Std Dev</span></div>
+        <div class="stat-item"><span class="stat-val" id="t3-max-load">—</span><span class="stat-label">Max Server Load</span></div>
+        <div class="stat-item"><span class="stat-val" id="t3-min-load">—</span><span class="stat-label">Min Server Load</span></div>
+    </div>
 
-            <div class="insight-box">
-                <div class="insight-label">🎓 What You're Seeing</div>
-                <p>Only the keys between the new/removed server and its predecessor (counterclockwise) are affected. All other keys stay exactly where they are. This is O(k/n) redistribution vs O(k) for naive hashing.</p>
+    <div class="canvas-wrap">
+        <canvas id="t3-ring" width="400" height="400"></canvas>
+        <canvas id="t3-bar" width="380" height="400"></canvas>
+    </div>
+
+    <div class="insight-box">
+        <div class="ilabel">🎓 Trade-off (Fig 5-12 & 5-13)</div>
+        <p>With 1 vnode/server, one server may own 60% of keys while another owns 5% (the "hotspot" problem). Increase vnodes → distribution converges to uniform. But <strong>more vnodes = more memory</strong> to store the ring metadata. Real systems (Dynamo, Cassandra) use 100–200 vnodes.</p>
+    </div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4: FIND AFFECTED KEYS (Figs 5-14, 5-15)
+     ══════════════════════════════════════════════════ -->
+<div id="t4" class="tab-panel">
+<div class="panel-inner">
+    <div class="panel-header">
+        <h2>Find Affected Keys</h2>
+        <p>When a server is <strong>added</strong>: go anticlockwise from the new node until hitting another server — keys in that arc are redistributed <em>to</em> the new server. When <strong>removed</strong>: go anticlockwise from the removed node — keys in that arc are redistributed <em>to</em> the next clockwise server.</p>
+    </div>
+
+    <div class="controls">
+        <button class="ctrl-btn success" id="t4-add">+ Add s4 (Fig 5-14)</button>
+        <button class="ctrl-btn danger" id="t4-remove">− Remove s1 (Fig 5-15)</button>
+        <button class="ctrl-btn" id="t4-reset">↺ Reset</button>
+    </div>
+
+    <div class="canvas-wrap">
+        <canvas id="t4-canvas" width="460" height="460"></canvas>
+        <div class="info-panel" style="max-width:260px;">
+            <h3>Affected Range</h3>
+            <div id="t4-info">
+                <div class="log-entry info">Click Add or Remove to see which keys are affected.</div>
             </div>
         </div>
     </div>
 
-    <!-- ════ TAB 3: Virtual Nodes ════ -->
-    <div id="t3" class="tab-panel">
-        <div class="panel-inner">
-            <div class="panel-header">
-                <h2>Virtual Nodes Distribution</h2>
-                <p>See how increasing virtual nodes per server creates more uniform load distribution. The bar chart shows how many keys each physical server owns.</p>
-            </div>
-
-            <div class="controls">
-                <div class="slider-group">
-                    <label>VNodes/Server:</label>
-                    <input type="range" id="t3-vnode-slider" min="1" max="20" value="1">
-                    <span class="slider-val" id="t3-vnode-val">1</span>
-                </div>
-                <div class="slider-group">
-                    <label>Keys:</label>
-                    <input type="range" id="t3-keys-slider" min="20" max="200" step="10" value="100">
-                    <span class="slider-val" id="t3-keys-val">100</span>
-                </div>
-                <button class="ctrl-btn" id="t3-randomize">↺ Randomize</button>
-            </div>
-
-            <div class="stats-bar">
-                <div class="stat-item"><span class="stat-val" id="t3-total-vnodes">4</span><span class="stat-label">Total VNodes on Ring</span></div>
-                <div class="stat-item"><span class="stat-val" id="t3-stddev">—</span><span class="stat-label">Std Dev (Load)</span></div>
-                <div class="stat-item"><span class="stat-val" id="t3-max-server">—</span><span class="stat-label">Max Server Load</span></div>
-                <div class="stat-item"><span class="stat-val" id="t3-min-server">—</span><span class="stat-label">Min Server Load</span></div>
-            </div>
-
-            <div class="canvas-wrapper">
-                <canvas id="t3-ring" width="400" height="400"></canvas>
-                <canvas id="t3-bar" width="400" height="400"></canvas>
-            </div>
-
-            <div class="insight-box">
-                <div class="insight-label">🎓 What You're Seeing</div>
-                <p>With 1 vnode per server, one server may own 60% of keys while another owns 5%. As you increase vnodes, distribution approaches uniform. At 200 vnodes: ~5% std dev. At 100 vnodes: ~10% std dev. More vnodes = better balance, but higher memory cost.</p>
-            </div>
-        </div>
+    <div class="insight-box">
+        <div class="ilabel">🎓 The Rule</div>
+        <p><strong>Add server s4:</strong> Affected range = arc from s4's predecessor (anticlockwise) to s4. Keys there move from old owner → s4.<br><br>
+        <strong>Remove server s1:</strong> Affected range = arc from s1's predecessor (anticlockwise) to s1. Keys there move from s1 → s1's clockwise successor.</p>
     </div>
+</div>
+</div>
 
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+<button class="theme-toggle" id="themeToggle">&#9789;</button>
 
-    <script>
-    // ════════════════════════════════════════════
-    //  UTILITIES
-    // ════════════════════════════════════════════
-    function getCSS(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+<script>
+// ══════════════════════════════════════════════════
+//  CONSTANTS & UTILITIES
+// ══════════════════════════════════════════════════
 
-    // Simple hash function (djb2-like, returns 0-1)
-    function hashStr(str) {
-        let h = 5381;
-        for (let i = 0; i < str.length; i++) h = ((h << 5) + h) + str.charCodeAt(i);
-        return Math.abs(h) / 2147483647;
-    }
+// Exact data from Alex Xu Table 5-1 and Table 5-2
+const PDF_KEYS = [
+    { key:'key0', hash:18358617, mod4:1, mod3:0 },
+    { key:'key1', hash:26143584, mod4:0, mod3:0 },
+    { key:'key2', hash:18131146, mod4:2, mod3:1 },
+    { key:'key3', hash:35863496, mod4:0, mod3:2 },
+    { key:'key4', hash:34085809, mod4:1, mod3:1 },
+    { key:'key5', hash:27581703, mod4:3, mod3:0 },
+    { key:'key6', hash:38164978, mod4:2, mod3:1 },
+    { key:'key7', hash:22530351, mod4:3, mod3:0 },
+];
 
-    // ════════════════════════════════════════════
-    //  TAB 1: REHASHING PROBLEM
-    // ════════════════════════════════════════════
-    const t1Canvas = document.getElementById('t1-canvas');
-    const t1Ctx = t1Canvas.getContext('2d');
-    const t1Keys = ['key0','key1','key2','key3','key4','key5','key6','key7'];
-    let t1N = 4;
-    let t1Prev = {};
-    let t1Moved = [];
+// Server colors matching Alex Xu's PDF color scheme
+const SRV_COLORS = {
+    0: '#9b7ec8',  // purple (server 0)
+    1: '#5ba3a8',  // teal (server 1)
+    2: '#d85090',  // pink/magenta (server 2)
+    3: '#d4a84b',  // orange (server 3)
+    4: '#7ea87e',  // green (server 4, when added)
+};
+const SRV_LABELS = ['s0','s1','s2','s3','s4'];
 
-    function t1HashKey(key, N) { return Math.floor(hashStr(key + '-v1') * 1000) % N; }
+function isDark() { return document.documentElement.getAttribute('data-theme') === 'dark'; }
+function bgCard()  { return isDark() ? '#1a1a2e' : '#fffdf7'; }
+function bgRing()  { return isDark() ? '#3a3a50' : '#d4c5a9'; }
+function textCol() { return isDark() ? '#e8dcc8' : '#3d2e1f'; }
+function mutedCol(){ return isDark() ? '#8a7a6a' : '#8a7a6a'; }
 
-    function t1GetAssignments(N) {
-        const a = {};
-        t1Keys.forEach(k => a[k] = t1HashKey(k, N));
-        return a;
-    }
+// pos: 0→1, 0=top, clockwise. Returns canvas {x,y}
+function posToXY(pos, r, cx, cy) {
+    const a = pos * 2 * Math.PI - Math.PI / 2;
+    return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+}
 
-    function t1Draw() {
-        const ctx = t1Ctx;
-        const W = t1Canvas.width, H = t1Canvas.height;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+// Find which server a key routes to (first server clockwise from pos)
+function findServerCW(pos, servers) {
+    const sorted = [...servers].sort((a, b) => a.pos - b.pos);
+    const found = sorted.find(s => s.pos >= pos);
+    return found || sorted[0];
+}
 
-        ctx.clearRect(0, 0, W, H);
+// Draw a thick colored arc from posA to posB (clockwise)
+function drawArc(ctx, posA, posB, cx, cy, r, color, lineWidth=10, alpha=0.35) {
+    const aA = posA * 2 * Math.PI - Math.PI/2;
+    const aB = posB * 2 * Math.PI - Math.PI/2;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, aA, aB, false);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.stroke();
+    ctx.restore();
+}
 
-        const bg = isDark ? '#1a1a2e' : '#fffdf7';
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-
-        const serverColors = ['#5ba3a8','#d4a84b','#7ea87e','#c97b6b','#b8a9c9','#a0c4d8'];
-        const servers = Array.from({length: t1N}, (_, i) => `s${i}`);
-
-        // Draw columns
-        const colW = W / (t1N + 1);
-        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
-        const mutedColor = isDark ? '#8a7a6a' : '#8a7a6a';
-
-        // Header row
-        ctx.font = 'bold 13px Inter';
-        ctx.fillStyle = mutedColor;
-        ctx.textAlign = 'center';
-        ctx.fillText('Key', colW * 0.5, 30);
-        servers.forEach((s, i) => {
-            ctx.fillStyle = serverColors[i];
-            ctx.fillText(s, colW * (i + 1) + colW * 0.5, 30);
-        });
-
-        // Draw divider
-        ctx.strokeStyle = isDark ? '#2a2a3e' : '#e8dcc8';
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(0, 40); ctx.lineTo(W, 40); ctx.stroke();
-
-        // Draw keys
-        const rowH = (H - 60) / t1Keys.length;
-        t1Keys.forEach((key, row) => {
-            const y = 50 + row * rowH + rowH * 0.5;
-            const si = t1HashKey(key, t1N);
-            const moved = t1Moved.includes(key);
-
-            // Key label
-            ctx.font = '13px JetBrains Mono';
-            ctx.fillStyle = moved ? '#c97b6b' : textColor;
-            ctx.textAlign = 'center';
-            ctx.fillText(key, colW * 0.5, y + 4);
-
-            // Dot in server column
-            const cx = colW * (si + 1) + colW * 0.5;
-            ctx.beginPath();
-            ctx.arc(cx, y, 10, 0, Math.PI * 2);
-            ctx.fillStyle = moved ? '#c97b6b' : serverColors[si];
-            ctx.fill();
-
-            if (moved) {
-                // Draw red X
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.beginPath(); ctx.moveTo(cx-5, y-5); ctx.lineTo(cx+5, y+5); ctx.stroke();
-                ctx.beginPath(); ctx.moveTo(cx+5, y-5); ctx.lineTo(cx-5, y+5); ctx.stroke();
-            } else {
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 8px Inter';
-                ctx.fillText('✓', cx, y + 3);
-            }
-
-            // hash formula
-            ctx.fillStyle = mutedColor;
-            ctx.font = '10px JetBrains Mono';
-            ctx.textAlign = 'left';
-            const hVal = Math.floor(hashStr(key + '-v1') * 1000);
-            ctx.fillText(`hash=${hVal}%${t1N}=${si}`, 4, y + 4);
-        });
-
-        // Update stats
-        document.getElementById('t1-n').textContent = t1N;
-        document.getElementById('t1-moved').textContent = t1Moved.length;
-        document.getElementById('t1-pct').textContent = Math.round(t1Moved.length / t1Keys.length * 100) + '%';
-
-        // Update assignments list
-        const aEl = document.getElementById('t1-assignments');
-        aEl.innerHTML = '';
-        t1Keys.forEach(k => {
-            const si = t1HashKey(k, t1N);
-            const moved = t1Moved.includes(k);
-            const div = document.createElement('div');
-            div.className = 'info-row';
-            div.innerHTML = `<span style="font-family:monospace;font-size:0.85em">${k}</span><span class="info-val" style="color:${moved?'#c97b6b':serverColors[si]}">${moved?'⚠ ':''}s${si}</span>`;
-            aEl.appendChild(div);
-        });
-    }
-
-    document.getElementById('t1-reset').addEventListener('click', () => {
-        t1N = 4; t1Moved = [];
-        t1Prev = t1GetAssignments(t1N);
-        document.getElementById('t1-status').textContent = 'N = 4 servers | Baseline set';
-        document.getElementById('t1-log').innerHTML = '';
-        t1Draw();
-    });
-
-    document.getElementById('t1-remove').addEventListener('click', () => {
-        if (t1N <= 1) return;
-        const before = t1GetAssignments(t1N);
-        t1N--;
-        const after = t1GetAssignments(t1N);
-        t1Moved = t1Keys.filter(k => before[k] !== after[k] || before[k] >= t1N);
-        t1Prev = before;
-        document.getElementById('t1-status').textContent = `N: ${t1N+1} → ${t1N} | ${t1Moved.length} keys remapped`;
-        const log = document.getElementById('t1-log');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry removed';
-        entry.textContent = `−Server removed: ${t1Moved.length}/${t1Keys.length} keys moved (${Math.round(t1Moved.length/t1Keys.length*100)}%)`;
-        log.prepend(entry);
-        t1Draw();
-    });
-
-    document.getElementById('t1-add').addEventListener('click', () => {
-        if (t1N >= 6) return;
-        const before = t1GetAssignments(t1N);
-        t1N++;
-        const after = t1GetAssignments(t1N);
-        t1Moved = t1Keys.filter(k => before[k] !== after[k]);
-        t1Prev = before;
-        document.getElementById('t1-status').textContent = `N: ${t1N-1} → ${t1N} | ${t1Moved.length} keys remapped`;
-        const log = document.getElementById('t1-log');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry added';
-        entry.textContent = `+Server added: ${t1Moved.length}/${t1Keys.length} keys moved (${Math.round(t1Moved.length/t1Keys.length*100)}%)`;
-        log.prepend(entry);
-        t1Draw();
-    });
-
-    t1Prev = t1GetAssignments(t1N);
-    t1Draw();
-
-    // ════════════════════════════════════════════
-    //  TAB 2: CONSISTENT HASH RING
-    // ════════════════════════════════════════════
-    const t2Canvas = document.getElementById('t2-canvas');
-    const t2Ctx = t2Canvas.getContext('2d');
-    const CX = 240, CY = 240, R = 185;
-    const serverColors = ['#5ba3a8','#d4a84b','#7ea87e','#c97b6b','#b8a9c9','#a0c4d8','#e8a050'];
-    let t2ServerCount = 0, t2KeyCount = 0;
-    let t2Servers = [], t2Keys = [], t2TotalMoved = 0, t2LastMoved = 0;
-
-    function angleToXY(angle, r) {
-        return {
-            x: CX + r * Math.cos(angle - Math.PI/2),
-            y: CY + r * Math.sin(angle - Math.PI/2)
-        };
-    }
-
-    function posToAngle(pos) { return pos * 2 * Math.PI; }
-
-    function findServer(pos, servers) {
-        if (servers.length === 0) return null;
-        const sorted = [...servers].sort((a, b) => a.pos - b.pos);
-        for (const s of sorted) {
-            if (s.pos >= pos) return s;
-        }
-        return sorted[0]; // wrap around
-    }
-
-    function t2Draw(highlight = null) {
-        const ctx = t2Ctx;
-        const W = t2Canvas.width, H = t2Canvas.height;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-        ctx.clearRect(0, 0, W, H);
-        const bg = isDark ? '#1a1a2e' : '#fffdf7';
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, W, H);
-
-        // Draw ring
+// Draw animated arc (clockwise, growing) — returns cancel fn
+function animateArc(ctx, posStart, posEnd, cx, cy, r, color, onDone, frames=45) {
+    let frame = 0;
+    // Compute the clockwise angular span (0 to 1)
+    let span = posEnd - posStart;
+    if (span <= 0) span += 1;
+    const aStart = posStart * 2 * Math.PI - Math.PI / 2;
+    const totalSweep = span * 2 * Math.PI;
+    let raf;
+    function tick() {
+        frame++;
+        const t = Math.min(frame / frames, 1);
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+        const sweep = totalSweep * ease;
+        ctx.save();
+        ctx.globalAlpha = 0.85;
         ctx.beginPath();
-        ctx.arc(CX, CY, R, 0, Math.PI * 2);
-        ctx.strokeStyle = isDark ? '#3a3a50' : '#d4c5a9';
+        ctx.arc(cx, cy, r, aStart, aStart + sweep, false);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 4;
+        ctx.setLineDash([8, 5]);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+        if (frame < frames) { raf = requestAnimationFrame(tick); }
+        else { onDone && onDone(); }
+    }
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+}
+
+// Draw arrow head at an angle on the ring perimeter
+function drawArrowAt(ctx, pos, cx, cy, r, color, clockwise=true) {
+    const a = pos * 2 * Math.PI - Math.PI/2;
+    const pt = { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+    const tangA = a + (clockwise ? Math.PI/2 : -Math.PI/2);
+    const size = 10;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(pt.x + size * Math.cos(tangA), pt.y + size * Math.sin(tangA));
+    ctx.lineTo(pt.x + size * Math.cos(a + 2.4), pt.y + size * Math.sin(a + 2.4));
+    ctx.lineTo(pt.x + size * Math.cos(a - 2.4), pt.y + size * Math.sin(a - 2.4));
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.restore();
+}
+
+// ══════════════════════════════════════════════════
+//  TAB 1: REHASHING PROBLEM
+// ══════════════════════════════════════════════════
+let t1Mode = 4;
+
+function t1Render() {
+    const isN3 = t1Mode === 3;
+    document.getElementById('t1-mod-header').textContent = isN3 ? 'hash % 3' : 'hash % 4';
+    document.getElementById('t1-server-header').textContent = isN3 ? 'New Server' : 'Server';
+    document.getElementById('t1-status-header').style.display = isN3 ? '' : 'none';
+    document.getElementById('t1-removed-badge').style.display = isN3 ? '' : 'none';
+    document.getElementById('t1-stats').style.display = isN3 ? '' : 'none';
+
+    const tbody = document.getElementById('t1-tbody');
+    tbody.innerHTML = '';
+    let moved = 0, same = 0;
+
+    PDF_KEYS.forEach(row => {
+        const serverIdx = isN3 ? row.mod3 : row.mod4;
+        const isMoved = isN3 && row.mod4 !== row.mod3;
+        if (isN3) { isMoved ? moved++ : same++; }
+        const color = SRV_COLORS[serverIdx] || '#999';
+        const tr = document.createElement('tr');
+        if (isN3) tr.className = isMoved ? 'row-moved' : 'row-same';
+        tr.innerHTML = `
+            <td class="key-col">${row.key}</td>
+            <td class="hash-col">${row.hash.toLocaleString()}</td>
+            <td>${isN3 ? row.hash+'%3='+row.mod3 : row.hash+'%4='+row.mod4}</td>
+            <td><span class="server-dot" style="background:${color}"></span>server ${serverIdx}</td>
+            ${isN3 ? `<td class="status-col">${isMoved ? '⚠ MOVED (was server '+row.mod4+')' : '✓ same'}</td>` : ''}
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (isN3) {
+        document.getElementById('t1-moved-count').textContent = moved;
+        document.getElementById('t1-same-count').textContent = same;
+        document.getElementById('t1-miss-rate').textContent = Math.round(moved/8*100)+'%';
+        document.getElementById('t1-status').textContent = `Server 1 removed: ${moved}/8 keys remapped (${Math.round(moved/8*100)}% cache miss rate!)`;
+    } else {
+        document.getElementById('t1-status').textContent = 'Baseline: 4 servers, 8 keys, serverIndex = hash(key) % 4';
+    }
+}
+
+document.getElementById('t1-mode4').addEventListener('click', () => {
+    t1Mode = 4;
+    document.getElementById('t1-mode4').classList.add('active');
+    document.getElementById('t1-mode3').classList.remove('active');
+    t1Render();
+});
+document.getElementById('t1-mode3').addEventListener('click', () => {
+    t1Mode = 3;
+    document.getElementById('t1-mode3').classList.add('active');
+    document.getElementById('t1-mode4').classList.remove('active');
+    t1Render();
+});
+t1Render();
+
+// ══════════════════════════════════════════════════
+//  TAB 2: CONSISTENT HASH RING
+//  Positions faithfully match Fig 5-5, 5-6, 5-7, 5-8, 5-9
+// ══════════════════════════════════════════════════
+const T2C = document.getElementById('t2-canvas');
+const T2X = T2C.getContext('2d');
+const CX2 = 230, CY2 = 230, R2 = 185;
+
+// Fixed positions (0=top, clockwise, 0-1 range)
+// s0 at ~1 o'clock, s1 at ~4 o'clock, s2 at ~7 o'clock, s3 at ~10 o'clock
+const S2_BASE = [
+    { id:0, pos:0.083, label:'s0' },  // 30° from top
+    { id:1, pos:0.333, label:'s1' },  // 120°
+    { id:2, pos:0.583, label:'s2' },  // 210°
+    { id:3, pos:0.833, label:'s3' },  // 300°
+];
+// Keys: each between two adjacent servers (matching Fig 5-6)
+// k0 at top (between s3 and s0), k1 between s0&s1, k2 between s1&s2, k3 between s2&s3
+const K2_BASE = [
+    { id:0, pos:0.010, label:'k0' },  // ~12 o'clock (between s3 and s0)
+    { id:1, pos:0.210, label:'k1' },  // right side (between s0 and s1)
+    { id:2, pos:0.440, label:'k2' },  // bottom-right (between s1 and s2)
+    { id:3, pos:0.690, label:'k3' },  // bottom-left (between s2 and s3)
+];
+
+let t2Servers = S2_BASE.map(s => ({...s}));
+let t2Keys = K2_BASE.map(k => ({...k}));
+let t2TraceAnim = null;
+let t2HighlightKey = null;
+let t2HighlightServer = null;
+let t2AffectedArc = null; // { fromPos, toPos, color }
+let t2scenario = 'base'; // 'base' | 'add_s4' | 'remove_s1'
+
+function t2DrawBase() {
+    const ctx = T2X;
+    ctx.clearRect(0, 0, T2C.width, T2C.height);
+    ctx.fillStyle = bgCard();
+    ctx.fillRect(0, 0, T2C.width, T2C.height);
+
+    // Draw colored partition arcs
+    const sorted = [...t2Servers].sort((a,b) => a.pos - b.pos);
+    sorted.forEach((s, i) => {
+        const prev = sorted[(i - 1 + sorted.length) % sorted.length];
+        const clr = SRV_COLORS[s.id] || '#999';
+        drawArc(ctx, prev.pos, s.pos, CX2, CY2, R2, clr, 14, 0.22);
+    });
+
+    // Highlighted arc (add/remove scenario)
+    if (t2AffectedArc) {
+        drawArc(ctx, t2AffectedArc.from, t2AffectedArc.to, CX2, CY2, R2, t2AffectedArc.color, 14, 0.5);
+    }
+
+    // Ring circle
+    ctx.beginPath();
+    ctx.arc(CX2, CY2, R2, 0, Math.PI*2);
+    ctx.strokeStyle = bgRing();
+    ctx.lineWidth = 2.5;
+    ctx.stroke();
+
+    // Draw keys (hollow circles on inner ring at 80%)
+    t2Keys.forEach(k => {
+        const pt = posToXY(k.pos, R2 * 0.80, CX2, CY2);
+        const server = findServerCW(k.pos, t2Servers);
+        const kColor = server ? (SRV_COLORS[server.id] || '#999') : '#999';
+        const isHL = t2HighlightKey !== null && t2HighlightKey === k.id;
+
+        // Trace line if highlighted
+        if (isHL && t2HighlightServer !== null) {
+            const sPt = posToXY(t2Servers.find(s=>s.id===t2HighlightServer)?.pos || 0, R2, CX2, CY2);
+            ctx.save();
+            ctx.setLineDash([6,4]);
+            ctx.beginPath();
+            ctx.moveTo(pt.x, pt.y);
+            ctx.lineTo(sPt.x, sPt.y);
+            ctx.strokeStyle = kColor + 'aa';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.restore();
+        }
+
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, isHL ? 11 : 8, 0, Math.PI*2);
+        ctx.fillStyle = isHL ? kColor + '33' : bgCard();
+        ctx.fill();
+        ctx.strokeStyle = kColor;
+        ctx.lineWidth = isHL ? 2.5 : 2;
+        ctx.stroke();
+
+        ctx.fillStyle = textCol();
+        ctx.font = `${isHL ? 'bold ' : ''}10px JetBrains Mono`;
+        ctx.textAlign = 'center';
+        ctx.fillText(k.label, pt.x, pt.y + 4);
+    });
+
+    // Draw servers (filled circles on ring)
+    t2Servers.forEach(s => {
+        const pt = posToXY(s.pos, R2, CX2, CY2);
+        const color = SRV_COLORS[s.id] || '#999';
+        const isHL = t2HighlightServer === s.id;
+
+        ctx.beginPath();
+        ctx.arc(pt.x, pt.y, isHL ? 20 : 16, 0, Math.PI*2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.strokeStyle = bgCard();
         ctx.lineWidth = 3;
         ctx.stroke();
 
-        // Draw server arcs
-        const sorted = [...t2Servers].sort((a, b) => a.pos - b.pos);
-        sorted.forEach((s, i) => {
-            const prevS = sorted[(i - 1 + sorted.length) % sorted.length];
-            const startA = posToAngle(prevS ? prevS.pos : 0) - Math.PI/2;
-            const endA = posToAngle(s.pos) - Math.PI/2;
-            const actualStart = sorted.length === 1 ? 0 : startA;
-
-            ctx.beginPath();
-            ctx.arc(CX, CY, R, actualStart, endA);
-            ctx.strokeStyle = serverColors[s.id % serverColors.length] + '50';
-            ctx.lineWidth = 12;
-            ctx.stroke();
-        });
-
-        // Draw keys with routing arrows
-        t2Keys.forEach(k => {
-            const server = findServer(k.pos, t2Servers);
-            const kPt = angleToXY(posToAngle(k.pos), R * 0.75);
-            const isHighlighted = highlight && highlight.key === k.id;
-
-            // Draw routing arrow to server if highlighted
-            if (server && isHighlighted) {
-                const sPt = angleToXY(posToAngle(server.pos), R);
-                ctx.strokeStyle = '#d4a84b80';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 4]);
-                ctx.beginPath();
-                ctx.moveTo(kPt.x, kPt.y);
-                ctx.lineTo(sPt.x, sPt.y);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-
-            // Key dot
-            ctx.beginPath();
-            ctx.arc(kPt.x, kPt.y, isHighlighted ? 9 : 7, 0, Math.PI * 2);
-            ctx.fillStyle = server ? serverColors[server.id % serverColors.length] + 'aa' : '#8a7a6a55';
-            ctx.fill();
-            ctx.strokeStyle = server ? serverColors[server.id % serverColors.length] : '#8a7a6a';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Key label
-            const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
-            ctx.fillStyle = textColor;
-            ctx.font = '9px JetBrains Mono';
-            ctx.textAlign = 'center';
-            ctx.fillText(k.name, kPt.x, kPt.y + 3);
-        });
-
-        // Draw servers
-        t2Servers.forEach(s => {
-            const pt = angleToXY(posToAngle(s.pos), R);
-            const color = serverColors[s.id % serverColors.length];
-
-            ctx.beginPath();
-            ctx.arc(pt.x, pt.y, 16, 0, Math.PI * 2);
-            ctx.fillStyle = color;
-            ctx.fill();
-            ctx.strokeStyle = isDark ? '#1a1a2e' : 'white';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 10px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText('S' + s.id, pt.x, pt.y + 4);
-        });
-
-        // Update info
-        const servers2 = t2Servers.map(s => {
-            const count = t2Keys.filter(k => {
-                const srv = findServer(k.pos, t2Servers);
-                return srv && srv.id === s.id;
-            }).length;
-            return {s, count};
-        });
-
-        const infoEl = document.getElementById('t2-info');
-        infoEl.innerHTML = '';
-        servers2.sort((a,b) => a.s.id - b.s.id).forEach(({s, count}) => {
-            const div = document.createElement('div');
-            div.className = 'info-row';
-            div.innerHTML = `<span style="color:${serverColors[s.id%serverColors.length]};font-weight:600">Server ${s.id}</span><span class="info-val">${count} keys (pos ${Math.round(s.pos*100)})</span>`;
-            infoEl.appendChild(div);
-        });
-
-        document.getElementById('t2-servers').textContent = t2Servers.length;
-        document.getElementById('t2-keys').textContent = t2Keys.length;
-        document.getElementById('t2-moved').textContent = t2LastMoved;
-        document.getElementById('t2-pct').textContent = t2Keys.length > 0 ? Math.round(t2LastMoved/t2Keys.length*100)+'%' : '0%';
-        document.getElementById('t2-status').textContent = `${t2Servers.length} server${t2Servers.length!==1?'s':''}, ${t2Keys.length} key${t2Keys.length!==1?'s':''} on ring`;
-    }
-
-    function t2AddServer() {
-        if (t2Servers.length >= 6) return;
-        // Get previous assignment for all keys
-        const prevAssign = {};
-        t2Keys.forEach(k => {
-            const s = findServer(k.pos, t2Servers);
-            prevAssign[k.id] = s ? s.id : -1;
-        });
-
-        const pos = Math.random();
-        t2Servers.push({id: t2ServerCount++, pos});
-
-        // Count moved keys
-        let moved = 0;
-        t2Keys.forEach(k => {
-            const s = findServer(k.pos, t2Servers);
-            if (s && s.id !== prevAssign[k.id]) moved++;
-        });
-        t2LastMoved = moved;
-
-        const log = document.getElementById('t2-log');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry added';
-        entry.textContent = `+S${t2ServerCount-1} added at pos ${Math.round(pos*100)} — ${moved} key(s) moved`;
-        log.prepend(entry);
-        while (log.children.length > 6) log.removeChild(log.lastChild);
-        t2Draw();
-    }
-
-    function t2RemoveServer() {
-        if (t2Servers.length === 0) return;
-        const prevAssign = {};
-        t2Keys.forEach(k => {
-            const s = findServer(k.pos, t2Servers);
-            prevAssign[k.id] = s ? s.id : -1;
-        });
-
-        const idx = Math.floor(Math.random() * t2Servers.length);
-        const removed = t2Servers.splice(idx, 1)[0];
-
-        let moved = 0;
-        t2Keys.forEach(k => {
-            const s = findServer(k.pos, t2Servers);
-            const newId = s ? s.id : -1;
-            if (newId !== prevAssign[k.id]) moved++;
-        });
-        t2LastMoved = moved;
-
-        const log = document.getElementById('t2-log');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry removed';
-        entry.textContent = `−S${removed.id} removed — ${moved} key(s) moved`;
-        log.prepend(entry);
-        while (log.children.length > 6) log.removeChild(log.lastChild);
-        t2Draw();
-    }
-
-    function t2AddKey() {
-        if (t2Keys.length >= 20) return;
-        const pos = Math.random();
-        t2Keys.push({id: t2KeyCount, name: 'k'+t2KeyCount, pos});
-        t2KeyCount++;
-        t2LastMoved = 0;
-        t2Draw();
-    }
-
-    function t2Reset() {
-        t2Servers = []; t2Keys = []; t2ServerCount = 0; t2KeyCount = 0; t2LastMoved = 0;
-        document.getElementById('t2-log').innerHTML = '';
-        // Add 4 servers and 6 keys
-        for (let i = 0; i < 4; i++) {
-            t2Servers.push({id: t2ServerCount++, pos: (i/4) + Math.random()*0.08});
-        }
-        for (let i = 0; i < 6; i++) {
-            t2Keys.push({id: t2KeyCount, name: 'k'+t2KeyCount, pos: Math.random()});
-            t2KeyCount++;
-        }
-        t2Draw();
-    }
-
-    document.getElementById('t2-add-server').addEventListener('click', t2AddServer);
-    document.getElementById('t2-remove-server').addEventListener('click', t2RemoveServer);
-    document.getElementById('t2-add-key').addEventListener('click', t2AddKey);
-    document.getElementById('t2-reset').addEventListener('click', t2Reset);
-    t2Reset();
-
-    // ════════════════════════════════════════════
-    //  TAB 3: VIRTUAL NODES
-    // ════════════════════════════════════════════
-    const t3Ring = document.getElementById('t3-ring');
-    const t3Bar = document.getElementById('t3-bar');
-    const t3RCtx = t3Ring.getContext('2d');
-    const t3BCtx = t3Bar.getContext('2d');
-    const PHYSICAL_SERVERS = 4;
-    const T3CX = 200, T3CY = 200, T3R = 170;
-    let t3VNodes = 1, t3NumKeys = 100;
-    let t3ServerSeeds = []; // random seeds per server for vnode placement
-
-    function t3Init() {
-        t3ServerSeeds = Array.from({length: PHYSICAL_SERVERS}, (_, i) => i * 137.508 + 42);
-    }
-
-    function t3GetVNodePositions(vnodeCount) {
-        const positions = []; // {server, pos}
-        for (let s = 0; s < PHYSICAL_SERVERS; s++) {
-            for (let v = 0; v < vnodeCount; v++) {
-                const seed = t3ServerSeeds[s] + v * 73.1;
-                const pos = hashStr('s' + s + '#' + v + '@' + seed);
-                positions.push({server: s, pos});
-            }
-        }
-        return positions.sort((a, b) => a.pos - b.pos);
-    }
-
-    function t3Distribute(vnodeCount, numKeys) {
-        const ring = t3GetVNodePositions(vnodeCount);
-        const counts = new Array(PHYSICAL_SERVERS).fill(0);
-        for (let i = 0; i < numKeys; i++) {
-            const pos = hashStr('key' + i + t3NumKeys);
-            // find first vnode >= pos
-            let found = ring.find(v => v.pos >= pos);
-            if (!found) found = ring[0];
-            counts[found.server]++;
-        }
-        return counts;
-    }
-
-    function t3DrawRing() {
-        const ctx = t3RCtx;
-        const W = t3Ring.width, H = t3Ring.height;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = isDark ? '#1a1a2e' : '#fffdf7';
-        ctx.fillRect(0, 0, W, H);
-
-        // Draw base ring
-        ctx.beginPath();
-        ctx.arc(T3CX, T3CY, T3R, 0, Math.PI * 2);
-        ctx.strokeStyle = isDark ? '#3a3a50' : '#d4c5a9';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        const ring = t3GetVNodePositions(t3VNodes);
-
-        // Draw vnode ticks
-        ring.forEach(v => {
-            const angle = v.pos * 2 * Math.PI - Math.PI/2;
-            const color = serverColors[v.server % serverColors.length];
-            const ix = T3CX + (T3R - 12) * Math.cos(angle);
-            const iy = T3CY + (T3R - 12) * Math.sin(angle);
-            const ox = T3CX + (T3R + 8) * Math.cos(angle);
-            const oy = T3CY + (T3R + 8) * Math.sin(angle);
-
-            ctx.beginPath();
-            ctx.moveTo(ix, iy);
-            ctx.lineTo(ox, oy);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = t3VNodes > 5 ? 2 : 3;
-            ctx.stroke();
-
-            if (t3VNodes <= 5) {
-                ctx.beginPath();
-                ctx.arc(ox, oy, 5, 0, Math.PI * 2);
-                ctx.fillStyle = color;
-                ctx.fill();
-            }
-        });
-
-        // Legend
-        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
-        for (let s = 0; s < PHYSICAL_SERVERS; s++) {
-            ctx.beginPath();
-            ctx.arc(16, 12 + s * 20, 7, 0, Math.PI * 2);
-            ctx.fillStyle = serverColors[s];
-            ctx.fill();
-            ctx.fillStyle = textColor;
-            ctx.font = '11px Inter';
-            ctx.textAlign = 'left';
-            ctx.fillText(`Server ${s}`, 28, 16 + s * 20);
-        }
-
-        // Center label
-        ctx.fillStyle = isDark ? '#8a7a6a' : '#8a7a6a';
-        ctx.font = 'bold 13px Inter';
+        ctx.fillStyle = 'white';
+        ctx.font = `bold 11px Inter`;
         ctx.textAlign = 'center';
-        ctx.fillText(`${ring.length} vnodes`, T3CX, T3CY - 8);
-        ctx.font = '11px Inter';
-        ctx.fillText(`${t3VNodes}/server`, T3CX, T3CY + 10);
+        ctx.fillText(s.label, pt.x, pt.y + 4);
+    });
+
+    // Center label
+    ctx.fillStyle = mutedCol();
+    ctx.font = 'bold 13px Inter';
+    ctx.textAlign = 'center';
+    ctx.fillText('Hash Ring', CX2, CY2 - 8);
+    ctx.font = '10px Inter';
+    ctx.fillText(`${t2Servers.length} servers · ${t2Keys.length} keys`, CX2, CY2 + 10);
+
+    t2UpdateInfo();
+}
+
+function t2UpdateInfo() {
+    const el = document.getElementById('t2-info');
+    el.innerHTML = '';
+    t2Servers.sort((a,b)=>a.id-b.id).forEach(s => {
+        const keys = t2Keys.filter(k => {
+            const srv = findServerCW(k.pos, t2Servers);
+            return srv && srv.id === s.id;
+        }).map(k => k.label);
+        const div = document.createElement('div');
+        div.className = 'info-row';
+        div.innerHTML = `<span style="color:${SRV_COLORS[s.id]};font-weight:600">${s.label}</span><span class="info-val">[${keys.join(', ')||'—'}]</span>`;
+        el.appendChild(div);
+    });
+}
+
+function t2Log(msg, type='info') {
+    const log = document.getElementById('t2-log');
+    const d = document.createElement('div');
+    d.className = `log-entry ${type}`;
+    d.textContent = msg;
+    log.prepend(d);
+    while(log.children.length > 6) log.removeChild(log.lastChild);
+}
+
+function t2TraceKey(keyId) {
+    t2HighlightKey = keyId;
+    t2HighlightServer = null;
+    const key = t2Keys.find(k => k.id === keyId);
+    if (!key) return;
+    const server = findServerCW(key.pos, t2Servers);
+    if (!server) return;
+    t2DrawBase();
+    if (t2TraceAnim) t2TraceAnim();
+    t2TraceAnim = animateArc(T2X, key.pos, server.pos, CX2, CY2, R2 * 0.9,
+        SRV_COLORS[server.id] || '#999',
+        () => {
+            t2HighlightServer = server.id;
+            t2DrawBase();
+            t2Log(`${key.label} → goes clockwise → finds ${server.label}`, 'info');
+        }
+    );
+}
+
+function t2Reset() {
+    t2Servers = S2_BASE.map(s => ({...s}));
+    t2Keys = K2_BASE.map(k => ({...k}));
+    t2HighlightKey = null;
+    t2HighlightServer = null;
+    t2AffectedArc = null;
+    t2scenario = 'base';
+    document.getElementById('t2-log').innerHTML = '';
+    // Re-enable buttons
+    document.getElementById('t2-add-s4').disabled = false;
+    document.getElementById('t2-remove-s1').disabled = false;
+    t2DrawBase();
+}
+
+function t2AddS4() {
+    if (t2Servers.find(s => s.id === 4)) return;
+    // s4 is inserted at pos 0.048 — between k0 (0.010) and s0 (0.083)
+    // Matches Fig 5-8: k0 was going to s0, now hits s4 first
+    const s4pos = 0.048;
+    t2Servers.push({ id:4, pos:s4pos, label:'s4' });
+    // Highlight the affected arc: from s3 (0.833) → s4 (0.048) going clockwise (wraps around top)
+    t2AffectedArc = { from:0.833, to:0.048, color:SRV_COLORS[4] };
+    t2HighlightKey = 0;
+    t2HighlightServer = 4;
+    t2DrawBase();
+    document.getElementById('t2-add-s4').disabled = true;
+    t2Log('+ s4 added at ~12 o\'clock', 'added');
+    t2Log('k0: s0 → s4 (only key affected)', 'moved');
+    t2Log('k1, k2, k3: unchanged ✓', 'info');
+}
+
+function t2RemoveS1() {
+    const idx = t2Servers.findIndex(s => s.id === 1);
+    if (idx === -1) return;
+    t2Servers.splice(idx, 1);
+    // Affected arc: from s0 (0.083) → s1 (0.333) going clockwise
+    t2AffectedArc = { from:0.083, to:0.333, color:SRV_COLORS[2] };
+    t2HighlightKey = 1;
+    t2HighlightServer = 2;
+    t2DrawBase();
+    document.getElementById('t2-remove-s1').disabled = true;
+    t2Log('− s1 removed', 'removed');
+    t2Log('k1: s1 → s2 (only key affected)', 'moved');
+    t2Log('k0, k2, k3: unchanged ✓', 'info');
+}
+
+document.getElementById('t2-trace0').addEventListener('click', () => t2TraceKey(0));
+document.getElementById('t2-trace1').addEventListener('click', () => t2TraceKey(1));
+document.getElementById('t2-trace2').addEventListener('click', () => t2TraceKey(2));
+document.getElementById('t2-trace3').addEventListener('click', () => t2TraceKey(3));
+document.getElementById('t2-add-s4').addEventListener('click', t2AddS4);
+document.getElementById('t2-remove-s1').addEventListener('click', t2RemoveS1);
+document.getElementById('t2-reset2').addEventListener('click', t2Reset);
+t2DrawBase();
+
+// ══════════════════════════════════════════════════
+//  TAB 3: VIRTUAL NODES
+//  Labels match Fig 5-12: s0_0, s0_1, s0_2 etc.
+// ══════════════════════════════════════════════════
+const T3R = document.getElementById('t3-ring');
+const T3B = document.getElementById('t3-bar');
+const T3RC = T3R.getContext('2d');
+const T3BC = T3B.getContext('2d');
+const CX3=200, CY3=200, R3=165;
+const PHYS=4; // physical servers
+let t3VN=3, t3NK=100, t3seeds=[0,1,2,3];
+
+// Simple deterministic hash for demo
+function hash31(str) {
+    let h=5381;
+    for(let i=0;i<str.length;i++) h=((h<<5)+h)+str.charCodeAt(i)|0;
+    return (Math.abs(h)%1000000)/1000000;
+}
+
+function t3VnodePos(server, vnode, seed) {
+    return hash31('s'+server+'_v'+vnode+'@seed'+seed);
+}
+
+function t3GetRing() {
+    const ring=[];
+    for(let s=0;s<PHYS;s++)
+        for(let v=0;v<t3VN;v++)
+            ring.push({ server:s, vnode:v, pos:t3VnodePos(s,v,t3seeds[s]), label:`s${s}_${v}` });
+    return ring.sort((a,b)=>a.pos-b.pos);
+}
+
+function t3Distribute(ring) {
+    const counts=new Array(PHYS).fill(0);
+    for(let i=0;i<t3NK;i++){
+        const kpos=hash31('key'+i+'n'+t3NK);
+        const found=ring.find(v=>v.pos>=kpos)||ring[0];
+        counts[found.server]++;
     }
+    return counts;
+}
 
-    function t3DrawBar(counts) {
-        const ctx = t3BCtx;
-        const W = t3Bar.width, H = t3Bar.height;
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        ctx.clearRect(0, 0, W, H);
-        ctx.fillStyle = isDark ? '#1a1a2e' : '#fffdf7';
-        ctx.fillRect(0, 0, W, H);
+function t3DrawRing(ring, traceK0=false) {
+    const ctx=T3RC;
+    ctx.clearRect(0,0,T3R.width,T3R.height);
+    ctx.fillStyle=bgCard(); ctx.fillRect(0,0,T3R.width,T3R.height);
 
-        const maxCount = Math.max(...counts, 1);
-        const avg = counts.reduce((a, b) => a + b, 0) / counts.length;
-        const barW = 60, gap = 20, startX = 30, topPad = 40, botPad = 60;
-        const barH = H - topPad - botPad;
-        const textColor = isDark ? '#e8dcc8' : '#3d2e1f';
-        const mutedColor = '#8a7a6a';
+    // Draw partition arcs
+    ring.forEach((vn,i)=>{
+        const prev=ring[(i-1+ring.length)%ring.length];
+        drawArc(ctx,prev.pos,vn.pos,CX3,CY3,R3,SRV_COLORS[vn.server],10,0.18);
+    });
 
-        // Title
-        ctx.fillStyle = textColor;
-        ctx.font = 'bold 13px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText('Key Distribution by Server', W/2, 24);
+    // Base ring
+    ctx.beginPath(); ctx.arc(CX3,CY3,R3,0,Math.PI*2);
+    ctx.strokeStyle=bgRing(); ctx.lineWidth=2; ctx.stroke();
 
-        // Avg line
-        const avgY = topPad + barH - (avg / maxCount * barH);
-        ctx.setLineDash([6, 4]);
-        ctx.strokeStyle = '#d4a84b80';
-        ctx.lineWidth = 1.5;
+    // k0 position (for trace demo)
+    const k0pos=hash31('key0n'+t3NK);
+
+    // Draw vnode ticks
+    ring.forEach(vn=>{
+        const a=vn.pos*2*Math.PI-Math.PI/2;
+        const color=SRV_COLORS[vn.server];
+        const iR=R3-10, oR=R3+8;
         ctx.beginPath();
-        ctx.moveTo(startX, avgY);
-        ctx.lineTo(W - 10, avgY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.fillStyle = '#d4a84b';
-        ctx.font = '10px Inter';
-        ctx.textAlign = 'right';
-        ctx.fillText(`avg ${Math.round(avg)}`, W - 12, avgY - 4);
+        ctx.moveTo(CX3+iR*Math.cos(a),CY3+iR*Math.sin(a));
+        ctx.lineTo(CX3+oR*Math.cos(a),CY3+oR*Math.sin(a));
+        ctx.strokeStyle=color;
+        ctx.lineWidth=t3VN>6?2:2.5; ctx.stroke();
 
-        // Bars
-        counts.forEach((count, i) => {
-            const x = startX + i * (barW + gap);
-            const bH = (count / maxCount) * barH;
-            const y = topPad + barH - bH;
+        // Draw filled dot for small vnode counts, label for very small
+        if(t3VN<=4){
+            const dot={x:CX3+(oR+6)*Math.cos(a),y:CY3+(oR+6)*Math.sin(a)};
+            ctx.beginPath(); ctx.arc(dot.x,dot.y,5,0,Math.PI*2);
+            ctx.fillStyle=color; ctx.fill();
+            // Label
+            ctx.save();
+            ctx.fillStyle=textCol();
+            ctx.font='bold 8px JetBrains Mono';
+            ctx.textAlign='center';
+            const lblDist=oR+18;
+            ctx.fillText(vn.label,CX3+lblDist*Math.cos(a),CY3+lblDist*Math.sin(a)+3);
+            ctx.restore();
+        }
+    });
 
-            // Bar
-            const color = serverColors[i];
-            ctx.fillStyle = color + 'cc';
-            ctx.fillRect(x, y, barW, bH);
-            ctx.strokeStyle = color;
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, barW, bH);
+    // k0 position indicator
+    const k0pt=posToXY(k0pos,R3*0.72,CX3,CY3);
+    ctx.beginPath(); ctx.arc(k0pt.x,k0pt.y,9,0,Math.PI*2);
+    ctx.fillStyle='rgba(212,168,75,0.2)'; ctx.fill();
+    ctx.strokeStyle=SRV_COLORS[0]; ctx.lineWidth=2; ctx.stroke();
+    ctx.fillStyle=textCol(); ctx.font='bold 9px JetBrains Mono';
+    ctx.textAlign='center'; ctx.fillText('k0',k0pt.x,k0pt.y+3);
 
-            // Count above bar
-            ctx.fillStyle = textColor;
-            ctx.font = 'bold 13px Inter';
-            ctx.textAlign = 'center';
-            ctx.fillText(count, x + barW/2, y - 8);
-
-            // Server label below
-            ctx.font = '11px Inter';
-            ctx.fillStyle = color;
-            ctx.fillText('S' + i, x + barW/2, H - botPad + 20);
-
-            const pct = Math.round(count / t3NumKeys * 100);
-            ctx.fillStyle = mutedColor;
-            ctx.font = '10px Inter';
-            ctx.fillText(pct + '%', x + barW/2, H - botPad + 36);
-        });
-
-        // Std dev
-        const mean = avg;
-        const variance = counts.reduce((sum, c) => sum + Math.pow(c - mean, 2), 0) / counts.length;
-        const stddev = Math.sqrt(variance);
-        const stddevPct = Math.round(stddev / mean * 100);
-
-        document.getElementById('t3-stddev').textContent = stddevPct + '%';
-        document.getElementById('t3-max-server').textContent = Math.max(...counts);
-        document.getElementById('t3-min-server').textContent = Math.min(...counts);
-        document.getElementById('t3-total-vnodes').textContent = t3VNodes * PHYSICAL_SERVERS;
+    // Trace k0 if requested
+    if(traceK0){
+        const target=ring.find(v=>v.pos>=k0pos)||ring[0];
+        const targetPt=posToXY(target.pos,R3,CX3,CY3);
+        ctx.save();
+        ctx.setLineDash([5,4]);
+        ctx.beginPath(); ctx.moveTo(k0pt.x,k0pt.y); ctx.lineTo(targetPt.x,targetPt.y);
+        ctx.strokeStyle=SRV_COLORS[target.server]+'bb';
+        ctx.lineWidth=1.5; ctx.stroke();
+        ctx.setLineDash([]); ctx.restore();
+        // Pulse ring point
+        ctx.beginPath(); ctx.arc(targetPt.x,targetPt.y,10,0,Math.PI*2);
+        ctx.fillStyle=SRV_COLORS[target.server]+'66'; ctx.fill();
+        ctx.fillStyle=textCol();
+        ctx.font='bold 9px JetBrains Mono';
+        ctx.textAlign='center';
+        ctx.fillText(target.label,targetPt.x,targetPt.y+3);
     }
 
-    function t3Update() {
-        const counts = t3Distribute(t3VNodes, t3NumKeys);
-        t3DrawRing();
-        t3DrawBar(counts);
+    // Legend
+    for(let s=0;s<PHYS;s++){
+        ctx.beginPath(); ctx.arc(16,12+s*20,7,0,Math.PI*2);
+        ctx.fillStyle=SRV_COLORS[s]; ctx.fill();
+        ctx.fillStyle=textCol(); ctx.font='11px Inter';
+        ctx.textAlign='left';
+        ctx.fillText(`Server ${s} (${t3VN} vnodes)`,28,16+s*20);
     }
 
-    const vnodeSlider = document.getElementById('t3-vnode-slider');
-    const keysSlider = document.getElementById('t3-keys-slider');
-    vnodeSlider.addEventListener('input', () => {
-        t3VNodes = parseInt(vnodeSlider.value);
-        document.getElementById('t3-vnode-val').textContent = t3VNodes;
-        t3Update();
+    // Center
+    ctx.fillStyle=mutedCol(); ctx.font='bold 12px Inter';
+    ctx.textAlign='center';
+    ctx.fillText(`${ring.length} vnodes`,CX3,CY3-7);
+    ctx.font='10px Inter';
+    ctx.fillText(`${t3VN}/server`,CX3,CY3+10);
+}
+
+function t3DrawBar(counts) {
+    const ctx=T3BC;
+    const W=T3B.width, H=T3B.height;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle=bgCard(); ctx.fillRect(0,0,W,H);
+
+    const max=Math.max(...counts,1);
+    const avg=counts.reduce((a,b)=>a+b,0)/counts.length;
+    const bW=50,gap=16,startX=24,topP=44,botP=56,barH=H-topP-botP;
+
+    ctx.fillStyle=textCol(); ctx.font='bold 12px Inter';
+    ctx.textAlign='center'; ctx.fillText('Key Distribution',W/2,26);
+
+    // Avg dashed line
+    const avgY=topP+barH-(avg/max*barH);
+    ctx.setLineDash([6,4]); ctx.beginPath();
+    ctx.moveTo(startX,avgY); ctx.lineTo(W-10,avgY);
+    ctx.strokeStyle='#d4a84b80'; ctx.lineWidth=1.5; ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle='#d4a84b'; ctx.font='9px Inter';
+    ctx.textAlign='right';
+    ctx.fillText('avg '+Math.round(avg),W-12,avgY-4);
+
+    counts.forEach((c,i)=>{
+        const x=startX+i*(bW+gap);
+        const bH=(c/max)*barH;
+        const y=topP+barH-bH;
+        const color=SRV_COLORS[i];
+        ctx.fillStyle=color+'cc'; ctx.fillRect(x,y,bW,bH);
+        ctx.strokeStyle=color; ctx.lineWidth=2; ctx.strokeRect(x,y,bW,bH);
+        ctx.fillStyle=textCol(); ctx.font='bold 12px Inter';
+        ctx.textAlign='center'; ctx.fillText(c,x+bW/2,y-7);
+        ctx.fillStyle=color; ctx.font='10px Inter';
+        ctx.fillText('s'+i,x+bW/2,H-botP+18);
+        ctx.fillStyle=mutedCol(); ctx.font='9px Inter';
+        ctx.fillText(Math.round(c/t3NK*100)+'%',x+bW/2,H-botP+32);
     });
-    keysSlider.addEventListener('input', () => {
-        t3NumKeys = parseInt(keysSlider.value);
-        document.getElementById('t3-keys-val').textContent = t3NumKeys;
-        t3Update();
-    });
-    document.getElementById('t3-randomize').addEventListener('click', () => {
-        t3Init();
-        t3Update();
-    });
-    t3Init();
+
+    const variance=counts.reduce((s,c)=>s+Math.pow(c-avg,2),0)/counts.length;
+    const sd=Math.sqrt(variance);
+    const sdPct=Math.round(sd/avg*100);
+    document.getElementById('t3-stddev').textContent=sdPct+'%';
+    document.getElementById('t3-max-load').textContent=Math.max(...counts);
+    document.getElementById('t3-min-load').textContent=Math.min(...counts);
+    document.getElementById('t3-total-vn').textContent=t3VN*PHYS;
+}
+
+let t3traceK0=false;
+function t3Update(){
+    const ring=t3GetRing();
+    const counts=t3Distribute(ring);
+    t3DrawRing(ring,t3traceK0);
+    t3DrawBar(counts);
+}
+
+document.getElementById('t3-slider').addEventListener('input',e=>{
+    t3VN=parseInt(e.target.value);
+    document.getElementById('t3-vval').textContent=t3VN;
+    t3traceK0=false;
     t3Update();
+});
+document.getElementById('t3-kslider').addEventListener('input',e=>{
+    t3NK=parseInt(e.target.value);
+    document.getElementById('t3-kval').textContent=t3NK;
+    t3Update();
+});
+document.getElementById('t3-randomize').addEventListener('click',()=>{
+    t3seeds=t3seeds.map((_,i)=>Math.floor(Math.random()*1000+i*100));
+    t3traceK0=false;
+    t3Update();
+});
+document.getElementById('t3-trace-k0').addEventListener('click',()=>{
+    t3traceK0=!t3traceK0;
+    document.getElementById('t3-trace-k0').classList.toggle('active',t3traceK0);
+    t3Update();
+});
+t3Update();
 
-    // ════════════════════════════════════════════
-    //  TABS
-    // ════════════════════════════════════════════
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-            btn.classList.add('active');
-            document.getElementById(btn.dataset.tab).classList.add('active');
-            // Redraw when tab becomes visible
-            if (btn.dataset.tab === 't1') t1Draw();
-            if (btn.dataset.tab === 't2') t2Draw();
-            if (btn.dataset.tab === 't3') t3Update();
-        });
+// ══════════════════════════════════════════════════
+//  TAB 4: FIND AFFECTED KEYS
+// ══════════════════════════════════════════════════
+const T4C = document.getElementById('t4-canvas');
+const T4X = T4C.getContext('2d');
+const CX4=230, CY4=230, R4=180;
+
+// Same base ring as Tab 2
+const T4_BASE_SERVERS = [
+    { id:0, pos:0.083, label:'s0' },
+    { id:1, pos:0.333, label:'s1' },
+    { id:2, pos:0.583, label:'s2' },
+    { id:3, pos:0.833, label:'s3' },
+];
+// Same keys as Tab 2
+const T4_KEYS = [
+    { id:0, pos:0.010, label:'k0', color:'#aaa' },
+    { id:1, pos:0.210, label:'k1', color:'#aaa' },
+    { id:2, pos:0.440, label:'k2', color:'#aaa' },
+    { id:3, pos:0.690, label:'k3', color:'#aaa' },
+];
+
+let t4Servers = T4_BASE_SERVERS.map(s=>({...s}));
+let t4ArcFrom=null, t4ArcTo=null, t4ArcColor=null;
+let t4AffectedKeys=[];
+let t4ArcAnim=null;
+
+function t4DrawBase() {
+    const ctx=T4X;
+    ctx.clearRect(0,0,T4C.width,T4C.height);
+    ctx.fillStyle=bgCard(); ctx.fillRect(0,0,T4C.width,T4C.height);
+
+    // Partition arcs
+    const sorted=[...t4Servers].sort((a,b)=>a.pos-b.pos);
+    sorted.forEach((s,i)=>{
+        const prev=sorted[(i-1+sorted.length)%sorted.length];
+        drawArc(ctx,prev.pos,s.pos,CX4,CY4,R4,SRV_COLORS[s.id]||'#999',12,0.18);
     });
 
-    // ════════════════════════════════════════════
-    //  DARK MODE
-    // ════════════════════════════════════════════
-    const themeToggle = document.getElementById('themeToggle');
-    const savedTheme = localStorage.getItem('ch5-viz-theme');
-    if (savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
-    themeToggle.addEventListener('click', () => {
-        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem('ch5-viz-theme', next);
-        themeToggle.textContent = next === 'dark' ? '\u2600' : '\u263D';
-        // Redraw active tab
-        const activeTab = document.querySelector('.tab-btn.active').dataset.tab;
-        if (activeTab === 't1') t1Draw();
-        if (activeTab === 't2') t2Draw();
-        if (activeTab === 't3') t3Update();
+    // Affected arc highlight
+    if(t4ArcFrom!==null && t4ArcTo!==null){
+        drawArc(ctx,t4ArcFrom,t4ArcTo,CX4,CY4,R4,t4ArcColor,14,0.55);
+        // Anticlockwise arrow label
+        const midPos=((t4ArcFrom+t4ArcTo)/2)%1;
+        const midPt=posToXY(midPos,R4+30,CX4,CY4);
+        ctx.fillStyle=t4ArcColor;
+        ctx.font='bold 10px Inter';
+        ctx.textAlign='center';
+        ctx.fillText('affected range',midPt.x,midPt.y);
+    }
+
+    // Base ring
+    ctx.beginPath(); ctx.arc(CX4,CY4,R4,0,Math.PI*2);
+    ctx.strokeStyle=bgRing(); ctx.lineWidth=2.5; ctx.stroke();
+
+    // Keys
+    T4_KEYS.forEach(k=>{
+        const pt=posToXY(k.pos,R4*0.78,CX4,CY4);
+        const isAffected=t4AffectedKeys.includes(k.id);
+        const kColor=isAffected ? (t4ArcColor||'#c97b6b') : mutedCol();
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,isAffected?12:8,0,Math.PI*2);
+        ctx.fillStyle=isAffected ? kColor+'44' : bgCard();
+        ctx.fill();
+        ctx.strokeStyle=kColor;
+        ctx.lineWidth=isAffected?2.5:1.5;
+        ctx.stroke();
+        ctx.fillStyle=isAffected?kColor:mutedCol();
+        ctx.font=`${isAffected?'bold ':''}10px JetBrains Mono`;
+        ctx.textAlign='center';
+        ctx.fillText(k.label,pt.x,pt.y+4);
     });
-    if (document.documentElement.getAttribute('data-theme') === 'dark') themeToggle.textContent = '\u2600';
-    </script>
+
+    // Servers
+    t4Servers.forEach(s=>{
+        const pt=posToXY(s.pos,R4,CX4,CY4);
+        const color=SRV_COLORS[s.id]||'#999';
+        ctx.beginPath(); ctx.arc(pt.x,pt.y,16,0,Math.PI*2);
+        ctx.fillStyle=color; ctx.fill();
+        ctx.strokeStyle=bgCard(); ctx.lineWidth=3; ctx.stroke();
+        ctx.fillStyle='white'; ctx.font='bold 10px Inter';
+        ctx.textAlign='center';
+        ctx.fillText(s.label,pt.x,pt.y+4);
+    });
+
+    ctx.fillStyle=mutedCol(); ctx.font='bold 12px Inter';
+    ctx.textAlign='center';
+    ctx.fillText('Hash Ring',CX4,CY4-7);
+    ctx.font='10px Inter';
+    ctx.fillText(`${t4Servers.length} servers`,CX4,CY4+10);
+}
+
+function t4InfoMsg(lines) {
+    const el=document.getElementById('t4-info');
+    el.innerHTML='';
+    lines.forEach(({text,type})=>{
+        const d=document.createElement('div');
+        d.className=`log-entry ${type||'info'}`;
+        d.textContent=text;
+        el.appendChild(d);
+    });
+}
+
+function t4AddS4() {
+    t4Servers=T4_BASE_SERVERS.map(s=>({...s}));
+    const s4pos=0.048;
+    t4Servers.push({id:4,pos:s4pos,label:'s4'});
+    // Affected arc: from s3 (0.833) clockwise to s4 (0.048) — wrapping around top
+    // Keys in this arc: only k0 (at 0.010) is between 0.833 and 0.048 (wrapping)
+    t4ArcFrom=0.833; t4ArcTo=0.048; t4ArcColor=SRV_COLORS[4];
+    t4AffectedKeys=[0]; // k0 is in the affected arc
+    t4DrawBase();
+    t4InfoMsg([
+        {text:'s4 added at ~12 o\'clock',type:'added'},
+        {text:'Affected arc: s3 → s4 (anticlockwise to predecessor)',type:'info'},
+        {text:'k0 in this arc → moves from s0 to s4',type:'moved'},
+        {text:'k1, k2, k3 outside arc → unchanged ✓',type:'info'},
+    ]);
+}
+
+function t4RemoveS1() {
+    t4Servers=T4_BASE_SERVERS.filter(s=>s.id!==1).map(s=>({...s}));
+    // Affected arc: from s0 (0.083) clockwise to s1 (0.333)
+    // Keys in this arc: k1 (at 0.210) is between 0.083 and 0.333
+    t4ArcFrom=0.083; t4ArcTo=0.333; t4ArcColor=SRV_COLORS[2];
+    t4AffectedKeys=[1]; // k1 is in affected arc
+    t4DrawBase();
+    t4InfoMsg([
+        {text:'s1 removed',type:'removed'},
+        {text:'Affected arc: s0 → s1 (anticlockwise to predecessor)',type:'info'},
+        {text:'k1 in this arc → moves from s1 to s2',type:'moved'},
+        {text:'k0, k2, k3 outside arc → unchanged ✓',type:'info'},
+    ]);
+}
+
+function t4Reset() {
+    t4Servers=T4_BASE_SERVERS.map(s=>({...s}));
+    t4ArcFrom=null; t4ArcTo=null; t4ArcColor=null;
+    t4AffectedKeys=[];
+    t4InfoMsg([{text:'Click Add or Remove to see which keys are affected.',type:'info'}]);
+    t4DrawBase();
+}
+
+document.getElementById('t4-add').addEventListener('click', t4AddS4);
+document.getElementById('t4-remove').addEventListener('click', t4RemoveS1);
+document.getElementById('t4-reset').addEventListener('click', t4Reset);
+t4DrawBase();
+
+// ══════════════════════════════════════════════════
+//  TABS
+// ══════════════════════════════════════════════════
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+        // Redraw on tab show (avoids off-screen canvas issues)
+        if(btn.dataset.tab==='t2') t2DrawBase();
+        if(btn.dataset.tab==='t3') t3Update();
+        if(btn.dataset.tab==='t4') t4DrawBase();
+    });
+});
+
+// ══════════════════════════════════════════════════
+//  DARK MODE + REDRAW
+// ══════════════════════════════════════════════════
+const themeToggle=document.getElementById('themeToggle');
+const savedTheme=localStorage.getItem('ch5viz-theme');
+if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
+if(isDark()) themeToggle.textContent='☀';
+
+themeToggle.addEventListener('click',()=>{
+    const next=isDark()?'light':'dark';
+    document.documentElement.setAttribute('data-theme',next);
+    localStorage.setItem('ch5viz-theme',next);
+    themeToggle.textContent=next==='dark'?'☀':'☽';
+    // Redraw active tab
+    const active=document.querySelector('.tab-btn.active')?.dataset.tab;
+    if(active==='t2') t2DrawBase();
+    if(active==='t3') t3Update();
+    if(active==='t4') t4DrawBase();
+});
+</script>
 </body>
 </html>

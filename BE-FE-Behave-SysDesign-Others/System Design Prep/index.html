@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Design Interview Prep — Study Hub</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --parchment: #fef6e4; --forest-deep: #2d4a3e; --ink-warm: #4a3728;
+            --water-teal: #5ba3a8; --gold-accent: #d4a84b; --sunset-rose: #c97b6b;
+            --moss-green: #7ea87e; --mist-lavender: #b8a9c9; --sky-soft: #e8f4f8;
+            --bg-page: #f5efe0; --bg-card: #fffdf7; --bg-section: #fdfaf2;
+            --text-primary: #3d2e1f; --text-secondary: #6b5744; --text-muted: #8a7a6a;
+            --border-light: #e8dcc8; --border-medium: #d4c5a9;
+            --shadow-soft: 0 2px 12px rgba(74,55,40,0.06);
+            --shadow-medium: 0 4px 20px rgba(74,55,40,0.1);
+            --shadow-hover: 0 8px 30px rgba(74,55,40,0.16);
+        }
+        [data-theme="dark"] {
+            --parchment: #1a1a2e; --forest-deep: #a8d5ba; --ink-warm: #e8d5c4;
+            --water-teal: #7ec8cc; --gold-accent: #e8c170; --sunset-rose: #e8a090;
+            --moss-green: #a8d4a8; --mist-lavender: #c8b8e0;
+            --bg-page: #0f0f1a; --bg-card: #1a1a2e; --bg-section: #16213e;
+            --text-primary: #e8dcc8; --text-secondary: #bfae98; --text-muted: #8a7a6a;
+            --border-light: #2a2a3e; --border-medium: #3a3a50;
+            --shadow-soft: 0 2px 12px rgba(0,0,0,0.2);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 30px rgba(0,0,0,0.4);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-page);
+            color: var(--text-primary);
+            min-height: 100vh;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        /* ─── Header ─── */
+        .hero {
+            background: var(--bg-card);
+            border-bottom: 2px solid var(--gold-accent);
+            padding: 48px 40px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(ellipse at 20% 50%, rgba(91,163,168,0.06) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 50%, rgba(212,168,75,0.06) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .hero::after {
+            content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 22px;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%23f5efe0'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        [data-theme="dark"] .hero::after {
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 1200 22' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 22 Q150 0 300 16 Q450 26 600 10 Q750 0 900 18 Q1050 26 1200 6 V22 Z' fill='%230f0f1a'/%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+        }
+        .hero-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--water-teal), var(--moss-green));
+            color: white; font-size: 0.72em; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; padding: 5px 14px; border-radius: 20px;
+            margin-bottom: 16px;
+        }
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.6em; font-weight: 800;
+            color: var(--ink-warm); margin-bottom: 10px; line-height: 1.2;
+        }
+        .hero p {
+            color: var(--text-secondary); font-size: 1.05em; max-width: 560px; margin: 0 auto 20px;
+        }
+        .hero-stats {
+            display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-top: 16px;
+        }
+        .hero-stat {
+            text-align: center;
+        }
+        .hero-stat strong {
+            display: block; font-size: 1.6em; font-weight: 700; color: var(--water-teal);
+        }
+        .hero-stat span { font-size: 0.8em; color: var(--text-muted); }
+
+        /* ─── Main ─── */
+        .main { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+        .section-label {
+            font-size: 0.75em; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 20px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        /* ─── Chapter Grid ─── */
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 48px;
+        }
+
+        .chapter-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 14px;
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .chapter-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 3px;
+        }
+        .chapter-card.ch1::before { background: linear-gradient(90deg, var(--water-teal), var(--moss-green)); }
+        .chapter-card.ch2::before { background: linear-gradient(90deg, var(--gold-accent), var(--sunset-rose)); }
+        .chapter-card.ch3::before { background: linear-gradient(90deg, var(--mist-lavender), var(--water-teal)); }
+        .chapter-card.ch4::before { background: linear-gradient(90deg, var(--sunset-rose), var(--gold-accent)); }
+        .chapter-card.ch5::before { background: linear-gradient(90deg, var(--moss-green), var(--water-teal)); }
+        .chapter-card.ch8::before { background: linear-gradient(90deg, var(--water-teal), var(--mist-lavender)); }
+
+        .chapter-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--border-medium);
+        }
+
+        .ch-num {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.72em; font-weight: 500;
+            color: var(--text-muted); margin-bottom: 6px;
+        }
+        .ch-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2em; font-weight: 700;
+            color: var(--ink-warm); margin-bottom: 8px; line-height: 1.3;
+        }
+        .ch-desc {
+            font-size: 0.85em; color: var(--text-secondary);
+            line-height: 1.6; margin-bottom: 16px;
+        }
+        .ch-topics {
+            display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 18px;
+        }
+        .ch-topic {
+            font-size: 0.72em; font-weight: 500;
+            background: var(--bg-section);
+            border: 1px solid var(--border-light);
+            color: var(--text-secondary);
+            padding: 3px 9px; border-radius: 10px;
+        }
+        .ch-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        .ch-link {
+            display: inline-flex; align-items: center; gap: 5px;
+            font-size: 0.8em; font-weight: 600;
+            padding: 7px 14px; border-radius: 8px;
+            text-decoration: none; transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        .ch-link.primary {
+            background: var(--water-teal); color: white;
+        }
+        .ch-link.primary:hover { opacity: 0.88; }
+        .ch-link.secondary {
+            background: var(--bg-section);
+            border-color: var(--border-medium);
+            color: var(--text-secondary);
+        }
+        .ch-link.secondary:hover {
+            background: var(--gold-accent); color: white; border-color: transparent;
+        }
+        .ch-link.accent {
+            background: var(--bg-section);
+            border-color: var(--border-medium);
+            color: var(--sunset-rose);
+        }
+        .ch-link.accent:hover {
+            background: var(--sunset-rose); color: white; border-color: transparent;
+        }
+
+        /* ─── Reference Box ─── */
+        .ref-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+            margin-bottom: 40px;
+        }
+        .ref-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 16px 18px;
+            box-shadow: var(--shadow-soft);
+        }
+        .ref-card h4 {
+            font-size: 0.88em; font-weight: 600;
+            color: var(--text-primary); margin-bottom: 6px;
+        }
+        .ref-card p {
+            font-size: 0.78em; color: var(--text-muted); line-height: 1.5;
+        }
+
+        /* ─── Progress Tracker ─── */
+        .progress-row {
+            display: flex; align-items: center; gap: 12px;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: 10px; padding: 14px 18px; margin-bottom: 12px;
+            box-shadow: var(--shadow-soft);
+        }
+        .progress-row .pr-label { font-size: 0.88em; font-weight: 500; min-width: 220px; }
+        .progress-row .pr-bar-wrap {
+            flex: 1; height: 7px; background: var(--bg-section);
+            border-radius: 4px; overflow: hidden;
+        }
+        .progress-row .pr-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        .progress-row .pr-pct { font-size: 0.8em; font-weight: 600; color: var(--text-muted); min-width: 36px; text-align: right; }
+
+        /* ─── Theme Toggle ─── */
+        .theme-toggle {
+            position: fixed; bottom: 24px; right: 24px;
+            width: 44px; height: 44px; border-radius: 50%;
+            background: var(--bg-card); border: 1px solid var(--border-medium);
+            cursor: pointer; font-size: 1.2em;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-medium); z-index: 100;
+            color: var(--text-secondary); transition: all 0.3s;
+        }
+        .theme-toggle:hover { background: var(--gold-accent); color: white; }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 1.8em; }
+            .chapters-grid { grid-template-columns: 1fr; }
+            .ch-links { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="hero">
+    <div class="hero-badge">🏗️ System Design Interview Prep</div>
+    <h1>Study Hub</h1>
+    <p>Alex Xu's <em>System Design Interview</em> — interactive guides, visualizations, and interview Q&A for every chapter.</p>
+    <div class="hero-stats">
+        <div class="hero-stat"><strong>6</strong><span>Chapters</span></div>
+        <div class="hero-stat"><strong>5</strong><span>Interactive Vizualizations</span></div>
+        <div class="hero-stat"><strong>4</strong><span>Interview Q&A Sets</span></div>
+    </div>
+</div>
+
+<div class="main">
+
+    <!-- ─── Chapters ─── -->
+    <div class="section-label">📚 Chapter Guides</div>
+    <div class="chapters-grid">
+
+        <!-- Chapter 1 -->
+        <div class="chapter-card ch1">
+            <div class="ch-num">CHAPTER 1</div>
+            <div class="ch-title">Scale From Zero to Millions of Users</div>
+            <div class="ch-desc">The foundational journey — from single-server to globally distributed system with CDN, sharding, and message queues.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Horizontal Scaling</span>
+                <span class="ch-topic">CDN</span>
+                <span class="ch-topic">Caching</span>
+                <span class="ch-topic">Message Queue</span>
+                <span class="ch-topic">DB Sharding</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 1 - Scale From Zero to Millions/chapter-1-complete.html" class="ch-link primary">📖 Study Guide</a>
+                <a href="Chapter 1 - Scale From Zero to Millions/Message-Queue-Visualize.html" class="ch-link secondary">⚡ Viz</a>
+                <a href="Chapter 1 - Scale From Zero to Millions/interview-qa-chapter1.html" class="ch-link accent">🎯 Q&A</a>
+            </div>
+        </div>
+
+        <!-- Chapter 2 -->
+        <div class="chapter-card ch2">
+            <div class="ch-num">CHAPTER 2</div>
+            <div class="ch-title">Back-of-the-Envelope Estimation</div>
+            <div class="ch-desc">Power of 2, latency numbers, availability SLA, and QPS estimation — the mental math toolkit every interview requires.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Power of 2</span>
+                <span class="ch-topic">Latency Numbers</span>
+                <span class="ch-topic">SLA / Availability</span>
+                <span class="ch-topic">QPS Calculation</span>
+                <span class="ch-topic">Storage Math</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 2 - Back of Envelope Estimation/chapter-2-complete.html" class="ch-link primary">📖 Study Guide</a>
+            </div>
+        </div>
+
+        <!-- Chapter 3 -->
+        <div class="chapter-card ch3">
+            <div class="ch-num">CHAPTER 3</div>
+            <div class="ch-title">A Framework for System Design Interviews</div>
+            <div class="ch-desc">The 4-step framework: clarify → high-level → deep dive → wrap up. How to navigate the ambiguity of open-ended design questions.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Requirements</span>
+                <span class="ch-topic">High-Level Design</span>
+                <span class="ch-topic">Deep Dive</span>
+                <span class="ch-topic">Trade-offs</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 3-Framework For System Design Interviews/chapter-3-complete.html" class="ch-link primary">📖 Study Guide</a>
+            </div>
+        </div>
+
+        <!-- Chapter 4 -->
+        <div class="chapter-card ch4">
+            <div class="ch-num">CHAPTER 4</div>
+            <div class="ch-title">Design A Rate Limiter</div>
+            <div class="ch-desc">Token bucket, leaking bucket, fixed/sliding window — why each algorithm exists, when to use each, and where to deploy.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Token Bucket</span>
+                <span class="ch-topic">Sliding Window</span>
+                <span class="ch-topic">Redis</span>
+                <span class="ch-topic">Distributed Limiter</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 4 - Design A Rate Limiter/chapter-4-complete.html" class="ch-link primary">📖 Study Guide</a>
+                <a href="Chapter 4 - Design A Rate Limiter/Rate-Limiter-Algorithms-Visualize.html" class="ch-link secondary">⚡ Viz</a>
+                <a href="Chapter 4 - Design A Rate Limiter/interview-qa-chapter4.html" class="ch-link accent">🎯 Q&A</a>
+            </div>
+        </div>
+
+        <!-- Chapter 5 -->
+        <div class="chapter-card ch5">
+            <div class="ch-num">CHAPTER 5</div>
+            <div class="ch-title">Design Consistent Hashing</div>
+            <div class="ch-desc">Why modular hashing breaks when servers change, how the hash ring solves it, and how virtual nodes create balanced load.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Hash Ring</span>
+                <span class="ch-topic">Virtual Nodes</span>
+                <span class="ch-topic">Rehashing Problem</span>
+                <span class="ch-topic">Dynamo / Cassandra</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 5 - Design Consistent Hashing/chapter-5-complete.html" class="ch-link primary">📖 Study Guide</a>
+                <a href="Chapter 5 - Design Consistent Hashing/Consistent-Hashing-Visualize.html" class="ch-link secondary">⚡ Viz</a>
+                <a href="Chapter 5 - Design Consistent Hashing/interview-qa-chapter5.html" class="ch-link accent">🎯 Q&A</a>
+            </div>
+        </div>
+
+        <!-- Chapter 8 -->
+        <div class="chapter-card ch8">
+            <div class="ch-num">CHAPTER 8</div>
+            <div class="ch-title">Design A URL Shortener</div>
+            <div class="ch-desc">Base62 encoding, hash collision handling, 301 vs 302 redirects, read-heavy caching, and horizontal database sharding.</div>
+            <div class="ch-topics">
+                <span class="ch-topic">Base62</span>
+                <span class="ch-topic">Hash Functions</span>
+                <span class="ch-topic">301 vs 302</span>
+                <span class="ch-topic">Cache</span>
+                <span class="ch-topic">Sharding</span>
+            </div>
+            <div class="ch-links">
+                <a href="Chapter 8 - Design A URL Shortener/chapter-8-complete.html" class="ch-link primary">📖 Study Guide</a>
+                <a href="Chapter 8 - Design A URL Shortener/URL-Shortener-Visualize.html" class="ch-link secondary">⚡ Viz</a>
+                <a href="Chapter 8 - Design A URL Shortener/interview-qa-chapter8.html" class="ch-link accent">🎯 Q&A</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ─── Quick Reference ─── -->
+    <div class="section-label">⚡ Key Numbers to Memorize</div>
+    <div class="ref-grid">
+        <div class="ref-card">
+            <h4>⏱ Latency Reference</h4>
+            <p>L1 cache: 0.5ns · RAM: 100ns · SSD: 150µs · HDD: 10ms · Same DC: 500µs · Cross-continent: 150ms</p>
+        </div>
+        <div class="ref-card">
+            <h4>📦 Storage Units</h4>
+            <p>2^10=1KB · 2^20=1MB · 2^30=1GB · 2^40=1TB · 2^50=1PB · 1 char=1 byte · 1 photo≈1MB</p>
+        </div>
+        <div class="ref-card">
+            <h4>📈 Availability SLA</h4>
+            <p>99% → 3.65d/yr · 99.9% → 8.77h/yr · 99.99% → 52.6min/yr · 99.999% → 5.26min/yr</p>
+        </div>
+        <div class="ref-card">
+            <h4>🔢 QPS Formula</h4>
+            <p>Avg QPS = DAU × req/user ÷ 86,400 · Peak = Avg × 2–5× · 86,400 = seconds in a day</p>
+        </div>
+    </div>
+
+    <!-- ─── Study Progress ─── -->
+    <div class="section-label">📊 Chapter Coverage Progress</div>
+    <div class="progress-row">
+        <span class="pr-label">📚 Ch1 · Scale From Zero to Millions</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:90%;background:linear-gradient(90deg,#5ba3a8,#7ea87e)"></div></div>
+        <span class="pr-pct">90%</span>
+    </div>
+    <div class="progress-row">
+        <span class="pr-label">🔢 Ch2 · Back-of-the-Envelope Estimation</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:75%;background:linear-gradient(90deg,#d4a84b,#c97b6b)"></div></div>
+        <span class="pr-pct">75%</span>
+    </div>
+    <div class="progress-row">
+        <span class="pr-label">🗺 Ch3 · Framework for SD Interviews</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:80%;background:linear-gradient(90deg,#b8a9c9,#5ba3a8)"></div></div>
+        <span class="pr-pct">80%</span>
+    </div>
+    <div class="progress-row">
+        <span class="pr-label">🛡 Ch4 · Design A Rate Limiter</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:85%;background:linear-gradient(90deg,#c97b6b,#d4a84b)"></div></div>
+        <span class="pr-pct">85%</span>
+    </div>
+    <div class="progress-row">
+        <span class="pr-label">⭕ Ch5 · Design Consistent Hashing</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:88%;background:linear-gradient(90deg,#7ea87e,#5ba3a8)"></div></div>
+        <span class="pr-pct">88%</span>
+    </div>
+    <div class="progress-row">
+        <span class="pr-label">🔗 Ch8 · Design A URL Shortener</span>
+        <div class="pr-bar-wrap"><div class="pr-bar" style="width:82%;background:linear-gradient(90deg,#5ba3a8,#b8a9c9)"></div></div>
+        <span class="pr-pct">82%</span>
+    </div>
+
+</div>
+
+<button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
+
+<script>
+    const themeToggle = document.getElementById('themeToggle');
+    const saved = localStorage.getItem('sd-hub-theme');
+    if (saved) document.documentElement.setAttribute('data-theme', saved);
+    if (document.documentElement.getAttribute('data-theme') === 'dark') themeToggle.textContent = '☀';
+    themeToggle.addEventListener('click', () => {
+        const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        localStorage.setItem('sd-hub-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀' : '☽';
+    });
+</script>
+</body>
+</html>

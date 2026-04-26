@@ -84,7 +84,7 @@
 
 ```
 Behavioral Prep/
-├── CONTEXT.md                              ← THIS FILE (Hadriel's memory)
+├── CLAUDE.md                               ← THIS FILE (Hadriel's memory)
 ├── README.md                               ← Overview + folder structure
 ├── behavioral-prep.html                    ← Main interactive battle page
 ├── Common-Questions/
