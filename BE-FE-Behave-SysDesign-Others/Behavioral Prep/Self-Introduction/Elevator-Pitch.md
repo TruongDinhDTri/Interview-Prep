@@ -8,6 +8,7 @@
 ---
 
 ## Version 1: General Full-Stack Engineer
+
 *Personality: Builder who loves giving people their time back*
 
 > Hi, I'm Tri — a full-stack engineer who genuinely loves building things that give people their time back. I come from a family of artists, and I bring that same obsession with craft into everything I code.
@@ -19,6 +20,7 @@
 ---
 
 ## Version 2: Python / Backend-Heavy Role
+
 *Personality: Automation-first engineer who can't stand watching people do things the hard way*
 
 > Hi, I'm Tri — a backend engineer who can't stand watching people do things the hard way. Give me Python and a painful workflow, and I'll come back with a tool that fixes it. That's just how my brain works.
@@ -30,6 +32,7 @@
 ---
 
 ## Version 3: AI-Native / AI Company
+
 *Personality: Architects AI systems, doesn't just prompt them*
 
 > Hi, I'm Tri — a full-stack engineer who doesn't just use AI tools — I architect them. I believe AI has closed the gap between imagination and what one person can actually build, and I want to push that boundary further.
@@ -41,6 +44,7 @@
 ---
 
 ## Version 4: Product Engineer / Design-Forward
+
 *Personality: Artist's soul, end-to-end builder*
 
 > Hi, I'm Tri — a full-stack engineer with an artist's soul. My grandfather was a painter, I play piano and draw, and I inherited this belief that everything we build should be both beautiful and useful — like a Da Vinci sketch that's art and engineering at once.
@@ -52,9 +56,10 @@
 ---
 
 ## Version 5: Startup / Founding Engineer
+
 *Personality: 0→1 builder who ships everything himself*
 
-> Hi, I'm Tri — a full-stack engineer who loves the zero-to-one phase. I get restless when there's a problem and no tool to solve it, so I build one. That's led me to ship Slack bots, Chrome extensions, bash automation suites, AI agents, and full-stack apps — all self-initiated, all adopted by real users.
+> Hi, I'm Tri — a full-stack engineer who loves the zero-to-one phase. I have an artist soul so I kinda bring that belief that everything we build should be both beautiful and useful.I get restless when there's a problem and no tool to solve it, so I build one. That's led me to ship Slack bots, Chrome extensions, bash automation suites, AI agents, and full-stack apps — all self-initiated, all adopted by real users.
 >
 > My proudest hack: our Chrome extension took 10–15 minutes to rebuild for every code change. I built a self-contained scraper bundle that runs directly in DevTools — instant feedback, zero rebuild time. It caught my coworkers' eyes, then our partner companies started using it too.
 >
@@ -63,6 +68,7 @@
 ---
 
 ## Version 6: Developer Tools / DX-Focused
+
 *Personality: Obsessed with developer experience*
 
 > Hi, I'm Tri — a full-stack engineer obsessed with developer experience. Nothing frustrates me more than watching talented engineers lose hours to bad tooling. So I build the tools that give them that time back.
@@ -74,6 +80,7 @@
 ---
 
 ## Version 7: WorldQuant / Quant-Adjacent
+
 *Personality: Python + data + analytical rigor + builder energy*
 
 > Hi, I'm Tri — a Python-focused engineer who loves working with data-driven systems. I've spent 3 years building tools that process, extract, and transform data at scale — and I bring a builder's energy to everything I touch.
@@ -89,6 +96,7 @@
 ---
 
 ## Version 8: Quick 15-Second Networking
+
 *Ultra-condensed, memorable hook*
 
 > Hi, I'm Tri — a full-stack engineer from Vietnam who builds tools people actually love using. I built 8 automation tools my team uses daily, an AI ecosystem with persistent memory, and a mental health platform from Figma to production. I'm looking for remote roles where I can ship impactful products.
@@ -99,15 +107,15 @@
 
 Swap the closing line based on company type:
 
-| Company Type | Closing Line Example |
-|---|---|
-| **Startup** | "...I thrive in small teams where I can own features end-to-end and move fast." |
-| **AI Company** | "...I want to build the AI infrastructure that makes these tools genuinely useful." |
-| **Enterprise** | "...I love bringing automation thinking to large-scale systems and making teams faster." |
-| **Remote-first** | "...I do my best work async — I'm disciplined, proactive, and ship independently." |
-| **Product Company** | "...I want to build products people don't just use, but genuinely love opening." |
-| **Dev Tools** | "...building tools that multiply what developers can do — that's my favorite work." |
-| **Quant/Data** | "...I love the intersection of engineering rigor and data-driven decision making." |
+| Company Type              | Closing Line Example                                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------------- |
+| **Startup**         | "...I thrive in small teams where I can own features end-to-end and move fast."          |
+| **AI Company**      | "...I want to build the AI infrastructure that makes these tools genuinely useful."      |
+| **Enterprise**      | "...I love bringing automation thinking to large-scale systems and making teams faster." |
+| **Remote-first**    | "...I do my best work async — I'm disciplined, proactive, and ship independently."      |
+| **Product Company** | "...I want to build products people don't just use, but genuinely love opening."         |
+| **Dev Tools**       | "...building tools that multiply what developers can do — that's my favorite work."     |
+| **Quant/Data**      | "...I love the intersection of engineering rigor and data-driven decision making."       |
 
 ---
 
@@ -137,7 +145,7 @@ Swap the closing line based on company type:
 ## Practice Log
 
 | Date | Version | Duration | Notes |
-|------|---------|----------|-------|
-| | | | |
+| ---- | ------- | -------- | ----- |
+|      |         |          |       |
 
 **Target: 45 seconds to 1 minute, natural delivery, sounds like YOU talking — not reading a script**

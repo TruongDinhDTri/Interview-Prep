@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 8: Practice Q&amp;A — Retry &amp; Circuit Breaker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           NOTION-STYLE CLEAN DESIGN SYSTEM
+           ═══════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-muted: #9b9a97;
+            --border: #e3e2de;
+            --border-light: #eeeeec;
+            --accent-blue: #2563eb;
+            --accent-red: #eb5757;
+            --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0;
+            --accent-orange: #e97f33;
+            --code-bg: #f7f6f3;
+            --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe;
+            --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0;
+            --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8;
+            --callout-purple-border: #9065b0;
+            --sidebar-width: 260px;
+            --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #191919;
+            --bg-secondary: #202020;
+            --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de;
+            --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b;
+            --border: #333;
+            --border-light: #2a2a2a;
+            --accent-blue: #529cca;
+            --accent-red: #eb5757;
+            --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8;
+            --accent-orange: #e97f33;
+            --code-bg: #252525;
+            --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a;
+            --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28;
+            --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a;
+            --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #e97f33, #eb5757, #9065b0);
+            z-index: 1001;
+            transition: width 0.1s linear;
+        }
+
+        /* ═══ Page Cover ═══ */
+        .page-cover {
+            height: var(--cover-height);
+            background: linear-gradient(135deg, #9065b0 0%, #e97f33 50%, #eb5757 100%);
+            position: relative;
+        }
+        [data-theme="dark"] .page-cover {
+            background: linear-gradient(135deg, #3a1f5a 0%, #5c2e0a 50%, #5a1a1a 100%);
+        }
+
+        /* ═══ Sidebar ═══ */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .sidebar-header {
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 8px;
+        }
+        .sidebar-header h3 {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        .sidebar a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 16px 6px 20px;
+            font-size: 0.82em;
+            font-weight: 400;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .sidebar a:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        .sidebar a.active {
+            color: var(--accent-orange);
+            font-weight: 500;
+            border-left-color: var(--accent-orange);
+            background: rgba(233,127,51,0.06);
+        }
+
+        /* ═══ Main Content ═══ */
+        .main-content {
+            max-width: calc(900px + var(--sidebar-width));
+            margin: 0 auto;
+            padding: 0 60px 80px calc(var(--sidebar-width) + 60px);
+        }
+
+        /* ═══ Breadcrumbs ═══ */
+        .breadcrumbs {
+            padding: 16px 0 8px;
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+        .breadcrumbs a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+
+        /* ═══ Page Title ═══ */
+        .page-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 16px 0 8px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05em;
+            margin-bottom: 32px;
+        }
+
+        /* ═══ Headings ═══ */
+        h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 48px 0 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            letter-spacing: -0.01em;
+        }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            color: var(--text-primary);
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        /* ═══ Paragraph & Lists ═══ */
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+
+        /* ═══ Divider ═══ */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 32px 0;
+        }
+
+        /* ═══ Toggle Blocks (details/summary) ═══ */
+        details {
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        summary {
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            transition: background 0.2s;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            font-size: 1em;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: '▶';
+            font-size: 0.65em;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* ═══ Nested details ═══ */
+        details details {
+            margin: 8px 0;
+            border-color: var(--border);
+        }
+        details details summary {
+            font-size: 0.95em;
+            padding: 10px 14px;
+        }
+
+        /* ═══ Callout Boxes ═══ */
+        .callout {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid;
+        }
+        .callout-emoji {
+            font-size: 1.2em;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+
+        .callout-yellow {
+            background: var(--callout-yellow-bg);
+            border-left-color: var(--callout-yellow-border);
+        }
+        .callout-red {
+            background: var(--callout-red-bg);
+            border-left-color: var(--callout-red-border);
+        }
+        .callout-green {
+            background: var(--callout-green-bg);
+            border-left-color: var(--callout-green-border);
+        }
+        .callout-blue {
+            background: var(--callout-blue-bg);
+            border-left-color: var(--callout-blue-border);
+        }
+        .callout-purple {
+            background: var(--callout-purple-bg);
+            border-left-color: var(--callout-purple-border);
+        }
+
+        /* ═══ Inline Code ═══ */
+        code {
+            font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-red);
+        }
+
+        /* ═══ Code Blocks ═══ */
+        pre {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* Syntax highlighting */
+        .kw { color: #d73a49; }
+        .fn { color: #6f42c1; }
+        .str { color: #032f62; }
+        .cm { color: #6a737d; font-style: italic; }
+        .num { color: #005cc5; }
+        .dec { color: #e36209; }
+        .cls { color: #6f42c1; }
+        .op { color: #d73a49; }
+        [data-theme="dark"] .kw { color: #ff7b72; }
+        [data-theme="dark"] .fn { color: #d2a8ff; }
+        [data-theme="dark"] .str { color: #a5d6ff; }
+        [data-theme="dark"] .cm { color: #8b949e; }
+        [data-theme="dark"] .num { color: #79c0ff; }
+        [data-theme="dark"] .dec { color: #ffa657; }
+        [data-theme="dark"] .cls { color: #d2a8ff; }
+        [data-theme="dark"] .op { color: #ff7b72; }
+
+        /* ═══ Tables ═══ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ═══ Quote Block ═══ */
+        blockquote {
+            border-left: 3px solid var(--border);
+            padding: 8px 16px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong { color: var(--text-primary); }
+
+        /* ═══ Tag Pills ═══ */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.78em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+        .tag-green { background: #d1fae5; color: #065f46; }
+        .tag-purple { background: #ede9fe; color: #5b21b6; }
+        .tag-orange { background: #fed7aa; color: #9a3412; }
+        .tag-red { background: #fecaca; color: #991b1b; }
+        .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; }
+        [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; }
+        [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+
+        /* ═══ Key Phrase Highlight ═══ */
+        .key-phrase {
+            background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%);
+            padding: 0 2px;
+        }
+
+        /* ═══ Numbered Step Cards ═══ */
+        .step-card {
+            display: flex;
+            gap: 14px;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+
+        /* ═══ Q Number Badge ═══ */
+        .q-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ═══ Dark Mode Toggle ═══ */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+
+        /* ═══ Mobile Menu Toggle ═══ */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ═══ Strong/Bold ═══ */
+        strong { font-weight: 600; }
+
+        /* ═══ Interview Answer ═══ */
+        .interview-answer {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-style: italic;
+        }
+        .interview-answer strong { font-style: normal; }
+
+        /* ═══ Section Label ═══ */
+        .section-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-orange);
+            margin-bottom: 4px;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin: 0; padding: 0 24px 60px; }
+            .menu-toggle { display: flex; }
+        }
+
+        /* ═══ Scrollbar ═══ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ═══ Print ═══ */
+        @media print {
+            .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
+            .main-content { margin-left: 0; max-width: 100%; }
+            details { break-inside: avoid; }
+            details[open] > .toggle-content { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- Sidebar TOC -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 8 — Practice Q&amp;A</h3>
+    </div>
+    <a href="#q1">Q1. Complete Retry Strategy</a>
+    <a href="#q2">Q2. Thundering Herd &amp; Jitter</a>
+    <a href="#q3">Q3. Circuit Breaker States</a>
+    <a href="#q4">Q4. Retrying a POST Request</a>
+    <a href="#q5">Q5. Bulkhead Pattern</a>
+    <a href="#q6">Q6. Circuit Opens on Payment</a>
+    <a href="#summary">Key Phrases</a>
+    <a href="#practice-strategy">Practice Strategy</a>
+</nav>
+
+<!-- Page Cover -->
+<div class="page-cover"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="01-Key-Talking-Points.html">Session 8 Key Points</a>
+        <span>/</span>
+        <a href="../Session 7 - Caching and Redis/02-Practice-Questions-Answers.html">Session 7</a>
+        <span>/</span>
+        <a href="../Session 9 - Message Queues/02-Practice-Questions-Answers.html">Session 9</a>
+    </div>
+
+    <div class="section-label">Session 8 — Retry &amp; Circuit Breaker</div>
+    <h1 class="page-title">&#128483;&#65039; Practice Questions &amp; Answers</h1>
+    <p class="page-subtitle"><strong>Instructions:</strong> Read the question. Answer out loud for 2 minutes. Then expand the strong answer and compare. Record yourself if possible.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-orange">Retry</span>
+        <span class="tag tag-red">Circuit Breaker</span>
+        <span class="tag tag-blue">Jitter</span>
+        <span class="tag tag-purple">Bulkhead</span>
+        <span class="tag tag-green">Idempotency</span>
+        <span class="tag tag-gray">Interview</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q1: Complete Retry Strategy
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q1">Q1 (Very Common): "Service A calls Service B and gets a timeout. Walk me through your complete retry strategy."</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want to hear:</strong> That you classify the failure first, know the exact backoff formula, understand jitter, and know what <em>not</em> to retry. Bonus points: idempotency awareness.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"I would retry the request a few times with exponential backoff so we don't overwhelm the service."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> No failure classification, no jitter mention, no idempotency awareness, no stopping conditions. It sounds memorized rather than understood.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — Step by Step</summary>
+        <div class="toggle-content">
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">&#9989;</span>
+                <div class="callout-content">
+                    <p>Structure: <strong>Classify → Policy → Jitter → Stop conditions → What NOT to retry</strong></p>
+                </div>
+            </div>
+
+            <details open>
+                <summary>Step 1&#65039;&#8419; — Start with diagnosis: what kind of failure is this?</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"First, I need to classify the failure. A timeout falls into 'transient' — it could be a network blip, a brief overload, or a GC pause on Service B. These typically self-resolve within seconds, so retrying is appropriate. But I need to know: was this request a GET (safe to retry) or a POST that creates a resource? Retrying a non-idempotent POST without an idempotency key creates duplicate records."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Step 2&#65039;&#8419; — The retry policy with exact numbers</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Assuming the operation is idempotent — or we've assigned an idempotency key — here's the policy: I would NOT retry immediately. The first retry waits 100ms–1s, the second waits 2–4s, the third waits 4–8s. Each wait time adds random jitter — not exactly 1s, but somewhere in [0, 1s]. This is critical: if 500 Service A instances all timed out at the same moment, without jitter they'd all retry at exactly T+1s, creating a synchronized 500× request spike on an already-struggling Service B."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Step 3&#65039;&#8419; — Stopping conditions</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Maximum 3–4 retries. If all 4 attempts fail, I stop and propagate the error up the stack. Retrying more than that on a service that's genuinely down just wastes CPU and holds connections. The circuit breaker — if configured — will open after the first few failures anyway, switching future calls to fail-fast mode."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>Step 4&#65039;&#8419; — What I would NOT retry</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"If Service B returns a 400 Bad Request instead of a timeout, I do not retry — my request payload is malformed, and retrying the same bad payload is pointless. Same for 401/403 — auth/permission errors don't resolve with time. Retrying those adds load for zero benefit."</p>
+                    </div>
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">&#128161;</span>
+                        <div class="callout-content">
+                            <p><strong>Key phrase to drop:</strong> <span class="key-phrase">"Retry only idempotent operations, only on transient errors, with exponential backoff and full jitter, capped at 3-5 attempts."</span></p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q2: Thundering Herd & Jitter
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q2">Q2: "What is the thundering herd problem and how does jitter solve it?"</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#129504;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want:</strong> Concrete numbers. Draw the mental picture of 2,000 instances all retrying at the same millisecond. Then explain exactly how jitter distributes that spike.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"Thundering herd is when too many requests hit a service at once. Jitter adds randomness to spread them out."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> No concrete scenario, no numbers, no explanation of how jitter <em>actually works</em> or why full jitter is better than equal jitter.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — Concrete Numbers Required</summary>
+        <div class="toggle-content">
+
+            <details open>
+                <summary>&#9889; Set up the scenario with exact numbers first</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Let me make this concrete. Imagine 2,000 Order Service instances all share the same Payment Service. At T=0, Payment Service experiences a brief overload spike and returns 503 to all 2,000 instances simultaneously. Each instance uses exponential backoff and waits exactly 1 second before retrying."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128165; Describe the thundering herd cascade</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"At T=1 second: all 2,000 instances retry simultaneously. Payment Service, which was just starting to recover from the T=0 overload, is now hit with a synchronized 2,000-request spike. This is 2–5× its normal load. It overloads again. All 2,000 instances get another failure. At T=2s: another synchronized spike of 2,000 requests. The system is caught in a retry loop where the retries are <em>causing</em> the very overload they're trying to recover from. This is the thundering herd — the herd of retries stampeding in unison."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#127381; How jitter breaks the synchronization</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Jitter destroys the synchronization by making each instance wait a different amount of time. With full jitter, instead of everyone waiting exactly 1 second, each of the 2,000 instances waits a random duration between 0 and 1 second. The retry load that was 2,000 requests at a single point in time is now ~2,000 requests spread across a 1-second window — about 2 requests per millisecond. That's 500× less peak load. Payment Service experiences a smooth drizzle of retries instead of a tidal wave. It recovers, retries succeed, system stabilizes."</p>
+                    </div>
+
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">&#128161;</span>
+                        <div class="callout-content">
+                            <p><strong>Implementation detail interviewers love:</strong> AWS, Google, and Netflix all recommend <strong>full jitter</strong> — <code>random.uniform(0, exponential_max)</code> — rather than adding jitter to a fixed base ("equal jitter"). Full jitter provides the best load distribution at scale because it makes the wait truly random, not just shifted by a random amount.</p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q3: Circuit Breaker States
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q3">Q3: "Explain circuit breaker states and when each transition happens."</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want:</strong> The analogy, exact transition triggers, <em>why</em> half-open exists (and why you don't jump straight to closed), and how failure counting works.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"Circuit breaker has three states: closed, open, and half-open. It opens when there are too many failures and closes when the service recovers."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> Correct but surface-level. No transition triggers, no why half-open is needed, no sliding window detail, no implementation awareness.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — Analogy First, Then Precision</summary>
+        <div class="toggle-content">
+
+            <details open>
+                <summary>&#9889; Start with the analogy to ground the concept</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"The name comes from household electrical circuit breakers — the safety device that trips and disconnects a circuit when it detects dangerous conditions, preventing fires. Same idea in software: detect a dangerous pattern (too many failures), disconnect the circuit (stop sending requests), test recovery, reconnect when safe."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128994; CLOSED state — the baseline with sliding window detail</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"In the CLOSED state, all requests flow through normally. The circuit breaker counts failures in a sliding time window. The specific threshold is configurable — a common setting is '50% failure rate over the last 10 requests' or '5 consecutive failures.' I prefer rate-based thresholds over count-based ones: a service with 10 requests/minute behaves very differently from one with 10,000 requests/minute, but a 50% failure rate is meaningful in both cases."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128308; CLOSED → OPEN transition &amp; what OPEN does</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"When the failure threshold is breached — say, 6 out of the last 10 calls failed — the circuit transitions to OPEN immediately. From this point, every incoming request fails instantaneously without making a network call. The caller receives a <code>CircuitBreakerOpenException</code> in microseconds instead of waiting for a network timeout. Threads freed immediately. Recovery timer starts. This is exactly what we want: instead of 100 threads piling up waiting 30 seconds each for a dead service, they all fail in microseconds."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128993; HALF-OPEN — why it exists and how it works</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"After the recovery timeout expires — usually 30–60 seconds — the circuit doesn't immediately go back to CLOSED. It enters HALF-OPEN: a cautious testing mode. A small number of probe requests — 1 to 3 — are allowed through. This avoids the scenario where the service barely recovers and immediately getting hit with full traffic causes it to crash again.</p>
+                        <p>If the probe requests succeed: CLOSED — full traffic resumes. If they fail: back to OPEN — another recovery timeout begins. This can cycle a few times if the service is intermittently recovering — normal and expected."</p>
+                    </div>
+
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">&#128161;</span>
+                        <div class="callout-content">
+                            <p><strong>Key phrase for why not jumping straight to CLOSED:</strong> <span class="key-phrase">"Half-open is conservative: one success per second, not full traffic. If truly recovered, CLOSED within seconds; if not, back to OPEN safely."</span></p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q4: Retrying a POST
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q4">Q4: "You need to retry a POST request that creates an order. What could go wrong, and how do you handle it?"</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want:</strong> You must describe the exact failure mode precisely (not just "duplicates happen"), then explain idempotency keys with the specific server-side logic, and ideally reference Stripe as a real-world example.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"POST requests aren't idempotent so retrying could create duplicate orders. We should use an idempotency key."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> Correct direction but no depth. Doesn't explain the exact failure scenario, doesn't explain what an idempotency key actually does on the server side, and no TTL awareness.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — The Exact Failure Mode First</summary>
+        <div class="toggle-content">
+
+            <details open>
+                <summary>&#9888;&#65039; Articulate the precise failure scenario</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Here's the precise failure mode: the client sends <code>POST /orders</code> with the order data. The Order Service receives it, processes it, creates the order in the database, and sends back a <code>201 Created</code> response. But at exactly that moment — network congestion — the response packet is dropped. The client sees a timeout: no response within 5 seconds. From the client's perspective: the request failed. From the server's perspective: the order was created successfully.</p>
+                        <p>If the client naively retries the POST, the Order Service creates a second order — same items, same user, same amount. The user is now charged twice and has two orders. This is a data integrity disaster."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128273; The solution — idempotency keys, server-side logic</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"The standard solution is an idempotency key: the client generates a unique UUID for this operation before sending the first request. It includes this key in every retry of the same operation. The server stores <code>(idempotency_key, response)</code> after processing. On receiving a request, the server first checks: have I already processed this idempotency key? If yes, return the stored response without re-processing. If no, process and store."</p>
+                    </div>
+
+<pre><code>Client:
+  idempotency_key = uuid4()  <span class="cm"># Generated ONCE, reused for all retries</span>
+
+  POST /orders
+  Headers: Idempotency-Key: <span class="str">"abc-123-xyz-def"</span>
+  Body: { product: <span class="num">456</span>, quantity: <span class="num">1</span> }
+
+  [timeout &#10142; retry]
+
+  POST /orders
+  Headers: Idempotency-Key: <span class="str">"abc-123-xyz-def"</span>  <span class="cm">← same key</span>
+  Body: { product: <span class="num">456</span>, quantity: <span class="num">1</span> }
+
+Server:
+  Request 1: key <span class="str">"abc-123-xyz-def"</span> not seen &#10142; create order &#10142; store key+response
+  Request 2: key <span class="str">"abc-123-xyz-def"</span> already seen &#10142; return stored 201 &#10142; no new order</code></pre>
+                </div>
+            </details>
+
+            <details>
+                <summary>&#128142; Stripe reference + TTL consideration</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Stripe is the canonical example — every charge request accepts an <code>Idempotency-Key</code> header. Their documentation explicitly states: always include this for payment operations, and reuse the same key for retries of the same charge.</p>
+                        <p>One implementation detail: the idempotency key storage needs a TTL — you don't want to store every key forever. Stripe uses 24 hours — long enough to cover any reasonable retry window. If a client retries after 25 hours, they might get a duplicate, but that's an extreme edge case far beyond normal retry scenarios."</p>
+                    </div>
+
+                    <div class="callout callout-yellow">
+                        <span class="callout-emoji">&#128161;</span>
+                        <div class="callout-content">
+                            <p><strong>Key phrase:</strong> <span class="key-phrase">"Same key in every retry — server returns stored result if key seen before. This makes POST effectively idempotent."</span></p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q5: Bulkhead Pattern
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q5">Q5: "How do bulkheads prevent cascading failures? Give me a concrete example."</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want:</strong> The ship analogy (briefly), then a concrete before/after scenario with real numbers showing exactly how thread exhaustion propagates without bulkheads, and how it's contained with them.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"Bulkheads isolate different services so that if one fails, it doesn't affect the others."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> Conceptually correct but no mechanism, no numbers, and no concrete example. Interviewers can't assess whether you actually understand it.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — Numbers and Mechanism</summary>
+        <div class="toggle-content">
+
+            <details open>
+                <summary>&#9875;&#65039; The analogy — briefly but effectively</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"The name comes from ship design — watertight compartments that prevent one breach from flooding the whole vessel. In software, it's the same idea: isolate failure domains so a breach in one doesn't sink everything."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128165; Without bulkheads — the failure cascade</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"Concrete scenario. Order Service has a single thread pool of 100 threads for all outbound service calls. It calls three services: Payment Service (normally 50ms), User Service (normally 20ms), and Inventory Service (normally 30ms).</p>
+                        <p>Payment Service starts responding in 5 seconds due to a database issue. Order Service handles 50 requests/second. At 50 requests/second to Payment Service, each taking 5 seconds: threads are occupied for 5 seconds each. Within 2 seconds: 100 threads are all full, waiting for Payment responses. Now a User Service call comes in — no threads available, it queues. An Inventory call — queues. Within 10 seconds, the request queue is full. Order Service is returning errors for everything — not just payment operations, but user lookups, inventory checks, everything. One slow downstream service has made our entire Order Service unresponsive."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#10003; With bulkheads — blast radius contained</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"With bulkheads, Order Service has three separate thread pools:</p>
+                        <ul>
+                            <li>Payment pool: 30 threads</li>
+                            <li>User pool: 30 threads</li>
+                            <li>Inventory pool: 30 threads</li>
+                        </ul>
+                        <p>Same scenario: Payment Service becomes slow (5s). Payment pool's 30 threads fill up within 1 second. New payment requests queue and then fail when the queue is full. But User Service calls? Still have 30 dedicated threads — completely unaffected. Inventory calls? Same — 30 dedicated threads untouched.</p>
+                        <p>The blast radius is 'payment-related requests are failing.' All other Order Service functionality is unimpaired. Users can still look up their account, view inventory, do everything except pay."</p>
+                    </div>
+
+                    <div class="callout callout-green">
+                        <span class="callout-emoji">&#128161;</span>
+                        <div class="callout-content">
+                            <p><strong>Key insight to close with:</strong> <span class="key-phrase">"Bulkheads don't prevent failures — they contain them. The goal isn't to make Payment Service fast again; it's to ensure that when Payment fails, it's the only thing that fails."</span> In large microservices systems, complete availability is impossible — partial degradation is the best you can achieve, and bulkheads make partial degradation the outcome instead of total failure.</p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         Q6: Circuit Opens on Payment
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="q6">Q6: "The circuit to your Payment Service opens. What does the user experience? What should the system do?"</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>What interviewers want:</strong> Three levels of user experience (worst → best), the operational response beyond just UX (alerting, queuing), and the principle that failure behavior should be <em>designed in advance</em>, not discovered during an incident.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#10060; Weak Answer</summary>
+        <div class="toggle-content">
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p>"The user will see an error. We should show a friendly error message and maybe use a fallback."</p>
+                </div>
+            </div>
+            <p><strong>Why it's weak:</strong> No infrastructure-level explanation, no levels of fallback quality, no operational response (alerting, queuing), no design-time principle.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#128293; Strong Answer — Infrastructure to UX to Operations</summary>
+        <div class="toggle-content">
+
+            <details open>
+                <summary>&#9889; First: What circuit open means at the infrastructure level</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"When the circuit opens, every call to Payment Service returns a <code>CircuitBreakerOpenException</code> in microseconds — no network round-trip. From the user's perspective, the checkout page responds immediately — but with an error or degraded state, depending on how we've designed the fallback."</p>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#127775; Three levels of user experience — worst to best</summary>
+                <div class="toggle-content">
+
+                    <div class="step-card">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <p><strong>Level 1 (worst): Generic 500 error page</strong></p>
+                            <div class="callout callout-red">
+                                <span class="callout-emoji">&#10060;</span>
+                                <div class="callout-content">
+                                    <p>'Something went wrong.' No context, no next steps. User leaves, possibly never returns. This is what happens with no fallback logic.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <p><strong>Level 2 (acceptable): Informative error message</strong></p>
+                            <div class="callout callout-yellow">
+                                <span class="callout-emoji">&#9889;</span>
+                                <div class="callout-content">
+                                    <p>Instead of a generic crash: "Payment processing is temporarily unavailable. Your cart has been saved — please try again in a few minutes." Requires the UI to handle the payment error gracefully, not propagate it as a full page crash. Critically, the user's cart state is preserved.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <p><strong>Level 3 (best for critical path): Queue and notify</strong></p>
+                            <div class="callout callout-green">
+                                <span class="callout-emoji">&#10003;</span>
+                                <div class="callout-content">
+                                    <p>Accept the order intent, queue it, and process when Payment Service recovers. Show user: "We're processing your order — you'll receive confirmation by email within 5 minutes." Requires the ability to decouple order acceptance from payment processing. Works for some businesses, not all.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details open>
+                <summary>&#128202; What the SYSTEM should do — beyond UX</summary>
+                <div class="toggle-content">
+                    <div class="interview-answer">
+                        <p>"The system should immediately alert on-call engineers when the circuit opens — this isn't a normal state, it indicates a real incident with Payment Service. The circuit state should be visible in the monitoring dashboard alongside the circuit open time and recovery timeout countdown.</p>
+                        <p>Ideally, there's also a queue of failed payment attempts that can be retried when the circuit closes. For e-commerce, losing payment attempts during a 30-minute outage can mean significant revenue loss — queuing them for automatic retry when the circuit recovers is important."</p>
+                    </div>
+
+                    <div class="callout callout-purple">
+                        <span class="callout-emoji">&#128142;</span>
+                        <div class="callout-content">
+                            <p><strong>Closing principle that impresses interviewers:</strong></p>
+                            <p><span class="key-phrase">"Every circuit opening should have a defined user experience and operational response designed in advance — not discovered in the middle of an incident. 'What happens when X fails?' should be answered at design time, not at 3am during an outage."</span></p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         KEY PHRASES SUMMARY
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="summary">&#128203; Key Phrases to Remember</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Situation</th>
+                    <th>What to say</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Starting retry discussion</td>
+                    <td><span class="key-phrase">"First I'd classify the failure — transient or permanent? Idempotent or not?"</span></td>
+                </tr>
+                <tr>
+                    <td>Exponential backoff</td>
+                    <td>"Wait doubles each attempt: 1s → 2s → 4s → 8s, with random jitter to prevent synchronization"</td>
+                </tr>
+                <tr>
+                    <td>Thundering herd</td>
+                    <td><span class="key-phrase">"1,000 callers retry at T+1s simultaneously — the retry storm is worse than the original failure"</span></td>
+                </tr>
+                <tr>
+                    <td>Circuit breaker states</td>
+                    <td>"Closed = normal + counting, Open = fail fast (microseconds), Half-open = cautious probe"</td>
+                </tr>
+                <tr>
+                    <td>Idempotency</td>
+                    <td>"Same key in every retry — server returns stored result if key seen before, no double processing"</td>
+                </tr>
+                <tr>
+                    <td>Bulkhead</td>
+                    <td><span class="key-phrase">"Separate thread pool per downstream → slow Payment doesn't exhaust User Service threads"</span></td>
+                </tr>
+                <tr>
+                    <td>Fallback</td>
+                    <td>"Cached response for reads, feature degradation for non-critical, queue for async"</td>
+                </tr>
+                <tr>
+                    <td>After circuit opens</td>
+                    <td>"Alert on-call, show user-friendly message, queue for retry when circuit recovers"</td>
+                </tr>
+                <tr>
+                    <td>Design principle</td>
+                    <td>"Failure behavior should be designed in advance — not discovered during an incident"</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         PRACTICE STRATEGY
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="practice-strategy">&#127947;&#65039; Practice Strategy &amp; Numbers to Know</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">&#9201;&#65039;</span>
+        <div class="callout-content">
+            <p><strong>Timing drill:</strong> Say the full answer to Q1 in under 90 seconds. It must include: failure classification, backoff formula, jitter reason, stopping condition, what not to retry. Time yourself.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#128203;</span>
+        <div class="callout-content">
+            <p><strong>Cascade walkthrough:</strong> Practice drawing the cascading failure timeline on paper — from C slow → B thread exhaustion → A thread exhaustion. Then add circuit breaker and bulkhead to show containment.</p>
+        </div>
+    </div>
+
+    <h3>&#128290; Numbers to Know Cold</h3>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Setting</th><th>Typical Value</th><th>Why</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>Circuit breaker threshold</td>
+                    <td>50% failure rate in 10-second window</td>
+                    <td>Rate-based catches both high and low traffic volumes</td>
+                </tr>
+                <tr>
+                    <td>Recovery timeout (OPEN → HALF-OPEN)</td>
+                    <td>30–60 seconds</td>
+                    <td>Enough time for service restart/recovery</td>
+                </tr>
+                <tr>
+                    <td>Bulkhead pool size per service</td>
+                    <td>20–30 threads</td>
+                    <td>Not shared — dedicated per downstream dependency</td>
+                </tr>
+                <tr>
+                    <td>Max retries</td>
+                    <td>3–5</td>
+                    <td>Beyond this, likely a prolonged outage — CB should take over</td>
+                </tr>
+                <tr>
+                    <td>Idempotency key TTL</td>
+                    <td>24 hours</td>
+                    <td>Covers all reasonable retry windows; Stripe's standard</td>
+                </tr>
+                <tr>
+                    <td>Timeout baseline</td>
+                    <td>2–3× P99 latency</td>
+                    <td>Buffer for legitimate slow calls without holding threads too long</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <blockquote>
+        <strong>"Every outbound call needs: timeout → backoff+jitter → circuit breaker → bulkhead → fallback. Each layer handles a distinct failure mode. Missing any one creates a reliability gap."</strong>
+    </blockquote>
+
+</div><!-- end main-content -->
+
+<script>
+    // ═══ Dark Mode Toggle ═══
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ═══ Mobile Menu Toggle ═══
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // ═══ Progress Bar ═══
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+
+    // ═══ Active Sidebar Link on Scroll ═══
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>

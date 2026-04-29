@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session 8: Key Talking Points — Retry &amp; Circuit Breaker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* ═══════════════════════════════════════════════
+           NOTION-STYLE CLEAN DESIGN SYSTEM
+           ═══════════════════════════════════════════════ */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f7f6f3;
+            --bg-hover: #f1f1ef;
+            --bg-sidebar: #fbfbfa;
+            --text-primary: #37352f;
+            --text-secondary: #787774;
+            --text-muted: #9b9a97;
+            --border: #e3e2de;
+            --border-light: #eeeeec;
+            --accent-blue: #2563eb;
+            --accent-red: #eb5757;
+            --accent-green: #0f7b6c;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #9065b0;
+            --accent-orange: #e97f33;
+            --code-bg: #f7f6f3;
+            --code-inline-bg: rgba(135,131,120,0.15);
+            --callout-blue-bg: #e7f3fe;
+            --callout-blue-border: #2563eb;
+            --callout-red-bg: #fde8e8;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #e6f6f0;
+            --callout-green-border: #0f7b6c;
+            --callout-yellow-bg: #fdf6e3;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #f3eef8;
+            --callout-purple-border: #9065b0;
+            --sidebar-width: 260px;
+            --cover-height: 140px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #191919;
+            --bg-secondary: #202020;
+            --bg-hover: #2c2c2c;
+            --bg-sidebar: #1e1e1e;
+            --text-primary: #e3e2de;
+            --text-secondary: #9b9a97;
+            --text-muted: #6b6b6b;
+            --border: #333;
+            --border-light: #2a2a2a;
+            --accent-blue: #529cca;
+            --accent-red: #eb5757;
+            --accent-green: #4dab9a;
+            --accent-yellow: #f6e8b1;
+            --accent-yellow-border: #e8d44d;
+            --accent-purple: #b08fd8;
+            --accent-orange: #e97f33;
+            --code-bg: #252525;
+            --code-inline-bg: rgba(135,131,120,0.25);
+            --callout-blue-bg: #1a2a3a;
+            --callout-blue-border: #529cca;
+            --callout-red-bg: #3a1a1a;
+            --callout-red-border: #eb5757;
+            --callout-green-bg: #1a2e28;
+            --callout-green-border: #4dab9a;
+            --callout-yellow-bg: #2e2a1a;
+            --callout-yellow-border: #e8d44d;
+            --callout-purple-bg: #2a1a3a;
+            --callout-purple-border: #b08fd8;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.2);
+            --shadow-md: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ═══ Progress Bar ═══ */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #e97f33, #eb5757, #9065b0);
+            z-index: 1001;
+            transition: width 0.1s linear;
+        }
+
+        /* ═══ Page Cover ═══ */
+        .page-cover {
+            height: var(--cover-height);
+            background: linear-gradient(135deg, #e97f33 0%, #eb5757 50%, #9065b0 100%);
+            position: relative;
+        }
+        [data-theme="dark"] .page-cover {
+            background: linear-gradient(135deg, #5c2e0a 0%, #5a1a1a 50%, #3a1f5a 100%);
+        }
+
+        /* ═══ Sidebar ═══ */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border-light);
+            padding: 20px 0;
+            overflow-y: auto;
+            z-index: 100;
+            transition: transform 0.3s ease, background 0.3s;
+        }
+        .sidebar-header {
+            padding: 8px 16px 16px;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 8px;
+        }
+        .sidebar-header h3 {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+        }
+        .sidebar a {
+            display: block;
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 6px 16px 6px 20px;
+            font-size: 0.82em;
+            font-weight: 400;
+            border-left: 2px solid transparent;
+            transition: all 0.2s;
+            line-height: 1.5;
+        }
+        .sidebar a:hover {
+            color: var(--text-primary);
+            background: var(--bg-hover);
+        }
+        .sidebar a.active {
+            color: var(--accent-orange);
+            font-weight: 500;
+            border-left-color: var(--accent-orange);
+            background: rgba(233,127,51,0.06);
+        }
+
+        /* ═══ Main Content ═══ */
+        .main-content {
+            max-width: calc(900px + var(--sidebar-width));
+            margin: 0 auto;
+            padding: 0 60px 80px calc(var(--sidebar-width) + 60px);
+        }
+
+        /* ═══ Breadcrumbs ═══ */
+        .breadcrumbs {
+            padding: 16px 0 8px;
+            font-size: 0.82em;
+            color: var(--text-muted);
+        }
+        .breadcrumbs a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .breadcrumbs a:hover { color: var(--accent-blue); }
+        .breadcrumbs span { margin: 0 6px; }
+
+        /* ═══ Page Title ═══ */
+        .page-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin: 16px 0 8px;
+            line-height: 1.2;
+            letter-spacing: -0.02em;
+        }
+        .page-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.05em;
+            margin-bottom: 32px;
+        }
+
+        /* ═══ Headings ═══ */
+        h2 {
+            font-size: 1.5em;
+            font-weight: 700;
+            margin: 48px 0 16px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-light);
+            letter-spacing: -0.01em;
+        }
+        h2:first-of-type { border-top: none; margin-top: 0; }
+        h3 {
+            font-size: 1.15em;
+            font-weight: 600;
+            margin: 28px 0 12px;
+            color: var(--text-primary);
+        }
+        h4 {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 20px 0 8px;
+        }
+
+        /* ═══ Paragraph & Lists ═══ */
+        p { margin: 8px 0; }
+        ul, ol { margin: 8px 0 8px 24px; }
+        li { margin: 4px 0; }
+        li::marker { color: var(--text-muted); }
+
+        /* ═══ Divider ═══ */
+        hr {
+            border: none;
+            border-top: 1px solid var(--border-light);
+            margin: 32px 0;
+        }
+
+        /* ═══ Toggle Blocks (details/summary) ═══ */
+        details {
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        summary {
+            padding: 12px 16px;
+            font-weight: 600;
+            cursor: pointer;
+            background: var(--bg-secondary);
+            transition: background 0.2s;
+            list-style: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            user-select: none;
+            font-size: 1em;
+        }
+        summary::-webkit-details-marker { display: none; }
+        summary::before {
+            content: '▶';
+            font-size: 0.65em;
+            color: var(--text-muted);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+        details[open] > summary::before { transform: rotate(90deg); }
+        summary:hover { background: var(--bg-hover); }
+        details > .toggle-content {
+            padding: 16px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        /* ═══ Callout Boxes ═══ */
+        .callout {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            border-radius: 4px;
+            margin: 12px 0;
+            border-left: 3px solid;
+        }
+        .callout-emoji {
+            font-size: 1.2em;
+            flex-shrink: 0;
+            line-height: 1.5;
+        }
+        .callout-content { flex: 1; }
+        .callout-content p:first-child { margin-top: 0; }
+        .callout-content p:last-child { margin-bottom: 0; }
+
+        .callout-yellow {
+            background: var(--callout-yellow-bg);
+            border-left-color: var(--callout-yellow-border);
+        }
+        .callout-red {
+            background: var(--callout-red-bg);
+            border-left-color: var(--callout-red-border);
+        }
+        .callout-green {
+            background: var(--callout-green-bg);
+            border-left-color: var(--callout-green-border);
+        }
+        .callout-blue {
+            background: var(--callout-blue-bg);
+            border-left-color: var(--callout-blue-border);
+        }
+        .callout-purple {
+            background: var(--callout-purple-bg);
+            border-left-color: var(--callout-purple-border);
+        }
+
+        /* ═══ Inline Code ═══ */
+        code {
+            font-family: 'Fira Code', 'SFMono-Regular', 'Consolas', monospace;
+            font-size: 0.88em;
+            background: var(--code-inline-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--accent-red);
+        }
+
+        /* ═══ Code Blocks ═══ */
+        pre {
+            background: var(--code-bg);
+            border-radius: 6px;
+            padding: 16px 20px;
+            overflow-x: auto;
+            margin: 12px 0;
+            border: 1px solid var(--border-light);
+            position: relative;
+        }
+        pre code {
+            background: none;
+            padding: 0;
+            color: var(--text-primary);
+            font-size: 0.85em;
+            line-height: 1.6;
+        }
+        .code-label {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7em;
+            color: var(--text-muted);
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        /* Syntax highlighting */
+        .kw { color: #d73a49; }
+        .fn { color: #6f42c1; }
+        .str { color: #032f62; }
+        .cm { color: #6a737d; font-style: italic; }
+        .num { color: #005cc5; }
+        .dec { color: #e36209; }
+        .cls { color: #6f42c1; }
+        .op { color: #d73a49; }
+        [data-theme="dark"] .kw { color: #ff7b72; }
+        [data-theme="dark"] .fn { color: #d2a8ff; }
+        [data-theme="dark"] .str { color: #a5d6ff; }
+        [data-theme="dark"] .cm { color: #8b949e; }
+        [data-theme="dark"] .num { color: #79c0ff; }
+        [data-theme="dark"] .dec { color: #ffa657; }
+        [data-theme="dark"] .cls { color: #d2a8ff; }
+        [data-theme="dark"] .op { color: #ff7b72; }
+
+        /* ═══ Tables ═══ */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 12px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th {
+            text-align: left;
+            padding: 10px 14px;
+            background: var(--bg-secondary);
+            font-weight: 600;
+            font-size: 0.85em;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-light);
+        }
+        tr:hover td { background: var(--bg-hover); }
+        tr:last-child td { border-bottom: none; }
+
+        /* ═══ Quote Block ═══ */
+        blockquote {
+            border-left: 3px solid var(--border);
+            padding: 8px 16px;
+            margin: 12px 0;
+            color: var(--text-secondary);
+            background: var(--bg-secondary);
+            border-radius: 0 4px 4px 0;
+        }
+        blockquote strong { color: var(--text-primary); }
+
+        /* ═══ Tag Pills ═══ */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.78em;
+            font-weight: 500;
+            margin: 2px;
+        }
+        .tag-blue { background: #dbeafe; color: #1e40af; }
+        .tag-green { background: #d1fae5; color: #065f46; }
+        .tag-purple { background: #ede9fe; color: #5b21b6; }
+        .tag-orange { background: #fed7aa; color: #9a3412; }
+        .tag-red { background: #fecaca; color: #991b1b; }
+        .tag-gray { background: #e5e7eb; color: #374151; }
+        [data-theme="dark"] .tag-blue { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .tag-green { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .tag-purple { background: #2d1f5e; color: #c4b5fd; }
+        [data-theme="dark"] .tag-orange { background: #3d2512; color: #fdba74; }
+        [data-theme="dark"] .tag-red { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .tag-gray { background: #2d2d2d; color: #9ca3af; }
+
+        /* ═══ Key Phrase Highlight ═══ */
+        .key-phrase {
+            background: linear-gradient(to bottom, transparent 60%, var(--accent-yellow) 60%);
+            padding: 0 2px;
+        }
+
+        /* ═══ Side-by-Side Columns ═══ */
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 12px 0;
+        }
+
+        /* ═══ Numbered Step Cards ═══ */
+        .step-card {
+            display: flex;
+            gap: 14px;
+            padding: 14px;
+            margin: 8px 0;
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            background: var(--bg-primary);
+        }
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        .step-content { flex: 1; }
+        .step-content p:first-child { margin-top: 0; }
+
+        /* ═══ State Cards (circuit breaker) ═══ */
+        .state-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 16px 0;
+        }
+        .state-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+        .state-card.closed { border-color: #0f7b6c; }
+        .state-card.open { border-color: #eb5757; }
+        .state-card.half-open { border-color: #e8d44d; }
+        .state-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            margin-bottom: 10px;
+        }
+        .state-badge.closed { background: #d1fae5; color: #065f46; }
+        .state-badge.open { background: #fecaca; color: #991b1b; }
+        .state-badge.half-open { background: #fef9c3; color: #713f12; }
+        [data-theme="dark"] .state-badge.closed { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .state-badge.open { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .state-badge.half-open { background: #2e2a1a; color: #fde047; }
+        .state-card h4 { margin: 0 0 8px; font-size: 0.9em; }
+        .state-card p { font-size: 0.82em; color: var(--text-secondary); margin: 0; }
+
+        /* ═══ Dark Mode Toggle ═══ */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 20px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-sm);
+        }
+        .theme-toggle:hover { box-shadow: var(--shadow-md); }
+
+        /* ═══ Mobile Menu Toggle ═══ */
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1em;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* ═══ Strong/Bold ═══ */
+        strong { font-weight: 600; }
+
+        /* ═══ Interview Answer ═══ */
+        .interview-answer {
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--accent-blue);
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-radius: 0 6px 6px 0;
+            font-style: italic;
+        }
+        .interview-answer strong { font-style: normal; }
+
+        /* ═══ Section Label ═══ */
+        .section-label {
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-orange);
+            margin-bottom: 4px;
+        }
+
+        /* ═══ Responsive ═══ */
+        @media (max-width: 900px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin: 0; padding: 0 24px 60px; }
+            .menu-toggle { display: flex; }
+            .columns { grid-template-columns: 1fr; }
+            .state-grid { grid-template-columns: 1fr; }
+        }
+
+        /* ═══ Scrollbar ═══ */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* ═══ Print ═══ */
+        @media print {
+            .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
+            .main-content { margin-left: 0; max-width: 100%; }
+            details { break-inside: avoid; }
+            details[open] > .toggle-content { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<button class="theme-toggle" id="themeToggle" title="Toggle dark mode">🌙</button>
+<button class="menu-toggle" id="menuToggle">☰</button>
+
+<!-- Sidebar TOC -->
+<nav class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <h3>Session 8 — Key Talking Points</h3>
+    </div>
+    <a href="#why-networks-fail">1. Why Networks Fail</a>
+    <a href="#naive-retry">2. Naive Retry Problems</a>
+    <a href="#exponential-backoff">3. Exponential Backoff</a>
+    <a href="#jitter">4. Jitter & Thundering Herd</a>
+    <a href="#circuit-breaker">5. Circuit Breaker</a>
+    <a href="#fallback">6. Fallback Strategies</a>
+    <a href="#bulkhead">7. Bulkhead Pattern</a>
+    <a href="#timeouts">8. Timeouts</a>
+    <a href="#resilience-stack">9. Complete Resilience Stack</a>
+    <a href="#interview-answers">Interview Answers</a>
+    <a href="#quick-ref">Quick Reference</a>
+</nav>
+
+<!-- Page Cover -->
+<div class="page-cover"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+    <!-- Breadcrumbs -->
+    <div class="breadcrumbs">
+        <a href="02-Practice-Questions-Answers.html">Session 8 Practice Q&amp;A</a>
+        <span>/</span>
+        <a href="../Session 7 - Caching and Redis/01-Key-Talking-Points.html">Session 7</a>
+        <span>/</span>
+        <a href="../Session 9 - Message Queues/01-Key-Talking-Points.html">Session 9</a>
+    </div>
+
+    <div class="section-label">Session 8 — Retry &amp; Circuit Breaker</div>
+    <h1 class="page-title">&#128221; Key Talking Points</h1>
+    <p class="page-subtitle"><strong>Goal:</strong> Explain <em>why</em> naive retry is dangerous, <em>how</em> exponential backoff + jitter solve thundering herd, and <em>when</em> circuit breaker is the right tool. This is "error handling &amp; resilience" in system design — shows you understand failure modes of distributed systems.</p>
+
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
+        <span class="tag tag-orange">Resilience</span>
+        <span class="tag tag-red">Fault Tolerance</span>
+        <span class="tag tag-blue">Microservices</span>
+        <span class="tag tag-purple">Distributed Systems</span>
+        <span class="tag tag-green">System Design</span>
+        <span class="tag tag-gray">Interview</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 1: Why Networks Fail
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="why-networks-fail">1. Why Networks Fail — The Starting Point &#128268;</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#127919;</span>
+        <div class="callout-content">
+            <p><strong>Core Insight:</strong> In a monolith, function calls either succeed or throw. In microservices, the outcome of a network call is <em>fundamentally ambiguous</em>.</p>
+        </div>
+    </div>
+
+    <h3>&#128268; Distributed Systems Lie to You</h3>
+
+    <p>In a monolith, when you call a function — it runs or it throws an exception. There is no in-between state.</p>
+    <p>In microservices, a single network call to Payment Service can return any of these:</p>
+
+    <details open>
+        <summary>&#128268; The Ambiguity Problem — All Possible Outcomes</summary>
+        <div class="toggle-content">
+<pre><code>Call to Payment Service returns...
+  &#10132; <span class="num">200</span> OK                      <span class="cm"># success — clean</span>
+  &#10132; <span class="num">500</span> Internal Server Error   <span class="cm"># server failed — did it process first?</span>
+  &#10132; TCP timeout               <span class="cm"># no response in 30s — did it run?</span>
+  &#10132; Connection refused        <span class="cm"># service is down</span>
+  &#10132; <span class="num">429</span> Too Many Requests      <span class="cm"># alive but overloaded</span>
+  &#10132; <span class="num">503</span> Service Unavailable    <span class="cm"># service restarting</span></code></pre>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#9888;&#65039;</span>
+                <div class="callout-content">
+                    <p><strong>The ambiguity problem:</strong> With a timeout — you sent the request, but you don't know if the server processed it. The server might have:</p>
+                    <ul>
+                        <li>Never received it (network dropped the packet)</li>
+                        <li>Received it and crashed <em>before</em> responding</li>
+                        <li>Received it, processed it fully, and <em>the response</em> got dropped</li>
+                    </ul>
+                    <p>This is fundamentally different from local function calls and is why retry logic requires careful design.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>&#128203; Types of Failures</h3>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Duration</th>
+                    <th>Cause</th>
+                    <th>Retry safe?</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Transient</strong></td>
+                    <td>Milliseconds–seconds</td>
+                    <td>Network blip, brief overload, GC pause</td>
+                    <td><span class="tag tag-green">&#10003; Yes</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Transient (slow)</strong></td>
+                    <td>Seconds–minutes</td>
+                    <td>Service restarting, deploy in progress</td>
+                    <td><span class="tag tag-green">&#10003; Yes, with backoff</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Prolonged</strong></td>
+                    <td>Minutes–hours</td>
+                    <td>Service down, dependency down, OOM</td>
+                    <td><span class="tag tag-orange">&#9888;&#65039; Circuit breaker</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Permanent</strong></td>
+                    <td>Until fix</td>
+                    <td>Bug in service, bad request data</td>
+                    <td><span class="tag tag-red">&#10060; Don't retry</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 2: Naive Retry
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="naive-retry">2. The Naive Retry — Why It Makes Things Worse &#128165;</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">&#128161;</span>
+        <div class="callout-content">
+            <p><strong>The Metaphor:</strong> Your friend is sick in bed. You need to ask them something. Do you call every 30 seconds until they pick up? That's exactly what naive retry does to a struggling service.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#10060; Naive Retry — The Worst Possible Approach</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm"># ❌ NAIVE RETRY — the worst possible approach</span>
+<span class="kw">def</span> <span class="fn">call_payment_service</span>(payload):
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(<span class="num">5</span>):
+        <span class="kw">try</span>:
+            <span class="kw">return</span> requests.<span class="fn">post</span>(<span class="str">'http://payment-service/charge'</span>, json=payload, timeout=<span class="num">5</span>)
+        <span class="kw">except</span> (ConnectionError, Timeout):
+            <span class="kw">continue</span>  <span class="cm"># Retry immediately!</span>
+    <span class="kw">raise</span> <span class="cls">Exception</span>(<span class="str">"Payment service unavailable"</span>)</code></pre>
+
+            <p><strong>What this looks like from Payment Service's perspective:</strong></p>
+<pre><code>T=0ms:   Payment Service gets overloaded (spike in traffic)
+T=100ms: Request 1 times out. Caller retries immediately.
+T=100ms: Request 2 arrives. Payment Service still overloaded.
+T=200ms: Request 2 times out. Retry immediately.
+T=200ms: ...
+
+If <span class="num">1,000</span> callers all do this: payment service receives
+<span class="num">3,000</span>-<span class="num">5,000</span> requests in the same period it was struggling with <span class="num">1,000</span>.
+The retry storm makes the overload 3-5x worse.</code></pre>
+        </div>
+    </details>
+
+    <h3>&#128165; Why Naive Retry Is Dangerous</h3>
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>Amplifies load</strong> on an already struggling service — immediate retry = more traffic when the service can least handle it.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>Thundering herd</strong> — when many callers retry simultaneously, they create a synchronized spike far worse than the original overload.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>Duplicate writes</strong> — if the server processed the request but the response was lost, a retry creates a duplicate order, duplicate charge, etc. Data corruption risk.</p>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 3: Exponential Backoff
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="exponential-backoff">3. Exponential Backoff — Retry with Courtesy &#9201;&#65039;</h2>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">&#128161;</span>
+        <div class="callout-content">
+            <p><strong>Core Idea:</strong> Give the service time to recover. After each failure, wait <em>exponentially longer</em> before trying again.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#9201;&#65039; The Backoff Formula &amp; Timeline</summary>
+        <div class="toggle-content">
+<pre><code>Attempt 1: Fail &#10132; wait 1 second   (2^0 = 1)
+Attempt 2: Fail &#10132; wait 2 seconds  (2^1 = 2)
+Attempt 3: Fail &#10132; wait 4 seconds  (2^2 = 4)
+Attempt 4: Fail &#10132; wait 8 seconds  (2^3 = 8)
+Attempt 5: Give up &#10132; raise exception
+
+Formula:
+  wait_time  = base_delay &times; 2^attempt_number
+  base_delay = 100ms (fast services) or 1s (slow/external)
+  max_retries = 3-5 (don't retry forever)
+  max_wait   = cap at 30-60s (2^10 = 1024s — too long)</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128013; Python Implementation — Exponential Backoff with Error Classification</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">import</span> time
+<span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">call_with_exponential_backoff</span>(url, payload, max_retries=<span class="num">4</span>, base_delay=<span class="num">1.0</span>):
+    <span class="kw">for</span> attempt <span class="kw">in</span> <span class="fn">range</span>(max_retries <span class="op">+</span> <span class="num">1</span>):
+        <span class="kw">try</span>:
+            response = requests.<span class="fn">post</span>(url, json=payload, timeout=<span class="num">5</span>)
+            response.<span class="fn">raise_for_status</span>()
+            <span class="kw">return</span> response
+
+        <span class="kw">except</span> requests.exceptions.<span class="cls">HTTPError</span> <span class="kw">as</span> e:
+            <span class="cm"># 4xx errors: don't retry (client error, retrying won't help)</span>
+            <span class="kw">if</span> <span class="num">400</span> <span class="op">&lt;=</span> e.response.status_code <span class="op">&lt;</span> <span class="num">500</span>:
+                <span class="kw">raise</span>  <span class="cm"># 400 Bad Request, 401 Unauthorized, 404 Not Found</span>
+
+            <span class="cm"># 429 Too Many Requests: retry but respect Retry-After header</span>
+            <span class="kw">if</span> e.response.status_code <span class="op">==</span> <span class="num">429</span>:
+                retry_after = <span class="fn">int</span>(e.response.headers.<span class="fn">get</span>(<span class="str">'Retry-After'</span>, base_delay <span class="op">*</span> (<span class="num">2</span> <span class="op">**</span> attempt)))
+                time.<span class="fn">sleep</span>(retry_after)
+                <span class="kw">continue</span>
+
+        <span class="kw">except</span> (requests.exceptions.<span class="cls">ConnectionError</span>, requests.exceptions.<span class="cls">Timeout</span>):
+            <span class="kw">pass</span>  <span class="cm"># Transient — worth retrying</span>
+
+        <span class="kw">if</span> attempt <span class="op">&lt;</span> max_retries:
+            wait = <span class="fn">min</span>(base_delay <span class="op">*</span> (<span class="num">2</span> <span class="op">**</span> attempt), <span class="num">60.0</span>)  <span class="cm"># Cap at 60s</span>
+            time.<span class="fn">sleep</span>(wait)
+
+    <span class="kw">raise</span> <span class="cls">Exception</span>(<span class="fn">f</span><span class="str">"Service unavailable after {max_retries} retries"</span>)</code></pre>
+        </div>
+    </details>
+
+    <h3>&#128683; Which Errors to Retry — Critical Rule</h3>
+
+    <div class="columns">
+        <div>
+            <div class="callout callout-green">
+                <span class="callout-emoji">&#10003;</span>
+                <div class="callout-content">
+                    <p><strong>RETRY (transient, will likely succeed)</strong></p>
+                    <ul>
+                        <li><code>503</code> Service Unavailable</li>
+                        <li><code>504</code> Gateway Timeout</li>
+                        <li>Connection timeout</li>
+                        <li>Connection refused</li>
+                        <li><code>429</code> Too Many Requests (respect Retry-After)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="callout callout-red">
+                <span class="callout-emoji">&#10060;</span>
+                <div class="callout-content">
+                    <p><strong>DO NOT RETRY (permanent / idempotency risk)</strong></p>
+                    <ul>
+                        <li><code>400</code> Bad Request — malformed payload</li>
+                        <li><code>401</code> Unauthorized — token invalid</li>
+                        <li><code>403</code> Forbidden — permission denied</li>
+                        <li><code>404</code> Not Found — resource gone</li>
+                        <li>Non-idempotent POST — creates duplicates</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3>&#128273; Idempotency — The Hidden Requirement for Safe Retries</h3>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#129504;</span>
+        <div class="callout-content">
+            <p><strong>Idempotent operation:</strong> Calling it N times has the same effect as calling it once.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Operation</th><th>Idempotent?</th><th>Why</th></tr></thead>
+            <tbody>
+                <tr><td><code>GET /users/123</code></td><td><span class="tag tag-green">&#10003; Yes</span></td><td>Reads don't change state</td></tr>
+                <tr><td><code>DELETE /users/123</code></td><td><span class="tag tag-green">&#10003; Yes</span></td><td>Second delete: user already gone</td></tr>
+                <tr><td><code>PUT /users/123 {name: "Bob"}</code></td><td><span class="tag tag-green">&#10003; Yes</span></td><td>Same result every time</td></tr>
+                <tr><td><code>POST /orders {product: 123}</code></td><td><span class="tag tag-red">&#10060; No</span></td><td>Second POST = second order</td></tr>
+                <tr><td><code>POST /payments {amount: 999}</code></td><td><span class="tag tag-red">&#10060; No</span></td><td>Second POST = double charge</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <details>
+        <summary>&#128273; Idempotency Keys — How Stripe Does It</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">import</span> uuid
+
+<span class="cm"># Client generates unique ID for this operation ONCE — reuses for all retries</span>
+idempotency_key = <span class="fn">str</span>(uuid.<span class="fn">uuid4</span>())
+
+<span class="cm"># Server: check if this key was already processed</span>
+<span class="cm"># If yes: return the same response as before (don't process again)</span>
+<span class="cm"># If no: process and store the key</span>
+
+requests.<span class="fn">post</span>(<span class="str">'/payments'</span>, json={
+    <span class="str">'amount'</span>: <span class="num">999</span>,
+    <span class="str">'user_id'</span>: <span class="num">123</span>
+}, headers={
+    <span class="str">'Idempotency-Key'</span>: idempotency_key  <span class="cm"># Stripe uses this exact pattern</span>
+})
+<span class="cm"># If request times out and we retry with the SAME key,</span>
+<span class="cm"># the payment processor knows it's a retry → returns original result → no double charge</span></code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">&#128161;</span>
+                <div class="callout-content">
+                    <p><strong>Key detail:</strong> Idempotency keys need a TTL (time-to-live). Stripe uses <strong>24 hours</strong> — long enough to cover any reasonable retry window, short enough to not store keys forever.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 4: Jitter
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="jitter">4. Jitter — Solving the Thundering Herd &#9889;</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">&#9889;</span>
+        <div class="callout-content">
+            <p><strong>The Problem:</strong> 1,000 services all fail at T=0. With exponential backoff (no jitter), all 1,000 retry at exactly T+1s — a synchronized spike that crashes the recovering service <em>again</em>.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#9889; Thundering Herd Without Jitter</summary>
+        <div class="toggle-content">
+<pre><code>T=0:    Payment Service gets overloaded
+T=0:    <span class="num">1,000</span> Order Service instances all get a timeout
+T=1s:   ALL <span class="num">1,000</span> instances retry at exactly T+<span class="num">1</span>s
+T=1s:   Payment Service hit with <span class="num">1,000</span> requests simultaneously
+T=1s:   Payment Service crashes under the spike &#10132; more timeouts
+T=2s:   ALL <span class="num">1,000</span> instances retry at exactly T+<span class="num">2</span>s
+T=2s:   Another <span class="num">1,000</span>-request spike &#10132; Payment crashes again</code></pre>
+
+            <p>This is the <strong>thundering herd problem</strong>. Exponential backoff without jitter just <em>shifts</em> the problem in time — it doesn't solve it.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#127381; Full Jitter — AWS Recommendation</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">import</span> random
+<span class="kw">import</span> time
+
+<span class="kw">def</span> <span class="fn">get_backoff_with_jitter</span>(attempt, base_delay=<span class="num">1.0</span>, max_delay=<span class="num">60.0</span>):
+    <span class="str">"""
+    Full Jitter (AWS recommendation):
+    randomly pick from [0, exponential_max].
+    Completely desynchronizes retries across all callers.
+    """</span>
+    exponential_max = <span class="fn">min</span>(base_delay <span class="op">*</span> (<span class="num">2</span> <span class="op">**</span> attempt), max_delay)
+    <span class="kw">return</span> random.<span class="fn">uniform</span>(<span class="num">0</span>, exponential_max)
+
+<span class="cm"># When 1,000 callers all fail at T=0:</span>
+<span class="cm"># Attempt 1 (max 1s): each waits 0–1000ms (uniformly distributed)</span>
+<span class="cm"># → 1,000 retries spread across 1 full second</span>
+<span class="cm"># → ~1 request/ms instead of 1,000 requests/ms</span>
+<span class="cm"># → payment service sees smooth traffic, not a spike</span></code></pre>
+
+            <div class="columns">
+                <div>
+                    <p><strong>Without jitter:</strong></p>
+<pre><code>    |
+1000|    ██
+    |    ██
+    |    ██          ██
+    |────┬──────────┬────
+         T+1s      T+2s
+         (spike)  (spike)</code></pre>
+                </div>
+                <div>
+                    <p><strong>With full jitter:</strong></p>
+<pre><code>    |
+ 100|▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+    |▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+  10|▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+    |──────────────────►
+       T+0  to  T+2s
+       (smooth load)</code></pre>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <h3>&#128184; Retry Budget — The Often-Forgotten Constraint</h3>
+
+    <blockquote>
+        If 1,000 services each retry 5 times, a struggling service that handles 1,000 req/s now receives up to <strong>5,000 req/s</strong> while trying to recover.
+    </blockquote>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">&#128161;</span>
+        <div class="callout-content">
+            <p><strong>Retry budget:</strong> Limit total retry <em>volume</em> across all callers, not just per-call. Options:</p>
+            <ul>
+                <li><strong>Client-side:</strong> max 3 retries per call; if retry rate &gt; 20% of total requests → stop retrying</li>
+                <li><strong>Server-side:</strong> return <code>429</code> with <code>Retry-After</code> header when overloaded</li>
+                <li><strong>Load shedder:</strong> server rejects lowest-priority requests under extreme load</li>
+            </ul>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 5: Circuit Breaker
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="circuit-breaker">5. Circuit Breaker — When Retry Isn't Enough &#9889;</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#129504;</span>
+        <div class="callout-content">
+            <p><strong>Analogy:</strong> In your house, a circuit breaker trips when it detects dangerous current — disconnecting the circuit instantly. You don't keep pushing electricity through a shorted wire.</p>
+            <p><strong>Retry says:</strong> "I'll keep trying, the service might recover."<br>
+            <strong>Circuit Breaker says:</strong> "I've tried enough times — clearly the service is down. I'll stop trying until I have reason to believe it recovered."</p>
+        </div>
+    </div>
+
+    <h3>&#127914; The Three States</h3>
+
+    <div class="state-grid">
+        <div class="state-card closed">
+            <div class="state-badge closed">CLOSED</div>
+            <h4>&#128994; Normal Operation</h4>
+            <p>Requests flow through normally. Failure counter is running in a sliding window. When threshold hit → transition to OPEN.</p>
+        </div>
+        <div class="state-card open">
+            <div class="state-badge open">OPEN</div>
+            <h4>&#128308; Circuit Tripped</h4>
+            <p>ALL requests fail immediately. No network call made. Threads freed instantly. After recovery timeout → transition to HALF-OPEN.</p>
+        </div>
+        <div class="state-card half-open">
+            <div class="state-badge half-open">HALF-OPEN</div>
+            <h4>&#128993; Cautious Testing</h4>
+            <p>A few probe requests allowed through. Success → CLOSED. Failure → back to OPEN.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#9889; State Transition Diagram</summary>
+        <div class="toggle-content">
+<pre><code>           failures exceed threshold
+[CLOSED] ──────────────────────────────&#10142; [OPEN]
+   &#8593;                                       |
+   |                               recovery timeout
+   |                                       &#8595;
+success                              [HALF-OPEN]
+   |                                       |
+   &#9492;───────────────────────────────────────&#9496; (probes pass)
+                                           |
+                              probe fails &#10142; [OPEN] again</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128994; CLOSED State — Counting Failures in a Sliding Window</summary>
+        <div class="toggle-content">
+            <p>Requests flow through normally. The circuit breaker counts failures in a sliding time window:</p>
+            <ul>
+                <li>e.g., "5 failures in the last 60 seconds"</li>
+                <li>or "failure rate &gt; 50% over last 10 requests"</li>
+            </ul>
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">&#128161;</span>
+                <div class="callout-content">
+                    <p><strong>Important:</strong> Failure counting must be <strong>time-windowed</strong>, not cumulative. A service that had 100 failures 3 hours ago (now healthy) shouldn't be tripped.</p>
+                    <p>Use <strong>rate-based thresholds</strong> (50% failure rate) over count-based when traffic is variable — a 50% failure rate is meaningful for both 10 req/min and 10,000 req/min services.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128308; OPEN State — Fast Fail, Save Threads</summary>
+        <div class="toggle-content">
+            <p>ALL requests fail <strong>immediately</strong> without making a network call. Return: error or fallback response.</p>
+            <div class="callout callout-green">
+                <span class="callout-emoji">&#10003;</span>
+                <div class="callout-content">
+                    <p><strong>Why this is the point:</strong> Instead of 100 threads piling up waiting for a 30-second timeout from a dead service, they all fail in <strong>microseconds</strong>. Threads freed. Resources preserved. Downstream service gets breathing room to recover.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128993; HALF-OPEN State — Cautious Testing</summary>
+        <div class="toggle-content">
+            <p>After the recovery timeout (e.g., 30 seconds), allow a <strong>small number</strong> of "probe" requests through (e.g., 1 per second).</p>
+            <ul>
+                <li>Probes succeed → service recovered → transition to <strong>CLOSED</strong></li>
+                <li>Probes fail → service still down → transition back to <strong>OPEN</strong></li>
+            </ul>
+            <div class="callout callout-blue">
+                <span class="callout-emoji">&#129504;</span>
+                <div class="callout-content">
+                    <p><strong>Why not go straight to CLOSED?</strong> The service might have partially recovered — some requests succeed, others don't. Half-open is conservative: one success per second, not full traffic. If truly recovered, CLOSED within seconds; if not, back to OPEN safely.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#9749; Real-World Config: Resilience4j (Java) &amp; pybreaker (Python)</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm">// Resilience4j Circuit Breaker — Java</span>
+<span class="cls">CircuitBreakerConfig</span> config = <span class="cls">CircuitBreakerConfig</span>.<span class="fn">custom</span>()
+    .<span class="fn">failureRateThreshold</span>(<span class="num">50</span>)           <span class="cm">// Open when 50%+ of last N calls fail</span>
+    .<span class="fn">slidingWindowSize</span>(<span class="num">10</span>)              <span class="cm">// Count last 10 calls</span>
+    .<span class="fn">waitDurationInOpenState</span>(Duration.<span class="fn">ofSeconds</span>(<span class="num">30</span>))  <span class="cm">// Wait 30s before testing</span>
+    .<span class="fn">permittedNumberOfCallsInHalfOpenState</span>(<span class="num">3</span>)  <span class="cm">// 3 probe requests</span>
+    .<span class="fn">recordExceptions</span>(
+        <span class="cls">IOException</span>.<span class="kw">class</span>,
+        <span class="cls">TimeoutException</span>.<span class="kw">class</span>
+    )
+    .<span class="fn">ignoreExceptions</span>(
+        <span class="cls">BusinessException</span>.<span class="kw">class</span>   <span class="cm">// Don't count business logic errors as CB failures</span>
+    )
+    .<span class="fn">build</span>();</code></pre>
+
+<pre><code><span class="cm"># Python — pybreaker</span>
+<span class="kw">import</span> pybreaker
+<span class="kw">import</span> requests
+
+<span class="cm"># Open after 5 failures, reset after 60 seconds</span>
+payment_cb = pybreaker.<span class="cls">CircuitBreaker</span>(
+    fail_max=<span class="num">5</span>,
+    reset_timeout=<span class="num">60</span>
+)
+
+<span class="dec">@payment_cb</span>
+<span class="kw">def</span> <span class="fn">charge_user</span>(user_id, amount):
+    response = requests.<span class="fn">post</span>(
+        <span class="str">'http://payment-service/charge'</span>,
+        json={<span class="str">'user_id'</span>: user_id, <span class="str">'amount'</span>: amount},
+        timeout=<span class="num">5</span>
+    )
+    response.<span class="fn">raise_for_status</span>()
+    <span class="kw">return</span> response.<span class="fn">json</span>()
+
+<span class="cm"># Usage — the circuit open check is automatic:</span>
+<span class="kw">try</span>:
+    result = <span class="fn">charge_user</span>(<span class="num">123</span>, <span class="num">999</span>)
+<span class="kw">except</span> pybreaker.<span class="cls">CircuitBreakerError</span>:
+    <span class="cm"># Circuit is open — return fallback immediately</span>
+    <span class="kw">return</span> {<span class="str">"status"</span>: <span class="str">"payment_unavailable"</span>, <span class="str">"message"</span>: <span class="str">"Try again in a moment"</span>}</code></pre>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 6: Fallback Strategies
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="fallback">6. Fallback Strategies — What to Show When Circuit is Open &#127937;</h2>
+
+    <p>When a circuit opens, you have options beyond "return an error":</p>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>Cached Response</strong> — Best for read operations</p>
+            <p>Serve stale cached data. <span class="key-phrase">Stale data &gt; no data.</span> Redis cache of product recommendations, user profiles, etc. The user gets an answer, even if it's a few minutes old.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>Default / Degraded Response</strong> — For non-critical features</p>
+            <p>Return a generic estimate. e.g., shipping service down → show "3-7 days" instead of a precise estimate. Don't block the core user flow (checkout) for a supporting feature.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>Graceful Feature Degradation</strong> — Hide it entirely</p>
+            <p>Recommendation service circuit opens on homepage. Hide the "Recommended for you" section entirely. Core browse/search/buy flow still works. Widget reappears when service recovers.</p>
+            <div class="callout callout-green">
+                <span class="callout-emoji">&#128161;</span>
+                <div class="callout-content"><p><span class="key-phrase">"Degrade gracefully, not catastrophically."</span> Core features must work even if supporting features fail.</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>Queue for Later</strong> — For async operations</p>
+            <p>Notification service down → queue the notification for delivery when it recovers. Fine for notifications, emails, analytics. <strong>Not</strong> for payments or order confirmations.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Scenario</th><th>Best Fallback</th></tr></thead>
+            <tbody>
+                <tr><td>Read operations</td><td>Cached response (stale data acceptable)</td></tr>
+                <tr><td>Non-critical features</td><td>Degrade gracefully (hide the feature)</td></tr>
+                <tr><td>Async operations</td><td>Queue for later</td></tr>
+                <tr><td>Critical path</td><td>Clear error + user message + support contact</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 7: Bulkhead Pattern
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="bulkhead">7. Bulkhead Pattern — Contain the Blast Radius &#128674;</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">&#9875;&#65039;</span>
+        <div class="callout-content">
+            <p><strong>Named After Ship Bulkheads:</strong> Modern ships are divided into watertight compartments. If one compartment floods, watertight doors prevent water from spreading. The ship might lose the bow — but the rest of the ship stays afloat.</p>
+            <p><strong>In software:</strong> Separate thread pools per downstream dependency. A slow/failing service can't exhaust resources needed for <em>other</em> services.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#128165; Without Bulkhead — One Slow Service Kills Everything</summary>
+        <div class="toggle-content">
+<pre><code>Order Service has <span class="num">100</span> threads for ALL outbound calls.
+
+Payment Service becomes slow (<span class="num">2</span>s response instead of <span class="num">50</span>ms):
+  &#10142; Payment calls occupy threads for 2s each
+  &#10142; At 50 requests/s to Payment: 100 threads tied up
+  &#10142; Thread pool EXHAUSTED
+  &#10142; New requests to User Service? No threads available.
+  &#10142; New requests to Inventory? No threads available.
+  &#10142; Order Service is now FULLY unresponsive
+  &#10142; ALL functionality down because of ONE slow downstream service
+
+Thread pool (100 threads):
+[Payment][Payment][Payment][Payment][Payment]... (all 100 slots full)
+[waiting][waiting][waiting][waiting][waiting]
+  &#8592; User Service requests: no threads &#10142; fail
+  &#8592; Inventory requests: no threads &#10142; fail</code></pre>
+        </div>
+    </details>
+
+    <details open>
+        <summary>&#10003; With Bulkhead — Blast Radius Contained to Payment Only</summary>
+        <div class="toggle-content">
+<pre><code>Order Service pools:
+  Payment pool:   <span class="num">20</span> threads  &#8592; slow Payment? ONLY these 20 affected
+  User pool:      <span class="num">20</span> threads  &#8592; User Service unaffected &#10003;
+  Inventory pool: <span class="num">20</span> threads  &#8592; Inventory unaffected &#10003;
+  General pool:   <span class="num">40</span> threads
+
+Payment pool fills up &#10142; payment requests fail or queue
+User calls: 20 dedicated threads still available &#10003;
+Inventory calls: 20 dedicated threads still available &#10003;
+Blast radius: Payment functionality only</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128013; Python — Separate ThreadPoolExecutors per Service</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">from</span> concurrent.futures <span class="kw">import</span> <span class="cls">ThreadPoolExecutor</span>
+
+<span class="cm"># Separate executor per downstream service</span>
+payment_executor = <span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">20</span>, thread_name_prefix=<span class="str">'payment'</span>)
+user_executor    = <span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">20</span>, thread_name_prefix=<span class="str">'user'</span>)
+inventory_executor = <span class="cls">ThreadPoolExecutor</span>(max_workers=<span class="num">20</span>, thread_name_prefix=<span class="str">'inventory'</span>)
+
+<span class="kw">def</span> <span class="fn">place_order</span>(user_id, product_id, amount):
+    <span class="cm"># Submit to SEPARATE pools — slow payment doesn't affect user/inventory</span>
+    payment_future   = payment_executor.<span class="fn">submit</span>(charge_payment, user_id, amount)
+    user_future      = user_executor.<span class="fn">submit</span>(get_user_details, user_id)
+    inventory_future = inventory_executor.<span class="fn">submit</span>(reserve_inventory, product_id)
+
+    <span class="cm"># If payment pool fills up → payment_future raises BrokenExecutor</span>
+    <span class="cm"># user_future and inventory_future are completely unaffected ✅</span></code></pre>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 8: Timeouts
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="timeouts">8. Timeouts — The First Line of Defense &#9201;&#65039;</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">&#9888;&#65039;</span>
+        <div class="callout-content">
+            <p><strong>Golden Rule:</strong> Every external call <em>must</em> have a timeout. Without timeouts, one slow dependency causes cascading thread exhaustion across your entire service.</p>
+        </div>
+    </div>
+
+    <details open>
+        <summary>&#9201;&#65039; Setting the Right Timeout — P99 Latency as Baseline</summary>
+        <div class="toggle-content">
+<pre><code>Measure Payment Service latency over 30 days:
+  P50 (median): <span class="num">45</span>ms
+  P95:          <span class="num">120</span>ms
+  P99:          <span class="num">280</span>ms
+
+Timeout = 2-3&#x00D7; P99 = <span class="num">600</span>-<span class="num">840</span>ms &#10132; round to 1 second
+
+Why 2-3&#x00D7; P99, not P99 directly?
+  &#10142; P99 means 1% of calls legitimately take &gt; 280ms
+  &#10142; Setting timeout at P99 would fail 1% of valid requests
+  &#10142; 2-3&#x00D7; gives buffer without holding threads too long</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#128268; Timeout Cascade — Timeouts Must DECREASE Down the Chain</summary>
+        <div class="toggle-content">
+<pre><code><span class="cm">❌ Wrong — outer timeouts are too tight:</span>
+  Client timeout:         <span class="num">30</span>s
+  Service A timeout to B: <span class="num">25</span>s
+  Service B timeout to C: <span class="num">20</span>s
+  (If C is slow → B waits 20s → A waits 25s → Client waits 30s)
+
+<span class="cm">✅ Correct — decrease down the chain:</span>
+  Client:    <span class="num">10</span>s
+  A &#10142; B:   <span class="num">8</span>s
+  B &#10142; C:   <span class="num">5</span>s
+  <span class="cm"># Inner service fails FIRST → frees outer threads early</span>
+  <span class="cm"># Cascade propagates upward quickly → caller can retry or degrade</span></code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">&#128161;</span>
+                <div class="callout-content">
+                    <p><strong>Key insight:</strong> If B → C timeout is shorter than A → B timeout, then when C is slow: B fails fast for C-related work, A sees the failure quickly, and A's threads are freed. Without this, threads pile up at every layer.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         SECTION 9: Complete Resilience Stack
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="resilience-stack">9. Putting It All Together — The Complete Resilience Stack &#127959;&#65039;</h2>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">&#127959;&#65039;</span>
+        <div class="callout-content">
+            <p><strong>Every outbound service call</strong> should have all five layers, from innermost to outermost:</p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>TIMEOUT</strong> — Fail fast if service hangs. Set at 2-3× P99 latency. Don't hold threads forever.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>RETRY</strong> — Handle transient failures. Exponential backoff + jitter. Only retry idempotent ops and genuine transient errors.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>CIRCUIT BREAKER</strong> — Stop trying when service is clearly down. Fail fast, preserve threads, give service breathing room.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>BULKHEAD</strong> — Isolate failure to a dedicated pool. Slow Payment doesn't exhaust User/Inventory threads.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content">
+            <p><strong>FALLBACK</strong> — Degrade gracefully when all else fails. Cached response, feature hiding, queuing for later.</p>
+        </div>
+    </div>
+
+    <details>
+        <summary>&#127959;&#65039; Complete Code Structure</summary>
+        <div class="toggle-content">
+<pre><code><span class="kw">try</span>:
+    result = bulkhead_executor.<span class="fn">submit</span>(
+        circuit_breaker.<span class="fn">call</span>(
+            <span class="fn">retry_with_backoff</span>(
+                payment_service.charge,  <span class="cm"># ← has internal timeout</span>
+                payload
+            )
+        )
+    )
+<span class="kw">except</span> <span class="cls">CircuitBreakerOpen</span>:
+    result = <span class="fn">get_cached_or_default_response</span>()
+<span class="kw">except</span> <span class="cls">BulkheadFull</span>:
+    result = {<span class="str">"error"</span>: <span class="str">"too_busy"</span>, <span class="str">"retry_after"</span>: <span class="num">5</span>}</code></pre>
+        </div>
+    </details>
+
+    <details>
+        <summary>&#127918; Cascading Failure Full Walkthrough — With &amp; Without Resilience Stack</summary>
+        <div class="toggle-content">
+<pre><code>System: Client &#10142; Service A &#10142; Service B &#10142; Service C (DB)
+
+<span class="cm">With Circuit Breakers + Bulkheads:</span>
+T=0:   Database backing Service C starts slow &#10142; C responds in 15s
+T=5s:  B's timeout (5s) fires &#10142; B retries C with backoff
+T=30s: B has exhausted CB threshold &#10142; CB opens
+T=30s: B fails fast for C calls &#10142; returns 503 to A
+T=35s: A's CB for B starts counting failures
+T=60s: A's CB opens &#10142; A returns 503 to Client
+<span class="cm">Requests NOT involving C? Still work! (bulkheads protect them)</span>
+
+<span class="cm">Without Circuit Breakers:</span>
+T=5s:  B holds threads waiting for C (15s response)
+T=1min: B's thread pool exhausted &#10142; B can't process ANY requests
+T=1min: A holds threads waiting for B
+T=2min: A's thread pool exhausted &#10142; entire system unresponsive</code></pre>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">&#128161;</span>
+                <div class="callout-content">
+                    <p><strong>The principle:</strong> In a chain A→B→C, if C fails: C should fail fast and isolated. B should fail fast for C-related functionality but work normally for everything else. A should see C-related requests degraded but other requests unaffected. <span class="key-phrase">Cascading failure becomes graceful partial degradation.</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         INTERVIEW ANSWERS
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="interview-answers">&#128483;&#65039; Interview-Ready Answers</h2>
+
+    <h3>Q: "What happens when Service A calls Service B and B is down?"</h3>
+
+    <div class="interview-answer">
+        <p>"My defense-in-depth approach has <strong>five layers</strong>.</p>
+        <p>First, every call to B has a <strong>timeout</strong> — set at 2-3× B's P99 latency. If B doesn't respond in, say, 500ms, the call fails fast and the thread is freed. Without this, threads pile up waiting forever.</p>
+        <p>Second, transient failures get retried with <strong>exponential backoff and jitter</strong> — wait 100ms, then 200ms, then 400ms, each with random variation to spread retry load. Critically, I only retry idempotent operations and genuine transient errors (5xx, timeouts) — not client errors (4xx) or non-idempotent POSTs without idempotency keys.</p>
+        <p>Third, the <strong>circuit breaker</strong> monitors failure rate. If 50% of calls to B fail over a 10-second window, the circuit opens. For the next 30 seconds, calls to B fail immediately without network attempts — threads freed, resources preserved. After 30 seconds, probe requests test whether B has recovered.</p>
+        <p>Fourth, B's calls run in a <strong>bulkhead</strong> — a dedicated thread pool. B being down doesn't exhaust threads that calls to Service C or D need.</p>
+        <p>Fifth, with the circuit open, I serve a <strong>fallback</strong> — cached data if available, or a degraded response that removes the feature rather than showing an error page."</p>
+    </div>
+
+    <h3>Q: "How do you prevent cascading failures in microservices?"</h3>
+
+    <div class="interview-answer">
+        <p>"Cascading failures happen when one slow service causes its callers to accumulate blocked threads, exhausting their thread pools, which then causes their callers to do the same. The fix is to stop the cascade at the source.</p>
+        <p><strong>Circuit breakers</strong> are the primary tool — they fail fast once a service is clearly unhealthy, preventing thread accumulation. But circuit breakers only work if <strong>timeouts</strong> are set properly first — you need calls to fail before threads accumulate.</p>
+        <p><strong>Bulkheads</strong> contain the damage — if Payment Service causes thread exhaustion in its dedicated pool, User Service calls (different pool) still work. The blast radius is 'Payment functionality degraded,' not 'entire service down.'</p>
+        <p>The principle: in a chain A→B→C, if C fails, C should fail fast and isolated. B should fail fast for C-related functionality but work normally for everything else. With proper circuit breakers and bulkheads, a cascading failure becomes a <span class="key-phrase">graceful partial degradation</span>."</p>
+    </div>
+
+    <hr>
+
+    <!-- ═══════════════════════════════════════════════════════
+         QUICK REFERENCE
+         ═══════════════════════════════════════════════════════ -->
+    <h2 id="quick-ref">&#128203; Quick Reference</h2>
+
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Tool</th><th>When</th><th>Key Config</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><strong>RETRY</strong></td>
+                    <td>Transient failures (5xx, timeout, conn refused)</td>
+                    <td><code>wait = random.uniform(0, min(base × 2^n, max))</code> · max 3-5 retries</td>
+                </tr>
+                <tr>
+                    <td><strong>JITTER</strong></td>
+                    <td>Always with retry, especially at scale</td>
+                    <td>Full jitter: <code>random.uniform(0, exponential_max)</code></td>
+                </tr>
+                <tr>
+                    <td><strong>CIRCUIT BREAKER</strong></td>
+                    <td>Prolonged outages (service down &gt;30s)</td>
+                    <td>50% failure in 10s → OPEN · 30s recovery · 3 probes</td>
+                </tr>
+                <tr>
+                    <td><strong>BULKHEAD</strong></td>
+                    <td>Always — every downstream service</td>
+                    <td>Separate ThreadPoolExecutor per service · 20-30 threads each</td>
+                </tr>
+                <tr>
+                    <td><strong>TIMEOUT</strong></td>
+                    <td>Every single external call</td>
+                    <td>2-3× P99 latency · decrease down the call chain</td>
+                </tr>
+                <tr>
+                    <td><strong>FALLBACK</strong></td>
+                    <td>When circuit opens</td>
+                    <td>Reads → cache · Non-critical → hide · Async → queue</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">&#10060;</span>
+        <div class="callout-content">
+            <p><strong>NEVER:</strong></p>
+            <ul>
+                <li>Retry immediately (thundering herd)</li>
+                <li>Retry non-idempotent POSTs without idempotency keys</li>
+                <li>Make any external call without a timeout</li>
+                <li>Use a shared thread pool for all downstream calls (no bulkhead)</li>
+            </ul>
+        </div>
+    </div>
+
+    <blockquote>
+        <strong>"Defense-in-depth for network calls: timeout → backoff + jitter → circuit breaker → bulkhead → fallback. Each layer handles a different failure mode."</strong>
+    </blockquote>
+
+</div><!-- end main-content -->
+
+<script>
+    // ═══ Dark Mode Toggle ═══
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('notion-theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const current = html.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('notion-theme', next);
+        themeToggle.textContent = next === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ═══ Mobile Menu Toggle ═══
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    document.addEventListener('click', (e) => {
+        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+        }
+    });
+
+    // ═══ Progress Bar ═══
+    const progressBar = document.getElementById('progressBar');
+    window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY;
+        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        progressBar.style.width = progress + '%';
+    });
+
+    // ═══ Active Sidebar Link on Scroll ═══
+    const sections = document.querySelectorAll('h2[id]');
+    const sidebarLinks = document.querySelectorAll('.sidebar a');
+
+    const observerOptions = { rootMargin: '-80px 0px -70% 0px', threshold: 0 };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                sidebarLinks.forEach(link => link.classList.remove('active'));
+                const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
+                if (activeLink) activeLink.classList.add('active');
+            }
+        });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+</script>
+
+</body>
+</html>
