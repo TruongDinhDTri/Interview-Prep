@@ -140,6 +140,14 @@ Interviewers score on 4 SEPARATE dimensions. Every step must serve at least one.
 3. Strip the story → abstract version
 4. Trace 1–2 examples by hand, write expected output and WHY
 
+```
+⛔ STOP WHEN (Step 1 is complete):
+"I can paraphrase the problem. I know the constraints.
+I can trace the given example and explain WHY the output
+is correct according to the problem's rules."
+→ Move to Step 2. NOW. You are NOT supposed to know HOW to solve it yet.
+```
+
 **The 9 Constraint Questions (ask EVERY time):**
 
 1. Is the input sorted?
@@ -255,6 +263,14 @@ Say it to the interviewer. It earns Communication points AND breaks the spiral. 
 → **YES to all 3**: Pattern Path (3P → 4P)
 → **NO to any**: First Principles Path (3F)
 
+```
+📊 RUBRIC NOTE:
+The interviewer's rubric scores "multiple solutions with trade-off analysis"
+as an ADVANCED Problem Solving signal — not just Strong Hire, ADVANCED.
+Even 10 seconds naming the brute force before your real approach earns this.
+Never skip the brute force mention, even when you already know the optimal answer.
+```
+
 **Wiganz's SAY THIS (even 10 seconds of this earns Problem Solving points):**
 
 > "I can think of two approaches. Brute force would be [X] in O(n²). But I see [signal keyword] — that's a [Pattern] signature, which would bring it to O(n). I'd like to go with the optimized approach — does that sound good?"
@@ -349,11 +365,42 @@ Say it to the interviewer. It earns Communication points AND breaks the spiral. 
 - Force Wiganz to find "Rules Discovered": concrete rules that emerge from the manual trace
 - Mall example Rules Discovered: "Add on enter, subtract on exit. Only check for peak when timestamp changes. DON'T check mid-timestamp."
 
+**⚠️ MANDATORY DELIVERABLE — Rules Discovered:**
+
+After any manual trace, Wiganz MUST state the Rules Discovered box out loud:
+> "OK so the rules I discovered from that trace are: [rule 1], [rule 2], [rule 3]."
+
+These rules are NOT optional insight — they ARE the blueprint for the code.
+Hadriel must ask: **"What rules did your trace reveal?"** before moving to any other technique.
+The rules you discover here ARE the steps you write as comments in Step 4 Blueprint.
+
+```
+⚔️ THE GOVERNING RULE — Both Paths Hunt for the Same Thing
+
+First Principles path → Technique B output → "Rules Discovered"
+  "Add on enter, subtract on exit. Only check at timestamp boundary."
+  These rules ARE the algorithm.
+
+Pattern Path → Step 4P Part C → "The Invariant"
+  "The window must contain only unique characters at all times."
+  This rule IS what keeps the solution valid.
+
+Both are the same job: find the rule that governs the algorithm.
+Different path. Same destination.
+```
+
 **C — Generate More Examples**
 
 - Hadriel: "Give me a normal case. Now an edge case. Now a TRICKY case — where would a naive solution break?"
 - The tricky case is where the insight lives.
 - Mall: tricky case = same-timestamp events → must batch ALL before checking peak
+
+```
+🎯 KEEP GOING UNTIL:
+The tricky case reveals a rule your manual solution must follow.
+That rule IS the algorithm — or the key constraint that leads to it.
+If the tricky case reveals nothing new → generate another one.
+```
 
 **D — Try Common Data Structures**
 
@@ -367,6 +414,22 @@ Say it to the interviewer. It earns Communication points AND breaks the spiral. 
 | Uniqueness, set operations         | Set             | Longest Substring: chars in window   |
 | String prefix lookup               | Trie            | Autocomplete: search by prefix       |
 | Relationships, connections, paths  | Graph + BFS/DFS | Number of Islands: DFS from each '1' |
+
+**Algorithms & Routines:**
+
+| If you need...                                              | Try...              | Example                                              |
+| ----------------------------------------------------------- | ------------------- | ---------------------------------------------------- |
+| Sorted input + search faster than O(n)                      | Binary Search       | Find target in rotated sorted array                  |
+| Contiguous subarray with constraint (length/sum/uniqueness) | Sliding Window      | Longest substring without repeating chars            |
+| Sorted array, searching pairs, removing duplicates          | Two Pointers        | Two Sum (sorted): left + right move inward           |
+| Traversal, paths, connected components, trees               | BFS / DFS           | BFS = shortest path. DFS = exhaustive paths          |
+| Connected components, merging groups dynamically            | Union Find          | Number of Connected Components                       |
+| Ordering with dependencies, scheduling                      | Topological Sort    | Course Schedule: Kahn's BFS on DAG                  |
+| Need order first, then apply technique                      | Sort first          | 3Sum: sort → two pointers. Intervals: sort by start |
+| Answer at end of array, right-to-left easier                | Traverse from back  | Next permutation: find pivot from right              |
+
+**Wiganz's SAY THIS (Mall — Technique D scan):**
+> "Do I need lookup? No. Counting? Just a running counter. Stack? No nesting. Heap? No priority. BFS/DFS? No graph. Simpler — one pass with a counter variable."
 
 **E — Decompose**
 
@@ -394,6 +457,18 @@ Use in ORDER before asking Hadriel for a hint.
 
 **⚠️ HADRIEL ENFORCEMENT RULE:** When Wiganz is stuck finding brute force or approach — do NOT give the answer directly. Guide through the 7 Lifelines ONE AT A TIME with Socratic questions. Ask "which lifeline do you want to try first?" and walk through them. In the interview Wiganz won't have Hadriel pointing at the answer — build the muscle memory of working through lifelines independently.
 
+**The Loop (not linear — has a cycle):**
+```
+Lifelines 1-2: State what you know → state brute force
+  ↓ (still stuck)
+Lifelines 3-6: Return to 3F techniques (Draw → Manual → DS Scan → Decompose)
+  ↓ (still stuck)
+Loop back: Technique C — generate more examples
+  Each new example narrows what the solution must do.
+  ↓ (still nothing after looping)
+Lifeline 7: Ask for hint. NOW. Do not keep spinning.
+```
+
 1. **State what you know** — restate constraints, inputs, expected outputs out loud. Hearing it again unlocks new angles.
 2. **State the brute force** — there is ALWAYS one. "I could check every pair in O(n²)..."
    - **Can't find the brute force?** → Don't stay stuck. Jump to Lifeline 3 (Draw it). Drawing almost always reveals the simplest solution = brute force. Lifelines 3-6 are returns to 3F Explore. Use them to FIND the brute force first, then optimize.
@@ -401,8 +476,26 @@ Use in ORDER before asking Hadriel for a hint.
 4. **Manual solve — return to 3F: Technique B** — trace through the example by hand, step by step. Write down every rule you discover. The rules you find ARE the steps of your brute force.
 5. **Data structure & algorithm scan — return to 3F: Technique D** — go through the full table systematically. Data structures: HashMap → Stack/Queue → Heap → Set → Trie → Graph. Algorithms: Binary Search → Sliding Window → Two Pointers → BFS/DFS → Union Find → Topological Sort. Ask "does this fit my problem?" for each.
 6. **Break it down — return to 3F: Technique E** — can you split this into two smaller independent sub-problems? Solve each separately, then combine.
-   - **Exhausted 3-6 and still no brute force?** → Loop back through 3F. Try more examples (Technique C). Each additional example narrows what the solution must do.
-7. **Ask for a hint** — only after working through 1-6. Use a pre-built phrase. Never go silent.
+   - **Exhausted 3-6 and still no insight?** → Loop back: go to Technique C and generate more examples. Each new example narrows what the solution must do. Then retry Lifelines 3-6 with the new information.
+7. **Ask for a hint** — only after working through 1-6 (or when the Time Gate fires). Use a pre-built phrase. Never go silent.
+
+```
+⏱️ TIME GATE RULE:
+If you have been in Approach/3F for 7+ minutes
+AND tried 3+ techniques with no insight →
+→ GO TO LIFELINE 7 IMMEDIATELY.
+→ Say: "I'm stuck on finding an efficient approach.
+         Could you give me a hint on the direction?"
+
+Why: A working solution with a hint is worth more than
+     zero code with no time left. Time in interviews is finite.
+     Spinning is not the same as working.
+```
+
+**Hadriel Time Gate Enforcement:** If Wiganz has been in 3F for 7+ minutes with no progress, Hadriel must flag:
+> "You've been here 7+ minutes. What's your next move — another technique or Lifeline 7?"
+
+Force Wiganz to make the call. Hadriel does NOT rescue silently.
 
 **Pre-built phrases Wiganz says (never go silent):**
 

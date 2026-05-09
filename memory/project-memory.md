@@ -136,42 +136,42 @@
 
 ## Current Session State
 
-### Where We Are — Updated 2026-04-23
-- **Roadmap:** Week 6 of Follow-Guide-Roadmap
-- **Total Problems Solved:** 38 / 120 (31.7%)
-- **Patterns Mastered:** 1 (linked_list)
-- **Patterns Competent:** 12 (hash_maps, sliding_window, two_pointers, prefix_sum, binary_search, fast_slow, bfs, dfs, stacks, monotonic_stack, top_k, trie, matrix)
-- **Patterns Beginner:** 4 (merge_intervals, cyclic_sort, subsets/backtracking, two_heaps, knapsack/DP)
+### Where We Are — Updated 2026-05-06
+- **Roadmap:** Week 7 COMPLETE ✅
+- **Total Problems Solved:** 65 / 120 (54.2%) — PAST HALFWAY 🔥
+- **Patterns Mastered (4):** linked_list, hash_maps, sliding_window, two_pointers
+- **Patterns Competent (14):** prefix_sum, binary_search, fast_slow, bfs, dfs, stacks, monotonic_stack, top_k, trie, matrix, merge_intervals, cyclic_sort, subsets, knapsack
+- **Patterns Beginner (1):** two_heaps (0/4 — only remaining beginner pattern)
 - **First Hard Cleared:** Merged K LinkedList ✅
 
 ### Immediate Next Priorities
-1. **REDO** — Binary Search + Search in Rotated Array (have redo dates from Jan 2026)
-2. **REDO** — Fruits into Baskets (Sliding Window)
-3. **REDO** — Linked List Cycle + Middle of LinkedList
-4. **REDO** — Merge Intervals → then do Insert Intervals
-5. **START** — Cyclic Sort (0/6 done, completely untouched)
-6. **START** — Subsets/Backtracking (0/8 done)
-7. **CONTINUE** — DP/Knapsack (only Climbing Stairs done)
+1. **REDO** — 3Sum (two_pointers) — 78 min session, cold redo target 25 min. Write 3-level duplicate logic from memory.
+2. **REDO** — Binary Search + Search in Rotated Array + Find Peak (3 problems flagged Jan 2026)
+3. **REDO** — Linked List Cycle + Middle of LinkedList (flagged Jan 2026)
+4. **REDO** — Fruits into Baskets (Sliding Window, flagged Jan 2026)
+5. **DEEPEN** — DP/Knapsack (only Climbing Stairs done — biggest skill gap)
+6. **DEEPEN** — Monotonic Stack (only 1 problem — need 5 more)
+7. **START** — Two Heaps (0/4 — only untouched pattern)
 
-### Recent Wins
-- 38 problems confirmed solved (was incorrectly tracked as 2!)
-- First HARD problem: Merged K LinkedList (Nov 19, 2025)
-- Monotonic Stack aha moment (Jan 22, 2026)
-- BFS level separation mastered (Jan 20, 2026)
-- Week 6 roadmap: Climbing Stairs, Longest Palindrome, Majority Element
+### Recent Wins (2026-05-06)
+- **65 problems confirmed** — full re-audit. Real total was hidden by bad counting.
+- **3Sum conquered** — 78 min, 9 bugs, 3-level duplicate pattern fully understood
+- **BFS Level Order** — deque([root]) mystery solved cold
+- **Week7 COMPLETE** — all 6 problems done
+- **Past halfway** — 54.2% to 120-problem target
 
 ### Current Struggles
-- Binary Search variants (rotated arrays, boundary finding) — has redo dates
-- DP problems — only 1 problem solved (Climbing Stairs), difficult
-- "Forgetting" previously solved patterns → redo queue building up
-- Cyclic Sort and Subsets not yet touched
+- 3Sum duplicate handling — needs to be written cold, not looked up
+- Binary Search variants (rotated arrays, boundary finding) — redo queue
+- DP — only 1 problem (Climbing Stairs), huge gap before interviews
+- Blueprint phase (write comments first) — Wiganz keeps skipping this
 
 ### Open Tasks
-- [ ] Redo 8 flagged problems (see problems_needing_redo in coding-progress.json)
-- [ ] Complete Cyclic Sort pattern (0/6 problems)
-- [ ] Complete Subsets/Backtracking pattern (0/8 problems)
+- [ ] Redo 3Sum — timed 25 min, cold from memory
+- [ ] Redo 5 flagged problems (see recall_needed in coding-progress.json)
 - [ ] Continue DP / Knapsack beyond Climbing Stairs
-- [ ] Insert Intervals (#38 in Notion — not yet completed)
+- [ ] Start Two Heaps (0/4 problems — only beginner pattern remaining)
+- [ ] Drill monotonic stack (1/10 problems)
 
 ---
 

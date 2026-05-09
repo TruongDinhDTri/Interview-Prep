@@ -31,7 +31,7 @@ This problem looked simple but hid two traps: (1) n is NOT an array, and (2) the
 ### Signal → Pattern
 > "I see we must eliminate half of the search space based on the middle value — that tells me **Binary Search** because that's exactly what Binary Search does."
 
-- Signal: ordered space + "minimize API calls" + find boundary
+- Signal: sorted/ordered space + "minimize API calls" + find boundary
 - "Minimize calls" = minimize steps = O(log n) = Binary Search
 
 ---
@@ -98,7 +98,7 @@ if isBadVersion(mid):
 
 ## 💡 Aha Moments & Click Points
 
-### The "Two Soldiers" Analogy — The Click Moment 🎯
+### The "Two Soldiers" Analogy — Why `left < right` (not `left <= right`) 🎯
 
 This is what finally made `left < right` click:
 
@@ -121,14 +121,14 @@ Step 2: mid=4, isBad(4)=True → right = 4
 left < right → 4 < 4 → FALSE → EXIT → return left = 4 ✅
 ```
 
-- `left` only moves RIGHT when mid is **GOOD** → left says *"everything before me is confirmed good"*
-- `right` only moves LEFT when mid is **BAD** → right says *"I'm sitting on a bad version"*
-- When they **meet**: same spot = first bad. 🎯
+- `left` only moves RIGHT when mid is **GOOD** → left is always saying *"everything before me is confirmed good"*
+- `right` only moves LEFT when mid is **BAD** → right is always saying *"I'm sitting on a bad version"*
+- When they **meet**: left has confirmed everything to its left is good, right is sitting on bad. **Same spot = first bad.** 🎯
 
 **In Wiganz's own words (THE INVARIANT):**
 > *"right is saying I'm sitting on the bad. left is saying everything before me is good. The spot where right = left meets is the right spot."*
 
-### Why `right = mid` (not `right = mid - 1`)
+### Why `right = mid` (not `right = mid - 1`) in Convergence approach
 > *"mid might BE the answer — so I can't throw it away. I hit `right = mid` to keep mid in the search space."*
 
 Wiganz said this himself. That's the exact correct reasoning.
@@ -174,7 +174,7 @@ mid = (left + right) // 2
 # Safe everywhere
 mid = left + (right - left) // 2
 ```
-- In Python this doesn't matter (arbitrary precision), but mention it in interviews — signals low-level awareness.
+- In Python this doesn't matter (arbitrary precision ints), but mention it in interviews anyway — it signals awareness of low-level constraints.
 
 ---
 
@@ -183,5 +183,5 @@ mid = left + (right - left) // 2
 | Case | Input | Expected | Handled? |
 |---|---|---|---|
 | Only 1 version | `n=1, bad=1` | `1` | ✅ Loop never runs, returns `left=1` immediately |
-| First version is bad | `n=5, bad=1` | `1` | ✅ right keeps shrinking until `left=right=1` |
-| Last version is bad | `n=5, bad=5` | `5` | ✅ left keeps growing until `left=right=5` |
+| First version is bad | `n=5, bad=1` | `1` | ✅ right keeps shrinking left until `left=right=1` |
+| Last version is bad | `n=5, bad=5` | `5` | ✅ left keeps growing right until `left=right=5` |

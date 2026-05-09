@@ -23,6 +23,40 @@ return current
 - A skewed BST (every node has only one child) has height = n → O(n) worst case.
 - Correct answer: **O(h)** where h = height of the tree. Then clarify: O(log n) if balanced, O(n) if skewed.
 
+**Time: O(h)** — h = height of tree
+
+```
+Skewed BST:              Balanced BST:
+1                              4
+ \                           /   \
+  2                         2     6
+   \                       / \   / \
+    3                     1   3 5   7
+     \
+      4
+
+Phải đi hết cây         Mỗi bước bỏ 1/2 cây
+→ O(n)                   → O(log n)
+```
+
+Tại sao bỏ 1/2? Vì BST property: `left < root < right`
+- Cả p, q đều < current → đi trái (bỏ nửa phải)
+- Cả p, q đều > current → đi phải (bỏ nửa trái)
+- Split → đây là LCA, dừng luôn
+
+**Space: O(1)** — vì dùng `while` loop, không phải recursion
+
+```
+Recursion → call stack → chồng đĩa  → O(h) space
+While loop → 1 biến current ghi đè  → O(1) space
+```
+
+| | Balanced BST | Skewed BST |
+|--|-------------|------------|
+| Time | O(log n) | O(n) |
+| Space | O(1) | O(1) |
+| Gọi chung | O(h) time, O(1) space |
+
 **3. Typo — `curren.val` instead of `current.val`**
 ```python
 # Wrong

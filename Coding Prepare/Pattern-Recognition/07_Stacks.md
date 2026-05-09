@@ -7,12 +7,14 @@
 | "matching" / "balanced" / "valid parentheses"       | Regular Stack   |
 | "next greater/smaller" / "previous greater/smaller" | Monotonic Stack |
 | "days until" / "span" / "temperatures"              | Monotonic Stack |
+| "pending items" / "wait" / "evaluate in order" / "operator fires on previous" | Regular Stack |
+| "postfix / RPN / evaluate expression"               | Regular Stack   |
 
 ---
 
 ## Why It Works
 
-- **Regular**: Stack holds "pending" items waiting for their match. `(` waits for `)`.
+- **Regular**: Stack holds "pending" items waiting for their match. `(` waits for `)`. Numbers wait for their operator (RPN).
 - **Monotonic**: Stack holds unresolved elements. When bigger element arrives, it "answers" all smaller ones waiting. (I need more on this explain)
 
 **O(N)**: Each element pushed once, popped once.
@@ -47,3 +49,31 @@ def nextGreater(nums):
 1. **Store INDICES, not values** - you'll need positions
 2. **Always check `stack and`** before comparing
 3. **Greater → Decreasing stack, Smaller → Increasing stack**
+
+---
+
+## Regular Stack — RPN Pattern (LeetCode #150)
+
+```python
+ops = {
+    "+": lambda a, b: a + b,
+    "-": lambda a, b: a - b,
+    "*": lambda a, b: a * b,
+    "/": lambda a, b: int(a / b),  # truncate toward zero, NOT //
+}
+stack = []
+for token in tokens:
+    if token not in ops:
+        stack.append(int(token))
+    else:
+        first_num = stack.pop()   # RIGHT operand
+        second_num = stack.pop()  # LEFT operand
+        stack.append(ops[token](second_num, first_num))  # LEFT op RIGHT ← order matters!
+return stack.pop()
+```
+
+**Critical traps:**
+- `isdigit()` fails on `"-11"` → use `token not in ops`
+- Operand order: `second_num op first_num` (LEFT op RIGHT), NOT reversed
+- Division: `int(a/b)` truncates toward zero. `a//b` is floor — different for negatives
+- Use `list`, not `deque` — `.append()` + `.pop()` is O(1) stack

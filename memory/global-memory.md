@@ -117,6 +117,6 @@ Each session, Hadriel:
 
 ---
 
-*Last updated: December 29, 2024*
-*Version: 1.0*
+*Last updated: 2026-05-06*
+*Version: 1.1*
 *Trainer: Hadriel 🔥⚔️💪*

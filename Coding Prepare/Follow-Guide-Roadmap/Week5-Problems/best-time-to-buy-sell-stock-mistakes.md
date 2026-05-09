@@ -15,8 +15,30 @@
 ## ❌ Mistakes Made
 
 **1. Wrong pattern name** — Called it Sliding Window. It's not.
-- No "contiguous subarray" constraint. No shrinking window.
 - Correct: **Greedy single pass**. Track `min_price`, scan once.
+
+**Tại sao KHÔNG phải Sliding Window:**
+
+Sliding Window cần 3 thứ:
+1. CẢ VÙNG giữa left-right quan trọng → phải biết window đang chứa GÌ (set, map, sum...)
+2. Shrink TỪNG BƯỚC (left += 1) → vì phải bỏ từng phần tử ra, cập nhật trạng thái
+3. Có CONSTRAINT trên window → "no repeating chars", "at most K distinct", etc.
+
+Bài Buy & Sell Stock KHÔNG CÓ cái nào:
+1. ❌ Không quan tâm giá ở giữa buy và sell → Chỉ cần 2 con số: giá mua & giá bán
+2. ❌ Không shrink từng bước → NHẢY thẳng: buy = sell (bỏ qua hết ở giữa)
+3. ❌ Không có constraint trên "window" → Vì không có window nào cả!
+
+**Vậy nó là gì?**
+
+Greedy — chỉ track MỘT con số: `min_price` (giá mua thấp nhất từ đầu tới giờ).
+
+```
+Sliding Window:  track CẢ VÙNG [left...right] → set, map, sum
+Greedy:          track MỘT con số min_price    → xong.
+```
+
+Cái "reset buy = sell" nhìn GIỐNG shrink, nhưng nó là greedy decision: "Tìm được giá rẻ hơn → đổi luôn, không cần biết ở giữa có gì." Không có window nào bị shrink cả — chỉ là thay 1 con số thôi!
 
 **2. Thought "must sell" was required** — Misread the problem.
 - If prices only go down → return `0`. You choose NOT to trade.

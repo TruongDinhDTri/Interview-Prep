@@ -224,19 +224,87 @@ Every technical response should include:
 
 ---
 
-## Track Over Time
+## 🔥 Live Training Observations — Updated 2026-05-06
 
-- [ ] Which patterns clicked quickly vs struggled
-- [ ] Which visualization styles work best
-- [ ] Behavioral interview comfort level
-- [ ] System design confidence growth
-- [ ] Common mistake patterns
-- [ ] Aha moment triggers
-- [ ] Energy and motivation trends
-- [ ] Interview readiness evolution
+### Consistent Patterns in How Wiganz Works
+
+**Blueprint Phase — He ALWAYS Skips It**
+Every single time at Step 4 (Code), Wiganz jumps straight to full implementation. He doesn't write the function signature + numbered comments first. This causes more bugs in Verify because the structure isn't in his head before typing.
+- **What to do:** At Step 4 entry, say: "Blueprint first. Signature + numbered comments. Then fill in." Every time. No exceptions.
+- **Evidence:** 3Sum session (2026-05-06) — Hadriel had to flag it mid-code. Wiganz acknowledged the rule but still jumped.
+
+**"Just Point for Me" — Frustration During Verify**
+When Verify takes long and bugs pile up, Wiganz gets frustrated and asks Hadriel to point directly. Example: "Fuck that time is too much. Just point for me."
+- **What to do:** Hold the line. "In the real interview there's no Hadriel to point. The trace IS how you catch bugs." Wiganz actually finds the bugs himself when guided through the trace — this reinforces the skill.
+- **Evidence:** 3Sum Verify (2026-05-06) — pushed back, he traced it, found the infinite loop himself.
+
+**Gate 2 Calibration — Wiganz Correctly Flags When It Goes Too Deep**
+Wiganz noticed when Hadriel pushed Gate 2 into 4P territory (deep "why" explanation vs quick YES/NO). He correctly identified this is wrong.
+- **What to do:** Gate 2 = 1-2 sentences max: "I see [signal] → [pattern] because [brief reason]." If Hadriel pushes deeper at Gate 2, Wiganz WILL call it out. That's correct — let him.
+- **Gate 2 vs 4P:** Gate 2 = quick path decision. 4P-B = full interview-worthy explanation. Same idea, different depth.
+- **Evidence:** 3Sum session (2026-05-06).
+
+**Strong Meta-Thinking**
+Wiganz asks great "why does this system work this way" questions:
+- "Why is Gate 2 different from 4P-B?" (valid insight — they're overlapping but different depth)
+- "Why deque([root]) not deque(root)?" (valid curiosity, not just copying code)
+- "Is BTTC just O(n)?" (challenged his own wrong assumption, worked through to O(n²))
+These show he's not just solving problems — he's building mental models. Reward and encourage this.
+
+**Complexity Articulation — Weak in Discuss**
+Wiganz consistently forgets to state time/space complexity at the end of Discuss, or says the wrong answer (said O(n) for 3Sum — should be O(n²)).
+- **What to do:** At end of every Step 3 (Discuss), prompt: "And what's the complexity? What's BTTC?"
+- **Pattern:** He knows the complexity once prompted — he just doesn't volunteer it.
+
+**Coding Speed vs Correctness Trade-off**
+Wiganz writes code fast but introduces subtle bugs (duplicate handling, pointer direction, guard order). The bugs aren't conceptual — they're implementation-level carelessness from speed.
+- **What to do:** After blueprint comments are written, say: "Now slow down. Each line should match the comment above it exactly."
 
 ---
 
-*Last updated: December 29, 2024*
-*Version: 1.0*
+## 🗓️ Session History — Key Observations
+
+| Date | Session | Key Insight |
+|------|---------|------------|
+| 2026-05-06 | 3Sum full Road (78 min) | Blueprint skip, Gate2 calibration, 3-level duplicate pattern |
+| 2026-04-25 | Diameter of Binary Tree | Post-order DFS two-concern pattern (return height vs update diameter) |
+| 2026-05-04 | K Closest Points | Negate trick for max-heap in Python, BTTC reasoning |
+| 2026-01-28 | Subsets II | Backtracking with duplicate skip at same depth |
+| 2026-01-22 | Daily Temperatures | Monotonic stack — store INDEX, update POPPED |
+| 2026-01-20 | Level Order BFS | Queue snapshot for level separation, deque([root]) |
+
+---
+
+## 🧠 Patterns Clicked vs Struggled
+
+### Clicked Fast
+- Hash Maps, Linked List, Stacks — clean execution, no drama
+- BFS matrix traversal (Number of Islands, Flood Fill, 01 Matrix) — strong
+- Two Pointers basic patterns (palindrome, sorted array) — solid
+- Top K / Heap concepts — understood negate trick quickly
+
+### Required Real Work
+- **3Sum duplicate handling** — needed 25+ min in Verify for 3-level duplicate logic
+- **DFS post-order pattern** — Diameter required deep conversation about two separate concerns
+- **Monotonic Stack** — storing INDEX vs value took time to click
+- **DP (Climbing Stairs)** — described as "HARD session" in memory
+
+### Not Yet Touched
+- Two Heaps, Cyclic Sort variants, Backtracking beyond basic, Advanced DP
+
+---
+
+## Track Over Time
+
+- [x] Blueprint skip is consistent — flag every Step 4
+- [x] Gate 2 calibration confirmed — keep it to 1-2 sentences
+- [x] Complexity in Discuss — always prompt at end of Step 3
+- [ ] Behavioral interview comfort level — not started
+- [ ] System design confidence growth — not started
+- [ ] Mock interview performance scores — not started
+
+---
+
+*Last updated: 2026-05-06*
+*Version: 2.0*
 *Trainer: Hadriel 🔥⚔️💪*
