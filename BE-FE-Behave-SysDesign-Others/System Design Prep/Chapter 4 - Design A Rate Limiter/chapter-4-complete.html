@@ -329,6 +329,19 @@
             border-radius: 12px; padding: 30px; margin: 30px 0;
             box-shadow: var(--shadow-soft); overflow: hidden;
         }
+        .pdf-page {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-soft);
+        }
+        .figure-note {
+            margin-top: 14px;
+            color: var(--text-secondary);
+            font-size: 0.95em;
+        }
         .figure-box .figure-title {
             font-family: 'Playfair Display', serif; color: var(--text-secondary);
             font-size: 0.9em; text-align: center; margin-bottom: 20px; font-style: italic;
@@ -630,87 +643,63 @@
 
                 <div class="detail-box">
                     <h3>Three Options</h3>
+                    <p>The right answer here is not “always server-side” or “always gateway.” The real question is: <strong>where can I reject excess traffic early, consistently, and with enough control over the rules?</strong></p>
 
                     <div class="consideration-card">
-                        <h4>Option 1: Client-Side</h4>
-                        <p>Generally, client is an unreliable place to enforce rate limiting because <strong>client requests can easily be forged by malicious actors</strong>. Moreover, we might not have control over the client implementation.</p>
+                        <h4>Option 1: Client-Side Rate Limiter</h4>
+                        <p>The client keeps its own counter or token bucket and slows itself down before sending requests.</p>
+                        <p>This works only when the client is trustworthy and under your control. It is weak for public APIs because malicious clients can bypass it, modify it, or ignore it entirely.</p>
                     </div>
 
                     <div class="consideration-card">
-                        <h4>Option 2: Server-Side</h4>
-                        <!-- Figure 4-1 -->
+                        <h4>Option 2: Server-Side Rate Limiter</h4>
                         <div class="figure-box">
-                            <div class="figure-title">Figure 4-1: Server-side rate limiter</div>
-                            <div class="figure-flow">
-                                <div class="fig-node client">Client</div>
-                                <span class="fig-arrow">&rarr;</span>
-                                <div style="text-align:center;">
-                                    <div class="fig-node server" style="position: relative;">
-                                        API Server
-                                        <div style="font-size:0.7em; margin-top:4px; background:var(--sunset-rose); padding:2px 8px; border-radius:4px;">Rate Limiter</div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="figure-title">Figure 4-1: limiter inside the API server</div>
+                            <img class="pdf-page" src="assets/chapter4-figures/figure-4-1.png" alt="Figure 4-1 server-side rate limiter">
                         </div>
+                        <p>Here the limiter lives inside or directly beside the API server. The request reaches the server first, then the server checks quota, then either processes or rejects it.</p>
+                        <p>This works because the server is authoritative. The downside is that each API server now owns part of the rate-limiting logic, so coordination can become harder in a distributed system.</p>
                     </div>
 
                     <div class="consideration-card">
                         <h4>Option 3: Rate Limiter Middleware</h4>
-                        <!-- Figure 4-2 -->
                         <div class="figure-box">
-                            <div class="figure-title">Figure 4-2: Rate limiter middleware</div>
-                            <div class="figure-flow">
-                                <div class="fig-node client">Client</div>
-                                <span class="fig-arrow">&rarr;</span>
-                                <div class="fig-node limiter">Rate Limiter<br>Middleware</div>
-                                <span class="fig-arrow">&rarr;</span>
-                                <div class="fig-node server">API Servers</div>
-                            </div>
+                            <div class="figure-title">Figure 4-2: limiter in front of the API servers</div>
+                            <img class="pdf-page" src="assets/chapter4-figures/figure-4-2.png" alt="Figure 4-2 rate limiter middleware">
                         </div>
+                        <p>The request hits the middleware first. The middleware checks the rule and current usage, and only forwards allowed traffic to the API servers.</p>
+                        <p>This works well because it rejects bad traffic before application code runs. It also centralizes rate-limiting behavior instead of duplicating it across every service.</p>
+                    </div>
 
-                        <!-- Figure 4-3 -->
-                        <div class="figure-box">
-                            <div class="figure-title">Figure 4-3: Middleware throttling (2 requests/sec)</div>
-                            <div style="padding: 10px;">
-                                <div style="display: flex; flex-direction: column; gap: 12px;">
-                                    <div class="figure-flow">
-                                        <div class="fig-node client" style="min-width:80px;">Request 1</div>
-                                        <span class="fig-arrow">&rarr;</span>
-                                        <div class="fig-node limiter">Rate Limiter</div>
-                                        <span class="fig-arrow" style="color: var(--moss-green);">&rarr; &#10003;</span>
-                                        <div class="fig-node server">API</div>
-                                    </div>
-                                    <div class="figure-flow">
-                                        <div class="fig-node client" style="min-width:80px;">Request 2</div>
-                                        <span class="fig-arrow">&rarr;</span>
-                                        <div class="fig-node limiter">Rate Limiter</div>
-                                        <span class="fig-arrow" style="color: var(--moss-green);">&rarr; &#10003;</span>
-                                        <div class="fig-node server">API</div>
-                                    </div>
-                                    <div class="figure-flow">
-                                        <div class="fig-node client" style="min-width:80px;">Request 3</div>
-                                        <span class="fig-arrow">&rarr;</span>
-                                        <div class="fig-node limiter">Rate Limiter</div>
-                                        <span class="fig-arrow reject">&rarr; &#10007;</span>
-                                        <div class="fig-node rejected">HTTP 429<br><small>Too Many Requests</small></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-3: why middleware throttling is useful</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-3.png" alt="Figure 4-3 middleware throttling">
+                    </div>
+
+                    <div class="critical-highlight">
+                        <strong>How Figure 4-3 works:</strong>
+                        <ul>
+                            <li>Assume the rule is <code>2 requests per second</code>.</li>
+                            <li>The client sends 3 requests within the same second.</li>
+                            <li>The middleware allows the first two because quota still exists.</li>
+                            <li>The third is blocked and a <code>429 Too Many Requests</code> response is returned.</li>
+                            <li>The benefit is operational: the API servers never spend CPU, DB, or downstream capacity on the rejected request.</li>
+                        </ul>
                     </div>
                 </div>
 
                 <div class="detail-box">
                     <h3>API Gateway</h3>
-                    <p>Cloud microservices have become widely popular, and rate limiting is usually implemented within a component called <strong>API gateway</strong>. API gateway is a fully managed service that supports rate limiting, SSL termination, authentication, IP whitelisting, servicing static content, etc.</p>
+                    <p>Before talking about API gateways, the key point from the book is this: <strong>there is no absolute answer</strong>. The placement depends on your current technology stack, business rules, engineering capacity, and whether you need full control over the algorithm.</p>
+                    <p style="margin-top: 10px;">An <strong>API gateway</strong> is just the practical version of option 3. Instead of embedding the limiter inside every API service, you put it in a shared front door that can also handle authentication, SSL termination, IP whitelisting, and routing.</p>
 
                     <div class="critical-highlight">
                         <strong>Key Guidelines for Placement:</strong>
                         <ul>
-                            <li>Evaluate your current technology stack (programming language, cache service, etc.). Make sure your current programming language is <strong>efficient to implement rate limiting on the server-side</strong></li>
-                            <li>Identify the rate limiting algorithm that fits your business needs. If you implement everything on the server-side, you have <strong>full control of the algorithm</strong>. However, your choice could be limited if you use a third-party gateway</li>
-                            <li>If you have already used <strong>microservice architecture and included an API gateway</strong> in the design, adding a rate limiter to the API gateway is reasonable</li>
-                            <li>Building your own rate limiting service <strong>takes time</strong>. If you do not have enough engineering resources, a commercial API gateway is a better option</li>
+                            <li>Evaluate your current stack first. If your language, cache, and service design already support this well, server-side can be fine.</li>
+                            <li>If you need full control over the rate-limiting algorithm, implementing it yourself gives you that control.</li>
+                            <li>If you already have a microservice architecture with an API gateway, putting throttling there is often the cleanest design.</li>
+                            <li>If engineering bandwidth is limited, a commercial or managed gateway may be better than building a custom limiter from scratch.</li>
                         </ul>
                     </div>
                 </div>
@@ -730,98 +719,50 @@
             <div class="section animate-in" id="token-bucket">
                 <div class="detail-box">
                     <h3>Token Bucket Algorithm</h3>
-                    <p>The token bucket algorithm is <strong>widely used for rate limiting</strong>. It is simple, well understood, and commonly used by internet companies. Both <span class="emphasis">Amazon</span> and <span class="emphasis">Stripe</span> use this algorithm to throttle their API requests.</p>
+                    <p>The token bucket is the default interview answer when you want <strong>burst tolerance</strong> but still need a hard cap over time. The bucket stores permits, not requests.</p>
 
-                    <h4>How it works:</h4>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-4: bucket capacity, refill, and overflow</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-4.png" alt="Figure 4-4 token bucket">
+                    </div>
+
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-5: accept if enough tokens, reject otherwise</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-5.png" alt="Figure 4-5 token bucket decision flow">
+                    </div>
+
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-6: token consumption and refill over time</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-6.png" alt="Figure 4-6 token bucket example">
+                    </div>
+
+                    <h4>Interview-ready mental model</h4>
                     <ul>
-                        <li>A token bucket is a container that has a <strong>pre-defined capacity</strong>. Tokens are put in the bucket at preset rates periodically. Once the bucket is full, no more tokens are added.</li>
-                        <li>Each request consumes one token. When a request arrives, we check if there are enough tokens in the bucket.</li>
-                        <li>If there are enough tokens, we take one token out for each request, and the request goes through.</li>
-                        <li>If there are not enough tokens, the request is dropped.</li>
+                        <li>Think of the bucket as a wallet of request credits.</li>
+                        <li>A refill job adds credits at a fixed rate until the bucket is full.</li>
+                        <li>Each request spends one credit.</li>
+                        <li>If the wallet is empty, the request is rejected.</li>
                     </ul>
 
-                    <!-- Figure 4-4: Token Bucket visual -->
-                    <div class="figure-box">
-                        <div class="figure-title">Figure 4-4: Token bucket (capacity 4, refill rate 2/sec)</div>
-                        <div style="display: flex; justify-content: center; align-items: center; gap: 40px; flex-wrap: wrap;">
-                            <div class="bucket-visual">
-                                <div style="font-size: 0.85em; color: var(--text-muted);">Refill: 2 tokens/sec</div>
-                                <div style="font-size: 1.2em; color: var(--gold-accent);">&#8595; &#8595;</div>
-                                <div class="bucket">
-                                    <div class="token"></div>
-                                    <div class="token"></div>
-                                    <div class="token"></div>
-                                    <div class="token"></div>
-                                </div>
-                                <div style="font-size: 0.85em; color: var(--text-muted);">Capacity: 4</div>
-                            </div>
-                            <div style="max-width: 250px;">
-                                <p style="font-size: 0.9em;"><strong>Overflow:</strong> If bucket is full, extra tokens overflow (are discarded).</p>
-                                <p style="font-size: 0.9em; margin-top: 8px;"><strong>Consume:</strong> Each request takes 1 token from the bucket.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Figure 4-5: Token consumption flow -->
-                    <div class="figure-box">
-                        <div class="figure-title">Figure 4-5: Token consumption &mdash; enough vs not enough tokens</div>
-                        <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-                            <div style="text-align: center;">
-                                <div class="fig-node client" style="margin: 0 auto 10px;">Request arrives</div>
-                                <div style="font-size: 1.2em; color: var(--water-teal);">&#8595;</div>
-                                <div style="padding: 10px; background: var(--bg-section); border-radius: 8px; margin: 10px 0;">Enough tokens?</div>
-                                <div style="display: flex; gap: 30px; justify-content: center; margin-top: 10px;">
-                                    <div style="text-align: center;">
-                                        <div style="color: var(--moss-green); font-weight: 600;">YES</div>
-                                        <div style="font-size: 1em;">&#8595;</div>
-                                        <div class="fig-node server" style="font-size: 0.85em;">Take token<br>Forward request</div>
-                                    </div>
-                                    <div style="text-align: center;">
-                                        <div style="color: var(--sunset-rose); font-weight: 600;">NO</div>
-                                        <div style="font-size: 1em;">&#8595;</div>
-                                        <div class="fig-node rejected" style="font-size: 0.85em;">Drop request</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Figure 4-6: Token bucket lifecycle -->
-                    <div class="figure-box">
-                        <div class="figure-title">Figure 4-6: Token bucket lifecycle (size=4, refill 4 tokens/min)</div>
-                        <div style="overflow-x: auto;">
-                            <table class="comparison-table" style="min-width: 500px;">
-                                <thead><tr><th>Time</th><th>Event</th><th>Tokens</th></tr></thead>
-                                <tbody>
-                                    <tr><td>0:00</td><td>Bucket starts full</td><td style="color: var(--moss-green); font-weight: 700;">4</td></tr>
-                                    <tr><td>0:10</td><td>3 requests arrive &rarr; 3 tokens consumed</td><td style="color: var(--gold-accent); font-weight: 700;">1</td></tr>
-                                    <tr><td>0:30</td><td>2 requests arrive &rarr; only 1 token left, 1 dropped</td><td style="color: var(--sunset-rose); font-weight: 700;">0</td></tr>
-                                    <tr><td>1:00</td><td>Refill +4 tokens (capped at capacity 4)</td><td style="color: var(--moss-green); font-weight: 700;">4</td></tr>
-                                    <tr><td>1:15</td><td>1 request &rarr; 1 token consumed</td><td style="color: var(--gold-accent); font-weight: 700;">3</td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <h4>Two Parameters:</h4>
+                    <h4>Two parameters:</h4>
                     <div class="advantages-grid">
                         <div class="advantage-card">
                             <h4>Bucket Size</h4>
-                            <p>The maximum number of tokens allowed in the bucket.</p>
+                            <p>The maximum number of tokens allowed in the bucket. This defines the burst you can absorb.</p>
                         </div>
                         <div class="advantage-card">
                             <h4>Refill Rate</h4>
-                            <p>The number of tokens put into the bucket every second.</p>
+                            <p>The number of tokens added to the bucket per second. This defines the long-term throughput.</p>
                         </div>
                     </div>
 
                     <div class="critical-highlight">
                         <strong>How many buckets do we need?</strong>
-                        <p>This depends on the rate-limiting rules. Here are a few examples:</p>
+                        <p>The answer depends on the rules you want to enforce.</p>
                         <ul>
-                            <li>It is usually necessary to have <strong>different buckets for different API endpoints</strong>. If a user is allowed to make 1 post per second, add 150 friends per day, and like 5 posts per second, <strong>3 buckets are required</strong> for each user.</li>
-                            <li>If we need to throttle requests based on IP addresses, <strong>each IP address requires a bucket</strong>.</li>
-                            <li>If the system allows a maximum of 10,000 requests per second, it makes sense to have a <strong>global bucket</strong> shared by all requests.</li>
+                            <li>Different API endpoints often need different buckets. If posting, friending, and liking have different quotas, each rule needs its own bucket.</li>
+                            <li>If the rule is based on identity, such as an IP address, then the bucket key should be that IP.</li>
+                            <li>If the requirement is a global cap, a shared bucket is enough.</li>
                         </ul>
                     </div>
 
@@ -831,13 +772,13 @@
                             <ul>
                                 <li>Easy to implement</li>
                                 <li>Memory efficient</li>
-                                <li>Token bucket allows a <strong>burst of traffic</strong> for short periods. A request can go through as long as there are tokens left</li>
+                                <li>Supports short bursts without violating the long-term rate</li>
                             </ul>
                         </div>
                         <div class="cons-box">
                             <h4>Cons</h4>
                             <ul>
-                                <li>Two parameters (bucket size and refill rate) &mdash; it might be <strong>challenging to tune them properly</strong></li>
+                                <li>Tuning bucket size and refill rate can be tricky</li>
                             </ul>
                         </div>
                     </div>
@@ -849,6 +790,10 @@
                 <div class="detail-box">
                     <h3>Leaking Bucket Algorithm</h3>
                     <p>The leaking bucket algorithm is similar to the token bucket except that <strong>requests are processed at a fixed rate</strong>. It is usually implemented with a <span class="emphasis">FIFO queue</span>.</p>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-7: queue first, drain at a fixed rate</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-7.png" alt="Figure 4-7 leaking bucket">
+                    </div>
 
                     <h4>How it works:</h4>
                     <ul>
@@ -920,6 +865,10 @@
             <div class="section animate-in" id="fixed-window">
                 <div class="detail-box">
                     <h3>Fixed Window Counter Algorithm</h3>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-8: requests counted inside fixed windows</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-8.png" alt="Figure 4-8 fixed window counter">
+                    </div>
 
                     <h4>How it works:</h4>
                     <ul>
@@ -966,6 +915,7 @@
                     <!-- Figure 4-9: Edge problem -->
                     <div class="figure-box" style="border-color: var(--sunset-rose);">
                         <div class="figure-title">Figure 4-9: The edge case problem (5 requests/min limit)</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-9.png" alt="Figure 4-9 fixed window edge case">
                         <div style="position: relative; padding: 40px 20px 60px;">
                             <div style="height: 4px; background: var(--border-medium); border-radius: 2px; position: relative;">
                                 <!-- Window 1: 2:00 - 3:00 -->
@@ -1025,6 +975,10 @@
             <div class="section animate-in" id="sliding-log">
                 <div class="detail-box">
                     <h3>Sliding Window Log Algorithm</h3>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-10: timestamp log inside a rolling minute</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-10.png" alt="Figure 4-10 sliding window log">
+                    </div>
                     <p>The sliding window log algorithm fixes the fixed window counter&rsquo;s edge case issue.</p>
 
                     <h4>How it works:</h4>
@@ -1096,6 +1050,10 @@
             <div class="section animate-in" id="sliding-counter">
                 <div class="detail-box">
                     <h3>Sliding Window Counter Algorithm</h3>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-11: overlap-weighted rolling count</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-11.png" alt="Figure 4-11 sliding window counter">
+                    </div>
                     <p>The sliding window counter algorithm is a <strong>hybrid approach that combines the fixed window counter and sliding window log</strong>.</p>
 
                     <!-- Figure 4-11: Sliding window counter formula -->
@@ -1157,55 +1115,26 @@
                 <div class="detail-box">
                     <h3>Why Redis?</h3>
                     <p>The basic idea of rate limiting algorithms is simple: at the high level, we need <strong>a counter to keep track of how many requests are sent from the same user, IP address, etc.</strong> If the counter is larger than the limit, the request is disallowed.</p>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-12: middleware checks Redis before forwarding</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-12.png" alt="Figure 4-12 high-level architecture">
+                    </div>
 
                     <div class="critical-highlight">
                         <strong>Where should we store counters?</strong> Using the database is not a good idea due to the <strong>slowness of disk access</strong>. In-memory cache is chosen because it is fast and supports time-based expiration strategy. <span class="emphasis">Redis</span> is a popular choice. It offers two commands: <code>INCR</code> (increase the stored counter by 1) and <code>EXPIRE</code> (set a timeout for the counter).
                     </div>
                 </div>
 
-                <!-- Figure 4-12: High-level architecture -->
-                <div class="figure-box">
-                    <div class="figure-title">Figure 4-12: High-level architecture</div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px;">
-                        <div class="figure-flow">
-                            <div class="fig-node client">Client</div>
-                            <span class="fig-arrow">&rarr;</span>
-                            <div class="fig-node limiter">Rate Limiter<br>Middleware</div>
-                        </div>
-                        <div style="display: flex; gap: 40px; align-items: center; flex-wrap: wrap; justify-content: center;">
-                            <div style="text-align: center;">
-                                <span class="fig-arrow" style="display: block; transform: rotate(90deg); margin: 0 auto;">&#8595;</span>
-                                <div class="fig-node redis" style="margin-top: 8px;">Redis<br><small>INCR / EXPIRE</small></div>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 20px; align-items: center; margin-top: 8px;">
-                            <div style="text-align: center; font-size: 0.85em; color: var(--text-muted);">
-                                counter &le; limit?
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
-                            <div style="text-align: center;">
-                                <div style="color: var(--moss-green); font-weight: 600; font-size: 0.9em;">YES</div>
-                                <span class="fig-arrow" style="color: var(--moss-green);">&#8595;</span>
-                                <div class="fig-node server" style="margin-top: 4px;">API Servers</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: var(--sunset-rose); font-weight: 600; font-size: 0.9em;">NO</div>
-                                <span class="fig-arrow reject">&#8595;</span>
-                                <div class="fig-node rejected" style="margin-top: 4px;">429 Rejected</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="detail-box">
-                    <h3>The Flow</h3>
+                    <h3>What Figure 4-12 Is Showing</h3>
                     <ul class="numbered-list">
-                        <li>The client sends a request to rate limiting middleware.</li>
-                        <li>Rate limiting middleware fetches the counter from the corresponding bucket in <strong>Redis</strong> and checks if the limit is reached or not.</li>
-                        <li>If the limit is reached, the request is rejected.</li>
-                        <li>If the limit is not reached, the request is sent to API servers. Meanwhile, the system <strong>increments the counter</strong> and saves it back to Redis.</li>
+                        <li><strong>Client -&gt; middleware.</strong> Every request hits the rate limiter before it hits the business API.</li>
+                        <li><strong>Middleware -&gt; Redis.</strong> The middleware reads the current counter or timestamp data from Redis because Redis is fast and supports expiration.</li>
+                        <li><strong>Decision point.</strong> The middleware compares the current usage with the rule for that user, IP, token, endpoint, or action.</li>
+                        <li><strong>If allowed,</strong> the request is forwarded to the API servers and the limiter updates the Redis state.</li>
+                        <li><strong>If blocked,</strong> the request never reaches the API server. The limiter returns a throttling response immediately.</li>
                     </ul>
+                    <p style="margin-top: 15px;">This is the key interview point: <strong>the rate limiter is usually placed in front of the API handler, and Redis stores the shared rate-limiting state</strong>. That keeps the application servers from doing useless work on requests that should be rejected early.</p>
                 </div>
             </div>
 
@@ -1219,7 +1148,8 @@
 
                 <div class="detail-box">
                     <h3>Lyft&rsquo;s Rate Limiting Configuration</h3>
-                    <p>Lyft open-sourced their rate-limiting component. Rules are generally written in <strong>configuration files and saved on disk</strong>. Here are some examples:</p>
+                    <p>Lyft open-sourced their rate-limiting component. The important design detail is that <strong>rules are not hardcoded into the request path</strong>; they are usually written in configuration files and saved on disk, then loaded into memory by workers.</p>
+                    <p style="margin-top: 10px;">That matters because the limiter must answer two separate questions for every request: <strong>what quota applies</strong> and <strong>which bucket this request belongs to</strong>. The <code>domain</code> and <code>descriptors</code> fields define that mapping.</p>
 
                     <div class="code-example">
 <span class="comment"># Example 1: Messaging domain</span>
@@ -1232,7 +1162,7 @@
       <span class="keyword">requests_per_unit</span>: 5
                     </div>
 
-                    <p style="margin-top: 15px;">This rule shows that the system is allowed a maximum of 5 marketing messages per day.</p>
+                    <p style="margin-top: 15px;"><strong>How to read this:</strong> in the <code>messaging</code> domain, requests with descriptor <code>message_type=marketing</code> share one quota bucket. That bucket allows <strong>5 requests per day</strong>.</p>
 
                     <div class="code-example">
 <span class="comment"># Example 2: Authentication domain</span>
@@ -1245,7 +1175,20 @@
       <span class="keyword">requests_per_unit</span>: 5
                     </div>
 
-                    <p style="margin-top: 15px;">Clients are not allowed to login more than 5 times in 1 minute.</p>
+                    <p style="margin-top: 15px;"><strong>How to read this:</strong> in the <code>auth</code> domain, requests with descriptor <code>auth_type=login</code> share one quota bucket. That bucket allows <strong>5 login requests per minute</strong>.</p>
+
+                    <div class="critical-highlight">
+                        <strong>Interview framing:</strong> a rule is just a way to say <em>which requests are grouped together</em> and <em>what limit that group gets</em>. The descriptor identifies the bucket. The rate limit defines the quota for that bucket.
+                    </div>
+
+                    <h3 style="margin-top: 28px;">Why Rules Live on Disk but Are Served from Cache</h3>
+                    <ul class="numbered-list">
+                        <li><strong>Disk or config store</strong> is the source of truth. It is easy to review, version, and update.</li>
+                        <li><strong>Workers</strong> periodically pull those rules and refresh an in-memory cache.</li>
+                        <li><strong>The request path reads from cache, not from disk.</strong> That keeps every request fast.</li>
+                        <li><strong>The limiter then combines rule + request attributes</strong> to decide which Redis key to read and update.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">If an interviewer pushes deeper, say the effective Redis key usually looks conceptually like: <code>{domain}:{descriptor_key}:{descriptor_value}:{client_id}</code>. The exact key format varies, but the point is the same: each rule maps traffic into a specific counter bucket.</p>
                 </div>
             </div>
 
@@ -1260,11 +1203,20 @@
                 <div class="detail-box" id="http-429">
                     <h3>HTTP 429 &mdash; Too Many Requests</h3>
                     <p>In case a request is rate limited, APIs return a <span class="emphasis">HTTP 429 (too many requests)</span> error response to the client. Depending on the use cases, we may <strong>enqueue the rate-limited requests to be processed later</strong>.</p>
+                    <p style="margin-top: 10px;">The main idea is simple: the limiter rejects the request <strong>before</strong> the backend does more work. That protects the system from overload and gives the client a clear contract about when to retry.</p>
+
+                    <h3 style="margin-top: 28px;">Drop vs Queue</h3>
+                    <ul class="numbered-list">
+                        <li><strong>Drop the request</strong> when the action is disposable or retryable, such as a burst of polling calls or repeated login attempts.</li>
+                        <li><strong>Queue the request</strong> when the action still matters and can be processed later, such as order creation, asynchronous notifications, or batch work.</li>
+                        <li><strong>Return 429 either way.</strong> From the client&rsquo;s point of view, the request was not processed right now.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">A good interview sentence is: <strong>rate limiting is not only about blocking traffic; it is also about deciding what to do with overflow traffic</strong>. For some flows you discard it. For others you buffer it.</p>
                 </div>
 
                 <div class="detail-box" id="headers">
                     <h3>Rate Limiter Response Headers</h3>
-                    <p>The rate limiter returns the following HTTP headers to clients:</p>
+                    <p>The rate limiter returns the following HTTP headers so the client can understand both the current quota and the retry policy:</p>
 
                     <table class="comparison-table">
                         <thead><tr><th>Header</th><th>Description</th></tr></thead>
@@ -1287,6 +1239,14 @@
                     <div class="critical-highlight">
                         <strong>When a user has sent too many requests</strong>, a 429 too many requests error and <code>X-Ratelimit-Retry-After</code> header are returned to the client.
                     </div>
+
+                    <h3 style="margin-top: 28px;">How a Client Uses These Headers</h3>
+                    <ul class="numbered-list">
+                        <li><code>X-Ratelimit-Limit</code> tells the client the size of the quota, for example <code>100 requests per minute</code>.</li>
+                        <li><code>X-Ratelimit-Remaining</code> tells the client how much budget is left in the current window or bucket.</li>
+                        <li><code>X-Ratelimit-Retry-After</code> tells the client how long to wait before sending another request after being throttled.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">This is why good clients implement <strong>backoff and retry</strong> instead of hammering the API again immediately. If the interviewer asks what a well-behaved client does, say: <strong>read the headers, slow down, retry later, and avoid repeated useless calls</strong>.</p>
                 </div>
             </div>
 
@@ -1298,65 +1258,24 @@
                     <h2><span class="section-number">8</span> Detailed Design</h2>
                 </div>
 
-                <!-- Figure 4-13: Detailed design -->
                 <div class="figure-box">
-                    <div class="figure-title">Figure 4-13: Detailed design &mdash; Rules &rarr; Workers &rarr; Cache &rarr; Middleware &rarr; Redis</div>
-                    <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px;">
-                        <!-- Rules on disk -->
-                        <div class="figure-flow">
-                            <div class="fig-node disk">Rules<br><small>(on disk)</small></div>
-                            <span class="fig-arrow">&rarr;</span>
-                            <div class="fig-node worker">Workers<br><small>pull rules</small></div>
-                            <span class="fig-arrow">&rarr;</span>
-                            <div class="fig-node cache">Rules Cache<br><small>(in memory)</small></div>
-                        </div>
-
-                        <!-- Client flow -->
-                        <div style="width: 100%; height: 2px; background: var(--border-light); margin: 8px 0;"></div>
-
-                        <div class="figure-flow">
-                            <div class="fig-node client">Client</div>
-                            <span class="fig-arrow">&rarr;</span>
-                            <div class="fig-node limiter" style="position: relative;">
-                                Rate Limiter<br>Middleware
-                                <div style="font-size: 0.65em; margin-top: 4px; opacity: 0.8;">fetches rules from cache<br>fetches counter from Redis</div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
-                            <div style="text-align: center;">
-                                <div class="fig-node redis">Redis<br><small>counters</small></div>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 40px; align-items: flex-start; flex-wrap: wrap; justify-content: center;">
-                            <div style="text-align: center;">
-                                <div style="color: var(--moss-green); font-weight: 600; font-size: 0.85em;">Allowed</div>
-                                <span class="fig-arrow" style="color: var(--moss-green);">&#8595;</span>
-                                <div class="fig-node server" style="margin-top: 4px;">API Servers</div>
-                            </div>
-                            <div style="text-align: center;">
-                                <div style="color: var(--sunset-rose); font-weight: 600; font-size: 0.85em;">Throttled</div>
-                                <span class="fig-arrow reject">&#8595;</span>
-                                <div class="fig-node rejected" style="margin-top: 4px;">429 / Queue</div>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="figure-title">Figure 4-13: detailed design from the reference PDF</div>
+                    <img class="pdf-page" src="assets/chapter4-figures/figure-4-13.png" alt="Figure 4-13 detailed design">
                 </div>
 
                 <div class="detail-box">
                     <h3>Design Walkthrough</h3>
                     <ul class="numbered-list">
-                        <li><strong>Rules are stored on the disk.</strong> Workers frequently pull rules from the disk and store them in the cache.</li>
-                        <li><strong>When a client sends a request</strong> to the server, the request is sent to the rate limiter middleware first.</li>
-                        <li><strong>Rate limiter middleware loads rules from the cache.</strong> It fetches counters and last request timestamp from Redis cache. Based on the response, the rate limiter decides:</li>
+                        <li><strong>Rules are stored on disk.</strong> This is the configuration source of truth.</li>
+                        <li><strong>Workers load rules into cache.</strong> The request path does not read config files directly because that would be slow and operationally messy.</li>
+                        <li><strong>The client sends a request.</strong> The request hits the rate limiter middleware first, before the API handler runs.</li>
+                        <li><strong>The middleware reads the matching rule from cache.</strong> It determines what limit applies to this request.</li>
+                        <li><strong>The middleware reads the current usage state from Redis.</strong> Depending on the algorithm, that state may be a counter, a token count, or recent timestamps.</li>
+                        <li><strong>The middleware makes the allow / reject decision.</strong> This is the critical control point.</li>
                     </ul>
-                    <div style="margin-left: 48px; margin-top: 15px;">
-                        <ul>
-                            <li>If the request is <strong>not rate limited</strong>, it is forwarded to API servers.</li>
-                            <li>If the request is <strong>rate limited</strong>, a 429 too many requests error is returned to the client. In the meantime, the request is either dropped or forwarded to a queue.</li>
-                        </ul>
-                    </div>
+                    <p style="margin-top: 15px;"><strong>Allowed path:</strong> the request goes to the API servers and the limiter updates Redis.</p>
+                    <p><strong>Rejected path:</strong> the limiter returns HTTP 429 immediately. Depending on the business requirement, the request is either dropped or forwarded to a queue for later processing.</p>
+                    <p><strong>What the figure is really teaching:</strong> rules and state are separated. <strong>Rules</strong> live in config and cache. <strong>State</strong> lives in Redis. The middleware joins those two pieces at request time to make the throttling decision.</p>
                 </div>
             </div>
 
@@ -1369,90 +1288,56 @@
                 </div>
 
                 <div class="critical-highlight">
-                    <strong>Building a rate limiter that works in a single server environment is not difficult.</strong> However, scaling the system to support multiple servers and concurrent threads is a different story. There are two challenges: <strong>race condition</strong> and <strong>synchronization issue</strong>.
+                    <strong>Single-server rate limiting is straightforward.</strong> The hard part starts when requests are concurrent and the limiter is deployed on multiple machines. The two classic distributed problems are <strong>race condition</strong> and <strong>synchronization issue</strong>.
                 </div>
 
-                <!-- Race Condition -->
                 <div class="detail-box" id="race-condition">
                     <h3>Race Condition</h3>
-                    <p>Race conditions can happen in a highly concurrent environment.</p>
-
-                    <!-- Figure 4-14: Race condition -->
-                    <div class="figure-box" style="border-color: var(--sunset-rose);">
-                        <div class="figure-title">Figure 4-14: Race condition &mdash; Two concurrent reads</div>
-                        <div style="display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; padding: 20px;">
-                            <div style="text-align: center; max-width: 200px;">
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Thread 1</div>
-                                <div style="margin: 8px 0; font-size: 0.85em;">read counter = <strong>3</strong></div>
-                                <div style="font-size: 0.85em;">counter + 1 = <strong>4</strong></div>
-                                <div style="font-size: 0.85em; color: var(--sunset-rose);">writes 4 to Redis</div>
-                            </div>
-                            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-                                <div class="fig-node redis" style="font-size: 0.85em;">Redis<br>counter = 3</div>
-                                <div style="margin-top: 10px; font-size: 0.85em; color: var(--sunset-rose); font-weight: 600;">Expected: 5<br>Actual: 4</div>
-                            </div>
-                            <div style="text-align: center; max-width: 200px;">
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Thread 2</div>
-                                <div style="margin: 8px 0; font-size: 0.85em;">read counter = <strong>3</strong></div>
-                                <div style="font-size: 0.85em;">counter + 1 = <strong>4</strong></div>
-                                <div style="font-size: 0.85em; color: var(--sunset-rose);">writes 4 to Redis</div>
-                            </div>
-                        </div>
+                    <p>The basic fixed-counter flow looks safe at first glance: read the counter, check the threshold, then increment it. The problem is that those three steps are not automatically one atomic operation.</p>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-14: two concurrent requests reading the same counter</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-14.png" alt="Figure 4-14 race condition">
                     </div>
-
-                    <p>Both threads read the counter value <strong>before</strong> either of them writes the updated value back. The counter should be 5 but ends up as 4.</p>
-
+                    <ul class="numbered-list">
+                        <li>Assume the counter in Redis is currently <strong>3</strong>.</li>
+                        <li><strong>Request 1</strong> reads the counter and sees 3.</li>
+                        <li><strong>Request 2</strong> reads the counter before Request 1 writes anything back, so it also sees 3.</li>
+                        <li>Both requests independently decide that the next valid value is <strong>4</strong>.</li>
+                        <li>Both write back 4.</li>
+                        <li>The correct result should have been <strong>5</strong>, but one increment is effectively lost.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">That is the race condition: <strong>multiple concurrent requests make decisions using stale shared state</strong>. In an interview, say the issue is not just data corruption. It can cause the limiter to allow more traffic than intended or track usage inaccurately.</p>
                     <div class="example-box">
-                        <h4>Solutions</h4>
+                        <h4>Practical Fixes</h4>
                         <ul>
-                            <li><strong>Locks:</strong> The most obvious solution. However, locks will <strong>significantly slow down the system</strong>.</li>
-                            <li><strong>Lua script:</strong> Redis supports Lua scripts which are executed atomically. This is a better approach.</li>
-                            <li><strong>Redis sorted sets:</strong> Using sorted sets from Redis can also solve this problem atomically.</li>
+                            <li><strong>Locks</strong> solve correctness but usually hurt throughput and latency.</li>
+                            <li><strong>Atomic Redis operations or Lua scripts</strong> are better because the read-check-update logic runs as one unit.</li>
+                            <li><strong>Redis sorted sets</strong> are also commonly used, especially for sliding-window style algorithms.</li>
                         </ul>
                     </div>
                 </div>
 
-                <!-- Synchronization -->
                 <div class="detail-box" id="synchronization">
                     <h3>Synchronization Issue</h3>
-                    <p>When multiple rate limiter servers are used, synchronization is necessary.</p>
-
-                    <!-- Figure 4-15: Sync problem -->
+                    <p>Synchronization is a different problem from race condition. Here the issue is not two threads updating one counter at the same time. The issue is that <strong>different rate limiter instances may see different subsets of the traffic</strong>.</p>
                     <div class="figure-box">
-                        <div class="figure-title">Figure 4-15: Synchronization problem &mdash; multiple rate limiters without shared state</div>
-                        <div style="display: flex; justify-content: center; gap: 30px; flex-wrap: wrap; padding: 20px;">
-                            <div style="text-align: center;">
-                                <div class="fig-node client" style="font-size: 0.85em;">Client 1</div>
-                                <div style="font-size: 1em; margin: 4px 0;">&#8595;</div>
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Rate Limiter 1<br><small>own counter</small></div>
-                            </div>
-                            <div style="display: flex; align-items: center; font-size: 2em; color: var(--sunset-rose); font-weight: bold;">&#10007;</div>
-                            <div style="text-align: center;">
-                                <div class="fig-node client" style="font-size: 0.85em;">Client 1</div>
-                                <div style="font-size: 1em; margin: 4px 0;">&#8595;</div>
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Rate Limiter 2<br><small>own counter</small></div>
-                            </div>
-                        </div>
-                        <p style="text-align: center; font-size: 0.85em; color: var(--text-muted); margin-top: 10px;">Client 1 sends requests to different rate limiters &mdash; no shared state!</p>
+                        <div class="figure-title">Figure 4-15: no shared state across rate limiter instances</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-15.png" alt="Figure 4-15 synchronization issue">
                     </div>
+                    <ul class="numbered-list">
+                        <li>In the left half of Figure 4-15, each client happens to stay on one limiter instance, so each limiter sees a clean local history.</li>
+                        <li>In the right half, the web tier is stateless, so the same client can hit different limiter instances on different requests.</li>
+                        <li>If limiter 1 and limiter 2 keep separate local counters, neither instance has the full picture.</li>
+                        <li>The result is incorrect enforcement: a client can exceed the intended global quota because its usage is split across multiple machines.</li>
+                    </ul>
+                    <p style="margin-top: 15px;">This is why local in-memory counters alone are not enough in a distributed deployment.</p>
 
-                    <!-- Figure 4-16: Centralized Redis -->
-                    <div class="figure-box" style="border-color: var(--moss-green);">
-                        <div class="figure-title">Figure 4-16: Solution &mdash; Centralized Redis data store</div>
-                        <div style="display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 20px;">
-                            <div style="display: flex; gap: 30px; flex-wrap: wrap; justify-content: center;">
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Rate Limiter 1</div>
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Rate Limiter 2</div>
-                                <div class="fig-node limiter" style="font-size: 0.85em;">Rate Limiter 3</div>
-                            </div>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <span style="font-size: 1.2em; color: var(--moss-green);">&#8600;</span>
-                                <span style="font-size: 1.2em; color: var(--moss-green);">&#8595;</span>
-                                <span style="font-size: 1.2em; color: var(--moss-green);">&#8601;</span>
-                            </div>
-                            <div class="fig-node redis">Centralized Redis<br><small>shared counters</small></div>
-                        </div>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-16: centralized shared state in Redis</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-16.png" alt="Figure 4-16 centralized Redis solution">
                     </div>
+                    <p>Figure 4-16 shows the fix: multiple rate limiter instances share a centralized data store such as Redis. Now every limiter reads and writes the same counters, so the quota is enforced consistently no matter which instance receives the request.</p>
+                    <p><strong>Why not sticky sessions?</strong> They can keep one client attached to one limiter, but that approach is usually rejected because it is less scalable, less flexible during failures, and harder to operate. Shared centralized state is the standard answer.</p>
                 </div>
             </div>
 
@@ -1466,14 +1351,19 @@
 
                 <div class="detail-box">
                     <h3>Performance Optimization</h3>
+                    <div class="figure-box">
+                        <div class="figure-title">Figure 4-17: multi-data-center edge routing</div>
+                        <img class="pdf-page" src="assets/chapter4-figures/figure-4-17.png" alt="Figure 4-17 edge routing">
+                    </div>
+                    <p><strong>What Figure 4-17 is showing:</strong> users should be routed to the closest edge location instead of sending every request to one faraway region. That reduces network latency before the request even reaches the limiter.</p>
                     <div class="advantages-grid">
                         <div class="advantage-card">
                             <h4>Multi-Data Center Setup</h4>
-                            <p>For users far away from the data center, latency is high. <strong>Edge servers</strong> (multi-data center) are crucial. Traffic is automatically routed to the closest edge server to reduce latency.</p>
+                            <p>If the limiter is geographically far from the user, the throttling check itself adds noticeable latency. Putting edge capacity closer to users reduces round-trip time.</p>
                         </div>
                         <div class="advantage-card">
                             <h4>Eventual Consistency</h4>
-                            <p>Synchronize data with an <strong>eventual consistency model</strong>. This is acceptable for rate limiting since perfect accuracy isn&rsquo;t required &mdash; a few extra or missed requests are tolerable.</p>
+                            <p>In global systems, perfect real-time synchronization across all regions is expensive. Many rate limiters accept small short-lived drift and use <strong>eventual consistency</strong> instead.</p>
                         </div>
                     </div>
                 </div>
@@ -1487,8 +1377,9 @@
                     </ul>
 
                     <div class="critical-highlight">
-                        <strong>Example:</strong> If rate limiting rules are too strict, many valid requests are dropped. In this case, we want to relax the rules a little bit. In another example, we notice our rate limiter becomes ineffective when there is a sudden increase in traffic like flash sales &mdash; in this case, we may replace the algorithm to support <strong>burst traffic</strong>. Token bucket is a good fit here.
+                        <strong>Example:</strong> If the rules are too strict, good requests are dropped and you loosen them. If bursts such as flash sales are still overwhelming the system, the algorithm may be the problem rather than the threshold. Token bucket is often a better fit because it allows controlled bursts.
                     </div>
+                    <p style="margin-top: 15px;">The monitoring answer in an interview should be practical: <strong>track 429 rate, allowed rate, false-positive throttling, queue buildup, Redis latency, and hot keys</strong>. Otherwise you will not know whether the limiter is protecting the system or hurting real users.</p>
                 </div>
             </div>
 
