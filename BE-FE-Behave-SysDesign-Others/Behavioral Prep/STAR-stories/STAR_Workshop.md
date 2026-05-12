@@ -7,36 +7,74 @@ Here we dump raw memories, refine them into the STAR(R) structure, and polish th
 
 ## 🏗️ The Framework: STAR(R)
 
-| Stage | What it is | The "Vibe" | Weight |
-|-------|------------|------------|--------|
-| **S**ituation | The Context | "Once upon a time..." (Keep it brief!) | 10% |
-| **T**ask | The Challenge | "The monster appeared..." | 10% |
-| **A**ction | **YOUR** Work | "I drew my sword and..." (The Hero's journey) | **50%** |
-| **R**esult | The Outcome | "And peace was restored." (Numbers/Impact) | 15% |
-| **R**eflection | The Growth | "Looking back, I learned..." (Seniority Signal!) | **15%** |
+| Stage | What It Is | What Interviewers Look For | The "Vibe" | Weight |
+|-------|-----------|---------------------------|-----------|--------|
+| **S**ituation | The Context | A recent challenge or situation you found yourself in. Keep it brief — this is setup, not the story. | "Once upon a time..." | 10% |
+| **T**ask | The Challenge | What were you required to achieve? 💡 **Pro tip:** Describe a *Target you set yourself* (not just an externally imposed task) — this signals intrinsic motivation and proactivity. | "The monster appeared..." | 10% |
+| **A**ction | **YOUR** Work | What did you do? **Why** did you do it? What were the **alternatives** you considered? — These are the *repeatable behaviors* the company wants to hire for THEIR projects. | "I drew my sword and..." | **50%** |
+| **R**esult | The Outcome | What was the outcome? What did you achieve? What did you **learn**? What steps did you take to **improve** after the experience? | "And peace was restored." (Numbers!) | 15% |
+| **R**eflection | The Growth | The principle you extracted — how it changed your approach going forward. This is your **seniority signal**: juniors describe what happened, seniors extract lasting wisdom. | "Looking back, I learned..." | **15%** |
 
-> 💡 **Why Reflection?** This is the **seniority signal**. Juniors describe what happened. Seniors reflect on what they'd do differently, what principle they extracted, and how it shaped future decisions. Interviewers LOVE this.
+> ⚡ **Actions = Repeatable Behaviors.** The company is NOT hiring you to repeat the same project you've done before. They want to see the *behaviors* embedded in your Actions — initiative, problem decomposition, cross-team coordination — so they can predict how you'll behave on *their* projects.
 
-> ⚠️ **Common Mistake:** Spending too much time on S/T and saying "We" instead of "I" in the Action.
+> ⚠️ **Common Mistakes:** Spending too much time on S/T (max 30 sec combined) · Saying "We" instead of "I" in the Action · Skipping the Reflection · No numbers in the Result.
 
 ---
 
 ## 🧠 Brainstorming Zone
 
+> **Strategy Note:** Unlike coding prep, drilling 30 questions has limited value. Instead, master 3-5 key stories from your career — each story should be high-impact, high-complexity, and highly personal. One story can answer 5-8 different questions depending on the angle you lead with.
+
 ### Story 1: The High-Impact Project (Efficiency & ROI) 🚀
 - **Raw Memory:** Jarvis-Bot. Automated manual timesheets for 20+ people. Went from 3 hours/week to 30 seconds. Saved 3,120 hours/year. Led to a salary increase.
+- **Why chosen:** Covers *High-Impact Project* (measurable ROI, team-wide adoption) + *Leadership Moment* (self-initiated, drove 20+ people) + *Proactivity* (nobody asked, I measured the cost and built it anyway)
 
 ### Story 2: The Technical Challenge (Deep Engineering) 🛠️
 - **Raw Memory:** JS-Injection Extension. Intercepting production sites to inject local/staging code. Bypassing CORS and blocking original scripts to speed up dev cycles by 90%.
+- **Why chosen:** Covers *Challenging Situation* (CORS/CORB/CSP technical blockers with no clear solution path) + *Unstructured Environment* (no spec, invented the problem definition + architecture) + *Perseverance* (multiple technical walls, kept pushing)
 
 ### Story 3: The Innovation (AI-Native) 🧠
 - **Raw Memory:** Second Brain Investigator. Semantic search over 1M+ Notion notes using Gemini. Solved keyword-search failure. Shared source with 10 colleagues.
+- **Why chosen:** Covers *High-Impact Project* (10 senior colleagues adopted it) + *Motivation* (built because genuinely excited about AI augmenting memory) + *Unstructured Environment* (no playbook for RAG at this scale, figured it out)
 
 ### Story 4: The Conflict (Setting Boundaries) 🛡️
 - **Raw Memory:** The Disrespectful Leader. Shouted at me in front of the team. I held back, de-escalated, and addressed it professionally in the review. Established boundaries.
+- **Why chosen:** The ONLY story dedicated to *Conflict Resolution & Empathy* — but it's a strong one. CEO involvement = Senior scope. Strategic timing of confrontation = leadership maturity signal.
 
 ### Story 5: The Failure/Growth (Ownership) 🌱
 - **Raw Memory:** The Dependency Trap. Relied on a senior to set up WSL/Env. It crashed. I was helpless. Learned to own the tools. Now I teach interns the "Why", not just the "How".
+- **Why chosen:** Covers *Learning Experience* (formative failure that created a lasting principle) + *Challenging Situation* (crisis under deadline, mentor unreachable) + *Leadership Moment* (20+ interns now mentored differently because of this failure)
+
+---
+
+## 🎯 Why These 5 Stories — The TIH Selection Framework
+
+TIH says to pick 3-5 projects based on 4 category types. Here's how your 5 stories map:
+
+| TIH Category | What It Covers | Your Stories |
+|-------------|---------------|-------------|
+| **High-Impact Projects** | Major launches, significant refactors, decisions that influenced multiple teams | S1: Jarvis-Bot, S3: Second Brain |
+| **Challenging Situations** | Tight deadlines, technical failures, ambiguous requirements, uncertain success | S2: JS-Injection, S5: Dependency Trap |
+| **Leadership Moments** | Mentoring, driving initiatives, times others looked to you for direction | S1: Jarvis-Bot, S5: Dependency Trap |
+| **Learning Experiences** | Mistakes that led to growth, feedback that changed your approach, skills under pressure | S5: Dependency Trap |
+
+> **The Overlap Is the Point.** S5 (Dependency Trap) alone covers 3 of 4 categories — that's why one story can answer "failure", "ambiguity", "leadership", and "growth" questions. Don't try to have a different story for every question. Drill these 5 until you can tell each one from any angle.
+
+---
+
+## 🏆 The Big Three — Must-Prep Questions
+
+These appear in nearly EVERY behavioral interview. Prepare them until they're natural, not memorized:
+
+| Question | Story to Use | Timing |
+|---------|-------------|--------|
+| **"Tell me about yourself"** | Self-Introduction (not a STAR story — see `../Self-Introduction/Elevator-Pitch.md`) | ~60 sec |
+| **"Tell me about your most impactful project"** | S1: Jarvis-Bot (for impact) or S3: Second Brain (for innovation) | ~3 min |
+| **"Tell me about a time you dealt with conflict"** | S4: The Conflict | ~3 min |
+
+> **Full polished answers with exact timing:** `../Common-Questions/Big-Three-Answers.md`
+
+> 💡 **Practice tip:** Don't memorize — write bullet points and verbalize near the interview. Memorized answers sound robotic. Bullet-pointed answers sound natural.
 
 ---
 

@@ -136,6 +136,9 @@
             <button onclick="showTerm('degree')">Degree</button>
             <button onclick="showTerm('distance')">Distance</button>
             <button onclick="showTerm('level')">Level/Depth</button>
+            <button onclick="showTerm('height')">Height</button>
+            <button onclick="showTerm('height-vs-depth')">Height vs Depth</button>
+            <button onclick="showTerm('max-depth-problem')">Max Depth Problem</button>
             <button onclick="showTerm('width')">Width</button>
             <button onclick="showTerm('reset')">Reset</button>
         </div>
@@ -226,8 +229,8 @@
             // Draw annotations
             if (highlights.annotations) {
                 highlights.annotations.forEach(ann => {
-                    ctx.fillStyle = 'rgba(102, 126, 234, 0.9)';
-                    ctx.font = 'bold 16px Arial';
+                    ctx.fillStyle = ann.color || 'rgba(102, 126, 234, 0.9)';
+                    ctx.font = ann.font || 'bold 16px Arial';
                     ctx.textAlign = ann.align || 'center';
                     ctx.fillText(ann.text, ann.x, ann.y);
                 });
@@ -346,20 +349,247 @@
                     drawTree({
                         nodes: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
                         annotations: [
-                            { text: 'Level 0 (Root)', x: 850, y: 50 },
-                            { text: 'Level 1', x: 850, y: 150 },
-                            { text: 'Level 2', x: 850, y: 250 },
-                            { text: 'Level 3 (Leaves)', x: 850, y: 350 }
+                            // Level lines on the right (centered in the 830–1000px right margin)
+                            { text: 'Depth 0 (Root)', x: 910, y: 50,  color: '#2980b9', font: 'bold 14px Arial' },
+                            { text: 'Depth 1',        x: 910, y: 150, color: '#2980b9', font: 'bold 14px Arial' },
+                            { text: 'Depth 2',        x: 910, y: 250, color: '#2980b9', font: 'bold 14px Arial' },
+                            { text: 'Depth 3 (Leaf)', x: 910, y: 350, color: '#2980b9', font: 'bold 14px Arial' },
+                            // Per-node Depth labels – left of each node
+                            { text: 'D=0', x: 455, y: 50,  color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=1', x: 255, y: 150, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=1', x: 455, y: 150, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=1', x: 655, y: 150, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=2', x: 155, y: 250, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=2', x: 355, y: 250, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=2', x: 555, y: 250, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=2', x: 755, y: 250, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=3', x: 105, y: 350, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=3', x: 205, y: 350, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=3', x: 505, y: 350, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            { text: 'D=3', x: 605, y: 350, color: '#2980b9', font: '13px Arial', align: 'right' },
+                            // Footer note
+                            { text: 'Depth = edges counted going UP ⬆  from the node to the Root', x: 500, y: 450, color: '#2980b9', font: 'bold 15px Arial' },
                         ]
                     });
                     infoBox.innerHTML = `
-                        <h2>Level / Depth</h2>
-                        <p><span class="highlight">Definition:</span> Number of edges along the unique path between a node and the root</p>
-                        <p><span class="highlight">Level 0:</span> A (root)</p>
-                        <p><span class="highlight">Level 1:</span> B, C, D (1 edge from root)</p>
-                        <p><span class="highlight">Level 2:</span> E, F, G, H (2 edges from root)</p>
-                        <p><span class="highlight">Level 3:</span> I, J, K, L (3 edges from root)</p>
-                        <p>Height of tree = maximum level = 3</p>
+                        <h2>Level / Depth ⬆</h2>
+                        <p><span class="highlight">Definition:</span> Number of edges from a node <strong>UP</strong> to the Root</p>
+                        <p><em>"Level" and "Depth" of a node are the same thing — just two names for the same measurement</em></p>
+                        <br>
+                        <p>• <span class="highlight">A</span> (Root) → Depth = <strong>0</strong> — already at the top, 0 edges to climb</p>
+                        <p>• <span class="highlight">B, C, D</span> → Depth = <strong>1</strong> — 1 edge up to reach Root</p>
+                        <p>• <span class="highlight">E, F, G, H</span> → Depth = <strong>2</strong> — 2 edges up to reach Root</p>
+                        <p>• <span class="highlight">I, J, K, L</span> (Leaves) → Depth = <strong>3</strong> — 3 edges up to reach Root</p>
+                        <br>
+                        <p>🤿 <strong>Diver analogy:</strong> Depth = how far you are <em>below the surface</em> (Root is the surface, depth=0)</p>
+                        <p>🔑 <strong>Key link:</strong> Max Depth of tree = <strong>3</strong> = Height of Root. See "Height vs Depth" to understand why.</p>
+                    `;
+                    break;
+
+                case 'height':
+                    drawTree({
+                        primary: 0,
+                        nodes: [1, 4, 8],
+                        edges: [[0,1],[1,4],[4,8]],
+                        annotations: [
+                            // Height labels – right of each node (orange = on highlighted path, gray = others)
+                            { text: 'H=3', x: 545, y: 50,  color: '#e67e22', font: 'bold 15px Arial', align: 'left' },
+                            { text: 'H=2', x: 345, y: 150, color: '#e67e22', font: 'bold 15px Arial', align: 'left' },
+                            { text: 'H=2', x: 545, y: 150, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=1', x: 745, y: 150, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=1', x: 245, y: 250, color: '#e67e22', font: 'bold 15px Arial', align: 'left' },
+                            { text: 'H=0', x: 445, y: 250, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=1', x: 645, y: 250, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=0', x: 845, y: 250, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=0', x: 195, y: 350, color: '#e67e22', font: 'bold 15px Arial', align: 'left' },
+                            { text: 'H=0', x: 295, y: 350, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=0', x: 595, y: 350, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            { text: 'H=0', x: 695, y: 350, color: '#aaa',    font: '14px Arial',      align: 'left' },
+                            // Legend
+                            { text: 'Orange path A → B → E → I = 3 edges  →  Height of A = 3', x: 500, y: 430, color: '#e67e22', font: 'bold 15px Arial' },
+                            { text: 'Height = edges counted going DOWN to farthest leaf below the node', x: 500, y: 460, color: '#555', font: '15px Arial' },
+                            { text: 'Leaf nodes always have Height = 0  (nothing below them)', x: 500, y: 488, color: '#888', font: '14px Arial' },
+                        ]
+                    });
+                    infoBox.innerHTML = `
+                        <h2>Height (Chiều Cao) 🌊</h2>
+                        <p><span class="highlight">Definition:</span> Number of edges from a node <strong>DOWN</strong> to its farthest leaf descendant</p>
+                        <p><em>Leaf nodes always have Height = 0 (no children below)</em></p>
+                        <br>
+                        <p><strong>Heights in this tree (orange = highlighted path A→B→E→I):</strong></p>
+                        <p>• Node <span class="highlight">A</span> (Root): Height = <strong>3</strong> — longest path down is A→B→E→I, 3 edges</p>
+                        <p>• Node <span class="highlight">B</span>: Height = <strong>2</strong> — longest path down is B→E→I, 2 edges</p>
+                        <p>• Node <span class="highlight">E</span>: Height = <strong>1</strong> — path down is E→I, 1 edge</p>
+                        <p>• Node <span class="highlight">I</span> (Leaf): Height = <strong>0</strong> — no children, nothing below</p>
+                        <br>
+                        <p>🤿 <strong>Diver analogy:</strong> Height = how far the diver can go <em>DOWN</em> before hitting the ocean floor (deepest leaf)</p>
+                    `;
+                    break;
+
+                case 'height-vs-depth':
+                    drawTree({
+                        nodes: [0, 1, 4, 8],
+                        edges: [[0,1],[1,4],[4,8]],
+                        annotations: [
+                            // A(500,50): Depth left (blue), Height right (orange)
+                            { text: 'D=0', x: 455, y: 50,  color: '#2980b9', font: 'bold 15px Arial', align: 'right' },
+                            { text: 'H=3', x: 545, y: 50,  color: '#e67e22', font: 'bold 15px Arial', align: 'left'  },
+                            // B(300,150)
+                            { text: 'D=1', x: 255, y: 150, color: '#2980b9', font: 'bold 15px Arial', align: 'right' },
+                            { text: 'H=2', x: 345, y: 150, color: '#e67e22', font: 'bold 15px Arial', align: 'left'  },
+                            // E(200,250)
+                            { text: 'D=2', x: 155, y: 250, color: '#2980b9', font: 'bold 15px Arial', align: 'right' },
+                            { text: 'H=1', x: 245, y: 250, color: '#e67e22', font: 'bold 15px Arial', align: 'left'  },
+                            // I(150,350)
+                            { text: 'D=3', x: 105, y: 350, color: '#2980b9', font: 'bold 15px Arial', align: 'right' },
+                            { text: 'H=0', x: 195, y: 350, color: '#e67e22', font: 'bold 15px Arial', align: 'left'  },
+                            // Direction indicators
+                            { text: '⬆  Depth (D): count edges going UP toward Root', x: 250, y: 430, color: '#2980b9', font: 'bold 14px Arial' },
+                            { text: '⬇  Height (H): count edges going DOWN toward leaf', x: 720, y: 430, color: '#e67e22', font: 'bold 14px Arial' },
+                            { text: 'For the whole tree:  Max Depth = Height of Root = 3  ✓  (same number!)', x: 500, y: 468, color: '#27ae60', font: 'bold 15px Arial' },
+                        ]
+                    });
+                    infoBox.innerHTML = `
+                        <h2>Height vs Depth 🤿</h2>
+                        <p>
+                            <span class="highlight" style="background:linear-gradient(120deg,#74b9ff,#2980b9);color:white;padding:3px 8px">Depth (D)</span>
+                            &nbsp;= edges from node <strong>UP</strong> to Root &nbsp;&nbsp;|&nbsp;&nbsp;
+                            <span class="highlight" style="background:linear-gradient(120deg,#fd79a8,#e67e22);color:white;padding:3px 8px">Height (H)</span>
+                            &nbsp;= edges from node <strong>DOWN</strong> to farthest leaf
+                        </p>
+                        <br>
+                        <p>🤿 <strong>Diver analogy — nhớ mãi không quên:</strong></p>
+                        <p>• <span class="highlight">Depth</span> = khoảng cách từ <strong>mặt nước (Root)</strong> xuống chỗ thợ lặn đứng</p>
+                        <p>• <span class="highlight">Height</span> = khoảng cách từ chỗ thợ lặn đứng <strong>xuống đáy biển sâu nhất (Leaf)</strong></p>
+                        <br>
+                        <p><strong>Path A → B → E → I — từng node một:</strong></p>
+                        <table style="width:100%;border-collapse:collapse;margin:10px 0;font-size:0.95em">
+                            <tr style="background:#f0f4ff">
+                                <th style="padding:8px;border:1px solid #ddd">Node</th>
+                                <th style="padding:8px;border:1px solid #ddd;color:#2980b9">Depth ⬆ (lên Root)</th>
+                                <th style="padding:8px;border:1px solid #ddd;color:#e67e22">Height ⬇ (xuống Leaf)</th>
+                                <th style="padding:8px;border:1px solid #ddd">Bằng nhau?</th>
+                            </tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;text-align:center">A (Root)</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#2980b9"><strong>0</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#e67e22"><strong>3</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center">❌ Khác</td></tr>
+                            <tr style="background:#f9f9f9"><td style="padding:8px;border:1px solid #ddd;text-align:center">B</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#2980b9"><strong>1</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#e67e22"><strong>2</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center">❌ Khác</td></tr>
+                            <tr><td style="padding:8px;border:1px solid #ddd;text-align:center">E</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#2980b9"><strong>2</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#e67e22"><strong>1</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center">❌ Khác</td></tr>
+                            <tr style="background:#f9f9f9"><td style="padding:8px;border:1px solid #ddd;text-align:center">I (Leaf)</td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#2980b9"><strong>3</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center;color:#e67e22"><strong>0</strong></td><td style="padding:8px;border:1px solid #ddd;text-align:center">❌ Khác</td></tr>
+                        </table>
+                        <div style="background:linear-gradient(135deg,#d4edda,#c3e6cb);border:2px solid #27ae60;border-radius:12px;padding:16px;margin-top:14px">
+                            <p style="font-weight:bold;color:#155724;margin-bottom:10px;font-size:1.05em">✅ Khi nào chúng bằng nhau?</p>
+                            <p style="color:#155724;margin-bottom:12px">Khi hỏi về <strong>cả cái cây</strong> (không phải node cụ thể), cả hai đo <em>cùng một khoảng cách</em> — chỉ nhìn từ hai phía:</p>
+                            <div style="display:flex;gap:10px;align-items:center;margin:4px 0 12px">
+                                <div style="flex:1;background:rgba(41,128,185,0.15);border:1px solid #2980b9;border-radius:8px;padding:10px;text-align:center">
+                                    <div style="color:#2980b9;font-weight:bold;font-size:0.95em">Max Depth of tree</div>
+                                    <div style="font-size:2em;font-weight:bold;color:#2980b9;line-height:1.2">3</div>
+                                    <div style="font-size:0.8em;color:#555">= Depth của lá I<br>(3 edges ⬆ lên Root)</div>
+                                </div>
+                                <div style="font-size:2em;color:#27ae60;font-weight:bold">=</div>
+                                <div style="flex:1;background:rgba(230,126,34,0.15);border:1px solid #e67e22;border-radius:8px;padding:10px;text-align:center">
+                                    <div style="color:#e67e22;font-weight:bold;font-size:0.95em">Height of Root</div>
+                                    <div style="font-size:2em;font-weight:bold;color:#e67e22;line-height:1.2">3</div>
+                                    <div style="font-size:0.8em;color:#555">= Height của node A<br>(3 edges ⬇ xuống lá)</div>
+                                </div>
+                            </div>
+                            <p style="color:#155724;font-size:0.9em;border-top:1px solid #a3d9a5;padding-top:10px;margin:0">💡 Cả hai đều là <strong>khoảng cách từ Root đến Leaf xa nhất</strong> — Depth đo từ dưới lên, Height đo từ trên xuống, nên bằng nhau</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'max-depth-problem':
+                    drawTree({
+                        primary: 0,
+                        nodes: [1, 4, 8],
+                        edges: [[0,1],[1,4],[4,8]],
+                        annotations: [
+                            // Node count ①②③④ — left side, shows WHICH node we're counting
+                            { text: '①', x: 455, y: 52,  color: '#27ae60', font: 'bold 20px Arial', align: 'right' },
+                            { text: '②', x: 255, y: 152, color: '#27ae60', font: 'bold 20px Arial', align: 'right' },
+                            { text: '③', x: 155, y: 252, color: '#27ae60', font: 'bold 20px Arial', align: 'right' },
+                            { text: '④', x: 105, y: 352, color: '#27ae60', font: 'bold 20px Arial', align: 'right' },
+                            // Return values bubbling UP — right side, shows WHAT the function returns
+                            { text: '↑ returns 4', x: 545, y: 50,  color: '#8e44ad', font: 'bold 14px Arial', align: 'left' },
+                            { text: '↑ returns 3', x: 345, y: 150, color: '#8e44ad', font: 'bold 14px Arial', align: 'left' },
+                            { text: '↑ returns 2', x: 245, y: 250, color: '#8e44ad', font: 'bold 14px Arial', align: 'left' },
+                            { text: '↑ returns 1', x: 195, y: 350, color: '#8e44ad', font: 'bold 14px Arial', align: 'left' },
+                            // Footer
+                            { text: 'Green ① = LeetCode counts NODES (not edges)  →  path has 4 nodes', x: 500, y: 425, color: '#27ae60', font: '14px Arial' },
+                            { text: 'Purple ↑ = return values bubbling back up the recursion', x: 500, y: 450, color: '#8e44ad', font: '14px Arial' },
+                            { text: 'Each node adds +1 to whatever its deepest child returned', x: 500, y: 478, color: '#e74c3c', font: 'bold 14px Arial' },
+                        ]
+                    });
+                    infoBox.innerHTML = `
+                        <h2>Maximum Depth — LeetCode #104 📘</h2>
+
+                        <p>📌 <strong>LeetCode's definition (literally from the problem):</strong></p>
+                        <p style="background:#f0f4ff;padding:10px;border-radius:8px;border-left:4px solid #667eea;font-style:italic;margin:8px 0">
+                            "The maximum depth is the number of <strong>nodes</strong> along the longest path from the root node down to the farthest leaf node."
+                        </p>
+                        <p>→ Đây là yêu cầu của đề bài — LeetCode chọn đếm <strong>nodes</strong>, không phải edges. Không có lý do sâu xa — đó chỉ là convention họ dùng.</p>
+
+                        <br>
+
+                        <p>⚙️ <strong>Tại sao code dùng <code style="background:#ffe0e0;padding:2px 5px;border-radius:4px;color:#e74c3c">+1</code> ?</strong></p>
+                        <p>Mental model đơn giản: <strong>mỗi node tự đếm chính nó vào kết quả.</strong></p>
+                        <div style="background:#f8f8f8;border-radius:8px;padding:12px;margin:8px 0;font-family:monospace;font-size:13px;line-height:2">
+                            <span style="color:#6c757d">return</span> <span style="color:#e74c3c;font-weight:bold">1</span> + max(left, right)<br>
+                            <span style="color:#888;font-size:12px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;↑            ↑</span><br>
+                            <span style="color:#888;font-size:12px">&nbsp;&nbsp;&nbsp;"tôi tồn tại"  kết quả sâu nhất từ con tôi trả lên</span>
+                        </div>
+
+                        <p>📍 <strong>Trace step-by-step trên path A→B→E→I:</strong></p>
+                        <table style="width:100%;border-collapse:collapse;margin:8px 0;font-size:0.9em">
+                            <tr style="background:#f0f4ff">
+                                <th style="padding:8px;border:1px solid #ddd">Node</th>
+                                <th style="padding:8px;border:1px solid #ddd">left / right từ con</th>
+                                <th style="padding:8px;border:1px solid #ddd">Tính</th>
+                                <th style="padding:8px;border:1px solid #ddd;color:#8e44ad">Returns</th>
+                            </tr>
+                            <tr style="background:#f9f9f9">
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center">null</td>
+                                <td style="padding:8px;border:1px solid #ddd">—</td>
+                                <td style="padding:8px;border:1px solid #ddd;font-family:monospace">base case</td>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center;color:#8e44ad"><strong>0</strong></td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center">I <em>(leaf)</em></td>
+                                <td style="padding:8px;border:1px solid #ddd">left=0, right=0</td>
+                                <td style="padding:8px;border:1px solid #ddd;font-family:monospace">1 + max(0,0) = 1</td>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center;color:#8e44ad"><strong>1</strong> ← I counts itself</td>
+                            </tr>
+                            <tr style="background:#f9f9f9">
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center">E</td>
+                                <td style="padding:8px;border:1px solid #ddd">left=1 (I), right=1 (J)</td>
+                                <td style="padding:8px;border:1px solid #ddd;font-family:monospace">1 + max(1,1) = 2</td>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center;color:#8e44ad"><strong>2</strong> ← E + 1 below</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center">B</td>
+                                <td style="padding:8px;border:1px solid #ddd">left=2 (E), right=1 (F)</td>
+                                <td style="padding:8px;border:1px solid #ddd;font-family:monospace">1 + max(2,1) = 3</td>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center;color:#8e44ad"><strong>3</strong> ← B + 2 below</td>
+                            </tr>
+                            <tr style="background:#f9f9f9">
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center">A <em>(root)</em></td>
+                                <td style="padding:8px;border:1px solid #ddd">left=3 (B), ...</td>
+                                <td style="padding:8px;border:1px solid #ddd;font-family:monospace">1 + max(3,...) = 4</td>
+                                <td style="padding:8px;border:1px solid #ddd;text-align:center;color:#8e44ad"><strong>4</strong> ← A + 3 below</td>
+                            </tr>
+                        </table>
+
+                        <p>❓ <strong>Nếu không có +1 thì sao?</strong></p>
+                        <p style="background:#fff3cd;padding:10px;border-radius:8px;border-left:4px solid #ffc107;margin:8px 0">
+                            Code sẽ trả về <strong>3</strong> — đúng là số edges, nhưng sai theo yêu cầu của LeetCode.<br>
+                            Cái <code style="background:#ffe0e0;padding:2px 4px;border-radius:4px;color:#e74c3c">+1</code> chính xác là thứ chuyển "đếm edges" sang "đếm nodes" — và đó là những gì LeetCode muốn.
+                        </p>
+
+                        <pre style="background:#f4f4f4;padding:12px;border-radius:8px;font-size:13px;color:#333;line-height:1.8;margin-top:10px">def maxDepth(root):
+    if not root: return 0              # null = không phải node thật → 0
+    left  = maxDepth(root.left)
+    right = maxDepth(root.right)
+    return 1 + max(left, right)
+    #      ↑
+    #   "tôi là 1 node" + "đứa con sâu nhất bên dưới tôi"</pre>
                     `;
                     break;
 
