@@ -734,6 +734,44 @@
                     <div class="figure-box">
                         <div class="figure-title">Figure 4-6: token consumption and refill over time</div>
                         <img class="pdf-page" src="assets/chapter4-figures/figure-4-6.png" alt="Figure 4-6 token bucket example">
+                        <div class="critical-highlight" style="margin-top:18px">
+                            <strong>What Figure 4-6 is showing — walk through each circle ①②③④:</strong>
+                            <p style="margin-top:10px">The figure uses <strong>bucket size = 4 tokens, refill rate = 4 tokens per 1 minute</strong>. Each circled snapshot freezes time to show you the state:</p>
+                            <table class="comparison-table" style="margin-top:14px">
+                                <thead><tr><th>Snapshot</th><th>Time</th><th>Bucket State</th><th>What Happens</th><th>Result</th></tr></thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="text-align:center;font-size:1.3em">①</td>
+                                        <td><code>1:00:00</code></td>
+                                        <td>4 tokens (full)</td>
+                                        <td>1 request arrives → consume 1 token → bucket now has 3</td>
+                                        <td style="color:var(--moss-green);font-weight:600">✓ Allowed</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:center;font-size:1.3em">②</td>
+                                        <td><code>1:00:05</code></td>
+                                        <td>3 tokens</td>
+                                        <td>3 requests arrive <em>at once</em> → consume 3 tokens → bucket now has 0. <strong>This is the burst!</strong></td>
+                                        <td style="color:var(--moss-green);font-weight:600">✓ All 3 allowed</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:center;font-size:1.3em">③</td>
+                                        <td><code>1:00:20</code></td>
+                                        <td>0 tokens (empty)</td>
+                                        <td>1 request arrives → no tokens left → nothing to consume</td>
+                                        <td style="color:var(--sunset-rose);font-weight:600">✗ Dropped</td>
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align:center;font-size:1.3em">④</td>
+                                        <td><code>1:01:00</code></td>
+                                        <td>0 tokens → 4 tokens</td>
+                                        <td>The refiller fires (1-minute interval) → 4 new tokens added → bucket is full again. Ready for next burst.</td>
+                                        <td style="color:var(--water-teal);font-weight:600">⟳ Refilled</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p style="margin-top:14px">⚡ <strong>The key insight:</strong> Token Bucket allows <em>bursts</em> (snapshot ②: 3 requests at once all pass) but still enforces a long-term cap (after 4 tokens are gone, you wait for the refill). That's the difference from Fixed Window which treats every request individually.</p>
+                        </div>
                     </div>
 
                     <h4>Interview-ready mental model</h4>
@@ -858,6 +896,13 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div class="consideration-card" style="border-left-color:var(--water-teal);margin-top:16px">
+                        <h4>🎙️ How to say it to the interviewer (30 seconds)</h4>
+                        <blockquote style="margin:10px 0 0;padding:12px 16px;border-left:3px solid var(--water-teal);background:var(--bg-section);border-radius:0 6px 6px 0;font-style:italic;color:var(--text-primary)">
+                            "Leaking Bucket is like a queue with a fixed drain rate. Requests arrive and join a FIFO queue. A background processor pulls from the queue at a constant speed — say, 10 requests per second. If the queue is full when a new request arrives, we drop it. The key trade-off is: bursts get smoothed into stable output, which is great for downstream services that can't handle spikes — but it also means a flood of requests can queue-starve newer ones. You tune two knobs: queue capacity and outflow rate."
+                        </blockquote>
+                    </div>
                 </div>
             </div>
 
@@ -968,6 +1013,13 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div class="consideration-card" style="border-left-color:var(--water-teal);margin-top:16px">
+                        <h4>🎙️ How to say it to the interviewer (30 seconds)</h4>
+                        <blockquote style="margin:10px 0 0;padding:12px 16px;border-left:3px solid var(--water-teal);background:var(--bg-section);border-radius:0 6px 6px 0;font-style:italic;color:var(--text-primary)">
+                            "Fixed Window Counter divides time into fixed slots — say, 0:00–0:59, 1:00–1:59 — and keeps one counter per slot in Redis. Each request increments the counter; if it exceeds the limit, we reject. It's simple and memory-efficient, but it has an edge-burst problem: a user can send the full quota at 0:59 and again at 1:00, getting 2× the allowed rate in a 2-second window. For anything accuracy-sensitive, that's a real vulnerability."
+                        </blockquote>
+                    </div>
                 </div>
             </div>
 
@@ -979,7 +1031,63 @@
                         <div class="figure-title">Figure 4-10: timestamp log inside a rolling minute</div>
                         <img class="pdf-page" src="assets/chapter4-figures/figure-4-10.png" alt="Figure 4-10 sliding window log">
                     </div>
-                    <p>The sliding window log algorithm fixes the fixed window counter&rsquo;s edge case issue.</p>
+
+                    <div class="critical-highlight" style="margin-top:18px">
+                        <strong>What Figure 4-10 is showing — walk through each circle ①②③④ (limit: 2 req/min):</strong>
+                        <table class="comparison-table" style="margin-top:12px">
+                            <thead>
+                                <tr>
+                                    <th>Snapshot</th>
+                                    <th>Time</th>
+                                    <th>Window (rolling 1 min)</th>
+                                    <th>Log After Action</th>
+                                    <th>Count</th>
+                                    <th>Result</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>①</strong></td>
+                                    <td>1:00:01</td>
+                                    <td>[0:59:01 → 1:00:01]</td>
+                                    <td><code>[1:00:01]</code></td>
+                                    <td>1 ≤ 2</td>
+                                    <td style="color:var(--moss-green);font-weight:600">✓ Accept</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>②</strong></td>
+                                    <td>1:00:30</td>
+                                    <td>[0:59:30 → 1:00:30]</td>
+                                    <td><code>[1:00:01, 1:00:30]</code></td>
+                                    <td>2 ≤ 2</td>
+                                    <td style="color:var(--moss-green);font-weight:600">✓ Accept</td>
+                                </tr>
+                                <tr style="background:rgba(220,53,69,0.06)">
+                                    <td><strong>③</strong></td>
+                                    <td>1:00:50</td>
+                                    <td>[0:59:50 → 1:00:50]</td>
+                                    <td><code>[1:00:01, 1:00:30, 1:00:50]</code></td>
+                                    <td>3 &gt; 2</td>
+                                    <td style="color:var(--sunset-rose);font-weight:600">✗ Reject<br><small>⚠️ but 1:00:50 stays in log!</small></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>④</strong></td>
+                                    <td>1:01:40</td>
+                                    <td>[1:00:40 → 1:01:40]</td>
+                                    <td><code>[1:00:50, 1:01:40]</code><br><small>evicted: 1:00:01, 1:00:30 (before 1:00:40)</small></td>
+                                    <td>2 ≤ 2</td>
+                                    <td style="color:var(--moss-green);font-weight:600">✓ Accept</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="margin-top:14px;display:flex;flex-direction:column;gap:8px">
+                            <p>⚡ <strong>The "sliding" part:</strong> The window is NOT a fixed 1:00:00–1:01:00 block. At 1:01:40 the window is <em>[1:00:40 → 1:01:40]</em> — it rolls with the current timestamp. That's why 1:00:01 and 1:00:30 get evicted (they're before 1:00:40).</p>
+                            <p>🧠 <strong>The memory cost:</strong> See snapshot ③ — the <em>rejected</em> timestamp 1:00:50 stays in the Redis sorted set. Every request (accepted or denied) leaves a footprint. Under high attack traffic this log bloats fast → that's why it's memory-heavy.</p>
+                            <p>🎯 <strong>Why it's accurate:</strong> Unlike Fixed Window (which resets at :00), the rolling window means there's no "edge burst" exploit. The count at ANY instant reflects exactly the last 60 seconds.</p>
+                        </div>
+                    </div>
+
+                    <p style="margin-top:16px">The sliding window log algorithm fixes the fixed window counter&rsquo;s edge case issue.</p>
 
                     <h4>How it works:</h4>
                     <ul>
@@ -1043,6 +1151,13 @@
                             </ul>
                         </div>
                     </div>
+
+                    <div class="consideration-card" style="border-left-color:var(--water-teal);margin-top:16px">
+                        <h4>🎙️ How to say it to the interviewer (30 seconds)</h4>
+                        <blockquote style="margin:10px 0 0;padding:12px 16px;border-left:3px solid var(--water-teal);background:var(--bg-section);border-radius:0 6px 6px 0;font-style:italic;color:var(--text-primary)">
+                            "Sliding Window Log stores the exact timestamp of every request in a Redis sorted set. On each new request, we first evict timestamps older than one window, then check the size. If it's at or under the limit, we add the timestamp and allow it. The rolling window means there's no fixed edge to exploit — accuracy is excellent. The cost is memory: every request, accepted or rejected, leaves a timestamp in the log. Under a DDoS scenario, that set can blow up fast."
+                        </blockquote>
+                    </div>
                 </div>
             </div>
 
@@ -1100,6 +1215,13 @@
                                 <li>According to experiments done by Cloudflare, only <strong>0.003% of requests are wrongly allowed or rate limited</strong> among 400 million requests.</li>
                             </ul>
                         </div>
+                    </div>
+
+                    <div class="consideration-card" style="border-left-color:var(--water-teal);margin-top:16px">
+                        <h4>🎙️ How to say it to the interviewer (30 seconds)</h4>
+                        <blockquote style="margin:10px 0 0;padding:12px 16px;border-left:3px solid var(--water-teal);background:var(--bg-section);border-radius:0 6px 6px 0;font-style:italic;color:var(--text-primary)">
+                            "Sliding Window Counter is a hybrid — it uses two fixed-window counters and weights them by how much of the previous window overlaps the current rolling window. The formula is: requests_in_current_window + (requests_in_prev_window × overlap_percentage). It assumes traffic was evenly distributed in the previous window, which isn't always true, but Cloudflare tested it at 400 million requests and found only 0.003% error. You get near-Sliding-Log accuracy at Fixed-Window memory cost — that's the sweet spot for most production systems."
+                        </blockquote>
                     </div>
                 </div>
             </div>
@@ -1307,13 +1429,61 @@
                         <li>The correct result should have been <strong>5</strong>, but one increment is effectively lost.</li>
                     </ul>
                     <p style="margin-top: 15px;">That is the race condition: <strong>multiple concurrent requests make decisions using stale shared state</strong>. In an interview, say the issue is not just data corruption. It can cause the limiter to allow more traffic than intended or track usage inaccurately.</p>
-                    <div class="example-box">
+                    <div class="critical-highlight" style="margin-top:16px">
+                        <strong>Why is this dangerous? — The exact failure scenario:</strong>
+                        <div style="display:flex;flex-direction:column;gap:8px;margin-top:12px">
+                            <div style="display:flex;gap:10px">
+                                <div style="min-width:80px;font-weight:600;color:var(--water-teal)">Thread A</div>
+                                <div style="min-width:80px;font-weight:600;color:var(--sunset-rose)">Thread B</div>
+                                <div style="font-weight:600;color:var(--text-muted)">Redis counter</div>
+                            </div>
+                            <div style="display:flex;gap:10px;padding:8px;background:var(--bg-section);border-radius:6px;font-family:monospace;font-size:0.85em">
+                                <div style="min-width:80px;color:var(--water-teal)">GET → 3</div>
+                                <div style="min-width:80px;color:var(--text-muted)">—</div>
+                                <div>3</div>
+                            </div>
+                            <div style="display:flex;gap:10px;padding:8px;background:var(--bg-section);border-radius:6px;font-family:monospace;font-size:0.85em">
+                                <div style="min-width:80px;color:var(--text-muted)">—</div>
+                                <div style="min-width:80px;color:var(--sunset-rose)">GET → 3</div>
+                                <div>3 (stale read!)</div>
+                            </div>
+                            <div style="display:flex;gap:10px;padding:8px;background:var(--bg-section);border-radius:6px;font-family:monospace;font-size:0.85em">
+                                <div style="min-width:80px;color:var(--water-teal)">3 &lt; 5 → SET 4</div>
+                                <div style="min-width:80px;color:var(--text-muted)">—</div>
+                                <div>4</div>
+                            </div>
+                            <div style="display:flex;gap:10px;padding:8px;background:rgba(220,53,69,0.08);border-radius:6px;font-family:monospace;font-size:0.85em">
+                                <div style="min-width:80px;color:var(--text-muted)">—</div>
+                                <div style="min-width:80px;color:var(--sunset-rose)">3 &lt; 5 → SET 4</div>
+                                <div style="color:var(--sunset-rose);font-weight:600">4 ← Should be 5! One write lost.</div>
+                            </div>
+                        </div>
+                        <p style="margin-top:12px">Limit is 5. Both threads read 3, both think they're the 4th request, both write 4. Counter shows 4 but <strong>2 requests passed</strong> — the counter undercounts. This is how an attacker can exceed the quota.</p>
+                    </div>
+
+                    <div class="example-box" style="margin-top:16px">
                         <h4>Practical Fixes</h4>
                         <ul>
                             <li><strong>Locks</strong> solve correctness but usually hurt throughput and latency.</li>
                             <li><strong>Atomic Redis operations or Lua scripts</strong> are better because the read-check-update logic runs as one unit.</li>
                             <li><strong>Redis sorted sets</strong> are also commonly used, especially for sliding-window style algorithms.</li>
                         </ul>
+                        <div style="margin-top:14px">
+                            <strong>Exact Lua script fix — what to say to the interviewer:</strong>
+                            <pre style="background:var(--bg-section);border:1px solid var(--border-color);border-radius:6px;padding:14px;margin-top:8px;overflow-x:auto;font-size:0.82em;line-height:1.6"><code>-- Redis executes this entire block atomically (single-threaded)
+local key = KEYS[1]
+local limit = tonumber(ARGV[1])
+local current = redis.call('GET', key)
+
+if current and tonumber(current) >= limit then
+    return 0  -- reject
+else
+    redis.call('INCR', key)
+    redis.call('EXPIRE', key, 60)  -- 1-minute window
+    return 1  -- allow
+end</code></pre>
+                            <p style="margin-top:8px;color:var(--text-muted);font-size:0.9em">Key point: Redis is single-threaded. When a Lua script runs, no other command can interleave — GET and INCR become one uninterruptible operation. That's the atomicity guarantee.</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1337,7 +1507,18 @@
                         <img class="pdf-page" src="assets/chapter4-figures/figure-4-16.png" alt="Figure 4-16 centralized Redis solution">
                     </div>
                     <p>Figure 4-16 shows the fix: multiple rate limiter instances share a centralized data store such as Redis. Now every limiter reads and writes the same counters, so the quota is enforced consistently no matter which instance receives the request.</p>
-                    <p><strong>Why not sticky sessions?</strong> They can keep one client attached to one limiter, but that approach is usually rejected because it is less scalable, less flexible during failures, and harder to operate. Shared centralized state is the standard answer.</p>
+
+                    <div class="critical-highlight" style="margin-top:16px">
+                        <strong>Why not sticky sessions? — The interviewer will ask this.</strong>
+                        <p style="margin-top:10px">Sticky sessions (a.k.a. session affinity) pin each client to one rate limiter instance via the load balancer. On paper it looks like it solves the problem — one client, one counter, no split state.</p>
+                        <p style="margin-top:8px"><strong>Why it breaks down:</strong></p>
+                        <ul style="margin-top:6px">
+                            <li><strong>Instance failure:</strong> If the limiter an IP is pinned to crashes, all that client's state is lost. The load balancer re-routes the client to a new instance — which has a fresh counter at 0. That client just had its quota reset for free.</li>
+                            <li><strong>Scaling events:</strong> When you add or remove instances (auto-scaling), the pinning map becomes stale. Clients get re-hashed to different instances, again losing historical counter state.</li>
+                            <li><strong>Hot spots:</strong> A heavy client (e.g., one IP sending 80% of traffic) always goes to the same instance, creating an uneven load that defeats the point of horizontal scaling.</li>
+                        </ul>
+                        <p style="margin-top:10px">✅ <strong>Standard answer:</strong> Stateless rate limiter instances + centralized Redis. All state lives in Redis; limiters are interchangeable. Any instance can handle any request.</p>
+                    </div>
                 </div>
             </div>
 
@@ -1355,15 +1536,21 @@
                         <div class="figure-title">Figure 4-17: multi-data-center edge routing</div>
                         <img class="pdf-page" src="assets/chapter4-figures/figure-4-17.png" alt="Figure 4-17 edge routing">
                     </div>
-                    <p><strong>What Figure 4-17 is showing:</strong> users should be routed to the closest edge location instead of sending every request to one faraway region. That reduces network latency before the request even reaches the limiter.</p>
-                    <div class="advantages-grid">
-                        <div class="advantage-card">
-                            <h4>Multi-Data Center Setup</h4>
-                            <p>If the limiter is geographically far from the user, the throttling check itself adds noticeable latency. Putting edge capacity closer to users reduces round-trip time.</p>
-                        </div>
-                        <div class="advantage-card">
-                            <h4>Eventual Consistency</h4>
-                            <p>In global systems, perfect real-time synchronization across all regions is expensive. Many rate limiters accept small short-lived drift and use <strong>eventual consistency</strong> instead.</p>
+
+                    <div class="critical-highlight" style="margin-top:16px">
+                        <strong>What Figure 4-17 is really showing — the world map explained:</strong>
+                        <p style="margin-top:10px">The world map shows users in multiple continents (US, Europe, Asia) connected to rate limiter clusters deployed at <strong>multiple edge locations</strong> around the globe, each backed by its own Redis instance. Those regional Redis nodes then sync with each other asynchronously.</p>
+                        <p style="margin-top:10px"><strong>Why this matters for the interview:</strong> If your rate limiter only exists in US-East, a user in Vietnam adds 200ms of network round-trip just for the throttle check — before the request even hits your API. Edge deployment moves that check to the closest PoP (Point of Presence), turning 200ms into ~10ms.</p>
+                        <div style="margin-top:14px;display:flex;flex-direction:column;gap:10px">
+                            <div style="padding:12px;background:var(--bg-section);border-radius:8px;border-left:3px solid var(--water-teal)">
+                                <strong>Multi-Data Center Setup</strong>
+                                <p style="margin:6px 0 0;font-size:0.9em">Each region has its own rate limiter + Redis. A user in Singapore is rate-limited by the Singapore cluster. Fast, low-latency enforcement at the edge.</p>
+                            </div>
+                            <div style="padding:12px;background:var(--bg-section);border-radius:8px;border-left:3px solid var(--gold-accent)">
+                                <strong>Eventual Consistency — the necessary trade-off</strong>
+                                <p style="margin:6px 0 0;font-size:0.9em">Regional Redis instances sync counters to each other asynchronously. For a brief window, Singapore may not know about requests the US cluster just counted. This means a user could slightly exceed the quota across regions during that sync lag — the system tolerates that small drift. <strong>Globally perfect consistency at real-time would require synchronous cross-region writes, which kills performance</strong>. Eventual consistency is the deliberate trade-off.</p>
+                                <p style="margin:8px 0 0;font-size:0.9em;color:var(--text-muted)">🎙️ <em>If the interviewer asks: "So a user could exceed the limit?" — Say yes, briefly, by a small margin, and that's accepted. The alternative (strong consistency) would make the rate limiter itself the bottleneck.</em></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1379,7 +1566,47 @@
                     <div class="critical-highlight">
                         <strong>Example:</strong> If the rules are too strict, good requests are dropped and you loosen them. If bursts such as flash sales are still overwhelming the system, the algorithm may be the problem rather than the threshold. Token bucket is often a better fit because it allows controlled bursts.
                     </div>
-                    <p style="margin-top: 15px;">The monitoring answer in an interview should be practical: <strong>track 429 rate, allowed rate, false-positive throttling, queue buildup, Redis latency, and hot keys</strong>. Otherwise you will not know whether the limiter is protecting the system or hurting real users.</p>
+
+                    <div style="margin-top:16px">
+                        <strong>Specific metrics to track — what to say in the interview:</strong>
+                        <table class="comparison-table" style="margin-top:10px">
+                            <thead>
+                                <tr><th>Metric</th><th>What it tells you</th><th>Action if wrong</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>429 rate</strong></td>
+                                    <td>% of requests being throttled</td>
+                                    <td>Spike = attack or rules too tight. Sudden drop = loophole found.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>False-positive throttle rate</strong></td>
+                                    <td>Legitimate users being blocked</td>
+                                    <td>High = loosen rules or check algorithm accuracy</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Queue depth</strong> (Leaking Bucket)</td>
+                                    <td>How backed up the outflow queue is</td>
+                                    <td>Growing queue = drain rate too slow or traffic surge</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Redis latency (p99)</strong></td>
+                                    <td>How fast the limiter checks are completing</td>
+                                    <td>&gt;10ms = Redis under load, consider read replicas or local cache layer</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Hot keys in Redis</strong></td>
+                                    <td>One key being hammered (e.g., global IP ban key)</td>
+                                    <td>Shard the key or use local counters + async sync</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Memory usage of sorted sets</strong></td>
+                                    <td>Sliding Window Log bloat during attacks</td>
+                                    <td>Implement TTL on eviction, cap log size per user</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -1389,6 +1616,37 @@
             <div class="section animate-in" id="wrapup">
                 <div class="section-header">
                     <h2><span class="section-number">11</span> Wrap Up</h2>
+                </div>
+
+                <div class="detail-box" style="margin-bottom:20px">
+                    <h3>🗺️ Algorithm Decision Flow — Which one do I pick?</h3>
+                    <p style="margin-bottom:16px">Use this when the interviewer asks <em>"which algorithm would you choose?"</em> — walk them through the decision tree:</p>
+                    <div style="display:flex;flex-direction:column;gap:10px">
+                        <div style="display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--bg-section);border-radius:8px;border:1px solid var(--border-color)">
+                            <div style="min-width:32px;height:32px;background:var(--water-teal);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">1</div>
+                            <div>
+                                <strong>Do you need burst tolerance?</strong>
+                                <p style="margin:4px 0 0;color:var(--text-muted);font-size:0.9em">→ <strong>Yes:</strong> Token Bucket. Burst is the feature — bucket absorbs spikes, long-term cap enforced by refill rate. Used by Stripe, Amazon.<br>→ <strong>No bursts, need smooth output:</strong> Leaking Bucket. Fixed drain rate, no spikes downstream.</p>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--bg-section);border-radius:8px;border:1px solid var(--border-color)">
+                            <div style="min-width:32px;height:32px;background:var(--gold-accent);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">2</div>
+                            <div>
+                                <strong>How strict is the accuracy requirement?</strong>
+                                <p style="margin:4px 0 0;color:var(--text-muted);font-size:0.9em">→ <strong>Strict, penny-perfect (financial/billing):</strong> Sliding Window Log. Every timestamp tracked, zero edge-burst exploit. Accept the memory cost.<br>→ <strong>Good accuracy, memory matters:</strong> Sliding Window Counter. Cloudflare's choice. 0.003% error, O(1) memory per user.</p>
+                            </div>
+                        </div>
+                        <div style="display:flex;align-items:flex-start;gap:12px;padding:14px;background:var(--bg-section);border-radius:8px;border:1px solid var(--border-color)">
+                            <div style="min-width:32px;height:32px;background:var(--sunset-rose);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:700">3</div>
+                            <div>
+                                <strong>Simplest possible and accuracy doesn't matter much?</strong>
+                                <p style="margin:4px 0 0;color:var(--text-muted);font-size:0.9em">→ <strong>Fixed Window Counter.</strong> Dead simple, just INCR + EXPIRE in Redis. Edge burst is the known flaw — if the interviewer asks about it, acknowledge it and say you'd upgrade to Sliding Window Counter for production.</p>
+                            </div>
+                        </div>
+                        <div style="padding:12px 16px;background:rgba(var(--water-teal-rgb,52,152,170),0.08);border-radius:8px;border-left:3px solid var(--water-teal)">
+                            <strong>🎙️ Interviewer one-liner:</strong> <em>"My default is Token Bucket for most APIs — it tolerates bursts, it's memory-efficient, and it's what Stripe uses. I'd switch to Sliding Window Counter if accuracy is more important than burst support, and only pick Sliding Window Log if we're billing by the request and every count matters."</em>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="detail-box">
