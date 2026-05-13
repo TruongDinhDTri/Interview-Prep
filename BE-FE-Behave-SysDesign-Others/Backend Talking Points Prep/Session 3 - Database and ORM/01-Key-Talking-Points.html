@@ -109,7 +109,7 @@
         }
         .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
         .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
-        .main-content { max-width: calc(900px + var(--sidebar-width)); margin: 0 auto; padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
+        .main-content { max-width: calc(1260px + var(--sidebar-width)); margin: 0 auto; padding: 0 40px 80px calc(var(--sidebar-width) + 40px); }
         .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
         .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
         .breadcrumbs a:hover { color: var(--accent-blue); }
@@ -335,13 +335,118 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
     <div class="callout callout-purple">
         <span class="callout-emoji">🧱</span>
         <div class="callout-content">
-            <p><strong>5 Schema Patterns (Lego Blocks)</strong> — Most systems are combinations of 5 patterns: Core Entity, One-to-Many, Many-to-Many, Activity/Event, Ownership. Deep dive + composition examples in <a href="./Database-Schema-Design/00-Master-Schema-Design-Process.html" style="color:var(--accent-blue);">00-Master-Schema-Design-Process.html →</a></p>
+            <p><strong>5 Schema Patterns (Lego Blocks)</strong> — Most systems are combinations of 5 patterns: Core Entity, One-to-Many, Many-to-Many, Activity/Event, Ownership. Train your brain to recognize them — schema design becomes almost automatic in interviews.</p>
         </div>
     </div>
 
+    <details>
+        <summary>🧱 The 5 Schema Patterns — Master These, Design Any System</summary>
+        <div class="toggle-content">
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🧠</span>
+                <div class="callout-content">
+                    <p><strong>Interview superpower:</strong> When requirements say "Users can like posts, comment on posts, follow users" — your brain fires: <em>Ownership → One-to-Many → Many-to-Many (self-referential)</em>. Then designing the schema becomes <span class="key-phrase">almost mechanical</span>.</p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">1</div>
+                <div class="step-content">
+                    <p><strong>Core Entity Pattern</strong> — The "nouns" in requirements</p>
+                    <p>Every requirement has nouns. Those nouns = core tables.</p>
+<pre><code>"Users can create posts"  → User, Post
+"Users buy products"      → User, Product
+"Users write reviews"     → User, Review</code></pre>
+                    <p><em>🧠 Mental rule: Look for nouns. Each noun becomes a table.</em></p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">2</div>
+                <div class="step-content">
+                    <p><strong>One-to-Many Pattern</strong> — "A can have multiple X"</p>
+                    <p>The <strong>foreign key lives on the "many" side</strong> — always.</p>
+<pre><code>User → many Orders   → FK on Order  (order.user_id)
+Post → many Comments → FK on Comment (comment.post_id)
+Category → many Products → FK on Product (product.category_id)</code></pre>
+                    <p><em>🧠 Mental rule: "A has multiple X" → FK on X pointing to A.</em></p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">3</div>
+                <div class="step-content">
+                    <p><strong>Many-to-Many Pattern</strong> — Both sides can have multiple</p>
+                    <p>Cannot store directly — must create a junction table. Add Through Model if the relationship carries its own data.</p>
+<pre><code>Students ↔ Courses       → Enrollment(student_id, course_id)
+Users ↔ Posts (likes)    → Like(user_id, post_id)
+Users ↔ Users (follows)  → Follow(follower_id, followed_id)
+Orders ↔ Products        → OrderItem(order_id, product_id, quantity) ← Through Model</code></pre>
+                    <p><em>🧠 Mental rule: "many ↔ many" → junction table. If relationship has data → Through Model.</em></p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">4</div>
+                <div class="step-content">
+                    <p><strong>Activity / Event Pattern</strong> — Things that "happen"</p>
+                    <p>If the requirement uses action verbs (logs in, sends, places, uploads) → event table. Always has <code>created_at</code>, usually has <code>status</code>.</p>
+<pre><code>User logs in     → LoginEvent(user_id, timestamp, ip_address)
+User sends msg   → Message(sender_id, receiver_id, content, created_at)
+User places order → Order(user_id, total, status, created_at)</code></pre>
+                    <p><em>🧠 Mental rule: Something "happens" or needs a timestamp → Activity pattern.</em></p>
+                </div>
+            </div>
+
+            <div class="step-card">
+                <div class="step-num">5</div>
+                <div class="step-content">
+                    <p><strong>Ownership Pattern</strong> — "Who created/owns X"</p>
+                    <p>A ForeignKey establishing creator/owner. Always <code>user_id</code> on the owned resource.</p>
+<pre><code>User creates Posts    → post.user_id    (owner FK)
+User uploads Files    → file.user_id    (owner FK)
+User owns Projects    → project.owner_id (owner FK)</code></pre>
+                    <p><em>🧠 Mental rule: "Users create/own X" → FK from X back to User. Always.</em></p>
+                </div>
+            </div>
+
+            <h4>🎯 Real System Compositions</h4>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>System</th><th>Entities</th><th>Patterns Used</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Social Media</strong></td>
+                            <td>User, Post, Comment, Like, Follow</td>
+                            <td>Ownership (user→post) + 1:N (post→comments) + M2M (users↔posts via Like) + M2M self (users↔users via Follow)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>E-Commerce</strong></td>
+                            <td>User, Product, Order, OrderItem, Review, Category</td>
+                            <td>Ownership + 1:N (user→orders, order→items) + M2M+Through (order↔product via OrderItem) + M2M (product↔category)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>LMS</strong></td>
+                            <td>Student, Course, Enrollment, Lesson, Assignment</td>
+                            <td>M2M+Through (student↔course via Enrollment with grade+date) + 1:N (course→lessons) + Activity (assignments)</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">✨</span>
+                <div class="callout-content">
+                    <p><strong>The Big Insight:</strong> Engineering often looks complex — but underneath it's <span class="key-phrase">simple patterns repeated everywhere</span>. Once your mind sees those patterns, chaos becomes structure. Every system you'll ever design in an interview is just a combination of these 5.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"My process starts with business requirements, not tables. First, I identify the core entities and their relationships — whether they're One-to-Many, Many-to-Many, or One-to-One. Then I apply normalization rules (up to 3NF) to ensure data integrity and reduce redundancy. Finally, if the system is read-heavy, I selectively denormalize specific fields to trade write speed for read performance."</p>
+        <p>"My process starts with business requirements, not tables. First, I identify the core entities and their relationships — whether they're One-to-Many, Many-to-Many, or One-to-One. Then I apply normalization rules (up to 3NF) to ensure data integrity and reduce redundancy. Finally, if the system is read-heavy, I selectively denormalize specific fields to trade write speed for read performance. Most systems I've designed are just combinations of 5 patterns: Core Entity, One-to-Many, Many-to-Many, Activity/Event, and Ownership — once you recognize the pattern, the schema almost writes itself."</p>
     </div>
 
     <hr>
@@ -395,7 +500,14 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
                 <span class="callout-emoji">📌</span>
                 <div class="callout-content">
                     <p><strong>Rule:</strong> Non-key columns must depend on the <strong>ENTIRE composite PK</strong> — not just part of it.</p>
-                    <p>Only relevant when the table has a <strong>composite primary key</strong>.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">⚡</span>
+                <div class="callout-content">
+                    <p><strong>Key insight: 2NF is only relevant with a composite PK.</strong></p>
+                    <p>If your table has a single <code>id</code> (auto-increment) as PK → you're automatically in 2NF. Partial dependency can only exist when you need <strong>two or more columns together</strong> to uniquely identify a row — like <code>(order_id, product_id)</code>. This is a differentiator in interviews: most candidates don't know this constraint.</p>
                 </div>
             </div>
 
@@ -419,6 +531,38 @@ price = models.DecimalField(max_digits=<span class="num">10</span>, decimal_plac
                 <div class="callout-content">
                     <p><strong>AHA #1 — Partial Dependency:</strong> <code>product_name</code> only needs <code>product_id</code> — doesn't care about <code>order_id</code>. iPhone is always "iPhone" regardless of which order.</p>
                     <p><strong>AHA #2 — Full Dependency:</strong> <code>quantity</code> needs BOTH — Order 1 bought 2 iPhones, Order 2 bought 1 iPhone. Same product, different quantity per order.</p>
+                </div>
+            </div>
+
+            <div class="columns" style="margin: 16px 0;">
+                <div style="border: 2px solid var(--accent-red); background: var(--callout-red-bg); border-radius: 8px; padding: 16px;">
+                    <p style="font-weight:700; color: var(--accent-red); margin-bottom:8px;">❌ PARTIAL Dependency — product_name</p>
+<pre><code>order_id=1, product_id=101 → "iPhone"
+order_id=2, product_id=101 → "iPhone"
+order_id=3, product_id=101 → "iPhone"
+                ↑ SAME every time.
+                order_id is irrelevant.
+                Only product_id matters.</code></pre>
+                    <p style="margin-top:8px;"><em>iPhone is always iPhone — it doesn't matter which order you're looking at.</em></p>
+                </div>
+                <div style="border: 2px solid var(--accent-green); background: var(--callout-green-bg); border-radius: 8px; padding: 16px;">
+                    <p style="font-weight:700; color: var(--accent-green); margin-bottom:8px;">✅ FULL Dependency — quantity</p>
+<pre><code>order_id=1, product_id=101 → qty=2  ← Order 1
+order_id=2, product_id=101 → qty=1  ← Order 2
+order_id=3, product_id=101 → qty=5  ← Order 3
+                ↑ DIFFERENT each time.
+                Changing either order_id OR
+                product_id changes the qty.</code></pre>
+                    <p style="margin-top:8px;"><em>Need BOTH to know "how many of THIS product in THAT order."</em></p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p><strong>The Test Question:</strong> "If I change <em>only</em> the order_id but keep the same product_id, does this column's value change?"</p>
+                    <p><code>product_name</code>: No → same product is still "iPhone" → <strong>Partial</strong> (fix it!)</p>
+                    <p><code>quantity</code>: Yes → different order can have different qty of same product → <strong>Full</strong> (correct!)</p>
                 </div>
             </div>
 
@@ -504,6 +648,18 @@ order_item.product.name  <span class="cm"># Django fetches from Product table</s
                 </table>
             </div>
 
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🎯</span>
+                <div class="callout-content">
+                    <p><strong>AHA — Dependency is ONE-DIRECTIONAL:</strong></p>
+                    <p>Knowing <code>order_id = 1</code> → you know <code>customer_id = 501</code> ✅ (each order belongs to exactly 1 customer)</p>
+                    <p>But knowing <code>customer_id = 501</code> → you <strong>cannot</strong> determine <code>order_id</code> ❌ (Wiganz has order 1, order 3, and thousands more)</p>
+<pre><code>order_id=1 → customer_id=501   ✅ (1 order has 1 customer — deterministic)
+customer_id=501 → order_id=???  ❌ (1 customer has N orders — ambiguous)</code></pre>
+                    <p><strong>"A depends on B"</strong> = knowing B uniquely determines A. This is always a one-way street.</p>
+                </div>
+            </div>
+
             <p>Ask: "<strong>Does <code>customer_city</code> depend on <code>order_id</code> (PK)? Or on <code>customer_id</code>?</strong>"</p>
 
             <div class="callout callout-purple">
@@ -541,6 +697,23 @@ Orders:    (order_id, customer_id, quantity)
 Customers: (customer_id, customer_name, customer_city)</code></pre>
 
             <p>Wiganz moves to Hanoi → update <strong>1 row</strong> in <code>Customers</code>. Done. ✅</p>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">📏</span>
+                <div class="callout-content">
+                    <p><strong>Universal Rule — One Table = One Entity:</strong></p>
+<pre><code>Ask about every column in your table:
+"Does this column DESCRIBE this entity, or does it describe ANOTHER entity?"
+
+Orders table:
+  order_id    → describes the Order    ✅ keep it here
+  quantity    → describes the Order    ✅ keep it here
+  customer_id → pointer to Customer    ✅ keep it (it's a FK, not a description)
+  customer_name → describes Customer   ❌ belongs in Customers table!
+  customer_city → describes Customer   ❌ belongs in Customers table!</code></pre>
+                    <p>If a column <em>belongs to</em> another entity → put it in that entity's table + use ForeignKey here as a pointer. This is the fastest 3NF check you'll ever use.</p>
+                </div>
+            </div>
 
             <h4>🐍 Django Connection</h4>
 <pre><code><span class="cm"># ❌ Violates 3NF — customer info stuck inside Orders</span>
@@ -698,6 +871,27 @@ orders = Order.objects.select_related(<span class="str">'customer'</span>).all()
                 </div>
             </div>
 
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">⚡</span>
+                <div class="callout-content">
+                    <p><strong>Lazy Load vs Eager Load — Two Philosophies:</strong></p>
+                    <div class="columns">
+                        <div>
+                            <p><strong>🦥 Lazy Load (Django default):</strong></p>
+                            <p>"I'll fetch related data <em>only when you ask for it.</em>"</p>
+                            <p>→ <code>order.customer.name</code> in a loop = Django fires a DB query <em>each time</em> you access <code>.customer</code></p>
+                            <p style="color: var(--accent-red);">Problem: N items in loop = N DB queries.</p>
+                        </div>
+                        <div>
+                            <p><strong>🚀 Eager Load (select_related):</strong></p>
+                            <p>"I know you'll need this, so I'll <em>fetch it all NOW</em> before the loop."</p>
+                            <p>→ <code>select_related('customer')</code> = 1 JOIN query before the loop. Data already in RAM.</p>
+                            <p style="color: var(--accent-green);">Result: No matter how many orders, 0 extra DB queries in loop.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <h4>What the JOIN Result Looks Like in RAM:</h4>
 <pre><code>| order_id | quantity | customer_id | customer_name | customer_city |
 |----------|----------|-------------|---------------|---------------|
@@ -705,6 +899,16 @@ orders = Order.objects.select_related(<span class="str">'customer'</span>).all()
 | 2        | 1        | 502         | Triết         | Hanoi         |
 | 3        | 5        | 501         | Wiganz        | HCMC          |</code></pre>
             <p>Django loads this merged table once → <code>order.customer.name</code> reads from RAM. Zero DB calls in the loop.</p>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>What does <code>SELECT orders.*, customers.*</code> actually mean?</strong></p>
+                    <p><code>orders.*</code> = ALL columns from the orders table. <code>customers.*</code> = ALL columns from the customers table.</p>
+                    <p>The JOIN merges them into one <strong>fat row per record</strong>. Django loads this entire merged table into RAM once. Then <code>order.customer.name</code> just reads the <code>customer_name</code> column from the already-loaded Python object — zero network roundtrips, zero DB queries.</p>
+                    <p>This is why the code <em>looks identical</em> with or without <code>select_related</code> — the difference is entirely in what SQL runs before your loop starts.</p>
+                </div>
+            </div>
         </div>
     </details>
 
@@ -789,8 +993,25 @@ orders = Order.objects.select_related(<span class="str">'customer'</span>).all()
 <pre><code><span class="cm">-- Query 1: fetch all customers</span>
 <span class="kw">SELECT</span> * <span class="kw">FROM</span> customers
 
-<span class="cm">-- Query 2: fetch all their orders in one shot</span>
+<span class="cm">-- Query 2: fetch ALL their orders in ONE bulk request (the magic)</span>
 <span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> customer_id <span class="kw">IN</span> (<span class="num">501</span>, <span class="num">502</span>, ...)</code></pre>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p><strong>The <code>IN (...)</code> is the magic — this is why it's always exactly 2 queries, not N:</strong></p>
+<pre><code>❌ Without prefetch (N+1 for reverse FK):
+SELECT * FROM orders WHERE customer_id = 501   ← 1 query for Wiganz
+SELECT * FROM orders WHERE customer_id = 502   ← 1 query for Triết
+... × 100 customers = 100 extra queries 💀
+
+✅ prefetch_related — 1 bulk query for ALL:
+SELECT * FROM orders WHERE customer_id IN (501, 502, 503, ...)
+           ↑ Django collected ALL customer IDs from Query 1,
+             then asked the DB for everything in ONE shot</code></pre>
+                    <p>100 customers or 10,000 customers → <strong>always exactly 2 total queries</strong>. The <code>IN()</code> clause is what makes this possible.</p>
+                </div>
+            </div>
 
             <div class="callout callout-purple">
                 <span class="callout-emoji">📄</span>
@@ -953,6 +1174,26 @@ At 1 million rows:
                 <span class="callout-emoji">💡</span>
                 <div class="callout-content">
                     <p><strong>Complexity:</strong> Full Table Scan = O(n). B-Tree Index = O(log n). At 1M rows, that's 1,000,000 vs 20 steps. This is why indexes matter.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🎯</span>
+                <div class="callout-content">
+                    <p><strong>WHY sorted = fast — The Core Insight Behind O(log n):</strong></p>
+                    <p>B-Tree works because the data is SORTED. At every node, you make a binary decision: "my target is smaller → go LEFT, or larger → go RIGHT." You <em>never</em> check both sides. You eliminate half the remaining candidates at every step.</p>
+<pre><code>Searching "Wiganz" (W=23) in unsorted data:
+  Scan An, Bình, Huy, Lan, Minh, Triết, Wiganz → 7 steps 💀
+
+Searching "Wiganz" (W=23) in B-Tree (SORTED):
+  [Minh M=13]  → W > M → go RIGHT  (eliminated left half ✅)
+  [Triết T=20] → W > T → go RIGHT  (eliminated left half again ✅)
+  [Wiganz]     → FOUND! → 3 steps ✅
+
+Each step halves what's left:
+  7 items → step 1 eliminates ~3, step 2 eliminates ~2, step 3 finds it.
+  1,000,000 items → ~20 steps.  log₂(1,000,000) ≈ 20</code></pre>
+                    <p><strong>This is why you can't use a B-Tree index on randomly ordered data</strong> — without sorting, you can't make that "bigger/smaller" decision, so you can't eliminate half at each step.</p>
                 </div>
             </div>
         </div>
@@ -1171,6 +1412,16 @@ Wiganz          grade: 9.5           Python
 | 1        | 15/01      | 2        | 1 (iPhone) |
 | 1        | 15/01      | 1        | 2 (AirPods)| ← order_date duplicated!</code></pre>
             <p>Change order date → must update 2 rows. Miss one → data inconsistency. This IS a through model structure already! Just formalize it properly.</p>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">🔥</span>
+                <div class="callout-content">
+                    <p><strong>The Ultimate AHA — You Already Designed a Through Model Without Knowing It!</strong></p>
+                    <p>When you naturally think <em>"I should add <code>product_id</code> to the Order table"</em>, you have instinctively arrived at a through model. You didn't need a lecture — the data forced you there.</p>
+                    <p>Through models aren't a magical Django feature. They're just the structure you <em>naturally reach</em> when you realize a piece of data needs to know about BOTH sides. The only difference: formalizing it as an explicit model (<code>OrderItem</code>) gives you full ORM control and lets you add more relationship fields later.</p>
+                    <p><strong>Interview answer:</strong> "A through model is just a junction table I control myself. The signal is when data produces '???' in either table alone — that's when you know it belongs to the relationship."</p>
+                </div>
+            </div>
         </div>
     </details>
 
@@ -1209,9 +1460,38 @@ Only makes sense knowing BOTH A + B? ✅
         </div>
     </details>
 
-    <details>
+    <details open>
         <summary>🐍 Django Code — Through Model</summary>
         <div class="toggle-content">
+
+            <div class="columns" style="margin-bottom: 16px;">
+                <div style="border: 2px solid var(--accent-red); background: var(--callout-red-bg); border-radius: 8px; padding: 14px;">
+                    <p style="font-weight:700; margin-bottom:8px;">❌ Default M2M — Django auto-creates</p>
+<pre><code>DB table: student_courses (auto)
+┌────────────┬───────────┐
+│ student_id │ course_id │
+├────────────┼───────────┤
+│     1      │     1     │
+│     1      │     2     │
+│     2      │     1     │
+└────────────┴───────────┘
+Only 2 columns. Can't add grade,
+enrolled_date, or anything else. 🔒</code></pre>
+                </div>
+                <div style="border: 2px solid var(--accent-green); background: var(--callout-green-bg); border-radius: 8px; padding: 14px;">
+                    <p style="font-weight:700; margin-bottom:8px;">✅ Through Model — you define it</p>
+<pre><code>DB table: enrollment (yours to control)
+┌────────────┬───────────┬───────┬──────────────┐
+│ student_id │ course_id │ grade │ enrolled_date│
+├────────────┼───────────┼───────┼──────────────┤
+│     1      │     1     │  9.5  │  2026-01-15  │
+│     1      │     2     │  8.0  │  2026-01-20  │
+│     2      │     1     │  7.5  │  2026-01-16  │
+└────────────┴───────────┴───────┴──────────────┘
+Add any columns. Full ORM control. ✅</code></pre>
+                </div>
+            </div>
+
 <pre><code><span class="cm"># Default M2M — Django auto-creates junction (can't add columns)</span>
 <span class="kw">class</span> <span class="cls">Student</span>(models.Model):
     name = models.CharField(max_length=<span class="num">200</span>)
@@ -1333,7 +1613,13 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
     <div class="callout callout-purple">
         <span class="callout-emoji">🧱</span>
         <div class="callout-content">
-            <p><strong>5 Schema Patterns (Lego Blocks):</strong> Core Entity → One-to-Many → Many-to-Many → Activity/Event → Ownership. <br>Social Media = 1+2+3+4. E-commerce = 1+2+3+4. LMS = 1+3. <br>→ Deep dive: <a href="./Database-Schema-Design/00-Master-Schema-Design-Process.html" style="color:var(--accent-blue);">00-Master-Schema-Design-Process.html</a></p>
+            <p><strong>5 Schema Patterns:</strong></p>
+            <p>① <strong>Core Entity</strong> — nouns in requirements → tables</p>
+            <p>② <strong>One-to-Many</strong> — FK lives on the "many" side, always</p>
+            <p>③ <strong>Many-to-Many</strong> — junction table; if data on relationship → Through Model</p>
+            <p>④ <strong>Activity/Event</strong> — if something "happens" → has <code>created_at</code> + <code>status</code></p>
+            <p>⑤ <strong>Ownership</strong> — "users create X" → <code>user_id FK</code> on X</p>
+            <p><span class="key-phrase">Social Media = ①②③④⑤. E-commerce = ①②③④⑤. LMS = ①②③+Through. Every system = combinations of these 5.</span></p>
         </div>
     </div>
 
@@ -1359,9 +1645,11 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
         <div class="callout-content">
             <p><strong>Senior Mindset:</strong></p>
             <p>"Normalize first, denormalize when needed."</p>
+            <p>"Every column should serve exactly one entity — if it doesn't, split it out with ForeignKey."</p>
             <p>"Fix N+1 before touching indexes — it's usually the fastest win."</p>
             <p>"select_related for FKs, prefetch_related for collections."</p>
             <p>"Index based on real query patterns, not assumptions."</p>
+            <p>"Through model = the structure you naturally arrive at when data needs to know BOTH sides."</p>
             <p><span class="key-phrase">"Measure, don't guess."</span></p>
         </div>
     </div>
