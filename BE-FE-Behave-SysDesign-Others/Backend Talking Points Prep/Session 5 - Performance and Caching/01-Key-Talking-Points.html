@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Session 5: Key Talking Points — Performance &amp; Caching</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Fira+Code:wght@400;500&amp;display=swap" rel="stylesheet">
     <style>
         :root {
             --bg-primary: #ffffff; --bg-secondary: #f7f6f3; --bg-hover: #f1f1ef;
@@ -110,9 +110,282 @@
         .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
         .interview-answer strong { font-style: normal; }
         .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-green); margin-bottom: 4px; }
-        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns { grid-template-columns: 1fr; } }
+        .gold-line { background: var(--callout-yellow-bg); border: 1px solid var(--callout-yellow-border); border-radius: 6px; padding: 14px 16px; margin: 12px 0; font-weight: 500; }
+        .mini-title { display: block; font-size: 0.78em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent-green); margin-bottom: 4px; }
+        .decision-tree { font-family: 'Fira Code', monospace; background: var(--code-bg); border: 1px solid var(--border-light); border-radius: 6px; padding: 16px 20px; margin: 12px 0; overflow-x: auto; line-height: 1.8; }
+        .flow-line { font-family: 'Fira Code', monospace; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 6px; padding: 12px 14px; margin: 10px 0; overflow-x: auto; }
+        .answer-stack { display: grid; gap: 10px; margin: 14px 0; }
+        .answer-card { border: 1px solid var(--border-light); border-radius: 6px; padding: 14px 16px; background: var(--bg-primary); box-shadow: var(--shadow-sm); }
+        .answer-card strong:first-child { color: var(--accent-blue); }
+        .signal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0; }
+        .signal-box { border: 1px solid var(--border-light); border-radius: 6px; padding: 12px; background: var(--bg-secondary); }
+        .signal-box h4 { margin-top: 0; color: var(--accent-green); }
+        .danger-text { color: var(--accent-red); font-weight: 600; }
+        .ok-text { color: var(--accent-green); font-weight: 600; }
+        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns, .signal-grid { grid-template-columns: 1fr; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; } ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
         @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+
+        /* ═══ Visual Decision Tree ═══ */
+        .vdt { margin: 24px 0; }
+        .vdt-root {
+            display: flex; justify-content: center;
+            margin-bottom: 0;
+        }
+        .vdt-box {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 18px;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9em;
+            background: var(--bg-secondary);
+            position: relative;
+            min-width: 180px;
+            max-width: 260px;
+            line-height: 1.4;
+        }
+        .vdt-box.question {
+            background: #eff6ff;
+            border-color: var(--accent-blue);
+            color: #1e40af;
+        }
+        [data-theme="dark"] .vdt-box.question {
+            background: #1e2a3a;
+            color: #93c5fd;
+            border-color: var(--accent-blue);
+        }
+        .vdt-box.yes-end {
+            background: #f0fdf4;
+            border-color: var(--accent-green);
+            color: #166534;
+        }
+        [data-theme="dark"] .vdt-box.yes-end {
+            background: #1a2e1f;
+            color: #86efac;
+            border-color: var(--accent-green);
+        }
+        .vdt-box.no-end {
+            background: #fef2f2;
+            border-color: var(--accent-red);
+            color: #991b1b;
+        }
+        [data-theme="dark"] .vdt-box.no-end {
+            background: #2a1a1a;
+            color: #fca5a5;
+            border-color: var(--accent-red);
+        }
+        .vdt-box.action {
+            background: #fefce8;
+            border-color: var(--accent-yellow-border);
+            color: #713f12;
+        }
+        [data-theme="dark"] .vdt-box.action {
+            background: #2a2010;
+            color: #fde68a;
+        }
+        .vdt-connector {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .vdt-vline {
+            width: 2px;
+            height: 20px;
+            background: var(--border);
+        }
+        .vdt-arrow-down {
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid var(--border);
+        }
+        .vdt-branch-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 0;
+            position: relative;
+        }
+        .vdt-branch-row::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: calc(50% - var(--branch-width, 140px));
+            right: calc(50% - var(--branch-width, 140px));
+            height: 2px;
+            background: var(--border);
+        }
+        .vdt-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+        }
+        .vdt-branch-label {
+            font-size: 0.72em;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin-bottom: 2px;
+        }
+        .vdt-branch-label.yes {
+            background: #dcfce7;
+            color: #166534;
+        }
+        .vdt-branch-label.no {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        [data-theme="dark"] .vdt-branch-label.yes { background: #1a2e1f; color: #86efac; }
+        [data-theme="dark"] .vdt-branch-label.no { background: #2a1a1a; color: #fca5a5; }
+
+        /* ═══ Cache Level Cards ═══ */
+        .cache-level-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        @media (max-width: 700px) { .cache-level-grid { grid-template-columns: 1fr; } }
+        .cache-lv-card {
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            overflow: hidden;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow-sm);
+            transition: box-shadow 0.2s;
+        }
+        .cache-lv-card:hover { box-shadow: var(--shadow-md); }
+        .cache-lv-card.lv1 { border-color: var(--accent-blue); }
+        .cache-lv-card.lv2 { border-color: var(--accent-orange); }
+        .cache-lv-header {
+            padding: 10px 16px;
+            font-weight: 700;
+            font-size: 0.82em;
+            letter-spacing: 0.05em;
+        }
+        .lv1 .cache-lv-header { background: #eff6ff; color: var(--accent-blue); }
+        .lv2 .cache-lv-header { background: #fff7ed; color: var(--accent-orange); }
+        [data-theme="dark"] .lv1 .cache-lv-header { background: #1e2a3a; color: #93c5fd; }
+        [data-theme="dark"] .lv2 .cache-lv-header { background: #2a1e10; color: #fdba74; }
+        .cache-lv-body { padding: 14px 16px; }
+        .cache-lv-title { font-size: 1.05em; font-weight: 700; margin-bottom: 4px; }
+        .cache-lv-subtitle { font-size: 0.8em; color: var(--text-secondary); margin-bottom: 12px; font-style: italic; }
+        .cache-lv-when {
+            font-size: 0.82em;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--border);
+            padding: 8px 10px;
+            border-radius: 0 6px 6px 0;
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .lv1 .cache-lv-when { border-left-color: var(--accent-blue); }
+        .lv2 .cache-lv-when { border-left-color: var(--accent-orange); }
+        .cache-flow-mini {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 4px;
+            margin: 10px 0;
+            padding: 8px 10px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 6px;
+            font-size: 0.78em;
+        }
+        .flow-pill {
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+            font-size: 0.95em;
+        }
+        .flow-pill.blue  { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .flow-pill.green { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+        .flow-pill.red   { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .flow-pill.gray  { background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); }
+        [data-theme="dark"] .flow-pill.blue  { background: #1e2a3a; color: #93c5fd; border-color: #3b5a7a; }
+        [data-theme="dark"] .flow-pill.green { background: #1a2e1f; color: #86efac; border-color: #2d5c3a; }
+        [data-theme="dark"] .flow-pill.red   { background: #2a1a1a; color: #fca5a5; border-color: #5c2a2a; }
+        [data-theme="dark"] .flow-pill.gray  { background: var(--bg-secondary); color: var(--text-secondary); }
+        .flow-arrow-small { color: var(--text-muted); font-size: 1.1em; }
+
+        /* ═══ WTC Cards ═══ */
+        .wtc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        @media (max-width: 700px) { .wtc-grid { grid-template-columns: 1fr; } }
+        .wtc-col { border-radius: 10px; overflow: hidden; border: 2px solid; }
+        .wtc-col.green-col { border-color: var(--accent-green); }
+        .wtc-col.red-col   { border-color: var(--accent-red); }
+        .wtc-col-header {
+            padding: 10px 16px;
+            font-weight: 800;
+            font-size: 0.95em;
+        }
+        .green-col .wtc-col-header { background: #f0fdf4; color: #166534; }
+        .red-col   .wtc-col-header { background: #fef2f2; color: #991b1b; }
+        [data-theme="dark"] .green-col .wtc-col-header { background: #1a2e1f; color: #86efac; }
+        [data-theme="dark"] .red-col   .wtc-col-header { background: #2a1a1a; color: #fca5a5; }
+        .wtc-col-body { padding: 12px 14px; background: var(--bg-primary); }
+        .wtc-item-card {
+            padding: 9px 12px;
+            margin-bottom: 8px;
+            border-radius: 7px;
+            background: var(--bg-secondary);
+            border-left: 3px solid var(--border);
+            font-size: 0.84em;
+            line-height: 1.5;
+        }
+        .wtc-item-card:last-child { margin-bottom: 0; }
+        .green-col .wtc-item-card { border-left-color: var(--accent-green); }
+        .red-col   .wtc-item-card { border-left-color: var(--accent-red); }
+        .wtc-item-title { font-weight: 700; display: block; margin-bottom: 2px; }
+        .wtc-item-why { color: var(--text-secondary); font-size: 0.9em; }
+        .wtc-footer {
+            padding: 8px 14px;
+            font-size: 0.78em;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 0.03em;
+        }
+        .green-col .wtc-footer { background: var(--accent-green); color: white; }
+        .red-col   .wtc-footer { background: var(--accent-red); color: white; }
+
+        /* ═══ Async Event Loop visual ═══ */
+        .event-loop-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 14px 0;
+        }
+        @media (max-width: 700px) { .event-loop-grid { grid-template-columns: 1fr; } }
+        .el-card {
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .el-card-header {
+            padding: 8px 14px;
+            font-weight: 700;
+            font-size: 0.82em;
+        }
+        .el-card.sync .el-card-header  { background: #fef2f2; color: #991b1b; border-bottom: 1px solid var(--border-light); }
+        .el-card.async .el-card-header { background: #f0fdf4; color: #166534; border-bottom: 1px solid var(--border-light); }
+        [data-theme="dark"] .el-card.sync  .el-card-header { background: #2a1a1a; color: #fca5a5; }
+        [data-theme="dark"] .el-card.async .el-card-header { background: #1a2e1f; color: #86efac; }
+        .el-card-body { padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.78em; line-height: 1.9; }
+        .el-req { padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+        .el-req.frozen { background: #fef2f2; color: #991b1b; }
+        .el-req.free   { background: #f0fdf4; color: #166534; }
+        .el-req.wait   { background: #fefce8; color: #713f12; }
     </style>
 </head>
 <body>
@@ -127,12 +400,13 @@
     </div>
     <a href="#redis-caching">1. Redis for Caching Hot Data</a>
     <a href="#what-to-cache">2. What to Cache vs. Not</a>
-    <a href="#n1-optimization">3. N+1 &amp; DB Query Optimization</a>
-    <a href="#async-views">4. Async Views (Django 4.1+)</a>
-    <a href="#celery">5. Celery Background Tasks</a>
-    <a href="#cdn">6. CDN for Static Assets</a>
-    <a href="#pgbouncer">7. DB Connection Pooling</a>
-    <a href="#summary">Summary</a>
+    <a href="#caching-strategy">3. Caching Strategy</a>
+    <a href="#n1-optimization">4. N+1 &amp; DB Query Optimization</a>
+    <a href="#async-views">5. Async Views (Django 4.1+)</a>
+    <a href="#celery">6. Celery Background Tasks</a>
+    <a href="#cdn">7. CDN for Static Assets</a>
+    <a href="#pgbouncer">8. DB Connection Pooling</a>
+    <a href="#summary">9. Full Performance Stack</a>
 </nav>
 
 <div class="page-cover"></div>
@@ -148,7 +422,7 @@
 
     <div class="section-label">Session 5 — Performance &amp; Caching</div>
     <h1 class="page-title">⚡ Key Talking Points</h1>
-    <p class="page-subtitle"><strong>Goal:</strong> Optimize from DB → Cache → Async → Infra. System thinking, not just code tweaks.</p>
+    <p class="page-subtitle"><strong>Goal:</strong> Measure first, optimize from DB → Cache → Async/Celery → Infra, and explain the trade-offs like a senior backend engineer.</p>
 
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
         <span class="tag tag-green">Redis</span>
@@ -157,6 +431,45 @@
         <span class="tag tag-orange">Celery</span>
         <span class="tag tag-gray">CDN</span>
         <span class="tag tag-red">Performance</span>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>The whole interview frame:</strong> "I optimize systematically. I measure first, fix database query shape, cache expensive read-heavy data, move slow work out of the request path, and use infrastructure like CDNs and PgBouncer when scale creates pressure."</p>
+            <p class="flow-line">Measure → DB Query Shape → Redis Cache → Async I/O / Celery Work → CDN → PgBouncer</p>
+        </div>
+    </div>
+
+    <h3>How to Answer Performance Questions Like a Senior</h3>
+    <div class="answer-stack">
+        <div class="answer-card">
+            <strong>30-second answer:</strong>
+            "I start by measuring. Then I fix database query shape, add indexes where the access pattern justifies them, cache expensive read-heavy data with Redis, move slow work out of the request path with Celery, use async for I/O waits, and use CDN/PgBouncer at the infrastructure layer."
+        </div>
+        <div class="answer-card">
+            <strong>2-minute answer:</strong>
+            "Most Django performance problems start at the database: N+1 queries, missing indexes, fetching too many columns, or doing queries inside loops. After the DB is shaped correctly, Redis protects repeated expensive reads. For request latency, I separate work the user needs now from work that can happen later: async views for waiting on I/O inside the request, Celery for background work. At scale, I stop wasting web workers on static assets with a CDN, and I reduce PostgreSQL connection churn with PgBouncer."
+        </div>
+        <div class="answer-card">
+            <strong>Senior caveat:</strong>
+            "I do not optimize blindly. Every tool has a cost: indexes slow writes, cache introduces stale data and invalidation, async can block the event loop if misused, Celery needs retries/idempotency/monitoring, and infrastructure adds operational complexity. I choose based on the bottleneck."
+        </div>
+    </div>
+
+    <div class="signal-grid">
+        <div class="signal-box">
+            <h4>Measure First</h4>
+            <p>Django Debug Toolbar locally; logs, APM, slow-query logs, and metrics in production.</p>
+        </div>
+        <div class="signal-box">
+            <h4>Protect the Request</h4>
+            <p>User-facing requests should stay short. Long work goes to workers; waiting work can use async.</p>
+        </div>
+        <div class="signal-box">
+            <h4>Protect Shared Resources</h4>
+            <p>DB, cache, workers, and web servers are shared. One bad endpoint can harm the whole system.</p>
+        </div>
     </div>
 
     <!-- SECTION 1: Redis Caching -->
@@ -211,33 +524,192 @@
         </div>
     </div>
 
+    <h3>What Redis Actually Is</h3>
+    <p>Redis is an <strong>in-memory key-value data store</strong>. It stores hot data in RAM, which makes reads extremely fast compared with repeatedly hitting Postgres for the same aggregate, profile, session, or API response.</p>
+    <p>In system-design language, Redis is a <strong>separate cache tier</strong>: a temporary data layer much faster than the database that can scale independently. It reduces DB workload, improves response time, and absorbs repeated reads during traffic spikes.</p>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Redis Structure</th><th>Use Case</th><th>Interview Meaning</th></tr>
+            <tr><td><strong>String</strong></td><td>Single JSON blob, count, token, rendered response</td><td>Classic cache value</td></tr>
+            <tr><td><strong>Hash</strong></td><td>User profile fields, compact object-like data</td><td>Update one field without replacing everything</td></tr>
+            <tr><td><strong>List</strong></td><td>Recent events, lightweight queues</td><td>Ordered sequence</td></tr>
+            <tr><td><strong>Set</strong></td><td>Unique IDs, membership checks</td><td>Fast "is this included?" checks</td></tr>
+            <tr><td><strong>Sorted Set</strong></td><td>Leaderboards, ranked jobs, scores</td><td>Ranked reads without expensive sorting every time</td></tr>
+        </table>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Feature</th><th>Redis</th><th>Memcached</th></tr>
+            <tr><td>Data model</td><td>Rich structures: strings, lists, sets, hashes, sorted sets</td><td>Simple key-value strings</td></tr>
+            <tr><td>Persistence</td><td>Can persist with RDB snapshots or AOF logs</td><td>Memory only</td></tr>
+            <tr><td>Common Django roles</td><td>Cache, sessions, rate limits, Celery broker</td><td>Simple cache only</td></tr>
+            <tr><td>Best fit</td><td>Complex caching and multi-purpose backend utility</td><td>Very simple ephemeral cache</td></tr>
+        </table>
+    </div>
+
+    <details>
+        <summary>Senior Distinction — Redis, Queue, Celery</summary>
+        <div class="toggle-content">
+            <p><strong>Redis is not Celery and Redis is not the concept of a queue.</strong> Redis is storage. A message queue is the async buffer pattern. Celery is the task system that uses a broker like Redis or RabbitMQ.</p>
+            <p class="flow-line">Django producer → Redis broker → Celery worker consumer → task runs outside the request</p>
+            <p class="gold-line"><span class="mini-title">Gold line</span>"Redis is fast storage. A queue is the communication pattern. Celery is the background-task system that uses a broker to make that pattern work."</p>
+        </div>
+    </details>
+
+    <h3>Cache Is Fast Because It Avoids Work</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Without Redis</th><th>With Redis</th><th>Why It Matters</th></tr>
+            <tr><td>Every dashboard load recalculates <code>COUNT</code>, <code>SUM</code>, filters, joins</td><td>First request computes, later requests read from RAM</td><td>Less DB CPU and lower latency</td></tr>
+            <tr><td>Every web server repeats the same expensive work</td><td>Shared cache tier stores the answer once</td><td>Scales better horizontally</td></tr>
+            <tr><td>Traffic spike goes straight to Postgres</td><td>Hot reads are absorbed by cache</td><td>Protects the primary database</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">Architect line</span>"Redis is not there because Redis is trendy. It is there to stop the most expensive repeated reads from reaching the database at all."</p>
+
     <!-- SECTION 2: What to Cache -->
     <h2 id="what-to-cache">2. What to Cache vs. What NOT to Cache 🚦</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "My first question is always: 'What is the business impact if this data is stale for 5 minutes?' If 'none' — cache it. If 'user gets charged twice' or 'data leaks' — go straight to primary DB."</p>
+            <p><strong>Interview Line:</strong> "My first question is always: <em>'What is the business impact if this data is stale for 5 minutes?'</em> If 'none' — cache it. If 'user gets charged twice' or 'we leak a private message' — go straight to primary DB."</p>
         </div>
     </div>
 
-    <div class="columns">
-        <div>
-            <h4>🟢 CACHE — Green Light</h4>
-            <ul>
-                <li>📊 <strong>Dashboard stats</strong> (COUNT, SUM, AVG) — heavy DB, rarely needs to be exact</li>
-                <li>👤 <strong>User profile data</strong> — avatar, display name, updated once a year</li>
-                <li>🌐 <strong>3rd-party API responses</strong> — country lists, currency rates</li>
-                <li>🍪 <strong>Session data</strong> — authentication checks without DB hit</li>
-            </ul>
+    <div class="wtc-grid">
+        <div class="wtc-col green-col">
+            <div class="wtc-col-header">🟢 CACHE THIS — Green Light</div>
+            <div class="wtc-col-body">
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">📊 Aggregate stats (COUNT, SUM, AVG)</span>
+                    <span class="wtc-item-why">Heavy DB computation, but OK to be 5 min stale. e.g. "Total applications this week"</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">👤 User profile data (avatar, display name)</span>
+                    <span class="wtc-item-why">Rendered on every page load — but changed maybe once a year</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">🌍 3rd-party API responses</span>
+                    <span class="wtc-item-why">Country lists, currency rates, weather — avoid rate limits + slow network</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">🍪 Session data</span>
+                    <span class="wtc-item-why">Redis sessions verify login without hitting DB on every single request</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">📦 Product / content listings</span>
+                    <span class="wtc-item-why">Read 1000× per hour, updated once a day — perfect TTL candidate</span>
+                </div>
+            </div>
+            <div class="wtc-footer">📌 Read-heavy + Rarely changes + OK to be stale</div>
         </div>
-        <div>
-            <h4>🔴 NO CACHE — Red Light</h4>
-            <ul>
-                <li>📡 <strong>Real-time data</strong> — live notifications, stock prices, live chat</li>
-                <li>🔐 <strong>Sensitive user data</strong> — billing info, security codes (cache key isolation required)</li>
-                <li>⚡ <strong>Already fast queries</strong> — caching adds complexity with zero benefit</li>
-            </ul>
+
+        <div class="wtc-col red-col">
+            <div class="wtc-col-header">🔴 NEVER CACHE THIS — Red Light</div>
+            <div class="wtc-col-body">
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">⚡ Real-time data (live chat, stock tickers)</span>
+                    <span class="wtc-item-why">Goes stale in milliseconds. Cache = lying to the user. Go direct to DB.</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">🔒 Sensitive data without key isolation</span>
+                    <span class="wtc-item-why">Wrong cache key → User A sees User B's billing data. Catastrophic breach 💀</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">⚡ Already fast, cheap DB queries</span>
+                    <span class="wtc-item-why">If SELECT takes 2ms — cache adds complexity with zero performance gain</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">🔄 Flash sale inventory counts</span>
+                    <span class="wtc-item-why">Stale count = oversell = chargebacks. Must be real-time source of truth.</span>
+                </div>
+                <div class="wtc-item-card">
+                    <span class="wtc-item-title">💳 Payment / billing state</span>
+                    <span class="wtc-item-why">Stale billing data = wrong charges. Always read from source of truth.</span>
+                </div>
+            </div>
+            <div class="wtc-footer">📌 Real-time + Sensitive + Cheap + Rapidly changing</div>
+        </div>
+    </div>
+
+    <h3>The Decision Tree — Should I Cache This?</h3>
+
+    <div class="vdt">
+        <!-- Root -->
+        <div class="vdt-root">
+            <div class="vdt-box question">❓ Is the data read-heavy?</div>
+        </div>
+        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+
+        <!-- Row 1 -->
+        <div class="vdt-branch-row" style="--branch-width: 130px;">
+            <div class="vdt-branch">
+                <div class="vdt-branch-label no">NO</div>
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <div class="vdt-box no-end">❌ Don't cache yet<br><small style="font-weight:400">DB is fine</small></div>
+            </div>
+            <div style="width:60px"></div>
+            <div class="vdt-branch">
+                <div class="vdt-branch-label yes">YES</div>
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <div class="vdt-box question">❓ Expensive to compute or fetch?</div>
+            </div>
+        </div>
+
+        <div style="display:flex;justify-content:flex-end;padding-right:0;">
+            <div style="width:calc(50% + 30px);display:flex;flex-direction:column;align-items:center;">
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <!-- Row 2 -->
+                <div class="vdt-branch-row" style="--branch-width: 110px;">
+                    <div class="vdt-branch">
+                        <div class="vdt-branch-label no">NO</div>
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-box no-end">❌ Skip cache<br><small style="font-weight:400">Indexed DB query is better</small></div>
+                    </div>
+                    <div style="width:40px"></div>
+                    <div class="vdt-branch">
+                        <div class="vdt-branch-label yes">YES</div>
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-box question">❓ Can it be stale for a few minutes?</div>
+                    </div>
+                </div>
+                <div style="display:flex;justify-content:flex-end;width:100%;">
+                    <div style="width:calc(50% + 20px);display:flex;flex-direction:column;align-items:center;">
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-branch-row" style="--branch-width: 100px;">
+                            <div class="vdt-branch">
+                                <div class="vdt-branch-label no">NO</div>
+                                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                <div class="vdt-box no-end">⚠️ Short TTL<br><small style="font-weight:400">or careful invalidation only</small></div>
+                            </div>
+                            <div style="width:30px"></div>
+                            <div class="vdt-branch">
+                                <div class="vdt-branch-label yes">YES</div>
+                                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                <div class="vdt-box question">❓ Same response for ALL users?</div>
+                                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                <div class="vdt-branch-row" style="--branch-width: 90px;">
+                                    <div class="vdt-branch">
+                                        <div class="vdt-branch-label yes">YES</div>
+                                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                        <div class="vdt-box yes-end">✅ Level 1<br><small style="font-weight:400">@cache_page(TTL)</small></div>
+                                    </div>
+                                    <div style="width:20px"></div>
+                                    <div class="vdt-branch">
+                                        <div class="vdt-branch-label no">NO</div>
+                                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                        <div class="vdt-box yes-end">✅ Level 2<br><small style="font-weight:400">cache-aside per user</small></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -248,12 +720,176 @@
         <table>
             <tr><th>Method</th><th>How</th><th>When to Use</th></tr>
             <tr><td>⏱️ <strong>TTL expiry</strong></td><td>Cache auto-expires after N seconds</td><td>Data that can tolerate slight staleness</td></tr>
-            <tr><td>🗑️ <strong>Manual delete</strong></td><td><code>cache.delete(cache_key)</code></td><td>Critical data that must be fresh immediately</td></tr>
+            <tr><td>🗑️ <strong>Manual delete</strong></td><td><code>cache.delete(cache_key)</code></td><td>Critical data that must be fresh after a write</td></tr>
         </table>
     </div>
 
+    <p class="gold-line"><span class="mini-title">Gold line</span>"Cache is a temporary band-aid, not a cure. I fix N+1 issues and add indexes first, then introduce cache only when the system still needs a performance boost after DB optimization."</p>
+
+    <h3>The 5 Cache Design Questions (Senior Signal)</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Question</th><th>Senior Reason</th><th>Good Answer</th></tr>
+            <tr><td>When do we cache?</td><td>Not all data benefits</td><td>Read frequently, modified infrequently, expensive to compute</td></tr>
+            <tr><td>How long is it valid?</td><td>Too short → DB reload storms; too long → stale data</td><td>Pick TTL based on business freshness needs</td></tr>
+            <tr><td>How do we keep it consistent?</td><td>DB write and cache update are not one transaction</td><td>TTL + manual invalidation on important writes</td></tr>
+            <tr><td>What if cache fails?</td><td>Single cache server = SPOF</td><td>Fall back to DB, alert, use multiple cache nodes at scale</td></tr>
+            <tr><td>Memory is full?</td><td>Eviction removes hot data unexpectedly</td><td>Understand LRU/LFU policy and overprovision memory</td></tr>
+        </table>
+    </div>
+
+
+    <!-- SECTION 3: Caching Strategy -->
+    <h2 id="caching-strategy">3. Caching Strategy — The Two Levels 🔑</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Interview Line:</strong> "My strategy has two layers. For public endpoints I use <code>@cache_page</code> — the entire response is served from Redis before my view code even runs. For user-specific pages I use cache-aside with a unique per-user key, TTL, and manual invalidation on write."</p>
+        </div>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🧠</span>
+        <div class="callout-content">
+            <p><strong>The most misunderstood part:</strong> Most people think caching = "just put it in Redis." But <em>where</em> you place the cache changes everything — it affects security, correctness, and which code actually runs.</p>
+        </div>
+    </div>
+
+    <div class="cache-level-grid">
+        <!-- Level 1 -->
+        <div class="cache-lv-card lv1">
+            <div class="cache-lv-header">🏗️ LEVEL 1 — View-Level Cache</div>
+            <div class="cache-lv-body">
+                <div class="cache-lv-title">Full Response Cached</div>
+                <div class="cache-lv-subtitle">The entire HTTP response is stored. Your view function <strong>never runs</strong> on a cache hit.</div>
+                <div class="cache-lv-when">
+                    <strong>Use when:</strong> Same response for ALL users — public data, no personalization.<br>
+                    <em>Examples: public stats page, homepage feed, global leaderboard</em>
+                </div>
+                <div class="cache-flow-mini">
+                    <span class="flow-pill blue">Request in</span>
+                    <span class="flow-arrow-small">→</span>
+                    <span class="flow-pill green">Redis HIT ✅</span>
+                    <span class="flow-arrow-small">→</span>
+                    <span class="flow-pill gray">Response (view skipped!)</span>
+                </div>
+                <div class="cache-flow-mini" style="flex-direction:column;align-items:flex-start;gap:3px;">
+                    <span style="font-size:0.8em;color:var(--text-muted)">On MISS:</span>
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                        <span class="flow-pill red">MISS ❌</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill gray">View runs</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill gray">DB query</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill green">Redis stores response</span>
+                    </div>
+                </div>
+<pre><code><span class="kw">from</span> django.views.decorators.cache <span class="kw">import</span> cache_page
+
+<span class="kw">@cache_page</span>(<span class="num">60</span> * <span class="num">5</span>)  <span class="cm"># entire response for 5 min</span>
+<span class="kw">def</span> <span class="fn">public_stats_view</span>(request):
+    <span class="cm"># Only runs on cache MISS</span>
+    stats = JobApplication.objects.aggregate(
+        total=Count(<span class="str">'id'</span>),
+        this_week=Count(<span class="str">'id'</span>, filter=Q(...))
+    )
+    <span class="kw">return</span> JsonResponse(stats)</code></pre>
+            </div>
+        </div>
+
+        <!-- Level 2 -->
+        <div class="cache-lv-card lv2">
+            <div class="cache-lv-header">🎯 LEVEL 2 — Low-Level Cache-Aside</div>
+            <div class="cache-lv-body">
+                <div class="cache-lv-title">Targeted Data Cached</div>
+                <div class="cache-lv-subtitle">Only one expensive fragment is cached. The view runs, but the heavy DB call doesn't.</div>
+                <div class="cache-lv-when">
+                    <strong>Use when:</strong> Page is user-specific, but one expensive piece can be cached per user.<br>
+                    <em>Examples: per-user dashboard stats, personalized analytics</em>
+                </div>
+                <div class="cache-flow-mini" style="flex-direction:column;align-items:flex-start;gap:3px;">
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                        <span class="flow-pill blue">cache.get(key)</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill green">HIT ✅ return fast</span>
+                    </div>
+                    <span style="font-size:0.8em;color:var(--text-muted)">On MISS:</span>
+                    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;">
+                        <span class="flow-pill red">MISS ❌</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill gray">DB query</span>
+                        <span class="flow-arrow-small">→</span>
+                        <span class="flow-pill green">cache.set(key, TTL)</span>
+                    </div>
+                </div>
+<pre><code><span class="kw">from</span> django.core.cache <span class="kw">import</span> cache
+
+<span class="kw">def</span> <span class="fn">get_user_stats</span>(user_id):
+    <span class="cm"># 🔐 Unique key — prevents cross-user leaks</span>
+    key = <span class="fn">f</span><span class="str">"user_stats_{user_id}"</span>
+    stats = cache.get(key)
+
+    <span class="kw">if</span> stats <span class="kw">is</span> None:  <span class="cm"># cache MISS</span>
+        stats = calculate_stats(user_id)
+        cache.<span class="fn">set</span>(key, stats, timeout=<span class="num">300</span>)
+
+    <span class="kw">return</span> stats
+
+<span class="kw">def</span> <span class="fn">submit_application</span>(user_id, payload):
+    Application.objects.create(user_id=user_id, **payload)
+    cache.<span class="fn">delete</span>(<span class="fn">f</span><span class="str">"user_stats_{user_id}"</span>)  <span class="cm"># invalidate!</span></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <h3>Level 1 vs Level 2 — Side by Side</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th></th><th>Level 1: @cache_page</th><th>Level 2: Cache-Aside</th></tr>
+            <tr><td><strong>What's cached?</strong></td><td>Entire HTTP response</td><td>One specific data fragment</td></tr>
+            <tr><td><strong>Works for?</strong></td><td>Public, same for all users</td><td>Personalized, user-specific</td></tr>
+            <tr><td><strong>View code runs on hit?</strong></td><td>❌ No — skipped entirely</td><td>✅ Yes — only DB call is skipped</td></tr>
+            <tr><td><strong>Key per user?</strong></td><td>No — same key for all</td><td>🔐 Yes — <code>user_stats_{id}</code></td></tr>
+            <tr><td><strong>Django tool</strong></td><td><code>@cache_page(TTL)</code></td><td><code>cache.get() / cache.set()</code></td></tr>
+        </table>
+    </div>
+
+    <h3>Key Isolation — The Security Signal</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Bad key: <code>user_profile</code></strong></p>
+                <p>Every user shares the same cache entry. User A's data gets served to User B. Silent security breach 💀</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Safe key: <code>user_profile_{user_id}</code></strong></p>
+                <p>Scoped to the data owner. Include user_id, tenant, permissions, and any filter params that affect the output.</p>
+            </div>
+        </div>
+    </div>
+
+    <h3>Common Interview Traps</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Trap</th><th>Why It Is Bad</th><th>Senior Answer</th></tr>
+            <tr><td>Cache everything</td><td>Wastes memory, invalidation chaos</td><td>Cache read-heavy, expensive, stable data only</td></tr>
+            <tr><td>No TTL</td><td>Stale data lives forever</td><td>Always set a business-appropriate timeout</td></tr>
+            <tr><td>Forget invalidation</td><td>User sees wrong dashboard after writes</td><td>Delete or update cache key on important writes</td></tr>
+            <tr><td>View-level cache on user pages</td><td>Cross-user data leak</td><td>Use cache-aside with scoped keys for any personalized data</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">Job Seeker App example</span>"I cache per-user dashboard stats — total applications, interview counts, weekly submissions — using <code>user_stats_{user_id}</code> with a 5-minute TTL. When the user submits an application, I call <code>cache.delete()</code> for that key so the next load is fresh."</p>
+
+
     <!-- SECTION 3: N+1 -->
-    <h2 id="n1-optimization">3. N+1 &amp; Database Query Optimization 🐘</h2>
+    <h2 id="n1-optimization">4. N+1 &amp; Database Query Optimization 🐘</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
@@ -267,6 +903,7 @@
         <span class="callout-emoji">📚</span>
         <div class="callout-content">
             <p>Ask a librarian for 10 books ✅ — one trip. Then ask "who wrote each one?" — the librarian goes back <strong>10 separate times 💀</strong>. That's N+1: 1 trip for the list + N trips for each item.</p>
+            <p>Django ORM is lazy. A queryset does not hit the database until evaluated, and related objects may be fetched silently when you access attributes like <code>post.author.name</code>. That silent attribute access inside a loop is how N+1 sneaks into production.</p>
         </div>
     </div>
 
@@ -298,17 +935,42 @@
     <div class="table-wrap">
         <table>
             <tr><th>Relationship</th><th>Tool</th><th>Mechanism</th></tr>
-            <tr><td>ForeignKey / OneToOne</td><td><code>select_related()</code></td><td>SQL JOIN — 1 query total</td></tr>
-            <tr><td>ManyToMany / Reverse FK</td><td><code>prefetch_related()</code></td><td>2 queries + Python join</td></tr>
+            <tr><td>ForeignKey / OneToOne</td><td><code>select_related()</code></td><td>SQL JOIN — one query with the related row included</td></tr>
+            <tr><td>ManyToMany / Reverse FK</td><td><code>prefetch_related()</code></td><td>Two separate queries, then Django joins in Python</td></tr>
         </table>
     </div>
+
+    <h3>The Real Difference: One Merged Paper vs Two Clean Papers</h3>
+    <p><code>select_related()</code> is perfect when each row points to <strong>one</strong> related object. But if one parent has many children, a JOIN can duplicate parent data across many rows. That is why Django uses <code>prefetch_related()</code> for collections.</p>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">⚠️</span>
+            <div class="callout-content">
+                <p><strong>Wrong mental model for 1→N</strong></p>
+                <p><code>Customer JOIN Order</code> can repeat the same customer name/city/email on every order row. One customer with 1,000 orders means the customer payload is duplicated 1,000 times in the result set.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Prefetch mental model</strong></p>
+                <p>Query 1 gets customers once. Query 2 gets orders with <code>customer_id</code>. Django stitches them in RAM. The repeated value is just an integer ID, not the full parent row.</p>
+            </div>
+        </div>
+    </div>
+
+<pre><code><span class="cm"># ManyToMany / reverse FK example</span>
+posts = Post.objects.<span class="fn">prefetch_related</span>(<span class="str">'comments'</span>)
+<span class="kw">for</span> post <span class="kw">in</span> posts:
+    <span class="cm"># comments already prefetched; no query per post</span>
+    print([comment.body <span class="kw">for</span> comment <span class="kw">in</span> post.comments.all()])</code></pre>
 
     <h3>Fetch Less Data — The Memory Diet</h3>
     <div class="table-wrap">
         <table>
-            <tr><th>Method</th><th>Returns</th><th>Best for</th></tr>
-            <tr><td><code>only('id', 'name')</code></td><td>Model instances (partial fields)</td><td>When you need model methods</td></tr>
-            <tr><td><code>values('id', 'name')</code></td><td>Plain dictionaries</td><td>JSON APIs — skips model instantiation overhead</td></tr>
+            <tr><th>Method</th><th>Returns</th><th>Best for</th><th>Warning</th></tr>
+            <tr><td><code>only('id', 'name')</code></td><td>Model instances (partial fields)</td><td>When you need model methods</td><td>Accessing an unloaded field later triggers another DB query</td></tr>
+            <tr><td><code>values('id', 'name')</code></td><td>Plain dictionaries</td><td>JSON APIs — skips model instantiation overhead</td><td>No model methods, no model instance behavior</td></tr>
         </table>
     </div>
 
@@ -319,62 +981,235 @@
         </div>
     </div>
 
+    <h3>Verify the SQL, Don't Guess</h3>
+<pre><code><span class="cm"># Quick way to inspect what Django will execute</span>
+queryset = Post.objects.<span class="fn">select_related</span>(<span class="str">'author'</span>).<span class="fn">only</span>(<span class="str">'id'</span>, <span class="str">'title'</span>, <span class="str">'author__name'</span>)
+print(queryset.query)</code></pre>
+    <p class="gold-line"><span class="mini-title">Gold line</span>"As a backend engineer, I do not blindly trust ORM code. I verify the SQL shape with Django Debug Toolbar, logs, APM, or <code>print(queryset.query)</code> before calling something optimized."</p>
+    <p class="gold-line"><span class="mini-title">Job Seeker App example</span>"When fetching job applications and showing applicant names, I use <code>select_related('user')</code> so Django fetches the user in the same SQL join. For dashboard JSON, I use <code>.values('id', 'status', 'applied_at')</code> because I do not need full model instances."</p>
+
+    <h3>Indexes — The Other Half of Query Optimization</h3>
+    <p>N+1 fixes reduce the <strong>number</strong> of queries. Indexes reduce how much work each query does. Without an index, the database may scan every row. With a B-tree index, it can jump through a sorted structure in roughly <code>O(log n)</code> time.</p>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Concept</th><th>Interview Explanation</th><th>Trade-off</th></tr>
+            <tr><td>Single-column index</td><td>Useful for fields frequently filtered or ordered by, like <code>status</code> or <code>created_at</code></td><td>Speeds reads, slows writes slightly</td></tr>
+            <tr><td>ForeignKey index</td><td>Django indexes FKs because joins and filters often use them</td><td>Good default because relationships are common query paths</td></tr>
+            <tr><td><code>unique=True</code></td><td>DB needs an index to check duplicates quickly</td><td>Constraint plus fast lookup</td></tr>
+            <tr><td>Composite index</td><td><code>['category', 'price']</code> helps queries starting with <code>category</code></td><td>Leftmost-prefix rule: filtering by only <code>price</code> may not use it</td></tr>
+            <tr><td>Too many indexes</td><td>Every insert/update/delete must update the index structures</td><td>Read speed vs write cost</td></tr>
+        </table>
+    </div>
+
+<pre><code><span class="kw">class</span> <span class="cls">Application</span>(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  <span class="cm"># FK indexed by Django</span>
+    status = models.CharField(max_length=<span class="num">30</span>)
+    applied_at = models.DateTimeField()
+
+    <span class="kw">class</span> <span class="cls">Meta</span>:
+        indexes = [
+            models.Index(fields=[<span class="str">'user'</span>, <span class="str">'status'</span>]),
+            models.Index(fields=[<span class="str">'user'</span>, <span class="str">'-applied_at'</span>]),
+        ]</code></pre>
+
+    <p class="gold-line"><span class="mini-title">Index gold line</span>"An index is like the book appendix for the database: faster reads because the DB can jump to the right rows, but slower writes because the appendix must be maintained on every insert, update, and delete."</p>
+
+    <details>
+        <summary>Database Optimization Interview Traps</summary>
+        <div class="toggle-content">
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Trap</th><th>Why It Fails</th><th>Senior Correction</th></tr>
+                    <tr><td>"Just add cache"</td><td>Hides bad queries and creates stale-data risk</td><td>Fix query count, fields, and indexes first</td></tr>
+                    <tr><td>Use <code>select_related</code> for everything</td><td>JOINs collections can duplicate parent rows and memory</td><td>Use <code>select_related</code> for one object, <code>prefetch_related</code> for collections</td></tr>
+                    <tr><td>Use <code>only()</code> everywhere</td><td>Accessing unloaded fields silently queries again</td><td>Use <code>values()</code> for simple API dictionaries when model behavior is unnecessary</td></tr>
+                    <tr><td>Index every column</td><td>Writes become slower and storage grows</td><td>Index columns that match real filters, joins, ordering, and uniqueness constraints</td></tr>
+                </table>
+            </div>
+        </div>
+    </details>
+
     <!-- SECTION 4: Async Views -->
-    <h2 id="async-views">4. Async Views (Django 4.1+) ⚡</h2>
+    <h2 id="async-views">5. Async Views (Django 4.1+) ⚡</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "I use async views for I/O-bound operations like external API calls, so the server can handle other requests while waiting — instead of blocking the entire worker thread."</p>
+            <p><strong>Interview Line:</strong> "I use async views for I/O-bound operations like external API calls, so the ASGI server can handle other requests while waiting — instead of blocking the entire worker thread."</p>
+        </div>
+    </div>
+
+    <h3>What Is It and Why Does It Matter?</h3>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><strong>The problem:</strong> In a standard sync Django view, when your code calls a slow external API (2 seconds), the <strong>worker thread freezes</strong>. It does nothing. It just waits. While it waits, it cannot serve any other user.</p>
+            <p style="margin-top:8px"><strong>The solution:</strong> Python's <code>async/await</code> + an ASGI server (Uvicorn) lets the server say: <em>"While I wait for this external response, go serve 50 other requests. I'll come back to this one the moment data arrives."</em></p>
+        </div>
+    </div>
+
+    <h3>Sync vs Async — What Actually Happens</h3>
+    <div class="event-loop-grid">
+        <div class="el-card sync">
+            <div class="el-card-header">❌ Sync / WSGI — Worker freezes</div>
+            <div class="el-card-body">
+Worker 1: <span class="el-req frozen">ReqA</span> → waiting API ⏳⏳⏳ → done
+Worker 2: <span class="el-req frozen">ReqB</span> → waiting DB  ⏳⏳⏳ → done
+Worker 3: <span class="el-req frozen">ReqC</span> → waiting API ⏳⏳⏳ → done
+
+Workers FROZEN while waiting.
+More users = more workers = more RAM.</div>
+        </div>
+        <div class="el-card async">
+            <div class="el-card-header">✅ Async / ASGI — Event loop switches</div>
+            <div class="el-card-body">
+Loop: <span class="el-req wait">ReqA starts</span> → await API → pause
+      <span class="el-req free">ReqB starts</span> → serve B immediately
+      <span class="el-req free">ReqC starts</span> → serve C immediately
+      API responds! → <span class="el-req free">resume A</span> → done ✅
+
+One loop handles many. No frozen workers.</div>
         </div>
     </div>
 
     <div class="callout callout-yellow">
         <span class="callout-emoji">☕</span>
         <div class="callout-content">
-            <p><strong>The Café Analogy:</strong> You don't freeze at the door waiting for coffee. You read a book, chat with someone — then grab it when it arrives. That's exactly what async does for your Django server.</p>
+            <p><strong>The Café Analogy:</strong> A sync waiter takes your order, walks to the kitchen, then <em>stands there staring at the pot</em> until your food is ready. Nobody else gets served. An async waiter takes your order, drops the ticket, then immediately serves the next table — coming back only when the kitchen rings the bell. Same waiter, many tables. ⚡</p>
         </div>
     </div>
 
+    <h3>The Code — Before and After</h3>
     <div class="columns">
         <div class="callout callout-red">
             <span class="callout-emoji">❌</span>
             <div class="callout-content">
-                <p><strong>Sync — Server frozen 😴</strong></p>
-<pre><code><span class="kw">def</span> <span class="fn">my_view</span>(request):
-    data = fetch_api()  <span class="cm"># frozen 😴</span>
-    <span class="kw">return</span> JsonResponse(data)</code></pre>
+                <p><strong>Sync — Thread blocks entire wait</strong></p>
+<pre><code><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="fn">weather_view</span>(request):
+    <span class="cm"># Thread FREEZES for 2 seconds</span>
+    <span class="cm"># No other user served during wait</span>
+    r = requests.get(<span class="str">"https://api.weather.com"</span>)
+    <span class="kw">return</span> JsonResponse(r.json())</code></pre>
             </div>
         </div>
         <div class="callout callout-green">
             <span class="callout-emoji">✅</span>
             <div class="callout-content">
-                <p><strong>Async — Server stays free ⚡</strong></p>
-<pre><code><span class="kw">async def</span> <span class="fn">my_view</span>(request):
-    data = <span class="kw">await</span> fetch_external_api()
-    <span class="kw">return</span> JsonResponse(data)</code></pre>
+                <p><strong>Async — Server serves others while waiting</strong></p>
+<pre><code><span class="kw">import</span> httpx  <span class="cm"># async-compatible</span>
+
+<span class="kw">async def</span> <span class="fn">weather_view</span>(request):
+    <span class="cm"># 'await' = pause here, serve others</span>
+    <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> c:
+        r = <span class="kw">await</span> c.get(<span class="str">"https://api.weather.com"</span>)
+    <span class="kw">return</span> JsonResponse(r.json())</code></pre>
             </div>
         </div>
     </div>
 
-    <h3>Async vs Celery — Critical Distinction</h3>
-    <div class="table-wrap">
-        <table>
-            <tr><th>Scenario</th><th>Tool</th></tr>
-            <tr><td>Waiting for I/O (user needs result <em>now</em>)</td><td><code>async def</code> + <code>await</code> ⚡</td></tr>
-            <tr><td>Heavy/long task (user doesn't need to wait)</td><td>Celery <code>.delay()</code> 🚀</td></tr>
-        </table>
+    <h3>⚡ Power Move — Parallel API Calls with asyncio.gather()</h3>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🚀</span>
+        <div class="callout-content">
+            <p><strong>The biggest async win:</strong> Three 1-second API calls that would take 3 seconds sequentially → take 1 second in parallel.</p>
+<pre><code><span class="kw">import</span> asyncio, httpx
+
+<span class="kw">async def</span> <span class="fn">enriched_job_view</span>(request, job_id):
+    <span class="kw">async with</span> httpx.AsyncClient() <span class="kw">as</span> client:
+        <span class="cm"># Sequential: 1s + 1.5s + 0.8s = 3.3s</span>
+        <span class="cm"># Parallel:  max(1s, 1.5s, 0.8s) = 1.5s 🔥</span>
+        company, salary, reviews = <span class="kw">await</span> asyncio.gather(
+            client.get(<span class="fn">f</span><span class="str">"https://company-api.com/{job_id}"</span>),
+            client.get(<span class="fn">f</span><span class="str">"https://salary-api.com/{job_id}"</span>),
+            client.get(<span class="fn">f</span><span class="str">"https://review-api.com/{job_id}"</span>),
+        )
+    <span class="kw">return</span> JsonResponse({<span class="str">"company"</span>: company.json(), ...})</code></pre>
+        </div>
+    </div>
+
+    <h3>When to Use What — Decision Tree</h3>
+
+    <div class="vdt">
+        <div class="vdt-root">
+            <div class="vdt-box question">❓ Is the view slow / heavy?</div>
+        </div>
+        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+        <div class="vdt-branch-row" style="--branch-width: 130px;">
+            <div class="vdt-branch">
+                <div class="vdt-branch-label no">NO</div>
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <div class="vdt-box yes-end">✅ Keep sync<br><small style="font-weight:400">Simple is best</small></div>
+            </div>
+            <div style="width:60px"></div>
+            <div class="vdt-branch">
+                <div class="vdt-branch-label yes">YES</div>
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <div class="vdt-box question">❓ Why is it slow?</div>
+                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                <div class="vdt-branch-row" style="--branch-width: 100px;">
+                    <div class="vdt-branch">
+                        <div class="vdt-branch-label" style="background:#eff6ff;color:#1e40af">I/O WAIT</div>
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-box question">❓ User needs result now?</div>
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-branch-row" style="--branch-width: 70px;">
+                            <div class="vdt-branch">
+                                <div class="vdt-branch-label yes">YES</div>
+                                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                <div class="vdt-box yes-end">⚡ async def<br><small style="font-weight:400">+ await</small></div>
+                            </div>
+                            <div style="width:20px"></div>
+                            <div class="vdt-branch">
+                                <div class="vdt-branch-label no">NO</div>
+                                <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                                <div class="vdt-box action">🚀 Celery<br><small style="font-weight:400">.delay()</small></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width:30px"></div>
+                    <div class="vdt-branch">
+                        <div class="vdt-branch-label" style="background:#fef2f2;color:#991b1b">CPU HEAVY</div>
+                        <div class="vdt-connector"><div class="vdt-vline"></div><div class="vdt-arrow-down"></div></div>
+                        <div class="vdt-box action">🚀 Celery<br><small style="font-weight:400">async blocks event loop!</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="callout callout-red">
         <span class="callout-emoji">⚠️</span>
         <div class="callout-content">
-            <p><strong>Common Trap:</strong> "Async makes everything faster" → WRONG. Async only helps when there's <em>waiting (I/O)</em> involved. For CPU-heavy work, async makes things <em>worse</em> by blocking the event loop.</p>
+            <p><strong>Critical rule:</strong> Async ONLY helps with I/O-bound waiting. For CPU-heavy work (image resize, PDF generation, ML), async makes things <em>worse</em> — it blocks the entire event loop and harms ALL concurrent users. That work belongs in Celery.</p>
+            <p style="margin-top:8px"><strong>Also:</strong> You must use async-compatible libraries. <code>requests</code> is sync-only → use <code>httpx</code> or <code>aiohttp</code> instead.</p>
         </div>
     </div>
 
+    <h3>Async vs Celery — How to Say the Difference</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Question</th><th>⚡ Async View</th><th>🚀 Celery</th></tr>
+            <tr><td>Is the user waiting?</td><td>Yes — request is still open</td><td>No — request returns immediately, work continues elsewhere</td></tr>
+            <tr><td>What is the server doing?</td><td>Pauses during I/O, serves other requests</td><td>Drops job into a queue for a separate worker</td></tr>
+            <tr><td>Best for</td><td>External API calls, network waits, quick I/O</td><td>Email, PDFs, image processing, bulk imports</td></tr>
+            <tr><td>Bad use</td><td>CPU-heavy work (blocks event loop)</td><td>Tasks where user needs the result right now</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">Memorize this</span>"Async is still part of the current HTTP request — the user is waiting. Celery breaks work out of the request entirely — the user can close the browser."</p>
+
+    <p class="gold-line"><span class="mini-title">Job Seeker App example</span>"If I enrich job listings by calling three external APIs, I use <code>async def</code> + <code>asyncio.gather()</code> to run all three in parallel — 1.5 seconds instead of 4.5 seconds. But if I generate a PDF report of all applications, that's CPU-heavy work and I hand it to Celery."</p>
+
+    <p class="gold-line"><span class="mini-title">Event-loop warning</span>"Python asyncio runs cooperative tasks on one thread. If I put heavy CPU work inside an async view, I block the event loop and hurt everyone. CPU-heavy work belongs in Celery or a thread pool executor."</p>
+
+    <p class="gold-line"><span class="mini-title">ASGI runtime note</span>"Async Django only pays off with an ASGI server like Uvicorn or Daphne. Deploy through classic WSGI/Gunicorn and you lose the concurrency benefit."</p>
+
+
     <!-- SECTION 5: Celery -->
-    <h2 id="celery">5. Background Tasks with Celery 🚀</h2>
+    <h2 id="celery">6. Background Tasks with Celery 🚀</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
@@ -391,6 +1226,36 @@
             <strong>Redis (Broker)</strong> → holds the queue<br>
             <strong>Celery Worker (Consumer)</strong> → picks it up and executes</p>
             <p>Django drops a 'ticket' into Redis. Workers constantly watch Redis, pick up tickets, and execute tasks in the background.</p>
+            <p class="flow-line">Django request → task message → Redis/RabbitMQ broker → Celery worker → retry/monitor/result</p>
+        </div>
+    </div>
+
+    <h3>When to Use Celery</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Task</th><th>Why Celery</th><th>User Experience</th></tr>
+            <tr><td>Send welcome email</td><td>Network I/O may fail or take seconds</td><td>User gets signup response immediately</td></tr>
+            <tr><td>Generate report/PDF</td><td>CPU and DB-heavy</td><td>User can close the page and return later</td></tr>
+            <tr><td>Image resize/compression</td><td>CPU-bound and slow</td><td>Upload accepted, processing continues in worker</td></tr>
+            <tr><td>Bulk imports or exports</td><td>Long-running batch work</td><td>Main web worker stays responsive</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">300-500ms rule</span>"If a request triggers work that regularly takes more than a few hundred milliseconds and the user does not need the result right now, I consider pushing it to a background task."</p>
+
+    <h3>Why a Queue Makes the System More Resilient</h3>
+    <div class="signal-grid">
+        <div class="signal-box">
+            <h4>Asynchronous</h4>
+            <p>The producer does not wait for the consumer. The web request can finish fast.</p>
+        </div>
+        <div class="signal-box">
+            <h4>Buffering</h4>
+            <p>The broker acts like a shock absorber during spikes. Work piles in the queue instead of crushing web workers.</p>
+        </div>
+        <div class="signal-box">
+            <h4>Decoupling</h4>
+            <p>Django does not need a worker to be available at the exact same millisecond. Services communicate through messages.</p>
         </div>
     </div>
 
@@ -429,8 +1294,41 @@
         </div>
     </div>
 
+    <h3>Idempotency — The Safety Rule</h3>
+    <p>Celery tasks can retry after failures, workers can crash mid-task, and messages can be delivered again. A senior task is designed so running it twice does not corrupt data or send duplicate side effects.</p>
+<pre><code><span class="dec">@shared_task</span>(bind=<span class="num">True</span>, max_retries=<span class="num">3</span>)
+<span class="kw">def</span> <span class="fn">send_welcome_email</span>(self, user_id):
+    user = User.objects.get(id=user_id)
+    <span class="kw">if</span> user.welcome_email_sent:
+        <span class="kw">return</span> <span class="str">"already sent"</span>
+
+    email_client.send_welcome(user.email)
+    user.welcome_email_sent = <span class="num">True</span>
+    user.save(update_fields=[<span class="str">"welcome_email_sent"</span>])</code></pre>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Production Concern</th><th>Tool / Practice</th><th>What You Watch</th></tr>
+            <tr><td>Transient API failure</td><td><code>self.retry()</code> with countdown/backoff</td><td>Retry count and final failures</td></tr>
+            <tr><td>Queue backlog</td><td>Flower dashboard</td><td>Queue depth, worker status, task runtime</td></tr>
+            <tr><td>Unhandled exceptions</td><td>Sentry / logs / alerts</td><td>Which task failed and why</td></tr>
+            <tr><td>Duplicate effects</td><td>Idempotent task design</td><td>Emails, payments, imports, external writes</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">Gold line</span>"Async is for waiting inside the current request. Celery is for handing the work off entirely. Once I use Celery, I think about retries, idempotency, monitoring, and queue depth."</p>
+
+    <details>
+        <summary>2-Phase Upload Example — Why Message Queues Shine</summary>
+        <div class="toggle-content">
+            <p><strong>Phase 1: network upload.</strong> The user must wait while a large file physically travels from their device to the server or object storage. That I/O is unavoidable.</p>
+            <p><strong>Phase 2: backend processing.</strong> Once the raw file arrives, Django should not spend 10 minutes encoding video or generating thumbnails inside the web request. It should enqueue a lightweight task like <code>process_upload_123</code>, return success, and let workers handle the expensive processing.</p>
+            <p class="gold-line"><span class="mini-title">Architect line</span>"The web tier should be fast cashiers. Heavy processing belongs to specialized workers behind a queue."</p>
+        </div>
+    </details>
+
     <!-- SECTION 6: CDN -->
-    <h2 id="cdn">6. CDN for Static Assets 🌍</h2>
+    <h2 id="cdn">7. CDN for Static Assets 🌍</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
@@ -465,6 +1363,14 @@
         </div>
     </div>
 
+    <div class="callout callout-purple">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>Why Django should not serve static files in production:</strong> Gunicorn has a limited number of worker processes. Every worker busy streaming CSS, JS, or images is a worker that cannot answer API requests, authenticate users, or run business logic.</p>
+            <p>The interview message is separation of concerns: <strong>backend equals brain, CDN equals delivery network</strong>.</p>
+        </div>
+    </div>
+
     <h3>Typical Setup</h3>
     <div class="table-wrap">
         <table>
@@ -476,8 +1382,48 @@
     </div>
     <p><strong>Flow:</strong> <code>collectstatic → S3 bucket → CloudFront CDN → Users worldwide ⚡</code></p>
 
+    <p class="gold-line"><span class="mini-title">Gold line</span>"Letting Django serve production static files is like making the surgeon hand out pamphlets in the waiting room. The app server should do logic; the CDN should deliver assets globally."</p>
+
+    <h3>CDN Workflow — What Actually Happens</h3>
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>User requests an asset URL</strong>, usually on the CDN domain, such as an image, CSS file, JS bundle, or video.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>CDN edge checks its cache.</strong> If the file is already there and TTL has not expired, the edge returns it immediately.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>On cache miss, the CDN asks the origin</strong>, usually S3 or the origin web server. The origin returns the file plus cache headers.</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>The CDN stores the file at the edge</strong> until TTL expires or you explicitly invalidate it. The next nearby user gets the cached copy.</p>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>CDN Concern</th><th>Why It Matters</th><th>Senior Answer</th></tr>
+            <tr><td>Cost</td><td>CDNs charge for transfer and requests</td><td>Put high-value/static assets there; do not blindly cache rarely used junk</td></tr>
+            <tr><td>Expiry</td><td>Too long means stale assets; too short means repeated origin fetches</td><td>Use hashed filenames for long-lived assets and controlled TTL for changing files</td></tr>
+            <tr><td>Invalidation</td><td>Sometimes bad assets must be removed before TTL</td><td>Use CDN invalidation APIs or versioned filenames</td></tr>
+            <tr><td>Fallback</td><td>CDN outage should not destroy the app experience</td><td>Plan origin fallback or graceful degradation for critical assets</td></tr>
+        </table>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">System-design line</span>"After adding cache and CDN, dynamic data reads stop hammering the database, and static assets stop hammering the web tier. Each layer does the job it is best at."</p>
+
     <!-- SECTION 7: PgBouncer -->
-    <h2 id="pgbouncer">7. Database Connection Pooling (PgBouncer) 🛢️</h2>
+    <h2 id="pgbouncer">8. Database Connection Pooling (PgBouncer) 🛢️</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
@@ -514,17 +1460,51 @@
         </div>
     </div>
 
+    <h3>Why Connections Are Expensive</h3>
+    <p>A database connection is not just a tiny function call. Opening one can involve a TCP handshake, authentication, SSL negotiation, memory allocation, and server-side bookkeeping. Under traffic spikes, Postgres can spend too much energy establishing connections instead of running SQL.</p>
+
+    <div class="answer-stack">
+        <div class="answer-card">
+            <strong>When the interviewer asks "why is DB CPU high if queries are simple?":</strong>
+            "I would check connection churn. If every web request opens and closes a PostgreSQL connection, the DB burns CPU on connection setup: TCP, auth, SSL, process/memory overhead. PgBouncer keeps a smaller pool of reusable connections."
+        </div>
+        <div class="answer-card">
+            <strong>When the interviewer asks "how do you handle traffic spikes?":</strong>
+            "I reduce pressure at multiple layers: cache hot reads, use replicas if read load grows, pool DB connections with PgBouncer, and make sure slow work is not blocking web workers."
+        </div>
+    </div>
+
     <div class="table-wrap">
         <table>
             <tr><th>Aspect</th><th>Detail</th></tr>
             <tr><td><strong>What</strong></td><td>Lightweight connection pooler for PostgreSQL</td></tr>
             <tr><td><strong>Where</strong></td><td>Sits between Django and PostgreSQL</td></tr>
             <tr><td><strong>Result</strong></td><td>⚡ Faster response, 📉 Less DB overhead, 🚀 Better scalability</td></tr>
+            <tr><td><strong>Transaction pooling</strong></td><td>Connection returns to the pool after each transaction; high efficiency, common at scale</td></tr>
+            <tr><td><strong>Session pooling</strong></td><td>Connection sticks for the session; safer for session-level DB features but less efficient</td></tr>
         </table>
     </div>
 
+    <div class="callout callout-purple">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>When to bring it up:</strong> traffic spikes, many short requests, connection exhaustion, or DB CPU high even though the SQL queries are simple. That smell often means the database is paying connection overhead, not query complexity.</p>
+        </div>
+    </div>
+
+    <p class="gold-line"><span class="mini-title">Gold line</span>"PgBouncer helps when the database is spending too much time opening doors and not enough time answering queries."</p>
+
+    <details>
+        <summary>PgBouncer Caveats Interviewers Like</summary>
+        <div class="toggle-content">
+            <p><strong>Transaction pooling</strong> is efficient because a connection returns to the pool after each transaction, but it can conflict with features that depend on session state.</p>
+            <p><strong>Session pooling</strong> is safer for session-level behavior but less efficient because the client holds the connection longer.</p>
+            <p><strong>Prepared statements and session variables</strong> can need special care depending on pooling mode. The senior move is to know PgBouncer is powerful but not invisible magic.</p>
+        </div>
+    </details>
+
     <!-- SECTION 8: Summary -->
-    <h2 id="summary">⚡ The Full Performance Stack</h2>
+    <h2 id="summary">9. The Full Performance Stack ⚡</h2>
 
     <div class="callout callout-green">
         <span class="callout-emoji">🎻</span>
@@ -538,11 +1518,36 @@
             <tr><th>Layer</th><th>Tool</th><th>What it Solves</th></tr>
             <tr><td>Measure first</td><td>Django Debug Toolbar</td><td>Find bottleneck before optimizing</td></tr>
             <tr><td>DB queries</td><td><code>select_related</code>, <code>prefetch_related</code>, <code>only()</code></td><td>N+1 problems, excess data</td></tr>
-            <tr><td>Caching</td><td>Redis + Cache-Aside</td><td>Expensive aggregate reads</td></tr>
-            <tr><td>Background tasks</td><td>Celery + Redis</td><td>Non-blocking user experience</td></tr>
+            <tr><td>Caching</td><td>Redis + View cache + Cache-Aside</td><td>Expensive aggregate reads and hot API responses</td></tr>
+            <tr><td>Cache safety</td><td>TTL + manual invalidation + key isolation</td><td>Staleness, memory waste, and cross-user leaks</td></tr>
             <tr><td>I/O concurrency</td><td>async/await views</td><td>External API calls without blocking</td></tr>
+            <tr><td>Background tasks</td><td>Celery + Redis/RabbitMQ</td><td>Long-running work outside the request path</td></tr>
             <tr><td>Static files</td><td>CDN (S3 + CloudFront)</td><td>Global delivery, free Gunicorn</td></tr>
             <tr><td>DB connections</td><td>PgBouncer</td><td>Connection overhead at scale</td></tr>
+        </table>
+    </div>
+
+    <div class="decision-tree">User request
+  → Measure bottleneck first
+  → Query shape: indexes, no N+1, fetch only needed fields
+  → Redis: cache expensive read-heavy data with TTL and safe keys
+  → Async: keep I/O waits from blocking workers
+  → Celery: move heavy work out of the request path
+  → CDN: deliver static assets at the edge
+  → PgBouncer: reuse DB connections under high traffic</div>
+
+    <p class="gold-line"><span class="mini-title">Final answer to memorize</span>"Performance optimization is layered defense. I do not just add Redis and hope. I measure, reduce query count, reduce data fetched, cache only justified reads, offload slow work, and use infrastructure so the app server and database are not exhausted. You have to tune the whole orchestra, not just one instrument."</p>
+
+    <h3>Interview Drill: If They Push Deeper</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>If They Ask</th><th>Your Senior Answer</th></tr>
+            <tr><td>"Why not cache everything?"</td><td>Because stale data, invalidation, memory pressure, and security leaks can cost more than a DB read.</td></tr>
+            <tr><td>"Why not make every view async?"</td><td>Async only helps I/O waiting. CPU work blocks the event loop, and normal CRUD is simpler as sync.</td></tr>
+            <tr><td>"Why not use Celery for every external API call?"</td><td>If the user needs the result now, Celery is the wrong model. Use async or sync depending on latency and deployment.</td></tr>
+            <tr><td>"Why does select_related not solve all N+1?"</td><td>It JOINs one related object well, but collections duplicate parent data. For ManyToMany/reverse FK, prefetch uses separate queries plus Python stitching.</td></tr>
+            <tr><td>"When do indexes hurt?"</td><td>Write-heavy tables. Every write must update the B-tree, so too many indexes slow inserts/updates/deletes.</td></tr>
+            <tr><td>"What happens if Redis goes down?"</td><td>The app should degrade to DB reads, alert, and recover. At scale, avoid cache as a single point of failure with replication/clustering.</td></tr>
         </table>
     </div>
 </div>

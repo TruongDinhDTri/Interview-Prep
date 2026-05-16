@@ -13,30 +13,33 @@ Started with a wrong pattern instinct (Sliding Window) — and when pushed to ex
 ## 🎯 Step 1 — Understand
 
 ### Paraphrase (Wiganz's words)
+
 > "I'm given an array and I need to find the subarray with the max sum and return the sum."
 
 ✅ Correct. Clean.
 
 ### The 9 Constraint Questions
 
-| Question | Answer |
-|---|---|
-| Is input sorted? | No |
-| Can values be negative? | Yes |
-| Can there be duplicates? | Yes |
-| Can input be empty/null? | No — guaranteed 1 ≤ n ≤ 10⁵ |
-| Can I modify the input? | Yes |
-| How is input stored? | Array — already stated in problem |
-| Expected input size? | Up to 10⁵ |
-| What to return? | The integer sum (not the subarray itself) |
-| One valid answer or multiple? | One |
+| Question                      | Answer                                    |
+| ----------------------------- | ----------------------------------------- |
+| Is input sorted?              | No                                        |
+| Can values be negative?       | Yes                                       |
+| Can there be duplicates?      | Yes                                       |
+| Can input be empty/null?      | No — guaranteed 1 ≤ n ≤ 10⁵           |
+| Can I modify the input?       | Yes                                       |
+| How is input stored?          | Array — already stated in problem        |
+| Expected input size?          | Up to 10⁵                                |
+| What to return?               | The integer sum (not the subarray itself) |
+| One valid answer or multiple? | One                                       |
 
 ### ⚠️ Mistake Made — Move Order
+
 Wiganz jumped straight to constraint questions (Move 2) and skipped **Move 1: Paraphrase**.
 
 **Why it matters:** In a real interview, skipping the paraphrase loses Communication points. The interviewer sees you as reactive, not methodical. Paraphrase first — even one sentence — to show you're confirming before assuming.
 
 **The Road's 4 Moves in order:**
+
 ```
 1. Paraphrase  ← must come first
 2. Ask 9 constraint questions
@@ -51,6 +54,7 @@ Wiganz jumped straight to constraint questions (Move 2) and skipped **Move 1: Pa
 **Hadriel asked:** "Are you returning the subarray or something else?"
 
 **Locked-in abstract version:**
+
 > "Find the contiguous subarray with the largest sum, return its sum."
 
 **Key word discovered:** *Contiguous* — a subarray is NOT a subset. You cannot skip elements. When asked "can I pick elements 1 and 3 from [1,2,3,4]?" — Wiganz correctly said no. A subarray must be connected.
@@ -89,70 +93,42 @@ Sliding Window requires a clear constraint that tells you WHEN to shrink the lef
 
 ## ❓ Why Does Sliding Window FEEL Right But Isn't?
 
-### Why Wiganz's brain jumped to Sliding Window
+## Why the instinct makes sense
 
-The signal words "contiguous" and "subarray" are associated with Sliding Window. That's correct pattern recognition. The instinct was not wrong — the signal keywords genuinely overlap. This confusion is extremely common.
+"Contiguous subarray" are genuine Sliding Window signal words — the pattern recognition wasn't wrong. This confusion is extremely common.
 
-### What Sliding Window actually requires
+#### What Sliding Window actually requires
 
-A Sliding Window has **two pointers: left and right.**
+Two pointers: a window that **expands** when satisfied, **shrinks** when a constraint is violated.
 
-```
-left ──────────── right
-  [  window  ]
-```
+The shrink condition always answers: *"What rule did we break, and how does moving left fix it?"*
 
-The window **expands** when a condition is satisfied.
-The window **shrinks** when a constraint is VIOLATED.
+| Problem                     | Shrink When                |
+| --------------------------- | -------------------------- |
+| Longest Substring No Repeat | Duplicate found in window  |
+| Fruits Into Baskets         | More than K distinct types |
+| Min Size Subarray Sum       | Sum already ≥ target      |
 
-The shrink condition must answer: "What rule did we break? How do we fix it by moving left?"
+#### Why Maximum Subarray breaks this
 
-**Examples of valid Sliding Window shrink conditions:**
+Here there's no violated constraint — just a  **growing negative burden** . When a negative drags down your total, moving the left pointer does nothing, because the problem isn't at the left edge — it's accumulated across the whole window.
 
-| Problem | Constraint | Shrink When |
-|---|---|---|
-| Longest Substring No Repeat | No duplicate chars | `seen[char] >= left` — char already in window |
-| Fruits Into Baskets | At most K distinct fruits | `len(basket) > K` — too many types |
-| Min Size Subarray Sum | Sum ≥ target | `running_sum >= target` — try to minimize window |
+What you actually need: *"Is my running total helping the next element, or hurting it?"*
+If `running_sum < 0` → discard everything, start fresh. That's not shrinking a window — it's **abandoning it entirely** (Kadane's greedy reset).
 
-**In every case, the shrink condition is about a RULE BEING VIOLATED.**
+#### The one question that separates them
 
-### Why Maximum Subarray breaks this model
+> **"If I find a bad element, does shrinking from the left fix it?"**
+>
+> * Duplicate char on right → shrink left past first occurrence → ✅ fixed
+> * Negative on right → shrink left → ❌ negative is still there
 
-The "problem" in Maximum Subarray is NOT a violated constraint. It's a **growing negative burden**.
+If the answer is **no** — Sliding Window doesn't fit.
 
-When you add a negative element, the issue is not "the window broke a rule." The issue is "the window's total value is now worse than starting fresh."
-
-If you try to shrink from the LEFT to fix a negative on the RIGHT:
-
-```
-[-2,  1, -3,  4, -1]
-  L              R
-```
-
-Moving L to the right removes `-2` from the window. But `-3` and `-1` are still there on the right. Moving left did NOTHING to help.
-
-The core problem: **the burden is not at the left edge — it's accumulated across the entire window.** Sliding Window's left-shrink cannot address accumulated negative weight.
-
-### What the problem actually needs
-
-Instead of shrinking a window, you need to ask at each step:
-
-> "Is my current running total helping the next element, or hurting it?"
-
-If `running_sum < 0` → it's hurting → DISCARD the entire history and start fresh from the next element.
-
-This is not "move the left pointer." This is "abandon the window entirely and start a new one." That's not Sliding Window — that's Kadane's greedy reset.
-
-### The line that separates them
-
-| | Sliding Window | Kadane's Algorithm |
-|---|---|---|
-| Structure | Two pointers, one window | One pointer, running total |
-| When to shrink/reset | Constraint violated → shrink left | Running sum goes negative → reset to 0 |
-| What changes | Left pointer moves right | Running sum resets to 0 (fresh start) |
-| The question asked | "Is a rule broken?" | "Is my history helping or hurting?" |
-| Works for | Constraint-bounded windows | Maximizing cumulative value |
+|                | Sliding Window      | Kadane's                            |
+| -------------- | ------------------- | ----------------------------------- |
+| Question asked | "Is a rule broken?" | "Is my history helping or hurting?" |
+| Fix            | Move left pointer   | Reset sum to 0                      |
 
 ### The signal that tells you Sliding Window won't work
 
@@ -177,6 +153,7 @@ running_sum:  -2   1  -2   4   3   5   6   1   5
 ```
 
 **Rules Discovered by Wiganz:**
+
 1. When the running sum is negative, it becomes a drag on everything after it.
 2. Adding more elements to a negative running sum always gives a worse result than just starting fresh.
 
@@ -186,6 +163,7 @@ Wiganz first said: "If I'm negative and I meet a positive, I should reset to the
 Hadriel pushed: "What if negative meets another negative? Do you wait for a positive?"
 
 Wiganz's refined answer:
+
 > "I reset the moment my running sum itself goes negative — because when it's negative, it becomes a burden. Even if the next number is negative or positive, it's better to start fresh from the next element."
 
 **✅ That is the exact rule of Kadane's Algorithm — discovered from scratch.**
@@ -205,12 +183,14 @@ Wiganz's refined answer:
 ```
 
 **Complexity stated:**
+
 - Time: O(n)
 - Space: O(1)
 
 ### ⚠️ Critical Mistake — Step Order
 
 Wiganz's **first draft** had the wrong order:
+
 ```
 Step 3: if running_sum < 0 → reset to 0   ← reset FIRST (WRONG)
 Step 4: max_sum = max(max_sum, running_sum) ← check AFTER
@@ -220,10 +200,12 @@ Step 4: max_sum = max(max_sum, running_sum) ← check AFTER
 Input: `[-3, -1, -2]`
 
 With wrong order:
+
 - running_sum = -3 → reset to 0 → max_sum = max(-inf, 0) = 0 → WRONG
 - Answer returned: 0 (but correct answer is -1)
 
 With correct order:
+
 - running_sum = -3 → max_sum = max(-inf, -3) = **-3** → then reset to 0
 - running_sum = -1 → max_sum = max(-3, -1) = **-1** → then reset to 0
 - running_sum = -2 → max_sum = max(-1, -2) = **-1** → reset to 0
@@ -232,6 +214,7 @@ With correct order:
 **The rule:** Always capture `max_sum` BEFORE resetting `running_sum`. The reset destroys the value — you need to record it first.
 
 **Wiganz also forgot to explain the WHY vs brute force in Discuss.** In a real interview, also state:
+
 - "Brute force would check all O(n²) subarrays — O(n²) time."
 - "This approach processes each element once — O(n) time."
 - "The key insight: a negative running sum never helps future elements, so we discard it."
@@ -254,12 +237,15 @@ def maxSubArray(self, nums: List[int]) -> int:
 ### Phase 2: Implementation
 
 **First draft had a syntax bug:**
+
 ```python
 running_sum, max_sum = 0, -float(int)  # ❌ WRONG
 ```
+
 `int` is a Python type/class, not a number. `float(int)` raises `TypeError`.
 
 **Fixed:**
+
 ```python
 running_sum, max_sum = 0, float('-inf')  # ✅ CORRECT
 ```
@@ -284,29 +270,30 @@ class Solution:
 
 ### Full Trace — `[-2, 1, -3, 4, -1, 2, 1, -5, 4]`
 
-| i | nums[i] | running_sum | max_sum | reset? |
-|---|---------|-------------|---------|--------|
-| 0 | -2 | -2 | -2 | ✅ → 0 |
-| 1 | 1 | 1 | 1 | no |
-| 2 | -3 | -2 | 1 | ✅ → 0 |
-| 3 | 4 | 4 | 4 | no |
-| 4 | -1 | 3 | 4 | no |
-| 5 | 2 | 5 | 5 | no |
-| 6 | 1 | 6 | 6 | no |
-| 7 | -5 | 1 | 6 | no |
-| 8 | 4 | 5 | 6 | no |
+| i | nums[i] | running_sum | max_sum | reset?  |
+| - | ------- | ----------- | ------- | ------- |
+| 0 | -2      | -2          | -2      | ✅ → 0 |
+| 1 | 1       | 1           | 1       | no      |
+| 2 | -3      | -2          | 1       | ✅ → 0 |
+| 3 | 4       | 4           | 4       | no      |
+| 4 | -1      | 3           | 4       | no      |
+| 5 | 2       | 5           | 5       | no      |
+| 6 | 1       | 6           | 6       | no      |
+| 7 | -5      | 1           | 6       | no      |
+| 8 | 4       | 5           | 6       | no      |
 
 **Answer: 6 ✅**
 
 ### Edge Cases
 
-| Input | Expected | Result | Why |
-|---|---|---|---|
-| `[1]` | 1 | 1 ✅ | running=1, max=max(-inf,1)=1 |
-| `[-3,-1,-2]` | -1 | -1 ✅ | max captured before reset each time |
-| `[5,4,-1,7,8]` | 23 | 23 ✅ | never resets, whole array is best |
+| Input            | Expected | Result | Why                                 |
+| ---------------- | -------- | ------ | ----------------------------------- |
+| `[1]`          | 1        | 1 ✅   | running=1, max=max(-inf,1)=1        |
+| `[-3,-1,-2]`   | -1       | -1 ✅  | max captured before reset each time |
+| `[5,4,-1,7,8]` | 23       | 23 ✅  | never resets, whole array is best   |
 
 ### Complexity
+
 - **Time: O(n)** — one pass through n elements
 - **Space: O(1)** — only two variables, no extra memory
 
@@ -317,6 +304,7 @@ class Solution:
 **BTTC for this problem:** O(n) — you must visit every element at least once to know the maximum. Cannot do better.
 
 **Wiganz's statement:**
+
 > "At least we have to iterate through all elements, so O(n) is already the best. O(1) space is already the best."
 
 **Already optimal. No further optimization needed.**
@@ -328,6 +316,7 @@ class Solution:
 **Kadane's Algorithm** — named after Joseph Kadane, Carnegie Mellon University.
 
 It is classified as:
+
 - **Greedy** — at each step, make the locally optimal choice (keep or reset)
 - **Linear DP** — `running_sum` implicitly stores the answer to "what's the best subarray ending at this position?"
 
@@ -337,35 +326,31 @@ The greedy insight: *a negative prefix can never help a future sum — discard i
 
 ## 📋 Rules Found In This Session
 
-| Rule | Why It's Correct |
-|---|---|
-| Reset when `running_sum < 0` | A negative sum is a burden — adding it to any future element gives a worse result than starting fresh |
-| Capture `max_sum` BEFORE resetting | Reset destroys the negative value — you need to check it against max before it's gone |
-| Initialize `max_sum = float('-inf')` | Handles all-negative arrays — 0 would be wrong if no positive exists |
-| Initialize `running_sum = 0` | Start with nothing — let the first element begin the window |
+| Rule                                   | Why It's Correct                                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Reset when `running_sum < 0`         | A negative sum is a burden — adding it to any future element gives a worse result than starting fresh |
+| Capture `max_sum` BEFORE resetting   | Reset destroys the negative value — you need to check it against max before it's gone                 |
+| Initialize `max_sum = float('-inf')` | Handles all-negative arrays — 0 would be wrong if no positive exists                                  |
+| Initialize `running_sum = 0`         | Start with nothing — let the first element begin the window                                           |
 
 ---
 
 ## ❌ Mistakes Log
 
-| Mistake | Why It's Wrong | Fix |
-|---|---|---|
-| Skipped Move 1 (Paraphrase) | Loses Communication points — interviewer sees you as reactive | Always paraphrase first, even one sentence |
-| Said "Sliding Window" without a shrink condition | Sliding Window requires a clear shrink trigger — this problem has none | Use 3-gate properly — if Gate 2 fails, go First Principles |
-| Wrong step order (reset before max check) | All-negative arrays return 0 instead of the correct negative max | Swap: capture max FIRST, then reset |
-| `-float(int)` instead of `float('-inf')` | `int` is a Python type, not a number — raises TypeError | Always use `float('-inf')` for negative infinity |
-| Called the return line after the loop (comment placement) | Minor readability issue | Place `return` before the closing comment |
+| Mistake                                                   | Why It's Wrong                                                          | Fix                                                         |
+| --------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Skipped Move 1 (Paraphrase)                               | Loses Communication points — interviewer sees you as reactive          | Always paraphrase first, even one sentence                  |
+| Said "Sliding Window" without a shrink condition          | Sliding Window requires a clear shrink trigger — this problem has none | Use 3-gate properly — if Gate 2 fails, go First Principles |
+| Wrong step order (reset before max check)                 | All-negative arrays return 0 instead of the correct negative max        | Swap: capture max FIRST, then reset                         |
+| `-float(int)` instead of `float('-inf')`              | `int` is a Python type, not a number — raises TypeError              | Always use `float('-inf')` for negative infinity          |
+| Called the return line after the loop (comment placement) | Minor readability issue                                                 | Place `return` before the closing comment                 |
 
 ---
 
 ## 💡 Key Insights To Remember
 
 1. **"Contiguous" is the key constraint** — subarrays cannot skip elements. This is what makes the problem non-trivial.
-
 2. **The reset insight** — when your running sum goes negative, it will always drag down future elements. Starting fresh from the next element is always better.
-
 3. **Order of operations matters** — in Kadane's, the sequence inside the loop is: add → capture max → then reset. Never reset before capturing.
-
 4. **Sliding Window ≠ Kadane's** — Sliding Window needs a concrete constraint to shrink on. Kadane's is a greedy reset, not a two-pointer window.
-
 5. **All-negative edge case** — initialize `max_sum` to negative infinity, not 0. This is the most common bug beginners make.
