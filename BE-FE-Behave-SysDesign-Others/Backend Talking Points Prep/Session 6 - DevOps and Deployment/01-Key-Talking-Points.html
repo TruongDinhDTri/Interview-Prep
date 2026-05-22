@@ -42,13 +42,15 @@
         .progress-bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--accent-orange), var(--accent-red)); z-index: 1001; transition: width 0.1s linear; }
         .page-cover { height: var(--cover-height); background: linear-gradient(135deg, #ea580c 0%, #dc2626 100%); }
         [data-theme="dark"] .page-cover { background: linear-gradient(135deg, #7c2d12 0%, #7f1d1d 100%); }
-        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transition: transform 0.3s ease, background 0.3s; }
+        .sidebar { position: fixed; left: 0; top: 0; width: var(--sidebar-width); height: 100vh; background: var(--bg-sidebar); border-right: 1px solid var(--border-light); padding: 20px 0; overflow-y: auto; z-index: 100; transform: translateX(-100%); transition: transform 0.3s ease, background 0.3s; }
+        .sidebar.open { transform: translateX(0); }
         .sidebar-header { padding: 8px 16px 16px; border-bottom: 1px solid var(--border-light); margin-bottom: 8px; }
         .sidebar-header h3 { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
         .sidebar a { display: block; color: var(--text-secondary); text-decoration: none; padding: 6px 16px 6px 20px; font-size: 0.82em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
         .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
         .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
-        .main-content { max-width: calc(900px + var(--sidebar-width)); margin: 0 auto; padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
+        .main-content { max-width: 1260px; margin: 0 auto; padding: 0 60px 80px 60px; transition: padding 0.3s ease, max-width 0.3s ease; }
+        body.sidebar-open .main-content { max-width: calc(1260px + var(--sidebar-width)); padding: 0 60px 80px calc(var(--sidebar-width) + 60px); }
         .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
         .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
         .breadcrumbs a:hover { color: var(--accent-blue); }
@@ -104,14 +106,96 @@
         .step-content { flex: 1; }
         .step-content p:first-child { margin-top: 0; }
         .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
-        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        .menu-toggle { display: flex; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); transition: all 0.2s; }
         strong { font-weight: 600; }
         .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
         .interview-answer strong { font-style: normal; }
         .section-label { font-size: 0.75em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-orange); margin-bottom: 4px; }
-        @media (max-width: 900px) { .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); } .main-content { margin: 0; padding: 0 24px 60px; } .menu-toggle { display: flex; } .columns { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) { .main-content { padding: 0 24px 60px; } body.sidebar-open .main-content { padding: 0 24px 60px; max-width: 100%; } .columns { grid-template-columns: 1fr; } }
         ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
         @media print { .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; } .main-content { margin-left: 0; max-width: 100%; } }
+        /* ── Answer-card components ── */
+        .answer-list { list-style: none; padding: 0; margin: 8px 0; }
+        .answer-list li { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+        .answer-list li:last-child { border-bottom: none; }
+        .answer-bullet { width: 22px; height: 22px; border-radius: 50%; background: var(--accent-blue); color: white; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+        .answer-bullet.red { background: var(--accent-red); }
+        .answer-bullet.green { background: var(--accent-green); }
+        .answer-bullet.purple { background: var(--accent-purple); }
+        .answer-bullet.orange { background: var(--accent-orange); }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; flex-shrink: 0; }
+        .badge-blue { background: #dbeafe; color: #1d4ed8; }
+        .badge-red { background: #fee2e2; color: #dc2626; }
+        .badge-green { background: #dcfce7; color: #16a34a; }
+        .badge-yellow { background: #fef9c3; color: #854d0e; }
+        .badge-purple { background: #f3e8ff; color: #7c3aed; }
+        .badge-orange { background: #ffedd5; color: #c2410c; }
+        [data-theme="dark"] .badge-blue { background: #1e3a5f; color: #93c5fd; }
+        [data-theme="dark"] .badge-red { background: #3d1212; color: #fca5a5; }
+        [data-theme="dark"] .badge-green { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .badge-yellow { background: #2e2a1a; color: #fde68a; }
+        [data-theme="dark"] .badge-purple { background: #2d1f5e; color: #c4b5fd; }
+        [data-theme="dark"] .badge-orange { background: #3d2512; color: #fdba74; }
+        .concept-row { display: flex; gap: 12px; align-items: flex-start; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+        .concept-row:last-child { border-bottom: none; }
+        .badge-desc { flex: 1; font-size: 0.9em; line-height: 1.5; }
+        .mini-flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 10px 0; font-size: 13px; }
+        .flow-step { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; font-family: 'Fira Code', monospace; font-size: 12px; }
+        .flow-arrow { color: var(--text-muted); font-weight: 700; }
+        /* ── Sidebar sub-sections ── */
+        .sidebar-section { margin-bottom: 4px; }
+        .sidebar-main { display: block; color: var(--text-secondary); text-decoration: none; padding: 7px 16px 7px 20px; font-size: 0.84em; font-weight: 600; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar-main:hover { color: var(--text-primary) !important; background: var(--bg-hover); }
+        .sidebar-main.active { color: var(--accent-blue) !important; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        .sidebar-sub { overflow: hidden; max-height: 0; transition: max-height 0.25s ease; }
+        .sidebar-section:hover .sidebar-sub, .sidebar-section:focus-within .sidebar-sub { max-height: 200px; }
+        .sidebar-sub a { display: block; color: var(--text-muted); text-decoration: none; padding: 3px 16px 3px 32px; font-size: 0.77em; font-weight: 400; border-left: 2px solid transparent; transition: all 0.2s; line-height: 1.5; }
+        .sidebar-sub a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar-sub a.active { color: var(--accent-blue); border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        /* ── CI/CD Pipeline visual ── */
+        .pipeline-wrap { margin: 20px 0; background: var(--bg-secondary); border: 1px solid var(--border-light); border-radius: 8px; padding: 20px; }
+        .pipeline-track { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .pipe-step { display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 10px 14px; border-radius: 8px; border: 2px solid var(--border); background: var(--bg-primary); transition: all 0.2s; min-width: 80px; text-align: center; }
+        .pipe-step:hover { border-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
+        .pipe-step.active { border-color: var(--accent-blue); background: rgba(37,99,235,0.08); box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+        .pipe-step.pass { border-color: var(--accent-green); background: rgba(15,123,108,0.06); }
+        .pipe-step.fail { border-color: var(--accent-red); background: rgba(235,87,87,0.06); }
+        .pipe-icon { font-size: 1.4em; }
+        .pipe-label { font-size: 0.72em; font-weight: 600; color: var(--text-secondary); }
+        .pipe-arrow { color: var(--text-muted); font-size: 1.1em; font-weight: 700; }
+        .pipe-detail { background: var(--bg-primary); border: 1px solid var(--border); border-radius: 6px; padding: 16px; min-height: 90px; }
+        .pipe-detail-title { font-weight: 700; font-size: 0.95em; margin-bottom: 8px; color: var(--accent-blue); }
+        .pipe-detail-cmd { font-family: 'Fira Code', monospace; font-size: 0.82em; color: var(--accent-red); background: var(--code-inline-bg); padding: 3px 8px; border-radius: 3px; display: inline-block; margin: 2px 0; }
+        .pipe-detail-why { font-size: 0.87em; color: var(--text-secondary); margin-top: 6px; }
+        .pipe-detail-fail { font-size: 0.87em; color: var(--accent-red); margin-top: 4px; }
+        /* ── Expand-Contract visual ── */
+        .expand-contract { display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr; gap: 0; align-items: start; margin: 16px 0; }
+        .ec-phase { border-radius: 8px; padding: 14px; }
+        .ec-phase-1 { background: rgba(37,99,235,0.08); border: 2px solid var(--accent-blue); }
+        .ec-phase-2 { background: rgba(234,88,12,0.08); border: 2px solid var(--accent-orange); }
+        .ec-phase-3 { background: rgba(15,123,108,0.08); border: 2px solid var(--accent-green); }
+        .ec-arrow { display: flex; align-items: center; justify-content: center; font-size: 1.4em; color: var(--text-muted); padding-top: 20px; }
+        .ec-title { font-weight: 700; font-size: 0.85em; margin-bottom: 8px; }
+        .ec-phase-1 .ec-title { color: var(--accent-blue); }
+        .ec-phase-2 .ec-title { color: var(--accent-orange); }
+        .ec-phase-3 .ec-title { color: var(--accent-green); }
+        .ec-item { font-size: 0.82em; color: var(--text-secondary); padding: 3px 0; border-bottom: 1px solid var(--border-light); }
+        .ec-item:last-child { border-bottom: none; }
+        .ec-lock { display: inline-block; font-size: 0.75em; padding: 1px 6px; border-radius: 3px; font-weight: 700; }
+        .ec-lock-safe { background: #dcfce7; color: #16a34a; }
+        .ec-lock-danger { background: #fee2e2; color: #dc2626; }
+        [data-theme="dark"] .ec-lock-safe { background: #1a3a2a; color: #6ee7b7; }
+        [data-theme="dark"] .ec-lock-danger { background: #3d1212; color: #fca5a5; }
+        @media (max-width: 768px) { .expand-contract { grid-template-columns: 1fr; } .ec-arrow { display: none; } }
+        /* GUIDE NAV CARDS */
+        .guide-nav-section { margin: 0 0 36px; }
+        .guide-nav-label { font-size: 0.75em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 12px; }
+        .guide-nav-row { display: flex; flex-wrap: wrap; gap: 12px; }
+        .guide-nav-card { display: flex; flex-direction: column; gap: 6px; padding: 18px 22px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; text-decoration: none; color: var(--text-primary); font-size: 1em; font-weight: 600; transition: all 0.2s; border-left: 4px solid var(--accent-blue); min-width: 130px; }
+        .guide-nav-card:hover { background: var(--bg-hover); transform: translateY(-2px); box-shadow: var(--shadow-md); border-left-color: var(--accent-orange); }
+        .guide-nav-card .gnc-emoji { font-size: 1.6em; line-height: 1; }
+        .guide-nav-card .gnc-label { font-size: 0.9em; font-weight: 600; }
+        .guide-nav-card .gnc-arrow { color: var(--text-muted); font-size: 0.75em; margin-top: 2px; }
     </style>
 </head>
 <body>
@@ -124,15 +208,64 @@
     <div class="sidebar-header">
         <h3>Session 6 — Key Talking Points</h3>
     </div>
-    <a href="#docker">1. Docker Containers</a>
-    <a href="#env-vars">2. Environment Variables</a>
-    <a href="#production-settings">3. Production Settings</a>
-    <a href="#migrations">4. Database Migrations</a>
-    <a href="#static-files">5. Static File Serving</a>
-    <a href="#logging">6. Logging &amp; Monitoring</a>
-    <a href="#platforms">7. Deployment Platforms</a>
-    <a href="#cicd">8. CI/CD (GitHub Actions)</a>
-    <a href="#summary">Summary</a>
+    <div class="sidebar-section">
+        <a href="#docker" class="sidebar-main">🐳 1. Docker</a>
+        <div class="sidebar-sub">
+            <a href="#docker-anatomy">Dockerfile Anatomy</a>
+            <a href="#docker-multistage">Multi-Stage Builds</a>
+            <a href="#docker-exitcodes">Exit Codes</a>
+            <a href="#docker-qa">Q&amp;A</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#cicd" class="sidebar-main">🔁 2. CI/CD Pipelines</a>
+        <div class="sidebar-sub">
+            <a href="#cicd-pipeline">Pipeline Visual</a>
+            <a href="#cicd-yaml">YAML Walkthrough</a>
+            <a href="#cicd-qa">Q&amp;A</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#migrations" class="sidebar-main">🧬 3. Migrations</a>
+        <div class="sidebar-sub">
+            <a href="#migrations-expand">Expand-Contract</a>
+            <a href="#migrations-checklist">Checklist</a>
+            <a href="#migrations-qa">Q&amp;A</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#secrets" class="sidebar-main">🔐 4. Secrets &amp; Env Vars</a>
+        <div class="sidebar-sub">
+            <a href="#secrets-layers">Three-Layer Architecture</a>
+            <a href="#secrets-leaks">8 Leak Vectors</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#logging" class="sidebar-main">📊 5. Logging &amp; Monitoring</a>
+        <div class="sidebar-sub">
+            <a href="#logging-pillars">3 Pillars</a>
+            <a href="#logging-sentry">Sentry Config</a>
+            <a href="#logging-structured">Structured Logging</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#security" class="sidebar-main">🛡️ 6. Django Security</a>
+        <div class="sidebar-sub">
+            <a href="#security-checklist">Production Checklist</a>
+            <a href="#security-code">Settings Code</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#deployment" class="sidebar-main">🚀 7. Deployment</a>
+        <div class="sidebar-sub">
+            <a href="#deployment-flow">ECS Deploy Flow</a>
+            <a href="#deployment-platform">Platform Matrix</a>
+            <a href="#deployment-bluegreen">Blue-Green vs Rolling</a>
+        </div>
+    </div>
+    <div class="sidebar-section">
+        <a href="#summary" class="sidebar-main">⚔️ Summary</a>
+    </div>
 </nav>
 
 <div class="page-cover"></div>
@@ -147,86 +280,754 @@
     </div>
 
     <div class="section-label">Session 6 — DevOps &amp; Deployment</div>
-    <h1 class="page-title">🚀 Key Talking Points</h1>
-    <p class="page-subtitle"><strong>Goal:</strong> Make deployments <strong>reproducible, secure, and observable</strong>. Every layer matters.</p>
+    <h1 class="page-title">🚀 DevOps &amp; Deployment — Interview Battle Guide</h1>
+    <p class="page-subtitle"><strong>Goal:</strong> Sound like someone who <strong>broke production and fixed it</strong> — not someone who read the docs. Every section has the exact phrase that flips an interviewer's mental model.</p>
 
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:32px;">
         <span class="tag tag-orange">Docker</span>
         <span class="tag tag-blue">CI/CD</span>
-        <span class="tag tag-red">Security</span>
-        <span class="tag tag-green">Monitoring</span>
-        <span class="tag tag-purple">DevOps</span>
-        <span class="tag tag-gray">Production</span>
+        <span class="tag tag-purple">Migrations</span>
+        <span class="tag tag-red">Secrets</span>
+        <span class="tag tag-green">Observability</span>
+        <span class="tag tag-gray">Security</span>
+        <span class="tag tag-orange">Deployment</span>
     </div>
 
-    <!-- SECTION 1: Docker -->
-    <h2 id="docker">1. Docker Containers 🐳</h2>
+    <!-- GUIDE NAV -->
+    <div class="guide-nav-section">
+        <div class="guide-nav-label">🗺️ Full Visual Deep-Dive Guides</div>
+        <div class="guide-nav-row">
+            <a href="guide/01-docker.html" class="guide-nav-card"><span class="gnc-emoji">🐳</span><span class="gnc-label">Docker</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/02-cicd.html" class="guide-nav-card"><span class="gnc-emoji">⚡</span><span class="gnc-label">CI/CD ⭐</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/03-migrations.html" class="guide-nav-card"><span class="gnc-emoji">🗄️</span><span class="gnc-label">Migrations</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/04-secrets.html" class="guide-nav-card"><span class="gnc-emoji">🔐</span><span class="gnc-label">Secrets</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/05-logging.html" class="guide-nav-card"><span class="gnc-emoji">📊</span><span class="gnc-label">Logging</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/06-security.html" class="guide-nav-card"><span class="gnc-emoji">🛡️</span><span class="gnc-label">Security</span><span class="gnc-arrow">→ Full Visual</span></a>
+            <a href="guide/07-deployment.html" class="guide-nav-card"><span class="gnc-emoji">🏗️</span><span class="gnc-label">Deployment</span><span class="gnc-arrow">→ Full Visual</span></a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 1: Docker in Production                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="docker">1. Docker in Production 🐳</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "I containerize my Django app using Docker and run it with Gunicorn. I structure the Dockerfile to copy <code>requirements.txt</code> before source code to leverage Docker's layer cache — so builds are fast even when only the code changes."</p>
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"Walk me through your Dockerfile for a Django app. Why is each line in that order?"</li>
+                <li>"How does Docker layer caching work, and how does it affect your <code>COPY requirements.txt</code> placement?"</li>
+                <li>"Your container exits immediately in production. How do you debug it?"</li>
+                <li>"What's a multi-stage build and why would you use one for a Python app?"</li>
+                <li>"What's the difference between <code>CMD</code> and <code>ENTRYPOINT</code>?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"Your container died with exit code 137. What does that mean? How do you fix it?"</li>
+                <li>"Why should you not run as root inside a container?"</li>
+                <li>"What does <code>docker-compose</code> give you over plain <code>docker run</code>, and what are its limits in production?"</li>
+                <li>"What's the difference between a volume and a bind mount?"</li>
+            </ul>
         </div>
     </div>
 
-    <div class="callout callout-yellow">
-        <span class="callout-emoji">📦</span>
-        <div class="callout-content">
-            <p><strong>The Core Problem → Solution:</strong> "It works on my machine!" → Docker packages code + Python version + all libraries into one sealed container. Same image runs identically everywhere.</p>
-        </div>
-    </div>
-
-<pre><code><span class="cm"># Production-Ready Dockerfile</span>
-<span class="kw">FROM</span> python:3.11-slim
-
-<span class="kw">WORKDIR</span> /app
-
-<span class="cm"># Copy deps FIRST → leverage Docker layer cache ⚡</span>
-<span class="kw">COPY</span> requirements.txt .
-<span class="kw">RUN</span> pip install --no-cache-dir -r requirements.txt
-
-<span class="kw">COPY</span> . .
-
-<span class="cm"># NEVER use runserver in production</span>
-<span class="kw">CMD</span> ["gunicorn", "myproject.wsgi:application", "--bind", "0.0.0.0:8000"]</code></pre>
-
-    <div class="callout callout-purple">
-        <span class="callout-emoji">💡</span>
-        <div class="callout-content">
-            <p><strong>Docker Cache Senior Signal:</strong> "I copy <code>requirements.txt</code> and run <code>pip install</code> BEFORE copying source code — on purpose. If you only change code (not dependencies), Docker skips the pip install layer. Builds that took 2 minutes → now take 10 seconds. ⚡"</p>
-        </div>
-    </div>
-
-    <!-- SECTION 2: Env Vars -->
-    <h2 id="env-vars">2. Environment Variables 🔐</h2>
-
-    <div class="callout callout-blue">
-        <span class="callout-emoji">🎯</span>
-        <div class="callout-content">
-            <p><strong>Interview Line:</strong> "Code = Logic 🧠 | Env Vars = Configuration ⚙️ — keep them strictly separated. Sensitive data like <code>SECRET_KEY</code> and <code>DATABASE_URL</code> are never hardcoded or committed."</p>
-        </div>
-    </div>
-
+    <h3 id="docker-qa">Weak vs Solid — "Walk me through your Dockerfile"</h3>
     <div class="columns">
         <div class="callout callout-red">
             <span class="callout-emoji">❌</span>
             <div class="callout-content">
-                <p><strong>Never Do This</strong></p>
-<pre><code>SECRET_KEY = <span class="str">'hardcoded-secret'</span>
-DEBUG = <span class="num">True</span>
-DATABASE_URL = <span class="str">'postgres://...'</span></code></pre>
+                <p><strong>Weak (tutorial-grad):</strong></p>
+                <p><em>"I use <code>FROM python:3.11</code>, then <code>COPY . .</code>, then <code>pip install</code>, then <code>CMD python manage.py runserver</code>."</em></p>
+                <p style="margin-top:8px">Three red flags in one sentence: full image (huge), <code>COPY . .</code> before install (cache-busts on every code change), <code>runserver</code> (dev only, never production).</p>
             </div>
         </div>
         <div class="callout callout-green">
             <span class="callout-emoji">✅</span>
             <div class="callout-content">
-                <p><strong>Always Do This</strong></p>
-<pre><code><span class="kw">import</span> os
-<span class="kw">from</span> dotenv <span class="kw">import</span> load_dotenv
+                <p><strong>Solid — Production Dockerfile:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet">1</span><span>Use <span class="key-phrase"><code>FROM python:3.12-slim</code></span> — not the full image. Full = <strong>920 MB</strong>, slim = ~85 MB with multi-stage.</span></li>
+                    <li><span class="answer-bullet">2</span><span>Set <code>PYTHONDONTWRITEBYTECODE=1</code> + <code>PYTHONUNBUFFERED=1</code> — logs flush to stdout immediately, no buffering surprises in prod.</span></li>
+                    <li><span class="answer-bullet green">3</span><span><span class="key-phrase">Copy <code>requirements.txt</code> FIRST, then <code>pip install</code>, THEN copy source</span> — dependency layer only re-runs when requirements change. Code change alone = cached deps = fast builds.</span></li>
+                    <li><span class="answer-bullet orange">4</span><span>Create a <strong>non-root user</strong> + <code>USER appuser</code> — attacker exploiting the app gets a locked-down user, not root inside the container.</span></li>
+                    <li><span class="answer-bullet red">5</span><span><code>CMD</code> = <code>gunicorn --bind 0.0.0.0:8000 --workers 3</code> <span class="badge badge-red">NEVER runserver</span> — add <code>--max-requests 1000 --max-requests-jitter 50</code> to recycle workers and prevent unbounded memory growth.</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-load_dotenv()
-SECRET_KEY = os.<span class="fn">getenv</span>(<span class="str">'SECRET_KEY'</span>)
-DEBUG = os.<span class="fn">getenv</span>(<span class="str">'DEBUG'</span>, <span class="str">'False'</span>) == <span class="str">'True'</span></code></pre>
+    <h3 id="docker-anatomy">Dockerfile Anatomy — The Production Pattern</h3>
+
+<pre><code><span class="cm"># ── STAGE 1: Builder (has gcc for compiled deps) ─────────────</span>
+<span class="kw">FROM</span> python:3.12-slim <span class="kw">AS</span> builder
+<span class="kw">WORKDIR</span> /app
+<span class="kw">ENV</span> PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+<span class="kw">COPY</span> requirements.txt .
+<span class="kw">RUN</span> pip install --no-cache-dir --user -r requirements.txt
+
+<span class="cm"># ── STAGE 2: Runtime (no gcc, no build tools) ────────────────</span>
+<span class="kw">FROM</span> python:3.12-slim
+<span class="kw">WORKDIR</span> /app
+<span class="kw">ENV</span> PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PATH=/home/appuser/.local/bin:$PATH
+
+<span class="kw">COPY</span> --from=builder /root/.local /root/.local
+<span class="kw">COPY</span> . .
+
+<span class="kw">RUN</span> python manage.py collectstatic --noinput
+<span class="kw">RUN</span> useradd --create-home --shell /bin/bash appuser
+<span class="kw">USER</span> appuser
+
+<span class="cm"># --max-requests recycles workers → bounds memory growth from leaks</span>
+<span class="kw">CMD</span> ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000",
+     "--workers", "3", "--max-requests", "1000", "--max-requests-jitter", "50"]</code></pre>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Approach</th><th>Image Size</th><th>Attack Surface</th></tr>
+            <tr><td><code>python:3.12</code> single stage</td><td>~920 MB</td><td>🔴 Huge — gcc, make, entire build toolchain</td></tr>
+            <tr><td><code>python:3.12-slim</code> single stage</td><td>~400 MB</td><td>🟡 Medium</td></tr>
+            <tr><td>Multi-stage <code>slim → slim</code></td><td>~85 MB</td><td>🟢 Minimal — pure runtime artifacts only</td></tr>
+        </table>
+    </div>
+
+    <h3 id="docker-exitcodes">Docker Exit Codes — Know These Cold</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Exit Code</th><th>Meaning</th><th>What To Do</th></tr>
+            <tr><td><strong>0</strong></td><td>Clean exit</td><td>Intentional stop</td></tr>
+            <tr><td><strong>1</strong></td><td>Generic app error</td><td>Check app logs</td></tr>
+            <tr><td><strong>125</strong></td><td>Docker daemon error</td><td>Docker engine issue</td></tr>
+            <tr><td><strong>126</strong></td><td>Command not executable</td><td>Check permissions on entrypoint</td></tr>
+            <tr><td><strong>127</strong></td><td>Command not found</td><td>Typo in CMD or missing binary</td></tr>
+            <tr><td><strong style="color:var(--accent-red)">137</strong></td><td>SIGKILL — OOMKilled 🔴</td><td><code>docker inspect</code> → <code>"OOMKilled": true</code> → reduce workers + add <code>--max-requests</code></td></tr>
+            <tr><td><strong>139</strong></td><td>Segfault</td><td>Memory corruption in native dependency</td></tr>
+            <tr><td><strong>143</strong></td><td>SIGTERM — graceful shutdown</td><td>Normal — orchestrator stopping container</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong><code>COPY . .</code> before <code>pip install</code></strong> — every code change invalidates the dependency cache. Layer ordering exists; use it.</li>
+                <li><strong><code>runserver</code> in CMD</strong> — instant disqualifier. Gunicorn (WSGI) or Uvicorn (ASGI) only.</li>
+                <li><strong>Running as root</strong> — if attacker exploits the app, they get root inside container → container escape vector.</li>
+                <li><strong><code>:latest</code> tag in FROM or deploy scripts</strong> — non-reproducible. Pin to digest or semantic version.</li>
+                <li><strong>No <code>.dockerignore</code></strong> — <code>.git/</code>, <code>__pycache__/</code>, <code>.env</code> end up baked into image layers pushed to registry.</li>
+                <li><strong>Not knowing exit codes</strong> — especially 137 = OOMKilled. "I just restart the container" is a fail.</li>
+                <li><strong>Confusing <code>EXPOSE</code> with publishing</strong> — <code>EXPOSE</code> is documentation only. <code>-p 8000:8000</code> actually publishes.</li>
+                <li><strong><code>docker-compose</code> in production</strong> — fine for local dev, not an orchestrator. No rolling updates, no health-driven scheduling, no built-in secrets.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"When the container died I ran <code>docker inspect &lt;id&gt;</code> and saw <code>"OOMKilled": true</code> — our Gunicorn worker count times per-worker memory was exceeding the container memory limit, so the kernel sent SIGKILL and we got exit 137. I dropped workers from 5 to 3 and added <code>--max-requests 1000</code> to recycle workers periodically so memory doesn't grow unbounded. The OOMs stopped."</em></blockquote>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 2: CI/CD Pipelines                            -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="cicd">2. CI/CD Pipelines 🔁</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"What's the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment?" <em>(gate question — if you say "they're the same thing" the interview is usually over)</em></li>
+                <li>"Walk me through a GitHub Actions workflow for a Django project."</li>
+                <li>"What happens when a test fails in your pipeline? What gets blocked?"</li>
+                <li>"How do you handle secrets in CI?"</li>
+                <li>"Tell me about a time a deployment failed. What did you do?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"How do you handle flaky tests in CI?"</li>
+                <li>"What is a deployment artifact and where do you store it?"</li>
+                <li>"How would you roll back a bad deploy?"</li>
+                <li>"Why is OIDC preferable to long-lived AWS keys for CI?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 id="cicd-qa">Weak vs Solid — The Three-Way Distinction</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak:</strong></p>
+                <p><em>"CI/CD means automated testing and deployment. They go together."</em></p>
+                <p style="margin-top:8px">That tells the interviewer you've heard the buzzword but can't separate the three concepts. This is a filter question almost every senior interviewer uses.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — Three distinct things:</strong></p>
+                <div class="concept-row">
+                    <span class="badge badge-blue">CI</span>
+                    <span class="badge-desc">Merge frequently into <code>main</code> with automated <strong>build + test on every push</strong>. Goal: <span class="key-phrase">keep the trunk green</span> always.</span>
+                </div>
+                <div class="concept-row">
+                    <span class="badge badge-orange">Delivery</span>
+                    <span class="badge-desc">Every passing build produces a <strong>deployable artifact</strong> that <em>could</em> go to prod. <span class="key-phrase">Human gates the release</span> — one button press, but a human still decides when.</span>
+                </div>
+                <div class="concept-row">
+                    <span class="badge badge-green">Deployment</span>
+                    <span class="badge-desc">Every green build on <code>main</code> <strong>automatically ships to production</strong>. No human gate. Requires: strong test suite + <span class="key-phrase">feature flags</span> + observability to detect regressions fast.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="cicd-yaml">Weak vs Solid — "What happens when tests fail?"</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak:</strong></p>
+                <p><em>"The pipeline goes red and I look at the logs."</em></p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — What exactly breaks the pipeline:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet">1</span><span>Failed test <strong>short-circuits the job</strong> — <span class="key-phrase"><code>needs: [test]</code></span> on the deploy job means it <em>never starts</em>. The DAG blocks downstream.</span></li>
+                    <li><span class="answer-bullet">2</span><span>PR gets a <strong>red check</strong> → blocked from merging to <code>main</code> via required status checks. No bypass without admin override.</span></li>
+                    <li><span class="answer-bullet red">3</span><span>Flaky tests: <span class="badge badge-red">quarantine + ticket</span> — <strong>never auto-retry</strong>. Auto-retry masks real bugs and destroys signal.</span></li>
+                    <li><span class="answer-bullet green">4</span><span>Docker image (tagged <span class="key-phrase">with Git SHA</span>) only pushes to ECR if <em>every</em> stage passes — which means rollback = <strong>re-deploy previous SHA</strong>, seconds not minutes.</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="cicd-pipeline">CI/CD Pipeline — Interactive Walkthrough</h3>
+    <div class="pipeline-wrap">
+        <div class="pipeline-track" id="pipelineTrack">
+            <div class="pipe-step active" onclick="showPipeStep(0, this)"><div class="pipe-icon">📝</div><div class="pipe-label">git push</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(1, this)"><div class="pipe-icon">🧪</div><div class="pipe-label">pytest</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(2, this)"><div class="pipe-icon">🔍</div><div class="pipe-label">Lint + Check</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(3, this)"><div class="pipe-icon">🐳</div><div class="pipe-label">Build Image</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(4, this)"><div class="pipe-icon">📦</div><div class="pipe-label">Push to ECR</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(5, this)"><div class="pipe-icon">🧬</div><div class="pipe-label">Run Migrations</div></div>
+            <div class="pipe-arrow">→</div>
+            <div class="pipe-step" onclick="showPipeStep(6, this)"><div class="pipe-icon">🚀</div><div class="pipe-label">Deploy ECS</div></div>
+        </div>
+        <div class="pipe-detail" id="pipelineDetail">
+            <div class="pipe-detail-title">📝 Step 0 — git push triggers the workflow</div>
+            <div><span class="pipe-detail-cmd">on: push: branches: [main]</span> <span class="pipe-detail-cmd">pull_request: branches: [main]</span></div>
+            <div class="pipe-detail-why">Why: every commit to main and every PR gets the same quality gate. No "deploy branch" tricks.</div>
+            <div class="pipe-detail-fail" style="color:var(--text-muted)">N/A — this is the trigger, not a step that can fail.</div>
+        </div>
+    </div>
+    <script>
+    const pipeStepData = [
+        { icon:'📝', title:'git push — Triggers the workflow', cmds:['on: push: branches: [main]','on: pull_request: branches: [main]'], why:'Every commit to main and every PR gets the same quality gate automatically.', fail:'N/A — this is just the trigger.' },
+        { icon:'🧪', title:'pytest — Tests against real Postgres', cmds:['pytest --reuse-db -x','services: postgres: image: postgres:15 (with pg_isready health check)'], why:'Real Postgres catches JSON fields, transactions, and date function differences that SQLite silently accepts. The <code>-x</code> flag stops on first failure — fast feedback.', fail:'Job fails → deploy job blocked by <code>needs: [test]</code>. PR blocked from merging.' },
+        { icon:'🔍', title:'Lint + Security Checks', cmds:['ruff check . && black --check .','python manage.py check --deploy','python manage.py makemigrations --check --dry-run'], why:'<code>check --deploy</code> catches DEBUG=True, ALLOWED_HOSTS=*, missing HSTS etc. <code>makemigrations --check</code> fails if a model changed but migration wasn\'t committed.', fail:'Build fails. The PR author gets specific error output telling them exactly what to fix.' },
+        { icon:'🐳', title:'Build Docker Image', cmds:['docker build -t $ECR_REGISTRY/app:${{ github.sha }} .'], why:'Tag with Git SHA — not \'latest\'. This makes every image uniquely traceable to a specific commit. Multi-stage build keeps it under 85 MB.', fail:'Usually a pip install error or a syntax problem in the Dockerfile. Check build logs.' },
+        { icon:'📦', title:'Push to ECR (only if tests pass)', cmds:['docker push $ECR_REGISTRY/app:${{ github.sha }}'], why:'The image only reaches the registry if all previous steps passed. Broken code can never be deployed — it doesn\'t exist in ECR.', fail:'ECR permission error. Check IAM role attached to the GitHub Actions runner.' },
+        { icon:'🧬', title:'Run Migrations (BEFORE code deploy)', cmds:['aws ecs run-task --overrides manage.py migrate --noinput'], why:'Migrations run in a one-off ECS task BEFORE the service update. DB schema is in the new state before any new code reads it. Expand-contract ensures old code still works during rollout.', fail:'Migration fails → stop deploy immediately. Old code is still running, no outage. Fix migration, re-run.' },
+        { icon:'🚀', title:'Rolling Deploy — ECS Service Update', cmds:['aws ecs update-service --task-definition app:${{ github.sha }}'], why:'ECS spins up new tasks → ALB health check /health/ (DB + cache) must pass → only then drains old tasks. Zero-downtime rolling deploy.', fail:'Health check fails → ECS stops the rollout, keeps old tasks alive. No outage. Rollback = <code>aws ecs update-service --task-definition app:PREVIOUS_SHA</code>.' }
+    ];
+    function showPipeStep(idx, el) {
+        document.querySelectorAll('.pipe-step').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+        const d = pipeStepData[idx];
+        document.getElementById('pipelineDetail').innerHTML =
+            '<div class="pipe-detail-title">' + d.icon + ' Step ' + idx + ' — ' + d.title + '</div>' +
+            d.cmds.map(c => '<div><span class="pipe-detail-cmd">' + c + '</span></div>').join('') +
+            '<div class="pipe-detail-why">💡 ' + d.why + '</div>' +
+            '<div class="pipe-detail-fail">❌ If this fails: ' + d.fail + '</div>';
+    }
+    </script>
+
+<pre><code><span class="cm"># .github/workflows/ci.yml — production-grade Django pipeline</span>
+name: CI Pipeline
+
+on: push: branches: [main]
+    pull_request: branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: testdb
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+
+      <span class="cm"># Cache deps on lockfile hash — skips re-install if unchanged</span>
+      - uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+
+      - run: pip install -r requirements.txt
+
+      - run: ruff check . && black --check .          <span class="cm"># lint</span>
+      - run: pytest --reuse-db -x                     <span class="cm"># test vs real Postgres</span>
+      - run: python manage.py check --deploy          <span class="cm"># security audit</span>
+      - run: python manage.py makemigrations --check --dry-run  <span class="cm"># fail if migration missing</span>
+
+  build-and-push:
+    needs: [test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build &amp; tag with Git SHA
+        run: |
+          IMAGE="$ECR_REGISTRY/myapp:${{ github.sha }}"
+          docker build -t $IMAGE .
+          docker push $IMAGE         <span class="cm"># SHA tag = rollback in seconds</span></code></pre>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong>Saying CI/CD is one thing</strong> — interviewers want to hear all three separated.</li>
+                <li><strong>Auto-retrying flaky tests</strong> — hides bugs. Quarantine + investigate.</li>
+                <li><strong>Secrets in workflow YAML</strong> — must use GitHub Actions Secrets. Never paste an AWS key in a <code>.yml</code>.</li>
+                <li><strong>Building image per environment</strong> — build once, tag with SHA, promote across envs. "Works in staging, breaks in prod" is a build-per-env symptom.</li>
+                <li><strong>No rollback story</strong> — if you can't say "we redeploy the previous SHA's image," you don't sound like you've shipped.</li>
+                <li><strong>CI as tests-only</strong> — production CI also runs <code>check --deploy</code>, <code>makemigrations --check --dry-run</code>, <code>ruff</code>, <code>mypy</code>, <code>pip-audit</code>, <code>bandit</code>, <code>gitleaks</code>.</li>
+                <li><strong>Testing on SQLite instead of Postgres</strong> — SQLite handles JSON fields, concurrent transactions, and date functions differently. Test divergence guarantees eventual production bugs.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"Our pipeline tags every image with the Git SHA and pushes to ECR, so rollback is re-deploying the previous tag — never 'git revert and rebuild.' I also added <code>python manage.py makemigrations --check --dry-run</code> as a required CI job so the build fails if someone forgets to commit a migration file. We got bitten once — model changed but the migration didn't make the commit, and prod blew up on startup."</em></blockquote>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 3: Database Migrations                        -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="migrations">3. Database Migrations 🧬</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">⚠️</span>
+        <div class="callout-content">
+            <p><strong>This is the topic where mid-level candidates routinely fail and production experience is hardest to fake.</strong> If you've never broken a production database, you can be exposed with one follow-up question.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"Walk me through how you'd add a new non-nullable column to a 50-million-row table in production."</li>
+                <li>"What's the difference between a schema migration and a data migration?"</li>
+                <li>"Have you ever had a migration cause downtime? Walk me through it."</li>
+                <li>"What's your pre-migration checklist before running migrate in production?"</li>
+                <li>"What does <code>python manage.py sqlmigrate &lt;app&gt; &lt;num&gt;</code> give you?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"What's the expand-contract pattern?"</li>
+                <li>"How do you roll back a migration that included a <code>RunPython</code>?"</li>
+                <li>"Why can <code>RunPython</code> lock a table for the entire migration?"</li>
+                <li>"What's <code>SeparateDatabaseAndState</code> and when would you reach for it?"</li>
+                <li>"Why is <code>db_default</code> preferred over <code>default</code> for new not-null columns?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 id="migrations-qa">Weak vs Solid — Adding a non-nullable column to a 50M-row table</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak:</strong></p>
+                <p><em>"I add the field, run <code>makemigrations</code>, and run <code>migrate</code> on production."</em></p>
+                <p style="margin-top:8px">This answer ends the interview at any production-serious shop. PostgreSQL's <code>ALTER TABLE … ADD COLUMN … NOT NULL</code> acquires an <strong>ACCESS EXCLUSIVE lock</strong> — no reads, no writes, until the column is added and every row is backfilled. On 50M rows: many minutes of downtime.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — <span class="key-phrase">Expand-Contract in 3 Deploys</span>:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet blue" style="background:var(--accent-blue)">1</span><span><span class="badge badge-blue">Deploy 1 — Expand</span> Add column as <code>null=True</code> — <strong>metadata-only in Postgres 11+</strong>, milliseconds, <span class="key-phrase">zero ACCESS EXCLUSIVE lock</span>. Old code ignores it.</span></li>
+                    <li><span class="answer-bullet orange" style="background:var(--accent-orange)">2</span><span><span class="badge badge-orange">Deploy 2 — Backfill</span> Management command, <strong>5,000 rows per chunk</strong>, each chunk its own transaction. <span class="badge badge-red">NEVER</span> a single UPDATE over 50M rows. <span class="badge badge-red">NEVER</span> inside the migration file itself (Django wraps migrations in a transaction → holds locks the entire backfill duration).</span></li>
+                    <li><span class="answer-bullet green" style="background:var(--accent-green)">3</span><span><span class="badge badge-green">Deploy 3 — Contract</span> <code>ADD CONSTRAINT … NOT VALID</code> skips full-table scan. Then <code>VALIDATE CONSTRAINT</code> — only takes <span class="key-phrase">SHARE UPDATE EXCLUSIVE</span> lock, allows concurrent reads/writes. Column is now effectively NOT NULL.</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="migrations-expand">Expand-Contract — Visual Timeline</h3>
+    <div class="expand-contract">
+        <div class="ec-phase ec-phase-1">
+            <div class="ec-title">🔵 Deploy 1 — Expand</div>
+            <div class="ec-item"><strong>Schema:</strong> <code>null=True</code> column added</div>
+            <div class="ec-item"><strong>Code:</strong> Old code (ignores new col)</div>
+            <div class="ec-item"><strong>Lock:</strong> <span class="ec-lock ec-lock-safe">SAFE ✓</span> metadata-only, milliseconds</div>
+            <div class="ec-item" style="margin-top:6px;font-size:0.8em;color:var(--text-muted)">Postgres 11+ handles ADD COLUMN nullable with no rewrite</div>
+        </div>
+        <div class="ec-arrow">→</div>
+        <div class="ec-phase ec-phase-2">
+            <div class="ec-title">🟠 Deploy 2 — Backfill</div>
+            <div class="ec-item"><strong>Schema:</strong> No change</div>
+            <div class="ec-item"><strong>Code:</strong> New code (writes both cols)</div>
+            <div class="ec-item"><strong>Backfill:</strong> Management cmd, 5k rows/tx</div>
+            <div class="ec-item"><strong>Lock:</strong> <span class="ec-lock ec-lock-safe">SAFE ✓</span> row-level, short-lived</div>
+            <div class="ec-item" style="margin-top:6px;font-size:0.8em;color:var(--text-muted)">Never inside the migration file — Django wraps migration in a transaction</div>
+        </div>
+        <div class="ec-arrow">→</div>
+        <div class="ec-phase ec-phase-3">
+            <div class="ec-title">🟢 Deploy 3 — Contract</div>
+            <div class="ec-item"><strong>Schema:</strong> ADD CONSTRAINT NOT VALID → VALIDATE</div>
+            <div class="ec-item"><strong>Code:</strong> Cleanup (drop old col later)</div>
+            <div class="ec-item"><strong>Lock:</strong> <span class="ec-lock ec-lock-safe">SAFE ✓</span> SHARE UPDATE EXCLUSIVE</div>
+            <div class="ec-item" style="margin-top:6px;font-size:0.8em;color:var(--text-muted)">Reads/writes allowed during VALIDATE — no blocking</div>
+        </div>
+    </div>
+
+<pre><code><span class="cm"># Expand-Contract Pattern — Visual</span>
+
+<span class="cm">──── Deploy 1: Add nullable (instant, zero lock) ────────────</span>
+class Migration(migrations.Migration):
+    operations = [
+        migrations.AddField(
+            model_name=<span class="str">'order'</span>,
+            name=<span class="str">'new_status'</span>,
+            field=models.CharField(max_length=20, null=True),
+        ),
+    ]
+
+<span class="cm">──── Deploy 2: Backfill in chunks (management command) ───────</span>
+<span class="kw">def</span> <span class="fn">handle</span>(self, *args, **options):
+    qs = Order.objects.filter(new_status__isnull=True)
+    total = qs.count()
+    <span class="kw">for</span> i <span class="kw">in</span> range(0, total, 5000):
+        chunk = qs[i:i+5000].values_list(<span class="str">'id'</span>, flat=True)
+        Order.objects.filter(id__in=list(chunk)).update(
+            new_status=F(<span class="str">'old_status'</span>)
+        )  <span class="cm"># each chunk its own transaction — no mega-lock</span>
+
+<span class="cm">──── Deploy 3: Constrain (SHARE UPDATE EXCLUSIVE lock only) ──</span>
+migrations.RunSQL(
+    <span class="str">"ALTER TABLE orders ADD CONSTRAINT chk_new_status_notnull "</span>
+    <span class="str">"CHECK (new_status IS NOT NULL) NOT VALID;"</span>,
+    reverse_sql=<span class="str">"ALTER TABLE orders DROP CONSTRAINT chk_new_status_notnull;"</span>
+)
+migrations.RunSQL(<span class="str">"ALTER TABLE orders VALIDATE CONSTRAINT chk_new_status_notnull;"</span>)</code></pre>
+
+    <h3 id="migrations-checklist">Pre-Migration Checklist — Memorize This</h3>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content"><strong><code>python manage.py sqlmigrate &lt;app&gt; &lt;num&gt;</code></strong> — eyeball the actual SQL before it runs. Look for <code>ALTER TABLE</code>, <code>CREATE INDEX</code> without <code>CONCURRENTLY</code>, any full-table rewrites.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content"><strong><code>makemigrations --check --dry-run</code></strong> — fail CI if a model changed without a migration committed.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content"><strong>Run on staging with a prod-data dump</strong> — time it. If it takes 45 seconds on staging's 10M rows, it takes 9 minutes on prod's 100M rows.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content"><strong>Snapshot the prod database</strong> — confirm point-in-time recovery is enabled. Know the rollback command before you run forward.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content"><strong>Check reversibility</strong> — every <code>RunPython</code> has a reverse function (even if <code>migrations.RunPython.noop</code>). Irreversible migration = no rollback.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-content"><strong>Ordering</strong> — additive changes (new nullable column, new table) run <em>before</em> new code deploys. Destructive changes (drop column) run <em>after</em> old code is fully replaced.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">7</div>
+        <div class="step-content"><strong>Have rollback ready</strong> — <code>python manage.py migrate &lt;app&gt; &lt;previous_migration_name&gt;</code>. Know the command before the incident, not during it.</div>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong>Combining schema change + data backfill in the same migration</strong> — table lock held for the entire backfill duration.</li>
+                <li><strong><code>RunPython</code> importing models directly</strong> — historical models change shape; always use <code>apps.get_model("app", "Model")</code>.</li>
+                <li><strong><code>makemigrations</code> not committed</strong> — model change ships, migration doesn't. Prod blows up on startup with <code>ProgrammingError</code>.</li>
+                <li><strong><code>RunPython</code> without a reverse function</strong> — you've made the migration irreversible. Always pass <code>migrations.RunPython.noop</code> if nothing to do.</li>
+                <li><strong>Renaming a column in one deploy</strong> — old workers running old code reference the old name → crash. Two-phase: add new, dual-write, deprecate old. Or use <code>db_column='old_name'</code> and rename only the Python attribute.</li>
+                <li><strong>Deleting a model in one deploy</strong> — same in reverse. Stop using it in code first, then drop in a later migration.</li>
+                <li><strong>Adding a standard index on a large table</strong> — <code>CREATE INDEX</code> takes a write lock. Use <code>AddIndexConcurrently</code> + <code>atomic = False</code> on the migration class.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"I once shipped a migration that combined a <code>RunPython</code> backfill with an <code>AlterField</code> to NOT NULL in the same file. Django wraps each migration in a transaction, so the ACCESS EXCLUSIVE lock queued behind the backfill and froze writes on the orders table for ~45 minutes during business hours. Postmortem: we now split every non-trivial schema change into add-nullable → backfill in 5,000-row chunks via a management command → <code>NOT VALID</code> constraint then <code>VALIDATE</code>. We also added a 5-second statement-timeout to the deploy migration runner so a runaway lock kills itself instead of blocking traffic indefinitely."</em></blockquote>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 4: Secrets & Env Vars                         -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="secrets">4. Secrets &amp; Environment Variables 🔐</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"Where do you store your <code>SECRET_KEY</code> and database credentials?"</li>
+                <li>"What's the difference between a <code>.env</code> file, platform environment variables, and a secrets manager?"</li>
+                <li>"What do you do if you accidentally commit an AWS access key?"</li>
+                <li>"How do you give your CI pipeline access to AWS without storing long-lived keys?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"Walk me through AWS Secrets Manager vs HashiCorp Vault. When would you pick which?"</li>
+                <li>"Why is <code>git rm</code> insufficient to remove a leaked secret?"</li>
+                <li>"What's GitHub push protection and how can it fail?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 id="secrets-layers">Weak vs Solid — "Where do you keep secrets?"</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak answers:</strong></p>
+                <p><em>"I put them in <code>settings.py</code> and add it to <code>.gitignore</code>."</em></p>
+                <p><em>"I have a <code>.env</code> file in the repo so the team can use it."</em></p>
+                <p style="margin-top:8px">Both are immediate disqualifiers. The second means secrets live in git history — which is effectively forever. Comparitech's honeypot study: <strong>attackers find and start abusing an exposed AWS key in under one minute.</strong></p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — <span class="key-phrase">Three-Layer Architecture</span>:</strong></p>
+                <div class="concept-row">
+                    <span class="badge badge-blue">Local</span>
+                    <span class="badge-desc"><code>.env</code> in <code>.gitignore</code> + committed <code>.env.example</code> (names, no values). Loaded via <code>django-environ</code>. <em>Template in git, secrets never in git.</em></span>
+                </div>
+                <div class="concept-row">
+                    <span class="badge badge-orange">CI</span>
+                    <span class="badge-desc">GitHub Actions Secrets → injected as env vars at job runtime. <strong>Never echoed in logs</strong>. Only the workflow can read them, not PRs from forks.</span>
+                </div>
+                <div class="concept-row">
+                    <span class="badge badge-purple">Prod</span>
+                    <span class="badge-desc">AWS Secrets Manager — app's <strong>IAM role</strong> grants <code>secretsmanager:GetSecretValue</code> on <em>only its own secret</em>. Fetched at container startup. For CI→AWS: <span class="key-phrase">OIDC federation</span> — GitHub Actions presents short-lived OIDC token → assumes role → temp STS creds. <span class="badge badge-red">Zero long-lived AWS keys anywhere.</span></span>
+                </div>
+                <div class="mini-flow" style="margin-top:12px">
+                    <span style="font-size:0.8em;color:var(--text-muted)">CI→AWS auth flow:</span>
+                    <span class="flow-step">GitHub OIDC token</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step">assume IAM role</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step">temp STS creds</span>
+                    <span class="flow-arrow">→</span>
+                    <span class="flow-step">push to ECR</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="secrets-leaks">8 Ways Secrets Actually Leak — Know All of These</h3>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content"><strong>Committed <code>.env</code></strong> — most common. GitHub push protection catches it now, but <code>git push --no-verify</code> bypasses it.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content"><strong>Hardcoded in source</strong> "just to test" — then committed in a rush and forgotten.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content"><strong>In Docker images</strong> — <code>ENV AWS_SECRET_KEY=…</code> in a Dockerfile, image pushed to a public registry. Anyone who pulls it can extract the layer.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content"><strong>In CI logs</strong> — secret accidentally echoed in a script. GitHub Actions masks known secrets but not derivatives (e.g., base64-encoded versions).</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content"><strong>In error pages</strong> — <code>DEBUG=True</code> in production exposes settings, env vars, traceback locals on every unhandled exception.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-content"><strong>In Sentry / log aggregation</strong> — request bodies and tracebacks captured by error tracking can include passwords, tokens. Configure scrubbing with <code>before_send</code>.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">7</div>
+        <div class="step-content"><strong>In screenshots / Slack / Jira</strong> — non-trivial fraction of real leaks happen here. Someone pastes a curl command with a header.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">8</div>
+        <div class="step-content"><strong>Force-pushed git history</strong> — GitHub retains "oops commits." Researchers have built scrapers for them. Treat any exposed key as compromised immediately.</div>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong>Thinking <code>git rm</code> deletes from history</strong> — it doesn't. Only <code>git filter-repo</code> rewrites history, and even then the remote may have cached it. Rotate immediately, always.</li>
+                <li><strong>Not knowing the rotation playbook</strong> — for an AWS key: revoke in IAM, audit CloudTrail for everything that principal touched, rotate dependent services. AWS auto-applies <code>AWSCompromisedKeyQuarantine</code> policy on detected-leaked keys.</li>
+                <li><strong>One giant secrets blob</strong> — every service sharing the same secret means blast radius is everything. Per-service IAM roles + per-service secrets.</li>
+                <li><strong>Never rotating</strong> — secrets without rotation policy become forever-credentials.</li>
+                <li><strong>Storing secrets in env vars on a shared host</strong> — visible to any process via <code>/proc/&lt;pid&gt;/environ</code> on Linux. Secrets Manager + fetch-at-startup is better for high-sensitivity values.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"We had an AWS access key end up in a commit — GitHub push protection caught it, but a teammate had pushed with <code>--no-verify</code>. Within minutes AWS auto-applied the <code>AWSCompromisedKeyQuarantine</code> policy, we rotated the key, audited CloudTrail for everything the IAM principal had touched, and moved that workload to OIDC-federated short-lived credentials. We then made push protection org-required and removed the per-user bypass."</em></blockquote>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 5: Logging & Monitoring                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="logging">5. Logging &amp; Monitoring 📊</h2>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"Production has a bug a user is reporting but you can't reproduce locally. Walk me through how you debug it."</li>
+                <li>"How is Sentry different from regular logging?"</li>
+                <li>"What's structured logging? Why would you use JSON logs over plain text?"</li>
+                <li>"How would you investigate a sudden spike in 5xx errors?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"What's the difference between logs, metrics, and traces?"</li>
+                <li>"What's a Sentry breadcrumb?"</li>
+                <li>"How do you keep Sentry costs under control?"</li>
+                <li>"What's the RED method? The USE method?"</li>
+            </ul>
+        </div>
+    </div>
+
+    <h3 id="logging-pillars">The 3 Pillars — Don't Conflate Them</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Pillar</th><th>What It Records</th><th>Tools</th><th>Answers</th></tr>
+            <tr><td>📜 <strong>Logs</strong></td><td>Events — what happened, when, to whom</td><td>structlog, CloudWatch, Loki</td><td>"What happened at 3:42pm for user 678?"</td></tr>
+            <tr><td>📊 <strong>Metrics</strong></td><td>Numbers over time — rates, gauges, histograms</td><td>Prometheus, Datadog, Grafana</td><td>"P99 latency? req/s? error rate?"</td></tr>
+            <tr><td>🔗 <strong>Traces</strong></td><td>Request path across functions and services</td><td>Jaeger, Zipkin, Datadog APM, Sentry</td><td>"Which downstream call caused the 3s spike?"</td></tr>
+        </table>
+    </div>
+
+    <h3 id="logging-qa">Weak vs Solid — "Production bug, how do you debug?"</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak:</strong></p>
+                <p><em>"I check the logs and try to reproduce locally."</em></p>
+                <p style="margin-top:8px">Or worse: "I SSH into the server and grep the log file." SSH into production is an anti-pattern in modern infrastructure and a security risk.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — Debug flow:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet">1</span><span><strong>Sentry first</strong> — groups duplicate exceptions, shows <span class="key-phrase">which release introduced it</span>, affected users, breadcrumbs (previous SQL queries, last HTTP requests, log statements). Error spiked after a deploy? That diff is the smoking gun.</span></li>
+                    <li><span class="answer-bullet">2</span><span>Not in Sentry? Query <strong>structured logs</strong> in CloudWatch/Loki/Datadog by <code>request_id</code> or <code>user_id</code> — fast, targeted, no guessing.</span></li>
+                    <li><span class="answer-bullet">3</span><span>If distributed tracing exists: pull the <span class="key-phrase">trace ID from the Sentry event</span> → follow it through every downstream call to pinpoint the slow or failing service.</span></li>
+                    <li><span class="answer-bullet red">4</span><span>Last resort: replicate prod state in staging with a redacted DB dump. <span class="badge badge-red">NEVER grep raw text</span> — if that's your only option, the real fix is <strong>JSON logging + request-ID middleware</strong>, not better grep skills.</span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <h3 id="logging-sentry">Sentry — The Production-Sensible Configuration</h3>
+
+<pre><code><span class="cm"># settings.py — Sentry config that won't bankrupt you</span>
+<span class="kw">import</span> sentry_sdk
+<span class="kw">from</span> sentry_sdk.integrations.django <span class="kw">import</span> DjangoIntegration
+<span class="kw">from</span> sentry_sdk.integrations.celery <span class="kw">import</span> CeleryIntegration
+
+sentry_sdk.<span class="fn">init</span>(
+    dsn=env(<span class="str">"SENTRY_DSN"</span>),
+    integrations=[<span class="cls">DjangoIntegration</span>(), <span class="cls">CeleryIntegration</span>()],
+    environment=env(<span class="str">"ENV"</span>),              <span class="cm"># 'production' / 'staging'</span>
+    release=env(<span class="str">"GIT_SHA"</span>),             <span class="cm"># ties every error to a specific deploy ← highest-leverage setting</span>
+    traces_sample_rate=<span class="num">0.1</span>,              <span class="cm"># 10% NOT 1.0 — 1.0 burns quota in days</span>
+    profiles_sample_rate=<span class="num">0.1</span>,
+    send_default_pii=<span class="num">False</span>,             <span class="cm"># GDPR — user emails, IPs, session tokens</span>
+    before_send=scrub_sensitive_data,   <span class="cm"># custom scrubber for tokens, card numbers</span>
+)</code></pre>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💡</span>
+        <div class="callout-content">
+            <p><strong>The <code>release=GIT_SHA</code> insight:</strong> Without it, when Sentry shows you an error spike, you can't tell which deploy introduced it. With it, every issue links to a specific commit and you see "first seen in release <code>abc123</code>" instantly. This is the single highest-leverage Sentry configuration — and most candidates don't know it.</p>
+        </div>
+    </div>
+
+    <h3 id="logging-structured">Structured Logging — The Difference That Matters</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Plain text (grep hell):</strong></p>
+<pre><code>[2026-05-21 14:22:01] ERROR Payment failed for order</code></pre>
+                <p>Ungreppable by user, unqueryable by amount, impossible to aggregate or join with traces.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Structured JSON (queryable):</strong></p>
+<pre><code>{"ts":"2026-05-21T14:22:01Z","level":"error",
+ "event":"payment_failed","order_id":12345,
+ "user_id":678,"request_id":"abc-123",
+ "amount":42.99,"gateway":"stripe",
+ "error_code":"card_declined"}</code></pre>
+                <p>Now query: all <code>payment_failed</code> for <code>gateway=stripe</code> in the last hour → dashboard → alert.</p>
             </div>
         </div>
     </div>
@@ -234,263 +1035,320 @@ DEBUG = os.<span class="fn">getenv</span>(<span class="str">'DEBUG'</span>, <spa
     <div class="callout callout-red">
         <span class="callout-emoji">🪤</span>
         <div class="callout-content">
-            <p><strong>The String Trap — Senior Signal:</strong> <code>os.getenv('DEBUG')</code> returns a string. If you set <code>DEBUG=False</code> on the server, Python reads <code>'False'</code> — a non-empty string → <strong>always evaluates as <code>True</code></strong>. 🔴<br>
-            <strong>Fix:</strong> <code>DEBUG = os.getenv('DEBUG', 'False') == 'True'</code> — only <code>True</code> when string is literally <code>'True'</code>.</p>
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong><code>traces_sample_rate=1.0</code> in production</strong> — sends every request to Sentry as a performance transaction. Burns through quota in days, costs a fortune.</li>
+                <li><strong>Not setting <code>release</code></strong> — every error looks like it could be from any deploy. Useless for post-deploy monitoring.</li>
+                <li><strong><code>send_default_pii=True</code> without thought</strong> — sends user emails, IPs, session tokens. GDPR/SOC2 violation waiting to happen.</li>
+                <li><strong>Alerting on <code>/health</code> endpoints</strong> — health checks fail occasionally under load; you get woken up at 3am. Filter with <code>traces_sampler</code>.</li>
+                <li><strong>Sentry fingerprinting with dynamic messages</strong> — <code>ValueError: Error processing order 123</code> and <code>ValueError: Error processing order 124</code> become two separate issues instead of one recurring bug. Alert fatigue. Use static fingerprinting.</li>
+                <li><strong>Logging the entire request body</strong> — passwords, card numbers, tokens end up in your log aggregator.</li>
+                <li><strong>Conflating the three pillars</strong> — logs, metrics, traces answer different questions. An interviewer asking the difference wants to hear you don't lump them.</li>
+            </ol>
         </div>
     </div>
 
-    <h3>Local vs Production Config</h3>
-    <div class="table-wrap">
-        <table>
-            <tr><th>Environment</th><th>How Config is Loaded</th></tr>
-            <tr><td><strong>Local Dev</strong></td><td><code>python-dotenv</code> reads from <code>.env</code> file</td></tr>
-            <tr><td><strong>Production</strong></td><td>Platform injects vars directly into OS runtime — <strong>no <code>.env</code> file on server</strong></td></tr>
-        </table>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"After we shipped release <code>abc123</code> we got a Sentry alert spike — the release tag immediately told me which commit, the breadcrumbs showed every failing request had the same feature flag enabled, and the trace pointed at an N+1 in a <code>prefetch_related</code> we missed. We flipped the flag off in seconds without redeploying. We also dropped <code>traces_sample_rate</code> from 1.0 to 0.1 because we were burning Sentry quota on <code>/health</code> and <code>/metrics</code> polling."</em></blockquote>
+        </div>
     </div>
 
-    <!-- SECTION 3: Production Settings -->
-    <h2 id="production-settings">3. Production Settings 🛡️</h2>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 6: Django Security                            -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="security">6. Django Security 🛡️</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "I build a defense in depth. I disable debug mode, restrict allowed hosts, enforce HTTPS, and enable secure cookie flags. Each setting blocks a different attack vector."</p>
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"What changes do you make to <code>settings.py</code> before going to production?" <em>(universal screening question — every senior interviewer asks this)</em></li>
+                <li>"Why is <code>DEBUG=True</code> dangerous in production? What does it actually expose?"</li>
+                <li>"What does <code>ALLOWED_HOSTS</code> do? Why is <code>ALLOWED_HOSTS=['*']</code> bad?"</li>
+                <li>"How does Django protect against CSRF? Where could that protection fail?"</li>
+                <li>"How does Django prevent SQL injection? Where can a developer break it?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"What does <code>SECURE_HSTS_SECONDS</code> do, and why should you start with a small value?"</li>
+                <li>"Why is <code>SECURE_PROXY_SSL_HEADER</code> something to set carefully?"</li>
+                <li>"What does <code>python manage.py check --deploy</code> do?"</li>
+            </ul>
         </div>
     </div>
 
-<pre><code><span class="cm"># settings.py — production security block</span>
-DEBUG = <span class="num">False</span>
-ALLOWED_HOSTS = [<span class="str">'myapp.com'</span>, <span class="str">'www.myapp.com'</span>]
-
-SECURE_SSL_REDIRECT = <span class="num">True</span>
-SECURE_HSTS_SECONDS = <span class="num">31536000</span>  <span class="cm"># 1 year</span>
-SESSION_COOKIE_SECURE = <span class="num">True</span>
-CSRF_COOKIE_SECURE = <span class="num">True</span></code></pre>
-
-    <div class="table-wrap">
-        <table>
-            <tr><th>Setting</th><th>Attack Blocked</th><th>Why It Matters</th></tr>
-            <tr><td><code>DEBUG = False</code></td><td>Data leaks</td><td><code>True</code> exposes full source code + env vars on error pages 🔴</td></tr>
-            <tr><td><code>ALLOWED_HOSTS</code></td><td>HTTP Host Header attacks</td><td>Blocks password reset link poisoning to hacker domains</td></tr>
-            <tr><td><code>SECURE_SSL_REDIRECT</code></td><td>Plain HTTP interception</td><td>Forces HTTPS — login creds can't travel in plaintext</td></tr>
-            <tr><td><code>SECURE_HSTS_SECONDS</code></td><td>SSL stripping</td><td>Browser knows to use HTTPS before even making the request</td></tr>
-            <tr><td><code>SESSION_COOKIE_SECURE</code></td><td>Session hijacking</td><td>Cookies only sent over HTTPS — not interceptable on public WiFi</td></tr>
-        </table>
-    </div>
-
-    <!-- SECTION 4: Migrations -->
-    <h2 id="migrations">4. Database Migrations in Production 🧬</h2>
-
-    <div class="callout callout-blue">
-        <span class="callout-emoji">🎯</span>
-        <div class="callout-content">
-            <p><strong>Interview Line:</strong> "When touching the database, I never migrate blindly. I use a zero-downtime approach: backup → stage → additive changes → execute → monitor."</p>
-        </div>
-    </div>
-
+    <h3 id="security-checklist">Weak vs Solid — "What do you change before going to production?"</h3>
     <div class="columns">
         <div class="callout callout-red">
             <span class="callout-emoji">❌</span>
             <div class="callout-content">
-                <p><strong>Junior Approach</strong></p>
-                <p><code>python manage.py migrate</code> straight to production</p>
-                <p>Rename column immediately</p>
-                <p>"It'll probably be fine" 🤞</p>
+                <p><strong>Weak:</strong></p>
+                <p><em>"I set <code>DEBUG=False</code> and put the domain in <code>ALLOWED_HOSTS</code>."</em></p>
+                <p style="margin-top:8px">Technically correct but bare minimum. You passed the junior filter and stopped there. Solid candidates rattle off the full checklist <em>and explain what each setting prevents</em>.</p>
             </div>
         </div>
         <div class="callout callout-green">
             <span class="callout-emoji">✅</span>
             <div class="callout-content">
-                <p><strong>Senior Approach</strong></p>
-                <p>Backup → Stage → Plan → Execute</p>
-                <p>Additive changes — add first, remove later</p>
-                <p>Zero-downtime strategy, tested in staging first</p>
+                <p><strong>Solid — <span class="key-phrase">Full Deployment Checklist</span>:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet red">!</span><span><span class="badge badge-red">DEBUG=False</span> — with it True, Django renders a yellow error page leaking: <strong>entire settings module</strong>, every SQL query, local variables in every frame, installed apps. An attacker's roadmap.</span></li>
+                    <li><span class="answer-bullet red">!</span><span><span class="badge badge-red">ALLOWED_HOSTS</span> from env var, <strong>never <code>['*']</code></strong> — disabling it allows <span class="key-phrase">Host header injection</span>. Django uses the Host header to build password-reset links.</span></li>
+                    <li><span class="answer-bullet red">!</span><span><span class="badge badge-red">SECRET_KEY</span> from env, never hardcoded or the default. Compromised = <strong>forged session cookies + manipulated signed data</strong>.</span></li>
+                    <li><span class="answer-bullet blue" style="background:var(--accent-blue)">🔒</span><span><strong>HTTPS bundle:</strong> <code>SECURE_SSL_REDIRECT</code>, <code>SESSION_COOKIE_SECURE</code>, <code>CSRF_COOKIE_SECURE</code>. For HSTS: <span class="key-phrase">start at 300s and ramp to 31536000</span> — HSTS is sticky in browsers; a bad rollout can lock users out of HTTP for a year.</span></li>
+                    <li><span class="answer-bullet orange">⚠</span><span><code>SECURE_PROXY_SSL_HEADER</code> — <strong>only</strong> if the LB strips the header from client requests. Otherwise an attacker can forge <code>X-Forwarded-Proto: https</code> → Django believes it's a secure request.</span></li>
+                    <li><span class="answer-bullet green" style="background:var(--accent-green)">✓</span><span>Run <span class="key-phrase"><code>python manage.py check --deploy</code></span> in CI — it tells you exactly what's missing and should be a <strong>required CI step</strong>, not a manual checklist.</span></li>
+                </ul>
             </div>
         </div>
     </div>
 
-    <h3>Zero-Downtime Strategy — Renaming a Column</h3>
-    <details open>
-        <summary>🔥 The 3-Phase Approach (This separates seniors from juniors)</summary>
-        <div class="toggle-content">
-<pre><code>Phase 1: ADD new column
-─────────────────────────────────────────
-DB:   [first_name] + [full_name]  ← both exist
-Code: writes to BOTH columns simultaneously
-Users: unaffected ✅
+    <h3 id="security-code">Production Settings — The Full Security Block</h3>
 
-Phase 2: BACKFILL data
-─────────────────────────────────────────
-Script copies data first_name → full_name
-Runs in background, no table lock
-Users: unaffected ✅
+<pre><code><span class="cm"># settings/production.py — the full security block</span>
+DEBUG = <span class="kw">False</span>
+SECRET_KEY = env(<span class="str">"SECRET_KEY"</span>)
+ALLOWED_HOSTS = env.list(<span class="str">"ALLOWED_HOSTS"</span>)  <span class="cm"># never ['*']</span>
 
-Phase 3: SWITCH & CLEANUP
-─────────────────────────────────────────
-Deploy: Code reads ONLY from full_name
-Verify: Stable for 1–2 days
-Migrate: DROP column first_name
-Users: never noticed a thing ✅</code></pre>
-            <p><strong>Why Table Locks Matter:</strong> When Postgres renames/drops a column, it locks the entire table. On a large table (millions of rows), this lock can hold for <em>minutes</em> — all reads and writes fail → users see 500 errors. Additive migrations avoid this entirely.</p>
-        </div>
-    </details>
+<span class="cm"># HTTPS enforcement</span>
+SECURE_SSL_REDIRECT = <span class="kw">True</span>
+SESSION_COOKIE_SECURE = <span class="kw">True</span>
+CSRF_COOKIE_SECURE = <span class="kw">True</span>
+X_FRAME_OPTIONS = <span class="str">'DENY'</span>
+SECURE_CONTENT_TYPE_NOSNIFF = <span class="kw">True</span>
 
-    <!-- SECTION 5: Static Files -->
-    <h2 id="static-files">5. Static File Serving 📦</h2>
+<span class="cm"># HSTS — start low (300s), ramp to 1 year over a month</span>
+<span class="cm"># Once browser caches it, you can't go back to HTTP for that duration</span>
+SECURE_HSTS_SECONDS = <span class="num">31536000</span>
+SECURE_HSTS_INCLUDE_SUBDOMAINS = <span class="kw">True</span>
+SECURE_HSTS_PRELOAD = <span class="kw">True</span>
 
-    <div class="callout callout-blue">
-        <span class="callout-emoji">🎯</span>
+<span class="cm"># Only set if your LB strips X-Forwarded-Proto from client requests</span>
+<span class="cm"># If LB doesn't strip it, attacker can forge it → security bypass</span>
+SECURE_PROXY_SSL_HEADER = (<span class="str">'HTTP_X_FORWARDED_PROTO'</span>, <span class="str">'https'</span>)</code></pre>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "For smaller apps, I use WhiteNoise — zero infrastructure overhead. For larger apps, I use <code>django-storages</code> with S3 and CloudFront. Django application servers should <em>never</em> serve static files in production."</p>
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong><code>ALLOWED_HOSTS=['*']</code> in production</strong> — same severity as <code>DEBUG=True</code>. Disables Host header validation entirely.</li>
+                <li><strong><code>SECURE_SSL_REDIRECT=True</code> behind Cloudflare</strong> that already redirects — double-redirect loop, breaks health checks. Cloudflare handles HTTPS; set to False there.</li>
+                <li><strong><code>SECURE_HSTS_PRELOAD=True</code> from day one with a 1-year duration</strong> — once a browser caches HSTS, you can't go back to HTTP for that duration. Ramp from 300s over weeks.</li>
+                <li><strong><code>SECURE_PROXY_SSL_HEADER</code> without the proxy stripping it</strong> — attacker sets <code>X-Forwarded-Proto: https</code> in their request, Django believes it's secure. Only set if your LB strips the header before forwarding.</li>
+                <li><strong>Using <code>.raw()</code> or <code>.extra()</code> with string formatting</strong> — that's how you break Django's SQLi protection. Always parameterize: <code>Model.objects.raw("SELECT … WHERE id = %s", [user_id])</code>.</li>
+                <li><strong><code>@csrf_exempt</code> on endpoints with side effects</strong> — common shortcut for "make the AJAX call work" that's actually a CSRF hole. Use the CSRF token properly.</li>
+                <li><strong>Not running <code>manage.py check --deploy</code></strong> in CI — it tells you exactly what you're missing and should be a required CI step, not a manual checklist.</li>
+                <li><strong>Not upgrading Django</strong> — almost every security release patches a CVE. Running an EOL version of Django is itself a security misconfiguration.</li>
+            </ol>
         </div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <tr><th>Option</th><th>When</th><th>Pros</th><th>Cons</th></tr>
-            <tr><td><strong>WhiteNoise</strong></td><td>MVPs, small apps, simple Docker setup</td><td>Minimal setup, compression built-in</td><td>Still uses server bandwidth</td></tr>
-            <tr><td><strong>S3 + CloudFront</strong></td><td>Media-heavy, global users, high traffic</td><td>Global CDN, Django is completely free</td><td>More infra to configure</td></tr>
-        </table>
-    </div>
-
-    <!-- SECTION 6: Logging -->
-    <h2 id="logging">6. Logging &amp; Monitoring 📊</h2>
-
-    <div class="callout callout-blue">
-        <span class="callout-emoji">🎯</span>
-        <div class="callout-content">
-            <p><strong>Interview Line:</strong> "I set up a three-layer observability stack: Django native logging writes errors to file. Sentry gives real-time exception alerts sent to Slack. Datadog tracks API performance to catch bottlenecks proactively."</p>
-        </div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <tr><th>Layer</th><th>Tool</th><th>What It Catches</th><th>Mental Model</th></tr>
-            <tr><td>1️⃣</td><td><strong>Django LOGGING</strong></td><td>ERROR level events to file — the base safety net</td><td>📜 Historical record</td></tr>
-            <tr><td>2️⃣</td><td><strong>Sentry</strong></td><td>Unhandled exceptions → Slack alert instantly, full stack trace + user context</td><td>🚨 Real-time alarm</td></tr>
-            <tr><td>3️⃣</td><td><strong>Datadog / New Relic</strong></td><td>API response times, slow queries, CPU spikes — catches <em>slowness</em> (not just crashes)</td><td>📊 Health dashboard</td></tr>
-        </table>
-    </div>
-
-    <div class="callout callout-yellow">
-        <span class="callout-emoji">💡</span>
-        <div class="callout-content">
-            <p><strong>Key insight:</strong> Sentry catches crashes — Datadog catches <em>slowness</em>. A slow API isn't an exception — no error is thrown — but users still leave. You need both layers.</p>
-        </div>
-    </div>
-
-    <!-- SECTION 7: Platforms -->
-    <h2 id="platforms">7. Deployment Platforms ☁️</h2>
-
-    <div class="callout callout-blue">
-        <span class="callout-emoji">🎯</span>
-        <div class="callout-content">
-            <p><strong>Interview Line:</strong> "Control ↑ → AWS | Speed ↑ → Railway. I choose the right tool for the right moment — not the fanciest one."</p>
-        </div>
-    </div>
-
-    <div class="table-wrap">
-        <table>
-            <tr><th>Platform</th><th>Control</th><th>DevOps Skill</th><th>Best For</th></tr>
-            <tr><td><strong>Railway</strong> 🚄</td><td>Low</td><td>Minimal (just Docker)</td><td>MVPs, side projects, hackathons</td></tr>
-            <tr><td><strong>DigitalOcean</strong> 🌊</td><td>Medium</td><td>Low</td><td>Small/medium startups</td></tr>
-            <tr><td><strong>AWS EC2 + RDS</strong> ☁️</td><td>Maximum</td><td>High</td><td>Enterprise, compliance, high traffic</td></tr>
-        </table>
     </div>
 
     <div class="callout callout-purple">
-        <span class="callout-emoji">💡</span>
+        <span class="callout-emoji">⚡</span>
         <div class="callout-content">
-            <p><strong>Senior Signal:</strong> "It depends on the stage of the project" — not "X is always best." For early-stage products, Railway lets you focus 100% on product features. When proven demand needs to scale, that's when AWS makes sense.</p>
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"When I joined this team I ran <code>manage.py check --deploy</code> on the staging settings and it lit up — <code>DEBUG=True</code>, <code>ALLOWED_HOSTS=['*']</code>, no HSTS. I moved config to <code>django-environ</code>, put secrets in AWS Secrets Manager, set HSTS to 300 seconds first and ramped it to a year over a month, and added <code>check --deploy</code> as a required CI job so DEBUG can't slip into a prod build. We caught two pull requests that would have re-enabled it within the first month."</em></blockquote>
         </div>
     </div>
 
-    <!-- SECTION 8: CI/CD -->
-    <h2 id="cicd">8. CI/CD Process (GitHub Actions) 🔁</h2>
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SECTION 7: Deployment & Architecture                  -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="deployment">7. Deployment &amp; Architecture 🚀</h2>
 
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Interview Line:</strong> "CI = Test your code 🧪 | CD = Ship your code 🚀 — every push is an automated quality check + deployment. Zero human intervention."</p>
+            <p><strong>HIGH FREQ Questions:</strong></p>
+            <ul>
+                <li>"How do you deploy your Django app?" <em>(the universal opening question of every senior interview)</em></li>
+                <li>"Describe what happens between <code>git push</code> and the user seeing the change."</li>
+                <li>"What's the difference between blue-green and rolling deployment?"</li>
+                <li>"How do you do a zero-downtime deploy?"</li>
+                <li>"How would you roll back a bad deploy?"</li>
+                <li>"How would you choose between Heroku/Railway/Render vs AWS ECS/EKS?"</li>
+                <li>"Why Gunicorn and not <code>runserver</code>? How many workers?"</li>
+            </ul>
+            <p style="margin-top:10px"><strong>NICE TO KNOW:</strong></p>
+            <ul>
+                <li>"Static files — where do they live and who serves them?"</li>
+                <li>"What's a canary deploy and when would you reach for it?"</li>
+                <li>"How do you decide between WSGI and ASGI?"</li>
+            </ul>
         </div>
     </div>
 
-    <h3>The 7-Step Pipeline</h3>
-
-    <div class="callout callout-yellow">
-        <span class="callout-emoji">🗺️</span>
-        <div class="callout-content">
-<pre><code>── CI PHASE ──────────────────────────────
-1. Push to main       →  Trigger 🔀
-2. Run tests (pytest) →  Gatekeeper 🧪
-         ↓
-   ✅ PASS → CD unlocks
-   ❌ FAIL → everything stops, Slack alert fires
-
-── CD PHASE ──────────────────────────────
-3. Build Docker image →  Package 🐳
-4. Push to registry   →  Store 📦
-5. Deploy to prod     →  Ship 🌍
-6. Run migrations     →  Sync DB 🗄️
-7. Health check       →  Verify ❤️
-         ↓
-   ✅ 200 OK → "Deploy successful!" 🎉
-   ❌ Fails  → abort + Slack alert 🚨</code></pre>
+    <h3 id="deployment-flow">Weak vs Solid — "How do you deploy your app?"</h3>
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">❌</span>
+            <div class="callout-content">
+                <p><strong>Weak:</strong></p>
+                <p><em>"I push to GitHub and Heroku/Railway deploys it."</em></p>
+                <p style="margin-top:8px">Stops there. Couldn't go deeper if pressed. No mention of Gunicorn, migrations, health checks, rollback, or how the traffic shift happens.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">✅</span>
+            <div class="callout-content">
+                <p><strong>Solid — Full ECS Deploy Flow:</strong></p>
+                <ul class="answer-list">
+                    <li><span class="answer-bullet">1</span><span><code>git push main</code> → GH Actions: tests → <code>check --deploy</code> → <code>makemigrations --check</code> → <strong>build image tagged with Git SHA</strong> → push to ECR.</span></li>
+                    <li><span class="answer-bullet purple" style="background:var(--accent-purple)">2</span><span><span class="key-phrase">Migrations run FIRST</span> — one-off ECS task <em>before</em> the service update. DB is in the new state before any new code reads it. Backward-compatible migrations mean old tasks keep working during the rolling window.</span></li>
+                    <li><span class="answer-bullet">3</span><span>ECS rolling deploy: spin up new tasks → <span class="key-phrase">ALB health check at <code>/health/</code></span> (checks DB + cache) must pass → drain old tasks → kill old. <strong>Zero-downtime</strong> throughout.</span></li>
+                    <li><span class="answer-bullet green" style="background:var(--accent-green)">↩</span><span><span class="key-phrase">Rollback = one command, ~90 seconds</span>: <code>aws ecs update-service --task-definition app:PREVIOUS_SHA</code>. Not "revert PR and rebuild" — that's 10+ minutes.</span></li>
+                </ul>
+            </div>
         </div>
     </div>
 
-<pre><code><span class="cm"># .github/workflows/deploy.yml</span>
-name: Django CI/CD Pipeline
+<pre><code><span class="cm"># Full deployment flow — from push to live</span>
 
-on:
-  push:
-    branches: [ <span class="str">"main"</span> ]
+git push → GitHub Actions
+   │
+   ├── pytest (w/ real Postgres service container)
+   ├── manage.py check --deploy
+   ├── makemigrations --check --dry-run
+   ├── ruff + mypy
+   │
+   ├── docker build -t $ECR_REGISTRY/app:$GIT_SHA .
+   └── docker push $ECR_REGISTRY/app:$GIT_SHA
+         │
+         ├── Run migration task (one-off ECS task, BEFORE service update)
+         │     ecs run-task --overrides manage.py migrate --noinput
+         │
+         └── Update ECS service → rolling deploy
+               ECS: spin up new tasks
+               ALB: health check /health/ (checks DB + cache)
+               ALB: drain old tasks
+               ECS: kill old tasks
+               ✅ Deploy complete (~90s)
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+<span class="cm"># Rollback = one command, ~90 seconds</span>
+aws ecs update-service --task-definition app:PREVIOUS_SHA</code></pre>
 
-      - name: Run Tests
-        run: pytest
-
-      - name: Build Docker Image
-        run: docker build -t myapp:latest .
-
-      - name: Push to Registry
-        run: docker push myregistry/myapp:latest
-
-      - name: Deploy + Migrate + Health Check
-        run: |
-          ssh user@server "
-            docker pull myregistry/myapp:latest &&
-            docker-compose up -d &&
-            docker exec web python manage.py migrate --noinput &&
-            curl -f https://myapp.com/api/health/
-          "</code></pre>
-
-    <!-- SECTION 9: Summary -->
-    <h2 id="summary">🚀 The Full Production Stack</h2>
-
-    <div class="callout callout-green">
-        <span class="callout-emoji">🎯</span>
-        <div class="callout-content">
-            <p><strong>One-Line Mental Model:</strong> "My production setup focuses on <strong>security, stability, and observability</strong> — ensuring the system is reliable, easy to maintain, and proactive about failures rather than reactive."</p>
-        </div>
-    </div>
-
+    <h3 id="deployment-platform">Platform Decision Framework</h3>
     <div class="table-wrap">
         <table>
-            <tr><th>Layer</th><th>Tool</th><th>What It Protects</th></tr>
-            <tr><td>App Runtime</td><td>Docker + Gunicorn</td><td>Consistency, concurrent requests</td></tr>
-            <tr><td>Config</td><td>Environment Variables</td><td>No secrets in codebase</td></tr>
-            <tr><td>Security</td><td>DEBUG=False, HTTPS, Secure Cookies</td><td>Data leaks, attacks, interception</td></tr>
-            <tr><td>Database</td><td>Additive migrations + pg_dump backup</td><td>Zero downtime, data safety</td></tr>
-            <tr><td>Static Files</td><td>WhiteNoise or S3 + CloudFront</td><td>Server CPU, global latency</td></tr>
-            <tr><td>Observability</td><td>Logging + Sentry + Datadog</td><td>Silent failures, slowness detection</td></tr>
-            <tr><td>Deployment</td><td>GitHub Actions CI/CD</td><td>Human error, broken deploys</td></tr>
+            <tr><th>Use Case</th><th>Pick</th><th>Why</th></tr>
+            <tr><td>Side project / MVP / "ship today"</td><td><strong>Railway or Render</strong></td><td>Git-push deploy, managed Postgres, predictable pricing</td></tr>
+            <tr><td>EU data residency, low ops budget</td><td><strong>Hetzner VPS + Coolify/Dokku</strong></td><td>Cheap, full control, GDPR-clean</td></tr>
+            <tr><td>Need global low latency</td><td><strong>Fly.io</strong></td><td>Edge regions, Firecracker microVMs</td></tr>
+            <tr><td>Standard production app, AWS shop</td><td><strong>ECS Fargate or App Runner</strong></td><td>Managed containers, IAM, ALB, fits with RDS</td></tr>
+            <tr><td>Heavy scale, complex networking, multiple teams</td><td><strong>EKS (Kubernetes)</strong></td><td>Power tool — only when you have a platform team</td></tr>
+            <tr><td>Tiny budget, total control</td><td><strong>docker-compose on a VPS</strong></td><td>$5–$20/mo, you wear the ops hat</td></tr>
         </table>
+    </div>
+
+    <h3 id="deployment-bluegreen">Blue-Green vs Rolling — The Two-Sentence Version</h3>
+    <div class="columns">
+        <div class="callout callout-blue">
+            <span class="callout-emoji">🔵🟢</span>
+            <div class="callout-content">
+                <p><strong>Blue-Green:</strong> Two identical full environments; deploy to idle one, validate, flip the load balancer. Double infrastructure cost; rollback is one traffic switch. Best when releases are big, risky, or schema changes are present.</p>
+                <p><strong>The trap:</strong> Blue-green doesn't solve the migration problem. A destructive schema change still breaks the blue environment after the cutover — you need the same expand-contract discipline regardless.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">🔄</span>
+            <div class="callout-content">
+                <p><strong>Rolling:</strong> Replace instances one batch at a time on the same infrastructure. Old and new versions coexist briefly. Cheap — no extra infra. Rollback is slow (another rolling deploy in reverse). Default for Kubernetes/ECS.</p>
+                <p><strong>Key constraint:</strong> Both code versions must be able to run against the same database simultaneously — which is exactly why backward-compatible migrations matter.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Common Traps:</strong></p>
+            <ol>
+                <li><strong>"I use <code>runserver</code> on the server"</strong> — instant disqualifier. Gunicorn (WSGI) or Uvicorn (ASGI) behind Nginx or an ALB.</li>
+                <li><strong>No mention of static files</strong> — the interviewer is waiting to hear S3+CloudFront or WhiteNoise. Not knowing what <code>collectstatic</code> does is a fail.</li>
+                <li><strong>No health check endpoint</strong> — your load balancer needs <code>/health/</code> returning 200 (checking DB + cache) to know when to route to a new container.</li>
+                <li><strong>Conflating WSGI and ASGI</strong> — WSGI (Gunicorn) is fine for 95% of apps. Reach for ASGI (Uvicorn) when you have websockets, SSE, or many slow upstream calls per request to handle concurrently.</li>
+                <li><strong>No rollback story</strong> — "we'd revert the PR and redeploy" takes 10+ minutes. "We re-deploy the previous image tag" takes under 2.</li>
+                <li><strong>Not separating migration deploy from code deploy</strong> — the source of most "zero downtime" failures.</li>
+                <li><strong>Over-engineering</strong> — Kubernetes for a CRUD app with one engineer. Hiring managers explicitly look for candidates who right-size the technology, not resume-driven architectures.</li>
+            </ol>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚡</span>
+        <div class="callout-content">
+            <p><strong>Production Signal — Drop This Line:</strong></p>
+            <blockquote><em>"Our first blue-green deploy failed because the new code expected a column the migration hadn't applied yet — we'd bundled the migration in the same release as the code change. Postmortem: we split migrations into a pre-deploy phase that runs before traffic shifts, made all code changes backward-compatible with the previous release for one cycle, and added smoke tests that run <code>manage.py migrate --check</code> and <code>collectstatic --dry-run</code> plus hit <code>/health/</code> on the new color before the load balancer flip. We haven't had a deploy-induced outage since."</em></blockquote>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!-- SUMMARY: Cross-Cutting Patterns                       -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <h2 id="summary">⚔️ Summary — Why Candidates Fail &amp; How To Win</h2>
+
+    <h3>The Full Production Stack</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Layer</th><th>Tool / Pattern</th><th>What It Solves</th></tr>
+            <tr><td>Container</td><td>Multi-stage Docker + non-root user + .dockerignore</td><td>920MB → 85MB image, attack surface, secrets not baked in</td></tr>
+            <tr><td>App Runtime</td><td>Gunicorn <code>--workers (2*CPU+1) --max-requests 1000</code></td><td>Concurrent requests, memory leak bounding, not runserver</td></tr>
+            <tr><td>Secrets</td><td>.env.example + GitHub Secrets + AWS Secrets Manager + OIDC</td><td>No long-lived keys, rotation-ready, identity-based access</td></tr>
+            <tr><td>Security</td><td>DEBUG=False, ALLOWED_HOSTS, HSTS ramp, check --deploy in CI</td><td>Data leaks, host header attacks, SSL stripping, cookie hijack</td></tr>
+            <tr><td>Migrations</td><td>Expand-contract + AddIndexConcurrently + SeparateDatabaseAndState</td><td>Zero downtime, no ACCESS EXCLUSIVE locks on big tables</td></tr>
+            <tr><td>Static Files</td><td>collectstatic in CI → WhiteNoise (simple) or S3+CloudFront (scale)</td><td>Django never serves static files in production</td></tr>
+            <tr><td>Observability</td><td>Structured JSON logs + Sentry (release=GIT_SHA) + metrics + traces</td><td>Crashes, slowness, distributed request path reconstruction</td></tr>
+            <tr><td>CI/CD</td><td>GitHub Actions: test (real Postgres) → build → tag SHA → ECR</td><td>Human error, broken deploys, missing migrations, untested code</td></tr>
+            <tr><td>Deployment</td><td>ECS rolling + migrations before code + /health/ + rollback=SHA</td><td>Zero downtime, sub-2-minute rollback, no deploy-induced outages</td></tr>
+        </table>
+    </div>
+
+    <h3>6 Red Flags That Immediately Downgrade a Candidate</h3>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content"><strong>No specific stories.</strong> "I've used Docker" with no incident. "I've done migrations" with no specific lock type or downtime. Stories are memorable — buzzwords are forgettable. If you can't name a specific exit code, row count, or error message, the interviewer assumes you read about it.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content"><strong>No numbers.</strong> "It was slow" vs. "P95 was 1.2 seconds, we got it to 180ms by adding <code>select_related</code> and an index on <code>(user_id, created_at)</code>." Solid candidates measure.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content"><strong>Tools over outcomes.</strong> "We used Kubernetes, Sentry, and Datadog" doesn't tell the interviewer what <em>you</em> did. Replace tool names with verbs and outcomes.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content"><strong>Vague about own role.</strong> "We did X" on team projects is a red flag. "I owned X" is what's being listened for.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">5</div>
+        <div class="step-content"><strong>Can't read an error.</strong> "Exit code 137? Not sure, I just restart the container" → fail. "OOMKilled — check memory limits and worker count" → pass.</div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">6</div>
+        <div class="step-content"><strong>No mental model of failure.</strong> "What happens when X fails?" — if you've only built the happy path, you've only built half the system.</div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚔️</span>
+        <div class="callout-content">
+            <p><strong>The 7 Production Signal Lines — Drop One Naturally Per Interview:</strong></p>
+            <ul>
+                <li>🐳 "I checked <code>docker inspect</code> for <code>"OOMKilled": true</code> — exit 137, reduced workers, added <code>--max-requests</code>."</li>
+                <li>🔁 "We tag every image with the Git SHA — rollback is re-deploying the previous tag, not 'git revert and rebuild.'"</li>
+                <li>🧬 "ACCESS EXCLUSIVE lock held for 45 minutes — now we always separate schema change, backfill, and constraint into three deploys."</li>
+                <li>🔐 "AWS auto-applied <code>AWSCompromisedKeyQuarantine</code> — we rotated, audited CloudTrail, and moved to OIDC-federated credentials."</li>
+                <li>📊 "The <code>release=GIT_SHA</code> Sentry setting is the one that actually matters — without it you don't know which deploy introduced the error."</li>
+                <li>🛡️ "I added <code>check --deploy</code> as a required CI job — caught two PRs that would have re-enabled <code>DEBUG=True</code> in the first month."</li>
+                <li>🚀 "Migrations run as a separate pre-deploy ECS task before the service update — first blue-green we ever did without a deploy-induced outage."</li>
+            </ul>
+        </div>
     </div>
 </div>
 
@@ -509,9 +1367,26 @@ jobs:
     });
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    const body = document.body;
+    const updateToggleIcon = () => {
+        menuToggle.textContent = sidebar.classList.contains('open') ? '✕' : '☰';
+    };
+    const savedSidebar = localStorage.getItem('sidebar-open') === 'true';
+    if (savedSidebar) { sidebar.classList.add('open'); body.classList.add('sidebar-open'); }
+    updateToggleIcon();
+    menuToggle.addEventListener('click', () => {
+        sidebar.classList.toggle('open');
+        body.classList.toggle('sidebar-open');
+        localStorage.setItem('sidebar-open', sidebar.classList.contains('open'));
+        updateToggleIcon();
+    });
     document.addEventListener('click', (e) => {
-        if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) sidebar.classList.remove('open');
+        if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && e.target !== menuToggle) {
+            sidebar.classList.remove('open');
+            body.classList.remove('sidebar-open');
+            localStorage.setItem('sidebar-open', 'false');
+            updateToggleIcon();
+        }
     });
     const progressBar = document.getElementById('progressBar');
     window.addEventListener('scroll', () => {
@@ -520,14 +1395,18 @@ jobs:
         const progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
         progressBar.style.width = progress + '%';
     });
-    const sections = document.querySelectorAll('h2[id]');
+    const sections = document.querySelectorAll('h2[id], h3[id]');
     const sidebarLinks = document.querySelectorAll('.sidebar a');
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 sidebarLinks.forEach(link => link.classList.remove('active'));
                 const activeLink = document.querySelector(`.sidebar a[href="#${entry.target.id}"]`);
-                if (activeLink) activeLink.classList.add('active');
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                    const subDiv = activeLink.closest('.sidebar-sub');
+                    if (subDiv) subDiv.style.maxHeight = '200px';
+                }
             }
         });
     }, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });

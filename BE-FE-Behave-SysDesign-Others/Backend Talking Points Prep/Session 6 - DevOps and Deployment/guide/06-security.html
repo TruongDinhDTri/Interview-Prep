@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🛡️ Django Security Settings — Complete Visual Guide</title>
+<style>
+:root{--bg:#f8f4ec;--card:#fff;--primary:#e67e22;--dark:#2c3e50;--text:#3a3530;--border:#ddd5c8;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+.topnav{background:var(--dark);padding:14px 40px;display:flex;align-items:center;gap:20px;}
+.topnav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;}
+.topnav .current{color:white;font-weight:600;}
+.header{background:linear-gradient(135deg,#7d3c00 0%,#c0560a 50%,#e67e22 100%);color:white;padding:50px 40px;}
+.header-inner{max-width:1400px;margin:0 auto;}
+.header h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;}
+.header p{font-size:1.1rem;opacity:0.85;max-width:800px;}
+.container{max-width:1400px;margin:0 auto;padding:50px 40px;}
+.section-header{font-size:1.6rem;font-weight:800;color:var(--dark);margin:50px 0 24px;padding-bottom:14px;border-bottom:3px solid var(--primary);display:flex;align-items:center;gap:12px;}
+.concept-card{background:white;border-radius:16px;padding:32px;margin-bottom:28px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:0.85rem;text-decoration:none;color:var(--text);margin-bottom:30px;}
+.code-block{background:#1e293b;color:#e2e8f0;padding:24px;border-radius:12px;font-family:'Consolas',monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;margin:16px 0;white-space:pre;}
+.c{color:#64748b;}.k{color:#93c5fd;}.v{color:#86efac;}.s{color:#fca5a5;}.h{color:#fbbf24;background:rgba(251,191,36,0.1);padding:0 4px;border-radius:3px;}
+.qa-full{background:white;border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);margin-bottom:20px;}
+.qa-header{padding:24px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.qa-header:hover{background:#fafaf8;}
+.qa-q-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.hf-label{background:#fff3e0;color:#b36b00;border:1px solid #f39c12;}
+.ntk-label{background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a;}
+.qa-q{font-weight:700;font-size:1rem;color:var(--dark);line-height:1.4;}
+.qa-toggle{font-size:1.3rem;color:#aaa;flex-shrink:0;transition:transform 0.3s;}
+.qa-body{border-top:1px solid #f0ebe0;display:none;}
+.qa-body.open{display:block;}
+.qa-toggle.rotated{transform:rotate(180deg);}
+.comparison{display:grid;grid-template-columns:1fr 1fr;}
+.weak-col,.solid-col{padding:20px 24px;}
+.weak-col{background:#fff5f5;border-right:1px solid #f0ebe0;}
+.solid-col{background:#f0faf4;}
+.col-label{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.weak-col .col-label{color:var(--danger);}
+.solid-col .col-label{color:var(--success);}
+.col-text{font-size:0.88rem;line-height:1.7;font-style:italic;color:#555;}
+.signal-line{background:linear-gradient(135deg,#2c3e50,#4a7c59);color:white;padding:20px 24px;font-size:0.9rem;line-height:1.7;font-style:italic;}
+.signal-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px;}
+.solid-answer{padding:20px 24px;font-size:0.9rem;line-height:1.8;color:var(--text);background:#fafaf8;}
+.trap-box{background:#fff8e1;border:1px solid #ffc107;border-left:4px solid #f57c00;border-radius:8px;padding:16px 20px;margin:10px 0;font-size:0.88rem;line-height:1.6;}
+
+/* SETTINGS CHECKLIST */
+.setting-row{display:flex;align-items:flex-start;gap:16px;padding:14px 0;border-bottom:1px solid #f0ebe0;}
+.setting-name{font-family:'Consolas',monospace;font-weight:700;color:#1565c0;min-width:260px;font-size:0.88rem;}
+.setting-why{font-size:0.88rem;line-height:1.6;color:var(--text);}
+.severity{display:inline-block;padding:3px 8px;border-radius:4px;font-size:0.72rem;font-weight:800;text-transform:uppercase;margin-left:8px;}
+.sev-critical{background:#ffcdd2;color:#c62828;}
+.sev-high{background:#fff3e0;color:#e65100;}
+.sev-med{background:#e8f5e9;color:#1b5e20;}
+
+@media(max-width:900px){.comparison{grid-template-columns:1fr;}}
+/* RIGHT SIDEBAR */
+.rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
+.rsidebar-toggle:hover{background:var(--dark);}
+.rsidebar{position:fixed;right:0;top:0;width:290px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;z-index:200;}
+.rsidebar.open{transform:translateX(0);}
+.rsidebar-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:0.95rem;color:var(--dark);position:sticky;top:0;background:#fff;}
+.rsidebar-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;}
+.rsidebar-group{padding:10px 0;border-bottom:1px solid #f0ebe0;}
+.rsidebar-group-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 20px 8px;}
+.rsidebar a{display:block;padding:5px 20px;font-size:0.82rem;color:#555;text-decoration:none;line-height:1.5;transition:all 0.15s;}
+.rsidebar a:hover{background:#f8f4ec;color:var(--dark);padding-left:24px;}
+.rsidebar a .rlink-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;background:#f0ebe0;padding:1px 5px;border-radius:3px;margin-right:4px;color:#888;}
+.rsidebar a .rlink-tag.hf{background:#fff3e0;color:#b36b00;}
+/* Q&A BEAUTY */
+.answer-tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;margin-right:4px;}
+.at-blue{background:#dbeafe;color:#1d4ed8;} .at-red{background:#fee2e2;color:#dc2626;} .at-green{background:#dcfce7;color:#16a34a;} .at-orange{background:#fef3c7;color:#92400e;}
+.kp{color:#1a202c;font-weight:700;}
+.answer-step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;line-height:1.6;}
+.answer-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-num.sn-red{background:#c62828;} .step-num.sn-green{background:#27ae60;} .step-num.sn-blue{background:#1976d2;}
+</style>
+</head>
+<body>
+<div class="topnav">
+  <a href="index.html">🏠 Hub</a><span style="color:#555">/</span>
+  <span class="current">🛡️ Django Security</span>
+</div>
+<div class="header"><div class="header-inner">
+  <div style="font-size:2.5rem;margin-bottom:12px;">🛡️</div>
+  <h1>Django Security Settings</h1>
+  <p>Full production checklist with WHY each setting matters. DEBUG dangers, ALLOWED_HOSTS, HSTS ramping, CSRF/SQLi. The settings that separate junior from production-ready.</p>
+</div></div>
+
+<div class="container">
+<a href="index.html" class="back-btn">← Back to Battle Hub</a>
+
+<div class="section-header" id="part1"><span>📋</span> Part 1: Production Settings Checklist — With Every "Why"</div>
+
+<div class="concept-card">
+  <p style="margin-bottom:16px;color:#666;">When asked "What changes do you make to settings.py before going to production?" — weak answer: "DEBUG=False and ALLOWED_HOSTS." Solid answer: all of these, each with a specific attack vector it prevents.</p>
+
+  <div class="setting-row">
+    <div class="setting-name">DEBUG = False<span class="severity sev-critical">CRITICAL</span></div>
+    <div class="setting-why"><strong>Real danger:</strong> DEBUG=True renders a yellow error page on ANY unhandled exception that shows: the entire settings module (minus SECRET|PASS|TOKEN patterns), all SQL queries run, local variables in every stack frame, installed apps list. It's a complete blueprint of your backend architecture for any attacker who can trigger a 500.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">ALLOWED_HOSTS = ['api.example.com']<span class="severity sev-critical">CRITICAL</span></div>
+    <div class="setting-why"><strong>Real danger:</strong> ALLOWED_HOSTS=['*'] disables Django's Host header validation. An attacker can send a forged Host header — Django might use it to construct absolute URLs (password reset links, email verification links), redirecting users to an attacker-controlled domain. Never use *.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SECRET_KEY = env('SECRET_KEY')<span class="severity sev-critical">CRITICAL</span></div>
+    <div class="setting-why">If compromised: attackers can forge session cookies (login as any user), manipulate signed data (CSRF tokens, signed cookies, password reset tokens). Never hardcode. Rotate if leaked.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SECURE_SSL_REDIRECT = True<span class="severity sev-high">HIGH</span></div>
+    <div class="setting-why">Redirect all HTTP to HTTPS. Without it, users can access your site over unencrypted HTTP — credentials and session cookies are visible in plaintext on the network. <strong>Trap:</strong> If behind Cloudflare/ALB that already redirects, set to False to avoid double-redirect loop.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SESSION_COOKIE_SECURE = True<span class="severity sev-high">HIGH</span></div>
+    <div class="setting-why">Prevents session cookie from being sent over HTTP. Without this, a browser on HTTP (accidental or attacker-induced) sends the session cookie in plaintext — trivial session hijacking on public WiFi.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">CSRF_COOKIE_SECURE = True<span class="severity sev-high">HIGH</span></div>
+    <div class="setting-why">Same as SESSION_COOKIE_SECURE but for the CSRF token. Without it, CSRF protection can be undermined on mixed HTTP/HTTPS connections.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SECURE_HSTS_SECONDS = 300 (→ 31536000)<span class="severity sev-high">HIGH</span></div>
+    <div class="setting-why">Tells browsers "always use HTTPS for this domain for N seconds." <strong>RAMP IT UP:</strong> Start at 300 (5 min). Then 86400 (1 day). Then 31536000 (1 year). HSTS is sticky — once a browser caches it, users can't reach your site over HTTP for the full duration. Wrong rollout = users locked out.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SECURE_HSTS_INCLUDE_SUBDOMAINS = True<span class="severity sev-med">MEDIUM</span></div>
+    <div class="setting-why">Apply HSTS to all subdomains. Important if you have staging.example.com on HTTP — without this, HSTS only protects the apex domain.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">X_FRAME_OPTIONS = 'DENY'<span class="severity sev-med">MEDIUM</span></div>
+    <div class="setting-why">Prevents your site from being loaded in iframes. Protects against clickjacking — attacker embeds your site invisibly in their page, tricks users into clicking on invisible elements.</div>
+  </div>
+  <div class="setting-row">
+    <div class="setting-name">SECURE_CONTENT_TYPE_NOSNIFF = True<span class="severity sev-med">MEDIUM</span></div>
+    <div class="setting-why">Sets X-Content-Type-Options: nosniff header. Prevents browsers from MIME-sniffing — guessing file type from content. Blocks a class of XSS attacks where attacker uploads a file that gets executed as HTML/JS.</div>
+  </div>
+  <div class="setting-row" style="border-bottom:none;">
+    <div class="setting-name">SECURE_PROXY_SSL_HEADER<span class="severity sev-high">HIGH (when behind LB)</span></div>
+    <div class="setting-why"><strong>Only set if behind a load balancer that terminates TLS.</strong> Set to <code>('HTTP_X_FORWARDED_PROTO', 'https')</code> so Django knows the original request was HTTPS (even though it received HTTP from the LB). <strong>TRAP:</strong> Only set this if your LB strips the header from client requests first — otherwise attackers can forge <code>X-Forwarded-Proto: https</code> themselves.</div>
+  </div>
+</div>
+
+<div class="concept-card" style="background:linear-gradient(135deg,#0d47a1,#1976d2);color:white;">
+  <h3 style="font-size:1.2rem;margin-bottom:14px;">⚡ The One Command That Catches Everything</h3>
+  <div class="code-block" style="background:rgba(0,0,0,0.3);"><span class="h">python manage.py check --deploy</span>
+
+<span class="c"># Django's built-in production readiness checker.
+# Run this in CI. If it fails, fail the build.
+# It validates every setting above and reports what's missing.
+# Example output:</span>
+System check identified 3 issues:
+WARNINGS:
+?: (security.W004) DEBUG is True
+?: (security.W008) ALLOWED_HOSTS is not set
+?: (security.W012) SESSION_COOKIE_SECURE is False</div>
+  <p style="margin-top:12px;opacity:0.9;font-size:0.9rem;">Add this as a required CI job. It catches DEBUG=True slipping into a prod build. Without it, a developer who sets DEBUG=True locally for debugging could accidentally deploy it.</p>
+</div>
+
+<div class="section-header" id="part2"><span>🎯</span> Part 2: All Interview Questions Answered</div>
+
+<div class="qa-full" id="q1">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q1: "What changes do you make to settings.py before going to production?" (Universal screening question)</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="comparison">
+      <div class="weak-col">
+        <div class="col-label">❌ WEAK</div>
+        <div class="col-text">"I set DEBUG=False and put the domain in ALLOWED_HOSTS."<br><br>Technically correct but bare minimum. Shows you know the obvious but not the full production checklist.</div>
+      </div>
+      <div class="solid-col">
+        <div class="col-label">✅ SOLID — FULL CHECKLIST WITH WHY</div>
+        <div class="answer-step"><div class="step-num sn-red">!</div><div><code>DEBUG = False</code> <span class="answer-tag at-red">critical</span> — exposes full settings module + all SQL queries + local vars in every stack frame to anyone who triggers a 500.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">!</div><div><code>ALLOWED_HOSTS = ['api.example.com']</code> <span class="answer-tag at-red">critical</span> — never <code>*</code>. Prevents Host header injection → forged password reset links pointing to attacker domain.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">!</div><div><code>SECRET_KEY = env('SECRET_KEY')</code> <span class="answer-tag at-red">critical</span> — if leaked, attacker can forge session cookies and sign any Django token.</div></div>
+        <div class="answer-step"><div class="step-num">H</div><div><code>SESSION_COOKIE_SECURE</code> + <code>CSRF_COOKIE_SECURE = True</code> <span class="answer-tag at-orange">high</span> — prevents cookies being sent over HTTP (session hijacking on public WiFi).</div></div>
+        <div class="answer-step"><div class="step-num">H</div><div><code>SECURE_HSTS_SECONDS</code> <span class="answer-tag at-orange">high</span> — <span class="kp">ramp it:</span> 300s → 86400 → 31536000. HSTS is sticky — wrong rollout = users locked out.</div></div>
+        <div class="answer-step"><div class="step-num sn-green">CI</div><div><span class="kp"><code>python manage.py check --deploy</code> in CI</span> — catches every setting above. Fail the build if it fails. Catches DEBUG slipping in.</div></div>
+      </div>
+    </div>
+    <div class="signal-line">
+      <div class="signal-label">⚡ Production Signal Line</div>
+      "When I joined this team I ran manage.py check --deploy on the staging settings and it lit up — DEBUG=True, ALLOWED_HOSTS=['*'], no HSTS. I moved config to django-environ, put secrets in AWS Secrets Manager, set HSTS to 300 seconds first and ramped it to a year over a month, and added check --deploy as a required CI job so DEBUG can't slip into a prod build. We caught two pull requests that would have re-enabled it within the first month."
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q2">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q2: "Why is DEBUG=True dangerous in production? What does it actually expose?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="comparison">
+      <div class="weak-col">
+        <div class="col-label">❌ WEAK</div>
+        <div class="col-text">"It shows the ugly yellow error pages to the end user, which looks unprofessional."<br><br>Focuses on UI/UX. Misses the actual security impact entirely.</div>
+      </div>
+      <div class="solid-col">
+        <div class="col-label">✅ SOLID — WHAT IT ACTUALLY EXPOSES</div>
+        <div class="answer-step"><div class="step-num sn-red">!</div><div><span class="kp">Any unhandled 500</span> renders a full yellow debug page. Any attacker who sends a malformed request triggers it.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">⚠</div><div><span class="answer-tag at-red">exposed</span> <span class="kp">Entire settings module</span> (minus names matching SECRET|PASS|TOKEN) — DB host, cache, email config, everything.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">⚠</div><div><span class="answer-tag at-red">exposed</span> <span class="kp">Every SQL query</span> that ran during the request — table names, column names, data.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">⚠</div><div><span class="answer-tag at-red">exposed</span> <span class="kp">Local variables in every stack frame</span> — could include user objects, tokens, request bodies.</div></div>
+        <div class="answer-step"><div class="step-num sn-red">⚠</div><div><span class="answer-tag at-red">exposed</span> Installed apps, middleware list, URL patterns — complete blueprint of your architecture.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q3">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q3: "What does ALLOWED_HOSTS do? Why is ALLOWED_HOSTS=['*'] bad?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-blue">def</div><div><span class="kp">ALLOWED_HOSTS validates the Host header</span> on every incoming request. Django rejects requests with Host values not in the list.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">*</div><div><span class="kp">Why <code>['*']</code> is dangerous:</span> Django uses the Host header to construct absolute URLs — password reset emails, verification links, API redirects. Attacker forges <code>Host: attacker.com</code>, triggers a password reset → email contains link to <em>attacker.com</em> → attacker captures the reset token.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">trap</div><div><span class="answer-tag at-red">common trap</span> Setting <code>['*']</code> to bypass a 400 Bad Request during initial deployment. Right fix: put your actual domain names in the list. The <code>*</code> is a shortcut that leaves a real vulnerability.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q4">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q4: "How does Django protect against CSRF? Where could that protection fail?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-green">how</div><div><span class="kp">Token in request body</span> (or <code>X-CSRFToken</code> header) must match a token stored in the session cookie. A malicious site can't read the victim's cookies (same-origin policy) → can't forge the token.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">1</div><div><span class="answer-tag at-red">fail vector</span> <code>@csrf_exempt</code> on a state-changing endpoint — developer slaps it on because AJAX isn't working. Now any site can POST to that endpoint using the victim's cookies.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">2</div><div><span class="answer-tag at-red">fail vector</span> <code>CSRF_COOKIE_SECURE=False</code> on HTTPS — cookie transmitted over HTTP → downgrade attack possible.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">3</div><div><span class="answer-tag at-red">fail vector</span> <code>SameSite=None</code> on session cookie — allows cross-site requests to carry the cookie.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">4</div><div><span class="answer-tag at-red">fail vector</span> <span class="kp">XSS vulnerability</span> — if attacker runs JS on your domain, they can read the CSRF cookie and forge requests. CSRF + XSS = full bypass.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q5">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q5: "How does Django prevent SQL injection? Where can a developer break it?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-green">ORM</div><div><span class="kp">Django ORM auto-parameterizes all queries</span> — user input is always a separate parameter, never interpolated into the SQL string. DB receives template + values separately.</div></div>
+<div class="code-block"><span class="c"># Django ORM — SAFE (parameterized automatically)</span>
+User.objects.filter(username=user_input)
+<span class="c"># → SQL: SELECT * FROM users WHERE username = %s, [user_input]</span>
+
+<span class="c"># ❌ DANGEROUS — breaking the ORM's protection</span>
+User.objects.raw(<span class="s">f"SELECT * FROM users WHERE username = '{user_input}'"</span>)
+<span class="c"># → user_input = "' OR '1'='1" → returns all users</span>
+
+<span class="c"># ❌ DANGEROUS — .extra() with string formatting</span>
+User.objects.extra(where=[<span class="s">f"name = '{user_input}'"</span>])
+
+<span class="c"># ✅ SAFE — .raw() with parameterization</span>
+User.objects.raw(<span class="s">"SELECT * FROM users WHERE username = %s"</span>, [user_input])</div>
+      <div class="answer-step"><div class="step-num sn-red">!</div><div><span class="answer-tag at-red">breaks it</span> <code>.raw(f"... WHERE username = '{user_input}'")</code> — direct string interpolation. <code>user_input = "' OR '1'='1"</code> returns all users.</div></div>
+      <div class="answer-step"><div class="step-num sn-red">!</div><div><span class="answer-tag at-red">breaks it</span> <code>.extra(where=[f"name = '{user_input}'"])</code> — same issue with .extra().</div></div>
+      <div class="answer-step"><div class="step-num sn-green">✓</div><div><span class="answer-tag at-green">safe</span> <code>.raw("SELECT ... WHERE username = %s", [user_input])</code> — parameterized even in raw SQL. <span class="kp">Rule: never f-strings or .format() to build SQL.</span></div></div>
+      <p style="margin-top:12px;font-size:0.85rem;color:#555;padding-top:10px;border-top:1px solid #f0ebe0;"><strong>The rule:</strong> Never use Python string formatting (f-strings, % formatting, .format()) to build SQL. If you must use raw SQL or .extra(), always use parameterized queries with a separate values list.</p>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;">
+  <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+  <a href="05-logging.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">← 📊 Logging</a>
+  <a href="07-deployment.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">🏗️ Deployment →</a>
+</div>
+</div>
+<script>
+function toggleQA(h){const b=h.nextElementSibling,t=h.querySelector('.qa-toggle'),o=b.classList.contains('open');b.classList.toggle('open',!o);t.classList.toggle('rotated',!o);}
+function toggleRSidebar(){document.getElementById('rsidebar').classList.toggle('open');}
+document.addEventListener('click',function(e){const sb=document.getElementById('rsidebar');const btn=document.querySelector('.rsidebar-toggle');if(sb&&sb.classList.contains('open')&&!sb.contains(e.target)&&e.target!==btn){sb.classList.remove('open');}});
+</script>
+<button class="rsidebar-toggle" onclick="toggleRSidebar()">☰ Sections</button>
+<div class="rsidebar" id="rsidebar">
+  <div class="rsidebar-header"><span>📍 On This Page</span><button class="rsidebar-close" onclick="toggleRSidebar()">✕</button></div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">📐 Visual Concepts</div>
+    <a href="#part1">📋 Production Settings Checklist</a>
+    <a href="#part2">🎯 Interview Q&amp;A</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🎯 Interview Q&amp;A</div>
+    <a href="#q1"><span class="rlink-tag hf">HF</span>settings.py before production?</a>
+    <a href="#q2"><span class="rlink-tag hf">HF</span>DEBUG=True dangers?</a>
+    <a href="#q3"><span class="rlink-tag hf">HF</span>ALLOWED_HOSTS=['*'] bad?</a>
+    <a href="#q4"><span class="rlink-tag hf">HF</span>CSRF protection &amp; failure points</a>
+    <a href="#q5"><span class="rlink-tag hf">HF</span>SQL injection prevention</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🗺️ Navigate</div>
+    <a href="05-logging.html">← 📊 Logging</a>
+    <a href="07-deployment.html">🏗️ Deployment →</a>
+  </div>
+</div>
+</body>
+</html>

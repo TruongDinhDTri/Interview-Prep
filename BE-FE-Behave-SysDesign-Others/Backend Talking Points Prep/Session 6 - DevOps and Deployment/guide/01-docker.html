@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐳 Docker & Containerization — Complete Visual Guide</title>
+<style>
+:root {
+  --bg:#f8f4ec; --card:#fff; --primary:#3498db; --dark:#2c3e50; --text:#3a3530;
+  --text-light:#6b6258; --border:#ddd5c8; --success:#27ae60; --danger:#e74c3c;
+  --warning:#f39c12; --purple:#8e44ad;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+.topnav{background:var(--dark);padding:14px 40px;display:flex;align-items:center;gap:20px;}
+.topnav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;}
+.topnav a:hover{color:white;}
+.topnav .current{color:white;font-weight:600;}
+.header{background:linear-gradient(135deg,#1a5276 0%,#2980b9 50%,#3498db 100%);color:white;padding:50px 40px;}
+.header-inner{max-width:1400px;margin:0 auto;}
+.header h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;}
+.header p{font-size:1.1rem;opacity:0.85;max-width:800px;}
+.container{max-width:1400px;margin:0 auto;padding:50px 40px;}
+.section-header{font-size:1.6rem;font-weight:800;color:var(--dark);margin:50px 0 24px;padding-bottom:14px;border-bottom:3px solid var(--primary);display:flex;align-items:center;gap:12px;}
+.concept-card{background:white;border-radius:16px;padding:32px;margin-bottom:28px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:0.85rem;text-decoration:none;color:var(--text);margin-bottom:30px;transition:all 0.2s;}
+.back-btn:hover{background:var(--bg);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+.code-block{background:#1e293b;color:#e2e8f0;padding:24px;border-radius:12px;font-family:'Consolas','Monaco',monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;margin:16px 0;white-space:pre;}
+.c{color:#64748b;} .k{color:#93c5fd;} .v{color:#86efac;} .s{color:#fca5a5;} .h{color:#fbbf24;background:rgba(251,191,36,0.1);padding:0 4px;border-radius:3px;}
+.qa-full{background:white;border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);margin-bottom:20px;}
+.qa-header{padding:24px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.qa-header:hover{background:#fafaf8;}
+.qa-q-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.hf-label{background:#fff3e0;color:#b36b00;border:1px solid #f39c12;}
+.ntk-label{background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a;}
+.qa-q{font-weight:700;font-size:1rem;color:var(--dark);line-height:1.4;}
+.qa-toggle{font-size:1.3rem;color:#aaa;flex-shrink:0;transition:transform 0.3s;}
+.qa-body{border-top:1px solid #f0ebe0;display:none;}
+.qa-body.open{display:block;}
+.qa-toggle.rotated{transform:rotate(180deg);}
+.comparison{display:grid;grid-template-columns:1fr 1fr;}
+.weak-col,.solid-col{padding:20px 24px;}
+.weak-col{background:#fff5f5;border-right:1px solid #f0ebe0;}
+.solid-col{background:#f0faf4;}
+.col-label{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.weak-col .col-label{color:var(--danger);}
+.solid-col .col-label{color:var(--success);}
+.col-text{font-size:0.88rem;line-height:1.7;font-style:italic;color:#555;}
+.signal-line{background:linear-gradient(135deg,#2c3e50,#4a7c59);color:white;padding:20px 24px;font-size:0.9rem;line-height:1.7;font-style:italic;}
+.signal-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px;}
+.solid-answer{padding:20px 24px;font-size:0.9rem;line-height:1.8;color:var(--text);background:#fafaf8;}
+.trap-box{background:#fff8e1;border:1px solid #ffc107;border-left:4px solid #f57c00;border-radius:8px;padding:16px 20px;margin:10px 0;font-size:0.88rem;line-height:1.6;}
+.trap-box strong{color:#e65100;}
+
+/* DOCKERFILE VISUAL */
+.dockerfile-line {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 3px;
+}
+.df-instruction {
+  background: #1e293b;
+  color: #93c5fd;
+  font-family: 'Consolas', monospace;
+  font-size: 0.88rem;
+  padding: 10px 16px;
+  min-width: 200px;
+  font-weight: 700;
+}
+.df-reason {
+  background: #0f172a;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  padding: 10px 16px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+.df-importance {
+  font-size: 0.75rem;
+  padding: 10px 12px;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* LAYER CACHE VISUAL */
+.layer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 16px 0;
+}
+.layer {
+  border-radius: 6px;
+  padding: 12px 16px;
+  font-family: 'Consolas', monospace;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid transparent;
+}
+.layer-good { background: #e8f5e9; border-color: #a5d6a7; }
+.layer-bad { background: #ffebee; border-color: #ef9a9a; }
+.layer-icon { font-size: 1.1rem; }
+.cache-tag {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+.cache-hit { background: #c8e6c9; color: #1b5e20; }
+.cache-miss { background: #ffcdd2; color: #b71c1c; }
+
+/* EXIT CODES TABLE */
+.exit-table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+.exit-table th { background: var(--dark); color: white; padding: 12px 16px; text-align: left; font-size: 0.85rem; }
+.exit-table td { padding: 12px 16px; border-bottom: 1px solid #f0ebe0; font-size: 0.88rem; }
+.exit-table tr:hover td { background: #fafaf8; }
+.exit-code { font-family: 'Consolas', monospace; font-weight: 700; font-size: 1rem; }
+
+/* TWO-COL */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 20px 0; }
+@media(max-width:900px){.two-col,.comparison{grid-template-columns:1fr;}}
+
+/* RIGHT SIDEBAR */
+.rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
+.rsidebar-toggle:hover{background:var(--dark);}
+.rsidebar{position:fixed;right:0;top:0;width:290px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;z-index:200;}
+.rsidebar.open{transform:translateX(0);}
+.rsidebar-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:0.95rem;color:var(--dark);position:sticky;top:0;background:#fff;}
+.rsidebar-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;}
+.rsidebar-group{padding:10px 0;border-bottom:1px solid #f0ebe0;}
+.rsidebar-group-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 20px 8px;}
+.rsidebar a{display:block;padding:5px 20px;font-size:0.82rem;color:#555;text-decoration:none;line-height:1.5;transition:all 0.15s;}
+.rsidebar a:hover{background:#f8f4ec;color:var(--dark);padding-left:24px;}
+.rsidebar a .rlink-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;background:#f0ebe0;padding:1px 5px;border-radius:3px;margin-right:4px;color:#888;}
+.rsidebar a .rlink-tag.hf{background:#fff3e0;color:#b36b00;}
+
+/* Q&A BEAUTY COMPONENTS */
+.answer-tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.3px;margin-right:4px;}
+.at-blue{background:#dbeafe;color:#1d4ed8;} .at-red{background:#fee2e2;color:#dc2626;} .at-green{background:#dcfce7;color:#16a34a;}
+.at-orange{background:#fef3c7;color:#92400e;} .at-purple{background:#f3e8ff;color:#7c3aed;} .at-gray{background:#f1f5f9;color:#475569;}
+.kp{color:#1a202c;font-weight:700;}
+.answer-step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;line-height:1.6;}
+.answer-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-num.sn-green{background:var(--success);} .step-num.sn-orange{background:var(--warning);} .step-num.sn-red{background:var(--danger);}
+.answer-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:10px 0;font-size:0.85rem;}
+.flow-node{background:#f8f4ec;border:1px solid var(--border);border-radius:6px;padding:4px 11px;font-family:monospace;font-size:0.8rem;}
+.flow-arrow{color:#aaa;font-weight:700;}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="index.html">🏠 Hub</a>
+  <span style="color:#555">/</span>
+  <span class="current">🐳 Docker</span>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div style="font-size:2.5rem; margin-bottom:12px;">🐳</div>
+    <h1>Docker & Containerization</h1>
+    <p>Dockerfile anatomy explained line-by-line. Layer caching mechanics. Multi-stage builds. Exit codes. Every High Frequency question answered cold.</p>
+  </div>
+</div>
+
+<div class="container">
+  <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+
+  <!-- PART 1: DOCKERFILE ANATOMY -->
+  <div class="section-header" id="part1"><span>🏗️</span> Part 1: Dockerfile Anatomy — Every Line Explained</div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:20px; color:#666;">When they say "Walk me through your Dockerfile for a Django app. Why is each line in that order?" — here's the complete answer with every decision justified:</p>
+
+    <div style="border-radius:12px; overflow:hidden; margin:16px 0;">
+      <div style="background:#1e293b; color:#64748b; padding:10px 16px; font-family:monospace; font-size:0.8rem; font-weight:700; letter-spacing:1px;">PRODUCTION DOCKERFILE — ANNOTATED</div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">FROM python:3.12-slim</div>
+        <div class="df-reason">Use <strong>slim</strong> variant — strips non-essential packages. Smaller attack surface, faster pull. <strong>Never</strong> use python:3.12 (includes gcc, build tools, 800MB+) or :latest (non-reproducible builds).</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">WORKDIR /app</div>
+        <div class="df-reason">Set working directory. All subsequent COPY/RUN commands are relative to this. Prevents accidental writes to / or other system paths.</div>
+        <div class="df-importance" style="background:#e8f5e9; color:#2e7d32;">GOOD PRACTICE</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">ENV PYTHONDONTWRITEBYTECODE=1<br>&nbsp;PYTHONUNBUFFERED=1</div>
+        <div class="df-reason"><strong>PYTHONDONTWRITEBYTECODE:</strong> Don't write .pyc files — saves space, nothing needs them in containers.<br><strong>PYTHONUNBUFFERED:</strong> Force stdout/stderr flush immediately — Docker captures logs; buffering = logs disappear if container crashes before flush.</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">COPY requirements.txt .</div>
+        <div class="df-reason">Copy ONLY requirements.txt FIRST — before copying source code. This is the layer caching trick (see Part 2). If requirements.txt hasn't changed, Docker reuses the cached pip install layer. Code changes don't invalidate this layer.</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">RUN pip install --no-cache-dir -r requirements.txt</div>
+        <div class="df-reason"><strong>--no-cache-dir:</strong> Don't store pip cache inside the image (we don't need to re-install in the container). Saves 50-200MB. Note: DO cache in CI; DON'T cache in Docker image itself.</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">COPY . .</div>
+        <div class="df-reason">Copy source code AFTER pip install. This is why: if you COPY . . before pip install, every code change invalidates the dependency layer. Swapping the order = dependencies cache properly.</div>
+        <div class="df-importance" style="background:#e8f5e9; color:#2e7d32;">ORDER MATTERS</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">RUN python manage.py collectstatic --noinput</div>
+        <div class="df-reason">Collect static files into STATIC_ROOT at build time, not at runtime. Container startup is faster. For S3: often skip this and let CI upload to S3 directly.</div>
+        <div class="df-importance" style="background:#e3f2fd; color:#1565c0;">DEPENDS</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">RUN useradd --create-home appuser<br>USER appuser</div>
+        <div class="df-reason"><strong>Don't run as root.</strong> If the app is compromised via a vulnerability, root inside container = easier container escape to host. Non-root user limits blast radius. Modern Docker security 101.</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">EXPOSE 8000</div>
+        <div class="df-reason">Documentation ONLY. Does NOT actually publish the port. The -p flag (docker run) or ports: in compose actually publishes. EXPOSE tells other developers and tools "the app listens on 8000."</div>
+        <div class="df-importance" style="background:#f3e5f5; color:#6a1b9a;">DOCS ONLY</div>
+      </div>
+
+      <div class="dockerfile-line">
+        <div class="df-instruction">CMD ["gunicorn", "config.wsgi", "--bind", "0.0.0.0:8000", "--workers", "3", "--max-requests", "1000", "--max-requests-jitter", "50"]</div>
+        <div class="df-reason"><strong>NEVER runserver.</strong> Gunicorn is multi-process, production-hardened. Bind to 0.0.0.0 (not 127.0.0.1 — that's localhost-only inside container). --max-requests recycles workers to bound memory growth from leaks.</div>
+        <div class="df-importance" style="background:#fff3e0; color:#e65100;">CRITICAL</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PART 2: LAYER CACHING -->
+  <div class="section-header" id="part2"><span>⚡</span> Part 2: Layer Caching — Why Order Matters</div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:20px; color:#666;">This is the most common Dockerfile mistake. The interviewer is explicitly testing if you understand this:</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="color:var(--danger); margin-bottom:12px;">❌ WRONG — Cache busted every time</h3>
+        <div class="layer-stack">
+          <div class="layer layer-good">
+            <span class="layer-icon">✅</span>
+            <span>FROM python:3.12-slim</span>
+            <span class="cache-tag cache-hit">CACHE HIT</span>
+          </div>
+          <div class="layer layer-bad">
+            <span class="layer-icon">🔄</span>
+            <span>COPY . .</span>
+            <span class="cache-tag cache-miss">CACHE MISS (code changed)</span>
+          </div>
+          <div class="layer layer-bad">
+            <span class="layer-icon">🔄</span>
+            <span>RUN pip install</span>
+            <span class="cache-tag cache-miss">REBUILDS (even if reqs didn't change!)</span>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:#d32f2f; margin-top:8px;"><strong>Result:</strong> Every code change = full pip install = 3-5 minutes per build.</p>
+      </div>
+      <div>
+        <h3 style="color:var(--success); margin-bottom:12px;">✅ RIGHT — Deps cached separately</h3>
+        <div class="layer-stack">
+          <div class="layer layer-good">
+            <span class="layer-icon">✅</span>
+            <span>FROM python:3.12-slim</span>
+            <span class="cache-tag cache-hit">CACHE HIT</span>
+          </div>
+          <div class="layer layer-good">
+            <span class="layer-icon">✅</span>
+            <span>COPY requirements.txt .</span>
+            <span class="cache-tag cache-hit">CACHE HIT (if reqs unchanged)</span>
+          </div>
+          <div class="layer layer-good">
+            <span class="layer-icon">✅</span>
+            <span>RUN pip install</span>
+            <span class="cache-tag cache-hit">CACHE HIT (deps cached!)</span>
+          </div>
+          <div class="layer layer-bad">
+            <span class="layer-icon">🔄</span>
+            <span>COPY . .</span>
+            <span class="cache-tag cache-miss">CACHE MISS (code changed)</span>
+          </div>
+        </div>
+        <p style="font-size:0.85rem; color:#2e7d32; margin-top:8px;"><strong>Result:</strong> Code changes = only COPY . . re-runs = 10 seconds per build.</p>
+      </div>
+    </div>
+
+    <div style="background:#e8f5e9; border-radius:10px; padding:18px; margin-top:16px; border-left:4px solid #27ae60;">
+      <strong>The Rule:</strong> Docker invalidates a layer's cache when the instruction OR its inputs change. Since COPY . . copies all your source code, it misses the cache on every code change. Put it LAST — after everything that doesn't change often.
+    </div>
+  </div>
+
+  <!-- PART 3: MULTI-STAGE BUILDS -->
+  <div class="section-header" id="part3"><span>🏗️</span> Part 3: Multi-Stage Builds</div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:20px; color:#666;"><strong>Why:</strong> Python packages like psycopg2, cryptography, and Pillow have C extensions that require gcc and build tools to compile. You need them to BUILD but NOT in the final production image.</p>
+
+    <div class="two-col">
+      <div>
+        <h3 style="margin-bottom:10px; color:#666;">Without Multi-Stage</h3>
+        <div style="background:#ffebee; border-radius:10px; padding:20px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">📦</div>
+          <div style="font-size:1.5rem; font-weight:800; color:#c62828;">~900 MB</div>
+          <div style="font-size:0.85rem; color:#666; margin-top:8px;">Includes gcc, make, build-essential, header files — all the compilers. Larger image = slower pull, larger attack surface.</div>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-bottom:10px; color:#666;">With Multi-Stage</h3>
+        <div style="background:#e8f5e9; border-radius:10px; padding:20px; text-align:center;">
+          <div style="font-size:2rem; margin-bottom:8px;">🪶</div>
+          <div style="font-size:1.5rem; font-weight:800; color:#1b5e20;">~85 MB</div>
+          <div style="font-size:0.85rem; color:#666; margin-top:8px;">Only compiled .so files, Python runtime, and your app code. No compilers. ~91% smaller.</div>
+        </div>
+      </div>
+    </div>
+
+<div class="code-block"><span class="c"># Stage 1: Builder — has all the build tools</span>
+<span class="k">FROM</span> <span class="v">python:3.12-slim AS builder</span>
+
+<span class="k">RUN</span> <span class="s">apt-get update && apt-get install -y \
+    gcc libpq-dev python3-dev \
+    && rm -rf /var/lib/apt/lists/*</span>
+
+<span class="k">COPY</span> requirements.txt .
+<span class="k">RUN</span> <span class="s">pip install --no-cache-dir --prefix=/install -r requirements.txt</span>
+
+<span class="c"># Stage 2: Runtime — lean and clean</span>
+<span class="k">FROM</span> <span class="v">python:3.12-slim AS runtime</span>
+
+<span class="c"># Copy compiled packages FROM builder — no compilers come with them</span>
+<span class="k">COPY --from=builder</span> /install /usr/local
+
+<span class="k">WORKDIR</span> /app
+<span class="k">COPY</span> . .
+
+<span class="c"># Non-root user</span>
+<span class="k">RUN</span> <span class="s">useradd --create-home appuser</span>
+<span class="k">USER</span> appuser
+
+<span class="k">CMD</span> ["gunicorn", "config.wsgi", <span class="s">"--bind"</span>, <span class="s">"0.0.0.0:8000"</span>]
+<span class="c"># The final image has ZERO compilers, ZERO build tools — just the compiled output</span>
+</div>
+  </div>
+
+  <!-- PART 4: EXIT CODES -->
+  <div class="section-header" id="part4"><span>🔢</span> Part 4: Docker Exit Codes — Memorize This Table</div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:16px; color:#666;">When asked "Your container exits immediately in production. How do you debug it?" — you need to know what the exit code means BEFORE you can fix it:</p>
+
+    <table class="exit-table">
+      <thead>
+        <tr>
+          <th>Exit Code</th>
+          <th>Meaning</th>
+          <th>How to Debug / Fix</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="exit-code" style="color:#27ae60;">0</span></td>
+          <td>Clean exit — process finished normally</td>
+          <td>Check if CMD is a one-shot command (not a server). Add a long-running process.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#e74c3c;">1</span></td>
+          <td>Generic application error</td>
+          <td><code>docker logs &lt;container_id&gt;</code> — look for Python exception or config error</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#f39c12;">125</span></td>
+          <td>Docker daemon error</td>
+          <td>Problem with Docker itself, not your app. Check Docker logs.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#f39c12;">126</span></td>
+          <td>Command not executable</td>
+          <td>CMD script exists but isn't executable. Run <code>chmod +x entrypoint.sh</code></td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#f39c12;">127</span></td>
+          <td>Command not found</td>
+          <td>CMD references a binary not installed. Check PATH, check image has the binary.</td>
+        </tr>
+        <tr style="background:#fff3e0;">
+          <td><span class="exit-code" style="color:#e74c3c;">137</span></td>
+          <td>SIGKILL — almost always OOMKilled</td>
+          <td><code>docker inspect &lt;id&gt; | grep OOMKilled</code> → if true: reduce workers, add --max-requests, increase memory limit.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#e74c3c;">139</span></td>
+          <td>Segfault (SIGSEGV)</td>
+          <td>Usually a C extension bug (psycopg2 version mismatch, etc). Update/pin deps.</td>
+        </tr>
+        <tr>
+          <td><span class="exit-code" style="color:#3498db;">143</span></td>
+          <td>SIGTERM — graceful shutdown</td>
+          <td>Normal: orchestrator sent shutdown signal. App should handle this and exit cleanly.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59);border-radius:12px;padding:22px;color:white;margin-top:16px;">
+      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:10px;">🔥 PRODUCTION SIGNAL LINE — Exit Code 137</div>
+      <p style="font-style:italic;line-height:1.8;opacity:0.95;">"When the container died I checked <code style="background:rgba(255,255,255,0.15);padding:2px 6px;border-radius:4px;">docker inspect</code> for <code style="background:rgba(255,255,255,0.15);padding:2px 6px;border-radius:4px;">"OOMKilled": true</code> — turned out our Gunicorn worker count times per-worker memory exceeded the container's memory limit, so the kernel sent SIGKILL and we got exit 137. I dropped worker count from 5 to 3 and added <code style="background:rgba(255,255,255,0.15);padding:2px 6px;border-radius:4px;">--max-requests 1000</code> to recycle workers periodically, and the OOMs stopped."</p>
+    </div>
+  </div>
+
+  <!-- PART 5: CMD vs ENTRYPOINT -->
+  <div class="section-header" id="part5"><span>🎛️</span> Part 5: CMD vs ENTRYPOINT</div>
+
+  <div class="concept-card">
+    <div class="two-col">
+      <div style="background:#e3f2fd;border-radius:12px;padding:20px;">
+        <h3 style="color:#1565c0;margin-bottom:12px;">CMD — Default command</h3>
+        <p style="font-size:0.9rem;line-height:1.7;">Provides default command + arguments. <strong>Can be completely overridden</strong> by arguments passed to <code>docker run</code>.</p>
+        <div class="code-block" style="margin-top:12px;">CMD ["gunicorn", "config.wsgi"]
+
+# User can override:
+docker run myimage python manage.py migrate
+# gunicorn is NOT run. migrate runs instead.</div>
+        <p style="font-size:0.85rem;margin-top:8px;color:#555;"><strong>Use for:</strong> The main command of the container that you want to be replaceable (e.g., swap Gunicorn for a management command).</p>
+      </div>
+      <div style="background:#e8f5e9;border-radius:12px;padding:20px;">
+        <h3 style="color:#1b5e20;margin-bottom:12px;">ENTRYPOINT — Fixed executable</h3>
+        <p style="font-size:0.9rem;line-height:1.7;">The executable that <strong>always runs</strong>. Arguments to <code>docker run</code> are appended AS arguments to ENTRYPOINT, not replacing it.</p>
+        <div class="code-block" style="margin-top:12px;">ENTRYPOINT ["gunicorn"]
+CMD ["config.wsgi"]  # default arg
+
+# User passes:
+docker run myimage myapp.wsgi
+# gunicorn myapp.wsgi (ENTRYPOINT + user arg)</div>
+        <p style="font-size:0.85rem;margin-top:8px;color:#555;"><strong>Use for:</strong> Containers that always run the same executable (e.g., a CLI tool, a fixed server). CMD provides the default arguments.</p>
+      </div>
+    </div>
+
+    <div style="background:#f8f9ff;border-radius:10px;padding:18px;margin-top:16px;border-left:4px solid #3498db;">
+      <strong>In practice for Django:</strong> Most production Dockerfiles use only CMD. Using both is for when you want: always run gunicorn (ENTRYPOINT) but let the worker config be overridable (CMD). A common pattern is an entrypoint.sh script that does setup (wait for DB, run migrations) then exec "$@" to run whatever CMD provides.
+    </div>
+  </div>
+
+  <!-- PART 6: .dockerignore -->
+  <div class="section-header" id="part6"><span>🚫</span> Part 6: .dockerignore — The File Everyone Forgets</div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:16px; color:#666;">Forgetting .dockerignore is the #1 trap interviewers see. It causes: slow builds, bloated images, and potentially leaked secrets.</p>
+<div class="code-block"><span class="c"># .dockerignore — ALWAYS create this file</span>
+
+<span class="c"># Virtual environments (huge — 200MB+)</span>
+.venv/
+venv/
+env/
+
+<span class="c"># Git history (large, not needed in image)</span>
+.git/
+.gitignore
+
+<span class="c"># Secrets (CRITICAL — don't bake these into the image)</span>
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+<span class="c"># Python cache (useless in container)</span>
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+<span class="c"># IDE/OS junk</span>
+.vscode/
+.idea/
+.DS_Store
+
+<span class="c"># Docs/tests (don't need in prod image)</span>
+docs/
+README.md
+</div>
+
+    <div class="trap-box">
+      <strong>🚫 What happens without .dockerignore:</strong> The build context (everything sent to Docker daemon before building) includes .git/ (huge), __pycache__ (useless), .env (secrets!). Build context of 500MB+ makes every build slow. Worse: your .env file might end up in the image layers — anyone with pull access to your registry can extract it with <code>docker history --no-trunc</code>.
+    </div>
+  </div>
+
+  <!-- PART 7: ALL Q&A -->
+  <div class="section-header" id="part7"><span>🎯</span> Part 7: All Interview Questions Answered</div>
+
+  <!-- Q1: Dockerfile walkthrough -->
+  <div class="qa-full" id="q1">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q1: "Walk me through your Dockerfile for a Django app. Why is each line in that order?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="comparison">
+        <div class="weak-col">
+          <div class="col-label">❌ WEAK (3 red flags in one sentence)</div>
+          <div class="col-text">"I use FROM python:3.11, then COPY . ., then RUN pip install -r requirements.txt, then CMD python manage.py runserver."<br><br>Red flags: full python:3.11 (800MB+), COPY . . before pip (cache busted every commit), runserver in CMD (dev only, single-threaded, disqualifier).</div>
+        </div>
+        <div class="solid-col">
+          <div class="col-label">✅ SOLID ANSWER</div>
+          <div class="answer-step"><span class="step-num">1</span><span><span class="kp">FROM python:3.12-slim</span> — slim strips build tools. Full image = <strong>800 MB+</strong>, slim = ~120 MB, multi-stage = <strong>~85 MB</strong>. Never use :latest (non-reproducible).</span></div>
+          <div class="answer-step"><span class="step-num">2</span><span><span class="kp">PYTHONDONTWRITEBYTECODE + PYTHONUNBUFFERED</span> — no .pyc files + logs flush to stdout immediately. Without PYTHONUNBUFFERED, crash logs disappear before Docker captures them.</span></div>
+          <div class="answer-step"><span class="step-num sn-green">3</span><span><span class="kp">COPY requirements.txt first → pip install → THEN COPY . .</span> — deps layer only rebuilds when requirements.txt changes. Code edits alone = cached deps = builds in <strong>10 seconds not 5 minutes</strong>.</span></div>
+          <div class="answer-step"><span class="step-num sn-orange">4</span><span><span class="kp">Non-root user</span>: <code>RUN useradd appuser</code> + <code>USER appuser</code> — if app is exploited, attacker gets a locked-down user, not root inside the container.</span></div>
+          <div class="answer-step"><span class="step-num sn-red">5</span><span><span class="kp">CMD = gunicorn, NEVER runserver</span> — add <code>--max-requests 1000 --max-requests-jitter 50</code> to recycle workers and prevent unbounded memory growth from leaks. <span class="answer-tag at-red">runserver = instant disqualifier</span></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2: CMD vs ENTRYPOINT -->
+  <div class="qa-full" id="q2">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q2: "What's the difference between CMD and ENTRYPOINT? When would you use each?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p><strong>CMD</strong> provides a default command that can be completely overridden at <code>docker run</code> time. <strong>ENTRYPOINT</strong> is the fixed executable — <code>docker run</code> arguments append to it rather than replacing it.</p>
+        <p style="margin-top:12px;"><strong>In practice for Django:</strong> Most setups use only CMD [gunicorn, ...]. Use ENTRYPOINT when you want the container to always run one specific executable — for example, an entrypoint.sh script that waits for the database, runs migrations, then exec's the CMD (whatever it is — could be gunicorn in prod, pytest in CI, a management command in a migration task).</p>
+        <div class="trap-box"><strong>Trap:</strong> Using ENTRYPOINT alone without CMD means you can't override the command easily. Using CMD alone is fine for most Django apps.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3: Layer caching -->
+  <div class="qa-full" id="q3">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q3: "How does Docker layer caching work, and how does it affect your COPY requirements.txt placement?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <div class="answer-step"><span class="step-num">1</span><span>Each Dockerfile instruction (FROM, RUN, COPY) creates a <span class="kp">cached layer</span>. Docker reuses a layer if the instruction AND its inputs haven't changed.</span></div>
+        <div class="answer-step"><span class="step-num sn-red">!</span><span><span class="kp">Cache invalidation cascades down</span> — when any layer misses, ALL layers below it also rebuild, even unchanged ones.</span></div>
+        <div class="answer-step"><span class="step-num sn-green">✓</span><span>Correct order:
+          <div class="answer-flow" style="margin-top:6px;">
+            <span class="flow-node">COPY requirements.txt .</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node">RUN pip install</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-node">COPY . .</span>
+          </div>
+          Code changes only bust the final <code>COPY . .</code> layer. Dependencies stay cached → <strong>10-second builds</strong> instead of 5 minutes.
+        </span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4: Container exits -->
+  <div class="qa-full" id="q4">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q4: "Your container exits immediately in production. How do you debug it?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <div class="answer-step"><span class="step-num">1</span><span><span class="kp">Check exit code:</span> <code>docker ps -a</code> → STATUS column shows the code. <span class="answer-tag at-orange">137 = OOMKilled</span> <span class="answer-tag at-red">1 = app error</span> <span class="answer-tag at-green">0 = clean exit</span></span></div>
+        <div class="answer-step"><span class="step-num">2</span><span><span class="kp">Read logs first:</span> <code>docker logs &lt;container_id&gt;</code> — most crashes print the Python traceback before dying.</span></div>
+        <div class="answer-step"><span class="step-num sn-orange">3</span><span>If exit 137: <code>docker inspect &lt;id&gt; | grep OOMKilled</code> → <code>"OOMKilled": true</code> → kernel killed it for exceeding memory limit. Fix: reduce Gunicorn workers + add <code>--max-requests 1000</code>.</span></div>
+        <div class="answer-step"><span class="step-num">4</span><span>If exit 1: startup crash — missing env vars, DB connection failure, or import error. Check logs for traceback.</span></div>
+        <div class="answer-step"><span class="step-num">5</span><span>If exit 0: CMD was a one-shot command that finished. Your server process must be a long-running foreground process.</span></div>
+        <div class="answer-step"><span class="step-num sn-green">6</span><span>Debug interactively: <code>docker run -it --entrypoint /bin/bash myimage</code> — drop into the container to investigate manually.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5: Multi-stage -->
+  <div class="qa-full" id="q5">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q5: "What's a multi-stage build and why would you use one for a Python app?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p>"Multi-stage builds use multiple FROM statements in one Dockerfile. Each stage can be named and you can copy artifacts between them. The final image only contains what you explicitly copy into it — earlier stages are discarded."</p>
+        <p style="margin-top:12px;">"For Python: packages like psycopg2, cryptography, Pillow need gcc and C headers to compile their C extensions. In a single-stage build, you install gcc, compile the packages, but gcc remains in the final image — it's large (200MB+) and a security risk. With multi-stage: Stage 1 (builder) has gcc and compiles everything. Stage 2 (runtime) starts fresh from python:3.12-slim and only receives the compiled .so files via COPY --from=builder. The final image has zero compilers. Typical result: 920 MB → 85 MB."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q6: Exit code 137 -->
+  <div class="qa-full" id="q6">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+        <div class="qa-q">Q6: "Your container died with exit code 137. What does that mean? How do you fix it?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p>"Exit code 137 = SIGKILL from the OS. In a container context this almost always means OOMKilled — the process exceeded the container's memory limit and the Linux kernel killed it."</p>
+        <p style="margin-top:10px;"><strong>Debug:</strong> <code>docker inspect &lt;container_id&gt;</code> → look for "OOMKilled": true in the State section.</p>
+        <p style="margin-top:10px;"><strong>Fix options:</strong></p>
+        <ol style="margin:8px 0 8px 20px;line-height:2;">
+          <li>Reduce Gunicorn worker count (each worker = ~50-100MB for Django)</li>
+          <li>Add <code>--max-requests 1000</code> to Gunicorn — recycles workers after N requests, preventing unbounded memory growth from leaks</li>
+          <li>Add <code>--max-requests-jitter 50</code> — randomizes restart time to prevent all workers restarting simultaneously</li>
+          <li>Increase container memory limit if workers are legitimately needed</li>
+          <li>Profile memory with memory-profiler or py-spy to find the actual leak</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q7: docker-compose in prod -->
+  <div class="qa-full" id="q7">
+    <div class="qa-header" onclick="toggleQA(this)">
+      <div>
+        <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+        <div class="qa-q">Q7: "What does docker-compose give you over plain docker run, and what are its limits in production?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p><strong>What it gives you:</strong> Define multi-container apps in YAML. All services start with one command. Automatic networking (services can reach each other by name). Volume management. Environment variable handling. Health checks.</p>
+        <p style="margin-top:12px;"><strong>Limits in production:</strong></p>
+        <ul style="margin:8px 0 8px 20px;line-height:2;">
+          <li>Single-host only — no distribution across multiple machines</li>
+          <li>No rolling updates — updating a service means downtime (stop old, start new)</li>
+          <li>No health-driven scheduling — if a container dies on one host, nothing moves it to another</li>
+          <li>No built-in secrets management</li>
+          <li>No built-in service discovery across hosts</li>
+        </ul>
+        <p><strong>Bottom line:</strong> docker-compose is excellent for local dev and tiny single-host deployments. For real production with multiple instances, rolling deploys, and HA: use ECS, Kubernetes, Nomad, or at minimum a single-host scheduler.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;">
+    <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+    <a href="02-cicd.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">⚡ CI/CD →</a>
+  </div>
+</div>
+
+<button class="rsidebar-toggle" onclick="toggleRSidebar()">☰ Sections</button>
+<div class="rsidebar" id="rsidebar">
+  <div class="rsidebar-header">
+    <span>📍 On This Page</span>
+    <button class="rsidebar-close" onclick="toggleRSidebar()">✕</button>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">📐 Visual Concepts</div>
+    <a href="#part1">🏗️ Dockerfile Anatomy</a>
+    <a href="#part2">⚡ Layer Caching</a>
+    <a href="#part3">🏗️ Multi-Stage Builds</a>
+    <a href="#part4">🔢 Exit Codes Table</a>
+    <a href="#part5">🎛️ CMD vs ENTRYPOINT</a>
+    <a href="#part6">🚫 .dockerignore</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🎯 Interview Q&amp;A</div>
+    <a href="#q1"><span class="rlink-tag hf">HF</span> Walk me through your Dockerfile</a>
+    <a href="#q2"><span class="rlink-tag hf">HF</span> CMD vs ENTRYPOINT</a>
+    <a href="#q3"><span class="rlink-tag hf">HF</span> Layer caching + COPY order</a>
+    <a href="#q4"><span class="rlink-tag hf">HF</span> Container exits immediately</a>
+    <a href="#q5"><span class="rlink-tag hf">HF</span> Multi-stage build why?</a>
+    <a href="#q6">Exit code 137 — OOMKilled</a>
+    <a href="#q7">docker-compose in prod?</a>
+  </div>
+  <div class="rsidebar-group" style="border-bottom:none;">
+    <a href="../01-Key-Talking-Points.html" style="color:#3498db;font-weight:600;">← Back to Session 6</a>
+    <a href="02-cicd.html" style="color:#e74c3c;font-weight:600;">⚡ Next: CI/CD →</a>
+  </div>
+</div>
+
+<script>
+function toggleQA(header) {
+  const body = header.nextElementSibling;
+  const toggle = header.querySelector('.qa-toggle');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('rotated', !isOpen);
+}
+function toggleRSidebar() {
+  document.getElementById('rsidebar').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const sb = document.getElementById('rsidebar');
+  const btn = document.querySelector('.rsidebar-toggle');
+  if (sb && sb.classList.contains('open') && !sb.contains(e.target) && e.target !== btn) {
+    sb.classList.remove('open');
+  }
+});
+</script>
+</body>
+</html>

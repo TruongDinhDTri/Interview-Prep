@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🏗️ Deployment Strategies — Complete Visual Guide</title>
+<style>
+:root{--bg:#f8f4ec;--card:#fff;--primary:#2ecc71;--dark:#2c3e50;--text:#3a3530;--border:#ddd5c8;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+.topnav{background:var(--dark);padding:14px 40px;display:flex;align-items:center;gap:20px;}
+.topnav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;}
+.topnav .current{color:white;font-weight:600;}
+.header{background:linear-gradient(135deg,#1a5c32 0%,#239b56 50%,#2ecc71 100%);color:white;padding:50px 40px;}
+.header-inner{max-width:1400px;margin:0 auto;}
+.header h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;}
+.header p{font-size:1.1rem;opacity:0.85;max-width:800px;}
+.container{max-width:1400px;margin:0 auto;padding:50px 40px;}
+.section-header{font-size:1.6rem;font-weight:800;color:var(--dark);margin:50px 0 24px;padding-bottom:14px;border-bottom:3px solid var(--primary);display:flex;align-items:center;gap:12px;}
+.concept-card{background:white;border-radius:16px;padding:32px;margin-bottom:28px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:0.85rem;text-decoration:none;color:var(--text);margin-bottom:30px;}
+.code-block{background:#1e293b;color:#e2e8f0;padding:24px;border-radius:12px;font-family:'Consolas',monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;margin:16px 0;white-space:pre;}
+.c{color:#64748b;}.k{color:#93c5fd;}.v{color:#86efac;}.s{color:#fca5a5;}
+.qa-full{background:white;border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);margin-bottom:20px;}
+.qa-header{padding:24px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.qa-header:hover{background:#fafaf8;}
+.qa-q-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.hf-label{background:#fff3e0;color:#b36b00;border:1px solid #f39c12;}
+.ntk-label{background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a;}
+.qa-q{font-weight:700;font-size:1rem;color:var(--dark);line-height:1.4;}
+.qa-toggle{font-size:1.3rem;color:#aaa;flex-shrink:0;transition:transform 0.3s;}
+.qa-body{border-top:1px solid #f0ebe0;display:none;}
+.qa-body.open{display:block;}
+.qa-toggle.rotated{transform:rotate(180deg);}
+.comparison{display:grid;grid-template-columns:1fr 1fr;}
+.weak-col,.solid-col{padding:20px 24px;}
+.weak-col{background:#fff5f5;border-right:1px solid #f0ebe0;}
+.solid-col{background:#f0faf4;}
+.col-label{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.weak-col .col-label{color:var(--danger);}
+.solid-col .col-label{color:var(--success);}
+.col-text{font-size:0.88rem;line-height:1.7;font-style:italic;color:#555;}
+.signal-line{background:linear-gradient(135deg,#2c3e50,#4a7c59);color:white;padding:20px 24px;font-size:0.9rem;line-height:1.7;font-style:italic;}
+.signal-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px;}
+.solid-answer{padding:20px 24px;font-size:0.9rem;line-height:1.8;color:var(--text);background:#fafaf8;}
+.trap-box{background:#fff8e1;border:1px solid #ffc107;border-left:4px solid #f57c00;border-radius:8px;padding:16px 20px;margin:10px 0;font-size:0.88rem;line-height:1.6;}
+
+/* PLATFORM TABLE */
+.platform-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.88rem;}
+.platform-table th{background:var(--dark);color:white;padding:12px 16px;text-align:left;}
+.platform-table td{padding:12px 16px;border-bottom:1px solid #f0ebe0;vertical-align:top;}
+.platform-table tr:hover td{background:#fafaf8;}
+
+/* BLUE-GREEN vs ROLLING */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:20px 0;}
+
+/* GUNICORN FORMULA */
+.formula-box{background:linear-gradient(135deg,#1a5c32,#239b56);color:white;border-radius:14px;padding:28px;text-align:center;margin:20px 0;}
+.formula-box .formula{font-size:1.6rem;font-weight:800;font-family:'Consolas',monospace;margin:14px 0;}
+.formula-box p{opacity:0.85;font-size:0.9rem;line-height:1.7;}
+
+@media(max-width:900px){.two-col,.comparison{grid-template-columns:1fr;}}
+/* RIGHT SIDEBAR */
+.rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
+.rsidebar-toggle:hover{background:var(--dark);}
+.rsidebar{position:fixed;right:0;top:0;width:290px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;z-index:200;}
+.rsidebar.open{transform:translateX(0);}
+.rsidebar-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:0.95rem;color:var(--dark);position:sticky;top:0;background:#fff;}
+.rsidebar-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;}
+.rsidebar-group{padding:10px 0;border-bottom:1px solid #f0ebe0;}
+.rsidebar-group-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 20px 8px;}
+.rsidebar a{display:block;padding:5px 20px;font-size:0.82rem;color:#555;text-decoration:none;line-height:1.5;transition:all 0.15s;}
+.rsidebar a:hover{background:#f8f4ec;color:var(--dark);padding-left:24px;}
+.rsidebar a .rlink-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;background:#f0ebe0;padding:1px 5px;border-radius:3px;margin-right:4px;color:#888;}
+.rsidebar a .rlink-tag.hf{background:#fff3e0;color:#b36b00;}
+/* Q&A BEAUTY */
+.answer-tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;margin-right:4px;}
+.at-blue{background:#dbeafe;color:#1d4ed8;} .at-red{background:#fee2e2;color:#dc2626;} .at-green{background:#dcfce7;color:#16a34a;} .at-orange{background:#fef3c7;color:#92400e;}
+.kp{color:#1a202c;font-weight:700;}
+.answer-step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;line-height:1.6;}
+.answer-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-num.sn-blue{background:#1976d2;} .step-num.sn-red{background:#c62828;} .step-num.sn-green{background:#27ae60;}
+.answer-concept-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;}
+.answer-concept-row:last-child{border-bottom:none;}
+.acr-badge{min-width:80px;text-align:center;padding:4px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;flex-shrink:0;}
+.flow-inline{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;font-size:0.82rem;}
+.flow-node-sm{background:#f8f4ec;border:1px solid var(--border);border-radius:5px;padding:3px 9px;font-family:monospace;font-size:0.78rem;}
+.flow-arrow-sm{color:#aaa;font-weight:700;}
+</style>
+</head>
+<body>
+<div class="topnav">
+  <a href="index.html">🏠 Hub</a><span style="color:#555">/</span>
+  <span class="current">🏗️ Deployment Strategies</span>
+</div>
+<div class="header"><div class="header-inner">
+  <div style="font-size:2.5rem;margin-bottom:12px;">🏗️</div>
+  <h1>Deployment Strategies</h1>
+  <p>Platform selection framework. Blue-green vs rolling with visuals. Zero-downtime requirements. Gunicorn workers formula. Rollback in 90 seconds. Every High Frequency question answered.</p>
+</div></div>
+
+<div class="container">
+<a href="index.html" class="back-btn">← Back to Battle Hub</a>
+
+<div class="section-header" id="part1"><span>🗺️</span> Part 1: Platform Selection — Decision Framework</div>
+
+<div class="concept-card">
+  <p style="margin-bottom:16px;color:#666;">When asked "How would you choose between platforms?" — don't say Kubernetes is always the answer. Show pragmatism:</p>
+
+  <table class="platform-table">
+    <thead><tr><th>Use Case</th><th>Platform</th><th>Why</th><th>When to Move On</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Side project / MVP / "ship today"</strong></td>
+        <td>Railway or Render</td>
+        <td>Git-push deploy, managed Postgres, managed Redis, SSL, $5-25/mo, zero ops time</td>
+        <td>When per-service pricing hurts or you need custom networking</td>
+      </tr>
+      <tr>
+        <td><strong>EU data residency, low ops budget</strong></td>
+        <td>Hetzner VPS + Coolify / Dokku</td>
+        <td>$4-20/mo, GDPR-clean, full control, simple container deploy</td>
+        <td>When you need auto-scaling or multi-region</td>
+      </tr>
+      <tr>
+        <td><strong>Need global low latency</strong></td>
+        <td>Fly.io</td>
+        <td>Edge regions, Firecracker microVMs, deploy close to users</td>
+        <td>When cost scales and you need more AWS integrations</td>
+      </tr>
+      <tr style="background:#e8f5e9;">
+        <td><strong>Standard production app, AWS shop ⭐</strong></td>
+        <td>AWS ECS Fargate or App Runner</td>
+        <td>Managed containers, IAM integration, ALB, RDS — full AWS ecosystem with no K8s overhead</td>
+        <td>When you need complex networking/RBAC across many teams → EKS</td>
+      </tr>
+      <tr>
+        <td><strong>Heavy scale, complex networking, multiple teams</strong></td>
+        <td>EKS (Kubernetes)</td>
+        <td>Maximum flexibility, massive ecosystem, multi-team RBAC</td>
+        <td>Only when you have a dedicated platform team</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="trap-box"><strong>🚫 The Kubernetes trap:</strong> Proposing Kubernetes for a standard CRUD app. "Adopting Kubernetes introduces immense overhead: networking (CNI plugins, service mesh), RBAC configuration, etcd management, node pool management, upgrade procedures. For a team of 3 engineers on one app, ECS Fargate gives 90% of the benefits with 10% of the complexity."</div>
+</div>
+
+<div class="section-header" id="part2"><span>🔄</span> Part 2: Blue-Green vs Rolling — Visual Comparison</div>
+
+<div class="concept-card">
+  <div class="two-col">
+    <div>
+      <h3 style="color:#1976d2;margin-bottom:14px;">🔵🟢 Blue-Green Deployment</h3>
+      <div style="background:#e3f2fd;border-radius:10px;padding:18px;margin-bottom:12px;">
+        <div style="font-size:0.85rem;line-height:1.8;">
+          <div style="margin-bottom:8px;"><strong>Infrastructure:</strong> Two full identical environments (Blue = current, Green = new)</div>
+          <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+            <span style="background:#1976d2;color:white;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">BLUE</span>
+            <span>← ALB routes 100% traffic here</span>
+          </div>
+          <div style="margin:8px 0;">→ Deploy new code to Green (idle)</div>
+          <div style="margin:8px 0;">→ Run smoke tests on Green</div>
+          <div style="display:flex;align-items:center;gap:8px;margin:8px 0;">
+            <span style="background:#27ae60;color:white;padding:4px 12px;border-radius:20px;font-size:0.8rem;font-weight:700;">GREEN</span>
+            <span>← Flip ALB: 100% traffic here instantly</span>
+          </div>
+          <div style="margin:8px 0;color:#1976d2;">→ Rollback: flip ALB back (seconds)</div>
+        </div>
+      </div>
+      <ul style="font-size:0.85rem;line-height:2;margin-left:16px;">
+        <li>✅ Zero overlap — old and new never run simultaneously</li>
+        <li>✅ Instant rollback (one ALB switch)</li>
+        <li>✅ Full environment to test before traffic flip</li>
+        <li>❌ 2x infrastructure cost</li>
+        <li>⚠️ Does NOT magically solve migrations — schema must still be backward-compatible</li>
+      </ul>
+    </div>
+    <div>
+      <h3 style="color:#e65100;margin-bottom:14px;">🔄 Rolling Deployment</h3>
+      <div style="background:#fff3e0;border-radius:10px;padding:18px;margin-bottom:12px;">
+        <div style="font-size:0.85rem;line-height:1.8;">
+          <div style="margin-bottom:8px;"><strong>Infrastructure:</strong> Same set of instances, replaced in batches</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:10px 0;">
+            <div style="background:#e74c3c;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">OLD v1</div>
+            <div style="background:#e74c3c;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">OLD v1</div>
+            <div style="background:#27ae60;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">NEW v2</div>
+          </div>
+          <div style="font-size:0.8rem;color:#666;margin-bottom:8px;">← Mid-deploy: old + new running simultaneously</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin:10px 0;">
+            <div style="background:#27ae60;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">NEW v2</div>
+            <div style="background:#27ae60;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">NEW v2</div>
+            <div style="background:#27ae60;color:white;text-align:center;padding:6px;border-radius:4px;font-size:0.78rem;font-weight:700;">NEW v2</div>
+          </div>
+          <div style="font-size:0.8rem;color:#666;">← After: all instances updated</div>
+        </div>
+      </div>
+      <ul style="font-size:0.85rem;line-height:2;margin-left:16px;">
+        <li>✅ No extra infrastructure cost</li>
+        <li>✅ Default for ECS, Kubernetes</li>
+        <li>⚠️ Old + new code run simultaneously → migrations MUST be backward-compatible</li>
+        <li>❌ Rollback = another rolling deploy (slower)</li>
+        <li>❌ Harder to fully validate before serving traffic</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="background:#fff3e0;border-radius:10px;padding:18px;border-left:4px solid #e65100;margin-top:12px;">
+    <strong>⚠️ The Critical Misunderstanding:</strong> "We do blue-green, so migrations aren't a concern." WRONG. Blue-green still means you have old code (the Blue environment) running and pointing to the same database during and right after the flip. If your migration removed a column Blue was using, Blue breaks. Backward-compatible migrations are required for BOTH strategies.
+  </div>
+</div>
+
+<div class="section-header" id="part3"><span>⚙️</span> Part 3: Gunicorn — Workers Formula + Why Not runserver</div>
+
+<div class="concept-card">
+  <div style="background:#ffebee;border-radius:10px;padding:20px;margin-bottom:20px;border-left:4px solid #e74c3c;">
+    <h3 style="color:#c62828;margin-bottom:10px;">🚫 Never Use manage.py runserver in Production</h3>
+    <p style="font-size:0.9rem;line-height:1.6;">The Django development server is: (1) single-threaded — one request at a time, (2) not security-audited, (3) not designed for load. It will collapse under real traffic. This is a hard filter question in every interview.</p>
+  </div>
+
+  <div class="formula-box">
+    <h3 style="opacity:0.85;">Gunicorn Workers Formula</h3>
+    <div class="formula">workers = (2 × CPU_cores) + 1</div>
+    <p>Starting point for CPU-bound Django apps. Tune based on your request mix and memory available per container.</p>
+    <p style="margin-top:8px;font-size:0.85rem;opacity:0.75;">Example: 2 vCPU container → 5 workers. Add --max-requests 1000 --max-requests-jitter 50 to recycle workers and prevent memory leaks from growing unbounded.</p>
+  </div>
+
+<div class="code-block"><span class="c"># WSGI (synchronous — right for 95% of Django apps)</span>
+gunicorn config.wsgi \
+  --bind 0.0.0.0:8000 \
+  --workers 3 \
+  --worker-class sync \
+  --max-requests 1000 \
+  --max-requests-jitter 50 \
+  --timeout 30 \
+  --keep-alive 5
+
+<span class="c"># ASGI (async — websockets, SSE, or many slow upstream calls)</span>
+uvicorn config.asgi:application \
+  --host 0.0.0.0 \
+  --port 8000 \
+  --workers 4 \
+  --loop uvloop
+
+<span class="c"># When to use ASGI instead of WSGI:</span>
+<span class="c"># - WebSockets (real-time features)</span>
+<span class="c"># - Server-Sent Events (live feeds)</span>
+<span class="c"># - Many concurrent slow I/O calls per request (external APIs)</span>
+<span class="c"># - For 95% of CRUD apps: WSGI (Gunicorn) is correct</span></div>
+</div>
+
+<div class="section-header" id="part4"><span>🎯</span> Part 4: All Interview Questions Answered</div>
+
+<div class="qa-full" id="q1">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q1: "How do you deploy your Django app?" (Universal opening question of every senior interview)</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="comparison">
+      <div class="weak-col">
+        <div class="col-label">❌ WEAK</div>
+        <div class="col-text">"I push to GitHub and Heroku/Railway deploys it." (Stops there. Can't go deeper if pressed.)<br><br>Shows you've used a tool but don't understand what's happening inside it.</div>
+      </div>
+      <div class="solid-col">
+        <div class="col-label">✅ SOLID — LAYER IT</div>
+        <div class="answer-step"><div class="step-num sn-blue">1</div><div><span class="kp">CI pipeline fires</span> — push to main → GitHub Actions: tests vs real Postgres → lint → security scan → <code>check --deploy</code> → <code>makemigrations --check</code></div></div>
+        <div class="answer-step"><div class="step-num sn-blue">2</div><div><span class="kp">Image built + tagged with SHA</span> → pushed to ECR. <span class="answer-tag at-blue">every deploy is immutable</span></div></div>
+        <div class="answer-step"><div class="step-num sn-blue">3</div><div><span class="kp">Migrations as separate ECS one-off task</span> — runs <code>manage.py migrate</code> before new service tasks start. Never inline with app startup.</div></div>
+        <div class="answer-step"><div class="step-num sn-blue">4</div><div><span class="kp">ECS rolling update</span> — new tasks start, pass <code>/health/</code> check, ALB routes → old tasks drain. No downtime.</div></div>
+        <div class="answer-step"><div class="step-num sn-green">⟳</div><div><span class="kp">Rollback = re-deploy previous SHA image</span> — ~90 seconds, no rebuild, no CI run. ECS updates task definition to prior image.</div></div>
+      </div>
+    </div>
+    <div class="signal-line">
+      <div class="signal-label">⚡ Production Signal Line — Full ECS Deploy</div>
+      "For my current production app I use AWS ECS Fargate behind an ALB. Push to main triggers GitHub Actions: tests run vs real Postgres, image built and tagged with Git SHA, pushed to ECR. Deploy job: register new task definition, update service, ECS does rolling update — new tasks start, pass /health/ check, ALB routes to them, old tasks drain. Migrations run as a separate ECS task before new service tasks start. Rollback: re-deploy the previous SHA image — ~90 seconds, no rebuild."
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q2">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q2: "Describe what happens between git push and the user seeing the change."</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="flow-inline" style="margin-bottom:8px;">
+        <span class="flow-node-sm">git push</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">webhook fires</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">Actions runner</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">CI jobs</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">build + ECR push</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">ECS deploy</span><span class="flow-arrow-sm">→</span>
+        <span class="flow-node-sm">user sees change</span>
+      </div>
+      <div class="answer-step"><div class="step-num">1</div><div><span class="kp">CI jobs:</span> checkout → Python setup → install → lint → typecheck → security scan → <code>check --deploy</code> → <code>makemigrations --check</code> → Postgres service → pytest</div></div>
+      <div class="answer-step"><div class="step-num">2</div><div><span class="kp">If ALL pass:</span> build Docker image → tag with git SHA → push to ECR. <span class="answer-tag at-blue">immutable artifact</span></div></div>
+      <div class="answer-step"><div class="step-num">3</div><div><span class="kp">Deploy job (main branch only):</span> OIDC → ECR login → register new ECS task definition with new image SHA</div></div>
+      <div class="answer-step"><div class="step-num">4</div><div><span class="kp">Run migrations first:</span> ECS one-off task → <code>manage.py migrate</code> completes before service tasks start</div></div>
+      <div class="answer-step"><div class="step-num">5</div><div><span class="kp">ECS rolling update:</span> new tasks start → <code>/health/</code> → ALB routes → old tasks drain. Total: <span class="answer-tag at-green">~5–10 min</span></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q3">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q3: "What's the difference between blue-green and rolling deployment?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-concept-row"><span class="acr-badge" style="background:#fff3e0;color:#e65100;">Rolling</span><span>Replace instances in batches on <em>same</em> infra. Old + new coexist briefly. <span class="answer-tag at-green">cheap</span> Default for ECS/K8s. Rollback = another rolling deploy <span class="answer-tag at-orange">slow</span>. Requires backward-compatible migrations.</span></div>
+      <div class="answer-concept-row"><span class="acr-badge" style="background:#e3f2fd;color:#1565c0;">Blue-Green</span><span>Two full identical environments. Deploy to idle env, validate, <span class="kp">flip ALB all at once</span>. <span class="answer-tag at-red">2× infra cost</span> Rollback = one ALB switch <span class="answer-tag at-green">seconds</span>. Used for large/risky releases.</span></div>
+      <div class="trap-box"><strong>🚫 Trap:</strong> "We do blue-green so migrations aren't a problem." Wrong. Blue env still runs during and after the switch — schema must be backward-compatible with Blue's code. Expand-contract required for BOTH strategies.</div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q4">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q4: "How do you do a zero-downtime deploy?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-green">1</div><div><span class="kp">Migrations before new code</span> — schema must be backward-compatible with the version currently running. Never run migrations as part of app startup (race condition).</div></div>
+      <div class="answer-step"><div class="step-num sn-green">2</div><div><span class="kp"><code>/health/</code> endpoint</span> — returns 200 only when fully ready (DB connected, cache connected). ALB only routes traffic to healthy tasks.</div></div>
+      <div class="answer-step"><div class="step-num sn-green">3</div><div><span class="kp">Rolling update</span> — ECS replaces tasks one by one, always keeping minimum healthy capacity. Never take everything down at once.</div></div>
+      <div class="answer-step"><div class="step-num sn-green">4</div><div><span class="kp">Connection draining</span> — ALB drains in-flight requests before killing old tasks. Users don't see connection resets.</div></div>
+      <div style="margin-top:8px;padding:10px;background:#fff5f5;border-radius:6px;font-size:0.83rem;border-left:3px solid #e74c3c;"><strong>What breaks it:</strong> non-backward-compatible migration · no /health/ endpoint · all instances replaced simultaneously · migrations inline with app startup</div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q5">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q5: "How would you roll back a bad deploy?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="comparison">
+      <div class="weak-col">
+        <div class="col-label">❌ WEAK</div>
+        <div class="col-text">"We'd revert the PR and redeploy."<br><br>10+ minutes while production is broken. While you're reverting and waiting for CI, users are impacted.</div>
+      </div>
+      <div class="solid-col">
+        <div class="col-label">✅ SOLID — SHA-based rollback</div>
+        <div class="answer-step"><div class="step-num sn-green">⟳</div><div><span class="kp">Re-deploy the previous SHA image from ECR</span> — <span class="answer-tag at-green">~90 seconds</span> one command, no rebuild, no CI run. ECS updates task definition to previous image.</div></div>
+        <div class="answer-step"><div class="step-num">⚠</div><div>If migration was <span class="kp">destructive</span> — can't rollback schema. Need a <span class="answer-tag at-orange">forward-fix</span> instead. This is why we use expand-contract and never ship destructive schema changes alongside code changes.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q6">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q6: "Why Gunicorn and not runserver? How many workers?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-red">✗</div><div><span class="kp">runserver is single-threaded</span> — one request at a time, not security-audited, collapses under real traffic. <span class="answer-tag at-red">never in prod</span></div></div>
+      <div class="answer-step"><div class="step-num sn-green">✓</div><div><span class="kp">Gunicorn = production WSGI server</span> — spawns multiple worker processes. Formula: <code>(2 × CPU cores) + 1</code>. 2 vCPU → 5 workers.</div></div>
+      <div class="answer-step"><div class="step-num">+</div><div><code>--max-requests 1000 --max-requests-jitter 50</code> — recycles workers to prevent memory growth. <span class="kp">Jitter</span> prevents all workers restarting simultaneously.</div></div>
+      <div class="answer-step"><div class="step-num sn-blue">A</div><div><span class="kp">ASGI instead (Uvicorn)</span> when: websockets · server-sent events · many concurrent slow upstream I/O calls. For <em>95% of CRUD apps: WSGI/Gunicorn is correct</em>.</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q7">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+      <div class="qa-q">Q7: "Static files — where do they live and who serves them?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><div class="step-num sn-blue">CI</div><div><span class="kp">collectstatic</span> in CI/CD gathers all static files into STATIC_ROOT before building the image.</div></div>
+      <div class="answer-step"><div class="step-num sn-green">S3</div><div><span class="kp">S3 + CloudFront (preferred for scale)</span> — CI uploads to S3, CloudFront CDN serves globally. <span class="answer-tag at-green">Django never serves static</span> STATIC_URL points to CloudFront. <code>django-storages</code> handles upload.</div></div>
+      <div class="answer-step"><div class="step-num">WN</div><div><span class="kp">WhiteNoise (simple/small scale)</span> — Python middleware serving static files directly from Gunicorn. Adds compression + caching headers. Add to MIDDLEWARE after SecurityMiddleware. No extra infra.</div></div>
+      <div class="trap-box"><strong>🚫 Never:</strong> Serve static via Django views in production. Development-only (<code>serve()</code> function). No caching headers, no compression, poor performance.</div>
+    </div>
+  </div>
+</div>
+
+<div style="background:linear-gradient(135deg,#2c3e50,#4a7c59);border-radius:16px;padding:32px;color:white;margin:40px 0;">
+  <div style="font-size:1.4rem;font-weight:800;margin-bottom:16px;">🏆 The Six Things That Kill Candidates in These Interviews</div>
+  <ol style="margin-left:20px;line-height:2.5;opacity:0.9;">
+    <li><strong>No specific stories</strong> — "I've used Docker" with no incident. Stories + numbers win.</li>
+    <li><strong>No numbers</strong> — "It was slow" → "P95 was 1.2s, we got it to 180ms with select_related + an index."</li>
+    <li><strong>Tools over outcomes</strong> — "We used Kubernetes and Sentry and Datadog" doesn't say what YOU did.</li>
+    <li><strong>Vague about own role</strong> — "We did X" is a flag. "I owned X" is what they're listening for.</li>
+    <li><strong>Can't read an error</strong> — "Exit code 137? Not sure, I restart." → FAIL. "OOMKilled, check memory limits." → PASS.</li>
+    <li><strong>No mental model of failure</strong> — If you've only built the happy path, you've only built half the system.</li>
+  </ol>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+  <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+  <a href="06-security.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">← 🛡️ Django Security</a>
+  <a href="02-cicd.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">⚡ Back to CI/CD</a>
+</div>
+</div>
+<script>
+function toggleQA(h){const b=h.nextElementSibling,t=h.querySelector('.qa-toggle'),o=b.classList.contains('open');b.classList.toggle('open',!o);t.classList.toggle('rotated',!o);}
+function toggleRSidebar(){document.getElementById('rsidebar').classList.toggle('open');}
+document.addEventListener('click',function(e){const sb=document.getElementById('rsidebar');const btn=document.querySelector('.rsidebar-toggle');if(sb&&sb.classList.contains('open')&&!sb.contains(e.target)&&e.target!==btn){sb.classList.remove('open');}});
+</script>
+<button class="rsidebar-toggle" onclick="toggleRSidebar()">☰ Sections</button>
+<div class="rsidebar" id="rsidebar">
+  <div class="rsidebar-header"><span>📍 On This Page</span><button class="rsidebar-close" onclick="toggleRSidebar()">✕</button></div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">📐 Visual Concepts</div>
+    <a href="#part1">🗺️ Platform Selection</a>
+    <a href="#part2">🔄 Blue-Green vs Rolling</a>
+    <a href="#part3">⚙️ Gunicorn Workers</a>
+    <a href="#part4">🎯 Interview Q&amp;A</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🎯 Interview Q&amp;A</div>
+    <a href="#q1"><span class="rlink-tag hf">HF</span>How do you deploy Django?</a>
+    <a href="#q2"><span class="rlink-tag hf">HF</span>git push → user sees change</a>
+    <a href="#q3"><span class="rlink-tag hf">HF</span>Blue-green vs rolling</a>
+    <a href="#q4"><span class="rlink-tag hf">HF</span>Zero-downtime deploy</a>
+    <a href="#q5"><span class="rlink-tag hf">HF</span>Roll back a bad deploy</a>
+    <a href="#q6"><span class="rlink-tag hf">HF</span>Gunicorn vs runserver + workers</a>
+    <a href="#q7">Static files in production</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🗺️ Navigate</div>
+    <a href="06-security.html">← 🛡️ Security</a>
+    <a href="../01-Key-Talking-Points.html">🏠 Session 6 Hub</a>
+  </div>
+</div>
+</body>
+</html>

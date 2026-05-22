@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🗄️ Database Migrations — Complete Visual Guide</title>
+<style>
+:root{--bg:#f8f4ec;--card:#fff;--primary:#f39c12;--dark:#2c3e50;--text:#3a3530;--text-light:#6b6258;--border:#ddd5c8;--success:#27ae60;--danger:#e74c3c;--warning:#f39c12;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+.topnav{background:var(--dark);padding:14px 40px;display:flex;align-items:center;gap:20px;}
+.topnav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;}
+.topnav .current{color:white;font-weight:600;}
+.header{background:linear-gradient(135deg,#7d5a00 0%,#c97d00 50%,#f39c12 100%);color:white;padding:50px 40px;}
+.header-inner{max-width:1400px;margin:0 auto;}
+.header h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;}
+.header p{font-size:1.1rem;opacity:0.85;max-width:800px;}
+.container{max-width:1400px;margin:0 auto;padding:50px 40px;}
+.section-header{font-size:1.6rem;font-weight:800;color:var(--dark);margin:50px 0 24px;padding-bottom:14px;border-bottom:3px solid var(--primary);display:flex;align-items:center;gap:12px;}
+.concept-card{background:white;border-radius:16px;padding:32px;margin-bottom:28px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
+.back-btn{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:0.85rem;text-decoration:none;color:var(--text);margin-bottom:30px;transition:all 0.2s;}
+.code-block{background:#1e293b;color:#e2e8f0;padding:24px;border-radius:12px;font-family:'Consolas','Monaco',monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;margin:16px 0;white-space:pre;}
+.c{color:#64748b;}.k{color:#93c5fd;}.v{color:#86efac;}.s{color:#fca5a5;}
+.qa-full{background:white;border-radius:16px;border:1px solid var(--border);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.06);margin-bottom:20px;}
+.qa-header{padding:24px;cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+.qa-header:hover{background:#fafaf8;}
+.qa-q-label{font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 10px;border-radius:20px;margin-bottom:8px;display:inline-block;}
+.hf-label{background:#fff3e0;color:#b36b00;border:1px solid #f39c12;}
+.ntk-label{background:#e8f5e9;color:#2e7d32;border:1px solid #66bb6a;}
+.qa-q{font-weight:700;font-size:1rem;color:var(--dark);line-height:1.4;}
+.qa-toggle{font-size:1.3rem;color:#aaa;flex-shrink:0;transition:transform 0.3s;}
+.qa-body{border-top:1px solid #f0ebe0;display:none;}
+.qa-body.open{display:block;}
+.qa-toggle.rotated{transform:rotate(180deg);}
+.comparison{display:grid;grid-template-columns:1fr 1fr;}
+.weak-col,.solid-col{padding:20px 24px;}
+.weak-col{background:#fff5f5;border-right:1px solid #f0ebe0;}
+.solid-col{background:#f0faf4;}
+.col-label{font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;}
+.weak-col .col-label{color:var(--danger);}
+.solid-col .col-label{color:var(--success);}
+.col-text{font-size:0.88rem;line-height:1.7;font-style:italic;color:#555;}
+.signal-line{background:linear-gradient(135deg,#2c3e50,#4a7c59);color:white;padding:20px 24px;font-size:0.9rem;line-height:1.7;font-style:italic;}
+.signal-label{font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:6px;}
+.solid-answer{padding:20px 24px;font-size:0.9rem;line-height:1.8;color:var(--text);background:#fafaf8;}
+.trap-box{background:#fff8e1;border:1px solid #ffc107;border-left:4px solid #f57c00;border-radius:8px;padding:16px 20px;margin:10px 0;font-size:0.88rem;line-height:1.6;}
+.trap-box strong{color:#e65100;}
+
+/* EXPAND-CONTRACT VISUAL */
+.deploy-timeline{display:flex;gap:0;margin:24px 0;overflow-x:auto;}
+.deploy-phase{flex:1;min-width:280px;border-radius:12px;padding:22px;position:relative;}
+.deploy-phase h3{font-size:1rem;font-weight:800;margin-bottom:12px;}
+.deploy-phase p{font-size:0.85rem;line-height:1.6;}
+.phase-arrow{display:flex;align-items:center;padding:0 10px;color:#aaa;font-size:1.5rem;flex-shrink:0;}
+
+/* LOCK TABLE */
+.lock-table{width:100%;border-collapse:collapse;margin:16px 0;font-size:0.88rem;}
+.lock-table th{background:var(--dark);color:white;padding:12px 16px;text-align:left;}
+.lock-table td{padding:12px 16px;border-bottom:1px solid #f0ebe0;}
+.lock-table tr:hover td{background:#fafaf8;}
+.lock-level{display:inline-block;padding:3px 10px;border-radius:20px;font-weight:700;font-size:0.78rem;}
+
+/* CHECKLIST */
+.checklist{list-style:none;margin:16px 0;}
+.checklist li{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid #f0ebe0;font-size:0.9rem;line-height:1.6;}
+.checklist li:last-child{border-bottom:none;}
+.check-num{background:var(--primary);color:white;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:800;flex-shrink:0;margin-top:1px;}
+@media(max-width:900px){.comparison{grid-template-columns:1fr;}.deploy-timeline{flex-direction:column;}}
+/* RIGHT SIDEBAR */
+.rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
+.rsidebar-toggle:hover{background:var(--dark);}
+.rsidebar{position:fixed;right:0;top:0;width:290px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;z-index:200;}
+.rsidebar.open{transform:translateX(0);}
+.rsidebar-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:0.95rem;color:var(--dark);position:sticky;top:0;background:#fff;}
+.rsidebar-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;}
+.rsidebar-group{padding:10px 0;border-bottom:1px solid #f0ebe0;}
+.rsidebar-group-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 20px 8px;}
+.rsidebar a{display:block;padding:5px 20px;font-size:0.82rem;color:#555;text-decoration:none;line-height:1.5;transition:all 0.15s;}
+.rsidebar a:hover{background:#f8f4ec;color:var(--dark);padding-left:24px;}
+.rsidebar a .rlink-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;background:#f0ebe0;padding:1px 5px;border-radius:3px;margin-right:4px;color:#888;}
+.rsidebar a .rlink-tag.hf{background:#fff3e0;color:#b36b00;}
+/* Q&A BEAUTY */
+.answer-tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;margin-right:4px;}
+.at-blue{background:#dbeafe;color:#1d4ed8;} .at-red{background:#fee2e2;color:#dc2626;} .at-green{background:#dcfce7;color:#16a34a;}
+.at-orange{background:#fef3c7;color:#92400e;}
+.kp{color:#1a202c;font-weight:700;}
+.answer-step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;line-height:1.6;}
+.answer-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-num.sn-blue{background:#1976d2;} .step-num.sn-orange{background:#e65100;} .step-num.sn-green{background:#27ae60;}
+.acr-badge{min-width:80px;text-align:center;padding:4px 8px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;flex-shrink:0;}
+</style>
+</head>
+<body>
+<div class="topnav">
+  <a href="index.html">🏠 Hub</a><span style="color:#555">/</span>
+  <span class="current">🗄️ Database Migrations</span>
+</div>
+<div class="header"><div class="header-inner">
+  <div style="font-size:2.5rem;margin-bottom:12px;">🗄️</div>
+  <h1>Database Migrations</h1>
+  <p>The topic where mid-level candidates routinely fail. Lock types, expand-contract pattern, pre-migration checklist. The exact incident story that wins interviews.</p>
+</div></div>
+
+<div class="container">
+<a href="index.html" class="back-btn">← Back to Battle Hub</a>
+
+<div class="section-header" id="part1"><span>🔒</span> Part 1: PostgreSQL Lock Types — Why Migrations Cause Downtime</div>
+
+<div class="concept-card">
+  <p style="margin-bottom:16px; color:#666;">The root of every migration disaster: you didn't know which SQL operation acquires which lock.</p>
+
+  <table class="lock-table">
+    <thead><tr><th>Lock Type</th><th>What It Blocks</th><th>When It Happens</th><th>Risk</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="lock-level" style="background:#ffcdd2;color:#c62828;">ACCESS EXCLUSIVE</span></td>
+        <td>Everything — reads AND writes</td>
+        <td>ALTER TABLE, DROP TABLE, ADD COLUMN NOT NULL (Postgres &lt;11), most ALTER COLUMN</td>
+        <td style="color:#c62828;font-weight:700;">MAXIMUM — all traffic blocked</td>
+      </tr>
+      <tr>
+        <td><span class="lock-level" style="background:#fff3e0;color:#e65100;">SHARE UPDATE EXCLUSIVE</span></td>
+        <td>Schema changes, VACUUM FULL</td>
+        <td>CREATE INDEX CONCURRENTLY, VALIDATE CONSTRAINT</td>
+        <td style="color:#e65100;font-weight:700;">LOW — reads/writes continue</td>
+      </tr>
+      <tr>
+        <td><span class="lock-level" style="background:#e8f5e9;color:#1b5e20;">ROW EXCLUSIVE</span></td>
+        <td>Other row-level locks</td>
+        <td>INSERT, UPDATE, DELETE (normal DML)</td>
+        <td style="color:#1b5e20;font-weight:700;">MINIMAL — normal operations</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div style="background:#fff3e0;border-radius:10px;padding:18px;border-left:4px solid #e65100;">
+    <strong>💡 The Key Insight:</strong> PostgreSQL 11+ changed <code>ADD COLUMN</code> with a constant default to be metadata-only (no ACCESS EXCLUSIVE). But <code>ADD COLUMN NOT NULL</code> without a default (or with a non-constant default) still rewrites the table. This is why you always add as nullable first on large tables.
+  </div>
+</div>
+
+<div class="section-header" id="part2"><span>🔄</span> Part 2: The Expand-Contract Pattern — 3 Deploys for Zero Downtime</div>
+
+<div class="concept-card">
+  <p style="margin-bottom:20px; color:#666;">The answer to "How do you add a non-nullable column to a 50M-row table without downtime?" — the single most asked migration question:</p>
+
+  <div class="deploy-timeline">
+    <div class="deploy-phase" style="background:#e3f2fd;border:2px solid #1976d2;">
+      <h3 style="color:#1565c0;">🔵 Deploy 1: EXPAND</h3>
+      <p><strong>What:</strong> Add the column as <code>null=True</code> (no NOT NULL constraint).<br><br>
+      <strong>SQL:</strong> <code>ALTER TABLE orders ADD COLUMN status VARCHAR(20)</code><br><br>
+      <strong>Why safe:</strong> In Postgres 11+, adding a nullable column with no default is metadata-only — milliseconds, no table rewrite, no lock.<br><br>
+      <strong>App state:</strong> New code can write both old format (no status) and new format (with status). Old code still works — column is nullable so it can be NULL.</p>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="deploy-phase" style="background:#fff3e0;border:2px solid #e65100;">
+      <h3 style="color:#e65100;">🟡 Deploy 2: BACKFILL</h3>
+      <p><strong>What:</strong> Backfill historical rows with a management command. NOT inside a migration file.<br><br>
+      <strong>Why separate:</strong> Django wraps migrations in a transaction. A RunPython over 50M rows holds an ACCESS EXCLUSIVE lock for the entire backfill duration = downtime.<br><br>
+      <strong>How:</strong> Batch updates of 5,000 rows in separate transactions:<br>
+      <code>Orders.objects.filter(status__isnull=True).values_list('id',flat=True)[:5000]</code><br><br>
+      <strong>Verify:</strong> Check zero NULL rows before proceeding.</p>
+    </div>
+    <div class="phase-arrow">→</div>
+    <div class="deploy-phase" style="background:#e8f5e9;border:2px solid #27ae60;">
+      <h3 style="color:#1b5e20;">🟢 Deploy 3: CONTRACT</h3>
+      <p><strong>What:</strong> Add the NOT NULL constraint using NOT VALID + VALIDATE pattern.<br><br>
+      <strong>SQL:</strong><br>
+      <code>ALTER TABLE orders ADD CONSTRAINT status_not_null CHECK (status IS NOT NULL) NOT VALID;</code><br>
+      Then:<br>
+      <code>ALTER TABLE orders VALIDATE CONSTRAINT status_not_null;</code><br><br>
+      <strong>Why NOT VALID:</strong> Skips full-table scan. Only takes SHARE UPDATE EXCLUSIVE lock — reads/writes continue.<br><br>
+      <strong>Django 5+:</strong> Prefer <code>db_default</code> over <code>default</code> — db_default is a real DB default, no Python-level rewrite.</p>
+    </div>
+  </div>
+
+  <div style="background:#fff3e0;border-radius:10px;padding:18px;margin-top:16px;border-left:4px solid #e74c3c;">
+    <strong>🚫 The Disaster Pattern (what NOT to do):</strong> Adding a non-nullable column + RunPython backfill in the SAME migration file. Django wraps the migration in a transaction. The ACCESS EXCLUSIVE lock from ALTER TABLE is held for the entire duration of the RunPython. On 50M rows, that's multiple minutes of zero reads + zero writes.
+  </div>
+</div>
+
+<div class="section-header" id="part3"><span>📋</span> Part 3: Pre-Migration Checklist — Memorize All 7 Steps</div>
+
+<div class="concept-card">
+  <ul class="checklist">
+    <li>
+      <div class="check-num">1</div>
+      <div><strong><code>python manage.py sqlmigrate &lt;app&gt; &lt;num&gt;</code></strong> — Read the actual SQL. Know what DDL is about to run. Is it an ALTER TABLE? INDEX? Does it lock?</div>
+    </li>
+    <li>
+      <div class="check-num">2</div>
+      <div><strong><code>python manage.py makemigrations --check --dry-run</code></strong> — Fail if any model changed without a migration committed. Run this in CI so deploy bombs don't reach production.</div>
+    </li>
+    <li>
+      <div class="check-num">3</div>
+      <div><strong>Run on staging with a recent prod-data dump</strong> — Time it. A migration that takes 3 seconds on staging with 1,000 rows can take 45 minutes on prod with 50M rows.</div>
+    </li>
+    <li>
+      <div class="check-num">4</div>
+      <div><strong>Snapshot the prod database (or confirm PITR is enabled)</strong> — If the migration corrupts data, you need to restore. Point-in-time recovery before every major migration.</div>
+    </li>
+    <li>
+      <div class="check-num">5</div>
+      <div><strong>Check the migration is reversible</strong> — Every <code>RunPython</code> needs a <code>reverse_code</code> function. Even if it's <code>migrations.RunPython.noop</code>. Without it you can't roll back.</div>
+    </li>
+    <li>
+      <div class="check-num">6</div>
+      <div><strong>Ordering: additive migrations BEFORE code, destructive AFTER</strong> — New nullable column: deploy migration before new code. Removing a column: deploy code that stops using it first, then migration.</div>
+    </li>
+    <li>
+      <div class="check-num">7</div>
+      <div><strong>Have the rollback command ready</strong> — <code>python manage.py migrate &lt;app&gt; &lt;previous_migration_name&gt;</code>. Know it cold. Don't look it up while prod is burning.</div>
+    </li>
+  </ul>
+</div>
+
+<div class="section-header" id="part4"><span>🎯</span> Part 4: All Interview Questions Answered</div>
+
+<div class="qa-full" id="q1">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q1: "Walk me through how you'd add a new non-nullable column to a 50-million-row table in production."</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="comparison">
+      <div class="weak-col">
+        <div class="col-label">❌ WEAK — INSTANT DISQUALIFIER</div>
+        <div class="col-text">"I add the field to the model, run makemigrations, and run migrate on production."<br><br>This answer ends the interview. PostgreSQL's ALTER TABLE ... ADD COLUMN ... NOT NULL acquires an ACCESS EXCLUSIVE lock — no reads, no writes — until the column is added and ALL 50M rows are backfilled. Multiple minutes of downtime.</div>
+      </div>
+      <div class="solid-col">
+        <div class="col-label">✅ SOLID — EXPAND-CONTRACT (3 DEPLOYS)</div>
+        <div class="answer-step"><span class="step-num sn-blue">1</span><span><span class="kp">Deploy 1 — EXPAND:</span> Add column as <code>null=True</code>. Postgres 11+ = metadata-only, <strong>milliseconds</strong>, no lock. Old code ignores it, new code can start writing it. <span class="answer-tag at-blue">safe</span></span></div>
+        <div class="answer-step"><span class="step-num sn-orange">2</span><span><span class="kp">Deploy 2 — BACKFILL:</span> Management command, batches of 5,000 rows in separate transactions. <strong>NOT inside a migration file</strong> — migrations are transactional, backfill inside holds ACCESS EXCLUSIVE lock for entire duration. <span class="answer-tag at-orange">separate command</span></span></div>
+        <div class="answer-step"><span class="step-num sn-green">3</span><span><span class="kp">Deploy 3 — CONTRACT:</span> <code>ADD CONSTRAINT ... CHECK ... NOT VALID</code> → then <code>VALIDATE CONSTRAINT</code>. NOT VALID skips full-table scan. VALIDATE takes only SHARE UPDATE EXCLUSIVE — reads/writes continue. <span class="answer-tag at-green">concurrent</span></span></div>
+      </div>
+    </div>
+    <div class="signal-line">
+      <div class="signal-label">⚡ Production Signal Line</div>
+      "I once shipped a migration that combined a RunPython backfill with an AlterField to NOT NULL in the same file — because Django wraps each migration in a transaction, the ACCESS EXCLUSIVE lock queued behind the backfill and effectively froze writes on the orders table for ~45 minutes during business hours. We now split every non-trivial schema change into add-nullable → backfill in a management command in batches → constraint-with-NOT-VALID-then-VALIDATE, and we time every migration on a staging copy of prod data before it ships."
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q2">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q2: "What's the difference between a schema migration and a data migration? When would you use each?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <p><strong>Schema migration:</strong> Changes the database structure — adds/removes columns, tables, indexes, constraints. Generated by Django when you change models. Examples: <code>AddField</code>, <code>RemoveField</code>, <code>AlterField</code>, <code>CreateModel</code>.</p>
+      <p style="margin-top:10px;"><strong>Data migration:</strong> Transforms or moves existing data — doesn't change structure. Uses <code>RunPython</code> or <code>RunSQL</code>. Example: splitting a full_name column into first_name + last_name, backfilling a new status column based on existing data.</p>
+      <div class="trap-box"><strong>🚫 Critical trap:</strong> Never put a large data migration (RunPython over millions of rows) in the same migration file as an AlterField. The transaction holds schema locks for the entire data operation duration. Split them: schema migration in one file, data migration in a separate file, or better — as a management command that runs independently.</div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q3">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q3: "Have you ever had a migration cause downtime? Walk me through it."</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><span class="step-num sn-orange">!</span><span><span class="kp">What failed:</span> RunPython backfill + AlterField to NOT NULL in the <strong>same migration file</strong>. <span class="answer-tag at-red">classic mistake</span></span></div>
+      <div class="answer-step"><span class="step-num">2</span><span><span class="kp">Why:</span> Django wraps each migration in a transaction. ACCESS EXCLUSIVE lock held for <strong>entire backfill duration</strong> — ~45 minutes of zero writes on the orders table during business hours.</span></div>
+      <div class="answer-step"><span class="step-num">3</span><span><span class="kp">Fix:</span> Rolled back with <code>migrate &lt;app&gt; &lt;previous&gt;</code> — worked because RunPython had a reverse function. Always write reverse_code.</span></div>
+      <div class="answer-step"><span class="step-num sn-green">✓</span><span><span class="kp">Prevention:</span> 3-deploy expand-contract, backfill as management command (separate transaction control), time on staging with prod data copy, 5-second statement-timeout on migration runner.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q4">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q4: "What's your pre-migration checklist before running migrate in production?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <div class="answer-step"><span class="step-num">1</span><span><code>sqlmigrate &lt;app&gt; &lt;num&gt;</code> — <span class="kp">read the actual SQL</span>. Know the lock type before touching prod. <span class="answer-tag at-red">ACCESS EXCLUSIVE</span> = danger.</span></div>
+      <div class="answer-step"><span class="step-num">2</span><span><span class="kp">Run on staging with prod-data copy</span> — time it. 3 seconds on staging can be 45 minutes on prod with 50M rows.</span></div>
+      <div class="answer-step"><span class="step-num">3</span><span><span class="kp">Snapshot the database</span> (or confirm PITR is enabled) before running. Data corruption needs a restore path.</span></div>
+      <div class="answer-step"><span class="step-num">4</span><span><span class="kp">Verify reversibility</span> — every RunPython needs a <code>reverse_code</code> function. <code>RunPython.noop</code> at minimum.</span></div>
+      <div class="answer-step"><span class="step-num sn-green">5</span><span><span class="kp">Rollback command ready</span>: <code>manage.py migrate &lt;app&gt; &lt;previous_name&gt;</code> — know it cold, don't look it up while prod is burning.</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q5">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+      <div class="qa-q">Q5: "What does python manage.py sqlmigrate app 0005 give you?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <p>"It prints the raw SQL that Django will execute when you run that migration — without actually running it. This lets you review the exact DDL before touching the database."</p>
+      <p style="margin-top:10px;"><strong>Why it matters:</strong> You can see if it's going to run <code>ALTER TABLE ... ADD COLUMN ... NOT NULL</code> (table lock), or <code>CREATE INDEX</code> (vs <code>CREATE INDEX CONCURRENTLY</code>), or a simple INSERT/UPDATE. Lets you catch dangerous operations before they hit production.</p>
+      <p style="margin-top:10px;"><strong>In practice:</strong> I run sqlmigrate for every migration as part of the pre-migration checklist. If I see an operation that will lock a large table, I know I need to restructure the migration before deploying.</p>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q6">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+      <div class="qa-q">Q6: "How do you roll back a migration that included a RunPython?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <p><code>python manage.py migrate &lt;app&gt; &lt;previous_migration_name&gt;</code> — Django runs the RunPython's reverse function.</p>
+      <p style="margin-top:10px;"><strong>But:</strong> If the RunPython was written without a reverse function (just <code>RunPython(forward_func)</code> without a second argument), Django raises an exception — migration is irreversible.</p>
+      <div class="code-block"><span class="c"># GOOD — reversible RunPython</span>
+<span class="k">def</span> forward(apps, schema_editor):
+    Order = apps.get_model(<span class="s">'orders'</span>, <span class="s">'Order'</span>)
+    Order.objects.update(status=<span class="s">'pending'</span>)
+
+<span class="k">def</span> backward(apps, schema_editor):
+    Order = apps.get_model(<span class="s">'orders'</span>, <span class="s">'Order'</span>)
+    Order.objects.update(status=<span class="k">None</span>)
+
+migrations.RunPython(forward, backward)
+
+<span class="c"># At minimum — if backward is truly a no-op:</span>
+migrations.RunPython(forward, migrations.RunPython.noop)</div>
+    </div>
+  </div>
+</div>
+
+<div class="qa-full" id="q7">
+  <div class="qa-header" onclick="toggleQA(this)">
+    <div>
+      <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+      <div class="qa-q">Q7: "Why is db_default preferred over default for new not-null columns in Django 5+?"</div>
+    </div>
+    <div class="qa-toggle">▼</div>
+  </div>
+  <div class="qa-body">
+    <div class="solid-answer">
+      <p><strong>default:</strong> Applied at the Python/ORM level. When you add a column with default=timezone.now, Django's ORM adds the current time to every new object — but the database doesn't know about the default. The migration has to UPDATE every existing row in Python, one by one (or in a batch), which is slow and locks the table.</p>
+      <p style="margin-top:10px;"><strong>db_default:</strong> A real database-level DEFAULT clause. The database engine handles it natively. In Postgres 11+, adding a column with a constant database default is metadata-only — no rewrite, no lock.</p>
+<div class="code-block"><span class="c"># Django 5+ — db_default sets a real DB-level DEFAULT</span>
+<span class="k">class</span> Order(models.Model):
+    status = models.CharField(
+        max_length=20,
+        <span class="s">db_default=</span><span class="v">'pending'</span>  <span class="c"># Real DB DEFAULT 'pending' — no row rewrite</span>
+    )
+
+<span class="c"># vs old pattern:</span>
+    status = models.CharField(
+        max_length=20,
+        <span class="s">default=</span><span class="v">'pending'</span>  <span class="c"># ORM-level — migration rewrites existing rows</span>
+    )</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:12px;margin-top:40px;flex-wrap:wrap;">
+  <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+  <a href="02-cicd.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">← ⚡ CI/CD</a>
+  <a href="04-secrets.html" style="display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:10px 18px;text-decoration:none;color:var(--text);font-size:0.9rem;">🔐 Secrets →</a>
+</div>
+</div>
+<button class="rsidebar-toggle" onclick="toggleRSidebar()">☰ Sections</button>
+<div class="rsidebar" id="rsidebar">
+  <div class="rsidebar-header">
+    <span>📍 On This Page</span>
+    <button class="rsidebar-close" onclick="toggleRSidebar()">✕</button>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">📐 Visual Concepts</div>
+    <a href="#part1">🔒 PostgreSQL Lock Types</a>
+    <a href="#part2">🔄 Expand-Contract Pattern (3 Deploys)</a>
+    <a href="#part3">📋 Pre-Migration Checklist (7 Steps)</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🎯 Interview Q&amp;A</div>
+    <a href="#q1"><span class="rlink-tag hf">HF</span> 50M row non-nullable column</a>
+    <a href="#q2"><span class="rlink-tag hf">HF</span> Schema vs data migration</a>
+    <a href="#q3"><span class="rlink-tag hf">HF</span> Migration caused downtime story</a>
+    <a href="#q4"><span class="rlink-tag hf">HF</span> Pre-migration checklist</a>
+    <a href="#q5"><span class="rlink-tag hf">HF</span> What sqlmigrate gives you</a>
+    <a href="#q6">Roll back a RunPython migration</a>
+    <a href="#q7">db_default vs default (Django 5+)</a>
+  </div>
+  <div class="rsidebar-group" style="border-bottom:none;">
+    <a href="../01-Key-Talking-Points.html" style="color:#f39c12;font-weight:600;">← Back to Session 6</a>
+    <a href="02-cicd.html" style="color:#e74c3c;">← CI/CD</a>
+    <a href="04-secrets.html" style="color:#9b59b6;font-weight:600;">🔐 Next: Secrets →</a>
+  </div>
+</div>
+<script>
+function toggleQA(h){const b=h.nextElementSibling,t=h.querySelector('.qa-toggle'),o=b.classList.contains('open');b.classList.toggle('open',!o);t.classList.toggle('rotated',!o);}
+function toggleRSidebar(){document.getElementById('rsidebar').classList.toggle('open');}
+document.addEventListener('click',function(e){const sb=document.getElementById('rsidebar'),btn=document.querySelector('.rsidebar-toggle');if(sb&&sb.classList.contains('open')&&!sb.contains(e.target)&&e.target!==btn)sb.classList.remove('open');});
+</script>
+</body>
+</html>

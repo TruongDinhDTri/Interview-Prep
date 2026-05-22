@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ CI/CD Pipelines — Complete Visual Guide</title>
+<style>
+:root {
+  --bg: #f8f4ec;
+  --card: #ffffff;
+  --primary: #e74c3c;
+  --primary-dark: #c0392b;
+  --accent: #3498db;
+  --green: #27ae60;
+  --orange: #f39c12;
+  --purple: #8e44ad;
+  --dark: #2c3e50;
+  --text: #3a3530;
+  --text-light: #6b6258;
+  --border: #ddd5c8;
+  --success: #27ae60;
+  --danger: #e74c3c;
+  --warning: #f39c12;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); }
+
+/* NAV */
+.topnav {
+  background: var(--dark);
+  padding: 14px 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.topnav a { color: rgba(255,255,255,0.7); text-decoration: none; font-size: 0.9rem; }
+.topnav a:hover { color: white; }
+.topnav .current { color: white; font-weight: 600; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, #c0392b 0%, #e74c3c 40%, #e67e22 100%);
+  color: white;
+  padding: 50px 40px;
+}
+.header-inner { max-width: 1400px; margin: 0 auto; }
+.header h1 { font-size: 2.6rem; font-weight: 800; margin-bottom: 10px; }
+.header p { font-size: 1.1rem; opacity: 0.85; max-width: 800px; }
+
+/* MAIN LAYOUT */
+.container { max-width: 1400px; margin: 0 auto; padding: 50px 40px; }
+
+/* SECTION HEADERS */
+.section-header {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin: 50px 0 24px;
+  padding-bottom: 14px;
+  border-bottom: 3px solid var(--primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* CONCEPT CARDS */
+.concept-card {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 28px;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+}
+
+/* THREE-WAY DISTINCTION */
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 20px;
+  margin: 24px 0;
+}
+.ci-box {
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}
+.ci-box h3 { font-size: 1.1rem; font-weight: 800; margin-bottom: 8px; }
+.ci-box p { font-size: 0.9rem; line-height: 1.6; }
+.ci-box .emoji { font-size: 2.5rem; margin-bottom: 12px; }
+
+/* PIPELINE VISUAL */
+.pipeline-container {
+  background: white;
+  border-radius: 16px;
+  padding: 40px;
+  margin: 28px 0;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  overflow-x: auto;
+}
+.pipeline-title {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.pipeline-phases {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.phase-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: 0;
+}
+.phase-label {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  background: var(--phase-color, #666);
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  padding: 12px 8px;
+  border-radius: 8px 0 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  letter-spacing: 1px;
+}
+.phase-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 16px;
+  flex: 1;
+  border: 2px solid;
+  border-left: none;
+  border-color: var(--phase-color, #ddd);
+  border-radius: 0 8px 8px 0;
+  background: var(--phase-bg, #fafafa);
+  align-items: center;
+}
+.step-chip {
+  border-radius: 30px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.step-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.arrow-down {
+  text-align: center;
+  font-size: 1.5rem;
+  color: #aaa;
+  padding: 4px 0;
+  line-height: 1;
+}
+
+/* STEP DETAIL PANEL */
+.step-detail {
+  background: #f8f9ff;
+  border: 2px solid #d0d8f0;
+  border-radius: 12px;
+  padding: 24px;
+  margin-top: 20px;
+  display: none;
+}
+.step-detail.active { display: block; }
+.step-detail h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--dark); }
+.step-detail p { font-size: 0.95rem; line-height: 1.7; color: var(--text); margin-bottom: 10px; }
+.step-detail code {
+  display: block;
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 16px;
+  border-radius: 8px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  margin-top: 10px;
+  white-space: pre;
+  overflow-x: auto;
+}
+
+/* FULL PIPELINE HORIZONTAL FLOW */
+.flow-container {
+  overflow-x: auto;
+  padding: 20px 0;
+}
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: max-content;
+  padding: 10px 20px;
+}
+.flow-node {
+  background: white;
+  border: 2px solid var(--node-color, #3498db);
+  border-radius: 12px;
+  padding: 14px 18px;
+  text-align: center;
+  min-width: 110px;
+  position: relative;
+}
+.flow-node .node-icon { font-size: 1.5rem; margin-bottom: 4px; }
+.flow-node .node-label { font-size: 0.78rem; font-weight: 600; color: var(--dark); }
+.flow-node .node-sub { font-size: 0.68rem; color: #888; margin-top: 2px; }
+.flow-arrow {
+  font-size: 1.3rem;
+  color: #bbb;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+
+/* Q&A SECTION */
+.qa-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin: 28px 0;
+}
+.qa-card {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.qa-header {
+  padding: 20px 24px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  transition: background 0.2s;
+}
+.qa-header:hover { background: #fafaf8; }
+.qa-q-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+.hf-label { background: #fff3e0; color: #b36b00; border: 1px solid #f39c12; }
+.ntk-label { background: #e8f5e9; color: #2e7d32; border: 1px solid #66bb6a; }
+.qa-q { font-weight: 700; font-size: 1rem; color: var(--dark); line-height: 1.4; }
+.qa-toggle { font-size: 1.3rem; color: #aaa; flex-shrink: 0; transition: transform 0.3s; }
+.qa-body {
+  border-top: 1px solid #f0ebe0;
+  display: none;
+}
+.qa-body.open { display: block; }
+.qa-toggle.rotated { transform: rotate(180deg); }
+
+.comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.weak-col, .solid-col {
+  padding: 20px 24px;
+}
+.weak-col { background: #fff5f5; border-right: 1px solid #f0ebe0; }
+.solid-col { background: #f0faf4; }
+.col-label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.weak-col .col-label { color: var(--danger); }
+.solid-col .col-label { color: var(--success); }
+.col-text { font-size: 0.88rem; line-height: 1.7; font-style: italic; color: #555; }
+.signal-line {
+  background: linear-gradient(135deg, #2c3e50, #4a7c59);
+  color: white;
+  padding: 20px 24px;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  font-style: italic;
+}
+.signal-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-bottom: 6px;
+}
+.solid-answer {
+  padding: 20px 24px;
+  font-size: 0.9rem;
+  line-height: 1.8;
+  color: var(--text);
+  background: #fafaf8;
+}
+.solid-answer strong { color: var(--dark); }
+
+/* KEY CONCEPTS */
+.key-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+  margin: 20px 0;
+}
+.key-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--kc-color, var(--primary));
+}
+.key-card h4 { font-size: 0.95rem; font-weight: 700; color: var(--dark); margin-bottom: 8px; }
+.key-card p { font-size: 0.85rem; line-height: 1.6; color: var(--text-light); }
+
+/* CODE BLOCK */
+.code-block {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 24px;
+  border-radius: 12px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 16px 0;
+  white-space: pre;
+}
+.code-comment { color: #64748b; }
+.code-key { color: #93c5fd; }
+.code-val { color: #86efac; }
+.code-str { color: #fca5a5; }
+
+/* TRAP BOX */
+.trap-box {
+  background: #fff8e1;
+  border: 1px solid #ffc107;
+  border-left: 4px solid #f57c00;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 10px 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+.trap-box strong { color: #e65100; }
+
+/* BACK BUTTON */
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.85rem;
+  text-decoration: none;
+  color: var(--text);
+  margin-bottom: 30px;
+  transition: all 0.2s;
+}
+.back-btn:hover { background: var(--bg); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+/* INFO BOX */
+.info-box {
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-left: 4px solid #1976d2;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 0.9rem;
+  line-height: 1.7;
+}
+
+/* FULL WIDTH QA */
+.qa-full {
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  margin-bottom: 20px;
+}
+
+/* YAML SECTION */
+.yaml-annotated {
+  position: relative;
+  margin: 20px 0;
+}
+.yaml-line {
+  display: flex;
+  font-family: 'Consolas', monospace;
+  font-size: 0.85rem;
+  line-height: 1.8;
+}
+.yaml-code {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 3px 16px;
+  flex: 1;
+}
+.yaml-ann {
+  background: #2d3748;
+  color: #fbbf24;
+  padding: 3px 14px;
+  font-size: 0.78rem;
+  min-width: 280px;
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .three-col { grid-template-columns: 1fr; }
+  .qa-grid { grid-template-columns: 1fr; }
+  .comparison { grid-template-columns: 1fr; }
+}
+
+/* PHASE LINK */
+.phase-group-label{cursor:pointer;transition:opacity 0.15s;}
+.phase-group-label:hover{opacity:0.8;}
+.phase-group-label::after{content:" ↓";font-size:0.7em;opacity:0.7;}
+.phase-section{transition:box-shadow 0.2s;}
+.phase-highlighted{animation:phaseGlow 2s ease;}
+@keyframes phaseGlow{0%,100%{outline:none;}15%,85%{outline:3px solid #f39c12;border-radius:10px;}}
+.pipeline-bridge{text-align:center;padding:10px 0 4px;font-size:0.82rem;color:#888;font-style:italic;}
+
+/* ── PHASE FLOW (Part 2 redesign) ── */
+.phase-legend {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.phase-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+.phase-flow-outer {
+  overflow-x: auto;
+  padding: 8px 4px 24px;
+  margin: 0 -8px;
+}
+.phase-flow {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  min-width: max-content;
+  padding: 4px 16px 8px;
+}
+.phase-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.phase-group-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+.phase-group-nodes {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 2px solid;
+}
+.phase-node {
+  background: white;
+  border: 2.5px solid var(--pn-color, #aaa);
+  border-radius: 14px;
+  padding: 14px 16px;
+  text-align: center;
+  min-width: 118px;
+  cursor: pointer;
+  transition: all 0.2s;
+  user-select: none;
+}
+.phase-node:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.14);
+}
+.phase-node.active-node {
+  box-shadow: 0 0 0 3px var(--pn-color, #aaa), 0 8px 24px rgba(0,0,0,0.12);
+  transform: translateY(-4px);
+}
+.phase-node .pn-icon { font-size: 1.9rem; margin-bottom: 6px; display: block; }
+.phase-node .pn-label { font-size: 0.82rem; font-weight: 700; color: #1a202c; line-height: 1.2; }
+.phase-node .pn-sub { font-size: 0.68rem; color: #888; margin-top: 3px; }
+.inline-node-arrow {
+  font-size: 1.2rem;
+  color: var(--pn-color, #bbb);
+  margin: 0 6px;
+  align-self: center;
+  padding-bottom: 18px;
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+.phase-between-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  padding-bottom: 22px;
+  margin: 0 6px;
+  flex-shrink: 0;
+}
+.phase-between-arrow span {
+  font-size: 1.5rem;
+  color: #cbd5e0;
+}
+
+/* Flow node detail panel */
+.flow-detail-panel {
+  display: none;
+  margin-top: 20px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid var(--fdp-color, #ddd);
+  animation: fdpSlide 0.22s ease;
+}
+@keyframes fdpSlide {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.flow-detail-panel.visible { display: block; }
+.fdp-header {
+  padding: 14px 22px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.fdp-phase-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: rgba(255,255,255,0.22);
+  color: white;
+  padding: 3px 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.fdp-title { font-size: 1.05rem; font-weight: 800; color: white; }
+.fdp-body {
+  padding: 20px 24px;
+  background: white;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 700px) { .fdp-body { grid-template-columns: 1fr; } }
+.fdp-section h5 {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--fdp-color, #333);
+  margin-bottom: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.fdp-section p { font-size: 0.88rem; line-height: 1.75; color: #444; }
+.fdp-tip {
+  grid-column: 1 / -1;
+  background: var(--fdp-bg, #f8f8f8);
+  border-left: 4px solid var(--fdp-color, #333);
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-size: 0.86rem;
+  line-height: 1.65;
+  color: #333;
+}
+/* RIGHT SIDEBAR */
+.rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
+.rsidebar-toggle:hover{background:var(--dark);}
+.rsidebar{position:fixed;right:0;top:0;width:290px;height:100vh;background:#fff;border-left:1px solid var(--border);box-shadow:-4px 0 20px rgba(0,0,0,0.1);transform:translateX(100%);transition:transform 0.3s ease;overflow-y:auto;z-index:200;}
+.rsidebar.open{transform:translateX(0);}
+.rsidebar-header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--border);font-weight:700;font-size:0.95rem;color:var(--dark);position:sticky;top:0;background:#fff;}
+.rsidebar-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:#aaa;}
+.rsidebar-group{padding:10px 0;border-bottom:1px solid #f0ebe0;}
+.rsidebar-group-title{font-size:0.68rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:#aaa;padding:4px 20px 8px;}
+.rsidebar a{display:block;padding:5px 20px;font-size:0.82rem;color:#555;text-decoration:none;line-height:1.5;transition:all 0.15s;}
+.rsidebar a:hover{background:#f8f4ec;color:var(--dark);padding-left:24px;}
+.rsidebar a .rlink-tag{font-size:0.62rem;font-weight:700;text-transform:uppercase;background:#f0ebe0;padding:1px 5px;border-radius:3px;margin-right:4px;color:#888;}
+.rsidebar a .rlink-tag.hf{background:#fff3e0;color:#b36b00;}
+/* Q&A BEAUTY COMPONENTS */
+.answer-tag{display:inline-block;padding:2px 9px;border-radius:12px;font-size:0.72rem;font-weight:700;letter-spacing:0.3px;margin-right:4px;}
+.at-blue{background:#dbeafe;color:#1d4ed8;} .at-red{background:#fee2e2;color:#dc2626;} .at-green{background:#dcfce7;color:#16a34a;}
+.at-orange{background:#fef3c7;color:#92400e;} .at-purple{background:#f3e8ff;color:#7c3aed;} .at-gray{background:#f1f5f9;color:#475569;}
+.kp{color:#1a202c;font-weight:700;}
+.answer-step{display:flex;gap:12px;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;line-height:1.6;}
+.answer-step:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;background:var(--primary);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.68rem;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-num.sn-green{background:var(--success);} .step-num.sn-orange{background:var(--warning);}
+.answer-concept-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0ebe0;font-size:0.88rem;}
+.answer-concept-row:last-child{border-bottom:none;}
+.acr-badge{min-width:90px;text-align:center;padding:4px 10px;border-radius:6px;font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.5px;flex-shrink:0;}
+</style>
+</head>
+<body>
+
+<div class="topnav">
+  <a href="index.html">🏠 Hub</a>
+  <span style="color:#555">/</span>
+  <span class="current">⚡ CI/CD Pipelines</span>
+  <span style="margin-left:auto; color:#666; font-size:0.85rem;">Session 6 — DevOps & Deployment</span>
+</div>
+
+<div class="header">
+  <div class="header-inner">
+    <div style="font-size:2.5rem; margin-bottom:12px;">⚡ CI/CD Pipelines</div>
+    <h1>Continuous Integration & Deployment</h1>
+    <p>From zero to production-fluent. Every step of the pipeline explained. Every question answered. The exact answers that flip interviews.</p>
+  </div>
+</div>
+
+<div class="container">
+  <a href="index.html" class="back-btn">← Back to Battle Hub</a>
+
+  <!-- ============================================================ -->
+  <!-- PART 1: THE THREE-WAY DISTINCTION -->
+  <!-- ============================================================ -->
+  <div class="section-header" id="part1">
+    <span>🔑</span> Part 1: The Three-Way Distinction — CI vs CD (Delivery) vs CD (Deployment)
+  </div>
+
+  <div class="concept-card">
+    <p style="font-size:1rem; color:#666; margin-bottom:20px;">⚠️ <strong>Gate Question:</strong> Interviewers use this to filter. If you say "they're the same thing" — the interview is usually over. Know ALL THREE cold.</p>
+
+    <div class="three-col">
+      <div class="ci-box" style="background:#e3f2fd; border: 2px solid #1976d2;">
+        <div class="emoji">🔄</div>
+        <h3 style="color:#1976d2;">Continuous Integration</h3>
+        <p><strong>WHAT:</strong> Developers merge code to <code>main</code> frequently (multiple times a day). Every push triggers automated build + tests.</p>
+        <p style="margin-top:10px;"><strong>GOAL:</strong> Keep the trunk green. Catch regressions immediately.</p>
+        <p style="margin-top:10px; font-size:0.82rem; background:white; border-radius:8px; padding:10px;"><em>"The pipeline tells you within minutes if your code broke something."</em></p>
+      </div>
+      <div class="ci-box" style="background:#fff3e0; border: 2px solid #e65100;">
+        <div class="emoji">📦</div>
+        <h3 style="color:#e65100;">Continuous Delivery</h3>
+        <p><strong>WHAT:</strong> Every passing build produces a deployable artifact that <em>could</em> go to prod with <strong>one button press</strong>. But a human gates the release.</p>
+        <p style="margin-top:10px;"><strong>WHEN TO USE:</strong> Right default for most teams — lets you batch risky changes, use deploy windows, or wait for feature flags.</p>
+        <p style="margin-top:10px; font-size:0.82rem; background:white; border-radius:8px; padding:10px;"><em>"The artifact is always ready. Humans decide when."</em></p>
+      </div>
+      <div class="ci-box" style="background:#e8f5e9; border: 2px solid #2e7d32;">
+        <div class="emoji">🚀</div>
+        <h3 style="color:#2e7d32;">Continuous Deployment</h3>
+        <p><strong>WHAT:</strong> Every green build on main <strong>automatically</strong> goes to production. Zero human gate.</p>
+        <p style="margin-top:10px;"><strong>REQUIRES:</strong> Strong test suite + feature flags + good observability + auto-rollback.</p>
+        <p style="margin-top:10px; font-size:0.82rem; background:white; border-radius:8px; padding:10px;"><em>"Every commit ships. You need mature safeguards first."</em></p>
+      </div>
+    </div>
+
+    <div style="background:#f8f4ec; border-radius:10px; padding:18px; margin-top:16px;">
+      <strong>The Trade-off in one sentence:</strong> Delivery = velocity with human safety gate. Deployment = maximum velocity, requires maximum safeguards. For most teams, <strong>Delivery is right</strong> — full Deployment is a goal you work toward, not a day-one choice.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PART 2: FULL PIPELINE ANATOMY -->
+  <!-- ============================================================ -->
+  <div class="section-header" id="part2">
+    <span>🏗️</span> Part 2: The Full Pipeline — Step by Step (Git Push → User Sees Change)
+  </div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:16px; color:#666; font-size:0.95rem;">This is what you say when asked: <em>"Describe what happens between <code>git push</code> and the user seeing the change."</em> <strong style="color:#333;">Click a phase label to jump to its detailed steps below. Click a node to see what it does.</strong></p>
+
+    <!-- Phase legend -->
+    <div class="phase-legend">
+      <span style="font-size:0.78rem; color:#888; font-weight:700; margin-right:2px;">PHASES:</span>
+      <span class="phase-pill" style="background:#e9ecef; color:#495057;">⬤ LOCAL DEV</span>
+      <span class="phase-pill" style="background:#fee2e2; color:#c0392b;">⬤ TRIGGER</span>
+      <span class="phase-pill" style="background:#eceff1; color:#37474f;">⬤ SETUP</span>
+      <span class="phase-pill" style="background:#dbeafe; color:#1565c0;">⬤ QUALITY</span>
+      <span class="phase-pill" style="background:#dcfce7; color:#1b5e20;">⬤ TEST</span>
+      <span class="phase-pill" style="background:#f3e8ff; color:#6a1b9a;">⬤ BUILD</span>
+      <span class="phase-pill" style="background:#ffe0b2; color:#bf360c;">⬤ DEPLOY</span>
+      <span class="phase-pill" style="background:#e8f5e9; color:#2e7d32;">⬤ LIVE</span>
+    </div>
+
+    <!-- Phase-grouped horizontal flow -->
+    <div class="phase-flow-outer">
+      <div class="phase-flow">
+
+        <!-- LOCAL DEV -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#6c757d;" onclick="jumpToPhase('local-dev')">LOCAL DEV</div>
+          <div class="phase-group-nodes" style="border-color:#6c757d; background:#f8f9fa;">
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('developer', this)">
+              <span class="pn-icon">👨‍💻</span>
+              <div class="pn-label">Developer</div>
+              <div class="pn-sub">Writes code locally</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#6c757d;">→</span>
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('git-commit', this)">
+              <span class="pn-icon">📝</span>
+              <div class="pn-label">git commit</div>
+              <div class="pn-sub">feature/my-branch</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#6c757d;">→</span>
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('git-push', this)">
+              <span class="pn-icon">⬆️</span>
+              <div class="pn-label">git push</div>
+              <div class="pn-sub">to remote</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- TRIGGER -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#e74c3c;" onclick="jumpToPhase('trigger')">TRIGGER</div>
+          <div class="phase-group-nodes" style="border-color:#e74c3c; background:#fff5f5;">
+            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showFlowDetail('github-pr', this)">
+              <span class="pn-icon">🐙</span>
+              <div class="pn-label">GitHub PR</div>
+              <div class="pn-sub">Webhook fires</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#e74c3c;">→</span>
+            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showFlowDetail('ci-trigger', this)">
+              <span class="pn-icon">⚡</span>
+              <div class="pn-label">CI Trigger</div>
+              <div class="pn-sub">Actions Runner</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- SETUP -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#546e7a;" onclick="jumpToPhase('setup')">SETUP</div>
+          <div class="phase-group-nodes" style="border-color:#546e7a; background:#eceff1;">
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('checkout', this)">
+              <span class="pn-icon">📥</span>
+              <div class="pn-label">Checkout</div>
+              <div class="pn-sub">actions/checkout@v4</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#546e7a;">→</span>
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('setup-python', this)">
+              <span class="pn-icon">🐍</span>
+              <div class="pn-label">Setup Python</div>
+              <div class="pn-sub">+ pip cache</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#546e7a;">→</span>
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('install-deps', this)">
+              <span class="pn-icon">📦</span>
+              <div class="pn-label">Install Deps</div>
+              <div class="pn-sub">requirements.txt</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- QUALITY -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#1976d2;" onclick="jumpToPhase('quality')">QUALITY</div>
+          <div class="phase-group-nodes" style="border-color:#1976d2; background:#e3f2fd;">
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showFlowDetail('lint-test', this)">
+              <span class="pn-icon">✅</span>
+              <div class="pn-label">Lint + Test</div>
+              <div class="pn-sub">vs real Postgres</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#1976d2;">→</span>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showFlowDetail('security-scan-flow', this)">
+              <span class="pn-icon">🔒</span>
+              <div class="pn-label">Security Scan</div>
+              <div class="pn-sub">pip-audit, bandit</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- TEST -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#27ae60;" onclick="jumpToPhase('test')">TEST</div>
+          <div class="phase-group-nodes" style="border-color:#27ae60; background:#e8f5e9;">
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('pg-service', this)">
+              <span class="pn-icon">🐘</span>
+              <div class="pn-label">Spin Up Postgres</div>
+              <div class="pn-sub">service container</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#27ae60;">→</span>
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('pytest', this)">
+              <span class="pn-icon">🧪</span>
+              <div class="pn-label">pytest</div>
+              <div class="pn-sub">real DB — not SQLite</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- BUILD -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#8e44ad;" onclick="jumpToPhase('build')">BUILD</div>
+          <div class="phase-group-nodes" style="border-color:#8e44ad; background:#f3e5f5;">
+            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showFlowDetail('build-image', this)">
+              <span class="pn-icon">🐳</span>
+              <div class="pn-label">Build Image</div>
+              <div class="pn-sub">Docker multi-stage</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#8e44ad;">→</span>
+            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showFlowDetail('tag-push', this)">
+              <span class="pn-icon">🏷️</span>
+              <div class="pn-label">Tag + Push</div>
+              <div class="pn-sub">sha-abc123 → ECR</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- DEPLOY -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#e65100;" onclick="jumpToPhase('deploy')">DEPLOY</div>
+          <div class="phase-group-nodes" style="border-color:#e65100; background:#fff3e0;">
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('run-migration-flow', this)">
+              <span class="pn-icon">🗄️</span>
+              <div class="pn-label">Run Migration</div>
+              <div class="pn-sub">ECS one-off task</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('rolling-deploy', this)">
+              <span class="pn-icon">🔄</span>
+              <div class="pn-label">Rolling Deploy</div>
+              <div class="pn-sub">ECS new tasks</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('health-check-flow', this)">
+              <span class="pn-icon">❤️</span>
+              <div class="pn-label">Health Check</div>
+              <div class="pn-sub">/health/ → 200</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="phase-between-arrow"><span>→</span></div>
+
+        <!-- LIVE -->
+        <div class="phase-group">
+          <div class="phase-group-label" style="background:#27ae60;" onclick="jumpToPhase('live')">LIVE 🎉</div>
+          <div class="phase-group-nodes" style="border-color:#27ae60; background:#e8f5e9;">
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('user-sees', this)">
+              <span class="pn-icon">👤</span>
+              <div class="pn-label">User Sees</div>
+              <div class="pn-sub">Zero downtime</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end .phase-flow -->
+    </div><!-- end .phase-flow-outer -->
+
+    <!-- Click-to-expand detail panel -->
+    <div id="flow-node-detail" class="flow-detail-panel"></div>
+  </div>
+
+  <div class="pipeline-bridge">↕ Each phase above maps directly to a section below — click any phase label to jump</div>
+
+  <!-- PIPELINE PHASES DETAILED -->
+  <div class="pipeline-container">
+    <div class="pipeline-title">🔍 Phase Detail — What Happens Inside Each Phase (click any step)</div>
+
+    <div id="phase-local-dev" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="--phase-color:#6c757d; background:#6c757d;">LOCAL DEV</div>
+        <div class="phase-steps" style="--phase-color:#6c757d; --phase-bg:#f8f9fa;">
+          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">👨‍💻 Write Code (feature branch)</div>
+          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">📝 git commit</div>
+          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">⬆️ git push → GitHub</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-trigger" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="--phase-color:#e74c3c; background:#e74c3c;">TRIGGER</div>
+        <div class="phase-steps" style="--phase-color:#e74c3c; --phase-bg:#fff5f5;">
+          <div class="step-chip" style="background:#ffcdd2; border-color:#e74c3c; color:#c62828;">🐙 Webhook fires (on: push / pull_request)</div>
+          <div class="step-chip" style="background:#ffcdd2; border-color:#e74c3c; color:#c62828;">⚡ Actions runner starts (clean ubuntu-latest VM)</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-setup" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="--phase-color:#546e7a; background:#546e7a;">SETUP</div>
+        <div class="phase-steps" style="--phase-color:#546e7a; --phase-bg:#eceff1;">
+          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('checkout')">📥 1. Checkout Code</div>
+          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('setup-python')">🐍 2. Setup Python + Cache</div>
+          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('install-deps')">📦 3. Install Dependencies</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-quality" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="background:#1976d2;">QUALITY</div>
+        <div class="phase-steps" style="--phase-color:#1976d2; --phase-bg:#e3f2fd;">
+          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('lint')">🔍 4. Lint (ruff / black)</div>
+          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('typecheck')">🏷️ 5. Type Check (mypy)</div>
+          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('security-scan')">🔐 6. Security Scan</div>
+          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('django-check')">⚙️ 7. manage.py check --deploy</div>
+          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('migration-check')">🗄️ 8. makemigrations --check</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-test" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="background:#27ae60;">TEST</div>
+        <div class="phase-steps" style="--phase-color:#27ae60; --phase-bg:#e8f5e9;">
+          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pg-service')">🐘 9. Spin Up PostgreSQL Service</div>
+          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pg-health')">❤️ 10. Wait: pg_isready</div>
+          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pytest')">🧪 11. pytest (real DB)</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓ <span style="color:#e74c3c; font-size:0.85rem; font-weight:700;">(If ANY step above fails → pipeline STOPS. No image built. No deploy.)</span></div>
+    </div>
+
+    <div id="phase-build" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="background:#8e44ad;">BUILD</div>
+        <div class="phase-steps" style="--phase-color:#8e44ad; --phase-bg:#f3e5f5;">
+          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('docker-build')">🐳 12. Docker Build (multi-stage)</div>
+          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('tag-sha')">🏷️ 13. Tag with Git SHA</div>
+          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('push-ecr')">☁️ 14. Push to ECR</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-deploy" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="background:#e65100;">DEPLOY</div>
+        <div class="phase-steps" style="--phase-color:#e65100; --phase-bg:#fff3e0;">
+          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('run-migration')">🗄️ 15. Run Migrations (ECS task)</div>
+          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('rolling-update')">🔄 16. Rolling Update ECS Service</div>
+          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('health-check')">❤️ 17. Health Check /health/</div>
+          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('drain-old')">🗑️ 18. Drain + Kill Old Tasks</div>
+          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('notify')">📢 19. Notify Slack/Email</div>
+        </div>
+      </div>
+      <div class="arrow-down">↓</div>
+    </div>
+
+    <div id="phase-live" class="phase-section">
+      <div class="phase-row">
+        <div class="phase-label" style="background:#27ae60;">LIVE 🎉</div>
+        <div class="phase-steps" style="--phase-color:#27ae60; --phase-bg:#e8f5e9;">
+          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;">🔀 ALB routes 100% traffic to new tasks</div>
+          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;">👤 User sees the change — zero downtime ✅</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Panel -->
+    <div id="step-detail-panel" class="step-detail" style="margin-top:20px;"></div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PART 3: THE GITHUB ACTIONS YAML ANNOTATED -->
+  <!-- ============================================================ -->
+  <div class="section-header" id="part3">
+    <span>📄</span> Part 3: GitHub Actions YAML — Line by Line
+  </div>
+
+  <div class="concept-card">
+    <p style="margin-bottom:16px; color:#666;">When asked to "walk through a GitHub Actions workflow for Django" — here's the exact YAML with what each section does and <em>why</em>:</p>
+
+<div class="code-block"><span class="code-comment"># .github/workflows/ci.yml</span>
+<span class="code-key">name:</span> <span class="code-str">CI/CD Pipeline</span>
+
+<span class="code-key">on:</span>
+  <span class="code-key">push:</span>
+    <span class="code-key">branches:</span> [<span class="code-str">main</span>]          <span class="code-comment"># Run on merge to main</span>
+  <span class="code-key">pull_request:</span>
+    <span class="code-key">branches:</span> [<span class="code-str">main</span>]          <span class="code-comment"># Run on every PR targeting main</span>
+
+<span class="code-key">jobs:</span>
+  <span class="code-key">test:</span>
+    <span class="code-key">runs-on:</span> <span class="code-str">ubuntu-latest</span>
+
+    <span class="code-comment"># ── STEP 1: Spin up PostgreSQL service container ──</span>
+    <span class="code-key">services:</span>
+      <span class="code-key">postgres:</span>
+        <span class="code-key">image:</span> <span class="code-str">postgres:15</span>             <span class="code-comment"># PINNED version — no surprises</span>
+        <span class="code-key">env:</span>
+          <span class="code-key">POSTGRES_DB:</span> <span class="code-str">testdb</span>
+          <span class="code-key">POSTGRES_USER:</span> <span class="code-str">testuser</span>
+          <span class="code-key">POSTGRES_PASSWORD:</span> <span class="code-str">testpass</span>
+        <span class="code-key">options:</span> <span class="code-str">&gt;-         # Health check — wait for DB ready</span>
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        <span class="code-key">ports:</span>
+          - <span class="code-str">5432:5432</span>
+
+    <span class="code-key">steps:</span>
+      <span class="code-comment"># ── STEP 2: Checkout code ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/checkout@v4</span>
+
+      <span class="code-comment"># ── STEP 3: Setup Python with dep caching ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/setup-python@v5</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">python-version:</span> <span class="code-str">'3.12'</span>
+          <span class="code-key">cache:</span> <span class="code-str">'pip'</span>              <span class="code-comment"># Cache ~/.cache/pip by requirements hash</span>
+
+      <span class="code-comment"># ── STEP 4: Install deps ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pip install -r requirements.txt</span>
+
+      <span class="code-comment"># ── STEP 5: Lint ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">ruff check . &amp;&amp; black --check .</span>
+
+      <span class="code-comment"># ── STEP 6: Type check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">mypy .</span>
+
+      <span class="code-comment"># ── STEP 7: Security scan ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pip-audit &amp;&amp; bandit -r . -x ./tests</span>
+
+      <span class="code-comment"># ── STEP 8: Django deployment check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">python manage.py check --deploy</span>
+
+      <span class="code-comment"># ── STEP 9: Migration committed check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">python manage.py makemigrations --check --dry-run</span>
+        <span class="code-comment"># Fails if model changed but migration not committed — catches deploy bombs</span>
+
+      <span class="code-comment"># ── STEP 10: Run tests vs REAL PostgreSQL ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pytest --tb=short -q</span>
+        <span class="code-key">env:</span>
+          <span class="code-key">DATABASE_URL:</span> <span class="code-str">postgres://testuser:testpass@localhost:5432/testdb</span>
+          <span class="code-key">DJANGO_SETTINGS_MODULE:</span> <span class="code-str">config.settings.test</span>
+
+  <span class="code-key">build-and-push:</span>
+    <span class="code-key">needs:</span> [<span class="code-str">test</span>]                  <span class="code-comment"># ← THIS is the gate. No test pass = no image</span>
+    <span class="code-key">if:</span> <span class="code-str">github.ref == 'refs/heads/main'</span>  <span class="code-comment"># Only build on main</span>
+    <span class="code-key">runs-on:</span> <span class="code-str">ubuntu-latest</span>
+
+    <span class="code-key">permissions:</span>
+      <span class="code-key">id-token:</span> <span class="code-str">write</span>              <span class="code-comment"># For OIDC — no long-lived AWS keys</span>
+      <span class="code-key">contents:</span> <span class="code-str">read</span>
+
+    <span class="code-key">steps:</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/checkout@v4</span>
+
+      <span class="code-comment"># ── OIDC: Get temporary AWS credentials (no stored keys!) ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/configure-aws-credentials@v4</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">role-to-assume:</span> <span class="code-str">arn:aws:iam::123456789:role/github-actions-role</span>
+          <span class="code-key">aws-region:</span> <span class="code-str">ap-southeast-1</span>
+
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/amazon-ecr-login@v2</span>
+
+      <span class="code-comment"># ── Build + tag with Git SHA for exact rollback ──</span>
+      - <span class="code-key">run:</span> |
+          IMAGE="$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}"
+          docker build -t $IMAGE .
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" >> $GITHUB_ENV
+
+      <span class="code-comment"># ── Deploy to ECS ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/amazon-ecs-deploy-task-definition@v1</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">task-definition:</span> <span class="code-str">task-def.json</span>
+          <span class="code-key">service:</span> <span class="code-str">my-django-service</span>
+          <span class="code-key">cluster:</span> <span class="code-str">production</span>
+          <span class="code-key">wait-for-service-stability:</span> <span class="code-str">true</span>
+</div>
+
+    <div class="info-box">
+      <strong>💡 Key pattern:</strong> <code>needs: [test]</code> is the dependency edge. The pipeline is a DAG — when the test job fails, GitHub Actions marks all downstream jobs as "skipped" (not cancelled). The Docker image is never built. ECR never receives the bad code. Production stays safe.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PART 4: ALL HIGH FREQUENCY Q&A -->
+  <!-- ============================================================ -->
+  <div class="section-header" id="part4">
+    <span>🎯</span> Part 4: All High Frequency Interview Questions — Answered
+  </div>
+
+  <!-- Q1: CI vs CD -->
+  <div class="qa-full" id="q1">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q1: "What's the difference between Continuous Integration, Continuous Delivery, and Continuous Deployment?" (Gate question — if you say "they're the same thing" the interview is usually over.)</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="comparison">
+        <div class="weak-col">
+          <div class="col-label">❌ WEAK ANSWER</div>
+          <div class="col-text">"CI/CD means automated testing and deployment. They go together."<br><br>That answer tells the interviewer you've heard the buzzword but can't distinguish the three. This is a filter question.</div>
+        </div>
+        <div class="solid-col">
+          <div class="col-label">✅ SOLID ANSWER — THREE DISTINCT THINGS</div>
+          <div class="answer-concept-row"><span class="acr-badge" style="background:#dbeafe;color:#1d4ed8;">CI</span><span><span class="kp">Merge frequently to main</span> with automated build + test on every push. Goal: keep the trunk green. Catches regressions <em>within minutes</em>.</span></div>
+          <div class="answer-concept-row"><span class="acr-badge" style="background:#fef3c7;color:#92400e;">Delivery</span><span><span class="kp">Every green build = deployable artifact</span>, but a <strong>human gates the release</strong>. One button press to prod. Default for most teams — lets you batch risky changes.</span></div>
+          <div class="answer-concept-row"><span class="acr-badge" style="background:#dcfce7;color:#16a34a;">Deployment</span><span><span class="kp">Every green build → prod automatically</span>. No human gate. Requires: strong tests + feature flags + observability + auto-rollback. Goal to work toward, not day-one choice.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q2: Walk through GitHub Actions -->
+  <div class="qa-full" id="q2">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q2: "Walk me through a GitHub Actions workflow for a Django project."</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p><strong>The solid answer hits FIVE things:</strong></p>
+        <ol style="margin: 12px 0 12px 20px; line-height: 2;">
+          <li><strong>Trigger:</strong> on push to main and on pull_request targeting main</li>
+          <li><strong>PostgreSQL service container:</strong> Not SQLite — spin up postgres:15 with a health check that waits for pg_isready before tests run</li>
+          <li><strong>Dependency caching:</strong> Cache ~/.cache/pip based on the requirements.txt hash — this takes reruns from 4 minutes to 30 seconds</li>
+          <li><strong>The quality gates before tests:</strong> ruff/black, mypy, pip-audit, bandit, <code>manage.py check --deploy</code>, <code>makemigrations --check --dry-run</code></li>
+          <li><strong>The blocking gate:</strong> <code>needs: [test]</code> on the build job — test fails = no Docker image, no deploy</li>
+        </ol>
+        <div class="trap-box">
+          <strong>🚫 Trap to avoid:</strong> Don't say you test against SQLite. "SQLite behaves fundamentally differently than PostgreSQL — different JSON field handling, concurrent transactions, date/time functions. Testing on a different engine guarantees eventual production bugs."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q3: Test fails -->
+  <div class="qa-full" id="q3">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q3: "What happens when a test fails in your pipeline? What gets blocked?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="comparison">
+        <div class="weak-col">
+          <div class="col-label">❌ WEAK ANSWER</div>
+          <div class="col-text">"The pipeline goes red and I look at the logs."<br><br>Doesn't mention the blocking mechanism. Doesn't show understanding of how the DAG structure prevents deployment.</div>
+        </div>
+        <div class="solid-col">
+          <div class="col-label">✅ SOLID ANSWER</div>
+          <div class="answer-step"><span class="step-num">1</span><span><span class="kp">needs: [test]</span> blocks the build job — test failure <strong>short-circuits the DAG</strong>. No Docker image built, nothing pushed to ECR.</span></div>
+          <div class="answer-step"><span class="step-num">2</span><span><span class="kp">Required status check on main</span> — PR gets a red check and is <strong>blocked from merging</strong> automatically. No manual intervention needed.</span></div>
+          <div class="answer-step"><span class="step-num sn-orange">!</span><span><span class="kp">No auto-retry on flaky tests</span> — that hides bugs. Quarantine the test (<code>@pytest.mark.skip</code>), file a ticket, investigate root cause.</span></div>
+          <div class="answer-step"><span class="step-num sn-green">+</span><span>Pin Postgres service to <code>postgres:15</code> — prevents a base image bump from silently breaking tests between runs. <span class="answer-tag at-blue">pin versions</span></span></div>
+        </div>
+      </div>
+      <div class="signal-line">
+        <div class="signal-label">⚡ Production Signal Line</div>
+        "Our pipeline tags every image with the Git SHA and pushes to ECR, so rollback is just re-deploying the previous tag — never a 'git revert and rebuild.' I also added <code>makemigrations --check --dry-run</code> as a required job so the build fails if someone forgets to commit a migration file."
+      </div>
+    </div>
+  </div>
+
+  <!-- Q4: Secrets in CI -->
+  <div class="qa-full" id="q4">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q4: "How do you handle secrets in CI? How does the pipeline access AWS without storing long-lived keys?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p style="margin-bottom:16px;"><strong>Three levels of answer — go from basic to OIDC:</strong></p>
+
+        <div style="border-left: 3px solid #e74c3c; padding-left: 16px; margin-bottom: 16px;">
+          <strong>❌ Never do this:</strong> Paste an AWS key into a workflow .yml file. Even in a "private" repo — git history is persistent, people get access to repos, and automated scanners find these within seconds.
+        </div>
+
+        <div style="border-left: 3px solid #f39c12; padding-left: 16px; margin-bottom: 16px;">
+          <strong>✅ Basic (acceptable):</strong> GitHub Actions Secrets — encrypted at rest, injected as environment variables at job time, never visible in logs. Set in repo Settings → Secrets.
+        </div>
+
+        <div style="border-left: 3px solid #27ae60; padding-left: 16px; margin-bottom: 16px;">
+          <strong>✅✅ Senior-level (OIDC):</strong> "We use OIDC federation — GitHub Actions presents a short-lived OIDC token to AWS, assumes an IAM role, and gets temporary credentials (max 1 hour). There's no long-lived AWS_ACCESS_KEY_ID stored anywhere. The role's trust policy is scoped to our specific repo and branch — <code>token.actions.githubusercontent.com:sub: repo:org/repo:ref:refs/heads/main</code>. Even if the token is somehow captured, it expires in under an hour and can only assume the specific role."
+        </div>
+
+        <div class="trap-box">
+          <strong>🚫 Trap:</strong> Long-lived AWS keys in CI become permanent exposure risks. When a developer leaves, keys are rarely rotated. When a repo becomes public accidentally, keys are scraped in seconds.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Q5: Deployment failed -->
+  <div class="qa-full" id="q5">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label hf-label">⭐ HIGH FREQUENCY</span>
+        <div class="qa-q">Q5: "Tell me about a time a deployment failed. What did you do?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p style="margin-bottom:14px;"><strong>The structure of a great answer: WHAT failed → WHY it failed → HOW you fixed it → WHAT you changed to prevent recurrence</strong></p>
+
+        <div style="background:#f8f9ff; border-radius:10px; padding:20px; border-left:4px solid #3498db;">
+          <p style="font-style:italic; line-height:1.8;">"Our first blue-green deploy failed because the new code expected a column the migration hadn't applied yet — we'd put the migration in the same release as the code change. The new tasks failed health checks, ECS rolled back to the old tasks automatically — so no user impact, but the deploy failed. Postmortem: we split migrations into a pre-deploy phase that runs before traffic shifts. We made all code changes backward-compatible with the previous release for one cycle. And we added a smoke test that runs <code>manage.py migrate --check</code> and hits <code>/health/</code> on the new tasks before the load balancer flips. We haven't had a deploy-induced outage since."</p>
+        </div>
+
+        <p style="margin-top:14px; color:#666; font-size:0.9rem;"><strong>Why this works:</strong> Specific failure mode (migration/code coupling) + what saved you (ECS auto-rollback) + structural fix (pre-deploy migration phase) + prevention (smoke test). Concrete, teachable, professional.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- NICE TO KNOW -->
+  <div class="qa-full" id="q6">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+        <div class="qa-q">Q6: "Why is OIDC preferable to long-lived AWS keys for CI? How does it work?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <p style="margin-bottom:16px;">OIDC (OpenID Connect) is identity federation — GitHub acts as an identity provider. Here's how it works:</p>
+
+        <div class="flow-container">
+          <div class="flow" style="min-width:auto; flex-wrap:wrap;">
+            <div class="flow-node" style="--node-color:#e74c3c; min-width:140px;">
+              <div class="node-icon">🐙</div>
+              <div class="node-label">GitHub Actions Job</div>
+              <div class="node-sub">Requests OIDC token from GitHub</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="--node-color:#f39c12; min-width:140px;">
+              <div class="node-icon">🪙</div>
+              <div class="node-label">Short-lived JWT</div>
+              <div class="node-sub">Contains: repo, branch, workflow info</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="--node-color:#3498db; min-width:140px;">
+              <div class="node-icon">🔑</div>
+              <div class="node-label">AWS STS AssumeRole</div>
+              <div class="node-sub">Verifies JWT, checks trust policy</div>
+            </div>
+            <div class="flow-arrow">→</div>
+            <div class="flow-node" style="--node-color:#27ae60; min-width:140px;">
+              <div class="node-icon">⏱️</div>
+              <div class="node-label">Temp Credentials</div>
+              <div class="node-sub">Valid ≤1hr. Scoped to specific role.</div>
+            </div>
+          </div>
+        </div>
+
+        <p style="margin-top:14px;"><strong>The benefit:</strong> No secret stored anywhere. The IAM role's trust policy can be scoped to your exact repo and branch — an attacker who compromises a different repo gets nothing. Credentials expire in under an hour. When a developer leaves, you don't need to rotate an access key they had.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-full" id="q7">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+        <div class="qa-q">Q7: "How do you handle flaky tests in CI? What's your strategy?"</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="solid-answer">
+        <div style="border-left: 3px solid #e74c3c; padding-left: 16px; margin-bottom: 16px;">
+          <strong>❌ Wrong answer:</strong> "We auto-retry the test X times." — This hides bugs. A test that passes on the second try is hiding a real problem.
+        </div>
+        <div style="border-left: 3px solid #27ae60; padding-left: 16px;">
+          <strong>✅ Right answer:</strong> "We quarantine it — mark it as <code>@pytest.mark.skip</code> or move it to a separate suite that doesn't block the main CI. File a ticket immediately. The test runs in a side pipeline so we can still measure flake frequency. Then we investigate: is it a timing issue? A real race condition in the code? An environment dependency (e.g., tests that depend on test order)? We fix the root cause, not the symptom. A flaky test that auto-retries is a lie in your test suite."
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-full" id="q8">
+    <div class="qa-header" onclick="toggleQA(this)" style="padding:24px;">
+      <div>
+        <span class="qa-q-label ntk-label">NICE TO KNOW</span>
+        <div class="qa-q">Q8: "How would you roll back a bad deploy? Walk me through the process."</div>
+      </div>
+      <div class="qa-toggle">▼</div>
+    </div>
+    <div class="qa-body">
+      <div class="comparison">
+        <div class="weak-col">
+          <div class="col-label">❌ WEAK ANSWER</div>
+          <div class="col-text">"We'd revert the PR and redeploy."<br><br>This takes 10-15 minutes minimum. While you're reverting and CI is re-running, users are broken.</div>
+        </div>
+        <div class="solid-col">
+          <div class="col-label">✅ SOLID ANSWER</div>
+          <div class="answer-step"><span class="step-num">1</span><span>Every image tagged with <span class="kp">Git SHA</span> in ECR. Rollback = re-point ECS at the previous tag: <code>aws ecs update-service --task-definition prev-sha</code></span></div>
+          <div class="answer-step"><span class="step-num sn-green">✓</span><span><strong>~90 seconds</strong> to roll back. No rebuild, no CI re-run, no git revert. Just deploy a known-good image. <span class="answer-tag at-green">fast rollback</span></span></div>
+          <div class="answer-step"><span class="step-num sn-orange">!</span><span>If migration was <strong>destructive</strong>: rollback might break the schema. Use <span class="kp">expand-contract</span> — never ship destructive schema changes alongside code changes for exactly this reason.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PART 5: COMMON TRAPS -->
+  <!-- ============================================================ -->
+  <div class="section-header">
+    <span>⚠️</span> Part 5: Common Traps That Kill Candidates
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 16px; margin-bottom: 40px;">
+    <div class="trap-box">
+      <strong>🚫 Trap 1: Testing against SQLite</strong><br>
+      SQLite ≠ PostgreSQL. JSON fields, concurrent transactions, date functions behave differently. Always test on the same engine you deploy.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 2: Auto-retrying flaky tests</strong><br>
+      Hides real bugs. Quarantine + investigate instead. A green test that passed on retry 3 is a lie.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 3: Secrets in workflow YAML</strong><br>
+      Even in private repos. Use GitHub Secrets or OIDC. Never paste AWS_ACCESS_KEY_ID in a .yml file.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 4: Building per environment</strong><br>
+      Image should be built ONCE, tagged with SHA, promoted across envs. Build-in-staging ≠ build-in-prod = "works in staging, breaks in prod."
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 5: No rollback story</strong><br>
+      "We'd revert the PR" takes 10+ minutes. Right answer: re-deploy previous SHA image in ~90 seconds.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 6: Not waiting for DB health check</strong><br>
+      Postgres service container takes time to initialize. Without pg_isready health check, tests run before DB is ready → "Connection Refused" on first run.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 7: CI = tests only</strong><br>
+      Production CI also runs: <code>manage.py check --deploy</code>, <code>makemigrations --check --dry-run</code>, ruff/black, mypy, pip-audit, bandit. Tests are one step.
+    </div>
+    <div class="trap-box">
+      <strong>🚫 Trap 8: Migration not committed</strong><br>
+      Model changed but migration file not added to commit. Deploy blows up on startup. <code>makemigrations --check --dry-run</code> in CI catches this.
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- PART 6: PRODUCTION SIGNAL LINES -->
+  <!-- ============================================================ -->
+  <div class="section-header">
+    <span>🔥</span> Part 6: Production Signal Lines — The Exact Sentences That Win Interviews
+  </div>
+
+  <div style="display:flex; flex-direction:column; gap:16px; margin-bottom:40px;">
+    <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59); border-radius:14px; padding:26px; color:white;">
+      <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:10px;">🔥 CI/CD Signal Line</div>
+      <p style="font-style:italic; font-size:1rem; line-height:1.8; opacity:0.95;">"Our pipeline tags every image with the Git SHA and pushes to ECR, so rollback is just <code style='background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;'>kubectl set image</code> or re-deploying the previous tag — never a 'git revert and rebuild.' I also added <code style='background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;'>python manage.py makemigrations --check --dry-run</code> as a required job so the build fails if someone forgets to commit a migration file."</p>
+      <p style="margin-top:12px; opacity:0.7; font-size:0.82rem;">Why it works: SHA tagging = rollback story. The migration check = you've been burned before and built prevention. Both are things you only add after incidents.</p>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#1a237e,#1976d2); border-radius:14px; padding:26px; color:white;">
+      <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:10px;">🔥 PostgreSQL in CI Signal Line</div>
+      <p style="font-style:italic; font-size:1rem; line-height:1.8; opacity:0.95;">"To guarantee testing parity and prevent regressions, our GitHub Actions pipeline spins up a PostgreSQL service container, explicitly waits for the <code style='background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;'>pg_isready</code> health check, caches dependencies based on the lockfile hash, and runs the test suite against a real database rather than falling back on SQLite."</p>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#4a148c,#7b1fa2); border-radius:14px; padding:26px; color:white;">
+      <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:10px;">🔥 OIDC Signal Line</div>
+      <p style="font-style:italic; font-size:1rem; line-height:1.8; opacity:0.95;">"We switched from GitHub Actions Secrets holding a long-lived AWS key to OIDC federation — the pipeline presents a short-lived OIDC token, assumes a scoped IAM role, and gets temporary credentials. There's no long-lived key stored anywhere. When our last junior dev left, we didn't have to rotate a single CI secret."</p>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-btn" style="margin-bottom:10px;">← Back to Battle Hub</a>
+  <div style="display:flex; gap:12px; margin-bottom:40px; flex-wrap:wrap;">
+    <a href="01-docker.html" style="display:inline-flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:8px; padding:10px 18px; text-decoration:none; color:var(--text); font-size:0.9rem;">← 🐳 Docker</a>
+    <a href="03-migrations.html" style="display:inline-flex; align-items:center; gap:8px; background:white; border:1px solid var(--border); border-radius:8px; padding:10px 18px; text-decoration:none; color:var(--text); font-size:0.9rem;">🗄️ Database Migrations →</a>
+  </div>
+
+</div>
+
+<script>
+const stepDetails = {
+  'checkout': {
+    title: '📥 Step 1: Checkout Code',
+    body: 'GitHub Actions clones your repository onto the runner VM. Uses <code>actions/checkout@v4</code>.\n\nWhy it matters: The runner starts with a clean VM every time. This is why builds are reproducible — no leftover state from previous runs.',
+    code: '- uses: actions/checkout@v4\n  with:\n    fetch-depth: 0  # Full history for git-based tools'
+  },
+  'setup-python': {
+    title: '🐍 Step 2: Setup Python + Cache Dependencies',
+    body: 'Installs Python and enables pip dependency caching. The cache key is the hash of requirements.txt — if the file hasn\'t changed, all packages are restored from cache. This reduces install time from 2-4 minutes to ~20 seconds on cache hit.',
+    code: '- uses: actions/setup-python@v5\n  with:\n    python-version: \'3.12\'\n    cache: \'pip\'  # Caches ~/.cache/pip based on requirements hash'
+  },
+  'install-deps': {
+    title: '📦 Step 3: Install Dependencies',
+    body: 'Installs all Python packages. With caching active, this is fast. Use --no-cache-dir in Docker but NOT here — caching in CI is a feature.',
+    code: '- run: pip install -r requirements.txt\n\n# Optional: faster with uv\n# - run: pip install uv && uv pip install -r requirements.txt'
+  },
+  'lint': {
+    title: '🔍 Step 4: Lint Check',
+    body: 'ruff checks for style violations and common bugs. black --check verifies formatting. These are fast (seconds) and catch real bugs — for example, ruff catches unused imports, undefined names, and security anti-patterns.',
+    code: '- name: Lint\n  run: |\n    ruff check .\n    black --check .\n    # Fail fast — no point running tests if code won\'t even parse'
+  },
+  'typecheck': {
+    title: '🏷️ Step 5: Type Check (mypy)',
+    body: 'Static type checking. Catches a class of bugs that tests might miss — wrong argument types, None values, missing methods. For Django projects: use django-stubs for better coverage.',
+    code: '- run: mypy . --ignore-missing-imports\n\n# mypy.ini or pyproject.toml configures strictness\n# [mypy]\n# plugins = mypy_django_plugin.main\n# django_settings_module = config.settings.test'
+  },
+  'security-scan': {
+    title: '🔐 Step 6: Security Scans',
+    body: '<strong>pip-audit</strong>: Checks all installed packages against PyPI Advisory Database for known CVEs. Catches "your requests version has a SSRF vulnerability".\n\n<strong>bandit</strong>: Static analysis for Python security anti-patterns — hardcoded passwords, SQL injection via string formatting, shell injection, etc.\n\n<strong>gitleaks</strong>: Scans git history for accidentally committed secrets (API keys, passwords, tokens).',
+    code: '- run: pip-audit              # CVE scan\n- run: bandit -r . -x ./tests  # Security linting\n- run: gitleaks detect --source . --no-git  # Secret scanning'
+  },
+  'django-check': {
+    title: '⚙️ Step 7: manage.py check --deploy',
+    body: 'Django\'s built-in deployment readiness checker. It validates:\n• DEBUG is False\n• ALLOWED_HOSTS is set\n• SESSION_COOKIE_SECURE is True\n• CSRF_COOKIE_SECURE is True\n• SECURE_SSL_REDIRECT is True\n• HSTS headers configured\n\nIf any check fails, the pipeline fails. This prevents DEBUG=True from slipping into a production build.',
+    code: '- run: python manage.py check --deploy\n  env:\n    DJANGO_SETTINGS_MODULE: config.settings.production\n    DATABASE_URL: postgres://...  # Use production-like settings'
+  },
+  'migration-check': {
+    title: '🗄️ Step 8: makemigrations --check --dry-run',
+    body: 'This fails the build if Django detects that a model has changed but the corresponding migration file was not committed. The most common deploy bomb: developer changes a model, forgets to run makemigrations, pushes — prod explodes on startup when Django sees the model state doesn\'t match migration history.',
+    code: '- run: python manage.py makemigrations --check --dry-run\n\n# Exit code 1 if any migrations would be generated.\n# This means: "You changed a model without committing the migration."\n# CI catches it before it reaches production.'
+  },
+  'pg-service': {
+    title: '🐘 Step 9: Spin Up PostgreSQL Service Container',
+    body: 'GitHub Actions spins up a real PostgreSQL container alongside the test runner. This is NOT a mock — it\'s a real database. This is critical because SQLite and PostgreSQL behave differently for JSON fields, transactions, date arithmetic, and more.\n\nPin to a specific version: postgres:15, not postgres:latest — so a PostgreSQL release can\'t silently break your CI.',
+    code: 'services:\n  postgres:\n    image: postgres:15        # PINNED version\n    env:\n      POSTGRES_DB: testdb\n      POSTGRES_USER: testuser\n      POSTGRES_PASSWORD: testpass\n    ports:\n      - 5432:5432'
+  },
+  'pg-health': {
+    title: '❤️ Step 10: Wait for pg_isready',
+    body: 'The PostgreSQL container starts booting, but it takes 5-10 seconds to be ready to accept connections. Without a health check, your tests run immediately and get "Connection Refused" errors. The options block tells the runner to poll pg_isready every 10 seconds and only proceed once the DB is accepting connections.',
+    code: 'options: >-\n  --health-cmd pg_isready\n  --health-interval 10s\n  --health-timeout 5s\n  --health-retries 5\n\n# The runner waits here until pg_isready returns 0.\n# Without this: tests start → DB not ready → "Connection Refused" → CI fails for wrong reason'
+  },
+  'pytest': {
+    title: '🧪 Step 11: Run Tests (pytest vs real PostgreSQL)',
+    body: 'Run the full test suite against the real PostgreSQL service. Use --tb=short for concise failure output. Set DATABASE_URL to point to the service container.\n\nFor parallelism on large suites: pytest-xdist with -n auto runs tests across multiple workers.',
+    code: '- run: pytest --tb=short -q\n  env:\n    DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb\n    DJANGO_SETTINGS_MODULE: config.settings.test\n    SECRET_KEY: ci-test-secret-key-not-real'
+  },
+  'docker-build': {
+    title: '🐳 Step 12: Docker Build (Multi-stage)',
+    body: 'Build the production Docker image. Multi-stage: builder stage compiles C extensions (psycopg2, cryptography), runtime stage only has the compiled artifacts. This keeps the image small (no gcc in production) and secure (smaller attack surface).\n\nThis step only runs if ALL test jobs passed — enforced by needs: [test].',
+    code: '# Dockerfile (multi-stage)\nFROM python:3.12-slim AS builder\nRUN pip install --no-cache-dir psycopg2-binary cryptography\n\nFROM python:3.12-slim AS runtime\nCOPY --from=builder /usr/local/lib/python3.12/site-packages ...\n# Final image has no gcc, no build tools'
+  },
+  'tag-sha': {
+    title: '🏷️ Step 13: Tag Image with Git SHA',
+    body: 'Tag the Docker image with the exact git commit SHA. This is the KEY to zero-regret rollback — any future rollback is just "point ECS at the previous SHA\'s image." No rebuild, no CI run, just deploy a known-good image.\n\nAlso tag with :latest for convenience, but SHA is what rollback uses.',
+    code: '- run: |\n    IMAGE="$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}"\n    LATEST="$ECR_REGISTRY/$ECR_REPO:latest"\n    docker build -t $IMAGE -t $LATEST .\n    docker push $IMAGE\n    docker push $LATEST\n    echo "IMAGE=$IMAGE" >> $GITHUB_ENV'
+  },
+  'push-ecr': {
+    title: '☁️ Step 14: Push to ECR',
+    body: 'Push the tagged image to Amazon Elastic Container Registry (ECR). This is a private image registry — only your ECS service can pull from it via its IAM role.\n\nAlternatives: Docker Hub (public/private), GitHub Container Registry, GCR (Google), ACR (Azure). ECR integrates naturally with ECS + IAM.',
+    code: '- uses: aws-actions/amazon-ecr-login@v2\n\n- run: docker push $IMAGE\n\n# ECR stores images indefinitely (until lifecycle policy expires them)\n# Each SHA becomes a rollback point\n# Old images: set lifecycle policy to keep last 10'
+  },
+  'run-migration': {
+    title: '🗄️ Step 15: Run Migrations BEFORE New Code',
+    body: 'This is the most important ordering rule in zero-downtime deployment: migrations run BEFORE new code starts handling traffic.\n\nIn ECS: run migrations as a one-off ECS task (not in entrypoint). The task runs, applies migrations, exits. Then the new service tasks start.\n\nAll migrations must be BACKWARD COMPATIBLE with the currently running code — old tasks keep running during the rolling deploy and must be able to use the new schema.',
+    code: '# Run as separate ECS task (not in app entrypoint)\naws ecs run-task \\\n  --cluster production \\\n  --task-definition migrate-task \\\n  --overrides \'{"containerOverrides":[{"name":"app","command":["python","manage.py","migrate","--noinput"]}]}\'\n\n# Wait for task to complete before deploying new service'
+  },
+  'rolling-update': {
+    title: '🔄 Step 16: Rolling Update ECS Service',
+    body: 'ECS replaces tasks one-by-one (or in batches). For each new task:\n1. ECS starts the new task\n2. New task must pass health check at /health/ (returns 200 + checks DB + cache)\n3. ALB starts sending traffic to the new task\n4. Old task is drained (existing connections finish)\n5. Old task is killed\n\nDuring the roll, old and new code run simultaneously — this is WHY migrations must be backward-compatible.',
+    code: 'aws ecs update-service \\\n  --cluster production \\\n  --service my-django-service \\\n  --task-definition my-django-service:42  # new task def with new image\n  --deployment-configuration \\\n    "minimumHealthyPercent=100,maximumPercent=200"\n\n# minimumHealthyPercent=100 → never go below current capacity\n# maximumPercent=200 → allow running 2x tasks during rollout'
+  },
+  'health-check': {
+    title: '❤️ Step 17: Health Check at /health/',
+    body: 'Every new ECS task must pass the ALB health check before receiving traffic. The /health/ endpoint should:\n• Return HTTP 200\n• Check database connectivity (simple SELECT 1)\n• Check cache connectivity (Redis PING)\n• Respond within 5 seconds\n\nIf /health/ doesn\'t return 200 within the timeout, ECS marks the task as unhealthy, kills it, and rolls back automatically.',
+    code: '# Django health check view\nfrom django.db import connection\nfrom django.core.cache import cache\n\ndef health(request):\n    try:\n        connection.ensure_connection()\n        cache.set("health", "ok", 10)\n    except Exception as e:\n        return JsonResponse({"status": "unhealthy", "error": str(e)}, status=503)\n    return JsonResponse({"status": "ok"})'
+  },
+  'drain-old': {
+    title: '🗑️ Step 18: Drain and Kill Old Tasks',
+    body: 'After the new tasks are healthy and receiving traffic, the old tasks are "drained" — the ALB stops sending NEW connections to them, but in-flight requests are allowed to complete (connection draining period, typically 30-60 seconds). After draining, the old tasks are terminated.',
+    code: '# ALB connection draining ensures:\n# - No new requests go to draining tasks\n# - Existing requests finish (up to deregistration_delay seconds)\n# - Users don\'t see connection resets during deploy\n\n# aws_lb_target_group deregistration_delay = 30 (Terraform)\n# ECS respects this before killing the task'
+  },
+  'notify': {
+    title: '📢 Step 19: Notify Team',
+    body: 'After successful deployment, send a notification to Slack/email/PagerDuty with:\n• What SHA was deployed\n• Which environment\n• Link to the deployment\n• How long it took\n\nOn failure: alert on-call, include direct link to failing step, include rollback command.',
+    code: '- name: Notify Slack\n  if: always()  # Run even on failure\n  uses: slackapi/slack-github-action@v1\n  with:\n    payload: |\n      {"text": "${{ job.status == \'success\' && \'✅\' || \'❌\' }} Deploy ${{ github.sha }} to production: ${{ job.status }}"}\n  env:\n    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}'
+  }
+};
+
+/* ─── Flow node detail data ─── */
+const flowNodeData = {
+  'developer': {
+    title: '👨‍💻 Developer — Writes Code Locally',
+    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
+    what: 'The developer writes feature code on their local machine — a new Django view, API endpoint, or model change. They run a local dev server connected to a local PostgreSQL instance to test changes before committing.',
+    how: 'Code lives on a feature branch (e.g. <code>feature/add-payment-flow</code>). Git tracks every change. The developer iterates locally until the feature is ready, then stages and commits.'
+  },
+  'git-commit': {
+    title: '📝 git commit — Save a Checkpoint',
+    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
+    what: 'The developer commits their changes locally. This creates an immutable snapshot with a unique SHA hash (e.g. <code>abc1234f</code>). Every commit is a potential rollback point — the SHA is the fingerprint that follows the code all the way to production.',
+    how: '<code>git add . && git commit -m "feat: add payment endpoint"</code>. Conventional commit format (feat/fix/chore) helps generate changelogs. Commits live locally until pushed. Small, atomic commits = easier debugging with <code>git bisect</code>.'
+  },
+  'git-push': {
+    title: '⬆️ git push — Sends Code to GitHub',
+    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
+    what: 'The developer pushes their local branch to the remote repository on GitHub. This is the moment code leaves their machine and enters the shared, automated system.',
+    how: '<code>git push origin feature/my-branch</code>. GitHub receives the commits and stores them. Critically: GitHub immediately fires a webhook event to GitHub Actions — this is what starts the CI pipeline. The push itself does not run CI; the webhook does.'
+  },
+  'github-pr': {
+    title: '🐙 GitHub PR — Opens the Quality Gate',
+    phase: 'TRIGGER', phaseColor: '#e74c3c', phaseBg: '#fff5f5',
+    what: 'The developer opens a Pull Request to merge their feature branch into <code>main</code>. GitHub fires a <code>pull_request</code> webhook event to GitHub Actions runners immediately.',
+    how: 'The CI workflow\'s <code>on: pull_request: branches: [main]</code> trigger fires. With "Required status checks" configured on the main branch, the PR <strong>cannot merge</strong> until CI passes — no bypass possible without admin override.'
+  },
+  'ci-trigger': {
+    title: '⚡ CI Trigger — GitHub Actions Spins Up a Runner',
+    phase: 'TRIGGER', phaseColor: '#e74c3c', phaseBg: '#fff5f5',
+    what: 'GitHub Actions picks up the webhook event and provisions a fresh <code>ubuntu-latest</code> VM (the "runner"). This VM is completely clean — no leftover state from any previous run. The workflow YAML defines every step that follows.',
+    how: 'GitHub\'s infrastructure allocates the runner in seconds. Multiple jobs in the same workflow run on separate, isolated VMs in parallel. Clean state = reproducible builds = CI catches "works on my machine" bugs.'
+  },
+  'lint-test': {
+    title: '✅ Lint + Test — Quality & Test Gates',
+    phase: 'QUALITY → TEST', phaseColor: '#1976d2', phaseBg: '#e3f2fd',
+    what: 'The runner executes all checks sequentially: ruff/black (style), mypy (types), pip-audit/bandit (security), Django deployment checks, migration committed check — then spins up a real PostgreSQL 15 container and runs <code>pytest</code> against it.',
+    how: 'Each step is sequential. If ruff fails, mypy never runs. pytest receives a <code>DATABASE_URL</code> pointing to the <code>postgres:15</code> service container. Tests use real SQL, real transactions, real constraints — NOT SQLite.'
+  },
+  'security-scan-flow': {
+    title: '🔒 Security Scan — CVE + Static Analysis',
+    phase: 'QUALITY', phaseColor: '#1976d2', phaseBg: '#e3f2fd',
+    what: '<strong>pip-audit</strong> scans all installed packages against the PyPI Advisory Database for known CVEs. <strong>bandit</strong> runs static analysis catching security anti-patterns: SQL injection via string formatting, hardcoded passwords, shell injection risks.',
+    how: '<code>pip-audit</code> exits non-zero if any CVE above severity threshold is found. <code>bandit -r . -x ./tests</code> excludes test files. Both run as required steps — a critical CVE fails the build before any Docker image is built.'
+  },
+  'build-image': {
+    title: '🐳 Build Image — Docker Multi-stage',
+    phase: 'BUILD', phaseColor: '#8e44ad', phaseBg: '#f3e5f5',
+    what: 'This step <strong>only runs if all test jobs passed</strong> (enforced by <code>needs: [test]</code>). Docker builds the production image using a multi-stage Dockerfile: a builder stage compiles C extensions (psycopg2, cryptography); the runtime stage is a slim Python image with only compiled artifacts — no gcc in production.',
+    how: '<code>docker build -t $IMAGE .</code> The multi-stage approach keeps the final image small and secure. The <code>needs: [test]</code> dependency is the pipeline\'s safety lock — test failure = this step skipped entirely = no bad code ever becomes an image.'
+  },
+  'tag-push': {
+    title: '🏷️ Tag + Push — SHA Tag → ECR',
+    phase: 'BUILD', phaseColor: '#8e44ad', phaseBg: '#f3e5f5',
+    what: 'The image is tagged with the exact Git SHA (e.g. <code>:abc1234f</code>) and pushed to Amazon ECR. This SHA tag is the key to instant rollback — any future rollback is just "re-point ECS at the previous SHA\'s image."',
+    how: '<code>IMAGE="$ECR_REGISTRY/$REPO:${{ github.sha }}"</code>. OIDC credentials authenticate to ECR — no long-lived AWS keys stored anywhere. ECR stores every image as a rollback point. Also tags <code>:latest</code> for convenience, but SHA is what rollback uses.'
+  },
+  'run-migration-flow': {
+    title: '🗄️ Run Migrations — BEFORE Traffic Shifts',
+    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
+    what: 'Before any new app code handles traffic, the database schema is updated. Migrations run as a one-off ECS task: it runs <code>manage.py migrate</code>, then exits. Only after success does the rolling deploy start.',
+    how: '<code>aws ecs run-task --overrides run manage.py migrate</code>. The deploy script waits for task completion. All migrations must be <strong>backward compatible</strong> — old containers keep running during the rolling deploy and must work with the new schema.'
+  },
+  'rolling-deploy': {
+    title: '🔄 Rolling Deploy — Zero-Downtime Switch',
+    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
+    what: 'ECS replaces old tasks with new tasks one-by-one. At no point does service drop below its minimum healthy task count. Old tasks keep serving traffic while new tasks warm up and pass health checks.',
+    how: '<code>minimumHealthyPercent=100, maximumPercent=200</code>. For each new task: ECS starts it → /health/ must return 200 → ALB routes traffic to it → old task drains → old task killed. During this window, old AND new code run simultaneously — exactly why migrations must be backward compatible.'
+  },
+  'health-check-flow': {
+    title: '❤️ Health Check — Gate Before Receiving Traffic',
+    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
+    what: 'Every new ECS task must pass the ALB health check before receiving production traffic. The <code>/health/</code> endpoint verifies: HTTP 200, database connectivity (<code>SELECT 1</code>), cache connectivity (Redis PING), all within 5 seconds.',
+    how: 'ALB polls <code>/health/</code> every 10s. 200 = healthy = starts receiving traffic. 503 = ECS marks task unhealthy, stops the rolling deploy, can auto-rollback to the previous task definition before more users are affected.'
+  },
+  'user-sees': {
+    title: '👤 User Sees the Change — Zero Downtime',
+    phase: 'LIVE 🎉', phaseColor: '#27ae60', phaseBg: '#e8f5e9',
+    what: 'The new version is live. Users experience the change with zero downtime — no maintenance window, no 503 errors, no dropped connections. The entire journey from <code>git push</code> to live typically takes 5–15 minutes.',
+    how: 'ALB routes 100% of traffic to the new tasks once rolling deploy completes. Old tasks have been drained and terminated. ECR still holds the previous SHA image for instant rollback (~90 seconds) if anything goes wrong post-deploy.'
+  }
+};
+
+function showFlowDetail(key, nodeEl) {
+  const data = flowNodeData[key];
+  if (!data) return;
+  document.querySelectorAll('.phase-node').forEach(n => n.classList.remove('active-node'));
+  if (nodeEl) nodeEl.classList.add('active-node');
+  const panel = document.getElementById('flow-node-detail');
+  panel.style.setProperty('--fdp-color', data.phaseColor);
+  panel.style.setProperty('--fdp-bg', data.phaseBg);
+  panel.innerHTML = `
+    <div class="fdp-header" style="background:${data.phaseColor};">
+      <span class="fdp-phase-badge">${data.phase}</span>
+      <span class="fdp-title">${data.title}</span>
+    </div>
+    <div class="fdp-body">
+      <div class="fdp-section">
+        <h5>🔍 What happens</h5>
+        <p>${data.what}</p>
+      </div>
+      <div class="fdp-section">
+        <h5>⚙️ How it works</h5>
+        <p>${data.how}</p>
+      </div>
+    </div>
+  `;
+  panel.classList.add('visible');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showDetail(key) {
+  const panel = document.getElementById('step-detail-panel');
+  const data = stepDetails[key];
+  if (!data) return;
+  panel.innerHTML = `
+    <h4>${data.title}</h4>
+    <p>${data.body.replace(/\n/g, '<br>')}</p>
+    ${data.code ? `<code>${data.code}</code>` : ''}
+  `;
+  panel.classList.add('active');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function toggleQA(header) {
+  const body = header.nextElementSibling;
+  const toggle = header.querySelector('.qa-toggle');
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  toggle.classList.toggle('rotated', !isOpen);
+}
+function jumpToPhase(id) {
+  const el = document.getElementById('phase-' + id);
+  if (!el) return;
+  el.scrollIntoView({behavior:'smooth', block:'center'});
+  el.classList.add('phase-highlighted');
+  setTimeout(() => el.classList.remove('phase-highlighted'), 2000);
+}
+function toggleRSidebar() {
+  document.getElementById('rsidebar').classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  const sb = document.getElementById('rsidebar');
+  const btn = document.querySelector('.rsidebar-toggle');
+  if (sb && sb.classList.contains('open') && !sb.contains(e.target) && e.target !== btn) {
+    sb.classList.remove('open');
+  }
+});
+</script>
+
+<button class="rsidebar-toggle" onclick="toggleRSidebar()">☰ Sections</button>
+<div class="rsidebar" id="rsidebar">
+  <div class="rsidebar-header">
+    <span>📍 On This Page</span>
+    <button class="rsidebar-close" onclick="toggleRSidebar()">✕</button>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">📐 Visual Concepts</div>
+    <a href="#part1">🔑 CI vs CD (Delivery) vs CD (Deploy)</a>
+    <a href="#part2">🏗️ Full Pipeline — Clickable Flow</a>
+    <a href="#part2" onclick="showFlowDetail('git-push', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#e9ecef;color:#495057;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">LOCAL</span> Dev → git push</a>
+    <a href="#part2" onclick="showFlowDetail('ci-trigger', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#fee2e2;color:#c0392b;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">TRIGGER</span> PR → CI Runner</a>
+    <a href="#part2" onclick="showFlowDetail('lint-test', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#dbeafe;color:#1565c0;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">QUALITY</span> Lint, Test, Scan</a>
+    <a href="#part2" onclick="showFlowDetail('build-image', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#f3e8ff;color:#6a1b9a;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">BUILD</span> Docker → ECR</a>
+    <a href="#part2" onclick="showFlowDetail('rolling-deploy', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#ffe0b2;color:#bf360c;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">DEPLOY</span> Migrate → Health</a>
+    <a href="#part3">📄 GitHub Actions YAML Annotated</a>
+    <a href="#part4">🎯 All Interview Q&amp;A</a>
+  </div>
+  <div class="rsidebar-group">
+    <div class="rsidebar-group-title">🎯 Interview Q&amp;A</div>
+    <a href="#q1"><span class="rlink-tag hf">HF</span> CI vs Delivery vs Deployment</a>
+    <a href="#q2"><span class="rlink-tag hf">HF</span> Walk through GitHub Actions</a>
+    <a href="#q3"><span class="rlink-tag hf">HF</span> Test fails — what's blocked?</a>
+    <a href="#q4"><span class="rlink-tag hf">HF</span> Secrets in CI / OIDC</a>
+    <a href="#q5"><span class="rlink-tag hf">HF</span> Deployment failed story</a>
+    <a href="#q6">Why OIDC vs long-lived keys</a>
+    <a href="#q7">Flaky tests strategy</a>
+    <a href="#q8">Rollback a bad deploy</a>
+  </div>
+  <div class="rsidebar-group" style="border-bottom:none;">
+    <a href="../01-Key-Talking-Points.html" style="color:#e74c3c;font-weight:600;">← Back to Session 6</a>
+    <a href="01-docker.html" style="color:#3498db;">← Docker</a>
+    <a href="03-migrations.html" style="color:#f39c12;font-weight:600;">🗄️ Next: Migrations →</a>
+  </div>
+</div>
+</body>
+</html>
