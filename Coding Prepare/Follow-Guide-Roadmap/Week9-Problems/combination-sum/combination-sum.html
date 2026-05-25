@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Combination Sum #39 — Backtracking Debugger</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f6f8fa;--bg2:#ffffff;--bg3:#f0f2f5;--border:#d0d7de;
+  --text:#1f2328;--muted:#656d76;--muted2:#9198a1;
+  --orange:#e36209;--orange-bg:#fff4e5;--orange-border:#f0883e;
+  --blue:#0969da;--blue-bg:#ddf4ff;--blue-border:#79c0ff;
+  --purple:#8250df;--purple-bg:#fbefff;--purple-border:#d2a8ff;
+  --green:#1a7f37;--green-bg:#dafbe1;--green-border:#56d364;
+  --red:#cf222e;--red-bg:#ffebe9;--red-border:#f85149;
+  --yellow:#9a6700;--yellow-bg:#fff8c5;
+  --d0-bg:#e36209;--d0-text:#fff;
+  --d1-bg:#0969da;--d1-text:#fff;
+  --d2-bg:#8250df;--d2-text:#fff;
+  --d3-bg:#1a7f37;--d3-text:#fff;
+  --d4-bg:#bc4c00;--d4-text:#fff;
+  --shadow:0 1px 3px rgba(27,31,36,.12),0 8px 24px rgba(66,74,83,.12);
+}
+body{background:var(--bg);color:var(--text);font-family:'Cascadia Code','Fira Code','SF Mono',monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:22px}
+
+/* ── TOPBAR ── */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 28px;height:76px;background:var(--bg2);
+  border-bottom:1px solid var(--border);flex-shrink:0;
+  box-shadow:0 1px 0 var(--border);
+}
+.top-title{display:flex;align-items:center;gap:17px}
+.top-title .icon{font-size:28px}
+.top-title .name{font-weight:700;font-size:21px;color:var(--text)}
+.top-title .sub{font-size:17px;color:var(--muted);padding:4px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:17px}
+.top-stats{display:flex;align-items:center;gap:34px;font-size:18px}
+.stat{display:flex;align-items:center;gap:8px}
+.stat-k{color:var(--muted);font-size:17px}
+.stat-v{font-weight:700;font-size:20px;color:var(--text)}
+.stat-v.orange{color:var(--orange)}
+.stat-v.blue{color:var(--blue)}
+.stat-v.green{color:var(--green)}
+#controls{display:flex;align-items:center;gap:11px}
+#controls button{
+  padding:10px 25px;border-radius:8px;font-size:18px;font-family:inherit;
+  cursor:pointer;border:1px solid var(--border);background:var(--bg3);
+  color:var(--text);font-weight:500;transition:all .12s;
+}
+#controls button:hover{background:var(--border)}
+#btn-play{background:var(--orange)!important;border-color:var(--orange)!important;color:#fff!important;font-weight:700!important}
+#btn-play:hover{opacity:.88!important}
+#controls select{padding:7px 14px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--text);font-size:17px;font-family:inherit;cursor:pointer}
+.speed-label{font-size:17px;color:var(--muted)}
+
+/* ── PROGRESS ── */
+#prog{height:4px;background:var(--border);flex-shrink:0}
+#prog-fill{height:100%;background:var(--orange);transition:width .15s;width:0%}
+
+/* ── MAIN ── */
+#main{display:flex;flex:1;overflow:hidden}
+
+/* ── RESIZE DIVIDER ── */
+.divider{
+  width:10px;flex-shrink:0;background:var(--bg3);
+  border-left:1px solid var(--border);border-right:1px solid var(--border);
+  cursor:col-resize;transition:background .15s;z-index:10;
+}
+.divider:hover,.divider.dragging{background:var(--orange-border)}
+
+/* ── LEFT: CODE ── */
+#left{width:730px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2)}
+.panel-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 22px;background:var(--bg3);border-bottom:1px solid var(--border);
+  font-size:17px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0;
+}
+.panel-header .ph-left{display:flex;align-items:center;gap:8px}
+#code-scroll{flex:1;overflow-y:auto;overflow-x:auto;background:var(--bg2)}
+.code-wrap{padding:17px 0;min-width:max-content}
+.cl{
+  display:flex;align-items:center;padding:4px 0;min-height:50px;
+  border-left:4px solid transparent;transition:all .12s;
+}
+.cl.active{background:var(--orange-bg);border-left-color:var(--orange)!important}
+.cl .ln{width:62px;text-align:right;color:var(--muted2);padding-right:20px;flex-shrink:0;font-size:20px;line-height:50px;user-select:none}
+.cl .arr{width:31px;flex-shrink:0;color:var(--orange);font-size:20px;line-height:50px;text-align:center}
+.cl .src{
+  padding-right:34px;font-size:21px;line-height:50px;
+  white-space:pre;
+}
+.kw{color:#cf222e}.fn{color:#0550ae}.cm{color:var(--muted);font-style:italic}
+.num{color:#0550ae}.str{color:#116329}
+
+/* ── CALLSTACK ── */
+#cs-panel{border-top:1px solid var(--border);max-height:294px;overflow-y:auto;flex-shrink:0}
+.cs-frame{padding:13px 22px;border-bottom:1px solid var(--border);font-size:17px}
+.cs-frame.top{background:var(--orange-bg);border-left:4px solid var(--orange)}
+.cs-frame .cs-sig{color:var(--blue);font-weight:600}
+.cs-frame .cs-d{color:var(--muted);font-size:15px;margin-top:4px}
+.cs-empty{padding:20px 22px;color:var(--muted2);font-size:17px;font-style:italic}
+.badge-count{background:var(--bg);border:1px solid var(--border);color:var(--orange);padding:3px 11px;border-radius:14px;font-size:15px;font-weight:700}
+
+/* ── CENTER: TREE ── */
+#center{flex:1;display:flex;flex-direction:column;overflow:hidden}
+#tree-scroll{flex:1;overflow:auto;background:var(--bg)}
+#tree-inner{padding:28px 34px;min-width:700px}
+
+.tnode{margin:4px 0;transition:opacity .2s}
+.tnode.unvisited{opacity:.25}
+.tnode.visited{opacity:1}
+
+.nrow{
+  display:inline-flex;align-items:center;gap:14px;
+  padding:13px 25px 13px 14px;border-radius:11px;
+  border:1px solid transparent;transition:all .15s;cursor:default;
+}
+.nrow.active{
+  background:var(--orange-bg);border-color:var(--orange-border);
+  box-shadow:0 0 0 4px rgba(227,98,9,.15);
+}
+.nrow.collected{background:var(--green-bg);border-color:var(--green-border)}
+.nrow.dead{background:var(--red-bg);border-color:var(--red-border)}
+
+.dbadge{
+  font-size:17px;font-weight:700;padding:6px 14px;border-radius:7px;
+  flex-shrink:0;min-width:50px;text-align:center;
+}
+.d0{background:var(--d0-bg);color:var(--d0-text)}
+.d1{background:var(--d1-bg);color:var(--d1-text)}
+.d2{background:var(--d2-bg);color:var(--d2-text)}
+.d3{background:var(--d3-bg);color:var(--d3-text)}
+.d4{background:var(--d4-bg);color:var(--d4-text)}
+
+.nlabel{font-size:20px;color:var(--text)}
+.nlabel .pick{color:var(--blue);font-weight:600}
+.nlabel .cb{color:var(--orange)}
+.nlabel .rm{color:var(--muted);font-size:18px}
+.nstatus{font-size:21px;margin-left:4px}
+
+/* found bar */
+#found-bar{
+  border-top:1px solid var(--border);padding:15px 25px;background:var(--bg2);
+  display:flex;align-items:center;gap:17px;flex-shrink:0;
+}
+.found-label{font-size:15px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;flex-shrink:0}
+#found-list{display:flex;flex-wrap:wrap;gap:8px}
+.fc{
+  background:var(--green-bg);border:1px solid var(--green-border);
+  color:var(--green);padding:4px 17px;border-radius:17px;font-size:17px;font-weight:600;
+}
+
+/* ── RIGHT: LOG ── */
+#right{width:504px;flex-shrink:0;display:flex;flex-direction:column;background:var(--bg2);border-left:1px solid var(--border)}
+#log-scroll{flex:1;overflow-y:auto}
+#log-placeholder{padding:28px 25px;color:var(--muted2);font-size:18px;font-style:italic;text-align:center;margin-top:56px}
+.le{
+  padding:15px 25px;border-bottom:1px solid var(--border);
+  font-size:18px;line-height:1.6;transition:background .1s;
+}
+.le.active{background:var(--blue-bg);border-left:4px solid var(--blue)}
+.le .ls{color:var(--muted2);font-size:17px;margin-bottom:3px}
+.le .la{font-weight:600;font-size:20px}
+.le .ld{color:var(--muted);font-size:17px;margin-top:3px}
+.le-call .la{color:var(--blue)}
+.le-check .la{color:var(--yellow)}
+.le-append .la{color:var(--orange)}
+.le-pop .la{color:var(--purple)}
+.le-collect .la{color:var(--green)}
+.le-dead .la{color:var(--red)}
+.le-return .la{color:var(--muted)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:7px;height:7px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted2)}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <div class="top-title">
+    <span class="icon">🌲</span>
+    <span class="name">COMBINATION SUM #39</span>
+    <span class="sub">Backtracking Debugger — candidates=[2,3,6,7] target=7</span>
+  </div>
+  <div class="top-stats">
+    <div class="stat"><span class="stat-k">Step</span><span class="stat-v orange" id="ss">0 / 0</span></div>
+    <div class="stat"><span class="stat-k">Combo</span><span class="stat-v blue" id="sc">[]</span></div>
+    <div class="stat"><span class="stat-k">Remain</span><span class="stat-v" id="sr">7</span></div>
+    <div class="stat"><span class="stat-k">Found</span><span class="stat-v green" id="sf">0</span></div>
+  </div>
+  <div id="controls">
+    <button id="btn-prev">◀ Prev</button>
+    <button id="btn-play">▶ Play</button>
+    <button id="btn-next">Next ▶</button>
+    <button id="btn-reset">⏹ Reset</button>
+    <span class="speed-label">Speed:</span>
+    <select id="spd">
+      <option value="1200">Slow</option>
+      <option value="700" selected>Normal</option>
+      <option value="350">Fast</option>
+      <option value="120">Turbo</option>
+    </select>
+  </div>
+</div>
+<div id="prog"><div id="prog-fill"></div></div>
+
+<!-- MAIN -->
+<div id="main">
+
+  <!-- LEFT -->
+  <div id="left">
+    <div class="panel-header">
+      <div class="ph-left">📄 <span>combination_sum.py</span></div>
+    </div>
+    <div id="code-scroll"><div class="code-wrap" id="code-wrap"></div></div>
+    <div id="cs-panel">
+      <div class="panel-header">
+        <div class="ph-left">📚 <span>Call Stack</span></div>
+        <span class="badge-count" id="cs-cnt">0</span>
+      </div>
+      <div id="cs-body"><div class="cs-empty">Not started</div></div>
+    </div>
+  </div>
+
+  <div class="divider" id="div-1"></div>
+
+  <!-- CENTER -->
+  <div id="center">
+    <div class="panel-header">
+      <div class="ph-left">🌲 <span>Decision Tree</span></div>
+      <span style="font-size:10px;color:var(--muted)">TOP → DOWN = ROOT → LEAVES (LIKE CALL STACK)</span>
+    </div>
+    <div id="tree-scroll"><div id="tree-inner"></div></div>
+    <div id="found-bar">
+      <span class="found-label">✅ Found:</span>
+      <div id="found-list"><span style="color:var(--muted2);font-size:11px">none yet</span></div>
+    </div>
+  </div>
+
+  <div class="divider" id="div-2"></div>
+
+  <!-- RIGHT -->
+  <div id="right">
+    <div class="panel-header"><div class="ph-left">📋 <span>Execution Log</span></div></div>
+    <div id="log-scroll">
+      <div id="log-placeholder">▶ Click Play or step through<br>to see execution log</div>
+      <div id="log-body"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ────────────────────────────────────────────────
+// CODE SOURCE
+// ────────────────────────────────────────────────
+const SRC = [
+  [1,  '<span class="kw">def</span> <span class="fn">combinationSum</span>(candidates, target):'],
+  [2,  '    result = []'],
+  [3,  '    combo  = []'],
+  [4,  ''],
+  [5,  '    <span class="kw">def</span> <span class="fn">backtrack</span>(combo, remain, start):'],
+  [6,  '        <span class="cm"># ── base cases ────────────────</span>'],
+  [7,  '        <span class="kw">if</span> remain == <span class="num">0</span>:'],
+  [8,  '            result.append(<span class="fn">list</span>(combo))'],
+  [9,  '            <span class="kw">return</span>'],
+  [10, '        <span class="kw">if</span> remain &lt; <span class="num">0</span>:'],
+  [11, '            <span class="kw">return</span>'],
+  [12, ''],
+  [13, '        <span class="cm"># ── explore from start onward ─</span>'],
+  [14, '        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, <span class="fn">len</span>(candidates)):'],
+  [15, '            combo.append(candidates[i])'],
+  [16, '            <span class="fn">backtrack</span>(combo, remain - candidates[i], i)'],
+  [17, '            combo.pop()  <span class="cm"># ← backtrack</span>'],
+  [18, ''],
+  [19, '    <span class="fn">backtrack</span>([], target, <span class="num">0</span>)'],
+  [20, '    <span class="kw">return</span> result'],
+];
+
+// ────────────────────────────────────────────────
+// TRACE GENERATION
+// ────────────────────────────────────────────────
+const CANDS = [2,3,6,7], TGT = 7;
+let steps=[], nodes={}, nodeSeq=0;
+
+function buildDepthClass(d){ return 'd'+Math.min(d,4); }
+
+function genTrace(){
+  steps=[]; nodes={}; nodeSeq=0;
+  const found=[];
+  // initial step
+  steps.push({line:19,type:'call',action:'backtrack([], 7, 0)',detail:'initial call — line 19',
+    nodeId:null,nact:null,stack:[],combo:[],remain:TGT,found:[]});
+  bt([],TGT,0,null,0,found);
+  steps.push({line:20,type:'return',action:'return result',
+    detail:`[[${found.map(c=>c.join(',')).join('], [')}]]`,
+    nodeId:null,nact:null,stack:[],combo:[],remain:TGT,found:[...found]});
+}
+
+function bt(combo,remain,start,parentId,depth,found){
+  const nid='n'+(nodeSeq++);
+  const cs='['+combo.join(',')+']';
+  nodes[nid]={id:nid,depth,parentId,indent:depth*36,
+    initLabel: depth===0?`<span class="pick">Start</span> <span class="cb">[]</span> <span class="rm">remain=7</span>`
+      :`<span class="pick">pick ${combo[combo.length-1]}</span> → <span class="cb">${cs}</span> <span class="rm">remain=${remain}</span>`
+  };
+
+  const stk=()=>[{depth,sig:`backtrack(${cs}, ${remain}, ${start})`,combo:cs,remain}];
+
+  // enter
+  steps.push({line:depth===0?5:16,type:'call',
+    action:`backtrack(${cs}, ${remain}, ${start})`,
+    detail:`depth=${depth}  start=${start}`,
+    nodeId:nid,nact:'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+
+  // check remain==0
+  steps.push({line:7,type:'check',
+    action:`remain == 0 ?  →  ${remain===0?'✅ YES':'NO'}`,
+    detail:`remain = ${remain}`,
+    nodeId:nid,nact:remain===0?'collect':'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+
+  if(remain===0){
+    found.push([...combo]);
+    steps.push({line:8,type:'collect',
+      action:`✅ COLLECT  ${cs}`,
+      detail:'result.append(list(combo))',
+      nodeId:nid,nact:'collect',stack:stk(),combo:[...combo],remain,found:[...found]});
+    steps.push({line:9,type:'return',action:'return',detail:'base case — found a combination',
+      nodeId:nid,nact:'collect',stack:stk(),combo:[...combo],remain,found:[...found]});
+    return;
+  }
+
+  // check remain<0
+  steps.push({line:10,type:'check',
+    action:`remain < 0 ?  →  ${remain<0?'💀 YES':'NO'}`,
+    detail:`remain = ${remain}`,
+    nodeId:nid,nact:remain<0?'dead':'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+
+  if(remain<0){
+    steps.push({line:11,type:'dead',
+      action:`💀 PRUNE  remain=${remain}`,
+      detail:'exceeded target — return',
+      nodeId:nid,nact:'dead',stack:stk(),combo:[...combo],remain,found:[...found]});
+    return;
+  }
+
+  // for loop
+  steps.push({line:14,type:'check',
+    action:`for i in range(${start}, ${CANDS.length})`,
+    detail:`will try: [${CANDS.slice(start).join(', ')}]`,
+    nodeId:nid,nact:'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+
+  for(let i=start;i<CANDS.length;i++){
+    const v=CANDS[i];
+    combo.push(v);
+    const nc='['+combo.join(',')+']';
+    steps.push({line:15,type:'append',
+      action:`combo.append(${v})  →  ${nc}`,
+      detail:`i=${i}  candidates[${i}] = ${v}`,
+      nodeId:nid,nact:'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+    bt(combo,remain-v,i,nid,depth+1,found);
+    combo.pop();
+    steps.push({line:17,type:'pop',
+      action:`combo.pop()  →  ${'['+combo.join(',')+']'}`,
+      detail:`removed ${v} — backtrack to depth ${depth}`,
+      nodeId:nid,nact:'activate',stack:stk(),combo:[...combo],remain,found:[...found]});
+  }
+}
+
+// ────────────────────────────────────────────────
+// RENDER CODE
+// ────────────────────────────────────────────────
+function renderCode(){
+  document.getElementById('code-wrap').innerHTML=
+    SRC.map(([ln,src])=>`
+      <div class="cl" id="cl-${ln}">
+        <span class="ln">${ln}</span>
+        <span class="arr" id="ar-${ln}"></span>
+        <span class="src">${src}</span>
+      </div>`).join('');
+}
+
+// ────────────────────────────────────────────────
+// RENDER TREE (all nodes, unvisited initially)
+// ────────────────────────────────────────────────
+function renderTree(){
+  const c=document.getElementById('tree-inner');
+  c.innerHTML='';
+  for(const [id,n] of Object.entries(nodes)){
+    const d=document.createElement('div');
+    d.className='tnode unvisited';
+    d.id='tn-'+id;
+    d.style.paddingLeft=n.indent+'px';
+    const dc=buildDepthClass(n.depth);
+    d.innerHTML=`<div class="nrow" id="nr-${id}">
+      <span class="dbadge ${dc}">D${n.depth}</span>
+      <span class="nlabel" id="nl-${id}">${n.initLabel}</span>
+      <span class="nstatus" id="nst-${id}"></span>
+    </div>`;
+    c.appendChild(d);
+  }
+}
+
+// ────────────────────────────────────────────────
+// RENDER LOG (all entries, hidden until reached)
+// ────────────────────────────────────────────────
+function renderLog(){
+  document.getElementById('log-body').innerHTML=
+    steps.map((s,i)=>`
+      <div class="le le-${s.type}" id="le-${i}" style="display:none">
+        <div class="ls">Step ${i+1} / ${steps.length} — line ${s.line}</div>
+        <div class="la">${s.action}</div>
+        <div class="ld">${s.detail}</div>
+      </div>`).join('');
+}
+
+// ────────────────────────────────────────────────
+// STATE
+// ────────────────────────────────────────────────
+let cur=-1, playing=false, timer=null, foundList=[];
+const nStates={};  // nodeId → 'collect'|'dead'
+
+function applyStep(idx){
+  if(idx<0||idx>=steps.length)return;
+  cur=idx;
+  const s=steps[idx];
+
+  // 1. code highlight
+  document.querySelectorAll('.cl').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.arr').forEach(e=>e.textContent='');
+  const ce=document.getElementById('cl-'+s.line);
+  const ae=document.getElementById('ar-'+s.line);
+  if(ce){ce.classList.add('active');ce.scrollIntoView({block:'nearest'})}
+  if(ae)ae.textContent='→';
+
+  // 2. tree node
+  if(s.nodeId){
+    const tn=document.getElementById('tn-'+s.nodeId);
+    if(tn){
+      tn.classList.remove('unvisited');
+      tn.classList.add('visited');
+      tn.scrollIntoView({block:'nearest',behavior:'smooth'});
+    }
+    // clear previous active
+    document.querySelectorAll('.nrow.active').forEach(e=>e.classList.remove('active'));
+
+    const nr=document.getElementById('nr-'+s.nodeId);
+    const ns=document.getElementById('nst-'+s.nodeId);
+    const nl=document.getElementById('nl-'+s.nodeId);
+
+    if(nr){
+      if(s.nact==='activate') nr.classList.add('active');
+      if(s.nact==='collect'&&!nStates[s.nodeId]){
+        nStates[s.nodeId]='collect';
+        nr.classList.add('collected');
+        if(ns){ns.textContent='✅';ns.style.color='var(--green)'}
+        if(nl&&!nl.innerHTML.includes('✅')) nl.innerHTML+=' <span style="color:var(--green);font-weight:700">✅</span>';
+      }
+      if(s.nact==='dead'&&!nStates[s.nodeId]){
+        nStates[s.nodeId]='dead';
+        nr.classList.add('dead');
+        if(ns){ns.textContent='💀';ns.style.color='var(--red)'}
+        if(nl&&!nl.innerHTML.includes('💀')) nl.innerHTML+=' <span style="color:var(--red)">💀</span>';
+      }
+    }
+  }
+
+  // hide placeholder on first step
+  const ph=document.getElementById('log-placeholder');
+  if(ph)ph.style.display='none';
+
+  // 3. log — show and highlight
+  document.querySelectorAll('.le.active').forEach(e=>e.classList.remove('active'));
+  const le=document.getElementById('le-'+idx);
+  if(le){
+    le.style.display='block';
+    le.classList.add('active');
+    le.scrollIntoView({block:'nearest',behavior:'smooth'});
+  }
+  // show all previous log entries too
+  for(let i=0;i<=idx;i++){
+    const el=document.getElementById('le-'+i);
+    if(el)el.style.display='block';
+  }
+
+  // 4. call stack
+  renderCallStack(s.stack);
+
+  // 5. stats
+  document.getElementById('ss').textContent=`${idx+1} / ${steps.length}`;
+  document.getElementById('sc').textContent=JSON.stringify(s.combo);
+  document.getElementById('sr').textContent=s.remain;
+
+  // 6. found
+  if(s.found.length>foundList.length){
+    foundList=[...s.found];
+    const fl=document.getElementById('found-list');
+    fl.innerHTML=foundList.map(c=>`<span class="fc">[${c.join(',')}]</span>`).join('');
+    document.getElementById('sf').textContent=foundList.length;
+  }
+
+  // 7. progress
+  document.getElementById('prog-fill').style.width=((idx+1)/steps.length*100)+'%';
+}
+
+function renderCallStack(frames){
+  const b=document.getElementById('cs-body');
+  if(!frames||frames.length===0){
+    b.innerHTML='<div class="cs-empty">Stack is empty</div>';
+    document.getElementById('cs-cnt').textContent='0';
+    return;
+  }
+  b.innerHTML=frames.map((f,i)=>`
+    <div class="cs-frame ${i===0?'top':''}">
+      <span class="dbadge ${buildDepthClass(f.depth)}" style="font-size:14px;padding:3px 8px">D${f.depth}</span>
+      <span class="cs-sig"> ${f.sig}</span>
+      <div class="cs-d">combo=${f.combo}  remain=${f.remain}</div>
+    </div>`).join('');
+  document.getElementById('cs-cnt').textContent=frames.length;
+}
+
+// ────────────────────────────────────────────────
+// RESET
+// ────────────────────────────────────────────────
+function reset(){
+  stopPlay();
+  cur=-1;
+  Object.keys(nStates).forEach(k=>delete nStates[k]);
+  foundList=[];
+
+  document.querySelectorAll('.cl').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('.arr').forEach(e=>e.textContent='');
+  document.querySelectorAll('.tnode').forEach(e=>{e.className='tnode unvisited'});
+  document.querySelectorAll('.nrow').forEach(e=>{e.classList.remove('active','collected','dead')});
+  document.querySelectorAll('.nstatus').forEach(e=>e.textContent='');
+  // reset labels
+  for(const [id,n] of Object.entries(nodes)){
+    const nl=document.getElementById('nl-'+id);
+    if(nl)nl.innerHTML=n.initLabel;
+  }
+  document.querySelectorAll('.le').forEach(e=>{e.style.display='none';e.classList.remove('active')});
+
+  document.getElementById('ss').textContent='0 / '+steps.length;
+  document.getElementById('sc').textContent='[]';
+  document.getElementById('sr').textContent=TGT;
+  document.getElementById('sf').textContent='0';
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('found-list').innerHTML='<span style="color:var(--muted2);font-size:11px">none yet</span>';
+  const rph=document.getElementById('log-placeholder');
+  if(rph)rph.style.display='block';
+  renderCallStack([]);
+}
+
+// ────────────────────────────────────────────────
+// PLAYBACK
+// ────────────────────────────────────────────────
+function stopPlay(){
+  playing=false;clearInterval(timer);
+  document.getElementById('btn-play').textContent='▶ Play';
+}
+function startPlay(){
+  if(cur>=steps.length-1){reset();applyStep(0)}
+  playing=true;
+  document.getElementById('btn-play').textContent='⏸ Pause';
+  const spd=parseInt(document.getElementById('spd').value);
+  timer=setInterval(()=>{
+    if(cur>=steps.length-1){stopPlay();return}
+    applyStep(cur+1);
+  },spd);
+}
+
+document.getElementById('btn-prev').onclick=()=>{
+  stopPlay();
+  if(cur>0){const t=cur-1;reset();for(let i=0;i<=t;i++)applyStep(i)}
+};
+document.getElementById('btn-next').onclick=()=>{
+  stopPlay();
+  if(cur<steps.length-1)applyStep(cur+1);
+};
+document.getElementById('btn-play').onclick=()=>{
+  if(playing){stopPlay()}else{startPlay()}
+};
+document.getElementById('btn-reset').onclick=reset;
+
+// ────────────────────────────────────────────────
+// RESIZABLE PANELS
+// ────────────────────────────────────────────────
+function makeResizable(dividerId, leftId, rightId){
+  const divider=document.getElementById(dividerId);
+  const leftEl=document.getElementById(leftId);
+  const rightEl=rightId?document.getElementById(rightId):null;
+  let startX,startW;
+  divider.addEventListener('mousedown',e=>{
+    startX=e.clientX; startW=leftEl.offsetWidth;
+    divider.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+    e.preventDefault();
+  });
+  function onMove(e){
+    const nw=Math.max(160, startW+(e.clientX-startX));
+    leftEl.style.width=nw+'px';
+    leftEl.style.flexShrink='0';
+  }
+  function onUp(){
+    divider.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    document.removeEventListener('mousemove',onMove);
+    document.removeEventListener('mouseup',onUp);
+  }
+}
+
+// ────────────────────────────────────────────────
+// INIT
+// ────────────────────────────────────────────────
+genTrace();
+renderCode();
+renderTree();
+renderLog();
+document.getElementById('ss').textContent='0 / '+steps.length;
+makeResizable('div-1','left','center');
+makeResizable('div-2','center','right');
+</script>
+</body>
+</html>

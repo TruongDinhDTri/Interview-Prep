@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backtracking — Interactive Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#faf6f1;--s1:#ffffff;--s2:#f3ede5;--s3:#e8dfd4;
+  --border:#ddd2c4;--text:#3d3529;--dim:#8c7e6e;
+  --accent:#c2715a;--accent2:#7a9e7e;--green:#5a9e6f;
+  --red:#c75050;--orange:#d4923a;--purple:#8b6fb0;--blue:#5b8db8;
+  --warm:#f0e6d8;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 0%,rgba(194,113,90,.06),transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(122,158,126,.06),transparent 60%);pointer-events:none;z-index:0}
+
+/* NAV */
+.topnav{position:sticky;top:0;z-index:100;background:rgba(250,246,241,.88);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:10px 0}
+.topnav-inner{max-width:880px;margin:0 auto;padding:0 20px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.topnav-inner::-webkit-scrollbar{display:none}
+.nav-btn{padding:9px 20px;border-radius:20px;background:transparent;border:1.5px solid transparent;color:var(--dim);cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;font-size:.85em;white-space:nowrap;transition:all .25s}
+.nav-btn:hover{color:var(--text);background:var(--s2)}
+.nav-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.container{max-width:880px;margin:0 auto;padding:28px 20px 80px;position:relative;z-index:1}
+
+/* SECTIONS */
+.section{display:none;animation:fadeUp .35s ease}
+.section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{text-align:center;padding:36px 0 32px}
+.hero h1{font-size:2.3em;font-weight:800;color:var(--accent);margin-bottom:4px}
+.hero p{color:var(--dim);font-size:1.05em;font-weight:500}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px 26px;margin-bottom:18px;box-shadow:0 2px 12px rgba(61,53,41,.04)}
+.card-title{font-size:1.15em;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--text)}
+
+/* HIGHLIGHT */
+.hl{border-left:3px solid var(--accent);background:linear-gradient(90deg,rgba(194,113,90,.06),transparent);padding:14px 18px;border-radius:0 10px 10px 0;margin:10px 0;line-height:1.75}
+.hl.green{border-color:var(--green);background:linear-gradient(90deg,rgba(90,158,111,.06),transparent)}
+.hl.orange{border-color:var(--orange);background:linear-gradient(90deg,rgba(212,146,58,.06),transparent)}
+.hl.purple{border-color:var(--purple);background:linear-gradient(90deg,rgba(139,111,176,.06),transparent)}
+
+/* RULES */
+.rule-grid{display:flex;flex-direction:column;gap:10px;margin:8px 0}
+.rule-item{display:flex;gap:12px;align-items:flex-start}
+.rule-num{width:26px;height:26px;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8em;flex-shrink:0;margin-top:2px}
+.rule-item.bonus .rule-num{background:var(--orange)}
+
+/* FLOW */
+.flow-box{background:var(--s2);border-radius:12px;padding:18px 22px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:.85em;line-height:2;white-space:pre-wrap;color:var(--dim)}
+.flow-box .kw{color:var(--accent);font-weight:700}
+.flow-box .act{color:var(--orange);font-weight:600}
+.flow-box .cmt{color:var(--accent2)}
+
+/* CODE */
+.code-block{background:#2d2a25;border-radius:12px;padding:20px 22px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:.82em;line-height:1.8;overflow-x:auto;color:#d4cfc6}
+.code-block .kw{color:#d4923a}
+.code-block .fn{color:#7ab88a}
+.code-block .cm{color:#7a7265;font-style:italic}
+.code-block .st{color:#c2715a}
+
+/* CHEAT TABLE */
+.cheat-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.88em}
+.cheat-table th{background:var(--s2);padding:10px 12px;text-align:left;font-weight:700;color:var(--accent);border-bottom:2px solid var(--border)}
+.cheat-table td{padding:10px 12px;border-bottom:1px solid var(--s3)}
+.cheat-table tr:last-child td{border-bottom:none}
+.cheat-table code{background:var(--s2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.9em;color:var(--accent)}
+
+/* CHECKLIST */
+.checklist{list-style:none;margin:8px 0}
+.checklist li{padding:7px 0;display:flex;gap:10px;align-items:flex-start}
+.checklist li::before{content:'☐';color:var(--accent);font-size:1.1em;flex-shrink:0}
+
+/* QUOTE */
+.interview-quote{background:var(--s2);border-radius:12px;padding:18px 22px;margin:10px 0;font-style:italic;border-left:3px solid var(--green);color:var(--text);line-height:1.8}
+
+code{background:var(--s2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.88em;color:var(--accent)}
+
+/* =========== ANIMATION =========== */
+.anim-section{margin-top:18px}
+.anim-label{font-size:.78em;font-weight:700;color:var(--accent2);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px}
+
+.arr-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:14px}
+.acell{width:52px;height:52px;display:flex;align-items:center;justify-content:center;border-radius:12px;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.15em;background:var(--s2);border:2px solid var(--border);transition:all .35s ease;color:var(--text)}
+.acell.chosen{background:rgba(194,113,90,.12);border-color:var(--accent);color:var(--accent);transform:scale(1.08);box-shadow:0 3px 12px rgba(194,113,90,.15)}
+.acell.dim{opacity:.25}
+.acell.used{background:rgba(90,158,111,.1);border-color:var(--green);color:var(--green)}
+.acell.pruned{background:rgba(199,80,80,.08);border-color:var(--red);color:var(--red)}
+
+.state-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:12px 0;min-height:50px}
+.state-label{font-weight:700;color:var(--dim);font-size:.88em}
+.state-bag{display:flex;gap:5px;padding:10px 18px;background:var(--s1);border-radius:12px;border:2px dashed var(--border);min-width:70px;min-height:40px;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-weight:600;transition:all .3s}
+.state-bag.saved{border-color:var(--green);border-style:solid;background:rgba(90,158,111,.06);box-shadow:0 0 0 3px rgba(90,158,111,.1)}
+.bag-chip{background:var(--accent);color:#fff;padding:3px 10px;border-radius:8px;font-size:.9em;animation:chipIn .25s ease}
+@keyframes chipIn{from{transform:scale(0);opacity:0}to{transform:scale(1);opacity:1}}
+
+.budget-display{text-align:center;font-family:'JetBrains Mono',monospace;font-size:1.1em;margin:6px 0}
+.bval{font-weight:700;padding:5px 14px;border-radius:8px;display:inline-block}
+.bval.ok{background:rgba(90,158,111,.1);color:var(--green)}
+.bval.hit{background:rgba(90,158,111,.15);color:var(--green)}
+.bval.over{background:rgba(199,80,80,.1);color:var(--red)}
+
+.saved-row{display:flex;align-items:flex-start;gap:6px;flex-wrap:wrap;margin-top:10px;min-height:26px}
+.saved-label{font-weight:700;color:var(--green);font-size:.82em;padding-top:3px}
+.saved-chip{background:rgba(90,158,111,.08);border:1px solid rgba(90,158,111,.2);padding:3px 10px;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:.8em;color:var(--green);animation:chipIn .25s ease}
+
+.explain-box{background:var(--warm);border-radius:12px;padding:16px 20px;margin-top:14px;min-height:46px;font-size:.98em;line-height:1.75;border-left:3px solid var(--orange)}
+
+.controls{display:flex;gap:10px;justify-content:center;margin-top:18px;align-items:center;flex-wrap:wrap}
+.btn{padding:10px 24px;border-radius:20px;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:.9em;cursor:pointer;transition:all .2s}
+.btn-go{background:var(--accent);color:#fff}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(194,113,90,.3)}
+.btn-go:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-rst{background:var(--s2);color:var(--text);border:1.5px solid var(--border)}
+.btn-rst:hover{border-color:var(--accent)}
+.step-info{color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.85em}
+
+/* PROB HEADER */
+.prob-header{margin-bottom:18px}
+.prob-title{font-size:1.4em;font-weight:800;color:var(--text);margin-bottom:3px}
+.prob-lc{color:var(--dim);font-size:.88em;margin-bottom:12px}
+.prob-core{border-left:3px solid var(--accent);background:linear-gradient(90deg,rgba(194,113,90,.05),transparent);padding:14px 18px;border-radius:0 10px 10px 0;line-height:1.7}
+
+.rules-mini{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:18px 22px;margin-top:16px;box-shadow:0 2px 8px rgba(61,53,41,.03)}
+.rules-mini-title{font-weight:800;color:var(--accent2);margin-bottom:10px;font-size:.92em}
+.rules-mini .rule-num{background:var(--accent2)}
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+<div class="topnav-inner" id="nav-bar">
+  <button class="nav-btn active" data-target="intro">🧠 Core Concepts</button>
+  <button class="nav-btn" data-target="subsets">📦 Subsets</button>
+  <button class="nav-btn" data-target="perms">🔄 Permutations</button>
+  <button class="nav-btn" data-target="combs">🎯 Combinations</button>
+  <button class="nav-btn" data-target="csum">♻️ Combo Sum</button>
+</div>
+</nav>
+
+<div class="container">
+
+<!-- ================= INTRO ================= -->
+<div id="intro" class="section active">
+  <div class="hero">
+    <h1>🔄 Backtracking</h1>
+    <p>One pattern. Three rules. Kill any interview.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔑 What Is Backtracking?</div>
+    <div class="hl">
+      Backtracking = Recursion + <strong>"undo"</strong>. One single pattern. Not 4 techniques — just <strong>ONE core engine</strong> applied to different problem shapes.
+    </div>
+    <p style="margin-top:10px">Like walking a maze 🏃‍♂️ — try a path, hit dead end, walk back to the fork, try another path.</p>
+    <p style="margin-top:6px">Used when problem says: <strong>"find all"</strong>, <strong>"generate all"</strong>, <strong>"all possible"</strong>, <strong>"every combination"</strong>.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⏱ Time Complexity</div>
+    <table class="cheat-table">
+      <tr><th>Problem type</th><th>Big-O</th></tr>
+      <tr><td>Subsets</td><td><code>O(2^n)</code></td></tr>
+      <tr><td>Permutations</td><td><code>O(n!)</code></td></tr>
+      <tr><td>Combinations</td><td><code>O(C(n,k))</code></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🧱 The ONE Core Idea</div>
+    <p><strong>Build a solution piece by piece</strong>, and <strong>undo</strong> when a piece doesn't work.</p>
+    <p style="margin-top:8px">Like building a LEGO tower 🧱 — place a block, keep going up. Tower wobbles? <strong>Remove the last block</strong> → try a different one.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📏 The 3 Rules (NEVER break these)</div>
+    <div class="rule-grid">
+      <div class="rule-item"><span class="rule-num">1</span><span><strong>CHOOSE</strong> — Pick one option. Add it to your current candidate.</span></div>
+      <div class="rule-item"><span class="rule-num">2</span><span><strong>EXPLORE</strong> — Recurse deeper with that choice. See where it leads.</span></div>
+      <div class="rule-item"><span class="rule-num">3</span><span><strong>UN-CHOOSE</strong> — After exploring, <strong>remove</strong> that choice. Now you're clean to try the next.</span></div>
+      <div class="rule-item bonus"><span class="rule-num">⚠</span><span><strong>COPY</strong> — When saving a solution, always <code>.copy()</code> it. Your candidate is mutated in-place.</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔄 The Idea Flow</div>
+    <div class="flow-box"><span class="kw">START</span> with empty candidate []
+
+→ Is this a complete solution?
+   <span class="act">YES</span> → save it (<span class="cmt">copy!</span>), return
+   <span class="act">NO</span>  → continue ↓
+
+→ Loop through available choices:
+   → Pick choice X         <span class="cmt">(CHOOSE)</span>
+   → Go deeper with X      <span class="cmt">(EXPLORE)</span>
+   → Remove X              <span class="cmt">(UN-CHOOSE)</span>
+   → Pick choice Y         <span class="cmt">(next iteration)</span>
+   → Go deeper with Y      <span class="cmt">(EXPLORE)</span>
+   → Remove Y              <span class="cmt">(UN-CHOOSE)</span>
+
+→ Return <span class="cmt">(this level is done, go back up)</span></div>
+    <p style="margin-top:10px">It's like a <strong>tree</strong>. Each level = one decision. Each branch = one choice. Walk down every branch, and <strong>clean up after yourself</strong> when you come back up.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💻 Generic Template</div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">backtrack</span>(candidate, choices, result):
+    <span class="kw">if</span> <span class="fn">is_solution</span>(candidate):
+        result.append(candidate.<span class="fn">copy</span>())  <span class="cm"># ⚠️ COPY!</span>
+        <span class="kw">return</span>
+
+    <span class="kw">for</span> choice <span class="kw">in</span> choices:
+        candidate.append(choice)                 <span class="cm"># Rule 1: CHOOSE</span>
+        <span class="fn">backtrack</span>(candidate, next_choices, result) <span class="cm"># Rule 2: EXPLORE</span>
+        candidate.pop()                           <span class="cm"># Rule 3: UN-CHOOSE</span></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🎯 The 3 Decisions That Change Everything</div>
+    <p style="margin-bottom:12px">The ONE pattern handles ALL problems. Only <strong>3 things</strong> change:</p>
+    <div class="hl"><strong>Decision 1: When is it "complete"?</strong><br>
+      • <strong>Subsets</strong> → ALWAYS. Save BEFORE the loop.<br>
+      • <strong>Permutations</strong> → When <code>len == n</code>. Use ALL elements.<br>
+      • <strong>Combinations</strong> → When <code>len == k</code>. Exactly k.<br>
+      • <strong>Combo Sum</strong> → When <code>remaining == 0</code>. Hit target.
+    </div>
+    <div class="hl purple"><strong>Decision 2: Available choices?</strong><br>
+      • <strong>Subsets / Combinations / Combo Sum</strong> → <code>start</code> index. Only forward.<br>
+      • <strong>Permutations</strong> → From <code>0</code> every time. Skip used.
+    </div>
+    <div class="hl green"><strong>Decision 3: Reuse?</strong><br>
+      • <strong>NO</strong> → recurse with <code>i + 1</code><br>
+      • <strong>YES</strong> (Combo Sum) → recurse with <code>i</code>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">⚡ Cheat Sheet</div>
+    <table class="cheat-table">
+      <tr><th>Problem</th><th>Complete when</th><th>Choices from</th><th>Reuse?</th><th>Recurse</th></tr>
+      <tr><td>Subsets</td><td>Always</td><td><code>start</code></td><td>No</td><td><code>i + 1</code></td></tr>
+      <tr><td>Permutations</td><td><code>len == n</code></td><td><code>0</code></td><td>No</td><td><code>used[]</code></td></tr>
+      <tr><td>Combinations</td><td><code>len == k</code></td><td><code>start</code></td><td>No</td><td><code>i + 1</code></td></tr>
+      <tr><td>Combo Sum</td><td><code>rem == 0</code></td><td><code>start</code></td><td>Yes</td><td><code>i</code></td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🔪 Duplicate Handling</div>
+    <p>When input has duplicates like <code>[1, 2, 2, 3]</code>:</p>
+    <div class="rule-grid" style="margin-top:10px">
+      <div class="rule-item"><span class="rule-num">1</span><span><strong>Sort the array first</strong></span></div>
+      <div class="rule-item"><span class="rule-num">2</span><span><strong>Skip</strong> if current == previous at same level: <code>if i > start and nums[i] == nums[i-1]: continue</code></span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🚨 Interview Checklist</div>
+    <ul class="checklist">
+      <li>"Find all" / "generate all"? → Backtracking</li>
+      <li>Can elements be <strong>reused</strong>? → <code>backtrack(i)</code> vs <code>backtrack(i+1)</code></li>
+      <li>Does <strong>order matter</strong>? → Permutation vs Combination</li>
+      <li><strong>Duplicates</strong> in input? → Sort + skip</li>
+      <li>What makes a solution <strong>complete</strong>? → That's your base case</li>
+      <li>Always <code>.copy()</code> when saving</li>
+      <li>Always <strong>undo</strong> after exploring</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <div class="card-title">🗣️ Say-It-Out-Loud</div>
+    <div class="interview-quote">"Backtracking is a recursive pattern where I build a solution incrementally. At each step I make a choice, recurse to explore that path, then undo the choice to try alternatives. The key decisions are: when is a solution complete, what choices are available, and can I reuse elements. Everything else is the same pattern with different answers to those 3 questions."</div>
+  </div>
+</div>
+
+<!-- ================= SUBSETS ================= -->
+<div id="subsets" class="section">
+  <div class="prob-header">
+    <div class="prob-title">📦 Subsets</div>
+    <div class="prob-lc">LeetCode 78 · Given [1, 2, 3] → find ALL possible subsets</div>
+    <div class="prob-core"><strong>🧠 Core idea:</strong> You have a bag and a row of items [1, 2, 3]. Walk down the row. For each item: <strong>"put it in or skip it?"</strong> Every bag — even empty — is a valid answer.</div>
+  </div>
+  <div class="card anim-section">
+    <div class="anim-label">▶ Interactive Flow</div>
+    <div class="arr-row" id="s-arr"></div>
+    <div class="state-row"><span class="state-label">🎒 Bag:</span><div class="state-bag" id="s-bag"><span style="color:var(--dim)">empty</span></div></div>
+    <div class="saved-row"><span class="saved-label">✅ Saved:</span><span id="s-res"></span></div>
+    <div class="explain-box" id="s-exp">Hit <strong>Next Step</strong> to watch the flow.</div>
+    <div class="controls"><button class="btn btn-rst" onclick="rst('s')">↺ Reset</button><span class="step-info" id="s-ctr">0 / 0</span><button class="btn btn-go" id="s-go" onclick="nxt('s')">Next Step →</button></div>
+  </div>
+  <div class="rules-mini"><div class="rules-mini-title">📏 Rules</div><div class="rule-grid">
+    <div class="rule-item"><span class="rule-num">1</span><span>Save <strong>before</strong> the loop — every state is valid</span></div>
+    <div class="rule-item"><span class="rule-num">2</span><span>Only pick <strong>forward</strong> — never backward</span></div>
+    <div class="rule-item"><span class="rule-num">3</span><span>Recurse with <code>i + 1</code> — no reuse</span></div>
+  </div></div>
+  <div class="card" style="margin-top:16px"><div class="card-title">💻 Code</div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">subsets</span>(nums):
+    result = []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, current):
+        result.append(current.<span class="fn">copy</span>())          <span class="cm"># save BEFORE loop</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, <span class="fn">len</span>(nums)):
+            current.append(nums[i])            <span class="cm"># CHOOSE</span>
+            <span class="fn">backtrack</span>(i + 1, current)           <span class="cm"># EXPLORE</span>
+            current.pop()                       <span class="cm"># UN-CHOOSE</span>
+    <span class="fn">backtrack</span>(0, [])
+    <span class="kw">return</span> result</div>
+    <p style="margin-top:10px"><strong>Duplicates</strong> (LC 90): Sort + <code>if i > start and nums[i] == nums[i-1]: continue</code></p>
+  </div>
+</div>
+
+<!-- ================= PERMUTATIONS ================= -->
+<div id="perms" class="section">
+  <div class="prob-header">
+    <div class="prob-title">🔄 Permutations</div>
+    <div class="prob-lc">LeetCode 46 · Given [1, 2, 3] → find ALL orderings</div>
+    <div class="prob-core"><strong>🧠 Core idea:</strong> 3 numbered cards, 3 empty slots. Fill <strong>every</strong> slot using ALL cards. [1,2,3] ≠ [2,1,3] — <strong>order matters</strong>. For each empty slot, try every card not yet placed.</div>
+  </div>
+  <div class="card anim-section">
+    <div class="anim-label">▶ Interactive Flow</div>
+    <div class="arr-row" id="p-arr"></div>
+    <div class="state-row"><span class="state-label">📝 Slots:</span><div class="state-bag" id="p-bag"><span style="color:var(--dim)">empty</span></div></div>
+    <div class="saved-row"><span class="saved-label">✅ Saved:</span><span id="p-res"></span></div>
+    <div class="explain-box" id="p-exp">Hit <strong>Next Step</strong> to watch the flow.</div>
+    <div class="controls"><button class="btn btn-rst" onclick="rst('p')">↺ Reset</button><span class="step-info" id="p-ctr">0 / 0</span><button class="btn btn-go" id="p-go" onclick="nxt('p')">Next Step →</button></div>
+  </div>
+  <div class="rules-mini"><div class="rules-mini-title">📏 Rules</div><div class="rule-grid">
+    <div class="rule-item"><span class="rule-num">1</span><span>Save only when <strong>all slots filled</strong></span></div>
+    <div class="rule-item"><span class="rule-num">2</span><span>Scan <strong>ALL cards from 0</strong> every time</span></div>
+    <div class="rule-item"><span class="rule-num">3</span><span>Skip already placed cards (<code>used[]</code>)</span></div>
+    <div class="rule-item"><span class="rule-num">4</span><span>Remove card <strong>AND</strong> unmark after exploring</span></div>
+  </div></div>
+  <div class="card" style="margin-top:16px"><div class="card-title">💻 Code</div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">permute</span>(nums):
+    result, used = [], [<span class="st">False</span>] * <span class="fn">len</span>(nums)
+    <span class="kw">def</span> <span class="fn">backtrack</span>(current):
+        <span class="kw">if</span> <span class="fn">len</span>(current) == <span class="fn">len</span>(nums):
+            result.append(current.<span class="fn">copy</span>()); <span class="kw">return</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(nums)):
+            <span class="kw">if</span> used[i]: <span class="kw">continue</span>
+            used[i] = <span class="st">True</span>; current.append(nums[i])
+            <span class="fn">backtrack</span>(current)
+            current.pop(); used[i] = <span class="st">False</span>
+    <span class="fn">backtrack</span>([]); <span class="kw">return</span> result</div>
+  </div>
+</div>
+
+<!-- ================= COMBINATIONS ================= -->
+<div id="combs" class="section">
+  <div class="prob-header">
+    <div class="prob-title">🎯 Combinations</div>
+    <div class="prob-lc">LeetCode 77 · Given n=4, k=2 → pick all teams of exactly 2</div>
+    <div class="prob-core"><strong>🧠 Core idea:</strong> Captain picks a team of <strong>exactly k players</strong> from n. Order doesn't matter — [Alice, Bob] = [Bob, Alice]. Every possible team of size k.</div>
+  </div>
+  <div class="card anim-section">
+    <div class="anim-label">▶ Interactive Flow</div>
+    <div class="arr-row" id="c-arr"></div>
+    <div class="state-row"><span class="state-label">🏀 Team:</span><div class="state-bag" id="c-bag"><span style="color:var(--dim)">empty</span></div></div>
+    <div class="saved-row"><span class="saved-label">✅ Saved:</span><span id="c-res"></span></div>
+    <div class="explain-box" id="c-exp">Hit <strong>Next Step</strong> to watch the flow.</div>
+    <div class="controls"><button class="btn btn-rst" onclick="rst('c')">↺ Reset</button><span class="step-info" id="c-ctr">0 / 0</span><button class="btn btn-go" id="c-go" onclick="nxt('c')">Next Step →</button></div>
+  </div>
+  <div class="rules-mini"><div class="rules-mini-title">📏 Rules</div><div class="rule-grid">
+    <div class="rule-item"><span class="rule-num">1</span><span>Save only when team has <strong>exactly k</strong></span></div>
+    <div class="rule-item"><span class="rule-num">2</span><span>Pick <strong>forward only</strong></span></div>
+    <div class="rule-item"><span class="rule-num">3</span><span>Cut last pick and try next after exploring</span></div>
+  </div></div>
+  <div class="card" style="margin-top:16px"><div class="card-title">💻 Code</div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">combine</span>(n, k):
+    result = []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, current):
+        <span class="kw">if</span> <span class="fn">len</span>(current) == k:
+            result.append(current.<span class="fn">copy</span>()); <span class="kw">return</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, n + 1):
+            current.append(i)
+            <span class="fn">backtrack</span>(i + 1, current)
+            current.pop()
+    <span class="fn">backtrack</span>(1, []); <span class="kw">return</span> result</div>
+  </div>
+</div>
+
+<!-- ================= COMBO SUM ================= -->
+<div id="csum" class="section">
+  <div class="prob-header">
+    <div class="prob-title">♻️ Combination Sum</div>
+    <div class="prob-lc">LeetCode 39 · Given [2, 3, 6, 7], target=7 → combos that sum to 7</div>
+    <div class="prob-core"><strong>🧠 Core idea:</strong> Coins worth [2, 3, 6, 7]. Make <strong>exactly 7</strong>. <strong>Unlimited</strong> coins of each. Find every way. You <strong>can reuse</strong> the same coin.</div>
+  </div>
+  <div class="card anim-section">
+    <div class="anim-label">▶ Interactive Flow</div>
+    <div class="arr-row" id="cs-arr"></div>
+    <div class="budget-display" id="cs-bgt">Budget: <span class="bval ok">7</span></div>
+    <div class="state-row"><span class="state-label">💰 Coins:</span><div class="state-bag" id="cs-bag"><span style="color:var(--dim)">empty</span></div></div>
+    <div class="saved-row"><span class="saved-label">✅ Saved:</span><span id="cs-res"></span></div>
+    <div class="explain-box" id="cs-exp">Hit <strong>Next Step</strong> to watch the flow.</div>
+    <div class="controls"><button class="btn btn-rst" onclick="rst('cs')">↺ Reset</button><span class="step-info" id="cs-ctr">0 / 0</span><button class="btn btn-go" id="cs-go" onclick="nxt('cs')">Next Step →</button></div>
+  </div>
+  <div class="rules-mini"><div class="rules-mini-title">📏 Rules</div><div class="rule-grid">
+    <div class="rule-item"><span class="rule-num">1</span><span>Save when budget <strong>== 0</strong></span></div>
+    <div class="rule-item"><span class="rule-num">2</span><span><strong>Prune</strong> when budget <strong>&lt; 0</strong></span></div>
+    <div class="rule-item"><span class="rule-num">3</span><span>Same coin again OK (recurse <code>i</code> not <code>i+1</code>)</span></div>
+    <div class="rule-item"><span class="rule-num">4</span><span>Still <strong>forward only</strong> to avoid dupes</span></div>
+  </div></div>
+  <div class="card" style="margin-top:16px"><div class="card-title">💻 Code</div>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">combinationSum</span>(candidates, target):
+    result = []
+    <span class="kw">def</span> <span class="fn">backtrack</span>(start, current, remaining):
+        <span class="kw">if</span> remaining == 0:
+            result.append(current.<span class="fn">copy</span>()); <span class="kw">return</span>
+        <span class="kw">if</span> remaining < 0: <span class="kw">return</span>       <span class="cm"># PRUNE</span>
+        <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(start, <span class="fn">len</span>(candidates)):
+            current.append(candidates[i])
+            <span class="fn">backtrack</span>(i, current, remaining - candidates[i]) <span class="cm"># i = reuse</span>
+            current.pop()
+    <span class="fn">backtrack</span>(0, [], target); <span class="kw">return</span> result</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+// ====== NAV (fixed: no implicit event) ======
+document.getElementById('nav-bar').addEventListener('click', function(e) {
+  const btn = e.target.closest('.nav-btn');
+  if (!btn) return;
+  const target = btn.dataset.target;
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(target).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+// ====== STEP DATA ======
+const A = '#c2715a', G = '#5a9e6f', R = '#c75050', O = '#d4923a';
+const D = {};
+
+D.s={nums:[1,2,3],steps:[
+  {b:[],c:{},x:`We start with an <b style="color:${A}">empty bag []</b>. In subsets, even empty is valid — so first we save it.`},
+  {b:[],c:{},sv:'[]',x:`<b style="color:${G}">📸 SAVE []</b> — first subset! Now look ahead: [1, 2, 3] available.`},
+  {b:[1],c:{0:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Put <b>1</b> in the bag → bag = [1]. Save this, then go deeper.`},
+  {b:[1],c:{0:'chosen'},sv:'[1]',x:`<b style="color:${G}">📸 SAVE [1]</b>. From 1, look ahead: [2, 3] available.`},
+  {b:[1,2],c:{0:'chosen',1:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Put <b>2</b> in → bag = [1,2]. Save it.`},
+  {b:[1,2],c:{0:'chosen',1:'chosen'},sv:'[1,2]',x:`<b style="color:${G}">📸 SAVE [1,2]</b>. Ahead of 2: only [3].`},
+  {b:[1,2,3],c:{0:'chosen',1:'chosen',2:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Put <b>3</b> in → bag = [1,2,3].`},
+  {b:[1,2,3],c:{0:'chosen',1:'chosen',2:'chosen'},sv:'[1,2,3]',x:`<b style="color:${G}">📸 SAVE [1,2,3]</b>. Nothing ahead. Path fully explored.`},
+  {b:[1,2],c:{0:'chosen',1:'chosen',2:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Take <b>3</b> out → bag = [1,2]. No more items here → go back up.`},
+  {b:[1],c:{0:'chosen',1:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Take <b>2</b> out → bag = [1]. Already tried 2, now try <b>3</b>.`},
+  {b:[1,3],c:{0:'chosen',2:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Put <b>3</b> in → bag = [1,3].`},
+  {b:[1,3],c:{0:'chosen',2:'chosen'},sv:'[1,3]',x:`<b style="color:${G}">📸 SAVE [1,3]</b>. Nothing ahead. Done with this branch.`},
+  {b:[1],c:{0:'chosen',2:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Take 3 out. Nothing left from 1's view.`},
+  {b:[],c:{0:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Take <b>1</b> out. Done with everything starting with 1. Now start with <b>2</b>.`},
+  {b:[2],c:{1:'chosen'},sv:'[2]',x:`<b style="color:${O}">CHOOSE</b>: Put <b>2</b> in → <b style="color:${G}">📸 SAVE [2]</b>. Ahead: [3].`},
+  {b:[2,3],c:{1:'chosen',2:'chosen'},sv:'[2,3]',x:`Put 3 in → <b style="color:${G}">📸 SAVE [2,3]</b>. No more.`},
+  {b:[],c:{1:'dim',2:'dim'},x:`Undo both. Now start with <b>3</b>.`},
+  {b:[3],c:{2:'chosen'},sv:'[3]',x:`Put 3 in → <b style="color:${G}">📸 SAVE [3]</b>. Nothing ahead.`},
+  {b:[],c:{},x:`<b style="color:${G}">🎉 DONE!</b> All 8 subsets found. Pattern: save first → pick forward → go deep → undo → next.`},
+]};
+
+D.p={nums:[1,2,3],steps:[
+  {b:[],c:{},x:`3 cards [1,2,3], 3 empty slots. For each slot, <b>scan every card</b> and skip used ones.`},
+  {b:[1],c:{0:'used'},x:`<b style="color:${O}">CHOOSE</b>: Card <b>1</b> in slot 1. Mark used. Fill slot 2 — scan ALL cards.`},
+  {b:[1,2],c:{0:'used',1:'used'},x:`<b style="color:${O}">CHOOSE</b>: Card 1? <span style="color:${R}">Used</span>. Card <b>2</b>? Free! Slot 2. One slot left.`},
+  {b:[1,2,3],c:{0:'used',1:'used',2:'used'},sv:'[1,2,3]',x:`Card <b>3</b> fills slot 3. All full → <b style="color:${G}">📸 SAVE [1,2,3]</b>. Backtrack.`},
+  {b:[1,2],c:{0:'used',1:'used',2:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Remove 3, unmark it. No other cards for slot 3. Back to slot 2.`},
+  {b:[1],c:{0:'used',1:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Remove 2, unmark. Try card <b>3</b> for slot 2.`},
+  {b:[1,3],c:{0:'used',2:'used'},x:`<b style="color:${O}">CHOOSE</b>: Card <b>3</b> in slot 2. Slot 3 — only card 2 free.`},
+  {b:[1,3,2],c:{0:'used',1:'used',2:'used'},sv:'[1,3,2]',x:`Card 2 → slot 3. <b style="color:${G}">📸 SAVE [1,3,2]</b>.`},
+  {b:[],c:{0:'dim'},x:`Undo all. Card 1 done. Try card <b>2</b> in slot 1.`},
+  {b:[2],c:{1:'used'},x:`<b style="color:${O}">CHOOSE</b>: Card <b>2</b> in slot 1. Scan all for slot 2.`},
+  {b:[2,1,3],c:{0:'used',1:'used',2:'used'},sv:'[2,1,3]',x:`→ <b style="color:${G}">📸 SAVE [2,1,3]</b>`},
+  {b:[2,3,1],c:{0:'used',1:'used',2:'used'},sv:'[2,3,1]',x:`→ <b style="color:${G}">📸 SAVE [2,3,1]</b>. Now card 3 first.`},
+  {b:[3,1,2],c:{0:'used',1:'used',2:'used'},sv:'[3,1,2]',x:`→ <b style="color:${G}">📸 SAVE [3,1,2]</b>`},
+  {b:[3,2,1],c:{0:'used',1:'used',2:'used'},sv:'[3,2,1]',x:`<b style="color:${G}">📸 SAVE [3,2,1]</b>. All 6 found!`},
+  {b:[],c:{},x:`<b style="color:${G}">🎉 DONE!</b> 6 permutations. Key: scan ALL cards every time, save only when ALL slots filled.`},
+]};
+
+D.c={nums:[1,2,3,4],steps:[
+  {b:[],c:{},x:`Pick a team of <b style="color:${A}">exactly 2</b> from [1,2,3,4]. Order doesn't matter → pick forward only.`},
+  {b:[1],c:{0:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Draft <b>1</b>. Need 1 more. Ahead: [2,3,4].`},
+  {b:[1,2],c:{0:'chosen',1:'chosen'},sv:'[1,2]',x:`Draft <b>2</b>. Size == k → <b style="color:${G}">📸 SAVE [1,2]</b>. Full → don't go deeper. Undo.`},
+  {b:[1],c:{0:'chosen',1:'dim'},x:`<b style="color:${R}">UN-CHOOSE</b>: Cut 2. Try <b>3</b>.`},
+  {b:[1,3],c:{0:'chosen',2:'chosen'},sv:'[1,3]',x:`Draft <b>3</b> → <b style="color:${G}">📸 SAVE [1,3]</b>.`},
+  {b:[1],c:{0:'chosen',2:'dim'},x:`Cut 3. Try <b>4</b>.`},
+  {b:[1,4],c:{0:'chosen',3:'chosen'},sv:'[1,4]',x:`Draft <b>4</b> → <b style="color:${G}">📸 SAVE [1,4]</b>. Done with 1 first.`},
+  {b:[],c:{0:'dim'},x:`Cut all. Try <b>2</b> first.`},
+  {b:[2,3],c:{1:'chosen',2:'chosen'},sv:'[2,3]',x:`2+3 → <b style="color:${G}">📸 SAVE [2,3]</b>.`},
+  {b:[2,4],c:{1:'chosen',3:'chosen'},sv:'[2,4]',x:`2+4 → <b style="color:${G}">📸 SAVE [2,4]</b>.`},
+  {b:[3,4],c:{2:'chosen',3:'chosen'},sv:'[3,4]',x:`3+4 → <b style="color:${G}">📸 SAVE [3,4]</b>. 4 alone can't make team of 2.`},
+  {b:[],c:{},x:`<b style="color:${G}">🎉 DONE!</b> 6 teams. Same engine, but only save when size == k.`},
+]};
+
+D.cs={nums:[2,3,6,7],steps:[
+  {b:[],bg:7,c:{},x:`Coins: [2,3,6,7]. Budget: <b style="color:${G}">7</b>. Need exactly 0. Can reuse coins!`},
+  {b:[2],bg:5,c:{0:'chosen'},x:`<b style="color:${O}">CHOOSE</b>: Coin <b>2</b>. Budget: 7−2 = <b>5</b>. Positive → keep going. Same coin again!`},
+  {b:[2,2],bg:3,c:{0:'chosen'},x:`Coin <b>2</b> again. Budget: 5−2 = <b>3</b>. Still good.`},
+  {b:[2,2,2],bg:1,c:{0:'chosen'},x:`Coin <b>2</b> again. Budget: 3−2 = <b>1</b>. Try one more?`},
+  {b:[2,2,2,2],bg:-1,c:{0:'pruned'},x:`Coin 2 → Budget: 1−2 = <b style="color:${R}">−1 NEGATIVE! PRUNE ✂️</b> Dead end.`},
+  {b:[2,2,2],bg:1,c:{0:'chosen'},x:`<b style="color:${R}">UN-CHOOSE</b>: Remove. Budget = 1. Coin 3? 1−3 = −2 prune. 6, 7? Too big. Go up.`},
+  {b:[2,2],bg:3,c:{0:'chosen'},x:`<b style="color:${R}">UN-CHOOSE</b>: Budget = 3. Instead of 2, try coin <b>3</b>.`},
+  {b:[2,2,3],bg:0,c:{0:'chosen',1:'chosen'},sv:'[2,2,3]',x:`Coin <b>3</b>. Budget: 3−3 = <b style="color:${G}">0! EXACT! 📸 SAVE [2,2,3]</b> 🎉`},
+  {b:[2,2],bg:3,c:{0:'chosen'},x:`Undo 3. Coin 6? 3−6=−3 prune. 7? Too big. Done with [2,2,...].`},
+  {b:[2],bg:5,c:{0:'chosen'},x:`Back to [2], budget 5. Tried 2 next. Now try <b>3</b>.`},
+  {b:[2,3],bg:2,c:{0:'chosen',1:'chosen'},x:`Coin 3. Budget: 5−3 = 2. Try 3? 2−3=−1 prune. 6,7? Too big. Dead end.`},
+  {b:[],bg:7,c:{},x:`Skip ahead... try coin <b>7</b> alone.`},
+  {b:[7],bg:0,c:{3:'chosen'},sv:'[7]',x:`Coin <b>7</b>. Budget: 7−7 = <b style="color:${G}">0! 📸 SAVE [7]</b> 🎉`},
+  {b:[],bg:7,c:{},x:`<b style="color:${G}">🎉 DONE!</b> Found: [2,2,3] and [7]. Key: <b>reuse</b> (recurse with i) + <b>prune</b> when negative.`},
+]};
+
+// ====== ENGINE ======
+const ST = {};
+
+function init(k) {
+  const d = D[k];
+  document.getElementById(k+'-arr').innerHTML = d.nums.map((n,i) => `<div class="acell" id="${k}C${i}">${n}</div>`).join('');
+  document.getElementById(k+'-ctr').textContent = `0 / ${d.steps.length}`;
+  document.getElementById(k+'-res').innerHTML = '';
+  const bag = document.getElementById(k+'-bag');
+  bag.innerHTML = '<span style="color:var(--dim)">empty</span>';
+  bag.className = 'state-bag';
+  ST[k] = { i: 0, saved: [] };
+  document.getElementById(k+'-go').disabled = false;
+  document.getElementById(k+'-exp').innerHTML = 'Hit <strong>Next Step</strong> to watch the flow.';
+  if (k === 'cs') document.getElementById('cs-bgt').innerHTML = 'Budget: <span class="bval ok">7</span>';
+}
+
+function render(k) {
+  const d = D[k], st = ST[k], step = d.steps[st.i];
+  d.nums.forEach((_, i) => {
+    const el = document.getElementById(k+'C'+i);
+    el.className = 'acell';
+    if (step.c[i]) el.classList.add(step.c[i]);
+  });
+  const bag = document.getElementById(k+'-bag');
+  if (!step.b.length) { bag.innerHTML = '<span style="color:var(--dim)">empty</span>'; bag.className = 'state-bag'; }
+  else { bag.innerHTML = step.b.map(v => `<span class="bag-chip">${v}</span>`).join(''); bag.className = 'state-bag'; }
+  if (step.sv) { st.saved.push(step.sv); bag.className = 'state-bag saved'; }
+  document.getElementById(k+'-res').innerHTML = st.saved.map(s => `<span class="saved-chip">${s}</span>`).join('');
+  document.getElementById(k+'-exp').innerHTML = step.x;
+  document.getElementById(k+'-ctr').textContent = `${st.i+1} / ${d.steps.length}`;
+  if (k === 'cs' && step.bg !== undefined) {
+    let c = 'ok'; if (step.bg === 0) c = 'hit'; if (step.bg < 0) c = 'over';
+    document.getElementById('cs-bgt').innerHTML = `Budget: <span class="bval ${c}">${step.bg}</span>`;
+  }
+  if (st.i >= d.steps.length - 1) document.getElementById(k+'-go').disabled = true;
+}
+
+function nxt(k) { if (ST[k].i >= D[k].steps.length) return; render(k); ST[k].i++; }
+function rst(k) { init(k); }
+
+['s','p','c','cs'].forEach(k => init(k));
+</script>
+</body>
+</html>
