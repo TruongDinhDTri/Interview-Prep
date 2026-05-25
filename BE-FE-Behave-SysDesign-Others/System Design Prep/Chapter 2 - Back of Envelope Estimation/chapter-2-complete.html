@@ -258,18 +258,58 @@
         ul.styled li, ol.styled li { padding: 4px 0; color: var(--text-secondary); }
         ul.styled li::marker { color: var(--gold-accent); }
 
+        /* ─── Mobile Hamburger ─── */
+        .hamburger {
+            display: none;
+            position: fixed; top: 14px; left: 14px; z-index: 200;
+            width: 40px; height: 40px; border-radius: 10px;
+            background: var(--bg-card); border: 1px solid var(--border-medium);
+            cursor: pointer; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-medium); font-size: 1.1em; color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        .hamburger:hover { background: var(--water-teal); color: white; }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0; z-index: 90;
+            background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
+        }
+
         @media (max-width: 860px) {
-            .sidebar { transform: translateX(-100%); }
+            .hamburger { display: flex; }
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 110;
+                box-shadow: var(--shadow-medium);
+            }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
             .main { margin-left: 0; }
-            .hero { padding: 40px 24px 36px; }
-            .content { padding: 28px 24px 60px; }
-            .hero h1 { font-size: 1.6em; }
+            .hero { padding: 56px 20px 36px; }
+            .content { padding: 28px 20px 60px; }
+            .hero h1 { font-size: 1.5em; }
+            .hero-meta { gap: 8px; }
+            .hero-tag { font-size: 0.75em; padding: 4px 10px; }
+            .ref-grid-inner { grid-template-columns: 1fr 1fr; gap: 10px; }
+            pre { font-size: 0.78em; padding: 14px; }
+            table { font-size: 0.82em; }
+            thead th, tbody td { padding: 9px 10px; }
+            .takeaway-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 480px) {
+            .ref-grid-inner { grid-template-columns: 1fr; }
+            .takeaway-grid { grid-template-columns: 1fr; }
+            .hero h1 { font-size: 1.3em; }
         }
     </style>
 </head>
 <body>
 
 <div class="progress-bar" id="progressBar"></div>
+
+<button class="hamburger" id="hamburger" aria-label="Open menu">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <!-- ─── Sidebar ─── -->
 <aside class="sidebar">
@@ -650,6 +690,16 @@ Server count: if 1 server holds 20TB
 <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">&#9789;</button>
 
 <script>
+    // ─── Hamburger / Sidebar ───
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburger = document.getElementById('hamburger');
+    function openSidebar() { sidebar.classList.add('open'); overlay.classList.add('open'); hamburger.textContent = '✕'; }
+    function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); hamburger.textContent = '☰'; }
+    hamburger.addEventListener('click', () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+    overlay.addEventListener('click', closeSidebar);
+    document.querySelectorAll('.nav-link').forEach(l => l.addEventListener('click', () => { if (window.innerWidth <= 860) closeSidebar(); }));
+
     // ─── Progress Bar ───
     const bar = document.getElementById('progressBar');
     window.addEventListener('scroll', () => {
