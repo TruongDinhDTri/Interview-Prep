@@ -1,7 +1,7 @@
 {
-  "last_updated": "2026-05-22",
-  "version": "3.6",
-  "notes": "2026-05-22: Added Rotting Oranges (#994, BFS/Multi-Source). Total unique: 72. BFS pattern: 8 problems solved.",
+  "last_updated": "2026-05-28",
+  "version": "3.8",
+  "notes": "2026-05-28: LCA #236 redone (Teaching Mode @ Start, First Principles path). Big aha: bubble-up signal-agnostic mechanism. 2 impl bugs left unfixed in solution.py for Wiganz to drill. Blueprint skip flagged as recurring weak area on DFS. 2026-05-26: Added Permutations (#46, Subsets/Backtracking). Total unique: 74.",
   "all_solved_problems": [
     {
       "num": 1,
@@ -295,7 +295,10 @@
       ],
       "difficulty": "Medium",
       "date_completed": "2025-11-03",
-      "source": "Notion"
+      "date_redone": "2026-05-28",
+      "source": "Notion",
+      "notes": "Teaching Mode @ Start redo. Path: First Principles (3F) — 3-gate failed because LCA-of-BST and LCA-of-general-tree are different algorithms. Discovered 5 rules from manual trace of p=7, q=4. BIG AHA: the bubble-up mechanism is signal-agnostic — Case 2 (self-match), Case 4 (one-side bubble), Case 5 (LCA born) all look identical to the parent. Bugs: 1) wrote 'root = current' (meaningless), 2) forgot 'return dfs(root)' — both rooted in skipped Blueprint phase. Code in solution.py NOT verified — bugs unfixed, left for Wiganz to drill. Recurring weakness: Blueprint skip (also 3Sum).",
+      "archive_link": "Coding Prepare/Follow-Guide-Roadmap/Week9-Problems/lca-binary-tree/lca-binary-tree.md"
     },
     {
       "num": 29,
@@ -754,6 +757,17 @@
       "notes": "Matrix BFS. Scan first, trigger BFS only on unvisited '1'. Each BFS call = one island. visited set OR grid mutation (set cell='0') as visited guard. 3 bugs in Verify: '0' vs 0 (string vs int), return inside loop, direction loop indentation. ~44 min session. BTTC O(m×n) already reached."
     },
     {
+      "num": 73,
+      "title": "Combination Sum",
+      "leetcode_num": 39,
+      "pattern": [
+        "subsets"
+      ],
+      "difficulty": "Medium",
+      "date_completed": "2026-05-25",
+      "source": "solo"
+    },
+    {
       "num": 72,
       "title": "Rotting Oranges",
       "leetcode_num": 994,
@@ -765,6 +779,17 @@
       "source": "Week8",
       "notes": "Multi-source BFS. 6 bugs caught. Key: if-queue minute guard, grid-as-visited, fresh_count==0 pre-check.",
       "week": 8
+    },
+    {
+      "num": 74,
+      "title": "Permutations",
+      "pattern": [
+        "subsets"
+      ],
+      "difficulty": "Medium",
+      "date_completed": "2026-05-26",
+      "source": "Hadriel Session",
+      "notes": "Used set tracks current path. pick→recurse→unpick template. Bug: misplaced return inside for loop."
     }
   ],
   "recall_needed": [
@@ -1017,9 +1042,9 @@
       "status": "competent",
       "problems_solved": 8,
       "problems_target": 10,
-      "last_practiced": "2026-05-20",
+      "last_practiced": "2026-05-28",
       "problems": [
-        "Lowest Common Ancestor (#28)",
+        "Lowest Common Ancestor (#28) [redone 2026-05-28]",
         "Maximum Depth of Binary Tree (#29)",
         "Flip the Binary Tree (#30)",
         "Balanced Binary Tree (Week5)",
@@ -1028,11 +1053,13 @@
         "Clone Graph (#133, Week7)",
         "Validate Binary Search Tree (#98, Week8)"
       ],
-      "notes": "Tree DFS very solid. Clone Graph = first GRAPH DFS. Validate BST = bounds propagation sub-technique: pass (min_val, max_val) down each call, tighten at each step. Key insight: Space is O(h) not O(n) — call stack depth = path length = tree height.",
+      "notes": "Tree DFS very solid. Clone Graph = first GRAPH DFS. Validate BST = bounds propagation sub-technique: pass (min_val, max_val) down each call, tighten at each step. Key insight: Space is O(h) not O(n) — call stack depth = path length = tree height. 2026-05-28: LCA #236 redone via First Principles — bubble-up mechanism is signal-agnostic (Case 2 / 4 / 5 all look identical to parent, single combine rule covers all). Two impl bugs left unfixed: 'root = current' typo, and missing 'return dfs(root)' — both caused by Blueprint phase skip.",
       "weak_areas": [
         "Graph DFS complexity articulation (O(N+E) — needs to be fluent)",
         "Recursion stack space O(N) reasoning",
-        "DFS + memoization"
+        "DFS + memoization",
+        "Blueprint phase skip on DFS problems — caused LCA #236 bugs (root=current, missing return dfs(root)). Recurring pattern also seen in 3Sum. DRILL.",
+        "LCA-of-BST vs LCA-of-general-tree distinction — different algorithms, easy to confuse at Step 2 gate"
       ],
       "aha_moments": [
         "Post-order DFS: children compute first, parent uses their results.",
@@ -1041,7 +1068,8 @@
         "LCA of BST uses BST property to navigate — no full traversal needed.",
         "Clone Graph: hashmap[node] = clone BEFORE for-loop — this is what prevents infinite cycles.",
         "hashmap[node] in the if-branch append refers to CURRENT stack frame's node, not the neighbor. Classic confusion point.",
-        "Deep copy = every node is a new object independent of original. Shallow copy = neighbors still point to original nodes."
+        "Deep copy = every node is a new object independent of original. Shallow copy = neighbors still point to original nodes.",
+        "LCA #236 — Bubble-up is signal-agnostic. Parent sees 'non-None or None', not 'target vs LCA vs relay'. One combine rule (both non-None → I'm the LCA, else bubble) covers Case 2 (self-match), Case 4 (one-side bubble), Case 5 (LCA born). Wiganz's words: 'À nó buble lên giống như cách nó bubble một candidate LCA (như 2) lên á hả?'"
       ]
     },
     "stacks": {
@@ -1091,22 +1119,24 @@
     "subsets": {
       "name": "Subsets / Backtracking",
       "status": "competent",
-      "problems_solved": 3,
+      "problems_solved": 5,
       "problems_target": 8,
-      "last_practiced": "2026-01-28",
+      "last_practiced": "2026-05-26",
       "problems": [
         "Generate Parentheses",
         "Combination",
-        "Subsets II"
+        "Subsets II",
+        "Combination Sum (#39)",
+        "Permutations (#46)"
       ],
-      "notes": "Recursive backtracking with and without duplicates. Subsets II required sorting + skip-same-choice-at-same-depth logic.",
+      "notes": "Recursive backtracking with and without duplicates. Subsets II required sorting + skip-same-choice-at-same-depth logic. Combination Sum adds unbounded reuse (start index stays same, not start+1).",
       "weak_areas": [
-        "Permutations",
         "N-Queens type problems",
         "Subsets with k constraints"
       ],
       "aha_moments": [
-        "Sort first, then skip: if i > start and nums[i] == nums[i-1]: continue — kills duplicate branches at same recursion depth"
+        "Sort first, then skip: if i > start and nums[i] == nums[i-1]: continue — kills duplicate branches at same recursion depth",
+        "Permutations use used set (not start index) because every ordering counts — loop ALL nums, skip if in used. Backtrack = pop + remove from used."
       ]
     },
     "top_k": {
@@ -1218,11 +1248,11 @@
     }
   },
   "overall_stats": {
-    "total_unique_problems": 72,
-    "total_problem_sessions": 92,
-    "counting_note": "71 previous + Rotting Oranges (#994, 2026-05-22) = 72 unique.",
+    "total_unique_problems": 73,
+    "total_problem_sessions": 93,
+    "counting_note": "72 previous + Combination Sum (#39, 2026-05-25) = 73 unique.",
     "total_problems_target": 120,
-    "completion_percentage_unique": 60.0,
+    "completion_percentage_unique": 60.8,
     "difficulty_breakdown": {
       "easy": 36,
       "medium": 34,
@@ -1237,7 +1267,9 @@
     "week7_note": "3Sum flagged for redo. Clone Graph = first Graph DFS. Course Schedule = first Topological Sort. Coin Change = 2nd DP problem.",
     "start_date": "2024-12-17",
     "last_active": "2026-05-22",
-    "milestone_note": "70 milestone HIT 🔥 — 58.3% to 120-problem target."
+    "milestone_note": "70 milestone HIT 🔥 — 58.3% to 120-problem target.",
+    "total_problems_solved": 74,
+    "last_session_date": "2026-05-26"
   },
   "weak_areas_meta": {
     "recall_issues": "8 problems need recall — binary_search (3), fast_slow (2), merge_intervals (2), sliding_window (1)",
@@ -1254,6 +1286,15 @@
     "7. DEEPEN — Backtracking beyond Generate Parentheses"
   ],
   "recent_sessions": [
+    {
+      "date": "2026-05-25",
+      "pattern": "subsets",
+      "problems": [
+        "Combination Sum (#39)"
+      ],
+      "aha_moment": "pending — not captured at log time",
+      "time": "solo session"
+    },
     {
       "date": "2026-05-22",
       "pattern": "bfs",

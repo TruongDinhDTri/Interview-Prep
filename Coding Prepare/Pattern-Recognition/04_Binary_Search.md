@@ -1,18 +1,21 @@
 # Binary Search
 
 ## Spot It
-| Signal | Binary Search |
-|--------|---------------|
-| Sorted array + find element | ✓ |
-| "minimum X that satisfies condition" | Search on answer space |
-| "first/last occurrence" | Boundary search |
-| Rotated sorted array | Modified binary search |
+
+| Signal                                                       | Binary Search          |
+| ------------------------------------------------------------ | ---------------------- |
+| Sorted array + find element                                  | ✓                     |
+| "minimum X that satisfies condition"                         | Search on answer space |
+| "first/last occurrence"                                      | Boundary search        |
+| Rotated sorted array                                         | Modified binary search |
+| eliminate half of the search space based on the middle value | ✓                     |
 
 **Key**: Search space has **monotonic property** — one side all true, other all false.
 
 ---
 
 ## Why It Works
+
 Eliminate half each step: n → n/2 → n/4 → 1 = **O(log n)**.
 
 ---
@@ -20,6 +23,7 @@ Eliminate half each step: n → n/2 → n/4 → 1 = **O(log n)**.
 ## The Core
 
 **Find Exact**
+
 ```python
 def binarySearch(nums, target):
     left, right = 0, len(nums) - 1
@@ -37,6 +41,7 @@ def binarySearch(nums, target):
 ```
 
 **Find Boundary (First True)**
+
 ```python
 def firstTrue(nums, condition):
     left, right = 0, len(nums) - 1
@@ -52,6 +57,7 @@ def firstTrue(nums, condition):
 ```
 
 **Search on Answer Space** (e.g., Koko Eating Bananas)
+
 ```python
 def minSpeed(piles, h):
     left, right = 1, max(piles)
@@ -69,6 +75,7 @@ def minSpeed(piles, h):
 ---
 
 ## Traps
+
 1. **Overflow**: Use `mid = left + (right - left) // 2`
 2. **`<=` vs `<`**: Exact search uses `<=`, boundary uses `<`
 3. **`mid` vs `mid + 1`**: If `condition(mid)` true and mid could be answer → `right = mid`

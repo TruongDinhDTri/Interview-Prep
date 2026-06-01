@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LeetCode #46 — Permutations Visualization</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500&display=swap');
+
+  :root {
+    --bg:        #f5ede0;
+    --bg2:       #ede0ce;
+    --brown:     #c4875a;
+    --brown-d:   #a0673a;
+    --green:     #7aaa7a;
+    --green-d:   #4e8b4e;
+    --teal:      #5a9e93;
+    --teal-d:    #3d7a70;
+    --gold:      #d4a852;
+    --red:       #c45a5a;
+    --text:      #3a2e22;
+    --text-lt:   #7a6a5a;
+    --card:      #fdf6ec;
+    --border:    #d4b896;
+    --shadow:    rgba(100,70,40,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #c4875a 0%, #a0673a 40%, #5a9e93 100%);
+    padding: 3rem 2rem 2.5rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .hero h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.4rem;
+    color: #fff;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.4rem;
+  }
+  .hero .subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+  .hero .badges {
+    display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .badge {
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--brown-d);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-title .icon { font-size: 1.1rem; }
+
+  /* ── CODE BLOCK ── */
+  pre {
+    background: #2b2015;
+    color: #e8d8c0;
+    border-radius: 8px;
+    padding: 1rem 1.2rem;
+    font-size: 0.82rem;
+    line-height: 1.7;
+    overflow-x: auto;
+    font-family: 'Fira Code', 'Courier New', monospace;
+  }
+  .kw  { color: #d4a852; }
+  .fn  { color: #7aaa7a; }
+  .cm  { color: #8a7a6a; font-style: italic; }
+  .str { color: #a0d0a0; }
+  .num { color: #c4a0d4; }
+  .hl  { background: rgba(196,135,90,0.3); border-radius: 3px; padding: 0 2px; }
+
+  /* ── MAIN VISUALIZER ── */
+  .vis-wrapper {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 24px var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+  .vis-header {
+    background: linear-gradient(90deg, var(--brown) 0%, var(--teal) 100%);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .vis-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    color: #fff;
+    font-size: 1.3rem;
+  }
+  .vis-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    padding: 0.4rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+  .btn-primary {
+    background: var(--gold);
+    color: #3a2e22;
+  }
+  .btn-primary:hover { background: #c49a40; transform: translateY(-1px); }
+  .btn-secondary {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.3);
+  }
+  .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ── SPEED CONTROL ── */
+  .speed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255,255,255,0.85);
+    font-size: 0.78rem;
+  }
+  .speed-row input[type=range] { width: 80px; accent-color: var(--gold); }
+
+  /* ── VIS BODY ── */
+  .vis-body {
+    padding: 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    min-height: 540px;
+  }
+  @media (max-width: 800px) {
+    .vis-body { grid-template-columns: 1fr; }
+  }
+
+  /* ── TREE PANEL ── */
+  .tree-panel {
+    position: relative;
+    background: #faf4ec;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .tree-panel canvas {
+    display: block;
+    width: 100%;
+    height: 400px;
+  }
+  .tree-label {
+    position: absolute;
+    top: 10px; left: 12px;
+    font-size: 0.7rem;
+    color: var(--text-lt);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ── STATE PANEL ── */
+  .state-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .state-section {
+    background: #faf4ec;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+  }
+  .state-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-lt);
+    margin-bottom: 0.6rem;
+  }
+
+  /* path display */
+  .path-display {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    min-height: 36px;
+    align-items: center;
+  }
+  .path-num {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  .path-num.active {
+    background: var(--teal);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(90,158,147,0.4);
+  }
+  .path-num.backtrack {
+    background: var(--red);
+    color: #fff;
+    animation: shake 0.3s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+  .path-num.recorded {
+    background: var(--green);
+    color: #fff;
+  }
+  .path-bracket {
+    color: var(--text-lt);
+    font-size: 1.1rem;
+    font-weight: 300;
+  }
+
+  /* used set display */
+  .used-display {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    min-height: 30px;
+    align-items: center;
+  }
+  .used-chip {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--brown);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s;
+  }
+  .used-chip.removing {
+    background: var(--red);
+    animation: fadeOut 0.3s ease forwards;
+  }
+  @keyframes fadeOut {
+    to { opacity: 0; transform: scale(0.8); }
+  }
+
+  /* action display */
+  .action-box {
+    border-left: 3px solid var(--gold);
+    padding: 0.5rem 0.75rem;
+    background: rgba(212,168,82,0.08);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+  }
+  .action-box.pick { border-color: var(--teal); background: rgba(90,158,147,0.08); }
+  .action-box.recurse { border-color: var(--gold); background: rgba(212,168,82,0.08); }
+  .action-box.record { border-color: var(--green); background: rgba(122,170,122,0.1); }
+  .action-box.unpick { border-color: var(--red); background: rgba(196,90,90,0.08); }
+
+  /* results display */
+  .results-display {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    min-height: 36px;
+    align-items: flex-start;
+  }
+  .result-item {
+    background: var(--green);
+    color: #fff;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  @keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* step counter */
+  .step-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0.75rem;
+    background: rgba(196,135,90,0.08);
+    border-radius: 8px;
+    border: 1px solid rgba(196,135,90,0.2);
+  }
+  .step-num {
+    font-size: 0.78rem;
+    color: var(--text-lt);
+  }
+  .depth-badge {
+    background: var(--brown);
+    color: #fff;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  /* ── EXPLANATION PANEL ── */
+  .explain-panel {
+    padding: 0 1.5rem 1.5rem;
+  }
+  .explain-box {
+    background: #fdf8f2;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    font-size: 0.87rem;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 52px;
+    transition: all 0.3s;
+  }
+  .explain-box strong { color: var(--brown-d); }
+  .explain-box .mono {
+    font-family: 'Fira Code', monospace;
+    background: rgba(196,135,90,0.1);
+    padding: 0 3px;
+    border-radius: 3px;
+    font-size: 0.82rem;
+  }
+
+  /* ── RULES SECTION ── */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (max-width: 700px) {
+    .rules-grid { grid-template-columns: 1fr; }
+  }
+  .rule-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: transform 0.2s;
+  }
+  .rule-card:hover { transform: translateY(-2px); }
+  .rule-icon { font-size: 1.8rem; margin-bottom: 0.5rem; }
+  .rule-card h3 { font-size: 0.85rem; font-weight: 600; color: var(--brown-d); margin-bottom: 0.35rem; }
+  .rule-card p { font-size: 0.78rem; color: var(--text-lt); line-height: 1.5; }
+
+  /* ── COMPLEXITY TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+  }
+  th {
+    background: var(--brown);
+    color: #fff;
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    font-weight: 500;
+  }
+  th:first-child { border-radius: 8px 0 0 0; }
+  th:last-child  { border-radius: 0 8px 0 0; }
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--bg2);
+    color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: rgba(196,135,90,0.04); }
+  .tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .tag-green { background: rgba(122,170,122,0.2); color: var(--green-d); }
+  .tag-gold  { background: rgba(212,168,82,0.2);  color: #9a7020; }
+  .tag-red   { background: rgba(196,90,90,0.15);  color: #8a3030; }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    color: var(--brown-d);
+    margin: 2rem 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin-left: 0.75rem;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-bar-wrap {
+    margin: 0.75rem 0;
+    height: 6px;
+    background: var(--bg2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--green));
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-lt);
+    font-size: 0.78rem;
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+  }
+  .footer strong { color: var(--brown); }
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>Permutations</h1>
+  <p class="subtitle">LeetCode #46 — Backtracking Decision Tree</p>
+  <div class="badges">
+    <span class="badge">Medium</span>
+    <span class="badge">Backtracking</span>
+    <span class="badge">O(n × n!) Time</span>
+    <span class="badge">O(n) Space</span>
+    <span class="badge">2026-05-26</span>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- THE 3 RULES -->
+  <p class="section-title">🔥 The 3 Rules (Discovered From the Decision Tree)</p>
+  <div class="rules-grid">
+    <div class="rule-card">
+      <div class="rule-icon">🌿</div>
+      <h3>Rule 1 — Pick</h3>
+      <p>Loop ALL nums, skip if <code>num in used</code>. Add to path AND used set.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">🍃</div>
+      <h3>Rule 2 — Base Case</h3>
+      <p>When <code>len(path) == len(nums)</code>, the path is a complete permutation. Record it.</p>
+    </div>
+    <div class="rule-card">
+      <div class="rule-icon">🔄</div>
+      <h3>Rule 3 — Unpick</h3>
+      <p>After recursing, <code>path.pop()</code> and <code>used.remove(num)</code> to restore parent state.</p>
+    </div>
+  </div>
+
+  <!-- MAIN VISUALIZER -->
+  <div class="vis-wrapper">
+    <div class="vis-header">
+      <h2>🌲 Decision Tree — Live Backtracking</h2>
+      <div class="vis-controls">
+        <div class="speed-row">
+          <span>Speed</span>
+          <input type="range" id="speedSlider" min="1" max="5" value="3">
+          <span id="speedLabel">Normal</span>
+        </div>
+        <button class="btn btn-secondary" id="btnPrev" disabled>← Prev</button>
+        <button class="btn btn-primary"   id="btnNext">Next Step →</button>
+        <button class="btn btn-secondary" id="btnPlay">▶ Auto</button>
+        <button class="btn btn-secondary" id="btnReset">↺ Reset</button>
+      </div>
+    </div>
+
+    <div class="vis-body">
+      <!-- Tree Canvas -->
+      <div class="tree-panel">
+        <span class="tree-label">Decision Tree</span>
+        <canvas id="treeCanvas" width="600" height="400"></canvas>
+      </div>
+
+      <!-- State Panel -->
+      <div class="state-panel">
+
+        <!-- Step info -->
+        <div class="step-info">
+          <span class="step-num">Step <span id="stepNum">0</span> / <span id="totalSteps">—</span></span>
+          <span class="depth-badge">Depth: <span id="depthNum">0</span></span>
+        </div>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+
+        <!-- Action -->
+        <div class="state-section">
+          <div class="state-label">Current Action</div>
+          <div class="action-box" id="actionBox">Press "Next Step" to begin the backtracking journey</div>
+        </div>
+
+        <!-- Path -->
+        <div class="state-section">
+          <div class="state-label">path (current sequence)</div>
+          <div class="path-display" id="pathDisplay">
+            <span class="path-bracket">[</span>
+            <span class="path-bracket">]</span>
+          </div>
+        </div>
+
+        <!-- Used Set -->
+        <div class="state-section">
+          <div class="state-label">used (current path membership)</div>
+          <div class="used-display" id="usedDisplay">
+            <span style="color:var(--text-lt); font-size:0.8rem;">empty set</span>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div class="state-section">
+          <div class="state-label">result (complete permutations found)</div>
+          <div class="results-display" id="resultDisplay">
+            <span style="color:var(--text-lt); font-size:0.8rem;">none yet</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="explain-panel">
+      <div class="explain-box" id="explainBox">
+        The algorithm starts at the root with an empty path. At each node, it loops through all numbers and picks one that is not yet in the <span class="mono">used</span> set. After recursing, it <strong>unpicks</strong> — removing from both <span class="mono">path</span> and <span class="mono">used</span> — so the next sibling can try a different number.
+      </div>
+    </div>
+  </div>
+
+  <!-- TWO COLUMN — CODE + COMPLEXITY -->
+  <div class="two-col">
+    <!-- Code -->
+    <div class="card">
+      <div class="card-title"><span class="icon">💻</span> Final Solution</div>
+      <pre><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">permute</span>(<span class="kw">self</span>, nums):
+        path   = []
+        result = []
+        used   = <span class="fn">set</span>()
+
+        <span class="kw">def</span> <span class="fn">backtrack</span>(path, used, nums):
+            <span class="cm"># Rule 2: base case — path is full</span>
+            <span class="kw">if</span> <span class="fn">len</span>(path) == <span class="fn">len</span>(nums):
+                result.<span class="fn">append</span>(<span class="fn">list</span>(path))  <span class="cm"># copy!</span>
+                <span class="kw">return</span>
+
+            <span class="kw">for</span> num <span class="kw">in</span> nums:
+                <span class="kw">if</span> num <span class="kw">not in</span> used:      <span class="cm"># Rule 1: pick remaining</span>
+                    path.<span class="fn">append</span>(num)       <span class="cm"># PICK</span>
+                    used.<span class="fn">add</span>(num)
+                    <span class="fn">backtrack</span>(path, used, nums)
+                    path.<span class="fn">pop</span>()             <span class="cm"># UNPICK (Rule 3)</span>
+                    used.<span class="fn">remove</span>(num)       <span class="cm"># UNPICK (Rule 3)</span>
+
+        <span class="fn">backtrack</span>(path, used, nums)
+        <span class="kw">return</span> result</pre>
+    </div>
+
+    <!-- Complexity -->
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> Complexity Analysis</div>
+      <table>
+        <thead>
+          <tr><th>Dimension</th><th>Complexity</th><th>Reasoning</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>⏱ Time</td>
+            <td><strong>O(n × n!)</strong></td>
+            <td>n! permutations at the leaves × O(n) per copy</td>
+          </tr>
+          <tr>
+            <td>📦 Space (aux)</td>
+            <td><strong>O(n)</strong></td>
+            <td>Recursion stack depth n + path (≤n) + used set (≤n)</td>
+          </tr>
+          <tr>
+            <td>🎯 BTTC</td>
+            <td><strong>O(n × n!)</strong></td>
+            <td>Can't skip any permutation — must visit all of them</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="margin-top:1.2rem;">
+        <div class="card-title" style="font-size:1rem; margin-bottom:0.75rem;"><span class="icon">⚠️</span> Almost Traps</div>
+        <table>
+          <thead>
+            <tr><th>Looks right</th><th>Actually wrong</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>return</code> after <code>path.pop()</code></td>
+              <td><span class="tag tag-red">Exits for loop</span> — only 1 permutation found</td>
+            </tr>
+            <tr>
+              <td><code>result.append(path)</code></td>
+              <td><span class="tag tag-red">Reference not copy</span> — all entries same list</td>
+            </tr>
+            <tr>
+              <td>Forget <code>used.remove(num)</code></td>
+              <td><span class="tag tag-red">used grows forever</span> — siblings blocked</td>
+            </tr>
+            <tr>
+              <td>O(n) time</td>
+              <td><span class="tag tag-red">Ignores n! leaves</span> — must be O(n × n!)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  🔥 <strong>Hadriel × Wiganz</strong> — 2026-05-26 &nbsp;|&nbsp;
+  "Call to me and I will answer you and tell you great and unsearchable things you do not know." — Jeremiah 33:3 ✝️
+</div>
+
+
+<script>
+// ─────────────────────────────────────────────
+//  STEP GENERATION — pre-compute every step
+// ─────────────────────────────────────────────
+const NUMS = [1, 2, 3];
+
+const steps  = [];
+const treeNodes = [];   // {id, depth, parent, num, x, y}
+const treeEdges = [];   // {from, to}
+
+let nodeId = 0;
+function buildSteps(path, used, parentNodeId, depth) {
+  const myId = nodeId++;
+  treeNodes.push({ id: myId, depth, parent: parentNodeId, nums: [...path], x: 0, y: 0 });
+  if (parentNodeId !== null) treeEdges.push({ from: parentNodeId, to: myId });
+
+  // BASE CASE step
+  if (path.length === NUMS.length) {
+    steps.push({
+      type:     'record',
+      path:     [...path],
+      used:     new Set(used),
+      result:   null,           // filled in post-pass
+      nodeId:   myId,
+      depth,
+      action:   `Base case: path length = ${NUMS.length} = nums length`,
+      explain:  `<strong>Rule 2 fires.</strong> The path <span class="mono">[${path.join(',')}]</span> is a complete permutation — all ${NUMS.length} numbers used exactly once. We <span class="mono">result.append(<strong>list</strong>(path))</span> — note the <strong>copy</strong>, not the reference — then return.`,
+    });
+    treeNodes[myId].isLeaf = true;
+    return;
+  }
+
+  // enter call frame step
+  steps.push({
+    type:    'enter',
+    path:    [...path],
+    used:    new Set(used),
+    result:  null,
+    nodeId:  myId,
+    depth,
+    action:  depth === 0
+      ? `backtrack([], {}, nums) — start at root`
+      : `Entered call frame — path=[${path.join(',')}], depth=${depth}`,
+    explain: depth === 0
+      ? `We call <span class="mono">backtrack</span> with an empty path. The <span class="mono">used</span> set is empty — all numbers are available. The for-loop will try picking each number in order.`
+      : `We're now inside a recursive call at depth ${depth}. The path so far is <span class="mono">[${path.join(',')}]</span> and <span class="mono">used = {${[...used].join(',')}}</span>. We'll try each remaining number.`,
+  });
+
+  for (const num of NUMS) {
+    if (used.has(num)) {
+      steps.push({
+        type:    'skip',
+        path:    [...path],
+        used:    new Set(used),
+        result:  null,
+        nodeId:  myId,
+        depth,
+        skipped: num,
+        action:  `Skip ${num} — already in used set`,
+        explain: `<strong>Rule 1 guard:</strong> ${num} is in <span class="mono">used = {${[...used].join(',')}}</span>, so it's already on the current path. Skipping — we can't use the same number twice in one permutation.`,
+      });
+      continue;
+    }
+
+    // PICK
+    steps.push({
+      type:    'pick',
+      path:    [...path],
+      used:    new Set(used),
+      result:  null,
+      nodeId:  myId,
+      depth,
+      picked:  num,
+      action:  `Pick ${num} → path.append(${num}), used.add(${num})`,
+      explain: `<strong>Rule 1 — Pick:</strong> ${num} is not in <span class="mono">used</span>, so we choose it. We do two things simultaneously: <span class="mono">path.append(${num})</span> adds it to the sequence, and <span class="mono">used.add(${num})</span> marks it as unavailable for deeper calls.`,
+    });
+
+    path.push(num);
+    used.add(num);
+
+    buildSteps(path, used, myId, depth + 1);
+
+    // UNPICK
+    steps.push({
+      type:    'unpick',
+      path:    [...path],
+      used:    new Set(used),
+      result:  null,
+      nodeId:  myId,
+      depth,
+      unpicked: num,
+      action:  `Unpick ${num} → path.pop(), used.remove(${num})`,
+      explain: `<strong>Rule 3 — Unpick (Backtrack):</strong> The recursive call returned. We reverse our choice: <span class="mono">path.pop()</span> removes ${num} from the sequence, <span class="mono">used.remove(${num})</span> makes it available again. The parent node is <em>fully restored</em> — the next sibling branch can now pick ${num} if it wants.`,
+    });
+
+    path.pop();
+    used.delete(num);
+  }
+}
+
+buildSteps([], new Set(), null, 0);
+
+// Fill in result snapshots (accumulated)
+let accumulated = [];
+for (const step of steps) {
+  if (step.type === 'record') {
+    accumulated = [...accumulated, [...step.path]];
+  }
+  step.result = [...accumulated];
+}
+
+// ─────────────────────────────────────────────
+//  TREE LAYOUT — Reingold–Tilford inspired
+// ─────────────────────────────────────────────
+function layoutTree(canvas) {
+  const W = canvas.width;
+  const H = canvas.height;
+  const LEVELS = 4;
+  const levelH = (H - 40) / LEVELS;
+
+  // group by depth
+  const byDepth = {};
+  for (const n of treeNodes) {
+    if (!byDepth[n.depth]) byDepth[n.depth] = [];
+    byDepth[n.depth].push(n);
+  }
+  for (const [depth, nodes] of Object.entries(byDepth)) {
+    const d = parseInt(depth);
+    const count = nodes.length;
+    nodes.forEach((n, i) => {
+      n.x = (W / (count + 1)) * (i + 1);
+      n.y = 30 + d * levelH;
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+//  DRAWING
+// ─────────────────────────────────────────────
+const canvas = document.getElementById('treeCanvas');
+const ctx    = canvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  canvas.width  = rect.width  || 500;
+  canvas.height = 400;
+  layoutTree(canvas);
+  drawTree(-1, -1, []);
+}
+
+function nodeColor(node, activeNodeId, result) {
+  if (node.isLeaf) {
+    const leafNums  = node.nums.join(',');
+    const inResult  = result.some(r => r.join(',') === leafNums);
+    return inResult ? '#7aaa7a' : '#d4b896';
+  }
+  if (node.id === activeNodeId) return '#c4875a';
+  if (node.nums.length === 0) return '#5a9e93';
+  return '#a09080';
+}
+
+function drawTree(activeNodeId, skippedNum, resultList) {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // edges
+  for (const e of treeEdges) {
+    const from = treeNodes[e.from];
+    const to   = treeNodes[e.to];
+    ctx.beginPath();
+    ctx.moveTo(from.x, from.y);
+    ctx.lineTo(to.x,   to.y);
+    ctx.strokeStyle = '#c4b09080';
+    ctx.lineWidth   = 1.5;
+    ctx.stroke();
+  }
+
+  // nodes
+  for (const node of treeNodes) {
+    const isActive = node.id === activeNodeId;
+    const r = isActive ? 18 : node.isLeaf ? 14 : 15;
+    const col = nodeColor(node, activeNodeId, resultList);
+
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+    ctx.fillStyle = col;
+    ctx.fill();
+    if (isActive) {
+      ctx.strokeStyle = '#3a2e22';
+      ctx.lineWidth   = 2.5;
+      ctx.stroke();
+    }
+
+    // label
+    const label = node.nums.length === 0 ? '[]' : `[${node.nums.join(',')}]`;
+    ctx.fillStyle   = isActive ? '#fff' : node.depth === 0 ? '#fff' : '#3a2e22';
+    ctx.font        = `${isActive ? 600 : 500} ${node.isLeaf ? 9 : 8}px Inter, sans-serif`;
+    ctx.textAlign   = 'center';
+    ctx.textBaseline = 'middle';
+    if (label.length <= 7) {
+      ctx.fillText(label, node.x, node.y);
+    } else {
+      ctx.fillText('['+node.nums.join(',')+']', node.x, node.y);
+    }
+  }
+}
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let currentStep = -1;
+let playing = false;
+let playTimer = null;
+
+const speedMap = { 1: 1600, 2: 1000, 3: 600, 4: 350, 5: 150 };
+const speedLabels = { 1: 'Slowest', 2: 'Slow', 3: 'Normal', 4: 'Fast', 5: 'Fastest' };
+
+function getDelay() {
+  return speedMap[document.getElementById('speedSlider').value] || 600;
+}
+
+// ─────────────────────────────────────────────
+//  RENDER STEP
+// ─────────────────────────────────────────────
+function renderStep(idx) {
+  const step = idx >= 0 && idx < steps.length ? steps[idx] : null;
+
+  const path   = step ? step.path   : [];
+  const used   = step ? step.used   : new Set();
+  const result = step ? step.result : [];
+  const activeNodeId = step ? step.nodeId : -1;
+
+  // draw tree
+  drawTree(activeNodeId, step?.skipped ?? -1, result);
+
+  // step counter
+  document.getElementById('stepNum').textContent   = idx + 1;
+  document.getElementById('totalSteps').textContent = steps.length;
+  document.getElementById('depthNum').textContent   = step ? step.depth : 0;
+  document.getElementById('progressBar').style.width = idx < 0 ? '0%' : `${((idx+1)/steps.length*100).toFixed(1)}%`;
+
+  // path display
+  const pd = document.getElementById('pathDisplay');
+  pd.innerHTML = '';
+  pd.innerHTML += '<span class="path-bracket">[</span>';
+  for (const n of path) {
+    const el = document.createElement('div');
+    el.className = 'path-num ' + (step?.type === 'record' ? 'recorded' : 'active');
+    el.textContent = n;
+    pd.appendChild(el);
+  }
+  pd.innerHTML += '<span class="path-bracket">]</span>';
+  if (path.length === 0) pd.innerHTML += '<span style="color:var(--text-lt);font-size:0.8rem;">empty</span>';
+
+  // used display
+  const ud = document.getElementById('usedDisplay');
+  ud.innerHTML = '';
+  if (used.size === 0) {
+    ud.innerHTML = '<span style="color:var(--text-lt);font-size:0.8rem;">empty set</span>';
+  } else {
+    for (const n of used) {
+      const el = document.createElement('div');
+      el.className = 'used-chip';
+      el.textContent = n;
+      ud.appendChild(el);
+    }
+  }
+
+  // results display
+  const rd = document.getElementById('resultDisplay');
+  rd.innerHTML = '';
+  if (result.length === 0) {
+    rd.innerHTML = '<span style="color:var(--text-lt);font-size:0.8rem;">none yet</span>';
+  } else {
+    for (const r of result) {
+      const el = document.createElement('div');
+      el.className = 'result-item';
+      el.textContent = '[' + r.join(',') + ']';
+      rd.appendChild(el);
+    }
+  }
+
+  // action box
+  const ab = document.getElementById('actionBox');
+  if (step) {
+    ab.className = 'action-box ' + (step.type || '');
+    ab.textContent = step.action;
+  } else {
+    ab.className = 'action-box';
+    ab.textContent = 'Press "Next Step" to begin the backtracking journey';
+  }
+
+  // explain box
+  const eb = document.getElementById('explainBox');
+  if (step) {
+    eb.innerHTML = step.explain;
+  } else {
+    eb.innerHTML = `The algorithm starts at the root with an empty path. At each node, it loops through all numbers and picks one that is not yet in the <span class="mono">used</span> set. After recursing, it <strong>unpicks</strong> — removing from both <span class="mono">path</span> and <span class="mono">used</span> — so the next sibling can try a different number.`;
+  }
+
+  // buttons
+  document.getElementById('btnPrev').disabled = idx <= -1;
+  document.getElementById('btnNext').disabled = idx >= steps.length - 1;
+}
+
+// ─────────────────────────────────────────────
+//  CONTROLS
+// ─────────────────────────────────────────────
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (currentStep < steps.length - 1) {
+    currentStep++;
+    renderStep(currentStep);
+  }
+});
+
+document.getElementById('btnPrev').addEventListener('click', () => {
+  if (currentStep > -1) {
+    currentStep--;
+    renderStep(currentStep);
+  }
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  stopPlay();
+  currentStep = -1;
+  renderStep(-1);
+});
+
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (playing) {
+    stopPlay();
+  } else {
+    startPlay();
+  }
+});
+
+function startPlay() {
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  function tick() {
+    if (currentStep < steps.length - 1) {
+      currentStep++;
+      renderStep(currentStep);
+      playTimer = setTimeout(tick, getDelay());
+    } else {
+      stopPlay();
+    }
+  }
+  playTimer = setTimeout(tick, getDelay());
+}
+
+function stopPlay() {
+  playing = false;
+  document.getElementById('btnPlay').textContent = '▶ Auto';
+  if (playTimer) { clearTimeout(playTimer); playTimer = null; }
+}
+
+const slider = document.getElementById('speedSlider');
+const slLabel = document.getElementById('speedLabel');
+slider.addEventListener('input', () => {
+  slLabel.textContent = speedLabels[slider.value];
+});
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+renderStep(-1);
+</script>
+</body>
+</html>

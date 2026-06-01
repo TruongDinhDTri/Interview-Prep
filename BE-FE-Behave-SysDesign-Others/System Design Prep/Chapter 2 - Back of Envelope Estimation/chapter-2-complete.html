@@ -403,63 +403,93 @@
         <!-- ─── Latency ─── -->
         <div class="section-block" id="latency">
             <h2>⏱ Section 2: Latency Numbers Every Engineer Should Know</h2>
-            <p>These numbers from Jeff Dean (Google) are the foundation for justifying <em>every</em> caching and architecture decision. You don't memorize the exact numbers — you memorize the <strong>order of magnitude and the ratio</strong>.</p>
+            <p>Dr. Dean from Google revealed the length of typical computer operations in 2010. Some numbers are outdated as computers become faster, but they still give us an excellent sense of the <strong>order of magnitude</strong> — the ratio between fast and slow operations is what matters. You don't memorize the exact numbers — you memorize the <strong>order of magnitude and the ratio</strong>.</p>
 
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr><th>Operation</th><th>Latency</th><th>Memory Hook</th></tr>
+                        <tr><th>Operation</th><th>Latency</th><th>In Nanoseconds</th><th>Memory Hook</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>L1 cache reference</td><td>0.5 ns</td><td>Lightning</td></tr>
-                        <tr><td>L2 cache reference</td><td>7 ns</td><td>14x slower than L1</td></tr>
-                        <tr class="highlight-row"><td>Main memory (RAM)</td><td>100 ns</td><td>200x slower than L1</td></tr>
-                        <tr><td>SSD random read</td><td>~150 µs</td><td>1,000x slower than RAM</td></tr>
-                        <tr><td>HDD disk seek</td><td>~10 ms</td><td>100x slower than SSD</td></tr>
-                        <tr><td>Read 1 MB from RAM</td><td>250 µs</td><td>—</td></tr>
-                        <tr><td>Read 1 MB from SSD</td><td>~1 ms</td><td>4x slower than RAM</td></tr>
-                        <tr><td>Read 1 MB from HDD</td><td>~30 ms</td><td>120x slower than RAM</td></tr>
-                        <tr class="highlight-row"><td>Round trip same datacenter</td><td>500 µs</td><td>0.5ms ≈ "local"</td></tr>
-                        <tr><td>Round trip CA → Netherlands → CA</td><td>150 ms</td><td>Cross-continent minimum</td></tr>
+                        <tr><td>L1 cache reference</td><td>0.5 ns</td><td>0.5 ns</td><td>⚡ Lightning — fastest possible</td></tr>
+                        <tr><td>Branch mispredict</td><td>5 ns</td><td>5 ns</td><td>10x slower than L1 cache</td></tr>
+                        <tr><td>L2 cache reference</td><td>7 ns</td><td>7 ns</td><td>14x slower than L1</td></tr>
+                        <tr><td>Mutex lock/unlock</td><td>100 ns</td><td>100 ns</td><td>Same as RAM — avoid hot locks</td></tr>
+                        <tr class="highlight-row"><td>Main memory reference (RAM)</td><td>100 ns</td><td>100 ns</td><td>200x slower than L1 ★</td></tr>
+                        <tr><td>Compress 1K bytes with Zippy</td><td>10 µs</td><td>10,000 ns</td><td>100x slower than RAM — but still fast!</td></tr>
+                        <tr><td>Send 2K bytes over 1 Gbps network</td><td>20 µs</td><td>20,000 ns</td><td>Network has overhead even locally</td></tr>
+                        <tr><td>Read 1 MB sequentially from RAM</td><td>250 µs</td><td>250,000 ns</td><td>Bulk RAM read is cheap</td></tr>
+                        <tr class="highlight-row"><td>Round trip within same datacenter</td><td>500 µs</td><td>500,000 ns</td><td>0.5ms ≈ "local" ★</td></tr>
+                        <tr><td>Disk seek (HDD)</td><td>10 ms</td><td>10,000,000 ns</td><td>20,000x slower than RAM — avoid!</td></tr>
+                        <tr><td>Read 1 MB sequentially from network</td><td>10 ms</td><td>10,000,000 ns</td><td>Same as disk seek!</td></tr>
+                        <tr><td>Read 1 MB sequentially from disk (HDD)</td><td>30 ms</td><td>30,000,000 ns</td><td>120x slower than RAM read</td></tr>
+                        <tr class="highlight-row"><td>Send packet CA → Netherlands → CA</td><td>150 ms</td><td>150,000,000 ns</td><td>Cross-continent minimum ★</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="callout key">
+                <div class="callout-label">📏 Unit Reference (memorize this!)</div>
+                <p>
+                    <strong>ns</strong> = nanosecond &nbsp;|&nbsp; <strong>µs</strong> = microsecond &nbsp;|&nbsp; <strong>ms</strong> = millisecond<br>
+                    <strong>1 ns</strong> = 10<sup>−9</sup> seconds<br>
+                    <strong>1 µs</strong> = 10<sup>−6</sup> seconds = <strong>1,000 ns</strong><br>
+                    <strong>1 ms</strong> = 10<sup>−3</sup> seconds = <strong>1,000 µs</strong> = <strong>1,000,000 ns</strong>
+                </p>
             </div>
 
             <h3>The 4 Conclusions You Must Be Able to State</h3>
             <div class="callout key">
                 <div class="callout-label">🎓 Interview-Ready Insights</div>
                 <p>
-                    <strong>1. Memory is fast. Disk is slow.</strong> → Always cache what you can read from disk.<br>
-                    <strong>2. Avoid disk seeks.</strong> → Use memory-first architectures (Redis, Memcached) for hot data.<br>
-                    <strong>3. Compression is fast.</strong> → Compress data before sending over the network; the CPU cost is worth it.<br>
-                    <strong>4. Cross-continent = 150ms minimum.</strong> → Global users need CDN edge nodes to reduce this.
+                    <strong>1. Memory is fast. Disk is slow.</strong> → RAM (100 ns) vs Disk seek (10 ms) = 100,000x difference. Always cache what you can read from disk.<br><br>
+                    <strong>2. Avoid disk seeks.</strong> → Use memory-first architectures (Redis, Memcached) for hot data. A disk seek (10ms) costs the same as reading 1MB over the network.<br><br>
+                    <strong>3. Compression beats network transfer.</strong> → Compressing 1K bytes costs ~10µs. Sending uncompressed over network costs ~20µs. The CPU overhead of Zippy is worth it — always compress before sending large payloads over the wire.<br><br>
+                    <strong>4. Cross-continent = 150ms minimum.</strong> → You cannot beat the speed of light. Global users need CDN edge nodes to reduce this latency.
                 </p>
+            </div>
+
+            <h3>Key Ratio to Remember: Compression is Cheap vs. Network</h3>
+            <div class="callout gold">
+                <div class="callout-label">💡 The Hidden Insight</div>
+                <p>Compress 1K with Zippy = <strong>10µs</strong>. Send 2K over network = <strong>20µs</strong>. This means: <em>compress first, send less</em>. The CPU cost is 2x cheaper than the raw network transfer — and your payload is now smaller so network time also drops. This is why gzip/Brotli on HTTP responses is always on in production.</p>
             </div>
 
             <h3>Using Latency to Justify a Cache Decision</h3>
             <div class="callout gold">
                 <div class="callout-label">💬 Say This in Interview</div>
-                <p>"A cache hit is roughly 1ms. A database query is roughly 10ms. With a read-to-write ratio of 10:1, adding a cache reduces average read latency by ~10x. For a URL shortener where the whole value proposition is <em>fast redirects</em>, this is a critical optimization."</p>
+                <p>"A cache hit is roughly 1ms. A database query hitting disk is roughly 10ms+. With a read-to-write ratio of 10:1, adding a cache reduces average read latency by ~10x. For a URL shortener where the whole value proposition is <em>fast redirects</em>, this is the single most critical optimization."</p>
             </div>
         </div>
 
         <!-- ─── Availability ─── -->
         <div class="section-block" id="availability">
             <h2>✅ Section 3: Availability Numbers & SLA</h2>
-            <p>An <strong>SLA (Service Level Agreement)</strong> is the uptime commitment between a provider and customer. It's measured in "nines." Knowing the downtime implications of each SLA tier is what separates a junior answer from a senior one.</p>
+            <p><strong>High availability</strong> is the ability of a system to be continuously operational for a desirably long period of time. High availability is measured as a percentage, with 100% meaning a service that has 0 downtime. Most services fall between 99% and 100%.</p>
+            <p>A <strong>service level agreement (SLA)</strong> is a commonly used term for service providers. This is an agreement between you (the service provider) and your customer, and this agreement formally defines the level of uptime your service will deliver. Cloud providers Amazon, Google and Microsoft set their SLAs at 99.9% or above. Uptime is traditionally measured in <em>nines</em> — the more nines, the better.</p>
+            <p>As shown in the table below, the number of nines correlates to the expected system downtime:</p>
 
             <div class="table-wrap">
                 <table>
                     <thead>
-                        <tr><th>Availability</th><th>Downtime / Day</th><th>Downtime / Year</th><th>Called</th></tr>
+                        <tr><th>Availability %</th><th>Downtime / Day</th><th>Downtime / Year</th><th>Called</th></tr>
                     </thead>
                     <tbody>
-                        <tr><td>99%</td><td>14.4 minutes</td><td>3.65 days</td><td>"Two nines"</td></tr>
-                        <tr class="highlight-row"><td>99.9%</td><td>1.44 minutes</td><td>8.77 hours</td><td>"Three nines"</td></tr>
-                        <tr class="highlight-row"><td>99.99%</td><td>8.64 seconds</td><td>52.6 minutes</td><td>"Four nines"</td></tr>
-                        <tr><td>99.999%</td><td>864 ms</td><td>5.26 minutes</td><td>"Five nines"</td></tr>
+                        <tr><td>99%</td><td>14.40 minutes</td><td>3.65 days</td><td>"Two nines"</td></tr>
+                        <tr class="highlight-row"><td>99.9%</td><td>1.44 minutes</td><td>8.77 hours</td><td>"Three nines" ★</td></tr>
+                        <tr class="highlight-row"><td>99.99%</td><td>8.64 seconds</td><td>52.60 minutes</td><td>"Four nines" ★</td></tr>
+                        <tr><td>99.999%</td><td>864.00 milliseconds</td><td>5.26 minutes</td><td>"Five nines"</td></tr>
+                        <tr><td>99.9999%</td><td>86.40 milliseconds</td><td>31.56 seconds</td><td>"Six nines"</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="callout key">
+                <div class="callout-label">💡 How to Count "Nines"</div>
+                <p>
+                    Count the 9s after "99". So 99.9% = three nines, 99.99% = four nines, 99.999% = five nines.<br><br>
+                    <strong>Quick math trick:</strong> Each extra nine cuts the downtime by ~10x. Going from 99.9% → 99.99% shrinks yearly downtime from 8.77 hours → 52.6 minutes — a 10x reduction for a huge engineering investment.
+                </p>
             </div>
 
             <h3>Connecting SLA to Architecture</h3>
@@ -467,13 +497,15 @@
             <div class="callout key">
                 <div class="callout-label">🏗️ Architectural Implication</div>
                 <p>
-                    <strong>99.9% (8.77h/yr):</strong> Active-passive with manual failover. Single points of failure acceptable in some components. Cost-optimized.<br><br>
-                    <strong>99.99% (52min/yr):</strong> Every component needs redundancy. Active-active load balancers, multi-AZ databases with synchronous replication, automated failover. Significantly higher cost.
+                    <strong>99% (3.65 days/yr):</strong> Single server acceptable for non-critical systems. No redundancy required. Fine for internal tools.<br><br>
+                    <strong>99.9% (8.77h/yr):</strong> Active-passive with manual failover. Single points of failure acceptable in some components. Cost-optimized. Most startups live here.<br><br>
+                    <strong>99.99% (52min/yr):</strong> Every component needs redundancy. Active-active load balancers, multi-AZ databases with synchronous replication, automated failover. Significantly higher cost. Required for payments, healthcare.<br><br>
+                    <strong>99.999%+ (5min/yr):</strong> Extremely expensive. Requires chaos engineering, global multi-region active-active. Rare — only for life-critical or financial infrastructure.
                 </p>
             </div>
             <div class="callout gold">
                 <div class="callout-label">💬 Say This in Interview</div>
-                <p>"That's the difference between 8 hours of downtime per year versus 52 minutes. For a payment system, I'd target 99.99% — for a social feed, 99.9% is probably acceptable and much more cost-effective to engineer."</p>
+                <p>"That's the difference between 8 hours of downtime per year versus 52 minutes — a 10x improvement that requires doubling or tripling infrastructure cost. For a payment system, I'd target 99.99% — for a social feed, 99.9% is probably acceptable and much more cost-effective to engineer. I'd confirm with the product team what the business actually needs before over-engineering."</p>
             </div>
         </div>
 
@@ -533,38 +565,91 @@ Step 6: Storage 5 years = daily × 365 × 5</code></pre>
         <!-- ─── Interview Tips ─── -->
         <div class="section-block" id="tips">
             <h2>💡 Section 5: Interview Tips</h2>
+            <p>Back-of-the-envelope estimation is all about the <strong>process</strong>. Solving the problem is more important than obtaining the exact result. Interviewers are testing your problem-solving skills. Here are the key tips to follow:</p>
 
-            <h3>1. Round Aggressively</h3>
-            <p>Never try to compute `99,987 ÷ 9.1` precisely. Say: "roughly 100,000 ÷ 10 = 10,000." Interviewers know you're estimating — false precision signals bad judgment.</p>
+            <h3>Tip 1: Rounding and Approximation</h3>
+            <p>It is difficult to perform complicated math operations during the interview. There is no need to spend valuable time to solve complicated math problems. <strong>Precision is not expected.</strong> Use round numbers and approximation to your advantage.</p>
+            <div class="callout gold">
+                <div class="callout-label">💡 Example</div>
+                <p>What is the result of <code>99,987 ÷ 9.1</code>? There is no need to work this out exactly. Simplify it:<br><br>
+                <strong>→ "100,000 ÷ 10 = 10,000"</strong><br><br>
+                The answer is close enough (real answer: ~10,987) and you saved 30 seconds of mental math. In an interview, that time is better spent discussing architecture.</p>
+            </div>
 
-            <h3>2. Write Your Assumptions First</h3>
+            <h3>Tip 2: Write Down Your Assumptions</h3>
+            <p>It is a good idea to write down your assumptions to be referenced later. This serves two purposes: it shows the interviewer you are structured, and it lets <em>you</em> catch errors by reviewing your own assumptions.</p>
             <div class="callout gold">
                 <div class="callout-label">💬 Say This</div>
-                <p>"I'll assume 10M DAU, each user reads 10 items and writes 1 item per day. That gives a 10:1 read-to-write ratio. Let me work from there."</p>
+                <p>"Let me state my assumptions upfront — I'll assume 300M monthly active users, 50% use daily (DAU = 150M), each user posts 2 tweets/day, and 10% of tweets contain a media photo at ~1MB each. I'll work from these numbers — let me know if you want me to adjust any of them."</p>
             </div>
-            <p>This shows you're <em>structured</em> and <em>transparent</em> — two things great engineers are.</p>
+            <p>Writing assumptions gives you a paper trail. If your final number seems off, you can trace it back to the assumption — not recalculate from scratch.</p>
 
-            <h3>3. Always Label Units</h3>
-            <p>Don't say "5" — say "5 MB" or "5 TB/day." Unlabeled numbers are a red flag. They suggest you're not thinking about the actual scale of the system.</p>
+            <h3>Tip 3: Label Your Units</h3>
+            <p>When you write down "5", does it mean 5 KB or 5 MB? You might confuse yourself with this. Always write down the units — <strong>"5 MB"</strong> helps to remove ambiguity and shows precision of thought.</p>
+            <div class="callout warning">
+                <div class="callout-label">⚠️ Common Mistake</div>
+                <p>
+                    ❌ "Daily storage: 150M × 2 × 250 = ... some big number"<br>
+                    ✅ "Daily storage: 150M users × 2 tweets × 250 <strong>bytes/tweet</strong> = <strong>75 GB/day</strong>"<br><br>
+                    The unit chain tells you <em>exactly</em> what you computed. Unlabeled numbers are a red flag to interviewers — it signals you may not know what scale you're operating at.
+                </p>
+            </div>
 
-            <h3>4. Sanity Check Against Real Systems</h3>
+            <h3>Tip 4: Commonly Asked Back-of-the-Envelope Estimations</h3>
+            <p>You can practice these calculations when preparing for an interview. <strong>Practice makes perfect.</strong> The most commonly asked estimation types are:</p>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>System</th><th>Known QPS (approx)</th></tr></thead>
+                    <thead><tr><th>Estimation Type</th><th>What You're Solving For</th><th>Quick Formula</th></tr></thead>
                     <tbody>
-                        <tr><td>Twitter</td><td>~6,000 tweets/second</td></tr>
-                        <tr><td>Instagram</td><td>~1,000 photos/second</td></tr>
-                        <tr><td>Google Search</td><td>~99,000 searches/second</td></tr>
+                        <tr><td>QPS (Queries Per Second)</td><td>Can 1 server handle this? Do I need load balancing?</td><td>DAU × requests/day ÷ 86,400</td></tr>
+                        <tr class="highlight-row"><td>Peak QPS</td><td>What's the worst-case traffic burst?</td><td>Average QPS × 2–5x</td></tr>
+                        <tr><td>Storage (per day)</td><td>How fast is data growing? What DB tier?</td><td>records/day × bytes/record</td></tr>
+                        <tr><td>Cache size</td><td>How much RAM do I need? Is Redis enough?</td><td>Hot data % × total dataset size</td></tr>
+                        <tr><td>Number of servers</td><td>How many machines for the fleet?</td><td>Peak QPS ÷ QPS/server</td></tr>
+                        <tr><td>Bandwidth</td><td>Do I need CDN? What's egress cost?</td><td>Peak QPS × avg response size</td></tr>
                     </tbody>
                 </table>
             </div>
-            <p>If your estimate lands near these → confidence boost. Way off? Double-check your DAU assumption.</p>
+            <div class="callout green">
+                <div class="callout-label">📊 Worked Mini-Example: Number of Servers</div>
+                <p>
+                    <strong>Scenario:</strong> Peak QPS = 7,000. One commodity web server handles ~1,000 QPS.<br>
+                    <strong>Servers needed:</strong> 7,000 ÷ 1,000 = <strong>7 servers</strong><br>
+                    <strong>With redundancy (N+1):</strong> 8–10 servers behind a load balancer.<br><br>
+                    <em>Say out loud:</em> "That's a manageable fleet — a single availability zone could handle this with a load balancer and auto-scaling group."
+                </p>
+            </div>
 
-            <h3>5. Connect Every Number to an Architecture Decision</h3>
+            <h3>Tip 5: Connect Every Number to an Architecture Decision</h3>
+            <p>Every number you calculate should answer a design question. Estimation isn't a math exercise — it's a <strong>design decision engine</strong>.</p>
             <div class="callout key">
                 <div class="callout-label">🎯 The Bridge</div>
-                <p>Every number you calculate should answer a design question. "7,000 peak QPS tells me a single DB server won't cut it → we need read replicas and connection pooling." The calculation isn't a math exercise — it's a design decision engine.</p>
+                <p>
+                    <strong>QPS tells you:</strong> Do I need a load balancer? How many servers?<br>
+                    <strong>Storage tells you:</strong> SQL vs NoSQL? Sharding strategy? Cold storage?<br>
+                    <strong>Read/write ratio tells you:</strong> Cache strategy? Read replicas?<br>
+                    <strong>Availability requirement tells you:</strong> Multi-AZ? Active-active? What's the failover plan?
+                </p>
             </div>
+            <div class="callout gold">
+                <div class="callout-label">💬 Say This — Not Just the Number</div>
+                <p>"Peak QPS of 7,000 tells me a single database server at ~1,000 QPS capacity won't cut it → we need read replicas and connection pooling for the read path. The write path at 3,500 QPS is also heavy — I'd use async message queuing to absorb spikes and write to the DB in batches."</p>
+            </div>
+
+            <h3>Tip 6: Sanity Check Against Real Systems</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead><tr><th>System</th><th>Known Scale (approx)</th></tr></thead>
+                    <tbody>
+                        <tr><td>Twitter (reads)</td><td>~300,000 QPS peak reads</td></tr>
+                        <tr><td>Twitter (writes)</td><td>~6,000 tweets/second</td></tr>
+                        <tr><td>Instagram uploads</td><td>~1,000 photos/second</td></tr>
+                        <tr><td>Google Search</td><td>~99,000 searches/second</td></tr>
+                        <tr><td>Netflix streaming</td><td>~15 TB/s outbound bandwidth</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>If your estimate lands near these → confidence boost. Way off (like 1,000x)? Double-check your DAU assumption or your bytes-per-record.</p>
         </div>
 
         <!-- ─── Quick Reference ─── -->

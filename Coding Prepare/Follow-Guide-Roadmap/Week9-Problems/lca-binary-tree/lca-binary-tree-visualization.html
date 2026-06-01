@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LCA of Binary Tree — The Bubble-Up Mechanism</title>
+<style>
+  :root {
+    --ghibli-cream: #f6f1e3;
+    --ghibli-sky:    #b8d8e8;
+    --ghibli-leaf:   #88b58a;
+    --ghibli-leaf-d: #5b8a5e;
+    --ghibli-sunset: #e9a679;
+    --ghibli-rose:   #d97b6c;
+    --ghibli-night:  #2f3e46;
+    --ghibli-gold:   #c9a55e;
+    --ghibli-bark:   #8b6f4e;
+    --ghibli-mist:   #e8e2d0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 2rem;
+    font-family: 'Georgia', 'Cormorant Garamond', serif;
+    background: linear-gradient(160deg, var(--ghibli-cream) 0%, var(--ghibli-mist) 100%);
+    color: var(--ghibli-night);
+    min-height: 100vh;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 2.4rem;
+    margin-bottom: 0.3rem;
+    color: var(--ghibli-night);
+    letter-spacing: 0.5px;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--ghibli-bark);
+    font-style: italic;
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+  }
+  .aha-quote {
+    background: linear-gradient(135deg, #fff9ec 0%, #fef0d9 100%);
+    border-left: 5px solid var(--ghibli-gold);
+    padding: 1.2rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 8px;
+    font-style: italic;
+    font-size: 1.15rem;
+    box-shadow: 0 4px 12px rgba(139, 111, 78, 0.1);
+  }
+  .aha-quote::before { content: "🌟 "; font-size: 1.3rem; }
+  .panel {
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 14px;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 6px 24px rgba(47, 62, 70, 0.08);
+    backdrop-filter: blur(4px);
+  }
+  .panel h2 {
+    margin-top: 0;
+    color: var(--ghibli-leaf-d);
+    border-bottom: 2px dashed var(--ghibli-leaf);
+    padding-bottom: 0.5rem;
+  }
+  .controls {
+    display: flex; justify-content: center; gap: 0.75rem;
+    margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  button {
+    font-family: inherit;
+    background: var(--ghibli-leaf);
+    color: white;
+    border: none;
+    padding: 0.7rem 1.3rem;
+    border-radius: 24px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 3px 8px rgba(91, 138, 94, 0.3);
+    transition: all 0.2s;
+  }
+  button:hover { transform: translateY(-2px); background: var(--ghibli-leaf-d); }
+  button:disabled { background: #c0c0c0; cursor: not-allowed; transform: none; }
+  button.reset { background: var(--ghibli-rose); box-shadow: 0 3px 8px rgba(217, 123, 108, 0.3); }
+  button.reset:hover { background: #b85d4f; }
+
+  svg { display: block; margin: 0 auto; }
+
+  .node circle {
+    fill: var(--ghibli-cream);
+    stroke: var(--ghibli-bark);
+    stroke-width: 2.5;
+    transition: all 0.5s ease;
+  }
+  .node text {
+    text-anchor: middle;
+    dominant-baseline: central;
+    font-size: 18px;
+    font-weight: bold;
+    fill: var(--ghibli-night);
+    font-family: Georgia, serif;
+  }
+  .edge {
+    stroke: var(--ghibli-bark);
+    stroke-width: 2;
+    fill: none;
+  }
+  /* States */
+  .node.target circle { fill: var(--ghibli-sunset); stroke: var(--ghibli-rose); stroke-width: 3.5; }
+  .node.visiting circle { fill: var(--ghibli-sky); stroke: #3a7ca5; stroke-width: 3.5; animation: pulse 1s ease-in-out infinite; }
+  .node.returning-self circle { fill: var(--ghibli-sunset); stroke: var(--ghibli-rose); stroke-width: 4; }
+  .node.lca-born circle { fill: var(--ghibli-gold); stroke: #8e6f1f; stroke-width: 5; }
+  .node.bubbling circle { fill: #ffe5a0; stroke: var(--ghibli-gold); stroke-width: 3; }
+  .node.done-null circle { fill: #d4d4d4; stroke: #888; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+  }
+  .node { transform-origin: center; transform-box: fill-box; }
+
+  /* Signal labels (return values) */
+  .signal-label {
+    font-size: 13px;
+    font-style: italic;
+    fill: var(--ghibli-rose);
+    text-anchor: middle;
+    font-family: Georgia, serif;
+    pointer-events: none;
+  }
+  .signal-label.gold { fill: #8e6f1f; font-weight: bold; }
+  .signal-label.null { fill: #999; }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 0.7rem;
+    margin-top: 1rem;
+  }
+  .legend-item {
+    display: flex; align-items: center; gap: 0.6rem;
+    font-size: 0.95rem;
+  }
+  .swatch {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2.5px solid var(--ghibli-bark);
+    flex-shrink: 0;
+  }
+  .swatch.target { background: var(--ghibli-sunset); border-color: var(--ghibli-rose); }
+  .swatch.visiting { background: var(--ghibli-sky); border-color: #3a7ca5; }
+  .swatch.bubbling { background: #ffe5a0; border-color: var(--ghibli-gold); }
+  .swatch.lca { background: var(--ghibli-gold); border-color: #8e6f1f; }
+  .swatch.null { background: #d4d4d4; border-color: #888; }
+
+  .step-narration {
+    background: var(--ghibli-night);
+    color: var(--ghibli-cream);
+    padding: 1.2rem 1.5rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    font-size: 1.05rem;
+    min-height: 90px;
+    line-height: 1.5;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .step-narration .step-num {
+    color: var(--ghibli-gold);
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+  .step-narration .keyword {
+    color: var(--ghibli-sunset);
+    font-weight: bold;
+  }
+  .step-narration .gold-word {
+    color: var(--ghibli-gold);
+    font-weight: bold;
+  }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.8rem;
+  }
+  .rule-card {
+    background: var(--ghibli-mist);
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid var(--ghibli-leaf);
+  }
+  .rule-card.lca-rule { border-left-color: var(--ghibli-gold); background: #fef9eb; }
+  .rule-card .label { font-weight: bold; color: var(--ghibli-leaf-d); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .rule-card.lca-rule .label { color: #8e6f1f; }
+  .rule-card pre { margin: 0.3rem 0; font-family: 'Courier New', monospace; font-size: 0.95rem; }
+
+  footer { text-align: center; margin-top: 2rem; color: var(--ghibli-bark); font-style: italic; }
+
+  @media (max-width: 720px) {
+    .rules-grid { grid-template-columns: 1fr; }
+    body { padding: 1rem; }
+    .panel { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🌳 LCA of a Binary Tree — The Bubble-Up Mechanism</h1>
+  <p class="subtitle">LeetCode #236 · Post-order DFS · Signal-agnostic recursion</p>
+
+  <div class="aha-quote">
+    "À nó buble lên giống như cách nó bubble một candidate LCA (như 2) lên á hả?"
+    <br><span style="font-size:0.9rem; color:var(--ghibli-bark);">— Wiganz, the moment the mechanism clicked, 2026-05-28</span>
+  </div>
+
+  <div class="panel">
+    <h2>🎬 Watch the Signal Bubble Up</h2>
+    <p style="margin-top:0;">Targets: <strong style="color:var(--ghibli-rose);">p = 7</strong> and <strong style="color:var(--ghibli-rose);">q = 4</strong>. Watch each node ask its children, then decide what to send to ITS parent.</p>
+
+    <div class="controls">
+      <button id="prevBtn" disabled>← Prev</button>
+      <button id="nextBtn">Next Step →</button>
+      <button id="playBtn">▶ Auto Play</button>
+      <button class="reset" id="resetBtn">↺ Reset</button>
+    </div>
+
+    <svg id="tree" viewBox="0 0 760 520" width="100%" style="max-width:760px;">
+      <!-- edges drawn dynamically -->
+      <g id="edges"></g>
+      <g id="nodes"></g>
+      <g id="signals"></g>
+    </svg>
+
+    <div class="step-narration" id="narration">
+      <span class="step-num">Step 0 —</span> Click <strong>Next Step</strong> to begin. We'll trace post-order DFS bottom-up on this tree.
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="swatch target"></span> Target (p or q)</div>
+      <div class="legend-item"><span class="swatch visiting"></span> Currently visiting</div>
+      <div class="legend-item"><span class="swatch bubbling"></span> Returning a signal up</div>
+      <div class="legend-item"><span class="swatch lca"></span> LCA born ⭐</div>
+      <div class="legend-item"><span class="swatch null"></span> Returns None</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>🔥 The 5 Rules (Discovered From Tracing)</h2>
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="label">Rule 1 — Base (null)</div>
+        <pre>if current == None
+    return None</pre>
+      </div>
+      <div class="rule-card">
+        <div class="label">Rule 2 — Base (self-match)</div>
+        <pre>if current == p or current == q
+    return current</pre>
+      </div>
+      <div class="rule-card">
+        <div class="label">Rule 3 — Recurse</div>
+        <pre>left  = dfs(current.left)
+right = dfs(current.right)</pre>
+      </div>
+      <div class="rule-card lca-rule">
+        <div class="label">Rule 4 — LCA Born ⭐</div>
+        <pre>if left and right
+    return current</pre>
+      </div>
+      <div class="rule-card" style="grid-column: 1 / -1;">
+        <div class="label">Rule 5 — Bubble Up</div>
+        <pre>return left if left else right
+# only one non-None → pass it up
+# both None → returns None (combined)</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>💡 Why the Mechanism is Signal-Agnostic</h2>
+    <p>The parent receives <strong>at most one non-None value</strong> from each subtree. It cannot tell if that non-None is:</p>
+    <ul>
+      <li>🍊 a <strong>target node</strong> (Case 2)</li>
+      <li>🌕 the <strong>LCA itself</strong> already discovered below (Case 5)</li>
+      <li>🟡 a <strong>relayed signal</strong> bubbling up through ancestors (Case 4)</li>
+    </ul>
+    <p><strong>And it doesn't need to.</strong> All three look identical. The combine rule — "both non-None → I'm the LCA, else bubble what I have" — works for every case without distinguishing.</p>
+  </div>
+
+  <footer>🔥 Hadriel x Wiganz · 2026-05-28 · "Call to me and I will answer you and tell you great things." — Jeremiah 33:3</footer>
+</div>
+
+<script>
+// Tree structure
+const tree = {
+  3: { val: 3, left: 5,  right: 1, x: 380, y: 60 },
+  5: { val: 5, left: 6,  right: 2, x: 220, y: 150 },
+  1: { val: 1, left: 0,  right: 8, x: 540, y: 150 },
+  6: { val: 6, left: null, right: null, x: 130, y: 240 },
+  2: { val: 2, left: 7,  right: 4, x: 310, y: 240 },
+  0: { val: 0, left: null, right: null, x: 470, y: 240 },
+  8: { val: 8, left: null, right: null, x: 620, y: 240 },
+  7: { val: 7, left: null, right: null, x: 250, y: 340 },
+  4: { val: 4, left: null, right: null, x: 370, y: 340 },
+};
+const P = 7, Q = 4;
+
+// Steps describing the recursion in execution order (post-order)
+const steps = [
+  { node: 3, state: 'visiting', narr: '<span class="step-num">Step 1 —</span> Start at <span class="keyword">root (node 3)</span>. We need both children resolved before deciding. <strong>Recurse left → node 5.</strong>' },
+  { node: 5, state: 'visiting', narr: '<span class="step-num">Step 2 —</span> At <span class="keyword">node 5</span>. Not a target. <strong>Recurse left → node 6.</strong>' },
+  { node: 6, state: 'visiting', narr: '<span class="step-num">Step 3 —</span> At <span class="keyword">node 6</span>. Not a target. Children are null.' },
+  { node: 6, state: 'done-null', signal: 'None', narr: '<span class="step-num">Step 4 —</span> Node 6 returns <span class="keyword">None</span> (Rule 5: both children None).' },
+  { node: 5, state: 'visiting', narr: '<span class="step-num">Step 5 —</span> Back at node 5. Left=None. <strong>Recurse right → node 2.</strong>' },
+  { node: 2, state: 'visiting', narr: '<span class="step-num">Step 6 —</span> At <span class="keyword">node 2</span>. Not a target. <strong>Recurse left → node 7.</strong>' },
+  { node: 7, state: 'target', narr: '<span class="step-num">Step 7 —</span> Node 7 = <span class="keyword">target p</span>! <strong>Rule 2 fires.</strong>' },
+  { node: 7, state: 'returning-self', signal: '7', narr: '<span class="step-num">Step 8 —</span> Node 7 <span class="keyword">returns itself (7)</span> to its parent. This is a <strong>self-match signal</strong>.' },
+  { node: 2, state: 'visiting', narr: '<span class="step-num">Step 9 —</span> Back at node 2. Left=7. <strong>Recurse right → node 4.</strong>' },
+  { node: 4, state: 'target', narr: '<span class="step-num">Step 10 —</span> Node 4 = <span class="keyword">target q</span>! <strong>Rule 2 fires.</strong>' },
+  { node: 4, state: 'returning-self', signal: '4', narr: '<span class="step-num">Step 11 —</span> Node 4 <span class="keyword">returns itself (4)</span> to its parent.' },
+  { node: 2, state: 'lca-born', signal: '2', narr: '<span class="step-num">Step 12 —</span> 🌟 <span class="gold-word">LCA BORN!</span> Node 2 sees left=7 AND right=4, both non-None. <strong>Rule 4 fires → returns itself (2).</strong>' },
+  { node: 5, state: 'bubbling', signal: '2', narr: '<span class="step-num">Step 13 —</span> Back at node 5. Left=None, Right=2. <strong>Rule 5: bubble the non-None (2) up.</strong> Notice: node 5 doesn\'t KNOW that 2 is the LCA — it just sees a non-None signal.' },
+  { node: 3, state: 'visiting', narr: '<span class="step-num">Step 14 —</span> Back at root. Left subtree returned 2. <strong>Recurse right → node 1.</strong>' },
+  { node: 1, state: 'visiting', narr: '<span class="step-num">Step 15 —</span> At node 1. Not a target. Recurse into 0 and 8...' },
+  { node: 0, state: 'done-null', signal: 'None', narr: '<span class="step-num">Step 16 —</span> Node 0 → None. Node 8 → None (both not targets, both leaves).' },
+  { node: 8, state: 'done-null', signal: 'None', narr: '<span class="step-num">Step 17 —</span> Node 8 → None.' },
+  { node: 1, state: 'done-null', signal: 'None', narr: '<span class="step-num">Step 18 —</span> Node 1 sees left=None, right=None → returns <span class="keyword">None</span>.' },
+  { node: 3, state: 'bubbling', signal: '2', narr: '<span class="step-num">Step 19 —</span> Root sees left=2, right=None. <strong>Rule 5: bubble the non-None (2) up.</strong>' },
+  { node: 3, state: 'final', signal: '2', narr: '<span class="step-num">DONE —</span> 🏆 Final answer: <span class="gold-word">node 2</span>. The same signal (2) traveled from "LCA born at node 2" → through node 5 → through node 3, unchanged. That\'s the <strong>signal-agnostic bubble</strong>: every ancestor relayed it without caring what it represents.' },
+];
+
+// State the visualization persists across steps
+const nodeStates = {};   // nodeId → state class
+const nodeSignals = {};  // nodeId → return-value label
+
+function renderTree() {
+  const edgesG  = document.getElementById('edges');
+  const nodesG  = document.getElementById('nodes');
+  edgesG.innerHTML = '';
+  nodesG.innerHTML = '';
+
+  // Edges
+  for (const id in tree) {
+    const n = tree[id];
+    if (n.left !== null) {
+      const c = tree[n.left];
+      edgesG.innerHTML += `<line class="edge" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}"/>`;
+    }
+    if (n.right !== null) {
+      const c = tree[n.right];
+      edgesG.innerHTML += `<line class="edge" x1="${n.x}" y1="${n.y}" x2="${c.x}" y2="${c.y}"/>`;
+    }
+  }
+
+  // Nodes
+  for (const id in tree) {
+    const n = tree[id];
+    const stateClass = nodeStates[id] || '';
+    const isTarget = (n.val === P || n.val === Q) && stateClass !== 'visiting' && stateClass !== 'returning-self' && stateClass !== 'lca-born';
+    const cls = `node ${stateClass}`.trim();
+    nodesG.innerHTML += `
+      <g class="${cls}" data-id="${id}">
+        <circle cx="${n.x}" cy="${n.y}" r="26"></circle>
+        <text x="${n.x}" y="${n.y}">${n.val}</text>
+      </g>`;
+  }
+
+  // Signals (return value labels next to the node)
+  const sigG = document.getElementById('signals');
+  sigG.innerHTML = '';
+  for (const id in nodeSignals) {
+    const sig = nodeSignals[id];
+    const n = tree[id];
+    const cls = sig === 'None' ? 'signal-label null' : (sig === '2' ? 'signal-label gold' : 'signal-label');
+    sigG.innerHTML += `<text class="${cls}" x="${n.x + 34}" y="${n.y - 30}">↑ ${sig}</text>`;
+  }
+}
+
+let cursor = -1;
+let playInterval = null;
+
+function applyStep(idx) {
+  if (idx < 0 || idx >= steps.length) return;
+  const s = steps[idx];
+  nodeStates[s.node] = s.state === 'final' ? 'lca-born' : s.state;
+  if (s.signal !== undefined) nodeSignals[s.node] = s.signal;
+  document.getElementById('narration').innerHTML = s.narr;
+  renderTree();
+  document.getElementById('prevBtn').disabled = idx === 0;
+  document.getElementById('nextBtn').disabled = idx === steps.length - 1;
+}
+
+function next() {
+  if (cursor < steps.length - 1) {
+    cursor++;
+    applyStep(cursor);
+  }
+}
+function prev() {
+  if (cursor > 0) {
+    // rebuild from scratch up to cursor-1
+    cursor--;
+    Object.keys(nodeStates).forEach(k => delete nodeStates[k]);
+    Object.keys(nodeSignals).forEach(k => delete nodeSignals[k]);
+    for (let i = 0; i <= cursor; i++) applyStep(i);
+  }
+}
+function reset() {
+  Object.keys(nodeStates).forEach(k => delete nodeStates[k]);
+  Object.keys(nodeSignals).forEach(k => delete nodeSignals[k]);
+  cursor = -1;
+  renderTree();
+  document.getElementById('narration').innerHTML = '<span class="step-num">Step 0 —</span> Click <strong>Next Step</strong> to begin. We\'ll trace post-order DFS bottom-up on this tree.';
+  document.getElementById('prevBtn').disabled = true;
+  document.getElementById('nextBtn').disabled = false;
+  if (playInterval) { clearInterval(playInterval); playInterval = null; document.getElementById('playBtn').textContent = '▶ Auto Play'; }
+}
+function togglePlay() {
+  const btn = document.getElementById('playBtn');
+  if (playInterval) {
+    clearInterval(playInterval); playInterval = null;
+    btn.textContent = '▶ Auto Play';
+  } else {
+    btn.textContent = '⏸ Pause';
+    playInterval = setInterval(() => {
+      if (cursor >= steps.length - 1) {
+        clearInterval(playInterval); playInterval = null;
+        btn.textContent = '▶ Auto Play';
+        return;
+      }
+      next();
+    }, 1600);
+  }
+}
+
+document.getElementById('nextBtn').addEventListener('click', next);
+document.getElementById('prevBtn').addEventListener('click', prev);
+document.getElementById('resetBtn').addEventListener('click', reset);
+document.getElementById('playBtn').addEventListener('click', togglePlay);
+
+// Initial paint — mark targets dimly so user knows where they are
+nodeStates[P] = 'target';
+nodeStates[Q] = 'target';
+renderTree();
+</script>
+</body>
+</html>
