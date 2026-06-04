@@ -1,7 +1,7 @@
 {
-  "last_updated": "2026-05-28",
-  "version": "3.8",
-  "notes": "2026-05-28: LCA #236 redone (Teaching Mode @ Start, First Principles path). Big aha: bubble-up signal-agnostic mechanism. 2 impl bugs left unfixed in solution.py for Wiganz to drill. Blueprint skip flagged as recurring weak area on DFS. 2026-05-26: Added Permutations (#46, Subsets/Backtracking). Total unique: 74.",
+  "last_updated": "2026-06-04",
+  "version": "4.0",
+  "notes": "2026-06-03: Accounts Merge (#721, dfs/connected-components) solved in Teaching Mode @ Start but logged CRITICAL / confidence 1/5 / NEEDS REDO (Wiganz's own call — cannot reproduce solo yet). Wiganz was stuck+exhausted in the morning ('thề không hiểu gì'), came back in the afternoon and CRUSHED it. First time ever building an adjacency list from RAW input (prior graph problems handed him node.neighbors or a grid). He caught all 3 bugs himself via manual Phase-1 trace: emails[1:] skipping emails[0] (johnsmith loses name), emails[1:] killing single-email accounts (Mary vanishes) — both fixed with 'for email in emails:' — and the RECURRING 'def dfs never called' Blueprint-skip bug (same wound as LCA #236 'missing return dfs(root)'). Taught the TWO dfs styles (mutation→call vs return-value→return dfs) and derived O(N log N)/O(N) complexity + WHY sort is O(k log k) (merge-sort halving = log levels) from scratch. Total unique: 76. PREVIOUS — 2026-06-02: Time-Based Key-Value Store (#981, binary_search) SOLVED in Interview Mode. CRITICAL problem, confidence 1/5, FLAGGED FOR REDO. Wiganz could not recognize binary search at first but DERIVED the half-elimination property himself; caught BOTH his logged weak-area bugs in Verify (the <= boundary AND the infinite loop) and reached for the ceil-mid fix on his own. Held Blueprint (broke LCA/3Sum skip pattern). Two templates taught deeply: `left=mid` (ceil mid) vs `left=mid+1` bisect (floor mid, never infinite-loops, RECOMMENDED). KEY LESSON: floor mid drifts toward left; `left=mid` stalls → infinite loop; fix = (l+r+1)//2 OR use left=mid+1/right=mid template. 2026-05-28: LCA #236 redone. 2026-05-26: Permutations. Total unique: 75.",
   "all_solved_problems": [
     {
       "num": 1,
@@ -790,6 +790,49 @@
       "date_completed": "2026-05-26",
       "source": "Hadriel Session",
       "notes": "Used set tracks current path. pick→recurse→unpick template. Bug: misplaced return inside for loop."
+    },
+    {
+      "num": 75,
+      "title": "Time Based Key-Value Store",
+      "leetcode_num": 981,
+      "pattern": [
+        "binary_search"
+      ],
+      "difficulty": "Medium",
+      "date_completed": "2026-06-02",
+      "source": "Hadriel-session",
+      "critical": true,
+      "confidence": "1/5",
+      "redo_date": "2026-06-02",
+      "notes": "CRITICAL — confidence 1/5, NEEDS REDO. Boundary binary search (rightmost ts <= t) + defaultdict(list). set O(1), get O(log n), space O(n), BTTC. Wiganz could not recognize binary search at first → derived half-elimination himself (middle>t kill >=middle go left; middle<=t kill <middle go right). 6 bugs caught in Verify: (1) timestamp[key] instead of self.timemap, (2) used t but param named timestamp → NameError, (3) missing self. on timemap, (4) final check == t instead of <= t (broke largest-<=-t contract, happy path returned '' wrongly), (5) INFINITE LOOP on get('foo',13) — floor mid + left=mid stalls (HIS #1 logged weakness, caught it himself), (6) empty/missing key IndexError. TWO templates taught: A) left=mid needs CEIL mid (l+r+1)//2, answer values[left]; B) bisect left=mid+1/right=mid floor mid, right=len, left=count of <=t, answer values[left-1], left==0→'' (RECOMMENDED, never infinite-loops). Archive: Coding Prepare/Follow-Guide-Roadmap/Week9-Problems/time-based-key-value-store/."
+    },
+    {
+      "num": 76,
+      "title": "Accounts Merge",
+      "leetcode_num": 721,
+      "pattern": [
+        "dfs"
+      ],
+      "difficulty": "Medium",
+      "date_completed": "2026-06-03",
+      "source": "Hadriel-session",
+      "critical": true,
+      "confidence": "1/5",
+      "redo_date": "2026-06-03",
+      "notes": "CRITICAL — confidence 1/5 (Wiganz's own call), NEEDS REDO. Solved end-to-end with heavy Teaching-Mode guidance, but Wiganz does NOT feel he could reproduce this cold/solo — log honestly. Stuck+exhausted morning ('thề không hiểu gì'), got it working afternoon in Teaching Mode @ Start. Connected Components — FIRST time building adjacency list from RAW input (Clone Graph gave node.neighbors, Number of Islands gave grid). Undirected = add BOTH directions adj[a].add(b) + adj[b].add(a) ('chung account' is symmetric). 3 BUGS all caught by Wiganz via manual Phase-1 trace: (1) emails[1:] skips emails[0]=johnsmith → johnsmith never gets a name; (2) emails[1:] on single-email account (Mary) = [] → loop never runs → Mary vanishes from output. FIX for both: 'for email in emails:' (no slice) — emails[0] now gets name AND single-email accounts run once (creates harmless self-loop, blocked by visited guard). (3) RECURRING WEAKNESS: 'def dfs' defined but NEVER CALLED — same wound as LCA #236 'missing return dfs(root)', root cause = Blueprint phase skip. Fix: add 'dfs(email)' kickoff line before result.append(component). KEY DISTINCTION taught: TWO dfs styles — (A) MUTATION style (this problem): dfs returns None, answer accumulates in outer var 'component' → just CALL dfs(x), NO return; (B) RETURN-VALUE style (LCA): answer IS the return → must write 'return dfs(x)' to catch it. Self-check reflex drilled: after def dfs, ask 'have I pressed the run button, and is the result wired out?'. COMPLEXITY derived from scratch by Wiganz: N=total emails. Time O(N log N) — Phase1 build O(N) + Phase2 DFS O(N) (visited guard → each email dfs'd exactly once → N total calls) + Phase3 sort O(N log N) DOMINATES. Space O(N) — adj + visited + recursion stack (depth=N worst case when all emails form one chain). Also taught WHY sort=O(k log k) to the ROOT via merge-sort: log k = how many halvings k→1 (the # of levels), k = work merging all elements per level, multiply = k log k. Archive: Coding Prepare/Follow-Guide-Roadmap/Week9-Problems/accounts-merge/."
+    },
+    {
+      "num": 77,
+      "title": "Sort Colors",
+      "leetcode_num": 75,
+      "pattern": [
+        "two_pointers",
+        "dutch_national_flag"
+      ],
+      "difficulty": "Medium",
+      "date_completed": "2026-06-04",
+      "source": "Hadriel-session",
+      "notes": "Interview Mode, Phase 1 (new technique, no timer). 3-gate failed (couldn't justify two-pointer) → First Principles path. Solved BOTH approaches. APPROACH 1 — counting sort (his brute force, reached via lifelines): Counter(nums) one pass to count 0s/1s/2s, then a SEPARATE write-index marches left→right painting 0s, then 1s, then 2s in place. Self-reached realizations: (a) values are ONLY {0,1,2} = the unlock; (b) ascending order is forced by CHOOSING to write 0 first, NOT by hashmap iteration (caught his own bug: Counter encounter-order ≠ ascending); (c) count and write are TWO separate passes, not simultaneous — after counting, original array is dead; (d) one shared write-index advances per placement (caught the bug where a per-loop counter restarts at 0 → would overwrite earlier values); (e) do NOT clear()/reset — nums[i]= on an empty list is IndexError; existing slots ARE the canvas; (f) return NOTHING, mutate in place; (g) Counter returns 0 for missing key (no KeyError, unlike plain dict; defaultdict(int) also returns 0 but inserts the key; cleanest = fixed list [0,0,0] indexed by value). Time O(n), space O(1). APPROACH 2 — Dutch National Flag one-pass follow-up, DERIVED FROM SCRATCH via lifelines (Wiganz chose 'grind it' over being shown). three pointers left/mid/right; mid scans; nums[mid]==0 → swap with left, left++ mid++; ==1 → mid++; ==2 → swap with right, right-- and MID STAYS. THE subtlety he discovered himself: 2-swap brings a value from the UNEXPLORED right zone = unchecked → mid stays to examine it; 0-swap brings a value from BEHIND mid (already-scanned, all 1s) = already checked → mid advances. Loop `while mid <= right` — he first guessed `<`, then TESTED [1,0] and saw index-1's 0 never processes → fixed to `<=`. THIS IS HIS DOCUMENTED BINARY-SEARCH BOUNDARY WEAKNESS, self-corrected by tracing the edge case = real healing. Code self-scan bugs caught: len(n)→len(nums); `if mid==2`→`elif nums[mid]==2` (index vs VALUE); three separate ifs→if/elif/else chain (the 1-case was falling through into the else swap); missing colon on else. Pedagogy note: hit a hard 'don't understand a single thing' wall on the mid-stays subtlety → recovered fully via dead-simple two-box [2,1] reframe, then derived the rest himself. Archive + HTML + Pattern-Recognition entry generated by leetcode-archivist."
     }
   ],
   "recall_needed": [
@@ -838,6 +881,22 @@
       "redo_date": "2026-05-06",
       "pattern": "two_pointers",
       "notes": "78 min session (target 25 min). 3-level duplicate handling not clean from memory. Blueprint phase skipped."
+    },
+    {
+      "title": "Time Based Key-Value Store (#981)",
+      "redo_date": "2026-06-02",
+      "pattern": "binary_search",
+      "critical": true,
+      "confidence": "1/5",
+      "notes": "CRITICAL. Boundary search (rightmost ts <= t). Hit the floor-mid + left=mid INFINITE LOOP (his #1 weakness). Re-observe binary search BOUNDARY pattern very carefully on redo. Practice BOTH templates (ceil-mid and bisect left=mid+1)."
+    },
+    {
+      "title": "Accounts Merge (#721)",
+      "redo_date": "2026-06-03",
+      "pattern": "dfs",
+      "critical": true,
+      "confidence": "1/5",
+      "notes": "CRITICAL (Wiganz's own call). Connected components — FIRST raw-graph build. Solved only with heavy Teaching-Mode guidance; cannot reproduce solo yet. REDO targets: (1) build adjacency list from raw input cold, undirected = BOTH directions; (2) the recurring 'def dfs never called' Blueprint-skip bug (LCA #236 wound); (3) 'for email in emails' (no slice) so emails[0] gets a name + single-email accounts survive; (4) complexity O(N log N)/O(N) + why sort O(k log k). Archive + HTML ready in folder."
     }
   ],
   "patterns_mastery": {
@@ -889,9 +948,9 @@
     "two_pointers": {
       "name": "Two Pointers",
       "status": "mastered",
-      "problems_solved": 10,
+      "problems_solved": 11,
       "problems_target": 10,
-      "last_practiced": "2026-04-23",
+      "last_practiced": "2026-06-04",
       "problems": [
         "Valid Palindrome",
         "Longest Substring WRC",
@@ -902,13 +961,16 @@
         "Remove Duplicate Numbers",
         "Squaring a Sorted Array",
         "Tripplet Sum to Zero",
-        "Longest Palindrome"
+        "Longest Palindrome",
+        "Sort Colors (#75 — Dutch National Flag, 3-pointer partition, derived from scratch)"
       ],
-      "notes": "STRONGEST pattern. 10 problems. Both sorted and string problems covered.",
+      "notes": "STRONGEST pattern. 11 problems. Both sorted and string problems covered. Sort Colors extends to the 3-POINTER (Dutch National Flag) partition variant — left/mid/right, in-place swaps, one pass.",
       "weak_areas": [],
       "aha_moments": [
         "Two ends moving inward for sorted arrays",
-        "Trigger-based pointer for distance problems"
+        "Trigger-based pointer for distance problems",
+        "Dutch National Flag (Sort Colors): 3 pointers carve 3 regions [0s | unknown | 2s]. mid scans. 0→swap left, advance both. 1→advance mid. 2→swap right, right--, MID STAYS. The asymmetry: a 2-swap pulls an UNCHECKED value from the unexplored right (so mid stays to inspect it); a 0-swap pulls an ALREADY-SCANNED value from behind mid (so mid advances). Loop while mid <= right — `<` strands the final element ([1,0] test proves it).",
+        "Counting sort when value-set is tiny ({0,1,2}): count in one pass, then a single write-index marches and paints values in chosen order — order is forced by WRITING 0s first, not by dict iteration. O(n)/O(1)."
       ]
     },
     "prefix_sum": {
@@ -933,22 +995,32 @@
     "binary_search": {
       "name": "Binary Search",
       "status": "competent",
-      "problems_solved": 4,
+      "problems_solved": 5,
       "problems_target": 10,
-      "last_practiced": "2026-01-17",
+      "last_practiced": "2026-06-02",
       "problems": [
         "Binary Search (recall)",
         "Search In Rotated Array (recall)",
         "Find Peak (recall)",
-        "First Bad Version"
+        "First Bad Version",
+        "Time Based Key-Value Store (#981 — CRITICAL, confidence 1/5, REDO)"
       ],
-      "notes": "⚠️ 3 of 4 problems have RECALL dates. Conceptually understood but needs reinforcement. Signal: sorted input, halving search space.",
+      "notes": "⚠️ 3 of 4 older problems have RECALL dates + Time-Based KV (#981) flagged CRITICAL/REDO. BOUNDARY search is the documented weak spot — drill it. Signal: sorted/monotonic input, eliminate half on middle-vs-target comparison.",
       "weak_areas": [
         "rotated arrays",
-        "finding left/right boundary",
-        "condition for shrinking"
+        "finding left/right boundary (CRITICAL — see Time-Based KV #981)",
+        "condition for shrinking",
+        "floor vs ceil mid choice — caused infinite loop in Time-Based KV. RULE: the pointer that assigns `= mid` (no ±1) is the only one that can freeze. `left = mid` + floor mid stalls → use CEIL mid (l+r+1)//2. `right = mid` + floor mid is safe (First Bad/Find Peak).",
+        "right = len vs len-1 in bisect template (boundaries-between-elements vs index)"
       ],
-      "aha_moments": []
+      "aha_moments": [
+        "floor mid (l+r)//2 always rounds DOWN toward left → mid lives on left's side. With `left = mid` and adjacent pointers, left = mid = left → no movement → INFINITE LOOP.",
+        "Fix 1: CEIL mid (l+r+1)//2 pushes mid toward right so `left = mid` advances. Fix 2 (preferred): use bisect template left=mid+1 / right=mid with floor mid — both branches always shrink, never loops.",
+        "Two mirror templates: `left=mid` (ceil, answer at values[left]) vs `left=mid+1` (floor, answer at values[left-1]).",
+        "Bisect template: left ends = COUNT of elements <= t = first index where ts > t. left==0 → none valid → ''. right=len (not len-1) because left/right are boundaries between elements (0..len); only values[mid] is ever read and mid < right ≤ len so always in-bounds.",
+        "left==0 guard also blocks Python values[-1] silent wrap-around.",
+        "Why First Bad/Find Peak never worry about infinite loop: they use `right = mid` (safe with floor), not `left = mid`."
+      ]
     },
     "fast_slow": {
       "name": "Fast & Slow Pointers",
@@ -1040,9 +1112,9 @@
     "dfs": {
       "name": "Depth-First Search (DFS)",
       "status": "competent",
-      "problems_solved": 8,
+      "problems_solved": 9,
       "problems_target": 10,
-      "last_practiced": "2026-05-28",
+      "last_practiced": "2026-06-03",
       "problems": [
         "Lowest Common Ancestor (#28) [redone 2026-05-28]",
         "Maximum Depth of Binary Tree (#29)",
@@ -1051,7 +1123,8 @@
         "LCA of BST (Week5)",
         "Diameter of Binary Tree (Week6)",
         "Clone Graph (#133, Week7)",
-        "Validate Binary Search Tree (#98, Week8)"
+        "Validate Binary Search Tree (#98, Week8)",
+        "Accounts Merge (#721, Week9 — connected components, first raw-graph build)"
       ],
       "notes": "Tree DFS very solid. Clone Graph = first GRAPH DFS. Validate BST = bounds propagation sub-technique: pass (min_val, max_val) down each call, tighten at each step. Key insight: Space is O(h) not O(n) — call stack depth = path length = tree height. 2026-05-28: LCA #236 redone via First Principles — bubble-up mechanism is signal-agnostic (Case 2 / 4 / 5 all look identical to parent, single combine rule covers all). Two impl bugs left unfixed: 'root = current' typo, and missing 'return dfs(root)' — both caused by Blueprint phase skip.",
       "weak_areas": [
@@ -1069,8 +1142,13 @@
         "Clone Graph: hashmap[node] = clone BEFORE for-loop — this is what prevents infinite cycles.",
         "hashmap[node] in the if-branch append refers to CURRENT stack frame's node, not the neighbor. Classic confusion point.",
         "Deep copy = every node is a new object independent of original. Shallow copy = neighbors still point to original nodes.",
-        "LCA #236 — Bubble-up is signal-agnostic. Parent sees 'non-None or None', not 'target vs LCA vs relay'. One combine rule (both non-None → I'm the LCA, else bubble) covers Case 2 (self-match), Case 4 (one-side bubble), Case 5 (LCA born). Wiganz's words: 'À nó buble lên giống như cách nó bubble một candidate LCA (như 2) lên á hả?'"
-      ]
+        "LCA #236 — Bubble-up is signal-agnostic. Parent sees 'non-None or None', not 'target vs LCA vs relay'. One combine rule (both non-None → I'm the LCA, else bubble) covers Case 2 (self-match), Case 4 (one-side bubble), Case 5 (LCA born). Wiganz's words: 'À nó buble lên giống như cách nó bubble một candidate LCA (như 2) lên á hả?'",
+        "Accounts Merge #721 — TWO dfs styles, fix differs: (A) MUTATION (answer in outer var) → just CALL dfs(x), no return; (B) RETURN-VALUE (answer is the return, e.g. LCA) → must write 'return dfs(x)'. Self-check after 'def dfs': pressed the run button? wired the result out?",
+        "Accounts Merge — Undirected graph = add BOTH directions: adj[a].add(b) AND adj[b].add(a). Symmetric relation ('share an account') → 2-way edge. (Course Schedule = directed, 1-way, for contrast.)",
+        "Accounts Merge — visited guard means each node is dfs'd exactly ONCE → N total calls = O(N) work. Recursion DEPTH (space) = longest chain = O(N) worst case. Depth (space) ≠ total calls (time) — easy to conflate.",
+        "Sort cost O(k log k) derived to the root via merge-sort: log k = number of times you halve k until 1 (the # of levels); k = work to merge all elements at each level; multiply → k log k. log₂(8)=3 because 8→4→2→1 is 3 halvings."
+      ],
+      "weak_area_active": "Blueprint-skip 'missing dfs kickoff' bug (LCA #236) RE-APPEARED in Accounts Merge ('def dfs' never called). Accounts Merge logged CRITICAL/1-5/REDO by Wiganz — cannot reproduce solo yet. Re-drill the dfs-kickoff reflex AND the raw adjacency-list build on the redo."
     },
     "stacks": {
       "name": "Stacks",
@@ -1248,28 +1326,29 @@
     }
   },
   "overall_stats": {
-    "total_unique_problems": 73,
-    "total_problem_sessions": 93,
-    "counting_note": "72 previous + Combination Sum (#39, 2026-05-25) = 73 unique.",
+    "total_unique_problems": 77,
+    "total_problem_sessions": 95,
+    "counting_note": "76 previous + Sort Colors (#75, 2026-06-04) = 77 unique.",
     "total_problems_target": 120,
-    "completion_percentage_unique": 60.8,
+    "completion_percentage_unique": 64.2,
     "difficulty_breakdown": {
       "easy": 36,
-      "medium": 34,
+      "medium": 36,
       "hard": 1,
-      "note": "+1 medium: Rotting Oranges (#994)"
+      "note": "+1 medium: Sort Colors (#75)"
     },
     "patterns_mastered": 4,
     "patterns_competent": 15,
     "patterns_beginner": 1,
-    "current_roadmap_week": 8,
+    "current_roadmap_week": 9,
+    "week9_status": "Time-Based KV (#981) ⚠️ [CRITICAL, 1/5, REDO] | Accounts Merge (#721) ⚠️ [CRITICAL, 1/5, REDO] | Sort Colors (#75) ✅ [both approaches derived; Dutch National Flag built from scratch; self-caught <= boundary]",
     "week8_status": "Validate BST (#98) ✅ | Number of Islands (#200) ✅ | Rotting Oranges (#994) ✅",
     "week7_note": "3Sum flagged for redo. Clone Graph = first Graph DFS. Course Schedule = first Topological Sort. Coin Change = 2nd DP problem.",
     "start_date": "2024-12-17",
-    "last_active": "2026-05-22",
-    "milestone_note": "70 milestone HIT 🔥 — 58.3% to 120-problem target.",
-    "total_problems_solved": 74,
-    "last_session_date": "2026-05-26"
+    "last_active": "2026-06-04",
+    "milestone_note": "77 unique 🔥 — 64.2% to 120-problem target. Sort Colors = derived BOTH counting sort AND the Dutch National Flag one-pass from First Principles via lifelines; self-caught the <= vs < boundary (old binary-search wound healing).",
+    "total_problems_solved": 77,
+    "last_session_date": "2026-06-04"
   },
   "weak_areas_meta": {
     "recall_issues": "8 problems need recall — binary_search (3), fast_slow (2), merge_intervals (2), sliding_window (1)",

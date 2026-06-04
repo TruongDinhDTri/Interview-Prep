@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sort Colors — Dutch National Flag · A Ghibli Walk</title>
+<style>
+  :root{
+    --sky:#dceef0; --sky2:#eef6ef; --cream:#fbf6ea; --ink:#4a4338;
+    --soft:#7a6f5d; --line:#e3d9c4;
+    --red:#e6736a; --redd:#c9544b;
+    --white:#fcfaf3; --whitee:#e9e2cd;
+    --blue:#6fa6c6; --bluee:#4d85a8;
+    --leaf:#88a86b; --gold:#d8a657; --rose:#caa6b0;
+    --shadow:0 10px 28px rgba(90,78,55,.18);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:'Inter',-apple-system,Segoe UI,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(1200px 500px at 15% -10%, #fff7e6 0%, transparent 60%),
+      radial-gradient(1000px 600px at 110% 10%, #e7f1ec 0%, transparent 55%),
+      linear-gradient(180deg, var(--sky) 0%, var(--sky2) 35%, var(--cream) 100%);
+    min-height:100vh; padding:0 0 4rem;
+  }
+  .wrap{max-width:1040px; margin:0 auto; padding:0 1.4rem}
+  header{text-align:center; padding:2.6rem 1rem 1.4rem}
+  h1{font-family:'Cormorant Garamond',Georgia,serif; font-weight:600; font-size:2.7rem; margin:.2rem 0; letter-spacing:.5px}
+  .sub{color:var(--soft); font-size:1.02rem; max-width:680px; margin:.4rem auto 0; line-height:1.6}
+  .clouds{font-size:1.3rem; letter-spacing:.5rem; opacity:.7}
+
+  .card{
+    background:rgba(255,253,247,.85); border:1px solid var(--line); border-radius:22px;
+    box-shadow:var(--shadow); padding:1.6rem 1.6rem 1.8rem; margin:1.4rem 0; backdrop-filter:blur(4px);
+  }
+  h2{font-family:'Cormorant Garamond',Georgia,serif; font-size:1.7rem; margin:.1rem 0 .8rem; font-weight:600}
+
+  /* regions banner */
+  .regions{display:grid; grid-template-columns:1fr 1fr 1fr; gap:.5rem; margin:.4rem 0 1.1rem}
+  .reg{border-radius:14px; padding:.55rem .6rem; text-align:center; font-size:.82rem; font-weight:600; border:1px dashed transparent}
+  .reg small{display:block; font-weight:400; opacity:.7; font-size:.72rem; margin-top:.15rem}
+  .reg.r0{background:#fbe7e3; color:var(--redd); border-color:#ecb7af}
+  .reg.ru{background:#f4eedd; color:var(--soft); border-color:#e0d3ad}
+  .reg.r2{background:#e3eef4; color:var(--bluee); border-color:#aecadb}
+
+  /* array */
+  .array{display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap; margin:1.4rem 0 .6rem; min-height:96px}
+  .cell{
+    width:74px; height:74px; border-radius:18px; display:flex; align-items:center; justify-content:center;
+    font-size:1.7rem; font-weight:700; color:#fff; position:relative;
+    box-shadow:0 6px 14px rgba(90,78,55,.18); transition:transform .45s cubic-bezier(.5,1.6,.4,1), box-shadow .3s, filter .3s;
+  }
+  .cell.v0{background:linear-gradient(160deg,var(--red),var(--redd))}
+  .cell.v1{background:linear-gradient(160deg,var(--white),var(--whitee)); color:#8a8164; border:1px solid #e6dcc3}
+  .cell.v2{background:linear-gradient(160deg,var(--blue),var(--bluee))}
+  .cell.swap{transform:translateY(-14px) scale(1.08); box-shadow:0 16px 28px rgba(90,78,55,.3); filter:saturate(1.2)}
+  .cell.locked::after{content:"✓"; position:absolute; top:-9px; right:-9px; width:22px; height:22px; border-radius:50%;
+    background:var(--leaf); color:#fff; font-size:.8rem; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 6px rgba(0,0,0,.2)}
+  .cell.dim{opacity:.42; filter:grayscale(.3)}
+
+  /* pointers */
+  .ptrrow{display:flex; gap:.7rem; justify-content:center; flex-wrap:wrap; margin-bottom:.2rem}
+  .pslot{width:74px; display:flex; flex-direction:column; align-items:center; gap:2px; height:46px}
+  .tag{font-size:.7rem; font-weight:700; padding:1px 8px; border-radius:8px; color:#fff; opacity:0; transform:translateY(-4px); transition:.35s}
+  .tag.show{opacity:1; transform:translateY(0)}
+  .tag.left{background:var(--redd)}
+  .tag.mid{background:var(--gold)}
+  .tag.right{background:var(--bluee)}
+  .tag.mr{background:var(--rose)} /* mid+right together */
+
+  /* narration */
+  .stage{display:flex; align-items:center; gap:.8rem; margin-top:1rem; min-height:70px}
+  .lantern{font-size:1.8rem; filter:drop-shadow(0 3px 5px rgba(216,166,87,.5))}
+  .say{flex:1; background:#fff8e8; border:1px solid #ecdcb4; border-radius:16px; padding:.7rem 1rem; font-size:.98rem; line-height:1.5}
+  .say b{color:var(--redd)}
+  .say .stay{color:var(--bluee); font-weight:700}
+  .say .go{color:var(--leaf); font-weight:700}
+
+  .ctrls{display:flex; gap:.6rem; justify-content:center; align-items:center; flex-wrap:wrap; margin-top:1.2rem}
+  button{
+    font-family:inherit; font-size:.95rem; font-weight:600; border:none; cursor:pointer;
+    padding:.65rem 1.4rem; border-radius:14px; color:#fff; background:linear-gradient(160deg,var(--leaf),#6f8e54);
+    box-shadow:0 6px 14px rgba(120,150,90,.35); transition:transform .15s, filter .2s;
+  }
+  button:hover{transform:translateY(-2px)}
+  button:disabled{filter:grayscale(.6) brightness(1.05); cursor:default; transform:none; box-shadow:none}
+  button.ghost{background:linear-gradient(160deg,#bfae8e,#a8966f); box-shadow:0 6px 14px rgba(150,130,90,.3)}
+  .step-count{color:var(--soft); font-size:.86rem}
+
+  .why{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:.4rem}
+  @media(max-width:760px){.why{grid-template-columns:1fr}}
+  .panel{border-radius:16px; padding:1rem 1.1rem; font-size:.92rem; line-height:1.55}
+  .panel h3{margin:.1rem 0 .5rem; font-size:1.05rem}
+  .panel.go-p{background:#eef5e6; border:1px solid #cfe0bd}
+  .panel.stay-p{background:#e6eff5; border:1px solid #bcd5e3}
+  .panel .key{font-weight:700}
+  .panel.go-p .key{color:#5f8043}
+  .panel.stay-p .key{color:var(--bluee)}
+
+  code{background:#f3ecda; padding:1px 7px; border-radius:6px; font-size:.86rem; color:#7a5d3a}
+
+  /* counting sort contrast */
+  details{margin-top:.4rem}
+  summary{cursor:pointer; font-weight:600; color:var(--soft); padding:.4rem 0}
+  pre{background:#2e2a22; color:#f3ecda; border-radius:14px; padding:1rem 1.2rem; overflow:auto; font-size:.84rem; line-height:1.55}
+  pre .cm{color:#9c9683} pre .kw{color:#d8a657} pre .st{color:#88a86b}
+  .legend{display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap; margin-top:.6rem; font-size:.84rem; color:var(--soft)}
+  .swatch{display:inline-block; width:14px; height:14px; border-radius:4px; vertical-align:-2px; margin-right:5px}
+  footer{text-align:center; color:var(--soft); font-size:.85rem; margin-top:2rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="clouds">☁︎   ☁︎   ☁︎</div>
+  <h1>Sort Colors · The Dutch Flag Walk</h1>
+  <p class="sub">A single scanner sweeps a meadow of reds, whites &amp; blues — sorting them in one pass.
+  Watch <b>why the scanner STAYS on a blue</b> but <b>STRIDES on a red</b>. LeetCode #75.</p>
+</header>
+
+<div class="wrap">
+
+  <div class="card">
+    <h2>🚩 The three regions forming</h2>
+    <div class="regions">
+      <div class="reg r0">RED zone (0s)<small>left of <code>left</code> — sorted</small></div>
+      <div class="reg ru">UNKNOWN<small><code>mid</code> sweeps here</small></div>
+      <div class="reg r2">BLUE zone (2s)<small>right of <code>right</code> — sorted</small></div>
+    </div>
+
+    <div id="ptrs" class="ptrrow"></div>
+    <div id="array" class="array"></div>
+
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--red)"></span>0 = red</span>
+      <span><span class="swatch" style="background:var(--whitee);border:1px solid #d8cdae"></span>1 = white</span>
+      <span><span class="swatch" style="background:var(--blue)"></span>2 = blue</span>
+      <span><span class="swatch" style="background:var(--leaf)"></span>✓ locked / sorted</span>
+    </div>
+
+    <div class="stage">
+      <div class="lantern">🏮</div>
+      <div id="say" class="say">Press <b>Step</b> to begin the walk through <code>[2,0,2,1,1,0]</code>.</div>
+    </div>
+
+    <div class="ctrls">
+      <button id="step">Step ▸</button>
+      <button id="auto" class="ghost">▶ Auto-play</button>
+      <button id="reset" class="ghost">↺ Reset</button>
+      <span id="counter" class="step-count"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🍃 The asymmetry — the whole secret</h2>
+    <div class="why">
+      <div class="panel go-p">
+        <h3>🔴 Hit a 0 → swap with <code>left</code></h3>
+        The value pulled under <code>mid</code> comes from <span class="key">BEHIND</span> — territory the scanner already walked (all whites). It's <span class="key">already checked</span>.
+        <br>→ <span class="key">mid STRIDES forward</span> (<code>mid++</code>), and <code>left++</code>.
+      </div>
+      <div class="panel stay-p">
+        <h3>🔵 Hit a 2 → swap with <code>right</code></h3>
+        The value pulled under <code>mid</code> comes from the <span class="key">UNEXPLORED right zone</span> — the scanner has <span class="key">never seen it</span>.
+        <br>→ <span class="key">mid STAYS PUT</span> to re-examine the newcomer; only <code>right--</code>.
+      </div>
+    </div>
+    <p style="margin:.9rem 0 0; color:var(--soft); font-size:.92rem">
+      White (1)? It already belongs in the middle — just step over it: <code>mid++</code>.
+      Loop runs <code>while mid &lt;= right</code> — the <code>=</code> is what processes the very last slot (test <code>[1,0]</code> to see why <code>&lt;</code> fails!).
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>🪣 Contrast — the two-pass Counting Sort</h2>
+    <p style="color:var(--soft); margin:.1rem 0 .6rem; font-size:.94rem">
+      When the value-set is tiny, skip swapping entirely: <b>tally</b> the counts, then <b>paint</b> the array back in the order YOU choose.
+      Sorted order comes from your write-order, not from the dict.</p>
+    <details open>
+      <summary>show counting-sort code</summary>
+<pre><span class="cm"># Pass 1: tally. Pass 2: paint with ONE shared cursor.</span>
+<span class="kw">from</span> collections <span class="kw">import</span> Counter
+<span class="kw">def</span> sortColors(nums):
+    c = Counter(nums)
+    i = <span class="st">0</span>
+    <span class="kw">for</span> v <span class="kw">in</span> (<span class="st">0</span>, <span class="st">1</span>, <span class="st">2</span>):        <span class="cm"># WE choose the order</span>
+        <span class="kw">for</span> _ <span class="kw">in</span> range(c[v]):
+            nums[i] = v
+            i += <span class="st">1</span>              <span class="cm"># one cursor marching — never reset</span></pre>
+    </details>
+  </div>
+
+  <footer>🔥 Hadriel × Wiganz — 2026-06-04 · "Be strong and courageous." — Joshua 1:9</footer>
+</div>
+
+<script>
+const START = [2,0,2,1,1,0];
+
+// Build the full list of frames by simulating Dutch Flag.
+function buildFrames(startArr){
+  const a = startArr.slice();
+  let left=0, mid=0, right=a.length-1;
+  const frames=[];
+  const snap = (msg, action) => frames.push({
+    arr:a.slice(), left, mid, right, msg, action:action||null
+  });
+  snap(`Start. <b>left</b>=0, <b>mid</b>=0, <b>right</b>=${right}. The whole array is UNKNOWN.`);
+  while(mid<=right){
+    if(a[mid]===1){
+      snap(`<code>nums[mid]=1</code> (white) — already home in the middle. Step over it: <span class="go">mid → ${mid+1}</span>.`, {type:'step1'});
+      mid++;
+    } else if(a[mid]===2){
+      const tmp=a[mid]; a[mid]=a[right]; a[right]=tmp;
+      snap(`<code>nums[mid]=2</code> (blue) — swap with <b>right</b>(${right}). Newcomer came from the <span class="stay">unexplored right</span> → <span class="stay">mid STAYS</span>, right → ${right-1}.`, {type:'swap2', i:mid, j:right});
+      right--;
+    } else {
+      const tmp=a[mid]; a[mid]=a[left]; a[left]=tmp;
+      snap(`<code>nums[mid]=0</code> (red) — swap with <b>left</b>(${left}). Newcomer is <span class="go">already scanned</span> → <span class="go">mid STRIDES</span>: left → ${left+1}, mid → ${mid+1}.`, {type:'swap0', i:mid, j:left});
+      left++; mid++;
+    }
+  }
+  snap(`<b>mid (${mid}) &gt; right (${right})</b> → STOP. Meadow sorted: all reds, then whites, then blues. ✅`, {type:'done'});
+  return frames;
+}
+
+let frames = buildFrames(START);
+let idx = 0;
+let autoTimer = null;
+
+const $array = document.getElementById('array');
+const $ptrs  = document.getElementById('ptrs');
+const $say   = document.getElementById('say');
+const $counter = document.getElementById('counter');
+const $step = document.getElementById('step');
+const $auto = document.getElementById('auto');
+const $reset = document.getElementById('reset');
+
+function render(prevArr){
+  const f = frames[idx];
+  $array.innerHTML='';
+  $ptrs.innerHTML='';
+  f.arr.forEach((v,i)=>{
+    const c=document.createElement('div');
+    c.className=`cell v${v}`;
+    c.textContent=v;
+    // locked = left of `left` (red zone) OR right of `right` (blue zone)
+    const sortedLeft = i < f.left;
+    const sortedRight = i > f.right;
+    if(sortedLeft||sortedRight) c.classList.add('locked');
+    if(i>f.right && f.action && f.action.type!=='done') c.classList.add('dim'); // blue zone settled but visually quieter
+    // highlight swap participants
+    if(f.action && (f.action.type==='swap0'||f.action.type==='swap2')){
+      if(i===f.action.i||i===f.action.j) c.classList.add('swap');
+    }
+    $array.appendChild(c);
+
+    // pointer tags
+    const slot=document.createElement('div');
+    slot.className='pslot';
+    const tags=[];
+    if(i===f.left) tags.push(['left','L']);
+    if(i===f.mid && i===f.right) tags.push(['mr','M·R']);
+    else { if(i===f.mid) tags.push(['mid','M']); if(i===f.right) tags.push(['right','R']); }
+    if(tags.length){
+      tags.forEach(([cls,txt])=>{
+        const t=document.createElement('div');
+        t.className=`tag ${cls} show`;
+        t.textContent=txt;
+        slot.appendChild(t);
+      });
+    }
+    $ptrs.appendChild(slot);
+  });
+  $say.innerHTML=f.msg;
+  $counter.textContent=`step ${idx} / ${frames.length-1}`;
+  $step.disabled = (idx>=frames.length-1);
+  if(idx>=frames.length-1) stopAuto();
+}
+
+function next(){
+  if(idx<frames.length-1){ idx++; render(); }
+}
+function reset(){
+  stopAuto(); idx=0; render();
+}
+function stopAuto(){
+  if(autoTimer){clearInterval(autoTimer); autoTimer=null; $auto.textContent='▶ Auto-play';}
+}
+function toggleAuto(){
+  if(autoTimer){stopAuto(); return;}
+  if(idx>=frames.length-1) idx=0;
+  $auto.textContent='⏸ Pause';
+  autoTimer=setInterval(()=>{ if(idx>=frames.length-1){stopAuto();return;} next(); }, 1500);
+  next();
+}
+
+$step.addEventListener('click', next);
+$auto.addEventListener('click', toggleAuto);
+$reset.addEventListener('click', reset);
+
+render();
+</script>
+</body>
+</html>

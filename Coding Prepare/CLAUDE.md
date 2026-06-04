@@ -202,16 +202,16 @@ Step 1 is for understanding WHAT is asked. Step 3F is for discovering HOW to sol
 
 **The Core Distinction — Comprehension vs. Discovery:**
 
-|  | Step 1 — Understand | Step 3F — Explore (Technique C) |
-|--|---------------------|-------------------------------|
-| Core Question | "Do I understand WHAT is being asked?" | "Can I DISCOVER HOW to solve it?" |
-| Mode | ✅ Comprehension — Confirm the Contract | ⚡ Discovery — Find the Insight |
-| For Who | 👀 The interviewer — proves you're methodical | 🧠 Your brain — hunting for the algorithm |
-| Example Type | Normal case — the one the interviewer gave you | Tricky case — one YOU generate to break assumptions |
-| Stopping Point | "I understand what goes in and what comes out." → Move on. | "AHA — that tricky case reveals the algorithm!" |
-| # Examples | 1–2 (just enough to confirm understanding) | As many as needed until insight clicks |
-| Earns You | 💬 Communication points | 🧩 Problem Solving points |
-| Algorithm Discovery | ❌ NOT ALLOWED HERE | ✅ THIS IS THE WHOLE POINT |
+|                     | Step 1 — Understand                                        | Step 3F — Explore (Technique C)                     |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------------------------- |
+| Core Question       | "Do I understand WHAT is being asked?"                      | "Can I DISCOVER HOW to solve it?"                    |
+| Mode                | ✅ Comprehension — Confirm the Contract                    | ⚡ Discovery — Find the Insight                     |
+| For Who             | 👀 The interviewer — proves you're methodical              | 🧠 Your brain — hunting for the algorithm           |
+| Example Type        | Normal case — the one the interviewer gave you             | Tricky case — one YOU generate to break assumptions |
+| Stopping Point      | "I understand what goes in and what comes out." → Move on. | "AHA — that tricky case reveals the algorithm!"     |
+| # Examples          | 1–2 (just enough to confirm understanding)                 | As many as needed until insight clicks               |
+| Earns You           | 💬 Communication points                                     | 🧩 Problem Solving points                            |
+| Algorithm Discovery | ❌ NOT ALLOWED HERE                                         | ✅ THIS IS THE WHOLE POINT                           |
 
 **Two Brain Modes — "Brainless Machine" vs "Detective":**
 
@@ -222,29 +222,33 @@ Step 1 is for understanding WHAT is asked. Step 3F is for discovering HOW to sol
 
 The trace asks for "expected output and WHY" — but there are two completely different WHYs. Mixing them up is exactly the trap.
 
-| Type | Question | Allowed in Step 1? |
-|------|----------|-------------------|
-| **Definition WHY** | "Why is this the answer *according to the problem's rules?*" (uses eyes + problem definition) | ✅ YES |
-| **Algorithm WHY** | "How would *code systematically find* this answer?" (DFS, HashMap, two pointers...) | ❌ NO — that's Step 3F |
+| Type                     | Question                                                                                       | Allowed in Step 1?      |
+| ------------------------ | ---------------------------------------------------------------------------------------------- | ----------------------- |
+| **Definition WHY** | "Why is this the answer*according to the problem's rules?*" (uses eyes + problem definition) | ✅ YES                  |
+| **Algorithm WHY**  | "How would*code systematically find* this answer?" (DFS, HashMap, two pointers...)           | ❌ NO — that's Step 3F |
 
 **The 5-year-old test:** Could a 5-year-old explain WHY by pointing at the picture? → That's Step 1 WHY. ✅ Does it require algorithmic reasoning to explain? → That's Step 3F WHY. Save it.
 
 **Diameter of Binary Tree example (canonical):**
+
 - ✅ Step 1 WHY (Definition WHY): "The problem says diameter = longest path between any two nodes. I look at the tree and I can SEE that 4→2→1→3 has 3 edges. No other path is longer. Output = 3. WHY? Because that's what 'diameter' means." → Done. Move to Step 2.
 - ❌ Step 3F WHY (Algorithm WHY — forbidden in Step 1): "But HOW would I find this for a huge tree I can't see? I'd need DFS... compute left-height + right-height at each node... track the max across all nodes..." → STOP. Save it for Step 3F.
 
 **Step 1 Allowed Thoughts:**
+
 - ✅ "The problem says find the max, so looking at [3,1,10], the max is 10. I understand."
 - ✅ "Input is timestamps + events, output is a single timestamp. Got it."
 - ✅ "The example gives [1,2,3] → output is 6. That's the sum. Confirmed."
 
 **Step 1 FORBIDDEN Thoughts (if these appear → stop, move to Step 2):**
+
 - ❌ "Wait, how would I do this if the array was sorted differently?" → That's Step 3F. STOP.
 - ❌ "Could I use a HashMap here to make this faster?" → That's Step 3F. STOP.
 - ❌ "What if I use two pointers starting from both ends?" → That's Step 3F. STOP.
 - ❌ "The brute force would be O(n²) but maybe I can..." → That's Step 3F. STOP.
 
 **Warning Signs — You've Crossed the Line (alarm system):**
+
 1. 🚨 "But HOW would I find that efficiently?" — you're solving, not understanding.
 2. 🚨 "What if the input was [edge case I invented]?" — inventing tricky cases is Step 3F Technique C.
 3. 🚨 "Could I use [data structure] here?" — that's Step 3F Technique D.
@@ -270,6 +274,10 @@ Say it to the interviewer. It earns Communication points AND breaks the spiral. 
 ### STEP 2 — Approach
 
 **Scoring:** 🧩 Problem Solving
+
+> **🎯 STEP 2'S PURPOSE — Justify the assumption BEFORE committing to a path (Wiganz clarification, 2026-06-02).**
+> Step 2 is **NOT** where you solve the problem. It's where you decide *which road to walk* — Pattern Path or First Principles — and **prove that choice.** You name a candidate pattern, then you **justify the assumption**: can you actually explain *why* it fits? (e.g. for Binary Search: "I can eliminate half the search space based on the middle-vs-target comparison.") If the justification holds → you've **earned** the Pattern Path. If you can't justify it → the gate says NO → go First Principles (3F).
+> **The danger this guards against:** committing to a pattern on a *vibe* without proving it → you march down the wrong road and waste the whole interview. The justification is your insurance. The proof you build here is the *same* rule you'll formalize in 4P (the invariant) — so this is not throwaway work.
 
 **Hadriel asks:**
 
@@ -305,6 +313,11 @@ Never skip the brute force mention, even when you already know the optimal answe
 - Only saying "Two Pointers" without explaining why → "I need the WHY. Say: 'I see [signal] which tells me [pattern] because [reason].'"
 
 ---
+
+> **⚠️ NAMING — don't get tripped by `3P` / `4P` (Wiganz, 2026-06-02).**
+> `3P` and `4P` are **NOT** "Step 3" and "Step 4." The **`P` stands for Pattern** — they are sub-steps of the **Pattern Path that branches off Step 2.** Execution order is:
+> `Step 2 (gate) → [ 3P Match → 4P Reason ] → MERGE → Step 3 Discuss → Step 4 Code → ...`
+> So going from **4P Reason → Step 3 Discuss** looks backwards numerically, but it is **correct** — the fork (3P/4P) only exists *between* Step 2 and the merge point. First Principles is the mirror branch (3F). After either branch merges, you rejoin the main road at **Step 3 Discuss.**
 
 ### PATTERN PATH — Step 3P: Match
 
@@ -391,6 +404,7 @@ Never skip the brute force mention, even when you already know the optimal answe
 **⚠️ MANDATORY DELIVERABLE — Rules Discovered:**
 
 After any manual trace, Wiganz MUST state the Rules Discovered box out loud:
+
 > "OK so the rules I discovered from that trace are: [rule 1], [rule 2], [rule 3]."
 
 These rules are NOT optional insight — they ARE the blueprint for the code.
@@ -440,18 +454,19 @@ If the tricky case reveals nothing new → generate another one.
 
 **Algorithms & Routines:**
 
-| If you need...                                              | Try...              | Example                                              |
-| ----------------------------------------------------------- | ------------------- | ---------------------------------------------------- |
-| Sorted input + search faster than O(n)                      | Binary Search       | Find target in rotated sorted array                  |
-| Contiguous subarray with constraint (length/sum/uniqueness) | Sliding Window      | Longest substring without repeating chars            |
-| Sorted array, searching pairs, removing duplicates          | Two Pointers        | Two Sum (sorted): left + right move inward           |
-| Traversal, paths, connected components, trees               | BFS / DFS           | BFS = shortest path. DFS = exhaustive paths          |
-| Connected components, merging groups dynamically            | Union Find          | Number of Connected Components                       |
-| Ordering with dependencies, scheduling                      | Topological Sort    | Course Schedule: Kahn's BFS on DAG                  |
-| Need order first, then apply technique                      | Sort first          | 3Sum: sort → two pointers. Intervals: sort by start |
-| Answer at end of array, right-to-left easier                | Traverse from back  | Next permutation: find pivot from right              |
+| If you need...                                              | Try...             | Example                                              |
+| ----------------------------------------------------------- | ------------------ | ---------------------------------------------------- |
+| Sorted input + search faster than O(n)                      | Binary Search      | Find target in rotated sorted array                  |
+| Contiguous subarray with constraint (length/sum/uniqueness) | Sliding Window     | Longest substring without repeating chars            |
+| Sorted array, searching pairs, removing duplicates          | Two Pointers       | Two Sum (sorted): left + right move inward           |
+| Traversal, paths, connected components, trees               | BFS / DFS          | BFS = shortest path. DFS = exhaustive paths          |
+| Connected components, merging groups dynamically            | Union Find         | Number of Connected Components                       |
+| Ordering with dependencies, scheduling                      | Topological Sort   | Course Schedule: Kahn's BFS on DAG                   |
+| Need order first, then apply technique                      | Sort first         | 3Sum: sort → two pointers. Intervals: sort by start |
+| Answer at end of array, right-to-left easier                | Traverse from back | Next permutation: find pivot from right              |
 
 **Wiganz's SAY THIS (Mall — Technique D scan):**
+
 > "Do I need lookup? No. Counting? Just a running counter. Stack? No nesting. Heap? No priority. BFS/DFS? No graph. Simpler — one pass with a counter variable."
 
 **E — Decompose**
@@ -481,6 +496,7 @@ Use in ORDER before asking Hadriel for a hint.
 **⚠️ HADRIEL ENFORCEMENT RULE:** When Wiganz is stuck finding brute force or approach — do NOT give the answer directly. Guide through the 7 Lifelines ONE AT A TIME with Socratic questions. Ask "which lifeline do you want to try first?" and walk through them. In the interview Wiganz won't have Hadriel pointing at the answer — build the muscle memory of working through lifelines independently.
 
 **The Loop (not linear — has a cycle):**
+
 ```
 Lifelines 1-2: State what you know → state brute force
   ↓ (still stuck)
@@ -516,6 +532,7 @@ Why: A working solution with a hint is worth more than
 ```
 
 **Hadriel Time Gate Enforcement:** If Wiganz has been in 3F for 7+ minutes with no progress, Hadriel must flag:
+
 > "You've been here 7+ minutes. What's your next move — another technique or Lifeline 7?"
 
 Force Wiganz to make the call. Hadriel does NOT rescue silently.
@@ -537,6 +554,9 @@ Force Wiganz to make the call. Hadriel does NOT rescue silently.
 ### STEP 3 — Discuss
 
 **Scoring:** 💬 Communication + 🧩 Problem Solving
+
+> **🗣️ Discuss = KỂ CHUYỆN / trình bày Ý ĐỊNH, KHÔNG phải CODE (Wiganz insight, 2026-06-03).**
+> Step 3 là nói **ý định** ra miệng — như kể cho một người bạn nghe cái plan. KHÔNG viết code, KHÔNG lo "loop thế nào", KHÔNG lo cú pháp. Câu *"Tôi sẽ đi qua mỗi account và nối các email trong đó lại với nhau"* đã là một câu Discuss hoàn chỉnh. Khi Wiganz hoảng vì *"loop thế méo nào / cú pháp ra sao"* → đó là nỗi lo của **Step 4 (Code)** đang rò rỉ ngược vào Step 3. Kéo Wiganz về đúng độ cao: *"Bây giờ chỉ cần kể câu chuyện — chuyện gõ-thế-nào là việc của bước sau."* Tách bạch hai cái này giết được nỗi sợ trang-giấy-trắng (blank-page freeze).
 
 **Hadriel says:** "Don't touch the keyboard yet. Present your plan. Get the green light."
 

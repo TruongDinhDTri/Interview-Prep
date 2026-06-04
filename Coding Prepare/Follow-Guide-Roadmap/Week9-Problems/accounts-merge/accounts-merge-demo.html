@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accounts Merge — Gom Đảo Email 🏝️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Caveat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f1e7; --bg2:#fbf7ee; --ink:#4a4438; --ink2:#7a7263;
+    --sky:#bcd6d4; --sky-d:#7fa9a6; --leaf:#a7c4a0; --leaf-d:#6f9a78;
+    --sun:#f0c987; --sun-d:#dba85a; --rose:#e0a9a0; --rose-d:#c47e72;
+    --lav:#b7a8cf; --card:#fffdf8; --line:#e4dac6;
+    --shadow:0 6px 22px rgba(90,75,50,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:'Quicksand',sans-serif;background:
+      radial-gradient(1200px 500px at 80% -10%, #fbe6c9 0%, transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, #d7e7df 0%, transparent 55%),
+      var(--bg);
+    color:var(--ink);line-height:1.6;padding:24px 16px 60px;min-height:100vh;
+  }
+  .wrap{max-width:1080px;margin:0 auto}
+  header{text-align:center;margin-bottom:18px}
+  h1{font-size:2.1rem;font-weight:700;letter-spacing:-.01em}
+  h1 .em{font-family:'Caveat',cursive;color:var(--rose-d);font-size:2.4rem}
+  .sub{color:var(--ink2);font-size:1rem;margin-top:2px}
+  .phase-tag{display:inline-block;font-family:'Caveat',cursive;font-size:1.5rem;
+    color:var(--sky-d);background:var(--bg2);padding:2px 16px;border-radius:20px;
+    border:2px dashed var(--sky);margin:10px 0 4px}
+
+  .stage{display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:10px}
+  @media(max-width:840px){.stage{grid-template-columns:1fr}}
+
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:18px;
+    box-shadow:var(--shadow);padding:16px 18px}
+  .panel h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--ink2);margin-bottom:10px;font-weight:700}
+
+  /* graph */
+  .graph{position:relative;height:340px;background:
+    repeating-linear-gradient(0deg,transparent,transparent 26px,rgba(180,160,120,.06) 27px),
+    var(--bg2);border-radius:14px;overflow:hidden}
+  svg.edges{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+  .node{position:absolute;transform:translate(-50%,-50%);width:96px;text-align:center;
+    transition:all .45s cubic-bezier(.34,1.3,.5,1)}
+  .bubble{background:#fff;border:2.5px solid var(--line);border-radius:14px;
+    padding:7px 4px;font-size:.74rem;font-weight:600;color:var(--ink);
+    box-shadow:0 3px 8px rgba(90,75,50,.1);transition:all .4s}
+  .node.dim .bubble{opacity:.35;filter:grayscale(.4)}
+  .node.active .bubble{border-color:var(--sun-d);background:#fff6e3;
+    box-shadow:0 0 0 5px rgba(240,201,135,.4);transform:scale(1.08)}
+  .node.visited .bubble{border-color:var(--leaf-d);background:#e9f3e6}
+  .node .cap{font-family:'Caveat',cursive;font-size:1rem;color:var(--ink2);margin-top:2px}
+  .edge{stroke:var(--sky-d);stroke-width:3.5;stroke-linecap:round;opacity:0;
+    transition:opacity .5s;stroke-dasharray:6 7}
+  .edge.on{opacity:.85}
+  .edge.hot{stroke:var(--sun-d);opacity:1;stroke-width:4.5}
+
+  /* side structures */
+  .struct{margin-bottom:14px}
+  .kv{display:flex;gap:8px;align-items:flex-start;font-size:.82rem;margin:3px 0;
+    padding:5px 9px;background:var(--bg2);border-radius:9px;border:1px solid var(--line);
+    opacity:0;transform:translateY(4px);transition:all .4s}
+  .kv.show{opacity:1;transform:none}
+  .kv .k{font-weight:700;color:var(--sky-d);white-space:nowrap}
+  .kv .arr{color:var(--ink2)}
+  .kv.name .k{color:var(--rose-d)}
+  .chip{display:inline-block;background:#fff;border:1.5px solid var(--line);
+    border-radius:7px;padding:1px 7px;margin:2px 3px 0 0;font-size:.76rem;font-weight:600}
+  .chip.vis{background:#e9f3e6;border-color:var(--leaf-d);color:var(--leaf-d)}
+  .visited-box{min-height:30px}
+
+  /* output */
+  .outrow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin:6px 0;
+    padding:8px 10px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);
+    opacity:0;transform:scale(.96);transition:all .45s}
+  .outrow.show{opacity:1;transform:none}
+  .outrow .nm{font-weight:700;color:var(--rose-d);font-family:'Caveat',cursive;font-size:1.15rem}
+  .outrow .mail{background:#fff;border:1.5px solid var(--leaf);border-radius:7px;
+    padding:1px 8px;font-size:.74rem;font-weight:600}
+
+  /* narration + controls */
+  .narrate{background:linear-gradient(135deg,#fff8ea,#fdeee6);border:2px solid var(--sun);
+    border-radius:16px;padding:14px 18px;margin-top:16px;min-height:70px;
+    display:flex;gap:12px;align-items:center}
+  .narrate .ico{font-size:1.8rem;flex-shrink:0}
+  .narrate .txt{font-size:.96rem;color:var(--ink)}
+  .narrate .txt b{color:var(--rose-d)}
+  .controls{display:flex;gap:10px;justify-content:center;align-items:center;margin-top:16px;flex-wrap:wrap}
+  button{font-family:'Quicksand',sans-serif;font-weight:700;font-size:.92rem;
+    border:none;border-radius:12px;padding:11px 22px;cursor:pointer;transition:all .2s;
+    box-shadow:0 4px 0 rgba(0,0,0,.08)}
+  .btn-main{background:var(--leaf-d);color:#fff}
+  .btn-main:hover{transform:translateY(-2px)}
+  .btn-main:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.08)}
+  .btn-ghost{background:#fff;color:var(--ink2);border:1.5px solid var(--line);box-shadow:none}
+  .btn-ghost:hover{background:var(--bg2)}
+  .progress{display:flex;gap:6px;justify-content:center;margin-top:12px}
+  .dot{width:9px;height:9px;border-radius:50%;background:var(--line);transition:all .3s}
+  .dot.on{background:var(--sun-d);transform:scale(1.3)}
+  .dot.phase1{background:var(--sky-d)} .dot.phase2{background:var(--leaf-d)} .dot.phase3{background:var(--rose-d)}
+  .legend{text-align:center;font-size:.8rem;color:var(--ink2);margin-top:14px}
+  .legend span{margin:0 8px;white-space:nowrap}
+  .sw{display:inline-block;width:11px;height:11px;border-radius:4px;vertical-align:middle;margin-right:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Accounts Merge — <span class="em">Gom Đảo Email</span> 🏝️</h1>
+    <div class="sub">Cùng một muscle với <b>Number of Islands</b> — chỉ đổi lưới thành đồ thị · Hadriel × Wiganz 🔥</div>
+    <div class="phase-tag" id="phaseTag">Nhấn ▶ để bắt đầu</div>
+  </header>
+
+  <div class="stage">
+    <!-- LEFT: graph -->
+    <div class="panel">
+      <h3>🗺️ Bản đồ email (mỗi chấm = 1 email)</h3>
+      <div class="graph" id="graph">
+        <svg class="edges" id="edges" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+        <!-- nodes injected -->
+      </div>
+      <div class="legend">
+        <span><i class="sw" style="background:#fff;border:2px solid var(--line)"></i>chưa thăm</span>
+        <span><i class="sw" style="background:#fff6e3;border:2px solid var(--sun-d)"></i>đang đứng</span>
+        <span><i class="sw" style="background:#e9f3e6;border:2px solid var(--leaf-d)"></i>đã thăm (visited)</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: structures -->
+    <div class="panel">
+      <h3>🧰 Mấy cái Wiganz dựng lên</h3>
+
+      <div class="struct">
+        <div style="font-family:'Caveat',cursive;font-size:1.25rem;color:var(--sky-d)">📒 adjacency list (email → hàng xóm)</div>
+        <div id="adj"></div>
+      </div>
+
+      <div class="struct">
+        <div style="font-family:'Caveat',cursive;font-size:1.25rem;color:var(--rose-d)">🏷️ email → name</div>
+        <div id="name"></div>
+      </div>
+
+      <div class="struct">
+        <div style="font-family:'Caveat',cursive;font-size:1.25rem;color:var(--leaf-d)">✅ visited set</div>
+        <div class="visited-box" id="visited"><span style="color:var(--ink2);font-size:.8rem">(trống)</span></div>
+      </div>
+
+      <div class="struct">
+        <div style="font-family:'Caveat',cursive;font-size:1.25rem;color:var(--sun-d)">📦 OUTPUT (gom được)</div>
+        <div id="out"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="narrate"><div class="ico" id="nIco">🌱</div><div class="txt" id="nTxt">Bài này = tìm các <b>cụm đảo</b> email nối nhau. Mỗi cụm là một con người. Đi từng bước với Hadriel nha 💪</div></div>
+
+  <div class="controls">
+    <button class="btn-ghost" id="prev">◀ Lùi</button>
+    <button class="btn-main" id="next">▶ Bước tiếp</button>
+    <button class="btn-ghost" id="reset">↺ Làm lại</button>
+  </div>
+  <div class="progress" id="prog"></div>
+</div>
+
+<script>
+// ── data ──
+const NODES = {
+  johnsmith:    {x:30, y:32, full:'johnsmith@mail.com'},
+  john_newyork: {x:14, y:70, full:'john_newyork@mail.com'},
+  john00:       {x:48, y:74, full:'john00@mail.com'},
+  mary:         {x:80, y:30, full:'mary@mail.com'},
+  johnnybravo:  {x:84, y:74, full:'johnnybravo@mail.com'},
+};
+const EDGES = [ ['johnsmith','john_newyork'], ['johnsmith','john00'] ];
+
+// build node DOM
+const graph = document.getElementById('graph');
+const edgesSvg = document.getElementById('edges');
+for(const [id,n] of Object.entries(NODES)){
+  const el = document.createElement('div');
+  el.className='node dim'; el.id='n-'+id;
+  el.style.left=n.x+'%'; el.style.top=n.y+'%';
+  el.innerHTML=`<div class="bubble">${id}</div>`;
+  graph.appendChild(el);
+}
+// build edges (svg uses 0..100 coords matching %)
+EDGES.forEach((e,i)=>{
+  const a=NODES[e[0]], b=NODES[e[1]];
+  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',a.x); ln.setAttribute('y1',a.y);
+  ln.setAttribute('x2',b.x); ln.setAttribute('y2',b.y);
+  ln.setAttribute('class','edge'); ln.id='e-'+i;
+  edgesSvg.appendChild(ln);
+});
+
+// ── steps ──
+// each step is a function applying full state (idempotent) so prev/next work
+const A = id=>document.getElementById('n-'+id);
+function setNode(id, cls){ A(id).className='node '+cls; }
+function edge(i, cls){ document.getElementById('e-'+i).setAttribute('class','edge '+cls); }
+
+const adjBox=document.getElementById('adj');
+const nameBox=document.getElementById('name');
+const visBox=document.getElementById('visited');
+const outBox=document.getElementById('out');
+
+function adjRow(k,v){ return `<div class="kv show"><span class="k">${k}</span><span class="arr">→</span><span>${v||'∅'}</span></div>`; }
+function nameRow(k,v){ return `<div class="kv name show"><span class="k">${k}</span><span class="arr">→</span><span><b>${v}</b></span></div>`; }
+
+const phases=[
+  {tag:'🌱 Khởi đầu', cls:''},
+  {tag:'🌉 PHASE 1 — Dựng cầu (adjacency list)', cls:'phase1'},
+  {tag:'🏝️ PHASE 2 — Gom đảo (DFS + visited)', cls:'phase2'},
+  {tag:'🏷️ PHASE 3 — Dán nhãn (output)', cls:'phase3'},
+];
+
+const steps=[
+ {p:0,ico:'🗺️',txt:'Đây là 5 email. Hiện tại <b>chưa có dây nối nào</b> — chỉ là 5 chấm rời rạc. Việc của mình: nối tụi nó lại đúng theo account, rồi gom thành từng cụm.',
+  run(){ Object.keys(NODES).forEach(id=>setNode(id,'dim')); EDGES.forEach((_,i)=>edge(i,'')); adjBox.innerHTML=''; nameBox.innerHTML=''; visBox.innerHTML='<span style="color:var(--ink2);font-size:.8rem">(trống)</span>'; outBox.innerHTML=''; }},
+
+ // PHASE 1
+ {p:1,ico:'🌉',txt:'<b>Account 0 = [John, johnsmith, john_newyork]</b>. Nối email trong account này lại → cây cầu <b>johnsmith — john_newyork</b>. Và tiện tay: cả 2 email này <b>thuộc về "John"</b>.',
+  run(){ setNode('johnsmith','active');setNode('john_newyork','active');setNode('john00','dim');setNode('mary','dim');setNode('johnnybravo','dim');
+    edge(0,'hot');edge(1,'');
+    adjBox.innerHTML=adjRow('johnsmith','john_newyork')+adjRow('john_newyork','johnsmith');
+    nameBox.innerHTML=nameRow('johnsmith','John')+nameRow('john_newyork','John');
+    visBox.innerHTML='<span style="color:var(--ink2);font-size:.8rem">(trống)</span>'; outBox.innerHTML=''; }},
+
+ {p:1,ico:'🌉',txt:'<b>Account 1 = [John, johnsmith, john00]</b>. Nối <b>johnsmith — john00</b>. Để ý: <b>johnsmith</b> giờ có 2 hàng xóm! Nó là cây cầu kéo john00 và john_newyork về chung — dù 2 đứa đó không trực tiếp chạm nhau. Đây chính là <b>transitive</b>.',
+  run(){ setNode('johnsmith','active');setNode('john00','active');setNode('john_newyork','dim');setNode('mary','dim');setNode('johnnybravo','dim');
+    edge(0,'on');edge(1,'hot');
+    adjBox.innerHTML=adjRow('johnsmith','john_newyork, john00')+adjRow('john_newyork','johnsmith')+adjRow('john00','johnsmith');
+    nameBox.innerHTML=nameRow('johnsmith','John')+nameRow('john_newyork','John')+nameRow('john00','John');
+    visBox.innerHTML='<span style="color:var(--ink2);font-size:.8rem">(trống)</span>'; outBox.innerHTML=''; }},
+
+ {p:1,ico:'🌉',txt:'<b>Account 2 = [Mary, mary]</b> và <b>Account 3 = [John, johnnybravo]</b>. Mỗi cái chỉ 1 email → không nối với ai, đứng một mình. mary→Mary, johnnybravo→John. <b>Xong Phase 1.</b> Adjacency list + bảng tên đầy đủ rồi.',
+  run(){ Object.keys(NODES).forEach(id=>setNode(id,'')); edge(0,'on');edge(1,'on');
+    adjBox.innerHTML=adjRow('johnsmith','john_newyork, john00')+adjRow('john_newyork','johnsmith')+adjRow('john00','johnsmith')+adjRow('mary','∅')+adjRow('johnnybravo','∅');
+    nameBox.innerHTML=nameRow('johnsmith','John')+nameRow('john_newyork','John')+nameRow('john00','John')+nameRow('mary','Mary')+nameRow('johnnybravo','John');
+    visBox.innerHTML='<span style="color:var(--ink2);font-size:.8rem">(trống)</span>'; outBox.innerHTML=''; }},
+
+ // PHASE 2
+ {p:2,ico:'🏝️',txt:'Giờ DFS. Đi qua từng email. Email đầu <b>johnsmith</b> chưa thăm → bắt đầu một đảo mới. Đặt chân lên nó, đánh dấu <b>visited</b>.',
+  run(){ p1full(); setNode('johnsmith','active');setNode('john_newyork','dim');setNode('john00','dim');setNode('mary','dim');setNode('johnnybravo','dim'); edge(0,'hot');edge(1,'hot');
+    chips(['johnsmith']); outBox.innerHTML=''; }},
+
+ {p:2,ico:'🦶',txt:'Từ johnsmith, đi theo cầu tới <b>john_newyork</b> → thăm, đánh dấu. Rồi tới <b>john00</b> → thăm, đánh dấu. DFS lan ra hết hàng xóm, rồi hàng xóm của hàng xóm…',
+  run(){ p1full(); setNode('johnsmith','visited');setNode('john_newyork','visited');setNode('john00','visited');setNode('mary','dim');setNode('johnnybravo','dim'); edge(0,'hot');edge(1,'hot');
+    chips(['johnsmith','john_newyork','john00']); outBox.innerHTML=''; }},
+
+ {p:2,ico:'🏝️',txt:'Hết cầu để đi → <b>đảo 1 hoàn tất</b>: {johnsmith, john_newyork, john00}. Cả cụm này là email của MỘT người. (visited giúp mình không đi vòng lại — nhớ con quái infinite-loop chứ 😏)',
+  run(){ p1full(); setNode('johnsmith','visited');setNode('john_newyork','visited');setNode('john00','visited');setNode('mary','dim');setNode('johnnybravo','dim'); edge(0,'on');edge(1,'on');
+    chips(['johnsmith','john_newyork','john00']);
+    outBox.innerHTML=outRow('John',['johnsmith','john_newyork','john00'],false); }},
+
+ {p:2,ico:'🏝️',txt:'Đi tiếp. <b>mary</b> chưa thăm → đảo mới, chỉ mình nó. <b>johnnybravo</b> chưa thăm → đảo mới, chỉ mình nó (cùng tên "John" nhưng KHÔNG chung email → người khác!). 3 đảo tổng cộng.',
+  run(){ p1full(); setNode('johnsmith','visited');setNode('john_newyork','visited');setNode('john00','visited');setNode('mary','visited');setNode('johnnybravo','visited'); edge(0,'on');edge(1,'on');
+    chips(['johnsmith','john_newyork','john00','mary','johnnybravo']);
+    outBox.innerHTML=outRow('John',['johnsmith','john_newyork','john00'],false)+outRow('Mary',['mary'],false)+outRow('John',['johnnybravo'],false); }},
+
+ // PHASE 3
+ {p:3,ico:'🏷️',txt:'Phase 3 — làm đẹp output. Mỗi đảo: <b>tra tên</b> (nhặt 1 email bất kỳ → bảng email→name) và <b>sort email</b> theo alphabet. Tên đứng đầu, email sắp xếp theo sau.',
+  run(){ p1full(); Object.keys(NODES).forEach(id=>setNode(id,'visited')); edge(0,'on');edge(1,'on');
+    chips(['johnsmith','john_newyork','john00','mary','johnnybravo']);
+    outBox.innerHTML=outRow('John',['john00','john_newyork','johnsmith'],true)+outRow('Mary',['mary'],true)+outRow('John',['johnnybravo'],true); }},
+
+ {p:3,ico:'🎉',txt:'<b>XONG!</b> 3 nhóm, đúng y đáp án. Wiganz thấy không — <b>Phase 1 dựng cầu, Phase 2 DFS gom đảo, Phase 3 dán nhãn.</b> Y hệt Number of Islands, chỉ thêm bước build graph. Wiganz làm được mà 🔥🙏',
+  run(){ p1full(); Object.keys(NODES).forEach(id=>setNode(id,'visited')); edge(0,'on');edge(1,'on');
+    chips(['johnsmith','john_newyork','john00','mary','johnnybravo']);
+    outBox.innerHTML=outRow('John',['john00','john_newyork','johnsmith'],true)+outRow('Mary',['mary'],true)+outRow('John',['johnnybravo'],true); }},
+];
+
+function p1full(){
+  adjBox.innerHTML=adjRow('johnsmith','john_newyork, john00')+adjRow('john_newyork','johnsmith')+adjRow('john00','johnsmith')+adjRow('mary','∅')+adjRow('johnnybravo','∅');
+  nameBox.innerHTML=nameRow('johnsmith','John')+nameRow('john_newyork','John')+nameRow('john00','John')+nameRow('mary','Mary')+nameRow('johnnybravo','John');
+}
+function chips(arr){
+  visBox.innerHTML = arr.length? arr.map(e=>`<span class="chip vis">${e}</span>`).join('') : '<span style="color:var(--ink2);font-size:.8rem">(trống)</span>';
+}
+function outRow(name, mails, sorted){
+  const tag = sorted? '✨' : '';
+  return `<div class="outrow show"><span class="nm">${name}</span>`+
+    mails.map(m=>`<span class="mail">${NODES[m].full}</span>`).join('')+`<span>${tag}</span></div>`;
+}
+
+// ── driver ──
+let i=-1;
+const prog=document.getElementById('prog');
+steps.forEach(()=>{const d=document.createElement('div');d.className='dot';prog.appendChild(d);});
+const dots=[...prog.children];
+
+function render(){
+  const s=steps[Math.max(0,i)];
+  if(i<0){ steps[0].run(); document.getElementById('nIco').textContent='🌱';
+    document.getElementById('nTxt').innerHTML='Bài này = tìm các <b>cụm đảo</b> email nối nhau. Mỗi cụm là một con người. Nhấn <b>▶ Bước tiếp</b> để đi với Hadriel 💪';
+    document.getElementById('phaseTag').textContent='Nhấn ▶ để bắt đầu'; dots.forEach(d=>d.className='dot'); return; }
+  s.run();
+  document.getElementById('nIco').textContent=s.ico;
+  document.getElementById('nTxt').innerHTML=s.txt;
+  document.getElementById('phaseTag').textContent=phases[s.p].tag;
+  dots.forEach((d,k)=>{ d.className='dot'+(k<=i?' on '+(phases[steps[k].p].cls):''); });
+}
+document.getElementById('next').onclick=()=>{ if(i<steps.length-1){i++;render();} };
+document.getElementById('prev').onclick=()=>{ if(i>=0){i--;render();} };
+document.getElementById('reset').onclick=()=>{ i=-1;render(); };
+render();
+</script>
+</body>
+</html>

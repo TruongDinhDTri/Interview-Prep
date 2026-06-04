@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Time Based Key-Value Store — Binary Search Boundary Visualization</title>
+<style>
+  :root {
+    --paper: #f4ecd8;
+    --paper-2: #efe4cb;
+    --ink: #4a3f35;
+    --ink-soft: #7a6a58;
+    --moss: #7c9070;
+    --moss-deep: #5d7256;
+    --sky: #8fb3c7;
+    --sky-deep: #5e88a0;
+    --clay: #c98a6b;
+    --clay-deep: #b06a4c;
+    --rose: #cf8a8a;
+    --gold: #d8b15a;
+    --dead: #d9cdb6;
+    --shadow: rgba(74,63,53,0.18);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+    background:
+      radial-gradient(ellipse at 20% 0%, #faf3e2 0%, transparent 55%),
+      radial-gradient(ellipse at 90% 10%, #f0e6cf 0%, transparent 50%),
+      var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    padding: 0 0 5rem;
+  }
+  header {
+    text-align: center;
+    padding: 3rem 1.5rem 2rem;
+    background: linear-gradient(180deg, rgba(124,144,112,0.16), transparent);
+  }
+  header h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 4vw, 2.8rem);
+    letter-spacing: 0.5px;
+    color: var(--moss-deep);
+    text-shadow: 0 1px 0 #fff8;
+  }
+  header p { margin: 0.4rem 0 0; color: var(--ink-soft); font-style: italic; }
+  .badge {
+    display: inline-block; margin-top: 0.9rem; padding: 0.3rem 1rem;
+    border-radius: 999px; background: var(--rose); color: #fff;
+    font-size: 0.85rem; letter-spacing: 1px; box-shadow: 0 3px 8px var(--shadow);
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 1.2rem; }
+  .card {
+    background: linear-gradient(160deg, #fbf5e6, var(--paper-2));
+    border: 1px solid #e3d6ba;
+    border-radius: 18px;
+    padding: 1.6rem 1.6rem 1.9rem;
+    margin: 1.8rem 0;
+    box-shadow: 0 8px 22px var(--shadow), inset 0 1px 0 #fff9;
+  }
+  .card h2 {
+    margin: 0 0 0.3rem; color: var(--clay-deep);
+    font-size: 1.4rem; display: flex; align-items: center; gap: 0.5rem;
+  }
+  .card .sub { color: var(--ink-soft); margin: 0 0 1.1rem; font-size: 0.95rem; }
+
+  /* ---- array of timestamps ---- */
+  .arrayRow { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 1.2rem 0 0.4rem; position: relative; }
+  .cell {
+    width: 84px; min-height: 78px; border-radius: 12px;
+    background: #fcf7ea; border: 2px solid #d8c9a8;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transition: all .45s cubic-bezier(.4,0,.2,1); position: relative;
+    box-shadow: 0 3px 7px var(--shadow);
+  }
+  .cell .val { font-size: 1.15rem; font-weight: 700; color: var(--ink); }
+  .cell .ts { font-size: 0.82rem; color: var(--ink-soft); }
+  .cell .idx { position: absolute; top: -20px; font-size: 0.72rem; color: var(--ink-soft); }
+  .cell.dead { background: var(--dead); border-color: #c7b894; opacity: 0.4; filter: grayscale(0.5); }
+  .cell.mid { border-color: var(--gold); background: #fdf3d2; box-shadow: 0 0 0 3px rgba(216,177,90,.35), 0 4px 10px var(--shadow); transform: translateY(-4px); }
+  .cell.answer { border-color: var(--moss); background: #e7efdf; box-shadow: 0 0 0 3px rgba(124,144,112,.4); }
+
+  /* pointer flags */
+  .ptrTrack { position: relative; height: 46px; margin-top: 4px; }
+  .flag {
+    position: absolute; top: 0; transform: translateX(-50%);
+    transition: left .45s cubic-bezier(.4,0,.2,1); text-align: center;
+    font-size: 0.78rem; font-weight: 700;
+  }
+  .flag .stick { width: 2px; height: 14px; margin: 0 auto; }
+  .flag.left  { color: var(--sky-deep); }
+  .flag.left .stick  { background: var(--sky-deep); }
+  .flag.right { color: var(--clay-deep); }
+  .flag.right .stick { background: var(--clay-deep); }
+  .flag.mid   { color: #a8861f; }
+  .flag.mid .stick { background: var(--gold); }
+
+  .controls { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-top: 1.4rem; }
+  button {
+    font-family: inherit; font-size: 0.95rem; cursor: pointer;
+    border: none; border-radius: 10px; padding: 0.55rem 1.1rem;
+    background: var(--moss); color: #fff; box-shadow: 0 4px 10px var(--shadow);
+    transition: transform .15s, background .2s;
+  }
+  button:hover { transform: translateY(-2px); background: var(--moss-deep); }
+  button.ghost { background: #e7dcc2; color: var(--ink); }
+  button.ghost:hover { background: #ddd0b2; }
+  button:disabled { opacity: 0.4; cursor: default; transform: none; }
+  button.danger { background: var(--clay); }
+  button.danger:hover { background: var(--clay-deep); }
+
+  .toggleRow { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 0.4rem; }
+  .toggleRow button { background: #e7dcc2; color: var(--ink-soft); }
+  .toggleRow button.active { background: var(--sky-deep); color: #fff; }
+
+  .qRow { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin: 0.6rem 0 0.2rem; }
+  .qRow button { background: #efe4cb; color: var(--ink); border: 1px solid #d8c9a8; }
+  .qRow button.active { background: var(--gold); color: #5a4708; border-color: var(--gold); }
+
+  .log {
+    margin: 1.2rem auto 0; max-width: 760px;
+    background: #fff8ea; border: 1px dashed #d2c3a3; border-radius: 12px;
+    padding: 0.9rem 1.1rem; min-height: 3.4rem; font-size: 0.97rem; color: var(--ink);
+  }
+  .log .step { color: var(--sky-deep); font-weight: 700; }
+  .log .kill { color: var(--clay-deep); font-weight: 700; }
+  .log .ok { color: var(--moss-deep); font-weight: 700; }
+  .log .warn { color: #b14a4a; font-weight: 700; }
+
+  .stall { animation: shake .5s infinite; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-3px); }
+    75% { transform: translateX(3px); }
+  }
+
+  .verdict { text-align:center; font-size:1.2rem; margin-top:1rem; min-height:1.6rem; font-weight:700; }
+  .verdict.good { color: var(--moss-deep); }
+  .verdict.bad { color: #b14a4a; }
+
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 760px){ .grid2 { grid-template-columns: 1fr; } }
+  .mini {
+    background: #fbf5e6; border:1px solid #e3d6ba; border-radius:14px; padding:1rem 1.1rem;
+  }
+  .mini h3 { margin:0 0 0.4rem; color: var(--sky-deep); font-size:1.05rem; }
+  .mini.bad h3 { color: var(--clay-deep); }
+  code, pre { font-family: "SF Mono", "Fira Code", Menlo, monospace; }
+  pre {
+    background: #2f2a22; color: #f0e6cf; border-radius: 10px; padding: 0.9rem 1rem;
+    overflow-x: auto; font-size: 0.82rem; line-height: 1.55; margin: 0.6rem 0 0;
+  }
+  pre .hl { color: var(--gold); }
+  pre .cm { color: #9bb38c; font-style: italic; }
+  .lesson {
+    background: linear-gradient(160deg,#fdf3d2,#f6e7bb);
+    border:1px solid var(--gold); border-radius:16px; padding:1.4rem 1.5rem; margin:1.8rem 0;
+  }
+  .lesson h2 { color:#9a7a16; }
+  .lesson .big { font-size:1.05rem; }
+  .lesson .vn { font-style: italic; color: var(--clay-deep); }
+  .chips { display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.6rem; }
+  .chip { background:#fff8ea; border:1px solid #d8c9a8; border-radius:999px; padding:0.25rem 0.8rem; font-size:0.85rem; }
+  .countBar { display:flex; justify-content:center; gap:6px; margin-top:0.8rem; flex-wrap:wrap; }
+  .countBar .seg { width:84px; text-align:center; font-size:0.78rem; color:var(--ink-soft); }
+  footer { text-align:center; color: var(--ink-soft); margin-top:2.5rem; font-style:italic; }
+</style>
+</head>
+<body>
+<header>
+  <h1>⏳ Time Based Key-Value Store</h1>
+  <p>Binary Search on the BOUNDARY — finding the largest timestamp ≤ t</p>
+  <span class="badge">CRITICAL · Confidence 1/5 · NEEDS REDO</span>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ THE DATA MODEL ============ -->
+  <div class="card">
+    <h2>🗄️ The data — one sorted list per key</h2>
+    <p class="sub">Because <code>set</code> timestamps are <b>strictly increasing</b> per key, the list is sorted for free. We binary-search it for the rightmost timestamp ≤ t.</p>
+    <div class="arrayRow">
+      <div class="cell"><span class="idx">0</span><span class="val">"a"</span><span class="ts">ts 1</span></div>
+      <div class="cell"><span class="idx">1</span><span class="val">"b"</span><span class="ts">ts 2</span></div>
+      <div class="cell"><span class="idx">2</span><span class="val">"x"</span><span class="ts">ts 7</span></div>
+      <div class="cell"><span class="idx">3</span><span class="val">"z"</span><span class="ts">ts 12</span></div>
+    </div>
+    <p class="sub" style="text-align:center;margin-top:1rem;">
+      Two half-elimination rules (derived from first principles):<br>
+      <b style="color:var(--clay-deep)">middle ts &gt; t</b> → kill everything ≥ middle (go left) &nbsp;·&nbsp;
+      <b style="color:var(--moss-deep)">middle ts ≤ t</b> → kill everything &lt; middle (go right, keep middle)
+    </p>
+  </div>
+
+  <!-- ============ THE CENTERPIECE ============ -->
+  <div class="card">
+    <h2>🎯 The two pointers crawling — watch them meet</h2>
+    <p class="sub">Toggle the template, pick a query, then <b>Step</b> through it. The dangerous template will STALL into an infinite loop — see it shake.</p>
+
+    <div class="toggleRow">
+      <button id="tmplA" class="active">Template A · <code>left = mid</code> (CEIL mid)</button>
+      <button id="tmplBad" class="danger">💀 BAD · <code>left = mid</code> + FLOOR mid</button>
+      <button id="tmplB">Template B · <code>left = mid + 1</code> (bisect)</button>
+    </div>
+
+    <div class="qRow">
+      <button data-q="0">get(t=0) → "" <span style="opacity:.6">(none)</span></button>
+      <button data-q="8" class="active">get(t=8) → "x" <span style="opacity:.6">(middle)</span></button>
+      <button data-q="13">get(t=13) → "z" <span style="opacity:.6">(last · stalls!)</span></button>
+    </div>
+
+    <div class="arrayRow" id="cells"></div>
+    <div class="ptrTrack" id="track"></div>
+
+    <div class="controls">
+      <button id="stepBtn">▶ Step</button>
+      <button id="autoBtn" class="ghost">⏩ Auto-run</button>
+      <button id="resetBtn" class="ghost">↺ Reset</button>
+    </div>
+
+    <div class="log" id="log">Pick a template &amp; query, then press <b>Step</b>.</div>
+    <div class="verdict" id="verdict"></div>
+
+    <div class="countBar" id="countBar"></div>
+    <p class="sub" style="text-align:center;margin-top:0.4rem;">
+      In Template B, <b>left</b> ends as the <b>COUNT of timestamps ≤ t</b> →
+      0 = none ("") · len = all (last element) · else = <code>values[left-1]</code>
+    </p>
+  </div>
+
+  <!-- ============ WHY MID DRIFTS LEFT ============ -->
+  <div class="lesson">
+    <h2>💡 The 1 điều duy nhất cần nhớ — why mid drifts LEFT</h2>
+    <p class="big">Integer division <b>truncates toward zero</b>. So the midpoint of two <b>adjacent</b> indices rounds DOWN to the lower (left) one. <b>mid lives on left's lap.</b></p>
+    <pre><span class="cm"># left=3, right=4 (adjacent)</span>
+mid = (3 + 4) // 2 = <span class="hl">3</span>   <span class="cm"># == left !</span>
+left = mid          <span class="cm"># left = 3 again → NOBODY MOVES → 🔁 infinite loop</span>
+
+<span class="cm"># THE FIX — ceil the mid so it jumps RIGHT, letting left advance:</span>
+mid = (3 + 4 + <span class="hl">1</span>) // 2 = <span class="hl">4</span>
+left = mid          <span class="cm"># left = 4 → progress ✅</span></pre>
+    <p class="vn">Floor mid → mid trôi về bên trái → <code>left = mid</code> đứng yên → fix bằng <code>+1</code> (hoặc dùng <code>left = mid + 1</code>).</p>
+    <div class="chips">
+      <span class="chip">Branch keeps via <code>left = mid</code> → MUST use CEIL mid</span>
+      <span class="chip">Floor mid → must advance with <code>left = mid + 1</code></span>
+      <span class="chip">Never mix templates</span>
+    </div>
+  </div>
+
+  <!-- ============ THE ASYMMETRY ============ -->
+  <div class="card">
+    <h2>⚖️ The asymmetry — why First Bad Version never worried</h2>
+    <p class="sub">Only the pointer that assigns <code>= mid</code> with <b>no ±1</b> can freeze. Floor mid sits on left's side, so:</p>
+    <div class="grid2">
+      <div class="mini bad">
+        <h3>💀 <code>left = mid</code> + floor mid</h3>
+        <p style="margin:0">left gets re-assigned to itself when adjacent → <b>STALL</b>. This is what THIS problem used.</p>
+      </div>
+      <div class="mini">
+        <h3>✅ <code>right = mid</code> + floor mid</h3>
+        <p style="margin:0">right gets pulled DOWN toward mid = always progress. This is what <b>First Bad Version</b> &amp; <b>Find Peak</b> use — they never had this bug.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CODE ============ -->
+  <div class="card">
+    <h2>💻 The two safe templates</h2>
+    <div class="grid2">
+      <div class="mini">
+        <h3>Template A · <code>left = mid</code></h3>
+        <pre>left, right = 0, len(values)-1
+while left &lt; right:
+    mid = (left+right<span class="hl">+1</span>)//2  <span class="cm"># CEIL</span>
+    if values[mid][1] &gt; timestamp:
+        right = mid - 1
+    else:
+        left = mid
+return values[left][0] \
+  if values[left][1] &lt;= timestamp else ""</pre>
+      </div>
+      <div class="mini">
+        <h3>Template B · <code>left = mid + 1</code> ⭐ default</h3>
+        <pre>left, right = 0, <span class="hl">len(values)</span>  <span class="cm"># not len-1</span>
+while left &lt; right:
+    mid = (left+right)//2   <span class="cm"># floor OK</span>
+    if values[mid][1] &lt;= timestamp:
+        left = mid + 1
+    else:
+        right = mid
+return values[<span class="hl">left-1</span>][0] \
+  if left &gt; 0 else ""</pre>
+      </div>
+    </div>
+    <p class="sub" style="margin-top:1rem;text-align:center">⭐ <b>Default to Template B</b> — it can never infinite-loop. <code>left</code> = count of ts ≤ t, so <code>left==0</code> → "", <code>left==len</code> → last element.</p>
+  </div>
+
+</div>
+
+<footer>🔥 Hadriel × Wiganz — 2026-06-02 — "Be strong and courageous." — Joshua 1:9 ✝️</footer>
+
+<script>
+const DATA = [
+  { val:"a", ts:1 }, { val:"b", ts:2 }, { val:"x", ts:7 }, { val:"z", ts:12 }
+];
+const N = DATA.length;
+
+let template = "A";   // "A" | "BAD" | "B"
+let query = 8;
+let state = null;     // {left,right,mid,done,steps,stalled,result}
+
+const cellsEl = document.getElementById("cells");
+const trackEl = document.getElementById("track");
+const logEl = document.getElementById("log");
+const verdictEl = document.getElementById("verdict");
+const countBarEl = document.getElementById("countBar");
+let autoTimer = null;
+
+function buildCells(){
+  cellsEl.innerHTML = "";
+  DATA.forEach((d,i)=>{
+    const c = document.createElement("div");
+    c.className = "cell"; c.id = "cell"+i;
+    c.innerHTML = `<span class="idx">${i}</span><span class="val">"${d.val}"</span><span class="ts">ts ${d.ts}</span>`;
+    cellsEl.appendChild(c);
+  });
+  countBarEl.innerHTML = "";
+}
+
+function cellCenterPercent(i){
+  // cells are 84px + 10px gap, centered. Use index over slots count.
+  // For template B, boundaries range 0..N (N+1 slots). We map pointer pos to cell positions.
+  const slots = (template === "B") ? N : (N-1);
+  if (slots === 0) return 50;
+  return (i / slots) * 100;
+}
+
+function initState(){
+  if (template === "B"){
+    state = { left:0, right:N, mid:null, done:false, steps:0, stalled:false, result:null };
+  } else {
+    state = { left:0, right:N-1, mid:null, done:false, steps:0, stalled:false, result:null };
+  }
+  // empty-list / immediate cases handled inside step
+  render();
+  verdictEl.textContent = ""; verdictEl.className = "verdict";
+  logEl.innerHTML = `Template <b>${template==="BAD"?"💀 BAD floor-mid":template}</b>, query <b>t=${query}</b>. Press <b>Step</b>.`;
+}
+
+function flag(cls, label, pos){
+  const f = document.createElement("div");
+  f.className = "flag "+cls + (state.stalled && cls==="left" ? " stall":"");
+  f.style.left = cellCenterPercent(pos)+"%";
+  f.innerHTML = `${label}<div class="stick"></div>`;
+  return f;
+}
+
+function render(){
+  DATA.forEach((d,i)=>{
+    const c = document.getElementById("cell"+i);
+    c.className = "cell";
+  });
+  // dead zones: anything outside [left,right] window is eliminated
+  for (let i=0;i<N;i++){
+    const inWindow = (template==="B")
+      ? (i >= state.left && i < state.right)
+      : (i >= state.left && i <= state.right);
+    if (!inWindow && !state.done) document.getElementById("cell"+i).classList.add("dead");
+  }
+  if (state.mid !== null && state.mid >=0 && state.mid < N && !state.done){
+    document.getElementById("cell"+state.mid).classList.add("mid");
+  }
+  if (state.done && state.answerIdx != null && state.answerIdx>=0){
+    document.getElementById("cell"+state.answerIdx).classList.add("answer");
+  }
+
+  // pointers
+  trackEl.innerHTML = "";
+  trackEl.appendChild(flag("left","L="+state.left, state.left));
+  trackEl.appendChild(flag("right","R="+state.right, Math.min(state.right, template==="B"?N:N-1)));
+  if (state.mid !== null && !state.done){
+    trackEl.appendChild(flag("mid","M="+state.mid, state.mid));
+  }
+
+  // count bar (template B story)
+  if (template === "B"){
+    countBarEl.innerHTML = `<div class="seg">left = <b>${state.left}</b> = count of ts ≤ ${query}</div>`;
+  } else {
+    countBarEl.innerHTML = "";
+  }
+}
+
+function step(){
+  if (state.done) return;
+  state.steps++;
+
+  // Template B
+  if (template === "B"){
+    if (state.left < state.right){
+      state.mid = (state.left + state.right) >> 1;
+      const ts = DATA[state.mid].ts;
+      if (ts <= query){
+        logEl.innerHTML = `<span class="step">Step ${state.steps}:</span> mid=${state.mid} (ts ${ts}) ≤ ${query} → valid, push <span class="ok">left = mid+1 = ${state.mid+1}</span>. Kill left half.`;
+        state.left = state.mid + 1;
+      } else {
+        logEl.innerHTML = `<span class="step">Step ${state.steps}:</span> mid=${state.mid} (ts ${ts}) &gt; ${query} → too big, <span class="kill">right = mid = ${state.mid}</span>. Kill right half.`;
+        state.right = state.mid;
+      }
+      render();
+      if (state.left >= state.right) finishB();
+    }
+    return;
+  }
+
+  // Template A (ceil) and BAD (floor)
+  if (state.left < state.right){
+    state.mid = (template === "BAD")
+      ? ((state.left + state.right) >> 1)            // floor — the bug
+      : ((state.left + state.right + 1) >> 1);       // ceil — the fix
+    const ts = DATA[state.mid].ts;
+    const prevLeft = state.left, prevRight = state.right;
+    if (ts > query){
+      logEl.innerHTML = `<span class="step">Step ${state.steps}:</span> mid=${state.mid} (ts ${ts}) &gt; ${query} → too big, <span class="kill">right = mid-1 = ${state.mid-1}</span>.`;
+      state.right = state.mid - 1;
+    } else {
+      logEl.innerHTML = `<span class="step">Step ${state.steps}:</span> mid=${state.mid} (ts ${ts}) ≤ ${query} → keep, <span class="ok">left = mid = ${state.mid}</span>.`;
+      state.left = state.mid;
+    }
+    render();
+
+    // STALL detection for BAD template
+    if (template === "BAD" && state.left === prevLeft && state.right === prevRight){
+      state.stalled = true;
+      logEl.innerHTML = `<span class="warn">💀 STALL!</span> mid=(${prevLeft}+${prevRight})//2=${state.mid}=left. <code>left = mid</code> re-assigns left to itself → <b>nobody moves → INFINITE LOOP 🔁</b>`;
+      verdictEl.textContent = "💀 INFINITE LOOP — floor mid + left = mid";
+      verdictEl.className = "verdict bad";
+      state.done = true;
+      render();
+      stopAuto();
+      return;
+    }
+    if (state.left >= state.right) finishA();
+  }
+}
+
+function finishA(){
+  state.done = true;
+  state.mid = null;
+  const idx = state.left;
+  const valid = idx >=0 && idx < N && DATA[idx].ts <= query;
+  state.answerIdx = valid ? idx : null;
+  state.result = valid ? DATA[idx].val : "";
+  verdictEl.textContent = valid ? `✅ return values[${idx}] = "${state.result}"` : `✅ values[${idx}].ts > ${query} → return ""`;
+  verdictEl.className = "verdict good";
+  render();
+  stopAuto();
+}
+
+function finishB(){
+  state.done = true;
+  state.mid = null;
+  const idx = state.left - 1;
+  if (state.left > 0){
+    state.answerIdx = idx;
+    state.result = DATA[idx].val;
+    verdictEl.textContent = `✅ left=${state.left} → values[left-1]=values[${idx}] = "${state.result}"`;
+  } else {
+    state.answerIdx = null;
+    state.result = "";
+    verdictEl.textContent = `✅ left=0 → no ts ≤ ${query} → return ""`;
+  }
+  verdictEl.className = "verdict good";
+  render();
+  stopAuto();
+}
+
+function stopAuto(){ if(autoTimer){ clearInterval(autoTimer); autoTimer=null; document.getElementById("autoBtn").textContent="⏩ Auto-run"; } }
+
+// ---- controls ----
+document.getElementById("stepBtn").onclick = () => step();
+document.getElementById("resetBtn").onclick = () => { stopAuto(); initState(); };
+document.getElementById("autoBtn").onclick = function(){
+  if (autoTimer){ stopAuto(); return; }
+  this.textContent = "⏸ Pause";
+  autoTimer = setInterval(()=>{ if(state.done){ stopAuto(); } else { step(); } }, 1100);
+};
+
+function setTemplate(t, btn){
+  template = t;
+  document.querySelectorAll(".toggleRow button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  stopAuto(); initState();
+}
+document.getElementById("tmplA").onclick   = function(){ setTemplate("A", this); };
+document.getElementById("tmplBad").onclick = function(){ setTemplate("BAD", this); };
+document.getElementById("tmplB").onclick   = function(){ setTemplate("B", this); };
+
+document.querySelectorAll(".qRow button").forEach(b=>{
+  b.onclick = function(){
+    document.querySelectorAll(".qRow button").forEach(x=>x.classList.remove("active"));
+    this.classList.add("active");
+    query = parseInt(this.dataset.q,10);
+    stopAuto(); initState();
+  };
+});
+
+// init
+buildCells();
+initState();
+</script>
+</body>
+</html>
