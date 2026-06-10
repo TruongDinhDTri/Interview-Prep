@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search in Rotated Sorted Array — The Invariant</title>
+<style>
+  :root{
+    --paper:#f6efe2;        /* warm paper */
+    --paper2:#efe6d4;
+    --ink:#4a4036;          /* soft brown ink */
+    --ink-soft:#7a6f60;
+    --sage:#8aa282;         /* Ghibli sage green */
+    --sage-deep:#6d8a66;
+    --sky:#9fc2d4;          /* soft sky */
+    --sky-deep:#6fa3bd;
+    --rose:#d99a8a;         /* warm clay */
+    --rose-deep:#c47a68;
+    --gold:#e3b85f;
+    --trash:#cdbfa8;        /* faded discarded */
+    --shadow:rgba(74,64,54,.18);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    background:
+      radial-gradient(1200px 500px at 15% -5%, #fbf6ea 0%, transparent 60%),
+      radial-gradient(900px 500px at 100% 0%, #f1ead8 0%, transparent 55%),
+      var(--paper);
+    color:var(--ink);
+    line-height:1.65;
+    padding:0 0 80px;
+  }
+  .wrap{max-width:1040px;margin:0 auto;padding:0 24px;}
+  h1,h2,h3{font-family:'Cormorant Garamond',Georgia,serif;font-weight:600;letter-spacing:.3px;}
+
+  /* HERO */
+  .hero{
+    text-align:center;padding:64px 24px 40px;position:relative;overflow:hidden;
+  }
+  .hero h1{font-size:clamp(2.2rem,5vw,3.4rem);margin:.2em 0 .1em;color:var(--ink);}
+  .hero .sub{font-size:1.05rem;color:var(--ink-soft);max-width:640px;margin:0 auto;}
+  .badge{display:inline-block;background:var(--sage);color:#fff;font-size:.72rem;letter-spacing:2px;
+    text-transform:uppercase;padding:5px 14px;border-radius:20px;margin-bottom:8px;box-shadow:0 4px 10px var(--shadow);}
+  .cloud{position:absolute;border-radius:50%;background:rgba(255,255,255,.5);filter:blur(2px);}
+  .c1{width:120px;height:120px;top:20px;left:8%;}
+  .c2{width:80px;height:80px;top:90px;right:12%;}
+  .c3{width:60px;height:60px;top:40px;right:30%;}
+
+  section{margin-top:40px;}
+  .card{
+    background:linear-gradient(180deg,#fffdf8,#f9f2e4);
+    border:1px solid rgba(122,111,96,.18);
+    border-radius:18px;padding:28px 30px;margin-top:22px;
+    box-shadow:0 10px 30px -16px var(--shadow);
+  }
+  .eyebrow{font-size:.74rem;letter-spacing:3px;text-transform:uppercase;color:var(--sage-deep);font-weight:700;}
+  h2{font-size:1.9rem;margin:.1em 0 .3em;}
+  h3{font-size:1.35rem;margin:.4em 0 .2em;}
+  p{margin:.5em 0;}
+  .muted{color:var(--ink-soft);}
+  .accent{color:var(--rose-deep);font-weight:600;}
+  .accent-sage{color:var(--sage-deep);font-weight:600;}
+
+  /* ARRAY BOXES */
+  .arr{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:18px 0 6px;}
+  .cell{
+    width:62px;height:62px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:1.5rem;font-weight:600;font-family:'Cormorant Garamond',serif;
+    background:#fff;border:2px solid rgba(122,111,96,.25);color:var(--ink);
+    transition:all .55s cubic-bezier(.4,0,.2,1);position:relative;
+    box-shadow:0 6px 14px -8px var(--shadow);
+  }
+  .cell .idx{position:absolute;top:-20px;font-size:.7rem;color:var(--ink-soft);font-weight:500;font-family:'Inter';}
+  .cell.sorted-left{background:linear-gradient(180deg,#cfe0c8,#bcd4b4);border-color:var(--sage-deep);}
+  .cell.sorted-right{background:linear-gradient(180deg,#cfe0c8,#bcd4b4);border-color:var(--sage-deep);}
+  .cell.mid{transform:translateY(-8px) scale(1.08);border-color:var(--gold);box-shadow:0 12px 22px -8px rgba(227,184,95,.6);}
+  .cell.target-found{background:linear-gradient(180deg,#f3c98f,#e9b46a);border-color:var(--rose-deep);transform:scale(1.14);}
+  .cell.trash{background:var(--trash);border-color:transparent;color:#9a8f7c;opacity:.35;transform:scale(.86);text-decoration:line-through;}
+  .ptr{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:4px;height:22px;}
+  .ptr .slot{width:62px;text-align:center;font-size:.78rem;font-weight:700;}
+  .pL{color:var(--sky-deep);}
+  .pR{color:var(--rose-deep);}
+  .pM{color:#c79a2e;}
+
+  /* CONTROLS */
+  .controls{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap;margin-top:22px;}
+  button{
+    font-family:'Inter';font-size:.92rem;font-weight:600;cursor:pointer;border:none;
+    padding:11px 22px;border-radius:12px;transition:all .2s;box-shadow:0 6px 14px -6px var(--shadow);
+  }
+  .btn-primary{background:var(--sage-deep);color:#fff;}
+  .btn-primary:hover{background:var(--sage);transform:translateY(-2px);}
+  .btn-ghost{background:#fff;color:var(--ink);border:1.5px solid rgba(122,111,96,.3);}
+  .btn-ghost:hover{background:var(--paper2);}
+  button:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+
+  .narrate{
+    background:#fffdf8;border-left:4px solid var(--sage);border-radius:0 12px 12px 0;
+    padding:16px 20px;margin-top:20px;min-height:64px;font-size:1.02rem;transition:all .3s;
+  }
+  .narrate .step-tag{font-size:.72rem;letter-spacing:2px;text-transform:uppercase;color:var(--sage-deep);font-weight:700;}
+  .narrate.found{border-left-color:var(--rose-deep);background:#fdf4ec;}
+
+  /* JOURNEY ACTS */
+  .acts{display:grid;grid-template-columns:1fr;gap:18px;}
+  @media(min-width:760px){.acts{grid-template-columns:1fr 1fr 1fr;}}
+  .act{background:#fffdf8;border:1px solid rgba(122,111,96,.18);border-radius:16px;padding:22px;position:relative;}
+  .act .num{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--sage);line-height:1;opacity:.6;}
+  .act.broken{border-color:var(--rose);}
+  .act.broken .num{color:var(--rose);}
+  .act.win{border-color:var(--gold);box-shadow:0 10px 24px -14px rgba(227,184,95,.7);}
+  .act.win .num{color:var(--gold);}
+  .mini-arr{display:flex;gap:5px;margin:12px 0;flex-wrap:wrap;}
+  .mini{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:.95rem;font-weight:600;background:#fff;border:1.5px solid rgba(122,111,96,.25);font-family:'Cormorant Garamond',serif;}
+  .mini.s{background:#cfe0c8;border-color:var(--sage-deep);}
+  .mini.b{background:#f0d2c9;border-color:var(--rose);}
+  .cliff{color:var(--rose-deep);font-weight:700;}
+
+  /* code */
+  pre{background:#2f2a24;color:#f1e7d4;border-radius:14px;padding:20px 22px;overflow-x:auto;
+    font-family:'SF Mono',Menlo,Consolas,monospace;font-size:.86rem;line-height:1.7;box-shadow:0 12px 30px -14px var(--shadow);}
+  .kw{color:#e3b85f;}.fn{color:#9fc2d4;}.cm{color:#8f8270;font-style:italic;}.st{color:#cba6c9;}.nm{color:#d99a8a;}
+
+  .quote{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-style:italic;text-align:center;
+    color:var(--sage-deep);margin:30px auto;max-width:680px;line-height:1.45;}
+  .pill{display:inline-block;background:var(--paper2);border:1px solid rgba(122,111,96,.2);border-radius:8px;
+    padding:2px 9px;font-size:.86rem;font-family:'SF Mono',monospace;color:var(--ink);}
+  .edge-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+  @media(min-width:680px){.edge-grid{grid-template-columns:1fr 1fr;}}
+  .edge{background:#fffdf8;border:1px solid rgba(122,111,96,.18);border-radius:12px;padding:14px 16px;}
+  .edge code{font-family:'SF Mono',monospace;font-size:.84rem;color:var(--rose-deep);}
+  footer{text-align:center;color:var(--ink-soft);font-size:.85rem;margin-top:50px;}
+  .heart{color:var(--rose-deep);}
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap');
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="hero">
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <span class="badge">Binary Search · The Invariant</span>
+  <h1>Search in a Rotated Sorted Array</h1>
+  <p class="sub">The whole array isn't sorted anymore — so the old promise breaks.
+  But a quieter promise survives every rotation. This is the story of finding it. 🌿</p>
+</div>
+
+<div class="wrap">
+
+  <!-- THE DISCOVERY JOURNEY -->
+  <section>
+    <div class="eyebrow">The Discovery Journey</div>
+    <h2>How the invariant was found 🔍</h2>
+    <p class="muted">An <span class="accent-sage">invariant</span> is just a <strong>promise that's always true, no matter what</strong> — a rule of the game that never breaks. Binary search lives or dies on one. Here's how the promise evolved.</p>
+
+    <div class="acts">
+      <div class="act">
+        <div class="num">01</div>
+        <h3>The original promise</h3>
+        <div class="mini-arr">
+          <div class="mini s">1</div><div class="mini s">3</div><div class="mini s">5</div><div class="mini s">7</div><div class="mini s">9</div>
+        </div>
+        <p class="muted">A normal sorted array. The promise: <span class="accent-sage">“the whole thing is sorted.”</span> If <span class="pill">target &lt; mid</span>, everything right of mid is bigger → throw it away. <strong>Safe.</strong></p>
+      </div>
+
+      <div class="act broken">
+        <div class="num">02</div>
+        <h3>Rotation breaks it 💥</h3>
+        <div class="mini-arr">
+          <div class="mini b">4</div><div class="mini b">5</div><div class="mini b">6</div><div class="mini b">7</div><div class="mini b">0</div><div class="mini b">1</div><div class="mini b">2</div>
+        </div>
+        <p class="muted">It climbs <span class="pill">4→5→6→7</span> then <span class="cliff">slaps down</span> to <span class="pill">0→1→2</span>. The whole array is <strong>no longer sorted</strong>. The old promise is <span class="accent">dead</span> — you can't trust “throw away the right” anymore.</p>
+      </div>
+
+      <div class="act win">
+        <div class="num">03</div>
+        <h3>The surviving promise 🌟</h3>
+        <div class="mini-arr">
+          <div class="mini s">4</div><div class="mini s">5</div><div class="mini s">6</div><div class="mini s">7</div>
+          <div class="mini">0</div><div class="mini">1</div><div class="mini">2</div>
+        </div>
+        <p class="muted">Split at mid. The <em>whole</em> may be broken — but look: <strong>at least ONE half is always fully sorted.</strong> That half is trustworthy. <span class="accent-sage">That</span> is the invariant.</p>
+      </div>
+    </div>
+
+    <div class="quote">“When I split at mid, at least one of the two halves is always fully sorted —<br>and only the sorted half can I trust the range check on.”</div>
+  </section>
+
+  <!-- INTERACTIVE -->
+  <section>
+    <div class="eyebrow">Watch It Run</div>
+    <h2>The invariant in motion 🎬</h2>
+    <p class="muted">Searching for <span class="pill">target = 0</span> in <span class="pill">[4, 5, 6, 7, 0, 1, 2]</span>.
+    Each step: find mid → light up the <span class="accent-sage">sorted half (green)</span> → ask “is the target inside its range?” → throw away the half that can't hold it.</p>
+
+    <div class="card">
+      <div class="ptr" id="ptrRow"></div>
+      <div class="arr" id="arr"></div>
+      <div class="narrate" id="narrate">
+        <div class="step-tag">Ready</div>
+        Press <strong>Next Step</strong> to begin the hunt. 🌿
+      </div>
+      <div class="controls">
+        <button class="btn-ghost" id="resetBtn">↺ Reset</button>
+        <button class="btn-primary" id="nextBtn">Next Step →</button>
+        <button class="btn-ghost" id="autoBtn">▶ Auto-play</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ALGORITHM -->
+  <section>
+    <div class="eyebrow">The Engine</div>
+    <h2>Why every line exists 🔧</h2>
+    <p class="muted">The whole algorithm is just the invariant, made literal:</p>
+<pre><span class="kw">class</span> <span class="fn">Solution</span>:
+    <span class="kw">def</span> <span class="fn">search</span>(self, nums, target):
+        left, right = <span class="nm">0</span>, len(nums) - <span class="nm">1</span>
+        <span class="kw">while</span> left &lt;= right:
+            mid = (left + right) // <span class="nm">2</span>
+            <span class="kw">if</span> nums[mid] == target:
+                <span class="kw">return</span> mid
+
+            <span class="cm"># ① WHICH half is the sorted one? (the invariant guarantees ≥1 is)</span>
+            <span class="kw">if</span> nums[left] &lt;= nums[mid]:          <span class="cm"># left half is sorted</span>
+                <span class="cm"># ② only NOW can I trust a range check — on the sorted half</span>
+                <span class="kw">if</span> nums[left] &lt;= target &lt; nums[mid]:
+                    right = mid - <span class="nm">1</span>             <span class="cm"># target lives here → hunt left</span>
+                <span class="kw">else</span>:
+                    left = mid + <span class="nm">1</span>              <span class="cm"># can't be here → throw left away</span>
+            <span class="kw">else</span>:                              <span class="cm"># right half is sorted</span>
+                <span class="kw">if</span> nums[mid] &lt; target &lt;= nums[right]:
+                    left = mid + <span class="nm">1</span>              <span class="cm"># target lives here → hunt right</span>
+                <span class="kw">else</span>:
+                    right = mid - <span class="nm">1</span>             <span class="cm"># can't be here → throw right away</span>
+        <span class="kw">return</span> -<span class="nm">1</span>
+</pre>
+    <p class="muted"><strong>Time</strong> <span class="pill">O(log n)</span> — still halving every step. <strong>Space</strong> <span class="pill">O(1)</span>. BTTC for a sorted search is O(log n) → <span class="accent-sage">already optimal.</span></p>
+  </section>
+
+  <!-- EDGE CASES -->
+  <section>
+    <div class="eyebrow">Don't Forget — Step 5 Verify</div>
+    <h2>The edge cases to test 🦅</h2>
+    <p class="muted">A real interviewer pounces if you only trace the happy path. The smallest inputs and the “not found” case are where bugs hide:</p>
+    <div class="edge-grid">
+      <div class="edge"><strong>Empty array</strong><br><code>[] , target=3 → -1</code><br><span class="muted">right = -1, loop never runs. ✅</span></div>
+      <div class="edge"><strong>Single element</strong><br><code>[1], target=1 → 0 &nbsp;|&nbsp; [1], target=0 → -1</code><br><span class="muted"><code>left&lt;=right</code> handles the size-1 box.</span></div>
+      <div class="edge"><strong>Target not present</strong><br><code>[4,5,6,7,0,1,2], target=3 → -1</code><br><span class="muted">Loop exhausts, falls to <code>return -1</code>.</span></div>
+      <div class="edge"><strong>No rotation</strong><br><code>[1,2,3,4,5], target=4 → 3</code><br><span class="muted">Left half always sorted → plain binary search.</span></div>
+      <div class="edge"><strong>Target at the seam</strong><br><code>[4,5,6,7,0,1,2], target=0 → 4</code><br><span class="muted">The pivot value itself — traced above.</span></div>
+      <div class="edge"><strong>Two elements</strong><br><code>[3,1], target=1 → 1</code><br><span class="muted">Smallest rotation. mid=left, right half sorted.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    Forged on the training ground with Hadriel <span class="heart">♥</span> · “Call to me and I will answer you and tell you great things.” — Jeremiah 33:3
+  </footer>
+
+</div>
+
+<script>
+// ---- Build the faithful step list by actually running the algorithm ----
+const nums = [4,5,6,7,0,1,2];
+const target = 0;
+
+function buildSteps(nums, target){
+  const steps = [];
+  let left = 0, right = nums.length - 1;
+  // snapshot helper
+  const snap = (mid, sortedHalf, action, found=false) => steps.push({
+    left, right, mid, sortedHalf, action, found
+  });
+
+  while(left <= right){
+    const mid = Math.floor((left+right)/2);
+    if(nums[mid] === target){
+      snap(mid, null, `nums[mid] = <b>${nums[mid]}</b> equals the target. <span class="accent">Found at index ${mid}!</span> 🎯`, true);
+      break;
+    }
+    if(nums[left] <= nums[mid]){
+      // left half sorted
+      if(nums[left] <= target && target < nums[mid]){
+        snap(mid,'left',`Mid = <b>${nums[mid]}</b>. <span class="accent-sage">Left half is sorted</span> (nums[left]=${nums[left]} ≤ nums[mid]=${nums[mid]}). Target ${target} <b>fits</b> the trusted range [${nums[left]}, ${nums[mid]}) → hunt left, throw the right away.`);
+        right = mid - 1;
+      } else {
+        snap(mid,'left',`Mid = <b>${nums[mid]}</b>. <span class="accent-sage">Left half is sorted</span> (nums[left]=${nums[left]} ≤ nums[mid]=${nums[mid]}). Target ${target} is <b>NOT</b> in [${nums[left]}, ${nums[mid]}) → it can't be on the trusted side → throw the left away, hunt right.`);
+        left = mid + 1;
+      }
+    } else {
+      // right half sorted
+      if(nums[mid] < target && target <= nums[right]){
+        snap(mid,'right',`Mid = <b>${nums[mid]}</b>. <span class="accent-sage">Right half is sorted</span> (nums[left]=${nums[left]} &gt; nums[mid]=${nums[mid]}). Target ${target} <b>fits</b> (${nums[mid]}, ${nums[right]}] → hunt right, throw the left away.`);
+        left = mid + 1;
+      } else {
+        snap(mid,'right',`Mid = <b>${nums[mid]}</b>. <span class="accent-sage">Right half is sorted</span> (nums[left]=${nums[left]} &gt; nums[mid]=${nums[mid]}). Target ${target} is <b>NOT</b> in (${nums[mid]}, ${nums[right]}] → throw the right away, hunt left.`);
+        right = mid - 1;
+      }
+    }
+  }
+  return steps;
+}
+
+const steps = buildSteps(nums, target);
+let cur = -1;        // -1 = initial state
+let auto = null;
+
+const arrEl = document.getElementById('arr');
+const ptrEl = document.getElementById('ptrRow');
+const narEl = document.getElementById('narrate');
+const nextBtn = document.getElementById('nextBtn');
+const resetBtn = document.getElementById('resetBtn');
+const autoBtn = document.getElementById('autoBtn');
+
+function render(){
+  // determine active window
+  let L=0, R=nums.length-1, M=-1, sorted=null, found=false;
+  if(cur >= 0){
+    const s = steps[cur];
+    L=s.left; R=s.right; M=s.mid; sorted=s.sortedHalf; found=s.found;
+  }
+  // pointers row
+  ptrEl.innerHTML = nums.map((_,i)=>{
+    let tags=[];
+    if(cur>=0){
+      if(i===L) tags.push('<span class="pL">L</span>');
+      if(i===M) tags.push('<span class="pM">M</span>');
+      if(i===R) tags.push('<span class="pR">R</span>');
+    }
+    return `<div class="slot">${tags.join(' ')}</div>`;
+  }).join('');
+
+  // cells
+  arrEl.innerHTML = nums.map((v,i)=>{
+    let cls='cell';
+    if(cur>=0){
+      const inWindow = i>=L && i<=R;
+      if(!inWindow) cls+=' trash';
+      else{
+        if(found && i===M) cls+=' target-found';
+        else if(i===M) cls+=' mid';
+        else if(sorted==='left' && i>=L && i<M) cls+=' sorted-left';
+        else if(sorted==='right' && i>M && i<=R) cls+=' sorted-right';
+      }
+    }
+    return `<div class="${cls}"><span class="idx">${i}</span>${v}</div>`;
+  }).join('');
+
+  // narration
+  if(cur < 0){
+    narEl.className='narrate';
+    narEl.innerHTML='<div class="step-tag">Ready</div>Press <strong>Next Step</strong> to begin the hunt. 🌿';
+  } else {
+    const s=steps[cur];
+    narEl.className = 'narrate' + (s.found?' found':'');
+    narEl.innerHTML = `<div class="step-tag">Step ${cur+1} of ${steps.length}${s.found?' · Solved':''}</div>${s.action}`;
+  }
+  nextBtn.disabled = cur >= steps.length-1;
+}
+
+function next(){
+  if(cur < steps.length-1){ cur++; render(); }
+  if(cur >= steps.length-1) stopAuto();
+}
+function reset(){ stopAuto(); cur=-1; render(); }
+function stopAuto(){ if(auto){clearInterval(auto);auto=null;autoBtn.textContent='▶ Auto-play';} }
+
+nextBtn.onclick = next;
+resetBtn.onclick = reset;
+autoBtn.onclick = ()=>{
+  if(auto){ stopAuto(); }
+  else{
+    if(cur>=steps.length-1) reset();
+    autoBtn.textContent='⏸ Pause';
+    auto=setInterval(next,1500);
+  }
+};
+
+render();
+</script>
+</body>
+</html>
