@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Two Heaps Guide</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="../../guide.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Two Heaps Guide</h1>
+</header>
+<h1 id="two-heaps-pattern-complete-guide">Two Heaps Pattern — Complete
+Guide</h1>
+<blockquote>
+<p>Use this guide anytime you look at a problem and wonder: “Is this Two
+Heaps?” Covers: what it is → why it works → the 3 steps → how to
+recognize it → the code → common traps.</p>
+</blockquote>
+<hr />
+<h2 id="the-one-question-this-pattern-answers">1. The One Question This
+Pattern Answers</h2>
+<blockquote>
+<p><strong>“Numbers keep arriving one by one. At any point, someone
+asks: what’s the median right now? How do I answer that without sorting
+every time?”</strong></p>
+</blockquote>
+<p>Two Heaps is the answer. Everything below is just explaining why.</p>
+<hr />
+<h2 id="the-mental-model-two-buckets">2. The Mental Model — Two
+Buckets</h2>
+<p>Forget “heaps” for a second. Think about this first:</p>
+<p>You have numbers. You split them into <strong>two buckets</strong>.
+One rule:</p>
+<pre><code>Everything in Left is SMALLER than everything in Right.
+
+    Left bucket          Right bucket
+    (small numbers)      (big numbers)
+    [1, 2, 3]           [5, 8, 9]</code></pre>
+<p>Now — you don’t care about the order inside each bucket. You only
+care about <strong>one number from each</strong>:</p>
+<pre><code>    Left  → the BIGGEST number in it    →  3
+    Right → the SMALLEST number in it   →  5
+                                            ↑↑
+                        median lives between these two</code></pre>
+<p>That’s the whole idea. Two buckets. Track one number from each.
+Median is right there.</p>
+<hr />
+<h2 id="so-what-are-the-heaps">3. So What Are the Heaps?</h2>
+<p>A heap is just a data structure that keeps the one number you care
+about <strong>at the top — instantly</strong>.</p>
+<pre><code>    Left bucket  → Max-Heap  → root always shows the BIGGEST   →  3
+    Right bucket → Min-Heap  → root always shows the SMALLEST  →  5</code></pre>
+<p>That’s why two heaps. Not because heaps are magic. Because you need
+<strong>two specific numbers fast</strong>, and each heap gives you one
+of them in O(1).</p>
+<h3 id="the-layout">The Layout</h3>
+<pre><code>┌─────────────────────────────────────────────────┐
+│              Two Heaps Layout                    │
+│                                                 │
+│   Max-Heap (Left)        Min-Heap (Right)       │
+│   smaller half           larger half            │
+│                                                 │
+│        [5]                   [8]                │
+│       /   \                 /   \               │
+│     [3]   [4]            [9]   [12]             │
+│    /                                            │
+│  [1]                                            │
+│                                                 │
+│   Root = 5 ←── boundary ──→ Root = 8            │
+│      (max of left)      (min of right)          │
+└─────────────────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="the-two-rules-invariants">4. The Two Rules (Invariants)</h2>
+<p>After EVERY insert, these must stay true:</p>
+<pre><code>    Rule 1 — ORDER:   Left root  ≤  Right root
+                      (nothing on Left is bigger than anything on Right)
+
+    Rule 2 — SIZE:    |Left| == |Right|
+                      OR
+                      |Left| == |Right| + 1    (Left can have ONE extra)</code></pre>
+<p>If either rule breaks → rebalance by moving a root. That’s the only
+active logic in the whole pattern.</p>
+<hr />
+<h2 id="the-3-steps-every-time-a-number-arrives">5. The 3 Steps — Every
+Time a Number Arrives</h2>
+<pre><code>┌─────────────────────────────────────────────┐
+│  NUMBER ARRIVES                             │
+│                                             │
+│  1. ROUTE — Put it in the right bucket      │
+│     Left is empty?   →  goes Left           │
+│     num ≤ Left root  →  goes Left           │
+│     num &gt;  Left root →  goes Right          │
+│                                             │
+│  2. REBALANCE — Fix the sizes               │
+│     Left has 2+ more than Right?            │
+│       → move Left root to Right             │
+│     Right has more than Left?               │
+│       → move Right root to Left             │
+│                                             │
+│  3. READ — Get the median                   │
+│     Equal size  →  (Left root + Right root) / 2 │
+│     Left is +1  →  Left root                │
+└─────────────────────────────────────────────┘</code></pre>
+<h3 id="why-this-order-matters">Why This Order Matters</h3>
+<ul>
+<li>Must <strong>insert before rebalancing</strong> — the number needs
+to be in a heap to potentially move.</li>
+<li>Must <strong>rebalance before reading</strong> — if sizes are off,
+the roots aren’t the middle numbers anymore.</li>
+</ul>
+<hr />
+<h2 id="deep-dive-why-do-we-rebalance">6. Deep Dive: WHY Do We
+Rebalance?</h2>
+<p>Watch what happens if we <strong>don’t</strong> rebalance:</p>
+<pre><code>    Left=[1,2,3,5]   Right=[8,9]       ← Left has 4, Right has 2
+    Left root = 5,   Right root = 8
+
+    We&#39;d say: median = (5+8)/2 = 6.5
+
+    But sorted list is [1, 2, 3, 5, 8, 9]
+    Real median = (3+5)/2 = 4
+
+    ❌ We got 6.5
+    ✅ Should be 4</code></pre>
+<p>The cut drifted away from the middle. The “biggest in Left” is no
+longer near the center — it’s too far right. So the roots stopped being
+the two middle numbers.</p>
+<p>Fix it — move 5 over:</p>
+<pre><code>    Left=[1,2,3]   Right=[5,8,9]      ← equal, cut is back in the middle
+    Left root = 3, Right root = 5
+
+    Median = (3+5)/2 = 4  ✅</code></pre>
+<p><strong>The size rule exists for one reason only: to keep the cut in
+the middle.</strong></p>
+<hr />
+<h2 id="deep-dive-why-do-we-always-move-the-root">7. Deep Dive: WHY Do
+We Always Move the Root?</h2>
+<p>Left is too big. We need to move one number from Left to Right. Which
+one? Let’s try them all:</p>
+<pre><code>    Left=[1, 2, 3, 5]   Right=[8, 9]
+    Rule: everything in Left must be SMALLER than everything in Right
+
+    Move 1?  →  Left=[2,3,5]   Right=[1, 8, 9]
+               1 is sitting in Right with 8 and 9
+               but 1 is NOT bigger than them
+               ❌ breaks the rule
+
+    Move 2?  →  Left=[1,3,5]   Right=[2, 8, 9]
+               same problem. 2 doesn&#39;t belong with 8 and 9
+               ❌ breaks the rule
+
+    Move 3?  →  Left=[1,2,5]   Right=[3, 8, 9]
+               3 &lt; 8 and 3 &lt; 9, order is fine
+               BUT Left root is now 5, Right root is 3
+               5 &gt; 3 ← Left has a bigger number than Right
+               ❌ breaks the rule
+
+    Move 5?  →  Left=[1,2,3]   Right=[5, 8, 9]
+               5 &lt; 8 and 5 &lt; 9  ✅
+               Left root=3, Right root=5, and 3 &lt; 5  ✅
+               Everything works  ✅</code></pre>
+<p><strong>5 is the only number that can move.</strong> It’s the biggest
+in Left — the number closest to the boundary. It’s the only one that
+fits into Right without breaking anything.</p>
+<p><strong>That’s why we use a max-heap on the left</strong> — not just
+to show us the biggest number, but so we can grab it and move it in O(1)
+when we rebalance.</p>
+<hr />
+<h2 id="live-trace-watch-it-happen">8. Live Trace — Watch It Happen</h2>
+<p>Stream: <strong>5, 2, 8, 1, 9</strong></p>
+<pre><code>Start: Left=[]  Right=[]
+
+① 5 arrives
+   Left is empty → goes Left
+   Left=[5]  Right=[]
+   Median = 5
+
+② 2 arrives  →  2 ≤ 5, goes Left
+   Left=[2,5]  Right=[]
+   ❗ Left is too big → move biggest (5) to Right
+   Left=[2]  Right=[5]
+   Median = (2+5)/2 = 3.5
+
+③ 8 arrives  →  8 &gt; 2, goes Right
+   Left=[2]  Right=[5,8]
+   ❗ Right is bigger → move smallest (5) to Left
+   Left=[2,5]  Right=[8]
+   Median = 5  (Left has extra → Left root)
+
+④ 1 arrives  →  1 ≤ 5, goes Left
+   Left=[1,2,5]  Right=[8]
+   ❗ Left is too big → move biggest (5) to Right
+   Left=[1,2]  Right=[5,8]
+   Median = (2+5)/2 = 3.5
+
+⑤ 9 arrives  →  9 &gt; 2, goes Right
+   Left=[1,2]  Right=[5,8,9]
+   ❗ Right is bigger → move smallest (5) to Left
+   Left=[1,2,5]  Right=[8,9]
+   Median = 5  (Left has extra → Left root)</code></pre>
+<p><strong>Notice:</strong> 5 keeps bouncing between buckets. That’s not
+a bug — that’s the rebalance working. The number closest to the median
+gets shuttled back and forth as new data comes in. It’s always the root
+that moves because it’s always the one closest to the boundary.</p>
+<hr />
+<h2 id="the-problem-trace-find-median-from-data-stream">9. The Problem
+Trace (Find Median from Data Stream)</h2>
+<pre><code>insertNum(3)  →  Left is empty → goes Left
+                 Left=[3]         Right=[]
+
+insertNum(1)  →  1 ≤ 3 → goes Left
+                 Left=[1,3]       Right=[]
+                 ❗ Left too big → move 3 to Right
+                 Left=[1]         Right=[3]
+
+findMedian()  →  Equal size → (1+3)/2 = 2.0  ✅
+
+insertNum(5)  →  5 &gt; 1 → goes Right
+                 Left=[1]         Right=[3,5]
+                 ❗ Right bigger → move 3 to Left
+                 Left=[1,3]       Right=[5]
+
+findMedian()  →  Left has extra → root = 3.0  ✅
+
+insertNum(4)  →  4 &gt; 3 → goes Right
+                 Left=[1,3]       Right=[4,5]
+                 Balanced. No move needed.
+
+findMedian()  →  Equal size → (3+4)/2 = 3.5  ✅</code></pre>
+<hr />
+<h2 id="why-the-median-doesnt-have-to-exist-in-the-stream">10. Why the
+Median Doesn’t Have to Exist in the Stream</h2>
+<p>Common confusion: <code>[1, 2, 3, 5, 8, 9]</code> → median = 4. But
+there’s no 4 in the data. Is that wrong?</p>
+<p><strong>No.</strong> Think about test scores:</p>
+<pre><code>    You:    60
+    Friend: 80
+
+    Median = (60 + 80) / 2 = 70</code></pre>
+<p>Neither of you scored 70. But 70 IS the middle. It’s the balance
+point between the two scores.</p>
+<pre><code>    Odd count  →  middle number exists in the data      →  return it
+    Even count →  middle falls BETWEEN two numbers      →  average them</code></pre>
+<p>The median is a <strong>position concept</strong> (where is the
+middle of this data?) — not a <strong>value concept</strong> (which
+number is in the middle?). That’s why the return type is
+<code>float</code>.</p>
+<hr />
+<h2 id="why-left-gets-the-extra-element">11. Why Left Gets the Extra
+Element</h2>
+<p>Odd count means one side MUST have one extra. We chose Left. Here’s
+why it’s clean:</p>
+<pre><code>5 numbers sorted:  [1, 2, 3, 4, 5]
+position:           1   2   3   4   5
+                            ↑
+                         middle = position 3
+
+Split → Left gets 3, Right gets 2:
+
+    position:  1    2    3  │  4    5
+    value:    [1,   2,   3] │ [4,   5]
+                        ↑
+                     LAST number in Left
+                     = BIGGEST in Left
+                     = the ROOT
+                     = the MIDDLE of the whole list</code></pre>
+<p>Same with 3 numbers:</p>
+<pre><code>    position:  1    2  │  3
+    value:    [2,   3] │ [4]
+                    ↑
+                 LAST number in Left = MIDDLE of the whole list = ROOT</code></pre>
+<p><strong>The pattern:</strong></p>
+<pre><code>    Left always covers from the start UP TO the middle.
+    The middle is the LAST number in Left.
+    The LAST number in Left = the BIGGEST in Left = the root.
+
+    So: root = middle = median.  Every time.</code></pre>
+<p>We could have given Right the extra instead — then we’d read Right’s
+root for odd counts. We just chose Left. Pick one rule, stick with it.
+Everything works.</p>
+<hr />
+<h2 id="the-signal-how-to-recognize-two-heaps">12. The Signal — How to
+Recognize Two Heaps</h2>
+<h3 id="signal-words">Signal Words</h3>
+<pre><code>┌──────────────────────────────────────────────────┐
+│           🔔 SIGNAL WORDS / PHRASES              │
+├──────────────────────────────────────────────────┤
+│                                                  │
+│  1. &quot;median&quot;                    ← strongest      │
+│  2. &quot;middle element&quot;            ← strongest      │
+│  3. &quot;stream&quot; + &quot;median&quot;         ← instant        │
+│  4. &quot;k-th smallest at any time&quot; ← strong         │
+│  5. &quot;sliding window median&quot;     ← instant        │
+│  6. &quot;split into two groups&quot;     ← moderate       │
+│  7. &quot;balance&quot; + &quot;partition&quot;     ← moderate       │
+│                                                  │
+└──────────────────────────────────────────────────┘</code></pre>
+<h3 id="the-decision-question">The Decision Question</h3>
+<blockquote>
+<p>“Do I need to track a <strong>middle point</strong> or <strong>k-th
+position</strong> in data that keeps changing?”</p>
+<p>If YES → Two Heaps.</p>
+</blockquote>
+<h3 id="two-heaps-vs.-similar-patterns">Two Heaps vs. Similar
+Patterns</h3>
+<pre><code>    &quot;Find median of a stream&quot;            → Two Heaps
+    &quot;Find top K elements&quot;                → Single Heap (Top K)
+    &quot;Find K-th smallest overall&quot;         → Single Min-Heap
+    &quot;Median in a sliding WINDOW&quot;         → Two Heaps + lazy deletion
+    &quot;Sort this data&quot;                     → Just sort</code></pre>
+<h3 id="key-difference-from-top-k">Key difference from Top K:</h3>
+<pre><code>    Top K:      &quot;I need the K best things&quot;        → 1 heap, size K
+    Two Heaps:  &quot;I need the MIDDLE of everything&quot; → 2 heaps, balanced</code></pre>
+<hr />
+<h2 id="the-4-classic-problems">13. The 4 Classic Problems</h2>
+<pre><code>┌─────────────────────────────────────────────────────────────┐
+│  #1  Find Median from Data Stream                           │
+│      Signal: &quot;stream&quot; + &quot;median&quot;                            │
+│      The base problem. You solved this one.                 │
+├─────────────────────────────────────────────────────────────┤
+│  #2  Sliding Window Median                                  │
+│      Signal: &quot;window&quot; + &quot;median&quot;                            │
+│      Same core idea + numbers also LEAVE the heaps          │
+│      (adds a &quot;remove&quot; step — the hardest variant)           │
+├─────────────────────────────────────────────────────────────┤
+│  #3  Maximize Capital (IPO)                                 │
+│      Signal: &quot;maximize profit&quot; + &quot;pick k projects&quot;          │
+│      Two heaps partition on a CONSTRAINT, not just value    │
+├─────────────────────────────────────────────────────────────┤
+│  #4  Find Median of Two Sorted Arrays                       │
+│      Signal: &quot;median&quot; + &quot;two sorted arrays&quot;                 │
+│      Same partition idea, optimized with binary search      │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="the-code-annotated">14. The Code (Annotated)</h2>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> heapq <span class="im">import</span> <span class="op">*</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.left  <span class="op">=</span> []   <span class="co"># max-heap (negate values — Python only has min-heap)</span></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.right <span class="op">=</span> []   <span class="co"># min-heap</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> insertNum(<span class="va">self</span>, num):</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ① ROUTE — which bucket?</span></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="va">self</span>.left <span class="op">==</span> []:              <span class="co"># empty → default Left</span></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>            heappush(<span class="va">self</span>.left, <span class="op">-</span>num)</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> num <span class="op">&lt;=</span> <span class="op">-</span><span class="va">self</span>.left[<span class="dv">0</span>]:       <span class="co"># ≤ Left root → Left</span></span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>            heappush(<span class="va">self</span>.left, <span class="op">-</span>num)    <span class="co"># negate! Left is max-heap</span></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:                            <span class="co"># &gt; Left root → Right</span></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>            heappush(<span class="va">self</span>.right, num)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ② REBALANCE — fix sizes</span></span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(<span class="va">self</span>.left) <span class="op">-</span> <span class="bu">len</span>(<span class="va">self</span>.right) <span class="op">&gt;</span> <span class="dv">1</span>:      <span class="co"># Left too big</span></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>            heappush(<span class="va">self</span>.right, <span class="op">-</span>heappop(<span class="va">self</span>.left))  <span class="co"># move Left root → Right</span></span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">elif</span> <span class="bu">len</span>(<span class="va">self</span>.left) <span class="op">&lt;</span> <span class="bu">len</span>(<span class="va">self</span>.right):         <span class="co"># Right too big</span></span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>            heappush(<span class="va">self</span>.left, <span class="op">-</span>heappop(<span class="va">self</span>.right))  <span class="co"># move Right root → Left</span></span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> findMedian(<span class="va">self</span>):</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># ③ READ — get median from roots</span></span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(<span class="va">self</span>.right) <span class="op">==</span> <span class="bu">len</span>(<span class="va">self</span>.left):          <span class="co"># even count</span></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> ((<span class="op">-</span><span class="va">self</span>.left[<span class="dv">0</span>]) <span class="op">+</span> (<span class="va">self</span>.right[<span class="dv">0</span>])) <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span><span class="va">self</span>.left[<span class="dv">0</span>] <span class="op">/</span> <span class="fl">1.0</span>                     <span class="co"># odd count → Left root</span></span></code></pre></div>
+<h3 id="why-the-negation">Why the negation?</h3>
+<p>Python’s <code>heapq</code> is <strong>min-heap only</strong>. To
+simulate max-heap:</p>
+<pre><code>    Push -num instead of num.
+    The smallest negative = the largest original number.
+    So heapq root = most negative = largest number = what we want on top.
+
+    Example: push 3, 5, 1 as -3, -5, -1
+    heapq sorts: [-5, -3, -1]
+    Root = -5  →  negate back →  5  →  the max. Correct.</code></pre>
+<hr />
+<h2 id="common-bugs-traps">15. Common Bugs &amp; Traps</h2>
+<table>
+<colgroup>
+<col style="width: 9%" />
+<col style="width: 15%" />
+<col style="width: 43%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>Bug</th>
+<th>What happened</th>
+<th>The Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>self = self</code></td>
+<td>Does nothing</td>
+<td><code>self</code> is auto-passed. Use it to SET attributes:
+<code>self.x = value</code>. Never assign it to itself.</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>heapq.push()</code></td>
+<td>Doesn’t exist</td>
+<td><code>from heapq import *</code> → use <code>heappush()</code>
+directly. No module prefix.</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>heapqpush</code></td>
+<td>Words smashed together</td>
+<td>It’s <code>heappush</code>. h-e-a-p-p-u-s-h. Two p’s.
+<code>heap</code> + <code>push</code>.</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Missing <code>-num</code> on first push</td>
+<td>First number not negated</td>
+<td>Left is ALWAYS max-heap. EVERY push to Left must negate. No
+exceptions — including the very first number.</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>if</code> instead of <code>elif</code></td>
+<td>Double push</td>
+<td>A number can only go to ONE place. Choices are mutually exclusive →
+use <code>elif</code>.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-if-vs-elif-trap-bug-5-the-sneaky-one">The if vs elif trap
+(Bug #5 — the sneaky one):</h3>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ❌ </span><span class="al">BUG</span><span class="co"> — both ifs check independently</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">self</span>.left <span class="op">==</span> []:</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    heappush(<span class="va">self</span>.left, <span class="op">-</span>num)      <span class="co"># runs: pushes 3</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> num <span class="op">&lt;=</span> <span class="op">-</span><span class="va">self</span>.left[<span class="dv">0</span>]:           <span class="co"># ALSO checks. 3 ≤ 3 = True.</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    heappush(<span class="va">self</span>.left, <span class="op">-</span>num)      <span class="co"># pushes 3 AGAIN. Double push.</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># ✅ FIXED — elif stops after first match</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="va">self</span>.left <span class="op">==</span> []:</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    heappush(<span class="va">self</span>.left, <span class="op">-</span>num)      <span class="co"># runs: pushes 3</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="cf">elif</span> num <span class="op">&lt;=</span> <span class="op">-</span><span class="va">self</span>.left[<span class="dv">0</span>]:         <span class="co"># SKIPPED. First if was True.</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>    heappush(<span class="va">self</span>.left, <span class="op">-</span>num)      <span class="co"># never runs.</span></span></code></pre></div>
+<p><strong>Rule:</strong> “Are these choices mutually exclusive?” → If
+yes → <code>if/elif/else</code>.</p>
+<hr />
+<h2 id="complexity">16. Complexity</h2>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Time</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>insertNum</td>
+<td>O(log n)</td>
+<td>At most 2 heap operations (push + rebalance)</td>
+</tr>
+<tr>
+<td>findMedian</td>
+<td>O(1)</td>
+<td>Just reading the two roots</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>O(n)</td>
+<td>All numbers stored across both heaps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-not-just-sort-each-time">Why not just sort each time?</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Insert</th>
+<th>Find Median</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sort every time</td>
+<td>O(n log n)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td>Two Heaps</td>
+<td><strong>O(log n)</strong></td>
+<td><strong>O(1)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Sorting rebuilds everything. Two Heaps only touches what changed.</p>
+<hr />
+<h2 id="quick-reference-card">Quick Reference Card</h2>
+<pre><code>  🔔 See &quot;median&quot; + &quot;stream/dynamic&quot;  →  Think Two Heaps
+
+  🏗️  Setup:
+       Left  = Max-Heap (smaller half)   ← root = BIGGEST of small
+       Right = Min-Heap (larger half)    ← root = SMALLEST of large
+
+  ⚙️  Each insert:   Route → Rebalance → Read
+  📏  Invariant:     |Left| == |Right|  OR  |Left| == |Right| + 1
+  📍  Median:        Between the two roots (or Left root if odd)
+
+  ⏱️  Time:  insert O(log n)  |  median O(1)
+  📦  Space: O(n)</code></pre>
+</body>
+</html>

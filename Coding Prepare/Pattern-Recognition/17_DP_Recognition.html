@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DP Recognition Guide</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pattern-guide.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DP Recognition Guide</h1>
+</header>
+<h1 id="dynamic-programming-problem-spotting">Dynamic Programming —
+Problem Spotting</h1>
+<blockquote>
+<p><strong>Use this BEFORE choosing a DP sub-type.</strong> It answers:
+“Is this DP?” and “Which DP shape am I looking at?” Specific sub-types →
+see <code>11_Knapsack_01_DP.md</code>, <code>16_Linear_DP.md</code></p>
+</blockquote>
+<hr />
+<h2 id="layer-1-is-this-dp">LAYER 1 — Is This DP?</h2>
+<p>The two mandatory properties. <strong>Both must be true.</strong> If
+either is missing → not DP.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Property</th>
+<th>What It Means</th>
+<th>How to Spot It</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Overlapping Subproblems</strong></td>
+<td>The same sub-answer is needed multiple times</td>
+<td>“I’m computing f(3) inside f(5) AND inside f(4)” → reuse instead of
+recompute</td>
+</tr>
+<tr>
+<td><strong>Optimal Substructure</strong></td>
+<td>The best answer to the whole = built from best answers to parts</td>
+<td>“The min cost path through node N uses the min cost path to reach
+N”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Quick gut-check:</strong> Can you write a plain recursion
+that solves it? → YES → Check if it recomputes the same args → YES → DP
+opportunity.</p>
+<hr />
+<h2 id="layer-2-the-5-dp-question-signals">LAYER 2 — The 5 DP Question
+Signals</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>If the problem asks…</th>
+<th>DP signal</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“How many <strong>ways</strong> / <strong>distinct</strong>
+paths”</td>
+<td>✓ Count DP</td>
+<td>Linear or 2D</td>
+</tr>
+<tr>
+<td>“<strong>Minimum</strong> / <strong>maximum</strong> cost, steps,
+coins”</td>
+<td>✓ Optimize DP</td>
+<td>Linear, Knapsack, or 2D</td>
+</tr>
+<tr>
+<td>“<strong>Can you reach</strong> / <strong>is it
+possible</strong>”</td>
+<td>✓ Reachability DP</td>
+<td>Linear or Knapsack</td>
+</tr>
+<tr>
+<td>“<strong>Take or skip</strong> each item, limited
+<strong>capacity</strong>”</td>
+<td>✓ Knapsack DP</td>
+<td>0/1 or Unbounded</td>
+</tr>
+<tr>
+<td>“Compare / align <strong>two strings/sequences</strong>”</td>
+<td>✓ String DP</td>
+<td>LCS / Edit Distance</td>
+</tr>
+<tr>
+<td>“<strong>Generate all</strong> / <strong>list all</strong>”</td>
+<td>✗ → Backtracking instead</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p><strong>The single clearest signal:</strong> <em>“answer for n
+depends on answer for smaller n — and those smaller n’s
+overlap.”</em></p>
+<hr />
+<h2 id="layer-3-which-dp-shape">LAYER 3 — Which DP Shape?</h2>
+<p>Once you know it’s DP, pick the shape from the problem’s
+structure:</p>
+<pre><code>One sequence, decisions at each step
+  ├─ &quot;take 1 or 2 steps&quot;, &quot;rob or skip&quot;, Fibonacci-style
+  └─ → LINEAR DP (see 16_Linear_DP.md)
+
+Items with weight + capacity limit, each item once
+  └─ → 0/1 KNAPSACK (see 11_Knapsack_01_DP.md)
+
+Items can be REUSED (coins, tiles)
+  └─ → UNBOUNDED KNAPSACK ↓
+
+Two strings or sequences being COMPARED / ALIGNED
+  └─ → STRING DP (LCS, Edit Distance) ↓
+
+Grid — move through cells (right/down)
+  └─ → 2D GRID DP ↓</code></pre>
+<hr />
+<h2 id="shape-unbounded-knapsack">Shape: Unbounded Knapsack</h2>
+<p><strong>Signal:</strong> items can be reused indefinitely +
+capacity/target exists</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Classic Problem</th>
+<th>Signal phrase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Coin Change (min coins)</td>
+<td>“any denomination, unlimited supply, make amount”</td>
+</tr>
+<tr>
+<td>Coin Change II (ways)</td>
+<td>“how many ways to make amount”</td>
+</tr>
+<tr>
+<td>Cutting Rod</td>
+<td>“cut into pieces of any length, maximize value”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key difference from 0/1:</strong> inner loop goes
+<strong>FORWARD</strong> (allows reuse), not backward.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> coinChange(coins, amount):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [<span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)] <span class="op">*</span> (amount <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> coin <span class="kw">in</span> coins:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> a <span class="kw">in</span> <span class="bu">range</span>(coin, amount <span class="op">+</span> <span class="dv">1</span>):   <span class="co"># FORWARD → allows reuse</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            dp[a] <span class="op">=</span> <span class="bu">min</span>(dp[a], dp[a <span class="op">-</span> coin] <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[amount] <span class="cf">if</span> dp[amount] <span class="op">!=</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(amount × coins) | Space: O(amount)</span></span></code></pre></div>
+<p><strong>Trap:</strong> Using backward loop (0/1 pattern) on an
+unbounded problem → each coin used at most once → WRONG.</p>
+<hr />
+<h3 id="example-deep-dive-coin-change-322">Example Deep Dive — Coin
+Change (#322)</h3>
+<p><strong>Problem:</strong> Given coins of any denomination with
+unlimited supply, find the minimum number of coins to make
+<code>amount</code>. Return -1 if impossible.</p>
+<h4 id="signals-that-point-to-dp-how-to-read-the-problem">Signals that
+point to DP (how to read the problem)</h4>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Signal you see</th>
+<th>What it tells you</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“minimum number of” + “combinations/selections”</td>
+<td>Optimize DP — not counting, not reachability</td>
+</tr>
+<tr>
+<td>Infinite supply of items + reach a target</td>
+<td>Unbounded Knapsack — items can be reused</td>
+</tr>
+<tr>
+<td>Subproblem inside subproblem of the SAME type</td>
+<td>Classic DP shape: <code>minCoins(15)</code> →
+<code>minCoins(10)</code> → same question</td>
+</tr>
+<tr>
+<td>Overlapping subproblems</td>
+<td><code>minCoins(10)</code> is called from multiple paths: from 15 via
+coin 5, from 11 via coin 1, etc.</td>
+</tr>
+</tbody>
+</table>
+<h4 id="why-greedy-fails-here">Why greedy fails here</h4>
+<p>Greedy (always pick the largest coin that fits) gives the
+<strong>wrong answer</strong> on certain inputs:</p>
+<pre><code>coins = [1, 3, 4], amount = 6
+Greedy: 4 + 1 + 1 = 3 coins  ❌
+DP:     3 + 3     = 2 coins  ✅</code></pre>
+<p>Greedy fails because a locally optimal choice (coin 4) blocks the
+globally optimal path (two 3s). Any time greedy fails → DP is the
+tool.</p>
+<h4 id="recurrence">Recurrence</h4>
+<pre><code>dp(amt) = min(1 + dp(amt - coin)  for each coin in coins)</code></pre>
+<p>Read it as: “To make <code>amt</code>, try subtracting each coin,
+recurse on the remainder, add 1 for the coin used. Take the
+minimum.”</p>
+<p><strong>Base cases:</strong> - <code>dp(0) = 0</code> — zero coins
+needed to make amount 0 - <code>dp(negative) = float('inf')</code> —
+impossible; don’t count this path</p>
+<h4 id="two-implementations">Two implementations</h4>
+<p><strong>Top-Down (recursion + HashMap memoization):</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> coinChange(coins, amount):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    memo <span class="op">=</span> {}</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> dp(amt):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> amt <span class="op">==</span> <span class="dv">0</span>: <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> amt <span class="op">&lt;</span> <span class="dv">0</span>:  <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> amt <span class="kw">in</span> memo: <span class="cf">return</span> memo[amt]</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        memo[amt] <span class="op">=</span> <span class="bu">min</span>(<span class="dv">1</span> <span class="op">+</span> dp(amt <span class="op">-</span> c) <span class="cf">for</span> c <span class="kw">in</span> coins)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> memo[amt]</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> dp(amount)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result <span class="cf">if</span> result <span class="op">!=</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(amount × coins) | Space: O(amount)</span></span></code></pre></div>
+<p><strong>Bottom-Up (tabulation — the interview default):</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> coinChange(coins, amount):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [<span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)] <span class="op">*</span> (amount <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> coin <span class="kw">in</span> coins:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> a <span class="kw">in</span> <span class="bu">range</span>(coin, amount <span class="op">+</span> <span class="dv">1</span>):   <span class="co"># FORWARD → allows reuse</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            dp[a] <span class="op">=</span> <span class="bu">min</span>(dp[a], dp[a <span class="op">-</span> coin] <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[amount] <span class="cf">if</span> dp[amount] <span class="op">!=</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(amount × coins) | Space: O(amount)</span></span></code></pre></div>
+<p><strong>When to use which:</strong> - Top-Down: easier to reason
+about — write the recurrence, add a cache, done - Bottom-Up: slightly
+faster in practice (no recursion overhead), preferred in interviews once
+you understand the pattern</p>
+<h4 id="complexity">Complexity</h4>
+<ul>
+<li><strong>Time:</strong> O(amount × len(coins)) — for each amount from
+1 to amount, try every coin</li>
+<li><strong>Space:</strong> O(amount) — dp array of size amount + 1</li>
+</ul>
+<hr />
+<h2 id="shape-string-dp-lcs-edit-distance">Shape: String DP (LCS / Edit
+Distance)</h2>
+<p><strong>Signal:</strong> two strings s1, s2 — compare, align,
+transform, or find commonality</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Classic Problem</th>
+<th>Signal phrase</th>
+<th>dp[i][j] means</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Longest Common Subsequence</td>
+<td>“longest subsequence in both”</td>
+<td>LCS of s1[:i] and s2[:j]</td>
+</tr>
+<tr>
+<td>Edit Distance</td>
+<td>“min operations to transform s1 → s2”</td>
+<td>min edits for s1[:i] → s2[:j]</td>
+</tr>
+<tr>
+<td>Longest Common Substring</td>
+<td>“contiguous common portion”</td>
+<td>length of common substr ending at i,j</td>
+</tr>
+<tr>
+<td>Is Subsequence</td>
+<td>“can s1 be found in s2 in order?”</td>
+<td>reachability DP</td>
+</tr>
+</tbody>
+</table>
+<p><strong>LCS recurrence — the template:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> lcs(s1, s2):</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    m, n <span class="op">=</span> <span class="bu">len</span>(s1), <span class="bu">len</span>(s2)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [[<span class="dv">0</span>] <span class="op">*</span> (n <span class="op">+</span> <span class="dv">1</span>) <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(m <span class="op">+</span> <span class="dv">1</span>)]</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, m <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> s1[i<span class="op">-</span><span class="dv">1</span>] <span class="op">==</span> s2[j<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>                dp[i][j] <span class="op">=</span> dp[i<span class="op">-</span><span class="dv">1</span>][j<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> <span class="dv">1</span>    <span class="co"># chars match → extend</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>                dp[i][j] <span class="op">=</span> <span class="bu">max</span>(dp[i<span class="op">-</span><span class="dv">1</span>][j], dp[i][j<span class="op">-</span><span class="dv">1</span>])   <span class="co"># skip one char</span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[m][n]</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(m×n) | Space: O(m×n)</span></span></code></pre></div>
+<p><strong>Trap:</strong> String DP is almost always 2D —
+<code>dp[i][j]</code> where i indexes s1 and j indexes s2. If you try to
+flatten it to 1D, you lose the cross-string relationship.</p>
+<hr />
+<h2 id="shape-2d-grid-dp">Shape: 2D Grid DP</h2>
+<p><strong>Signal:</strong> grid/matrix — move from top-left to
+bottom-right, count paths or minimize cost</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Classic Problem</th>
+<th>Signal phrase</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Unique Paths</td>
+<td>“how many ways to reach bottom-right”</td>
+<td>only right/down moves</td>
+</tr>
+<tr>
+<td>Min Path Sum</td>
+<td>“minimum cost path, right/down only”</td>
+<td>grid values are costs</td>
+</tr>
+<tr>
+<td>Triangle Min Path</td>
+<td>“min path from top to bottom”</td>
+<td>pyramid shape</td>
+</tr>
+<tr>
+<td>Maximal Square</td>
+<td>“largest square of all 1s”</td>
+<td>grid of 0/1</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Unique Paths recurrence:</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> uniquePaths(m, n):</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [[<span class="dv">1</span>] <span class="op">*</span> n <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(m)]</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, m):</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, n):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            dp[i][j] <span class="op">=</span> dp[i<span class="op">-</span><span class="dv">1</span>][j] <span class="op">+</span> dp[i][j<span class="op">-</span><span class="dv">1</span>]   <span class="co"># from above + from left</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[m<span class="op">-</span><span class="dv">1</span>][n<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(m×n) | Space: O(m×n) → can optimize to O(n)</span></span></code></pre></div>
+<p><strong>Space optimization:</strong> Grid DP with only top/left
+dependency → keep only previous row.</p>
+<hr />
+<h2 id="decision-flowchart-interview-use">Decision Flowchart (Interview
+Use)</h2>
+<pre><code>Problem spotted as DP? (overlapping subproblems + optimal substructure)
+              │
+    ┌─────────┴────────────┐
+    │                      │
+ 1 sequence            2 sequences
+ or 1D                  (strings)
+    │                      │
+    ├─ Fibonacci-style      └─ STRING DP
+    │  (take/skip 1 step)     (LCS/Edit Distance)
+    │  → LINEAR DP
+    │
+    ├─ Items + capacity, each once
+    │  → 0/1 KNAPSACK
+    │
+    ├─ Items + capacity, reuse ok
+    │  → UNBOUNDED KNAPSACK
+    │
+    └─ Grid movement (right/down)
+       → 2D GRID DP</code></pre>
+<hr />
+<h2 id="master-signal-table">Master Signal Table</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Signal Keyword</th>
+<th>DP Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>climb stairs / jump game / decode ways</td>
+<td>Linear DP</td>
+</tr>
+<tr>
+<td>rob houses / max profit (skip adjacent)</td>
+<td>Linear DP</td>
+</tr>
+<tr>
+<td>coin change / rod cutting (reuse)</td>
+<td>Unbounded Knapsack</td>
+</tr>
+<tr>
+<td>“minimum number of” + “unlimited supply” + reach target</td>
+<td>Unbounded Knapsack</td>
+</tr>
+<tr>
+<td>greedy fails (local best ≠ global best)</td>
+<td>DP required — check Unbounded Knapsack</td>
+</tr>
+<tr>
+<td>subset sum / partition equal subset</td>
+<td>0/1 Knapsack</td>
+</tr>
+<tr>
+<td>LCS / edit distance / align two strings</td>
+<td>String DP</td>
+</tr>
+<tr>
+<td>unique paths / min path sum in grid</td>
+<td>2D Grid DP</td>
+</tr>
+<tr>
+<td>largest square / dungeon game</td>
+<td>2D Grid DP</td>
+</tr>
+<tr>
+<td>palindrome subsequence / longest palindrome</td>
+<td>String DP</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="universal-dp-traps">Universal DP Traps</h2>
+<ol type="1">
+<li><strong>Plain recursion ≠ DP</strong> — you MUST add memoization or
+tabulation. <code>f(n-1) + f(n-2)</code> alone is O(2ⁿ).</li>
+<li><strong>“Generate all” → Backtracking</strong> — if the answer is a
+list of solutions, not a count/min/max.</li>
+<li><strong>Wrong loop direction for Knapsack</strong> — 0/1 = backward,
+Unbounded = forward.</li>
+<li><strong>String DP needs 2D</strong> — one dimension per string.
+Don’t flatten prematurely.</li>
+<li><strong>Off-by-one on dp size</strong> —
+<code>dp = [0] * (n + 1)</code> not <code>n</code>, because dp[0] = base
+case.</li>
+<li><strong>Greedy feels right but fails</strong> — if you can construct
+a counter-example where the locally optimal pick leads to a globally
+worse result (e.g., <code>coins=[1,3,4], amount=6</code>), greedy is
+wrong. Reach for DP.</li>
+</ol>
+</body>
+</html>

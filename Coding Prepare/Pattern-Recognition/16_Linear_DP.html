@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Linear DP Pattern Recognition</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pattern-guide.css" />
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Linear DP Pattern Recognition</h1>
+</header>
+<h1 id="linear-dp">Linear DP</h1>
+<h2 id="spot-it">Spot It</h2>
+<table>
+<thead>
+<tr>
+<th>Signal</th>
+<th>Linear DP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>“how many ways / distinct ways”</td>
+<td>✓ count DP</td>
+</tr>
+<tr>
+<td>“minimum steps / coins / operations”</td>
+<td>✓ optimize DP</td>
+</tr>
+<tr>
+<td>“can you reach / is it possible?”</td>
+<td>✓ reachability DP</td>
+</tr>
+<tr>
+<td>answer for n depends on smaller n</td>
+<td>✓ overlapping subproblems</td>
+</tr>
+<tr>
+<td>“climb / jump / tile / decode”</td>
+<td>✓ classic linear DP</td>
+</tr>
+<tr>
+<td>“generate all” / “list all”</td>
+<td>✗ → Backtracking instead</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Key:</strong> You have <strong>overlapping
+subproblems</strong> — the same sub-answer is needed multiple times.
+Reuse it instead of recomputing.</p>
+<p><strong>DP vs Backtracking:</strong> - Backtracking: GENERATES paths.
+Signal = “generate all”, “list all” - DP: COUNTS/OPTIMIZES using stored
+results. Signal = “how many”, “min/max” - Wiganz’s rule: <em>“reuse the
+old result”</em> = DP</p>
+<hr />
+<h2 id="why-it-works">Why It Works</h2>
+<p>The recurrence <code>f(n) = f(n-1) + f(n-2)</code> comes from asking:
+<strong>“What’s the LAST decision that got me here?”</strong></p>
+<p>The allowed moves define the recurrence: - “take 1 or 2 steps” →
+<code>f(n) = f(n-1) + f(n-2)</code> - “take 1, 2, or 3 steps” →
+<code>f(n) = f(n-1) + f(n-2) + f(n-3)</code> - “take 1 or k steps” →
+<code>f(n) = f(n-1) + f(n-k)</code></p>
+<p><strong>This is the core of ALL Linear DP:</strong> don’t solve the
+big problem directly — ask what subproblems feed into it.</p>
+<hr />
+<h2 id="the-core">The Core</h2>
+<p><strong>Template 1: Space-Optimized (O(1) space) —
+preferred</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    prev1 <span class="op">=</span> <span class="dv">1</span>   <span class="co"># f(1)</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    prev2 <span class="op">=</span> <span class="dv">2</span>   <span class="co"># f(2)</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):   <span class="co"># range(3, n+1) — include n!</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        prev1 <span class="op">=</span> prev2</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        prev2 <span class="op">=</span> curr</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> prev2</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(1)</span></span></code></pre></div>
+<p><strong>Template 2: Tabulation with Full Array (O(n)
+space)</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [<span class="dv">0</span>] <span class="op">*</span> (n <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">2</span>] <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        dp[i] <span class="op">=</span> dp[i<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> dp[i<span class="op">-</span><span class="dv">2</span>]</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[n]</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(n)</span></span></code></pre></div>
+<p><strong>Template 3: Memoization (Top-Down)</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> lru_cache</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">@lru_cache</span>(maxsize<span class="op">=</span><span class="va">None</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">2</span>: <span class="cf">return</span> <span class="dv">2</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> climbingStairs(n<span class="op">-</span><span class="dv">1</span>) <span class="op">+</span> climbingStairs(n<span class="op">-</span><span class="dv">2</span>)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(n) for cache + call stack</span></span></code></pre></div>
+<p><strong>Bottom-Up vs Tabulation vs Loop+Reuse — Same Thing, Different
+Words:</strong> | Term | Meaning | |—|—| | Bottom-up | start from base
+cases, build up to n | | Tabulation | fill a table (dp array) cell by
+cell | | Loop + reuse | what it looks like in code | | Space-optimized
+tabulation | tabulation but only keep last K values | All of these refer
+to the same approach. Top-down = recursion + cache (memoization).</p>
+<hr />
+<h2 id="traps">Traps</h2>
+<p><strong>1. Off-by-one in range</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — for n=3, range(3,3) is empty!</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    ...</span></code></pre></div>
+<p><strong>2. Wrong swap order</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — loses prev1 before using it</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>prev1 <span class="op">=</span> prev2   <span class="co"># ← prev1 overwritten!</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>prev2 <span class="op">=</span> curr</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>prev2 <span class="op">=</span> prev1   <span class="co"># save old prev1 first</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>prev1 <span class="op">=</span> curr</span></code></pre></div>
+<p>OR: keep first swap but <code>return prev2</code> (both work — be
+consistent).</p>
+<p><strong>3. Submitting pure recursion as DP</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — this is O(2^n), NOT DP (no memoization)</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> f(n<span class="op">-</span><span class="dv">1</span>) <span class="op">+</span> f(n<span class="op">-</span><span class="dv">2</span>)</span></code></pre></div>
+<p>DP requires either a cache (memoization) or a loop (tabulation).
+Plain recursion = brute force.</p>
+<p><strong>4. Missing base case guard</strong> - n=1 needs a guard:
+without it, <code>range(3, 2)</code> is empty → returns
+<code>prev2=2</code> (wrong, should be 1) - n=2 does NOT need a guard:
+<code>range(3, 3)</code> is empty → returns <code>prev2=2</code>
+(correct)</p>
+<p><strong>5. Confusing DP with Backtracking</strong> - If you’re about
+to write “generate all paths” → stop. That’s Backtracking. - If the
+question says “how many ways” → DP. Count, don’t enumerate.</p>
+<hr />
+<h2 id="classic-problems">Classic Problems</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Recurrence</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Climbing Stairs</td>
+<td><code>f(n) = f(n-1) + f(n-2)</code></td>
+<td>base: f(1)=1, f(2)=2</td>
+</tr>
+<tr>
+<td>Fibonacci Number</td>
+<td><code>f(n) = f(n-1) + f(n-2)</code></td>
+<td>base: f(0)=0, f(1)=1</td>
+</tr>
+<tr>
+<td>House Robber</td>
+<td><code>f(n) = max(f(n-1), f(n-2) + nums[n])</code></td>
+<td>can’t rob adjacent</td>
+</tr>
+<tr>
+<td>Min Cost Climbing Stairs</td>
+<td><code>f(n) = min(f(n-1)+cost[n-1], f(n-2)+cost[n-2])</code></td>
+<td>take min path</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
