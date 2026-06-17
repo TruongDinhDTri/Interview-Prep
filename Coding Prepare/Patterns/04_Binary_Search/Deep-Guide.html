@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Binary Search — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.8rem,11vw,6.4rem);line-height:.92;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:33ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}
+  .lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}
+  .eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}
+  .core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}
+  .pin b{color:var(--sage-deep);}
+  /* predicate line */
+  .pred{display:flex;gap:6px;justify-content:center;margin:18px 0;flex-wrap:wrap;}
+  .pred .c{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-weight:600;}
+  .pred .f{background:#f6e3da;color:var(--clay-deep);border:1.5px solid var(--clay);}
+  .pred .t{background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .pred .flip{position:relative;}
+  .pred .flip::after{content:"flip ↓";position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.6rem;color:var(--ink-soft);white-space:nowrap;}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}
+
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.ex{border-color:var(--sky);}.shape.bd{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.ex .tag{background:var(--sky-deep);}.shape.bd .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}
+  .lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+  /* mini hallway inside the two cards */
+  .mini{margin-top:18px;}
+  .mini .strip{display:flex;gap:7px;justify-content:center;align-items:flex-end;}
+  .mini .r{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;border:1.5px solid var(--line);background:#fbf5e6;position:relative;}
+  .mini .r.drop{opacity:.3;}
+  .mini .r.drop::after{content:"";position:absolute;inset:-1px;border-radius:9px;background:linear-gradient(135deg,transparent 44%,var(--clay) 46%,var(--clay) 54%,transparent 56%);opacity:.65;}
+  .mini .r.live{border-color:var(--sage);background:#e6eddf;color:var(--sage-deep);}
+  .mini .r.keep{border-color:var(--sage-deep);background:#e6eddf;box-shadow:0 0 0 2.5px var(--sage);}
+  .mini .r.mid::before,.mini .r.keep::before{position:absolute;bottom:-17px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.56rem;white-space:nowrap;}
+  .mini .r.mid::before{content:"mid";color:var(--clay-deep);}
+  .mini .r.keep::before{content:"✓ keep";color:var(--sage-deep);}
+  .mini .cap{font-family:'Spline Sans Mono',monospace;font-size:.68rem;text-align:center;margin-top:26px;color:var(--ink-soft);}
+  .mini .cap b{color:var(--clay-deep);}
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}.alt b{color:var(--clay-deep);}
+
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  .stage{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;min-height:96px;margin:34px 0 6px;}
+  .cell{width:50px;height:50px;border-radius:12px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.28rem;position:relative;transition:transform .45s cubic-bezier(.34,1.56,.64,1),background .45s,border-color .45s,color .45s,opacity .45s;}
+  .cell .ptr{position:absolute;top:-25px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.56rem;white-space:nowrap;opacity:0;transition:opacity .3s;color:var(--ink-soft);}
+  .cell.has .ptr{opacity:1;}
+  .cell.dead{opacity:.22;transform:scale(.9);}
+  .cell.mid{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);transform:translateY(-8px) scale(1.06);}.cell.mid .ptr{color:var(--clay-deep);}
+  .cell.found{background:var(--sage);border-color:var(--sage-deep);color:#fbf5e6;transform:translateY(-8px) scale(1.12);}.cell.found .ptr{color:var(--sage-deep);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:2px 0 14px;flex-wrap:wrap;}.pbar i{width:20px;height:4px;border-radius:2px;background:var(--paper-deep);transition:background .3s;}.pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5em;font-size:1.02rem;line-height:1.55;}
+  .exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--clay-deep);display:block;margin-bottom:4px;}.exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Pattern 04</p>
+    <h1 class="title"><span class="l1">Binary</span><span class="l2">Search.</span></h1>
+    <p class="lede">One core idea — <b>throw away half</b> every step. Press step and watch the search space collapse.</p>
+  </header>
+
+  <!-- CORE IDEA -->
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>It's not “sorted” — it's <em>monotonic</em>.</h2>
+    <p>Everyone learns binary search as “a sorted array.” The real requirement is deeper: a <b>monotonic predicate</b> — a yes/no test that is <b>false … false, then true … true</b>, and never flips back. Sortedness is just <i>one</i> way to get that line.</p>
+    <div class="pred">
+      <span class="c f">F</span><span class="c f">F</span><span class="c f">F</span><span class="c t flip">T</span><span class="c t">T</span><span class="c t">T</span>
+    </div>
+    <p class="core">Binary search hunts the <b>flip point</b>. Check the middle: if it's on the false side, the flip is to the right — <b>delete the left half</b>. If true, the flip is here or left — <b>delete the right half</b>. <b>One test kills half the candidates.</b></p>
+    <div class="pin" data-l="THE ONE LINE"><b>Halve the search space with one comparison.</b> Each step throws away half: n → n/2 → n/4 → … → 1 = <b>O(log n)</b>. The only thing you ever need is a <b>monotonic</b> question — then the middle's answer tells you which half cannot contain what you seek.</div>
+  </section>
+
+  <!-- =============== SHAPE 1: FIND EXACT =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>Find exact</em> — is it here?</h2>
+    <div class="shape ex">
+      <span class="tag">The hit-or-miss</span>
+      <h3>Find exact</h3>
+      <p class="one">A sorted array; find the index of a target. Compare the middle to the target and discard the half that can't hold it — <b>including the mid itself</b>.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Sorted ⇒ the middle value tells you direction. <code class="inl">nums[mid] &lt; target</code> ⇒ everything from <code class="inl">left..mid</code> is too small ⇒ jump <code class="inl">left = mid+1</code>. Bigger ⇒ <code class="inl">right = mid−1</code>. Equal ⇒ done. The loop is <code class="inl">while left &lt;= right</code> because a single leftover cell still needs checking.</p>
+
+      <p class="lbl">The movement — watch half vanish each step</p>
+      <p class="muted" style="margin:0 0 4px">Find <code class="inl">9</code> in <code class="inl">[1, 3, 5, 7, 9, 11, 13]</code>.</p>
+      <div class="player" id="ex">
+        <div class="stage"></div><div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">def</span> binary_search(nums, target):
+    left, right = <span class="s">0</span>, <span class="k">len</span>(nums) - <span class="s">1</span>
+    <span class="k">while</span> left &lt;= right:                  <span class="c"># &lt;= : the last lone cell still counts</span>
+        mid = left + (right - left) // <span class="s">2</span>   <span class="c"># overflow-safe midpoint</span>
+        <span class="k">if</span>   nums[mid] == target: <span class="k">return</span> mid
+        <span class="k">elif</span> nums[mid] &lt;  target: left  = mid + <span class="s">1</span>  <span class="c"># kill left half + mid</span>
+        <span class="k">else</span>:                    right = mid - <span class="s">1</span>  <span class="c"># kill right half + mid</span>
+    <span class="k">return</span> -<span class="s">1</span></pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> search a sorted array · search a rotated sorted array (find which half is sorted first).</p>
+    </div>
+  </section>
+
+  <!-- =============== SHAPE 2: FIND BOUNDARY =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>Find boundary</em> — where does it flip?</h2>
+    <div class="shape bd">
+      <span class="tag">The flip-finder</span>
+      <h3>Find boundary (first true)</h3>
+      <p class="one">Forget “find a value.” Here you find a <b>border</b> — the one place where the world turns from NO to YES and never turns back. This is the real power of binary search.</p>
+
+      <p class="lbl">Picture it — a hallway of lamps 🚪</p>
+      <p style="margin:0 0 4px">A row of rooms. The first few are <b>dark 🌑</b>; then from one door onward <b>every room is lit 💡</b> — and never goes dark again. Exactly one door is the dark→lit border. You want the <b>first lit room</b>. You can't see the hallway — you may only walk into one room and ask “is this room lit?”</p>
+      <div class="pred">
+        <span class="c f">🌑</span><span class="c f">🌑</span><span class="c f">🌑</span><span class="c t flip">💡</span><span class="c t">💡</span><span class="c t">💡</span>
+      </div>
+      <p class="muted" style="margin:.2em 0 0;text-align:center;font-size:.92rem">rooms 0 · 1 · 2 · <b style="color:var(--sage-deep)">3 ← first lit</b> · 4 · 5</p>
+
+      <p class="lbl">The idea — two answers, two moves</p>
+      <p style="margin:0">Walk into the <b>middle</b> room and ask one question:</p>
+      <div class="flav" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;">
+        <div style="border:1.5px solid var(--clay);border-radius:12px;padding:14px 16px;background:#f7e9e4;">
+          <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;margin:0 0 4px;color:var(--clay-deep);">Middle is DARK 🌑</h5>
+          <p style="margin:.2em 0 0;font-size:.96rem">The border is still <b>ahead</b>. Every room from here back is dark → none can be the answer. <b>Throw away this room and everything left of it</b> → <code class="inl">left = mid + 1</code>.</p>
+          <div class="mini">
+            <div class="strip">
+              <div class="r drop">🌑</div><div class="r drop">🌑</div><div class="r drop mid">🌑</div><div class="r live">💡</div><div class="r live">💡</div><div class="r live">💡</div>
+            </div>
+            <div class="cap">✂ drop mid + all left &nbsp;·&nbsp; survivors → <b>right side</b></div>
+          </div>
+        </div>
+        <div style="border:1.5px solid var(--sage);border-radius:12px;padding:14px 16px;background:#eef3e7;">
+          <h5 style="font-family:'Fraunces',serif;font-size:1.1rem;margin:0 0 4px;color:var(--sage-deep);">Middle is LIT 💡</h5>
+          <p style="margin:.2em 0 0;font-size:.96rem">You found <i>a</i> lit room — but maybe an earlier one is also lit. So this room is a <b>suspect, not proven</b>. <b>Keep it, search left</b> → <code class="inl">right = mid</code>.</p>
+          <div class="mini">
+            <div class="strip">
+              <div class="r live">🌑</div><div class="r live">🌑</div><div class="r live">🌑</div><div class="r keep">💡</div><div class="r drop">💡</div><div class="r drop">💡</div>
+            </div>
+            <div class="cap">✂ drop right of mid &nbsp;·&nbsp; <b>KEEP mid</b> + look left</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="alt"><span class="h">⚠️ The one line everyone gets wrong: why <code style="font-family:monospace">right = mid</code>, not <code style="font-family:monospace">mid − 1</code>?</span>
+        <p style="margin:.3em 0 0">In <b>Find Exact</b>, a non-matching mid is <i>useless</i> → you toss it (<code class="inl">mid − 1</code>). Here it's the opposite: a <b>lit mid could BE the first lit room.</b> Write <code class="inl">right = mid − 1</code> and you'd throw away the very answer you're standing in. So a lit room is <b>never discarded</b> — you only shrink the search up to it: <code class="inl">right = mid</code>. <b>Lit = keep. Dark = drop.</b> That single asymmetry is the whole pattern.</p>
+      </div>
+
+      <p class="lbl">The movement — converge onto the first 💡</p>
+      <p class="muted" style="margin:0 0 4px">The hallway: <code class="inl">🌑 🌑 🌑 💡 💡 💡</code> — find the first lit room. (dark = keep walking right · lit = keep it, look left)</p>
+      <div class="player" id="bd">
+        <div class="stage"></div><div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">The code</p>
+      <pre><span class="k">def</span> first_true(lo, hi, lit):
+    <span class="k">while</span> lo &lt; hi:                  <span class="c"># &lt; : pinch down to ONE room</span>
+        mid = lo + (hi - lo) // <span class="s">2</span>
+        <span class="k">if</span> lit(mid): hi = mid         <span class="c"># 💡 lit → might be first → KEEP (not mid-1!)</span>
+        <span class="k">else</span>:        lo = mid + <span class="s">1</span>     <span class="c"># 🌑 dark → border is later → drop it</span>
+    <span class="k">return</span> lo                      <span class="c"># lo == hi == the first lit room</span></pre>
+
+      <div class="alt"><span class="h">The hidden super-power: search on the ANSWER</span>
+        <p style="margin:.3em 0 0">The predicate doesn't need an array at all — it can run over a <b>range of possible answers</b>. “Min eating speed so Koko finishes in time?” → <code class="inl">ok(speed) = canFinish(speed)</code> is monotonic (faster always finishes), so binary-search the <i>speed</i> from 1…max. Same flip-finder, applied to a number line.</p>
+      </div>
+
+      <p class="lbl">The invariant — the promise that makes it correct</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The first lit room is ALWAYS still inside <code class="inl">[left, right]</code>.</b> A dark mid is proven worthless (drop it + everything left). A lit mid is never thrown away (keep it). You only ever delete rooms you've <i>proven</i> can't be the border — so when <code class="inl">left</code> and <code class="inl">right</code> finally touch, that one room <b>must</b> be the first lit one.</div>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> first/last occurrence · insert position · min/max value that satisfies a condition (Koko, ship-in-D-days, split array).</p>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Find exact</b> asks “is mid <i>the</i> value?” and may finish early (<code class="inl">&lt;=</code>, drop mid). <b style="color:var(--sage-deep)">Find boundary</b> asks “is mid <i>true</i>?” and converges on the flip (<code class="inl">&lt;</code>, keep mid). Same core: <b>one test deletes half</b>.</div>
+  </section>
+
+  <!-- TRAPS + MASTERY -->
+  <section class="reveal">
+    <p class="eyebrow">Where it breaks</p>
+    <h2>Three <em>traps</em>.</h2>
+    <ul class="check" style="margin-top:6px">
+      <li><b>Overflow:</b> use <code class="inl">mid = left + (right − left)//2</code>, never <code class="inl">(left+right)//2</code>.</li>
+      <li><b><code class="inl">&lt;=</code> vs <code class="inl">&lt;</code>:</b> exact uses <code class="inl">&lt;=</code> (check the lone cell); boundary uses <code class="inl">&lt;</code> (converge).</li>
+      <li><b><code class="inl">mid</code> vs <code class="inl">mid+1</code>:</b> if a true mid could be the answer → <code class="inl">right = mid</code> (keep it), else you'd skip it.</li>
+    </ul>
+    <h3 style="font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .3em">You own it when…</h3>
+    <ul class="check">
+      <li>Core idea in one line: <b>a monotonic test → one check deletes half</b>.</li>
+      <li>You can replay <b>exact</b> and say why mid is dropped (<code class="inl">&lt;=</code>).</li>
+      <li>You can replay <b>boundary</b> and say why a true mid is kept (<code class="inl">&lt;</code>, right=mid).</li>
+      <li>You can turn a “min/max that satisfies …” problem into <b>search on the answer space</b>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“She seeks wisdom and searches for it as for hidden treasure.” — Proverbs 2:4</p>
+    🔥 HADRIEL × WIGANZ · Binary Search · Pattern 04
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  function player(rootId, vals, frames){
+    const root=document.getElementById(rootId);
+    const stage=root.querySelector('.stage'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const cells=[];vals.forEach(v=>{const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v">'+v+'</span>';stage.appendChild(c);cells.push(c);});
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i];
+      cells.forEach((c,idx)=>{const m=f.marks[idx]||'',p=f.ptrs[idx];
+        c.className='cell'+(m?' '+m:'')+(p?' has':'');c.querySelector('.ptr').textContent=p||'';});
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));
+      stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};
+    resetB.onclick=()=>{i=0;apply();};apply();
+  }
+
+  // EXACT: find 9 in [1,3,5,7,9,11,13]
+  player('ex',[1,3,5,7,9,11,13],[
+    {marks:{3:'mid'},ptrs:{0:'L',6:'R',3:'mid'},tag:'range [0..6] · mid=3 → 7',
+      exp:'mid value <b>7 &lt; 9</b> → the target must be to the <b>right</b> → throw away the left half <b>and mid</b> (left = mid+1).'},
+    {marks:{0:'dead',1:'dead',2:'dead',3:'dead',5:'mid'},ptrs:{4:'L',6:'R',5:'mid'},tag:'range [4..6] · mid=5 → 11',
+      exp:'Half gone already. mid value <b>11 &gt; 9</b> → target is to the <b>left</b> → drop the right half + mid (right = mid−1).'},
+    {marks:{0:'dead',1:'dead',2:'dead',3:'dead',5:'dead',6:'dead',4:'found'},ptrs:{4:'L·R·mid'},tag:'range [4..4] · mid=4 → 9 ✓',
+      exp:'<b>nums[4] = 9 == target ✓</b> found at index 4. Three checks for seven elements — log₂7 ≈ 3.'}
+  ]);
+
+  // BOUNDARY: first lit room in 🌑🌑🌑💡💡💡
+  player('bd',['🌑','🌑','🌑','💡','💡','💡'],[
+    {marks:{2:'mid'},ptrs:{0:'L',5:'R',2:'mid'},tag:'rooms [0..5] · check middle room 2 → 🌑 DARK',
+      exp:'Room 2 is <b>dark</b> → the border is <b>still ahead</b>. Everything from here back is dark, so none can be the first lit room → <b>drop rooms 0,1,2</b> → left = mid+1 = 3.'},
+    {marks:{0:'dead',1:'dead',2:'dead',4:'mid'},ptrs:{3:'L',5:'R',4:'mid'},tag:'rooms [3..5] · check middle room 4 → 💡 LIT',
+      exp:'Room 4 is <b>lit</b> — a real suspect! But an earlier room might also be lit → <b>do NOT throw it away</b>. Shrink up to it: right = mid = 4 (this is the <code style="font-family:monospace">right=mid</code>, NOT mid−1).'},
+    {marks:{0:'dead',1:'dead',2:'dead',5:'dead',3:'mid'},ptrs:{3:'L',4:'R',3:'mid'},tag:'rooms [3..4] · check middle room 3 → 💡 LIT',
+      exp:'Room 3 is <b>lit</b> too → keep it, look left → right = mid = 3. Now left == right → the search has pinched down to a single room.'},
+    {marks:{0:'dead',1:'dead',2:'dead',4:'dead',5:'dead',3:'found'},ptrs:{3:'first 💡'},tag:'DONE · the border is room 3',
+      exp:'<b>left == right == 3</b> → room 3 is the <b>first lit room</b>. The dark→lit border, found in log steps — never once discarding a lit room.'}
+  ]);
+</script>
+</body>
+</html>

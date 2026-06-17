@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Two Pointers — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(3.2rem,12vw,7.2rem);line-height:.92;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.4em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:32ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}
+  .lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}
+  .eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}
+  .core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.82rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.cv{border-color:var(--sky);}.shape.pl{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.cv .tag{background:var(--sky-deep);}.shape.pl .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}
+  .lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}
+  .alt b{color:var(--clay-deep);}
+
+  /* animated movement player (one per shape) */
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  .stage{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;min-height:96px;margin:30px 0 6px;}
+  .cell{width:56px;height:56px;border-radius:13px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.36rem;position:relative;transition:transform .45s cubic-bezier(.34,1.56,.64,1),background .45s,border-color .45s,color .45s,box-shadow .45s;}
+  .cell .ptr{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.58rem;white-space:nowrap;opacity:0;transition:opacity .3s;color:var(--ink-soft);}
+  .cell.has .ptr{opacity:1;}
+  .cell.L{border-color:var(--sky);background:#e3edf2;color:var(--sky-deep);transform:translateY(-9px);}.cell.L .ptr{color:var(--sky-deep);}
+  .cell.R{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);transform:translateY(-9px);}.cell.R .ptr{color:var(--clay-deep);}
+  .cell.slow{border-color:var(--sage);background:#e6eddf;color:var(--sage-deep);transform:translateY(-9px);}.cell.slow .ptr{color:var(--sage-deep);}
+  .cell.fast{border-color:var(--gold);background:#f7eecd;color:var(--clay-deep);}.cell.fast .ptr{color:var(--clay-deep);}
+  .cell.kept{box-shadow:inset 0 0 0 3px var(--sage);}
+  .cell.found{background:var(--sage);border-color:var(--sage-deep);color:#fbf5e6;transform:translateY(-9px) scale(1.08);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:2px 0 14px;}
+  .pbar i{width:22px;height:4px;border-radius:2px;background:var(--paper-deep);transition:background .3s;}
+  .pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5.2em;font-size:1.02rem;line-height:1.55;}
+  .exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.78rem;color:var(--clay-deep);display:block;margin-bottom:4px;}
+  .exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Pattern 01</p>
+    <h1 class="title"><span class="l1">Two</span><span class="l2">Pointers.</span></h1>
+    <p class="lede">One core idea — and the <b>two shapes</b> it wears, <b>animated</b> move by move until the movement is yours.</p>
+  </header>
+
+  <!-- CORE IDEA -->
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>Stop <em>restarting</em> the inner loop.</h2>
+    <p>Brute force is two loops: an outer <code class="inl">i</code> and an inner <code class="inl">j</code> that <b>restarts from zero every time</b> <code class="inl">i</code> moves. That restart is the entire O(n²) — re-asking questions already answered.</p>
+    <p class="core">Two Pointers is the realisation that <b>the second index never has to restart.</b> Each pointer only moves <b>forward in its own direction</b>, so the two of them combined cost one pass.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>Two indices that never backtrack.</b> Each step, one local comparison forces which pointer moves — so you never re-scan. <b>O(n²) → O(n), O(1) space.</b> Everything else is just <i>which way</i> the two pointers move.</div>
+  </section>
+
+  <!-- =============== SHAPE 1: CONVERGING =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>Converging</em> — two ends, moving in.</h2>
+    <div class="shape cv">
+      <span class="tag">The pinch</span>
+      <h3>Converging</h3>
+      <p class="one">Two pointers start at the <b>far ends</b> and walk <b>toward</b> each other. The gap shrinks every step until they meet.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Place <code class="inl">left</code> on the smallest value, <code class="inl">right</code> on the largest. Their sum is a <b>dial</b>: too big means the largest value is too greedy; too small means the smallest is too timid. One reading tells you exactly which end to pull in — <b>but only because the array is sorted.</b></p>
+
+      <p class="lbl">The movement — press step, watch it move</p>
+      <p class="muted" style="margin:0 0 4px">Find a pair summing to <code class="inl">6</code> in <code class="inl">[1, 2, 3, 4, 6]</code>.</p>
+      <div class="player" id="cv">
+        <div class="stage"></div>
+        <div class="pbar"></div>
+        <div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <div class="alt"><span class="h">Why not move the other pointer?</span>
+        <p style="margin:.3em 0 0">When the sum was too big, we did <b>right−−</b>. What if you tried <b>left++</b> instead? <code class="inl">2+6=8</code> — <b>even bigger</b>; <code class="inl">3+6, 4+6</code> only grow. Every pair using <code class="inl">6</code> is ≥ 7, so pulling <code class="inl">left</code> can <i>never</i> fix a too-big sum — only <code class="inl">right−−</code> can. <b>The move is forced, not guessed.</b></p>
+      </div>
+
+      <p class="lbl">The invariant — why nothing is lost</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The answer, if it exists, always lives between <code class="inl">left</code> and <code class="inl">right</code>.</b> We only ever discard an element we have <i>proven</i> cannot pair with anything remaining — so shrinking the gap can never throw the answer away.</div>
+
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">while</span> left &lt; right:
+    s = arr[left] + arr[right]
+    <span class="k">if</span>   s == target: <span class="k">return</span> [left, right]
+    <span class="k">elif</span> s &lt;  target: left  += <span class="s">1</span>   <span class="c"># too small → smallest can't win → drop it</span>
+    <span class="k">else</span>:             right -= <span class="s">1</span>   <span class="c"># too big   → largest can't win  → drop it</span></pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> sorted pair/triplet sums (Two Sum II, 3Sum) · palindrome checks · container/area between two walls.</p>
+    </div>
+  </section>
+
+  <!-- =============== SHAPE 2: PARALLEL =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>Parallel</em> — same way, two speeds.</h2>
+    <div class="shape pl">
+      <span class="tag">The chase</span>
+      <h3>Parallel</h3>
+      <p class="one">Both pointers move the <b>same direction</b>, one leading. The <b>gap between</b> them carries the state — no order required.</p>
+
+      <p class="lbl">The idea — two roles</p>
+      <p style="margin:0"><code class="inl">slow</code> is the <b>boundary / writer</b>: everything at or behind it is already finished. <code class="inl">fast</code> is the <b>scout</b>: it races ahead reading. <code class="inl">slow</code> only advances when <code class="inl">fast</code> finds something that <i>belongs</i>. Two jobs sharing one array — that's why it needs no extra space.</p>
+
+      <p class="lbl">The movement — press step, watch it move</p>
+      <p class="muted" style="margin:0 0 4px">Dedupe <code class="inl">[1, 1, 2, 2, 3]</code> in place. Watch the cell <i>values rewrite</i> as the prefix grows.</p>
+      <div class="player" id="pl">
+        <div class="stage"></div>
+        <div class="pbar"></div>
+        <div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">The invariant — what makes it correct</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>Everything in <code class="inl">arr[0 .. slow]</code> is already the final answer.</b> <code class="inl">fast</code> can wander through any number of duplicates without disturbing it — the prefix only ever <i>grows</i>, never rewrites a kept value. So when <code class="inl">fast</code> reaches the end, the prefix <i>is</i> the result.</div>
+
+      <p class="lbl">Same shape, a faster gap — the “2× speed” twin</p>
+      <p style="margin:0">When the gap itself is the goal (linked lists), <code class="inl">fast</code> takes <b>two</b> steps for every <b>one</b> of <code class="inl">slow</code>:</p>
+      <pre><span class="k">while</span> <span class="f">fast</span> <span class="k">and</span> <span class="f">fast</span>.next:
+    slow = slow.next            <span class="c"># 1 step</span>
+    <span class="f">fast</span> = <span class="f">fast</span>.next.next       <span class="c"># 2 steps</span>
+    <span class="k">if</span> slow == <span class="f">fast</span>: <span class="k">return</span> <span class="k">True</span>  <span class="c"># a cycle pulled them back together</span></pre>
+      <div class="alt"><span class="h">Why 2× reveals structure</span>
+        <p style="margin:.3em 0 0"><b>Middle:</b> when <code class="inl">fast</code> (2×) hits the end, <code class="inl">slow</code> (1×) has covered exactly <b>half</b> → it sits on the middle. <b>Cycle:</b> on a loop the fast runner laps the slow one; the gap can only close to zero <i>inside</i> a cycle — so meeting ⇒ a cycle exists.</p>
+      </div>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> in-place dedupe / move-zeros · linked-list cycle / middle / nth-from-end · partition while scanning. <b>No sort needed.</b></p>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Converging</b> pinches a <i>value</i> from both ends — <b>needs sorted</b>. <b style="color:var(--sage-deep)">Parallel</b> drags an <i>invariant prefix</i> forward with two speeds — <b>works unsorted</b>. Same non-backtracking core; the only difference is <b>which way the pointers move</b>.</div>
+  </section>
+
+  <!-- MASTERY -->
+  <section class="reveal">
+    <p class="eyebrow">You own it when…</p>
+    <h2>The <em>test</em>.</h2>
+    <ul class="check">
+      <li>Core idea in one line: <b>two indices that never restart</b>.</li>
+      <li>You can replay <b>Converging's movement</b> and say <i>why each pointer is forced</i>, not guessed.</li>
+      <li>You can replay <b>Parallel's movement</b> and name its invariant: <i>everything behind slow is final</i>.</li>
+      <li>You know <b>Converging needs sorted, Parallel doesn't</b> — and why.</li>
+      <li>Order gone but indices matter → you reach for a <b>Hash Map</b> instantly.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“Two are better than one, because they have a good return for their labor.” — Ecclesiastes 4:9</p>
+    🔥 HADRIEL × WIGANZ · Two Pointers · Pattern 01
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // ---- generic animated movement player ----
+  // frame = { vals:[...], marks:{idx:'L|R|slow|fast|kept|found'...}, ptrs:{idx:'label'}, tag, exp }
+  function player(rootId, frames){
+    const root=document.getElementById(rootId);
+    const stage=root.querySelector('.stage'), bar=root.querySelector('.pbar'),
+          exp=root.querySelector('.exp'), stepB=root.querySelector('.step'), resetB=root.querySelector('.reset');
+    const n=frames[0].vals.length; let i=0; const cells=[];
+    for(let k=0;k<n;k++){const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v"></span>';stage.appendChild(c);cells.push(c);}
+    for(let k=0;k<frames.length;k++){const d=document.createElement('i');bar.appendChild(d);}
+    function apply(){
+      const f=frames[i];
+      cells.forEach((c,idx)=>{
+        const m=f.marks[idx]||''; const p=f.ptrs[idx];
+        c.className='cell'+(m?' '+m:'')+(p?' has':'');
+        c.querySelector('.v').textContent=f.vals[idx];
+        c.querySelector('.ptr').textContent=p||'';
+      });
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));
+      stepB.disabled = i>=frames.length-1;
+    }
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};
+    resetB.onclick=()=>{i=0;apply();};
+    apply();
+  }
+
+  // ---- Converging frames: [1,2,3,4,6], target 6 ----
+  const V=[1,2,3,4,6];
+  player('cv',[
+    {vals:V,marks:{0:'L',4:'R'},ptrs:{0:'left',4:'right'},tag:'START',
+      exp:'<b>left</b> on the smallest (1), <b>right</b> on the largest (6). Their sum is the dial we read.'},
+    {vals:V,marks:{0:'L',3:'R'},ptrs:{0:'left',3:'right'},tag:'STEP 1 · sum 1+6 = 7 &gt; 6',
+      exp:'Too big. <b>6 is the largest</b> — even with the smallest partner (1) it overshoots, so it overshoots with everyone. <b>6 can never be in the answer</b> → drop it, <b>right−−</b>.'},
+    {vals:V,marks:{1:'L',3:'R'},ptrs:{1:'left',3:'right'},tag:'STEP 2 · sum 1+4 = 5 &lt; 6',
+      exp:'Too small. <b>1 is the smallest</b> — even with the largest partner left (4) it falls short. <b>1 can never reach the target</b> → drop it, <b>left++</b>.'},
+    {vals:V,marks:{1:'found',3:'found'},ptrs:{1:'left',3:'right'},tag:'STEP 3 · sum 2+4 = 6 == 6 ✓',
+      exp:'<b>Found [2, 4].</b> Three steps, not a nested loop — each step deleted one element <i>for good</i>, the pointers only moved inward.'}
+  ]);
+
+  // ---- Parallel frames: dedupe [1,1,2,2,3] (values rewrite!) ----
+  player('pl',[
+    {vals:[1,1,2,2,3],marks:{0:'slow kept',1:'fast'},ptrs:{0:'slow',1:'fast'},tag:'START',
+      exp:'<b>slow</b> guards the finished prefix <code style="font-family:monospace">[1]</code>; <b>fast</b> scouts ahead. Everything at or behind slow is already final.'},
+    {vals:[1,1,2,2,3],marks:{0:'slow kept',2:'fast'},ptrs:{0:'slow',2:'fast'},tag:'STEP 1 · arr[fast]=1 == kept 1',
+      exp:'A <b>duplicate</b> of what slow already kept → nothing new. <b>slow stays</b>; only <b>fast</b> moves on.'},
+    {vals:[1,2,2,2,3],marks:{0:'kept',1:'slow kept',3:'fast'},ptrs:{1:'slow',3:'fast'},tag:'STEP 2 · arr[fast]=2 ≠ kept 1',
+      exp:'<b>New value!</b> Grow the prefix: <b>slow++</b> and <b>write the 2</b> into it (watch cell #2 rewrite). Prefix is now <code style="font-family:monospace">[1, 2]</code>.'},
+    {vals:[1,2,2,2,3],marks:{0:'kept',1:'slow kept',4:'fast'},ptrs:{1:'slow',4:'fast'},tag:'STEP 3 · arr[fast]=2 == kept 2',
+      exp:'Another <b>duplicate</b> 2 → skip. slow holds the boundary; only fast advances.'},
+    {vals:[1,2,3,2,3],marks:{0:'kept',1:'kept',2:'slow kept'},ptrs:{2:'slow'},tag:'STEP 4 · arr[fast]=3 ≠ kept 2',
+      exp:'<b>New value 3</b> → <b>slow++</b> and <b>write the 3</b> (cell #3 rewrites). Prefix <code style="font-family:monospace">[1, 2, 3]</code>. fast has reached the end.'},
+    {vals:[1,2,3,2,3],marks:{0:'found',1:'found',2:'found'},ptrs:{},tag:'DONE · one pass',
+      exp:'fast visited every cell once; slow only moved on genuine progress. First <b>slow+1 = 3</b> cells = <code style="font-family:monospace">[1, 2, 3]</code>.'}
+  ]);
+</script>
+</body>
+</html>

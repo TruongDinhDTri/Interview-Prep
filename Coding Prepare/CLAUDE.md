@@ -351,6 +351,16 @@ Never skip the brute force mention, even when you already know the optimal answe
 
 ---
 
+### 📚 Where Pattern Knowledge Lives — the `Patterns/` Library
+
+Every pattern has ONE home: `Coding Prepare/Patterns/NN_Name/` →
+- `Recognition.md` — the deeper form of the cheat sheet above (how to spot it).
+- `Deep-Guide.html` — optional full visual lesson, for patterns that earn depth.
+
+**The rule that keeps it clean forever:** pattern *theory* always lives in `Patterns/` (one home, regardless of which week it was learned); week folders hold only *demos + solved problems*. A new pattern discovered while solving — week 5, 10, 12, anytime — gets its own `Patterns/` folder, never crammed into a stray note. The `pattern-writer` agent maintains this contract (see Leetcode Post-Solve Protocol).
+
+---
+
 ### PATTERN PATH — Step 4P: Reason
 
 **Scoring:** 🧩 Problem Solving + 💬 Communication

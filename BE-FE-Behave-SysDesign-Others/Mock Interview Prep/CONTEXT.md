@@ -140,7 +140,7 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 ## Question Sources
 
 ### Coding Problems
-- **By pattern:** `Coding Prepare/Pattern-Recognition/*.md` — 15 patterns with problem lists
+- **By pattern:** `Coding Prepare/Patterns/*/Recognition.md` — 15 patterns with problem lists
 - **By week:** `Coding Prepare/Week */` — problems organized by weekly focus
 - **Selection rule:** Choose problems matching Wiganz's current weakest pattern from `memory/coding-progress.json`
 

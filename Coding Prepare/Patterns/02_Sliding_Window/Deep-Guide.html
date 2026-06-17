@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sliding Window — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.9rem,11vw,6.6rem);line-height:.92;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:33ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}
+  .lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}
+  .eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}
+  .core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.fx{border-color:var(--sky);}.shape.vr{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.fx .tag{background:var(--sky-deep);}.shape.vr .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}
+  .lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}
+  .alt b{color:var(--clay-deep);}
+
+  .flav{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  @media(max-width:640px){.flav{grid-template-columns:1fr;}}
+  .flav div{border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;background:#fbf5e6;}
+  .flav h5{font-family:'Fraunces',serif;font-size:1.1rem;margin:0 0 4px;color:var(--sage-deep);}
+  .flav .m{font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--clay-deep);}
+
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  /* the array + the sliding window frame */
+  .stage{position:relative;display:flex;gap:11px;justify-content:center;flex-wrap:nowrap;min-height:96px;margin:36px 0 8px;padding:0 6px;overflow-x:auto;}
+  .cell{width:52px;height:52px;flex:0 0 auto;border-radius:12px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.3rem;position:relative;z-index:1;transition:color .4s;}
+  .cell .ptr{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.58rem;white-space:nowrap;opacity:0;transition:opacity .3s;color:var(--ink-soft);}
+  .cell.has .ptr{opacity:1;}
+  .cell.in{color:var(--sage-deep);}
+  .swframe{position:absolute;z-index:2;border:3px solid var(--sage);border-radius:14px;background:rgba(111,135,101,.14);pointer-events:none;transition:left .5s cubic-bezier(.34,1.4,.64,1),width .5s cubic-bezier(.34,1.4,.64,1),top .3s,height .3s,border-color .3s,background .3s;box-shadow:0 8px 18px rgba(82,104,74,.28);}
+  .swframe::before{content:"window";position:absolute;top:-19px;left:10px;font-family:'Spline Sans Mono',monospace;font-size:.56rem;letter-spacing:.12em;color:var(--sage-deep);}
+  .swframe.bad{border-color:var(--clay);background:rgba(192,104,72,.14);box-shadow:0 8px 18px rgba(164,80,47,.26);}
+  .swframe.bad::before{content:"window · breaks the rule";color:var(--clay-deep);}
+  .swframe.best{border-color:var(--sage-deep);background:rgba(111,135,101,.26);}
+  .swframe.best::before{content:"window · best so far ★";color:var(--sage-deep);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:6px 0 14px;flex-wrap:wrap;}
+  .pbar i{width:20px;height:4px;border-radius:2px;background:var(--paper-deep);transition:background .3s;}.pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5em;font-size:1.02rem;line-height:1.55;}
+  .exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--clay-deep);display:block;margin-bottom:4px;}
+  .exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Pattern 02</p>
+    <h1 class="title"><span class="l1">Sliding</span><span class="l2">Window.</span></h1>
+    <p class="lede">One core idea — and the <b>two shapes</b> it wears. Press step and watch a real <b>window glide</b> across the array.</p>
+  </header>
+
+  <!-- CORE IDEA -->
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>Don't <em>recompute</em> the window — slide it.</h2>
+    <p>Checking every contiguous subarray means re-summing overlapping stretches again and again — that's the O(n²) waste. But two neighbouring windows share almost everything; they differ by just <b>one element entering</b> and <b>one leaving</b>.</p>
+    <p class="core">Sliding Window keeps a <b>live window</b> and <b>edits only its edges</b> instead of rebuilding it. Each element is added <b>once</b> and removed <b>once</b> across the whole run.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>One window, edited only at its two edges.</b> Right edge adds, left edge removes — never re-scan the middle. Total edge-events ≤ 2n → <b>O(n²) → O(n)</b>, O(k) space for whatever you track.</div>
+  </section>
+
+  <!-- =============== SHAPE 1: FIXED =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>Fixed-size</em> — a window of length K.</h2>
+    <div class="shape fx">
+      <span class="tag">Constant width</span>
+      <h3>Fixed-size</h3>
+      <p class="one">The window length <b>K never changes</b>. It just <b>slides right</b>: one in, one out, every step.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">The problem hands you the size (“K consecutive”, “subarrays of length K”). When you slide one step, the new sum is the old sum <b>minus the element leaving</b> the left <b>plus the element entering</b> the right — <code class="inl">sum = sum − arr[left] + arr[right]</code>. You never re-add the K−1 elements that stayed.</p>
+
+      <p class="lbl">The movement — watch the window slide right</p>
+      <p class="muted" style="margin:0 0 4px">Max sum of <code class="inl">K = 3</code> consecutive in <code class="inl">[2, 1, 5, 1, 3, 2]</code>.</p>
+      <div class="player" id="fx">
+        <div class="stage"></div><div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">The invariant</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The window is always exactly K wide, and its running value is always correct.</b> Because each slide repairs the value at both edges, you never recompute — so every window is read in O(1).</div>
+
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">def</span> max_sum_k(arr, k):
+    s = <span class="k">sum</span>(arr[:k]); best = s        <span class="c"># first window</span>
+    <span class="k">for</span> right <span class="k">in</span> range(k, <span class="k">len</span>(arr)):
+        s += arr[right] - arr[right - k]   <span class="c"># add right, drop the one leaving</span>
+        best = <span class="k">max</span>(best, s)
+    <span class="k">return</span> best</pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> max/avg sum of K consecutive · all subarrays of length K · fixed-window anagram counts.</p>
+    </div>
+  </section>
+
+  <!-- =============== SHAPE 2: VARIABLE =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>Variable-size</em> — grow, then shrink.</h2>
+    <div class="shape vr">
+      <span class="tag">Breathing width</span>
+      <h3>Variable-size</h3>
+      <p class="one">The window <b>expands</b> on the right while it can, and <b>shrinks</b> from the left when it must — its width breathes to obey a <b>validity rule</b>.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Right always marches forward, pulling new elements in. The moment the window breaks its rule, the left edge advances — removing elements — until the rule holds again. Track the best window seen while valid. No fixed size; the <i>condition</i> sets the size.</p>
+
+      <p class="lbl">The movement — watch the window grow, then shrink</p>
+      <p class="muted" style="margin:0 0 4px">Longest substring with <b>≤ 2 distinct</b> in <code class="inl">a r a a c i</code>. It grows to 4, then a 3rd letter forces it to shrink.</p>
+      <div class="player" id="vr">
+        <div class="stage"></div><div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">Two flavours — same window, opposite trigger</p>
+      <div class="flav">
+        <div><h5>Longest valid</h5><p class="m" style="margin:.2em 0">shrink WHILE invalid</p><p style="margin:.3em 0 0;font-size:.96rem">Expand freely; only contract to <i>restore</i> validity. Record size <b>after</b> it's valid again.</p></div>
+        <div><h5>Shortest valid</h5><p class="m" style="margin:.2em 0">shrink WHILE valid</p><p style="margin:.3em 0 0;font-size:.96rem">Once valid, contract greedily for the tightest fit. Record size <b>before</b> each shrink.</p></div>
+      </div>
+
+      <p class="lbl">The invariant</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>After the shrink loop, the window is always valid.</b> So the result you record is always from a legal window — and since <code class="inl">left</code> only moves forward, every index enters once and leaves once.</div>
+
+      <p class="lbl">The code</p>
+      <pre><span class="k">def</span> longest_k_distinct(s, k):
+    left = <span class="s">0</span>; best = <span class="s">0</span>; freq = {}
+    <span class="k">for</span> right <span class="k">in</span> range(<span class="k">len</span>(s)):
+        freq[s[right]] = freq.get(s[right], <span class="s">0</span>) + <span class="s">1</span>   <span class="c"># right edge ADDS</span>
+        <span class="k">while</span> <span class="k">len</span>(freq) &gt; k:                       <span class="c"># rule broken → SHRINK</span>
+            freq[s[left]] -= <span class="s">1</span>
+            <span class="k">if</span> freq[s[left]] == <span class="s">0</span>: <span class="k">del</span> freq[s[left]]
+            left += <span class="s">1</span>                            <span class="c"># left edge REMOVES</span>
+        best = <span class="k">max</span>(best, right - left + <span class="s">1</span>)         <span class="c"># window valid here</span>
+    <span class="k">return</span> best</pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> longest substring (no repeats / ≤K distinct) · shortest subarray sum ≥ target · minimum window substring.</p>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Fixed</b> = constant K, pure slide (one in, one out). <b style="color:var(--sage-deep)">Variable</b> = a breathing width ruled by a <i>validity</i> condition (Longest → shrink while invalid · Shortest → shrink while valid). Same core: <b>edit only at the edges, never re-scan</b>.</div>
+  </section>
+
+  <!-- GUARD + MASTERY -->
+  <section class="reveal">
+    <p class="eyebrow">Reading a new problem</p>
+    <h2>Which window — and <em>is</em> it a window?</h2>
+    <p><b>Size given (“K consecutive”)?</b> → Fixed. <b>“Longest …”?</b> → Variable, shrink while invalid. <b>“Shortest / minimum window …”?</b> → Variable, shrink while valid.</p>
+    <div class="alt"><span class="h">The one premise that must hold</span>
+      <p style="margin:.3em 0 0">Sliding Window only works on <b>contiguous</b> subarrays/substrings. The instant elements may be <i>skipped</i> (a subsequence), the window breaks — that's <b>DP</b>. And “find a pair” is <b>Two Pointers</b>, not a window.</p>
+    </div>
+    <h3 style="font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:2em 0 .3em">You own it when…</h3>
+    <ul class="check">
+      <li>Core idea in one line: <b>edit the window at its edges, never re-scan</b>.</li>
+      <li>You can replay the <b>fixed slide</b> and say why <code class="inl">sum − left + right</code> is O(1).</li>
+      <li>You can replay the <b>variable breathing</b> and name its invariant: <i>after the shrink, the window is valid</i>.</li>
+      <li>You map instantly: <b>Longest → shrink-while-invalid</b>, <b>Shortest → shrink-while-valid</b>.</li>
+      <li>“Non-contiguous / subsequence” → drop the window, reach for <b>DP</b>.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“To everything there is a season — a time to gather, and a time to let go.” — Ecclesiastes 3:1,6</p>
+    🔥 HADRIEL × WIGANZ · Sliding Window · Pattern 02
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // ---- sliding-window player: a real frame that glides + resizes over the array ----
+  function sw(rootId, vals, frames){
+    const root=document.getElementById(rootId);
+    const stage=root.querySelector('.stage'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const cells=[];
+    vals.forEach(v=>{const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v">'+v+'</span>';stage.appendChild(c);cells.push(c);});
+    const frame=document.createElement('div');frame.className='swframe';stage.appendChild(frame);
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function place(){
+      const f=frames[i],a=cells[f.l],b=cells[f.r];
+      const left=a.offsetLeft-7, right=b.offsetLeft+b.offsetWidth+7;
+      frame.style.left=left+'px';frame.style.width=(right-left)+'px';
+      frame.style.top=(a.offsetTop-9)+'px';frame.style.height=(a.offsetHeight+18)+'px';
+      frame.className='swframe'+(f.state==='bad'?' bad':'')+(f.state==='best'?' best':'');
+    }
+    function apply(){
+      const f=frames[i];
+      cells.forEach((c,idx)=>{const inw=idx>=f.l&&idx<=f.r;const p=(f.l===f.r&&idx===f.l)?'l·r':(idx===f.l?'left':(idx===f.r?'right':''));
+        c.className='cell'+(inw?' in':'')+(p?' has':'');c.querySelector('.ptr').textContent=p;});
+      place();
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));
+      stepB.disabled=i>=frames.length-1;
+    }
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};
+    resetB.onclick=()=>{i=0;apply();};
+    window.addEventListener('resize',place);window.addEventListener('load',place);
+    apply();
+  }
+
+  // FIXED: [2,1,5,1,3,2], K=3 — window slides right
+  sw('fx',[2,1,5,1,3,2],[
+    {l:0,r:2,state:'',tag:'START · [2,1,5]',exp:'First window of K=3 → sum <b>2+1+5 = 8</b>. best = 8.'},
+    {l:1,r:3,state:'',tag:'SLIDE → · drop 2, add 1',exp:'Window glides one cell right. sum = 8 <b>− 2</b> (left leaves) <b>+ 1</b> (right enters) = <b>7</b>. The middle stayed — never re-added. best 8.'},
+    {l:2,r:4,state:'best',tag:'SLIDE → · drop 1, add 3',exp:'sum = 7 <b>− 1 + 3</b> = <b>9</b>. New best = <b>9</b> 🎯 window [5,1,3].'},
+    {l:3,r:5,state:'',tag:'SLIDE → · drop 5, add 2',exp:'sum = 9 <b>− 5 + 2</b> = <b>6</b>. best stays 9.'},
+    {l:2,r:4,state:'best',tag:'DONE · one pass',exp:'Best window = <b>[5, 1, 3] = 9</b>. Each element entered once &amp; left once → <b>O(n)</b>, never recomputed.'}
+  ]);
+
+  // VARIABLE: "araaci", ≤2 distinct — window grows then shrinks
+  sw('vr',['a','r','a','a','c','i'],[
+    {l:0,r:0,state:'',tag:"right=0 · 'a'",exp:"Window 'a' → {a} = 1 distinct ≤ 2 ✓. len 1, max 1."},
+    {l:0,r:1,state:'',tag:"GROW → · add 'r'",exp:"Right edge expands. {a, r} = 2 ≤ 2 ✓. len 2, max 2."},
+    {l:0,r:2,state:'',tag:"GROW → · add 'a'",exp:"Expand. {a, r} still 2 ✓ (a repeats, no new key). len 3, max 3."},
+    {l:0,r:3,state:'best',tag:"GROW → · add 'a'",exp:"Expand. {a, r} ✓. len <b>4</b> — best window: <b>'araa'</b> 🎯."},
+    {l:0,r:4,state:'bad',tag:"GROW → · add 'c' → RULE BREAKS",exp:"{a, r, c} = <b>3 &gt; 2</b> ✗. The window is now invalid → the <b>left edge must move in</b> to shrink."},
+    {l:1,r:4,state:'bad',tag:"SHRINK ← · drop 'a' (idx 0)",exp:"Left edge advances. But more 'a's remain inside → {a, r, c} still 3 ✗. <b>Keep shrinking.</b>"},
+    {l:2,r:4,state:'',tag:"SHRINK ← · drop 'r' (idx 1)",exp:"Now {a, c} = 2 ✓ valid again. Window 'aac', len 3. max stays <b>4</b>. (Right keeps marching, shrinking the same way — nothing beats 4.)"},
+    {l:0,r:3,state:'best',tag:'DONE · answer',exp:"Longest valid window = <b>'araa' = 4</b>. Right swept once; left only moved forward → every index entered once &amp; left once → <b>O(n)</b>."}
+  ]);
+</script>
+</body>
+</html>

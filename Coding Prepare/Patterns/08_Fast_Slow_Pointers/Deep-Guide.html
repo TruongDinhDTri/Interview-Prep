@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fast &amp; Slow Pointers — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#a9781f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,10vw,5.8rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:34ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}
+  .lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}
+  .eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.4rem,3.6vw,2rem);line-height:1.34;margin:6px 0;}
+  .core b{font-style:normal;color:var(--clay-deep);}
+  .twotrack{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:22px 0;}
+  @media(max-width:640px){.twotrack{grid-template-columns:1fr;}}
+  .tt{border:1.5px solid var(--line);border-radius:14px;padding:16px 18px;background:#fbf5e6;}
+  .tt h5{font-family:'Fraunces',serif;font-size:1.18rem;margin:0 0 4px;}
+  .tt.s h5{color:var(--sky-deep);}.tt.g h5{color:var(--sage-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.cy{border-color:var(--sky);}.shape.po{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.cy .tag{background:var(--sky-deep);}.shape.po .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}
+  .lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}
+  .alt b{color:var(--clay-deep);}
+
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  /* RING */
+  .ringbox{position:relative;width:290px;height:290px;margin:14px auto 4px;}
+  .ringpath{position:absolute;inset:34px;border:2px dashed var(--line);border-radius:50%;}
+  .ringdir{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.1em;color:var(--ink-soft);text-align:center;}
+  .ringdir b{display:block;font-size:1.6rem;color:var(--line);}
+  .node{position:absolute;width:46px;height:46px;border-radius:50%;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;transform:translate(-50%,-50%);transition:border-color .4s,background .4s,color .4s,box-shadow .4s;color:var(--ink-soft);}
+  .node.ns{border-color:var(--sage);} .node.nf{border-color:var(--gold-deep);}
+  .node.meet{background:var(--sage);border-color:var(--sage-deep);color:#fbf5e6;box-shadow:0 0 0 6px rgba(111,135,101,.25);}
+  .tok{position:absolute;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.15rem;transform:translate(-50%,-50%);transition:left .6s cubic-bezier(.45,.05,.3,1),top .6s cubic-bezier(.45,.05,.3,1);z-index:5;box-shadow:0 3px 9px rgba(58,47,38,.25);}
+  .tok.turtle{background:#e6eddf;border:2px solid var(--sage);}
+  .tok.hare{background:#f7eecd;border:2px solid var(--gold-deep);}
+  /* LINEAR list */
+  .stage{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;min-height:88px;margin:30px 0 4px;align-items:center;}
+  .arrowto{font-family:'Spline Sans Mono',monospace;color:var(--line);font-size:1rem;}
+  .cell{width:48px;height:48px;border-radius:50%;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.2rem;position:relative;transition:transform .45s cubic-bezier(.34,1.56,.64,1),background .45s,border-color .45s,color .45s,box-shadow .45s;}
+  .cell .ptr{position:absolute;top:-24px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.58rem;white-space:nowrap;opacity:0;transition:opacity .3s;}.cell.has .ptr{opacity:1;}
+  .cell.slow{border-color:var(--sage);background:#e6eddf;color:var(--sage-deep);transform:translateY(-8px);}.cell.slow .ptr{color:var(--sage-deep);}
+  .cell.fast{border-color:var(--gold-deep);background:#f7eecd;color:var(--clay-deep);transform:translateY(-8px);}.cell.fast .ptr{color:var(--clay-deep);}
+  .cell.found{background:var(--sage);border-color:var(--sage-deep);color:#fbf5e6;transform:translateY(-8px) scale(1.12);}
+
+  .pbar{display:flex;gap:4px;justify-content:center;margin:8px 0 14px;flex-wrap:wrap;}
+  .pbar i{width:20px;height:4px;border-radius:2px;background:var(--paper-deep);transition:background .3s;}.pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5em;font-size:1.02rem;line-height:1.55;}
+  .exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--clay-deep);display:block;margin-bottom:4px;}
+  .exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Pattern 08</p>
+    <h1 class="title"><span class="l1">Fast &amp; Slow</span><span class="l2">Pointers.</span></h1>
+    <p class="lede">Two runners, <b>different speeds</b>, same track. Watch them <b>race a real loop</b> — and collide.</p>
+  </header>
+
+  <!-- CORE IDEA -->
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>Two runners. <em>One twice as fast.</em></h2>
+    <p>Send two pointers down the same path: 🐢 takes <b>1 step</b> per move, 🐇 takes <b>2</b>. Don't watch where they are — watch what happens between them. There are only two possible endings:</p>
+    <div class="twotrack">
+      <div class="tt s"><h5>Straight track</h5><p style="margin:.2em 0 0;font-size:.98rem">🐇 reaches the end and runs off. It never meets 🐢. → <b>no loop.</b></p></div>
+      <div class="tt g"><h5>Looping track</h5><p style="margin:.2em 0 0;font-size:.98rem">There's no end. 🐇 keeps circling, gains <b>1 step</b> on 🐢 each move, and taps it from behind. → <b>they collide.</b></p></div>
+    </div>
+    <p class="core">So a <b>collision means the path loops.</b> And if you instead <b>lock the speeds</b> (or give 🐇 a head start), you can make 🐢 stop on an <b>exact spot</b> — the middle, the n-th from the end.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>Two speeds, same track.</b> They <b>collide ⟹ a loop exists</b>. Lock the ratio ⟹ one runner <b>lands on a chosen position</b>. Why it's guaranteed: 🐇 gains <b>exactly 1</b> step each move, so the gap ticks down 5→4→3→…→0 — it can never jump <i>over</i> the meeting point. <b>O(n) time, O(1) space.</b></div>
+  </section>
+
+  <!-- =============== SHAPE 1: CYCLE (RING) =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>The chase</em> — do they collide?</h2>
+    <div class="shape cy">
+      <span class="tag">Tortoise &amp; Hare</span>
+      <h3>Cycle detection</h3>
+      <p class="one">Both start at the head. On a loop, 🐇 (2×) laps the track and chases 🐢 (1×) down from behind. A collision is the proof the list <b>loops</b>.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Inside a loop there is no exit, so the faster runner cannot escape — it just keeps gaining ground. Because it earns <b>+1 net step</b> every move, the distance to 🐢 shrinks by 1 each time and <b>must</b> reach 0. No loop ⇒ 🐇 falls off the end first.</p>
+
+      <p class="lbl">The movement — watch them race the ring &amp; collide</p>
+      <p class="muted" style="margin:0 0 2px">A real loop: <code class="inl">3 → 4 → 5 → 6 → 7 → 8</code> → back to <code class="inl">3</code>.</p>
+      <div class="player" id="cy">
+        <div class="ringbox"></div>
+        <div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <div class="alt"><span class="h">Why 2× and not 3×?</span>
+        <p style="margin:.3em 0 0">At 3× the gap drops by <b>2</b> each step: <code class="inl">5 → 3 → 1 → −1</code> — it can <b>leap over</b> 🐢 and miss. At 2× the gap drops by exactly <b>1</b> → it <b>cannot skip 0</b>. The collision is <i>guaranteed</i>, not luck.</p>
+      </div>
+
+      <p class="lbl">The invariant</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>Once both are inside the loop, the gap strictly drops by 1 each step.</b> A non-negative integer that loses 1 per step hits 0 in finite time → they provably meet.</div>
+
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">def</span> has_cycle(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:      <span class="c"># guard BOTH → safe to hop twice</span>
+        slow = slow.next             <span class="c"># 1×</span>
+        fast = fast.next.next        <span class="c"># 2×</span>
+        <span class="k">if</span> slow == fast: <span class="k">return</span> <span class="k">True</span>   <span class="c"># check AFTER moving (else equal at start)</span>
+    <span class="k">return</span> <span class="k">False</span>                    <span class="c"># hare fell off the end → no loop</span></pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> detect a cycle · find the cycle's start · is a linked list a palindrome.</p>
+    </div>
+  </section>
+
+  <!-- =============== SHAPE 2: POSITION (LINEAR) =============== -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>The stake-out</em> — land on a spot.</h2>
+    <div class="shape po">
+      <span class="tag">Fixed ratio / offset</span>
+      <h3>Position finding</h3>
+      <p class="one">No loop here — a straight list. Keep the speed ratio fixed so that when 🐇 hits the end, 🐢 is sitting <b>exactly</b> on the node you want.</p>
+
+      <p class="lbl">The idea</p>
+      <p style="margin:0">🐇 at 2× covers the whole list while 🐢 at 1× covers exactly <b>half</b> — so 🐢 lands on the <b>middle</b>, one pass, no length count. (Offset version: give 🐇 a <b>k-node head start</b>; the gap stays k, so when 🐇 ends, 🐢 is on the <b>n-th from the end</b>.)</p>
+
+      <p class="lbl">The movement — 🐇 races to the end, 🐢 lands on the middle</p>
+      <p class="muted" style="margin:0 0 2px">Straight list <code class="inl">1 → 2 → 3 → 4 → 5</code>.</p>
+      <div class="player" id="po">
+        <div class="stage"></div><div class="pbar"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+
+      <p class="lbl">The invariant</p>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>🐢's distance from the head is always exactly half of 🐇's.</b> So the instant 🐇 reaches the end (distance n), 🐢 is at n/2 — the middle — by construction.</div>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">The chase</b> lets the gap <i>close to zero</i> — a collision proves a loop. <b style="color:var(--sage-deep)">The stake-out</b> holds the gap steady so the follower <i>lands on a position</i>. Same engine — <b>two speeds, one gap</b> — two questions.</div>
+  </section>
+
+  <!-- MASTERY -->
+  <section class="reveal">
+    <p class="eyebrow">You own it when…</p>
+    <h2>The <em>test</em>.</h2>
+    <ul class="check">
+      <li>Core idea in one line: <b>two runners, one twice as fast — watch what the gap does</b>.</li>
+      <li>You can replay the <b>ring chase</b> and explain why the gap can't skip 0 at 2×.</li>
+      <li>You can replay the <b>stake-out</b> and say why 🐢 = n/2 when 🐇 = n.</li>
+      <li>You know the two rituals: <b>move before checking</b>, and <b>guard <code class="inl">fast and fast.next</code></b>.</li>
+      <li>“Different speeds on a linked list” → Fast &amp; Slow; “a pair on a sorted array” → Two Pointers.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“The race is not to the swift… but time and chance happen to them all.” — Ecclesiastes 9:11</p>
+    🔥 HADRIEL × WIGANZ · Fast &amp; Slow Pointers · Pattern 08
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // ===== RING player: nodes on a circle, two tokens chase around =====
+  function ring(rootId, vals, frames){
+    const root=document.getElementById(rootId);
+    const box=root.querySelector('.ringbox'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const N=vals.length, cx=145, cy=145, R=104;
+    const path=document.createElement('div');path.className='ringpath';box.appendChild(path);
+    const dir=document.createElement('div');dir.className='ringdir';dir.innerHTML='<b>↻</b>one way';box.appendChild(dir);
+    const centers=[];
+    vals.forEach((v,k)=>{const ang=(-90+k*360/N)*Math.PI/180;const x=cx+R*Math.cos(ang),y=cy+R*Math.sin(ang);
+      centers.push([x,y]);const n=document.createElement('div');n.className='node';n.dataset.k=k;n.textContent=v;
+      n.style.left=x+'px';n.style.top=y+'px';box.appendChild(n);});
+    const turtle=document.createElement('div');turtle.className='tok turtle';turtle.textContent='🐢';box.appendChild(turtle);
+    const hare=document.createElement('div');hare.className='tok hare';hare.textContent='🐇';box.appendChild(hare);
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;const nodes=[...box.querySelectorAll('.node')];
+    function apply(){
+      const f=frames[i],meet=f.slow===f.fast;
+      nodes.forEach((n,k)=>{n.className='node'+(k===f.slow?' ns':'')+(k===f.fast?' nf':'')+(meet&&k===f.slow?' meet':'');});
+      const [sx,sy]=centers[f.slow],[hx,hy]=centers[f.fast];
+      turtle.style.left=(meet?sx-11:sx)+'px';turtle.style.top=(meet?sy-11:sy)+'px';
+      hare.style.left=(meet?hx+11:hx)+'px';hare.style.top=(meet?hy+11:hy)+'px';
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));
+      stepB.disabled=i>=frames.length-1;
+    }
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};
+    resetB.onclick=()=>{i=0;apply();};apply();
+  }
+
+  ring('cy',[3,4,5,6,7,8],[
+    {slow:0,fast:0,tag:'START',exp:'Both at the head (node 3). Ritual: <b>move first, then check</b> — else they look "equal" before they run.'},
+    {slow:1,fast:2,tag:'STEP 1 · gap 1',exp:'🐢 +1 → node 4. 🐇 +2 → node 5. They split apart; gap = 1.'},
+    {slow:2,fast:4,tag:'STEP 2 · gap 2',exp:'🐢 → 5, 🐇 → 7. Gap = 2 — the hare looks like it is escaping…'},
+    {slow:3,fast:0,tag:'STEP 3 · the hare loops',exp:'🐢 → 6. 🐇 runs off node 8 and <b>comes back round to node 3</b> — there is no exit. Now it is <i>behind</i>, chasing.'},
+    {slow:4,fast:2,tag:'STEP 4',exp:'🐢 → 7, 🐇 → 5. Both circling now; the hare gains <b>1 net</b> step each move.'},
+    {slow:5,fast:4,tag:'STEP 5',exp:'🐢 → 8, 🐇 → 7. One node apart — the gap is about to close.'},
+    {slow:0,fast:0,tag:'STEP 6 · COLLISION 💥',exp:'Both land on node 3 — <b>they collide ⟹ the list has a cycle.</b> Guaranteed: the gap fell to 0 one tick at a time, never skipping.'}
+  ]);
+
+  // ===== LINEAR player: straight list, slow lands on middle =====
+  function linear(rootId, vals, frames){
+    const root=document.getElementById(rootId);
+    const stage=root.querySelector('.stage'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const cells=[];
+    vals.forEach((v,k)=>{const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v">'+v+'</span>';stage.appendChild(c);cells.push(c);
+      if(k<vals.length-1){const a=document.createElement('span');a.className='arrowto';a.textContent='→';stage.appendChild(a);}});
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i],meet=f.slow===f.fast;
+      cells.forEach((c,k)=>{let cls='cell';if(meet&&k===f.slow)cls+=' found';else{if(k===f.slow)cls+=' slow';if(k===f.fast)cls+=' fast';}
+        const p=f.ptrs&&f.ptrs[k]?f.ptrs[k]:'';c.className=cls+(p?' has':'');c.querySelector('.ptr').textContent=p;});
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));
+      stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};
+    resetB.onclick=()=>{i=0;apply();};apply();
+  }
+
+  linear('po',[1,2,3,4,5],[
+    {slow:0,fast:0,ptrs:{0:'🐢🐇 head'},tag:'START',exp:'Both at the head. 🐢 walks 1×, 🐇 2×.'},
+    {slow:1,fast:2,ptrs:{1:'🐢',2:'🐇'},tag:'STEP 1',exp:'🐢 → node 2 (1 step). 🐇 → node 3 (2 steps). 🐇 always at double 🐢\'s distance.'},
+    {slow:2,fast:4,ptrs:{2:'🐢',4:'🐇'},tag:'STEP 2',exp:'🐢 → node 3. 🐇 → node 5, the <b>last node</b>. <code style="font-family:monospace">fast.next</code> is None → loop stops.'},
+    {slow:2,fast:2,ptrs:{2:'🐢 MIDDLE'},tag:'DONE · one pass',exp:'🐇 covered the whole list (4); 🐢 covered exactly <b>half</b> (2) → it sits on the <b>middle, node 3</b>. No counting, no second pass.'}
+  ]);
+</script>
+</body>
+</html>
