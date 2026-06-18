@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>balanced-binary-tree</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="balanced-binary-tree--mistakes--insights">Balanced Binary Tree —
+Mistakes &amp; Insights</h1>
+<p><strong>Pattern:</strong> DFS (Post-order) |
+<strong>Difficulty:</strong> Easy | <strong>Date:</strong> 2026-04-16 |
+<strong>Revisit:</strong> ✅ DONE (2026-05-09 — Time &amp; Space
+complexity fully understood)</p>
+<hr />
+<h2 id="x-mistakes-made">❌ Mistakes Made</h2>
+<p><strong>1. Said "no pattern" — jumped to brute force
+thinking</strong></p>
+<ul>
+<li>Thought "it's simple, no pattern here."</li>
+<li>Rule: ANY tree problem with "every node" + "height" + "traversal" =
+DFS signal.</li>
+<li>Use the 3P Match sentence: "I see <strong>tree height</strong> and
+<strong>every node</strong> which tells me <strong>DFS
+(post-order)</strong> because each node needs the height of its children
+FIRST before it can check the balance condition."</li>
+</ul>
+<p><strong>2. Said O(n) for skewed brute force — ✅
+UNDERSTOOD</strong></p>
+<h3 id="key-brute-force-là-gì-trong-bài-này">🔑 Brute Force là gì trong
+bài này?</h3>
+<p>Brute force = với MỖI node trong cây, gọi hàm <code>height()</code>
+RIÊNG cho subtree trái VÀ phải, rồi so sánh.</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> isBalanced(root):</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> root <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    left_h  <span class="op">=</span> height(root.left)     <span class="co"># ← gọi height() RIÊNG</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    right_h <span class="op">=</span> height(root.right)    <span class="co"># ← gọi height() RIÊNG</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> <span class="bu">abs</span>(left_h <span class="op">-</span> right_h) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> isBalanced(root.left) <span class="kw">and</span> isBalanced(root.right)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      rồi LẠI đi vào con trái, con phải</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      mà ở đó LẠI gọi height() RIÊNG CHO NÓ NỮA!!</span></span></code></pre></div>
+<p><strong>Vấn đề:</strong> Hàm <code>height()</code> KHÔNG nhớ kết quả.
+Mỗi lần gọi, nó phải <strong>đi xuống đếm lại từ đầu</strong>.
+<code>isBalanced(node2)</code> sẽ gọi <code>height()</code> LẠI TỪ ĐẦU
+cho subtree của node 2 — dù node 1 đã đếm qua node 2 rồi!</p>
+<p>Tưởng tượng: Mỗi quản lý tầng trong tòa nhà đều phải TỰ ĐI BỘ XUỐNG
+để đếm số tầng bên dưới mình. Không ai nhớ kết quả cho người khác.</p>
+<h3 id="red_circle-skewed-tree-brute-force--on²--vì-đạp-lên-nhau">🔴
+Skewed Tree Brute Force = O(n²) — VÌ ĐẠP LÊN NHAU</h3>
+<pre><code>1  gọi height() → đếm [2, 3, 4, 5]     = 4 bước
+ \
+  2  gọi height() → đếm [3, 4, 5]      = 3 bước  ← TRÙNG 3,4,5!
+   \
+    3  gọi height() → đếm [4, 5]       = 2 bước  ← TRÙNG 4,5!
+     \
+      4  gọi height() → đếm [5]        = 1 bước  ← TRÙNG 5!
+       \
+        5  leaf                         = 0 bước</code></pre>
+<p><strong>Các node bị đếm LẶP LẠI nhiều lần:</strong></p>
+<ul>
+<li>Node 5 bị đếm <strong>4 LẦN</strong> (bởi node 1, 2, 3, 4)</li>
+<li>Node 4 bị đếm <strong>3 LẦN</strong> (bởi node 1, 2, 3)</li>
+<li>Node 3 bị đếm <strong>2 LẦN</strong> (bởi node 1, 2)</li>
+</ul>
+<p><strong>Tại sao đạp lên nhau?</strong> Vì mỗi level chỉ có 1 node, và
+node đó phải đếm GẦN HẾT cây bên dưới. Node tiếp theo cũng đếm gần hết
+cây bên dưới NÓ — mà cây bên dưới nó TRÙNG với cây mà node trước đã
+đếm!</p>
+<p><strong>Tổng = 4 + 3 + 2 + 1 + 0 = 10</strong></p>
+<p>Tổng quát với n nodes:
+<code>(n-1) + (n-2) + ... + 1 = n(n-1)/2 = O(n²)</code></p>
+<p>Kiểm tra: n=5 → (5-1)×5/2 = 4×5/2 = 10 ✅</p>
+<h3
+id="green_circle-balanced-tree-brute-force--on-log-n--vì-chia-nhau-không-trùng">🟢
+Balanced Tree Brute Force = O(n log n) — VÌ CHIA NHAU, KHÔNG TRÙNG</h3>
+<pre><code>        1              ← Level 0
+       / \
+      2   3            ← Level 1
+     / \ / \
+    4  5 6  7          ← Level 2 (leaf)</code></pre>
+<p>Đếm từng node gọi height() đi qua mấy node:</p>
+<pre><code>Node 1: height() đi qua [2,3,4,5,6,7]  = 6 bước
+Node 2: height() đi qua [4,5]           = 2 bước
+Node 3: height() đi qua [6,7]           = 2 bước
+Node 4: leaf                             = 0
+Node 5: leaf                             = 0
+Node 6: leaf                             = 0
+Node 7: leaf                             = 0</code></pre>
+<p><strong>Cộng theo TỪNG LEVEL:</strong></p>
+<pre><code>Level 0:  Node 1 làm 6 bước                        → tổng = 6  ≈ n(7)
+Level 1:  Node 2 làm 2 + Node 3 làm 2              → tổng = 4  ≈ n
+Level 2:  4 leaf nodes × 0                          → tổng = 0</code></pre>
+<p><strong>Tại sao mỗi level ≈ n?</strong> Vì các node cùng level có
+subtree RIÊNG, KHÔNG TRÙNG:</p>
+<pre><code>Level 1:
+  Node 2 &quot;sở hữu&quot; nửa TRÁI:  đếm [4, 5]   ← subtree riêng
+  Node 3 &quot;sở hữu&quot; nửa PHẢI:  đếm [6, 7]   ← subtree riêng
+                                               ──────────────
+                                   KHÔNG AI ĐẠP LÊN AI!
+                                   Cộng lại = 4 nodes ≈ n ✅</code></pre>
+<p>Kiểm chứng với cây lớn hơn (15 nodes, 4 levels):</p>
+<pre><code>              1                              ← Level 0
+           /     \
+         2         3                         ← Level 1
+        / \       / \
+       4   5     6   7                       ← Level 2
+      /\ / \   / \ / \
+     8 9 10 11 12 13 14 15                   ← Level 3 (leaf)
+
+Level 0: Node 1 → đi qua 14 nodes                        = 14  ≈ n(15)
+Level 1: Node 2 → [4,5,8,9,10,11]=6  +  Node 3 → [6,7,12,13,14,15]=6  = 12  ≈ n
+Level 2: Node 4→[8,9]=2 + Node 5→[10,11]=2 + Node 6→[12,13]=2 + Node 7→[14,15]=2 = 8  ≈ n
+Level 3: 8 leaves × 0                                     = 0</code></pre>
+<p>Mỗi level ≈ n. Cây balanced có <strong>log(n) levels</strong>. → Tổng
+= n × log(n) = <strong>O(n log n)</strong></p>
+<h3 id="fire-aha-moment--sự-khác-biệt-cốt-lõi-đạp-lên-vs-chia-nhau">🔥
+AHA MOMENT — Sự khác biệt cốt lõi: ĐẠP LÊN vs CHIA NHAU</h3>
+<pre><code>┌─────────────────────────────────────────────────────────────────────┐
+│  SKEWED:   Mỗi level 1 node → node đó đếm GẦN HẾT cây           │
+│            Node kế tiếp cũng đếm gần hết → TRÙNG LẶP/ĐẠP LÊN    │
+│            n levels × giảm dần = 1+2+...+(n-1) = O(n²)            │
+│                                                                     │
+│  BALANCED: Mỗi level nhiều nodes → mỗi node đếm PHẦN RIÊNG       │
+│            KHÔNG TRÙNG → cộng lại ≈ n                              │
+│            log(n) levels × ~n mỗi level = O(n log n)               │
+└─────────────────────────────────────────────────────────────────────┘</code></pre>
+<h3 id="zap-so-sánh-3-approaches--time-complexity">⚡ So sánh 3
+approaches — Time Complexity</h3>
+<table>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Skewed Tree</th>
+<th>Balanced Tree</th>
+<th>Lý do</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Brute force</td>
+<td>O(n²)</td>
+<td>O(n log n)</td>
+<td>Gọi height() riêng cho mỗi node, đếm lại từ đầu</td>
+</tr>
+<tr>
+<td>DFS (optimal)</td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>Tính height + check balance trong 1 lần duy nhất</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DFS optimal O(n):</strong> Mỗi node thăm ĐÚNG 1 LẦN. height()
+truyền kết quả NGƯỢC LÊN cho cha — không ai đếm lại.</p>
+<hr />
+<p><strong>3. Said Space = O(1) — forgot call stack — ✅
+UNDERSTOOD</strong></p>
+<h3 id="recursion--call-stack--chồng-đĩa">Recursion = Call Stack = Chồng
+đĩa</h3>
+<p>Mỗi lần gọi đệ quy <code>dfs(node)</code>, máy tính xếp 1 "stack
+frame" (đĩa) lên call stack. Khi hàm return, bỏ đĩa ra. <strong>Space =
+số đĩa chồng lên nhau CÙNG LÚC cao nhất.</strong></p>
+<h3 id="green_circle-cây-balanced--stack-cao-tối-đa-logn">🟢 Cây
+Balanced — Stack cao tối đa log(n)</h3>
+<pre><code>        1
+       / \
+      2   3
+     / \ / \
+    4  5 6  7
+
+DFS trace:
+dfs(1)          Stack: [1]              1 đĩa
+  dfs(2)        Stack: [1, 2]           2 đĩa
+    dfs(4)      Stack: [1, 2, 4]        3 đĩa  🔴 CAO NHẤT
+      dfs(None) return
+    bỏ đĩa 4    Stack: [1, 2]          ← QUAY LẠI, bỏ đĩa ra!
+    dfs(5)      Stack: [1, 2, 5]        3 đĩa  🔴
+      return
+    bỏ đĩa 5    Stack: [1, 2]
+  bỏ đĩa 2      Stack: [1]             ← bỏ đĩa ra trước khi đi nhánh phải!
+  dfs(3)        Stack: [1, 3]           2 đĩa
+    dfs(6)      Stack: [1, 3, 6]        3 đĩa  🔴
+    ...
+
+Stack cao nhất = 3 = height = log₂(7) ≈ 3 ✅</code></pre>
+<p><strong>Cây balanced có chỗ "rẽ nhánh" → DFS đi xuống rồi QUAY LẠI,
+bỏ đĩa ra trước khi đi nhánh khác → stack không bao giờ quá
+cao.</strong></p>
+<h3 id="red_circle-cây-skewed--stack-cao-tối-đa-n">🔴 Cây Skewed — Stack
+cao tối đa n</h3>
+<pre><code>1
+ \
+  2
+   \
+    3
+     \
+      4
+       \
+        5
+
+DFS trace:
+dfs(1)    Stack: [1]                1 đĩa
+  dfs(2)  Stack: [1, 2]            2 đĩa
+    dfs(3) Stack: [1, 2, 3]        3 đĩa
+      dfs(4) Stack: [1, 2, 3, 4]   4 đĩa
+        dfs(5) Stack: [1, 2, 3, 4, 5]  5 đĩa  🔴 = n!
+
+Stack cao nhất = 5 = n (KHÔNG CÓ CHỖ QUAY LẠI, cứ chồng đĩa mãi!)</code></pre>
+<p><strong>Cây skewed KHÔNG có chỗ rẽ → DFS cứ đi thẳng xuống → stack
+chồng hết n đĩa lên.</strong></p>
+<h3 id="fire-aha-moment--tại-sao-space--oh">🔥 AHA MOMENT — Tại sao
+Space = O(h)</h3>
+<p><strong>h = chiều cao cây = đường đi SÂU NHẤT từ root xuống
+leaf.</strong></p>
+<p>Stack chỉ giữ các node <strong>trên đường đi hiện tại</strong> từ
+root xuống node đang xét. Đường đi dài nhất = h.</p>
+<pre><code>┌──────────────────────────────────────────────────────┐
+│  Space = O(h) vì stack = đường đi từ root → node    │
+│                                                       │
+│  Balanced: h = log(n)  → Space = O(log n)            │
+│  Skewed:   h = n       → Space = O(n)                │
+│                                                       │
+│  Rule: Recursive DFS KHÔNG BAO GIỜ là O(1) space.   │
+│        Tối thiểu luôn là O(h).                       │
+└──────────────────────────────────────────────────────┘</code></pre>
+<h3 id="zap-so-sánh-space--balanced-vs-skewed">⚡ So sánh Space —
+Balanced vs Skewed</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Balanced Tree</th>
+<th>Skewed Tree</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Height (h)</td>
+<td>log(n)</td>
+<td>n</td>
+</tr>
+<tr>
+<td>Stack cao nhất</td>
+<td>log(n) đĩa</td>
+<td>n đĩa</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>O(log n)</td>
+<td>O(n)</td>
+</tr>
+<tr>
+<td>Lý do</td>
+<td>Có rẽ nhánh → bỏ đĩa ra trước khi đi nhánh khác</td>
+<td>Không rẽ → chồng đĩa mãi</td>
+</tr>
+</tbody>
+</table>
+<p><strong>4. Returned <code>False</code> instead of using -1
+sentinel</strong></p>
+<ul>
+<li>Original instinct: return False when unbalanced.</li>
+<li>Problem: the function needs to return height (int) to the parent.
+Mixing int + bool = messy type checking.</li>
+<li>Fix: use <strong>-1 as a sentinel</strong> — impossible as a real
+height, so parent knows "broken below."</li>
+</ul>
+<p><strong>5. Missing outer wrapper — returned int instead of
+bool</strong></p>
+<ul>
+<li><code>isBalanced()</code> signature requires <code>-&gt; bool</code>
+but the DFS helper returns int.</li>
+<li>Fix: wrap with <code>return dfs(root) != -1</code></li>
+</ul>
+<hr />
+<h2 id="bulb-the--1-sentinel-trick--how-it-was-derived">💡 The -1
+Sentinel Trick — How It Was Derived</h2>
+<p><strong>The problem:</strong> each node needs to return TWO pieces of
+info to its parent:</p>
+<ol type="1">
+<li>My height (int)</li>
+<li>Whether I (or anything below me) is unbalanced (bool)</li>
+</ol>
+<p><strong>Option A:</strong> Use a global variable / nonlocal flag —
+works but ugly.</p>
+<p><strong>Option B:</strong> Return False sometimes, int sometimes —
+messy type checking.</p>
+<p><strong>Option C (cleanest):</strong> Pick an impossible height value
+to signal "broken."</p>
+<ul>
+<li>Real heights are always ≥ 0 (a None node returns 0, a leaf returns
+1)</li>
+<li><strong>-1 is impossible as a real height</strong> → safe to use as
+"unbalanced detected"</li>
+<li>Parent just checks:
+<code>if left == -1 or right == -1: return -1</code> — one condition,
+clean propagation</li>
+</ul>
+<p>This is a classic pattern: <strong>piggyback two signals into one
+return value</strong> using a sentinel.</p>
+<hr />
+<h2 id="bar_chart-the-3-return-rules">📊 The 3 Return Rules</h2>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Rule 1: If left == -1 OR right == -1 → return -1 (propagate unbalanced UP)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Rule 2: If |left - right| &gt; 1        → return -1 (THIS node is unbalanced)</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Rule 3: Otherwise                    → return 1 + max(left, right)  (report height up)</span></span></code></pre></div>
+<p><strong>Rule 1 — deep dive (the propagation rule):</strong></p>
+<ul>
+<li>When <code>dfs(node.left)</code> returns <code>-1</code>, it means
+SOMEWHERE deep in the left subtree, a node had
+<code>|left - right| &gt; 1</code> (Rule 2 fired there).</li>
+<li>That <code>-1</code> bubbled up through every ancestor via Rule
+1.</li>
+<li>At THIS node, you check <code>if left_height == -1</code> BEFORE
+doing <code>abs(left - right)</code>.</li>
+<li>Why check BEFORE? Because <code>-1</code> is a fake height. If you
+did <code>abs(-1 - 2) = 3 &gt; 1</code> you'd accidentally trigger Rule
+2 again — but the reason is wrong (the real reason is a node far
+below).</li>
+<li>Rule 1 must fire FIRST: "I don't need to check balance at THIS node
+— I already know something below is broken. Short-circuit and return -1
+immediately."</li>
+<li>This is the <strong>early exit</strong> that makes DFS efficient —
+once broken, no more checking needed anywhere above.</li>
+</ul>
+<p><strong>Rule 2 — the actual balance check:</strong></p>
+<ul>
+<li>Only runs if BOTH subtrees returned real heights (not -1).</li>
+<li>Uses the heights returned by children to check THIS node's balance
+condition.</li>
+<li><code>abs(left_height - right_height) &gt; 1</code> → THIS node is
+the problem.</li>
+</ul>
+<p><strong>Rule 3 — report height to parent:</strong></p>
+<ul>
+<li><code>1 + max(left_height, right_height)</code> — the +1 counts THIS
+node itself.</li>
+<li>Parent will use this value to do its own Rule 2 check.</li>
+</ul>
+<hr />
+<h2 id="mag-concrete-trace--unbalanced-tree">🔍 Concrete Trace —
+Unbalanced Tree</h2>
+<pre><code>    1
+   / \
+  2   3
+ / \
+4   5  ← left height=1, right height=2 → diff=1 ✅ (node 2 is OK)
+     \
+      6  ← but what if 5 had TWO more children? Then diff &gt; 1 at node 2</code></pre>
+<p><strong>Actual unbalanced trace:</strong></p>
+<pre><code>    1
+   / \
+  2   3
+ / \
+4   5
+     \
+      6
+       \
+        7   ← now node 5 height = 3, node 4 height = 1 → diff = 2 → UNBALANCED at node 2</code></pre>
+<ul>
+<li><code>dfs(4)</code> → returns <code>1</code> (leaf)</li>
+<li><code>dfs(7)</code> → returns <code>1</code> (leaf)</li>
+<li><code>dfs(6)</code> → left=0, right=1 → diff=1 ✅ → returns
+<code>2</code></li>
+<li><code>dfs(5)</code> → left=0, right=2 → diff=2 ❌ → returns
+<code>-1</code></li>
+<li><code>dfs(2)</code> → right=-1 → Rule 1 fires → returns
+<code>-1</code></li>
+<li><code>dfs(1)</code> → left=-1 → Rule 1 fires → returns
+<code>-1</code></li>
+<li><code>isBalanced</code> → <code>-1 != -1</code> is
+<code>False</code> → <strong>NOT balanced</strong> ✅</li>
+</ul>
+<hr />
+<h2 id="white_check_mark-clean-solution">✅ Clean Solution</h2>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> isBalanced(<span class="va">self</span>, root: Optional[TreeNode]) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> dfs(node):</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> node <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>            left_height <span class="op">=</span> dfs(node.left)</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            right_height <span class="op">=</span> dfs(node.right)</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> left_height <span class="op">==</span> <span class="op">-</span><span class="dv">1</span> <span class="kw">or</span> right_height <span class="op">==</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">abs</span>(left_height <span class="op">-</span> right_height) <span class="op">&gt;</span> <span class="dv">1</span>:</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">1</span> <span class="op">+</span> <span class="bu">max</span>(left_height, right_height)</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> dfs(root) <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span></span></code></pre></div>
+<p><strong>Time:</strong> O(n) — each node visited exactly once |
+<strong>Space:</strong> O(h) — call stack depth = tree height</p>
+<hr />
+<h2 id="bulb-key-insights">💡 Key Insights</h2>
+<ul>
+<li><strong>Abstract version:</strong> "At every node, check if left
+subtree height and right subtree height differ by more than 1. If any
+node fails, the whole tree is unbalanced."</li>
+<li><strong>Signal → Pattern:</strong> "tree height" + "every node" →
+DFS (post-order)</li>
+<li><strong>Post-order is mandatory:</strong> you MUST know children's
+heights before checking the current node. Process bottom-up.</li>
+<li><strong>Brute force vs DFS:</strong>
+<ul>
+<li>Brute force: separate <code>height()</code> call per node → O(n²)
+worst case, O(n log n) balanced</li>
+<li>DFS: compute height AND check balance in one pass → O(n)</li>
+</ul></li>
+<li><strong>The -1 sentinel:</strong> piggybacks height (int) + validity
+(bool) into one return value. Parent checks one condition to propagate
+failure.</li>
+<li><strong>Wrapper pattern:</strong> inner <code>dfs()</code> returns
+int (height or -1). Outer <code>isBalanced()</code> converts to bool
+with <code>!= -1</code>.</li>
+<li><strong>Space:</strong> always O(h) for recursive DFS — never O(1).
+O(log n) balanced, O(n) skewed.</li>
+<li><strong>Why <code>None</code> returns 0:</strong> an empty subtree
+has height 0 — this is the base case that terminates recursion.</li>
+</ul>
+  </div>
+</body>
+</html>

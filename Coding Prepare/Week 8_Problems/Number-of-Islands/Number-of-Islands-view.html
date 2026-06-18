@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number-of-Islands</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-number-of-islands--complete-session-archive">🗡️ Number of
+Islands — Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> BFS (Matrix Traversal) |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #200 |
+<strong>Date:</strong> 2026-05-21 <strong>Path Taken:</strong> Pattern
+Path | <strong>⏱️ Time Used:</strong> ~44 min (including discussion) |
+<strong>🎯 Target:</strong> 25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>Wiganz recognized the BFS pattern correctly and moved through the
+Road with solid structural thinking. The session ran overtime not from
+confusion on approach, but from condition logic precision in the
+Blueprint — particularly <code>== '0'</code> vs <code>== 0</code> and
+return statement placement. Three bugs surfaced only at Verify, all
+caught through Socratic guidance. The key conceptual unlock: matrix BFS
+does NOT pre-load a start node — you scan first, trigger BFS only when
+you find an unvisited <code>'1'</code>. That difference from graph BFS
+is subtle but load-bearing.</p>
+<hr />
+<h2 id="open_book-step-1--understand">📖 Step 1 — Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given a 2D grid of characters where <code>'1'</code> means land and
+<code>'0'</code> means water, count the number of
+<strong>islands</strong> — groups of <code>'1'</code>s that are
+connected horizontally or vertically. Diagonal connections do NOT count.
+Each island is a connected component of land cells.</p>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given a 2D grid of '1's and '0's, count the number of connected
+components of '1's, where connectivity is defined as horizontally or
+vertically adjacent cells only."</p>
+</blockquote>
+<h3 id="question-constraint-questions-asked">❓ Constraint Questions
+Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is connectivity horizontal/vertical only, or also diagonal?</td>
+<td>Horizontal + vertical only — no diagonal</td>
+</tr>
+<tr>
+<td>Can the grid be empty?</td>
+<td>No — guaranteed non-empty</td>
+</tr>
+<tr>
+<td>Grid cells are strings <code>'1'</code>/<code>'0'</code>, not
+integers?</td>
+<td>Yes — strings</td>
+</tr>
+<tr>
+<td>Can I modify the grid in-place?</td>
+<td>Yes — grid mutation is allowed</td>
+</tr>
+<tr>
+<td>What do I return?</td>
+<td>Integer — count of islands</td>
+</tr>
+<tr>
+<td>Single cell grid?</td>
+<td>Yes — possible edge case</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<pre><code>Grid:
+1 1 0 0
+1 0 0 0
+0 0 1 0
+0 0 0 1</code></pre>
+<p>Output: <code>3</code> — Because the top-left cluster (three
+connected <code>'1'</code>s) is one island, the lone <code>'1'</code> at
+(2,2) is a second, and the lone <code>'1'</code> at (3,3) is a third.
+Definition WHY: the problem says a group of horizontally/vertically
+connected <code>'1'</code>s counts as one island.</p>
+<hr />
+<h2 id="compass-step-2--approach-3-gate-check">🧭 Step 2 — Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<ul>
+<li>Gate 1 (abstract shape match): ✅ "count connected components in a
+2D binary matrix" → BFS/DFS signature</li>
+<li>Gate 2 (name + why): ✅ BFS — explore all cells reachable from a
+<code>'1'</code> before moving to the next unvisited one</li>
+<li>Gate 3 (solved something like this): ✅ 01 Matrix, Flood Fill — same
+matrix BFS template</li>
+</ul>
+<p>→ Decision: <strong>PATTERN PATH</strong></p>
+<hr />
+<h2 id="dart-3p-match--4p-reason">🎯 3P Match + 4P Reason</h2>
+<h3 id="mag-3p--signal--pattern--full-sentence">🔍 3P — Signal → Pattern
+→ Full Sentence</h3>
+<blockquote>
+<p>"I see 'connected components' in a 2D matrix — that's a BFS
+signature, because BFS can flood-fill from any unvisited starting cell
+and mark everything reachable before I move on."</p>
+</blockquote>
+<h3 id="brain-4p--reason-before-any-code">🧠 4P — Reason (Before ANY
+code)</h3>
+<p><strong>A — 🐢 Brute Force + Why Bad:</strong> Check every cell; for
+each <code>'1'</code>, try every possible path to count connectivity —
+exponential branching, revisiting cells repeatedly. O(m×n × m×n) in the
+worst case. Completely impractical.</p>
+<p><strong>B — ⚡ What BFS Does Instead:</strong> Scan the grid cell by
+cell. When an unvisited <code>'1'</code> is found, increment the counter
+and immediately BFS outward from that cell, marking every connected
+<code>'1'</code> as visited before moving on. Each cell is touched at
+most once → O(m×n).</p>
+<p><strong>C — 🔒 The Invariant:</strong></p>
+<blockquote>
+<p>Once a <code>'1'</code> cell is added to the queue and marked
+visited, it will NEVER be counted again. Every BFS call exhausts exactly
+one island — no more, no less.</p>
+</blockquote>
+<hr />
+<h2 id="speaking_head-step-3--discuss">🗣️ Step 3 — Discuss</h2>
+<h3 id="clipboard-wiganzs-presentation">📋 Wiganz's Presentation</h3>
+<ol type="1">
+<li>Scan each cell in the grid row by row.</li>
+<li>Skip cells that are <code>'0'</code> or already visited.</li>
+<li>When an unvisited <code>'1'</code> is found, increment
+<code>count</code> and launch BFS from that cell.</li>
+<li>BFS explores all 4 neighbors (up/down/left/right), skipping
+out-of-bounds, <code>'0'</code>s, and already-visited cells.</li>
+<li>Mark each cell visited as it enters the queue.</li>
+<li>Return <code>count</code> after all cells are scanned.</li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Time: O(m×n) — every cell visited at most once</li>
+<li>Space: O(m×n) — visited set + queue in worst case (all land)</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>Asked "Shall I code it?" — yes.</p>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<ul>
+<li>Did not explicitly name the brute force before presenting the
+optimal — missed the 10-second brute force mention that earns Problem
+Solving points.</li>
+<li>Condition logic precision (string vs int, return placement) not
+verified verbally before coding.</li>
+</ul>
+<hr />
+<h2 id="computer-step-4--code">💻 Step 4 — Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> numIslands(<span class="va">self</span>, matrix):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Get rows, cols. Init count=0, visited set, queue, directions</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Outer scan: for each (row, col), skip if visited or &#39;0&#39;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Otherwise: count += 1, mark visited, enqueue</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. BFS inner loop: popleft, check 4 neighbors</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5.   Skip: out of bounds, visited, &#39;0&#39;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 6.   Otherwise: mark visited, enqueue neighbor</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 7. Return count</span></span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> numIslands(<span class="va">self</span>, matrix: List[List[<span class="bu">str</span>]]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        rows <span class="op">=</span> <span class="bu">len</span>(matrix)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        cols <span class="op">=</span> <span class="bu">len</span>(matrix[<span class="dv">0</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        visited <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        queue <span class="op">=</span> deque()</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        directions <span class="op">=</span> [(<span class="dv">0</span>,<span class="dv">1</span>), (<span class="dv">1</span>,<span class="dv">0</span>), (<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>), (<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>)]</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> row <span class="kw">in</span> <span class="bu">range</span>(rows):</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> col <span class="kw">in</span> <span class="bu">range</span>(cols):</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> (row, col) <span class="kw">in</span> visited <span class="kw">or</span> matrix[row][col] <span class="op">==</span> <span class="st">&quot;0&quot;</span>:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">continue</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                visited.add((row, col))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                queue.append((row, col))</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">while</span> queue:</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                    current <span class="op">=</span> queue.popleft()</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">for</span> direction <span class="kw">in</span> directions:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                        neighbor_row <span class="op">=</span> current[<span class="dv">0</span>] <span class="op">+</span> direction[<span class="dv">0</span>]</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>                        neighbor_col <span class="op">=</span> current[<span class="dv">1</span>] <span class="op">+</span> direction[<span class="dv">1</span>]</span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>                        neighbor <span class="op">=</span> (neighbor_row, neighbor_col)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> neighbor_row <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_row <span class="op">&gt;=</span> rows:</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">continue</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> neighbor_col <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_col <span class="op">&gt;=</span> cols:</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">continue</span></span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> neighbor <span class="kw">in</span> visited:</span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">continue</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">if</span> matrix[neighbor_row][neighbor_col] <span class="op">==</span> <span class="st">&quot;0&quot;</span>:</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                            <span class="cf">continue</span></span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>                        visited.add(neighbor)</span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                        queue.append(neighbor)</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> count</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(m×n) — each cell enqueued and dequeued at
+most once <strong>📦 Space:</strong> O(m×n) — visited set + queue both
+scale with grid size</p>
+<hr />
+<h2 id="mag-step-5--verify">🔍 Step 5 — Verify</h2>
+<h3 id="footprints-trace-through-example">👣 Trace Through Example</h3>
+<pre><code>Grid:
+1 1 0
+1 0 0
+0 0 1</code></pre>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>count</th>
+<th>visited size</th>
+<th>queue</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(0,0): '1', unvisited</td>
+<td>count+=1, enqueue</td>
+<td>1</td>
+<td>1</td>
+<td>[(0,0)]</td>
+</tr>
+<tr>
+<td>BFS from (0,0): check neighbors (0,1)=1, (1,0)=1</td>
+<td>enqueue both</td>
+<td>1</td>
+<td>3</td>
+<td>[(0,1),(1,0)]</td>
+</tr>
+<tr>
+<td>BFS (0,1): neighbors (0,2)='0', (0,0) visited, (1,1)='0'</td>
+<td>nothing added</td>
+<td>1</td>
+<td>3</td>
+<td>[(1,0)]</td>
+</tr>
+<tr>
+<td>BFS (1,0): neighbors (0,0) visited, (2,0)='0', (1,1)='0'</td>
+<td>nothing added</td>
+<td>1</td>
+<td>3</td>
+<td>[]</td>
+</tr>
+<tr>
+<td>Scan continues: (0,1) visited, (0,2)='0', (1,0) visited, (1,1)='0',
+(1,2)='0', (2,0)='0', (2,1)='0'</td>
+<td>skip all</td>
+<td>1</td>
+<td>3</td>
+<td>—</td>
+</tr>
+<tr>
+<td>(2,2): '1', unvisited</td>
+<td>count+=1, enqueue</td>
+<td>2</td>
+<td>4</td>
+<td>[(2,2)]</td>
+</tr>
+<tr>
+<td>BFS from (2,2): all neighbors out-of-bounds or '0'</td>
+<td>nothing added</td>
+<td>2</td>
+<td>4</td>
+<td>[]</td>
+</tr>
+<tr>
+<td>Return</td>
+<td><strong>2</strong></td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Output: <code>2</code> ✅</p>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All water</td>
+<td><code>[["0","0"],["0","0"]]</code></td>
+<td>0</td>
+<td>✅ — outer scan skips all</td>
+</tr>
+<tr>
+<td>All land (one island)</td>
+<td><code>[["1","1"],["1","1"]]</code></td>
+<td>1</td>
+<td>✅ — BFS floods entire grid</td>
+</tr>
+<tr>
+<td>Single cell land</td>
+<td><code>[["1"]]</code></td>
+<td>1</td>
+<td>✅ — count=1, BFS has no valid neighbors</td>
+</tr>
+<tr>
+<td>Single cell water</td>
+<td><code>[["0"]]</code></td>
+<td>0</td>
+<td>✅ — skipped immediately</td>
+</tr>
+<tr>
+<td>Checkerboard</td>
+<td><code>[["1","0"],["0","1"]]</code></td>
+<td>2</td>
+<td>✅ — no adjacency between the two</td>
+</tr>
+<tr>
+<td>Diagonal '1's</td>
+<td><code>[["1","0"],["0","1"]]</code></td>
+<td>2</td>
+<td>✅ — diagonal NOT connected by design</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<p>Time O(m×n) — outer scan + BFS together visit each cell at most once
+(visited set prevents re-entry). Space O(m×n) — visited set holds up to
+m×n tuples; queue can hold up to m×n cells in an all-land grid.</p>
+<hr />
+<h2 id="zap-step-6--optimize">⚡ Step 6 — Optimize</h2>
+<h3 id="bttc-already-reached">BTTC Already Reached</h3>
+<p>BTTC = O(m×n) — must inspect every cell to determine if it belongs to
+an island. Already there.</p>
+<h3 id="space-optimization-identified">Space Optimization
+Identified</h3>
+<p><strong>Grid mutation trick:</strong> Replace <code>visited</code>
+set with in-place mutation — set <code>grid[r][c] = '0'</code> when a
+cell is visited. This eliminates the O(m×n) visited set entirely,
+reducing space from O(m×n) to O(m×n) queue-only in worst case. Net
+improvement is constant factor, but is cleaner in interviews where grid
+mutation is allowed.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Instead of: visited.add((row, col))</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Use:        matrix[row][col] = &quot;0&quot;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># And check:  if matrix[row][col] == &quot;0&quot;: continue  (covers both water AND visited)</span></span></code></pre></div>
+<p>This was correctly identified and confirmed as the space-optimal
+path. Not implemented in final solution (visited set version submitted)
+— both are valid interview answers.</p>
+<hr />
+<h2 id="bug-bugs--mistakes-every-single-one">🐛 Bugs &amp; Mistakes
+(Every Single One)</h2>
+<h3 id="bug-bug-1--0-instead-of--0">🐛 Bug 1: <code>== 0</code> instead
+of <code>== "0"</code></h3>
+<ul>
+<li><strong>❌ What:</strong> Wrote <code>matrix[row][col] == 0</code>
+(integer) — condition never triggers because grid stores strings
+<code>"0"</code> and <code>"1"</code>.</li>
+<li><strong>🔍 Why:</strong> <code>concept gap</code> — forgot that the
+input type is <code>List[List[str]]</code>, not integers. The problem
+signature says <code>str</code>, but coding muscle memory defaulted to
+int comparison.</li>
+<li><strong>💸 Cost:</strong> Every cell would appear to be land — BFS
+would flood infinitely (or throw errors), count would be wildly
+wrong.</li>
+<li><strong>🛡️ Prevention:</strong> During Step 1, explicitly state the
+cell type in the abstract. If the problem says <code>str</code>, write
+<code>"0"</code> in your Blueprint comment, not <code>0</code>. Check
+your comparison type before coding the condition.</li>
+</ul>
+<h3 id="bug-bug-2-return-count-placed-inside-the-outer-for-loop">🐛 Bug
+2: <code>return count</code> placed inside the outer for loop</h3>
+<ul>
+<li><strong>❌ What:</strong> <code>return count</code> was indented one
+level too deep — inside the <code>for col in range(cols)</code> loop —
+returning after the first island is found instead of after the full
+scan.</li>
+<li><strong>🔍 Why:</strong> <code>rush</code> +
+<code>indentation error</code> — wrote the return at the wrong level
+when filling in Blueprint comments. Did not re-check nesting before
+proceeding.</li>
+<li><strong>💸 Cost:</strong> Function exits after the very first
+<code>'1'</code> is processed, always returning <code>1</code>
+regardless of grid contents.</li>
+<li><strong>🛡️ Prevention:</strong> After writing the return statement,
+explicitly ask: "Is this at the TOP level of the function?" Return for
+the scan result always lives OUTSIDE all loops. Blueprint comment should
+read <code># 7. Return count</code> at function scope — match
+indentation to the comment's intended level.</li>
+</ul>
+<h3
+id="bug-bug-3-indentation-error-in-for-direction-in-directions-block">🐛
+Bug 3: Indentation error in <code>for direction in directions</code>
+block</h3>
+<ul>
+<li><strong>❌ What:</strong> The
+<code>for direction in directions</code> loop (neighbor expansion) was
+misindented — placed outside the <code>while queue</code> block instead
+of inside it.</li>
+<li><strong>🔍 Why:</strong> <code>rush</code> — copied the direction
+iteration logic without verifying it was nested inside the BFS while
+loop.</li>
+<li><strong>💸 Cost:</strong> Neighbor expansion would run once per
+outer-loop cell rather than per BFS step — breaking the entire BFS
+traversal logic.</li>
+<li><strong>🛡️ Prevention:</strong> The BFS skeleton has a fixed nesting
+structure: <code>while queue</code> → <code>popleft</code> →
+<code>for direction</code>. These three always go together. Verify the
+three-level nesting every time you write a BFS.</li>
+</ul>
+<blockquote>
+<p>Root cause categories used: <code>rush</code> |
+<code>concept gap</code> | <code>indentation error</code></p>
+</blockquote>
+<hr />
+<h2 id="bulb-discoveries-aha-moments--insights">💡 Discoveries (Aha
+Moments &amp; Insights)</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p><strong>Once a cell is marked visited and added to the queue, it will
+never be re-counted.</strong> Each BFS call from a new <code>'1'</code>
+exhausts exactly one island — all cells touched by that BFS belong to
+the same connected component. The outer scan then skips all of them.</p>
+</blockquote>
+<p>Think of it like a wildfire: you light the match at one cell, and the
+fire spreads to every connected neighbor. When the fire burns out (queue
+empty), that entire island is ash — gray, visited, done. You keep
+walking the grid looking for unlit land.</p>
+<h3 id="zap-aha-moments-in-order">⚡ Aha Moments (in order)</h3>
+<p><strong>💡 1. Matrix BFS does NOT pre-load a start node</strong></p>
+<ul>
+<li><strong>Before:</strong> Expected to set up BFS with a starting node
+before the scan, like in graph BFS.</li>
+<li><strong>Trigger:</strong> Realized that in matrix BFS there is no
+single starting cell — you don't know where the islands are until you
+scan. The scan IS the discovery mechanism.</li>
+<li><strong>After:</strong> The outer <code>for row / for col</code>
+loop plays the role of "finding the source." BFS only fires when the
+scan encounters an unvisited <code>'1'</code>. The queue starts empty
+and is populated on-demand.</li>
+</ul>
+<p><strong>💡 2. "Connected components" = islands</strong></p>
+<ul>
+<li><strong>Before:</strong> The term "connected components" sounded
+abstract.</li>
+<li><strong>Trigger:</strong> Abstracting the problem: "count connected
+components of '1's in a 2D binary matrix."</li>
+<li><strong>After:</strong> Every island IS a connected component. This
+directly maps to the BFS template already practiced on graphs — same
+logic, different representation.</li>
+</ul>
+<p><strong>💡 3. Grid mutation as visited set replacement</strong></p>
+<ul>
+<li><strong>Before:</strong> Used <code>visited = set()</code> as
+default — didn't question the space cost.</li>
+<li><strong>Trigger:</strong> "What if you don't need the set at
+all?"</li>
+<li><strong>After:</strong> Setting <code>grid[r][c] = '0'</code> serves
+the same purpose as <code>visited.add((r,c))</code> — the next check
+<code>matrix[row][col] == "0"</code> will catch it. Eliminates the set
+entirely. Requires explicit permission that grid mutation is OK
+(confirmed in Step 1 constraints).</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>Wildfire metaphor:</strong> Each BFS call is a wildfire
+starting at one cell and burning through all connected land. When the
+fire dies, one island is fully charred. You keep walking to find unlit
+land and start the next fire. The count = number of times you struck a
+match.</li>
+<li><strong>Checkerboard edge case:</strong>
+<code>[["1","0"],["0","1"]]</code> — diagonal <code>'1'</code>s look
+close on paper but are NOT connected. Confirmed that the 4-directional
+constraint is the whole definition of adjacency here.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(m×n)</td>
+<td>Outer scan visits every cell once. BFS for each island also visits
+cells once — the visited set/mutation prevents re-entry. Total work
+across all BFS calls is bounded by m×n.</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(m×n)</td>
+<td>visited set stores up to m×n tuples. Queue can hold up to m×n cells
+in the worst case (all land, BFS enqueues everything). Grid mutation
+version reduces this to O(m×n) queue only (no set).</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(m×n)</td>
+<td>Must inspect every cell to determine land or water. Cannot skip any
+cell — already at theoretical floor.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 3/5 — Pattern recognition and BFS
+structure are solid. The three bugs (type comparison, return placement,
+indentation) reveal Blueprint precision is still a weak area under time
+pressure.</li>
+<li><strong>🔄 Revisit:</strong>
+<ul>
+<li>Blueprint phase — condition logic: always annotate expected types
+next to comparisons in comments</li>
+<li>Return statement placement — must verify scope before writing</li>
+<li>BFS nesting discipline — the <code>while queue</code> →
+<code>popleft</code> → <code>for direction</code> triple must become
+reflex</li>
+</ul></li>
+<li><strong>📈 Pattern Mastery Impact:</strong> Adds a matrix-traversal
+BFS problem to the solved set. Reinforces the "scan first, trigger BFS
+on discovery" template that distinguishes matrix BFS from graph BFS.
+Problems solved in BFS pattern now: 7.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems">🔗 Similar Problems</h2>
+<ul>
+<li><strong>01 Matrix (#542)</strong> — BFS from all <code>0</code>s
+simultaneously (multi-source BFS). Same matrix traversal template,
+different trigger.</li>
+<li><strong>Flood Fill (#733)</strong> — BFS/DFS from a single start
+cell, recolor connected component. Simplified version of this exact
+problem.</li>
+<li><strong>Max Area of Island (#695)</strong> — Same template, track
+island size instead of island count. Direct extension.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz — 2026-05-21</em> <em>"Be strong and
+courageous. Do not be afraid; do not be discouraged, for the Lord your
+God will be with you wherever you go." — Joshua 1:9 ✝️</em></p>
+  </div>
+</body>
+</html>

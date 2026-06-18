@@ -8,6 +8,22 @@ import { generateSteps } from './services/algorithm';
 import { AlgorithmStep, StepType } from './types';
 import { INITIAL_LISTS, PYTHON_CODE } from './constants';
 
+// --- lightweight Python syntax highlighter (gruvbox-dark palette) ---
+const _PYKW = new Set("def return for in if elif else while import from as and or not None True False class with lambda yield break continue pass is raise try except finally global nonlocal del assert await async".split(" "));
+const _PYBI = new Set("len range enumerate print sorted min max abs sum map filter zip reversed int str list dict set tuple float ord chr heappush heappop heapify heapq append pop".split(" "));
+const hlPy = (line: string): React.ReactNode[] => {
+  const P = { kw: '#FB4934', bi: '#FABD2F', fn: '#8EC07C', st: '#B8BB26', nu: '#D3869B', co: '#928374', self: '#83A598' };
+  const re = /(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+\.?\d*\b)|([A-Za-z_]\w*)|(\s+)|([^\w\s])/g;
+  const out: React.ReactNode[] = []; let m: RegExpExecArray | null; let k = 0;
+  while ((m = re.exec(line))) {
+    const t = m[0]; let c = '';
+    if (m[1]) c = P.co; else if (m[2]) c = P.st; else if (m[3]) c = P.nu;
+    else if (m[4]) { if (_PYKW.has(t)) c = P.kw; else if (_PYBI.has(t)) c = P.bi; else if (t === 'self' || t === 'cls') c = P.self; else if (line[re.lastIndex] === '(') c = P.fn; }
+    out.push(c ? <span key={k++} style={{ color: c }}>{t}</span> : <span key={k++}>{t}</span>);
+  }
+  return out;
+};
+
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'visualizer' | 'concepts'>('visualizer');
   const [rawLists, setRawLists] = useState<number[][]>(INITIAL_LISTS);
@@ -287,8 +303,8 @@ const App: React.FC = () => {
                        className={`flex relative ${isHighlighted ? 'bg-[#504945] -mx-4 px-4' : ''}`}
                      >
                        <span className={`w-8 text-right mr-4 select-none flex-shrink-0 text-[#928374] ${isHighlighted ? 'text-[#FABD2F] font-bold' : ''}`}>{lineNum}</span>
-                       <span className={`${isHighlighted ? 'text-white' : ''} whitespace-pre`}>
-                         {line}
+                       <span className="whitespace-pre">
+                         {hlPy(line)}
                        </span>
                        {isHighlighted && (
                          <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#FABD2F]"></div>

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>evaluate-reverse-polish-notation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1
+id="evaluate-reverse-polish-notation----complete-session-archive">Evaluate
+Reverse Polish Notation -- Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Stack | <strong>Difficulty:</strong> Medium
+| <strong>LeetCode:</strong> #150 | <strong>Date:</strong> 2026-05-08
+<strong>Path Taken:</strong> Pattern Path | <strong>Time Used:</strong>
+25 min (timed) + Teaching Mode debrief | <strong>Target:</strong> 25
+min</p>
+</blockquote>
+<hr />
+<h2 id="the-journey----how-understanding-built">The Journey -- How
+Understanding Built</h2>
+<p>Wiganz entered this session without knowing what RPN even was.
+Through a single guiding question from Hadriel, he decoded the notation
+from scratch -- and then, without any hint, recognized the Stack pattern
+himself by connecting it to Valid Parentheses. The code came in within
+the target time, but Teaching Mode uncovered five real bugs: a wrong
+variable name, a negative-number trap with <code>isdigit()</code>, a
+wrong return target, a silent operand-order reversal, and a
+float-corruption bug that only surfaces with intermediate division. The
+hardest lesson of the session was that the most dangerous bugs are the
+ones that compile and run fine -- they just silently return the wrong
+answer.</p>
+<hr />
+<h2 id="step-1----understand">Step 1 -- Understand</h2>
+<h3 id="problem-statement-human-language">Problem Statement (Human
+Language)</h3>
+<p>Given an array of string tokens representing a math expression in
+Reverse Polish Notation (postfix), evaluate it and return the integer
+result.</p>
+<p>RPN means operators come AFTER their two operands. So
+<code>["2","1","+"]</code> means <code>2 + 1 = 3</code>. When you see an
+operator, it fires on the two numbers that came just before it.</p>
+<ul>
+<li>Input: <code>tokens: List[str]</code> -- a mix of number strings and
+operator strings (<code>"+"</code>, <code>"-"</code>, <code>"*"</code>,
+<code>"/"</code>)</li>
+<li>Output: one integer -- the final evaluated result</li>
+<li>Division truncates toward zero (not floor):
+<code>int(-7/2) = -3</code>, not <code>-4</code></li>
+</ul>
+<h3 id="abstract-story-stripped">Abstract (Story Stripped)</h3>
+<blockquote>
+<p>"Given an array of tokens -- numbers wait in place, operator fires on
+the two before it, result replaces them. Return the final value."</p>
+</blockquote>
+<h3 id="constraint-questions-asked">Constraint Questions Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is the input sorted?</td>
+<td>No -- order matters, do not touch it</td>
+</tr>
+<tr>
+<td>Can values be negative?</td>
+<td>Yes -- e.g. <code>"-11"</code> is a valid token</td>
+</tr>
+<tr>
+<td>Can values be zero?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can there be duplicates?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can the input be empty?</td>
+<td>No -- guaranteed valid, never empty</td>
+</tr>
+<tr>
+<td>How is the input stored?</td>
+<td>Array of strings</td>
+</tr>
+<tr>
+<td>What's the input size?</td>
+<td>Up to 10^4 tokens</td>
+</tr>
+<tr>
+<td>What to return?</td>
+<td>One integer -- the final result</td>
+</tr>
+<tr>
+<td>Division truncation direction?</td>
+<td>Toward zero (not floor) -- <code>int()</code> in Python</td>
+</tr>
+</tbody>
+</table>
+<h3 id="trace-by-hand">Trace by Hand</h3>
+<p>Input: <code>["2","1","+","3","*"]</code></p>
+<ul>
+<li>See <code>"2"</code> -- it's a number. Wait.</li>
+<li>See <code>"1"</code> -- it's a number. Wait.</li>
+<li>See <code>"+"</code> -- operator fires. 2 + 1 = 3. Replace both with
+3.</li>
+<li>See <code>"3"</code> -- it's a number. Wait.</li>
+<li>See <code>"*"</code> -- operator fires. 3 * 3 = 9. Replace both with
+9.</li>
+<li>Output: <code>9</code>. Because the problem says postfix operators
+consume the two values before them.</li>
+</ul>
+<hr />
+<h2 id="step-2----approach-3-gate-check">Step 2 -- Approach (3-Gate
+Check)</h2>
+<h3 id="3-gate-results">3-Gate Results</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate 1</td>
+<td>Does the abstract shape match a pattern signature?</td>
+<td>YES -- "numbers wait, pending items retrieved later" = Stack
+signal</td>
+</tr>
+<tr>
+<td>Gate 2</td>
+<td>Can I name it AND explain why it fits?</td>
+<td>YES -- Stack because numbers must be held pending until an operator
+arrives</td>
+</tr>
+<tr>
+<td>Gate 3</td>
+<td>Have I solved something like this before?</td>
+<td>YES -- Valid Parentheses (#26) -- same "item waits, retrieved on
+trigger" mechanic</td>
+</tr>
+</tbody>
+</table>
+<p>Decision: PATTERN PATH</p>
+<hr />
+<h2 id="3p-match--4p-reason">3P Match + 4P Reason</h2>
+<h3 id="3p----signal-to-pattern">3P -- Signal to Pattern</h3>
+<p>Signal seen: <strong>"numbers wait"</strong> + <strong>"pending
+items"</strong> + <strong>"retrieved later in order"</strong></p>
+<blockquote>
+<p>"I see 'numbers waiting to be consumed by operators' which tells me
+Stack because items that wait and are retrieved when a condition
+triggers is the classic Stack signature. Valid Parentheses had
+<code>(</code> waiting for <code>)</code> -- same mechanic here."</p>
+</blockquote>
+<h3 id="4p----reason">4P -- Reason</h3>
+<p><strong>A -- Brute Force + Why Bad:</strong></p>
+<p>Scan the array, find the leftmost operator, pop the two numbers
+before it, compute, replace, repeat. This requires shifting the array on
+every operation -- O(n) per operation, O(n^2) total. Too slow for 10^4
+tokens.</p>
+<p><strong>B -- What Stack Does Instead:</strong></p>
+<p>Push numbers onto a stack as we scan left to right. When we hit an
+operator, pop two numbers, compute, push the result back. Each token is
+visited exactly once -- O(n).</p>
+<p><strong>C -- The Invariant:</strong></p>
+<blockquote>
+<p>"At any point while scanning tokens, the stack always holds the most
+recent values not yet consumed by an operator."</p>
+</blockquote>
+<p>This is the rule that keeps the solution correct at every step. The
+stack IS the "waiting room" -- numbers sit there until an operator
+claims them.</p>
+<hr />
+<h2 id="step-3----discuss">Step 3 -- Discuss</h2>
+<h3 id="wiganzs-presentation">Wiganz's Presentation</h3>
+<ol type="1">
+<li>Use a Stack (Python list)</li>
+<li>Scan tokens left to right</li>
+<li>If the token is a number -- push it</li>
+<li>If the token is an operator -- pop two numbers, apply the operator,
+push the result</li>
+<li>At the end, the stack contains exactly one value -- return it</li>
+</ol>
+<h3 id="complexity-stated">Complexity Stated</h3>
+<ul>
+<li>Time: O(n) -- one pass through all tokens</li>
+<li>Space: O(n) -- worst case all tokens are numbers with one operator
+at the end</li>
+</ul>
+<h3 id="green-light">Green Light</h3>
+<p>This aspect was not fully explored during the session -- whether
+Wiganz explicitly asked "Shall I code it?" was not recorded.</p>
+<h3 id="what-was-missed">What Was Missed</h3>
+<ul>
+<li>Wiganz did not mention the brute force approach before presenting
+the optimized solution</li>
+<li>The operand order issue (LEFT op RIGHT) was not flagged before
+coding -- it surfaced as a bug during testing</li>
+</ul>
+<hr />
+<h2 id="step-4----code">Step 4 -- Code</h2>
+<h3 id="blueprint-comments-first">Blueprint (Comments First)</h3>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> evalRPN(<span class="va">self</span>, tokens: List[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Build operator map: token -&gt; lambda(a, b)</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Initialize empty stack</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. For each token:</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#    - If NOT an operator -&gt; push int(token)</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">#    - If operator -&gt; pop two, apply op (LEFT op RIGHT), push result</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Return stack.pop()</span></span></code></pre></div>
+<h3 id="final-clean-solution">Final Clean Solution</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> evalRPN(<span class="va">self</span>, tokens: List[<span class="bu">str</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        ops <span class="op">=</span> {</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;+&quot;</span>: <span class="kw">lambda</span> a, b: a <span class="op">+</span> b,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;-&quot;</span>: <span class="kw">lambda</span> a, b: a <span class="op">-</span> b,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;*&quot;</span>: <span class="kw">lambda</span> a, b: a <span class="op">*</span> b,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>            <span class="st">&quot;/&quot;</span>: <span class="kw">lambda</span> a, b: <span class="bu">int</span>(a <span class="op">/</span> b),  <span class="co"># truncate toward zero, not floor</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        }</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        stack <span class="op">=</span> []</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> token <span class="kw">in</span> tokens:</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> token <span class="kw">not</span> <span class="kw">in</span> ops:</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>                stack.append(<span class="bu">int</span>(token))</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>                first_num <span class="op">=</span> stack.pop()   <span class="co"># RIGHT operand (pushed last)</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>                second_num <span class="op">=</span> stack.pop()  <span class="co"># LEFT operand (pushed first)</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>                stack.append(ops[token](second_num, first_num))  <span class="co"># LEFT op RIGHT</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> stack.pop()</span></code></pre></div>
+<p><strong>Time:</strong> O(n) -- one pass through all tokens
+<strong>Space:</strong> O(n) -- stack holds at most all operands</p>
+<p><strong>Why no <code>deque</code>?</strong> Python <code>list</code>
+with <code>.append()</code> and <code>.pop()</code> is already a stack
+-- both O(1). <code>deque</code> is for queues (popleft). Do not
+over-import.</p>
+<p><strong>Why no <code>int()</code> on the return?</strong> Numbers are
+converted with <code>int(token)</code> on push, and division uses
+<code>int(a/b)</code> immediately at the step. The stack only ever holds
+integers -- the final <code>.pop()</code> is already an int.</p>
+<hr />
+<h2 id="step-5----verify">Step 5 -- Verify</h2>
+<h3 id="trace-through-example">Trace Through Example</h3>
+<p>Input: <code>["2","1","+","3","*"]</code></p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Action</th>
+<th>Stack After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"2"</code></td>
+<td>push int("2")</td>
+<td>[2]</td>
+</tr>
+<tr>
+<td><code>"1"</code></td>
+<td>push int("1")</td>
+<td>[2, 1]</td>
+</tr>
+<tr>
+<td><code>"+"</code></td>
+<td>first=1 (RIGHT), second=2 (LEFT), 2+1=3, push 3</td>
+<td>[3]</td>
+</tr>
+<tr>
+<td><code>"3"</code></td>
+<td>push int("3")</td>
+<td>[3, 3]</td>
+</tr>
+<tr>
+<td><code>"*"</code></td>
+<td>first=3 (RIGHT), second=3 (LEFT), 3*3=9, push 9</td>
+<td>[9]</td>
+</tr>
+</tbody>
+</table>
+<p>Return <code>stack.pop()</code> = 9. Correct.</p>
+<h3 id="edge-cases">Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Single number</td>
+<td><code>["5"]</code></td>
+<td>5</td>
+<td>Yes -- push, return pop</td>
+</tr>
+<tr>
+<td>Negative number token</td>
+<td><code>["-11","2","+"]</code></td>
+<td>-9</td>
+<td>Yes -- <code>token not in ops</code> catches <code>-11</code></td>
+</tr>
+<tr>
+<td>Division truncating positive</td>
+<td><code>["7","2","/"]</code></td>
+<td>3</td>
+<td>Yes -- <code>int(7/2) = 3</code></td>
+</tr>
+<tr>
+<td>Division truncating negative</td>
+<td><code>["-7","2","/"]</code></td>
+<td>-3</td>
+<td>Yes -- <code>int(-7/2) = -3</code>, not <code>-4</code></td>
+</tr>
+<tr>
+<td>Intermediate float corruption</td>
+<td><code>["7","2","/","3","*"]</code></td>
+<td>9</td>
+<td>Yes -- truncate at division step, not end</td>
+</tr>
+</tbody>
+</table>
+<h3 id="complexity-confirmed">Complexity Confirmed</h3>
+<ul>
+<li>Time O(n): one pass, each token processed once</li>
+<li>Space O(n): stack worst case holds all n/2 operands before the
+single operator fires</li>
+</ul>
+<hr />
+<h2 id="step-6----optimize">Step 6 -- Optimize</h2>
+<p>BTTC for this problem is O(n) -- every token must be visited at least
+once to evaluate the expression. The solution is already at the floor.
+No optimization path exists.</p>
+<p>The lambda dict approach is cleaner than <code>if/elif</code> chains
+and avoids the float-return trap of <code>operator.truediv</code>. No
+further optimization needed.</p>
+<hr />
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="brain-conceptual-mistakes">🧠 Conceptual Mistakes</h3>
+<h4 id="bug-c1-operand-order-reversed-critical--silent-wrong-answer">🐛
+C1: Operand Order Reversed (CRITICAL — silent wrong answer)</h4>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — first popped used as LEFT operand</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>first_num <span class="op">=</span> stack.pop()</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>second_num <span class="op">=</span> stack.pop()</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>stack.append(ops[token](first_num, second_num))   <span class="co"># LEFT=first_pop ❌</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — second popped is LEFT</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>first_num <span class="op">=</span> stack.pop()        <span class="co"># RIGHT operand (LIFO: last pushed = first popped)</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>second_num <span class="op">=</span> stack.pop()       <span class="co"># LEFT operand</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>stack.append(ops[token](second_num, first_num))   <span class="co"># LEFT=second_pop ✅</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — forgot that stack
+LIFO means LAST pushed = FIRST popped. Left operand was pushed before
+right, so it sits deeper</li>
+<li><strong>How it was caught:</strong> Commutative ops (<code>+</code>,
+<code>*</code>) silently pass. Only <code>-</code> and <code>/</code>
+reveal the bug — test <code>["13","5","/"]</code> returning 0 instead of
+2</li>
+<li><strong>Rule to prevent:</strong> <em>first_pop = RIGHT, second_pop
+= LEFT</em>. Always write
+<code>ops[token](second_num, first_num)</code></li>
+<li><strong>Trick:</strong> <em>"Second is left"</em> — the second thing
+you pop is the left side of the expression</li>
+</ul>
+<h4 id="bug-c2-isdigit-fails-on-negative-number-tokens">🐛 C2:
+<code>isdigit()</code> Fails on Negative Number Tokens</h4>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — isdigit() returns False for &quot;-11&quot;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> token.isdigit():</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    stack.append(<span class="bu">int</span>(token))</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... negative numbers wrongly fall here, KeyError on ops[token]</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — operators are the only non-numbers</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> token <span class="kw">not</span> <span class="kw">in</span> ops:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    stack.append(<span class="bu">int</span>(token))</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ... only real operators here</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> —
+<code>isdigit()</code> requires ALL chars be digits. <code>-</code> is
+not a digit char → <code>"-11".isdigit()</code> is False</li>
+<li><strong>How it was caught:</strong> Any expression with negative
+tokens produces KeyError crash</li>
+<li><strong>Rule to prevent:</strong> NEVER use <code>isdigit()</code> /
+<code>isnumeric()</code> to identify number tokens when input can
+include negatives. Use <code>token not in ops</code> — O(1) dict lookup,
+handles all cases</li>
+<li><strong>Trick:</strong> <em>"Not in ops = is a number"</em> — the
+four operators are the only non-numbers. Everything else is
+pushable</li>
+</ul>
+<h4 id="bug-c3-division-float-corrupts-intermediate-results">🐛 C3:
+Division Float Corrupts Intermediate Results</h4>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — operator.truediv returns float, corrupts stack</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ops <span class="op">=</span> { <span class="st">&#39;/&#39;</span>: operator.truediv, ... }</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># [&quot;7&quot;,&quot;2&quot;,&quot;/&quot;,&quot;3&quot;,&quot;*&quot;]: 7/2=3.5 → 3.5*3=10.5 → int(10.5)=10 ❌</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — truncate AT the division step</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>ops <span class="op">=</span> { <span class="st">&#39;/&#39;</span>: <span class="kw">lambda</span> a, b: <span class="bu">int</span>(a <span class="op">/</span> b), ... }</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co"># [&quot;7&quot;,&quot;2&quot;,&quot;/&quot;,&quot;3&quot;,&quot;*&quot;]: 7/2→3 → 3*3=9 ✅</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — assumed
+<code>int(stack.pop())</code> at the end was enough. Not — intermediate
+floats poison every later operation</li>
+<li><strong>How it was caught:</strong> Traced
+<code>["7","2","/","3","*"]</code> both ways and saw the divergence</li>
+<li><strong>Rule to prevent:</strong> Truncate AT the division step, not
+at the end. Stack must ALWAYS hold integers — one float in stack poisons
+everything downstream</li>
+<li><strong>Trick:</strong> <em>"<code>int()</code> at the slash, not at
+the end."</em></li>
+</ul>
+<h3 id="wrench-implementation-mistakes">🔧 Implementation Mistakes</h3>
+<p><strong>1. Wrong Variable Name (<code>tokens</code> vs
+<code>nums</code>)</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — used non-existent `nums`</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(tokens)):</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> nums[i].isdigit():   <span class="co"># NameError: nums is not defined</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — iterate directly, match variable to array</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> token <span class="kw">in</span> tokens:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> token <span class="kw">not</span> <span class="kw">in</span> ops:</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>typo</code> — mental model had array as
+<code>nums</code>, parameter was <code>tokens</code></li>
+<li><strong>How it was caught:</strong> NameError on first run</li>
+<li><strong>Rule to prevent:</strong> Iterate directly —
+<code>for token in tokens</code>. Eliminates wrong-variable risk AND
+off-by-one risk from <code>range(len(...))</code></li>
+</ul>
+<p><strong>2. Wrong Return Target (<code>result</code> vs
+<code>stack</code>)</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — result is an int (the computed value), not the stack list</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> <span class="bu">int</span>(result.pop())    <span class="co"># AttributeError: &#39;int&#39; has no .pop()</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — return from the stack itself</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> stack.pop()</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>typo</code> — variable name mismatch
+between stack and a temp result variable</li>
+<li><strong>How it was caught:</strong> AttributeError</li>
+<li><strong>Rule to prevent:</strong> Name the stack <code>stack</code>.
+Never call the stack <code>result</code></li>
+</ul>
+<h3 id="stopwatch-time-management-mistakes">⏱️ Time Management
+Mistakes</h3>
+<p>None this session ✅ — solved within the 25-minute target.</p>
+<h3 id="bar_chart-mistake-summary">📊 Mistake Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Count</th>
+<th>Most Costly</th>
+<th>Pattern Emerging?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠 Conceptual</td>
+<td>3</td>
+<td>C1 — silent wrong answer (commutative ops mask it)</td>
+<td>Stack mechanics + Python type pitfalls (<code>isdigit</code>,
+<code>truediv</code> returning float). Drill <em>"second_pop is
+LEFT"</em> + <em>"<code>int()</code> at slash"</em> as atomic facts</td>
+</tr>
+<tr>
+<td>🔧 Implementation</td>
+<td>2</td>
+<td>Both immediate crashes</td>
+<td>Variable naming discipline — match loop var to array, name stack
+<code>stack</code></td>
+</tr>
+<tr>
+<td>⏱️ Time Management</td>
+<td>0</td>
+<td>—</td>
+<td>Hit target</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="discoveries">Discoveries</h2>
+<h3 id="core-invariant--rule">Core Invariant / Rule</h3>
+<blockquote>
+<p>"At any point while scanning tokens, the stack always holds the most
+recent values not yet consumed by an operator."</p>
+</blockquote>
+<p>The stack is a waiting room. Numbers wait in it silently. The moment
+an operator arrives, it claims the two most recent waiters, computes,
+and sends the result back into the waiting room. This continues until
+one value remains.</p>
+<h3 id="aha-moments">Aha Moments</h3>
+<p><strong>1. RPN Decoded</strong></p>
+<ul>
+<li>Before: Wiganz did not understand what RPN meant.</li>
+<li>Trigger: Hadriel asked -- "Nhin <code>["2","1","+"]</code> --
+<code>+</code> dung sau <code>2</code> va <code>1</code>. Khi gap
+<code>+</code> thi bro lam gi?"</li>
+<li>After: "Do operation on 2 previous." RPN = operator always fires on
+the two numbers directly before it. The format exists because machines
+love it -- no parentheses, no precedence rules needed.</li>
+</ul>
+<p><strong>2. Stack Pattern Self-Recognition</strong></p>
+<ul>
+<li>Before: Had not yet named a pattern.</li>
+<li>Trigger: Wiganz saw "numbers wait, pending items" in the abstract
+description.</li>
+<li>After: Without any hint -- "kinda looks like Valid Parentheses... a
+Stack I believe." Connected a new problem to a solved one through the
+abstract shape alone.</li>
+<li>In his words: "kinda looks like Valid Parentheses... a Stack I
+believe."</li>
+</ul>
+<p><strong>3. isdigit() vs token not in ops</strong></p>
+<ul>
+<li>Before: Used <code>isdigit()</code> to identify number tokens.</li>
+<li>Trigger: Wiganz himself asked -- "wait, neu token not in ops thi no
+la so." Traced the logic himself.</li>
+<li>After: <code>token not in ops</code> is the cleanest check. O(1)
+dict lookup, handles negatives, handles any future edge case.</li>
+</ul>
+<p><strong>4. int() = truncate toward zero</strong></p>
+<ul>
+<li>Before: Vague understanding of division truncation.</li>
+<li>Trigger: Hadriel explained and Wiganz confirmed -- "So
+<code>int()</code> la truncate toward zero ha?"</li>
+<li>After: <code>int()</code> cuts the decimal and pulls toward 0. For
+positive numbers, same as floor. For negative numbers, different --
+<code>int(-3.5) = -3</code>, not <code>-4</code>. This is what the
+problem requires.</li>
+</ul>
+<p><strong>5. Division Bug Proved by Example</strong></p>
+<ul>
+<li>Before: Suspected intermediate truncation mattered but unsure.</li>
+<li>Trigger: Traced <code>["7","2","/","3","*"]</code> both ways:
+<ul>
+<li><code>operator.truediv</code>: 7/2=3.5 -&gt; 3.5*3=10.5 -&gt; int=10
+(wrong)</li>
+<li><code>int(a/b)</code>: 7/2-&gt;3 -&gt; 3*3=9 (correct)</li>
+</ul></li>
+<li>After: Never assume you can truncate at the end. Truncation must
+happen at the exact division step. Seeing it proved by code made it
+stick.</li>
+</ul>
+<h3 id="key-metaphors-and-examples">Key Metaphors and Examples</h3>
+<ul>
+<li><strong>The Waiting Room:</strong> The stack is a waiting room for
+numbers. They sit until an operator calls their number. This metaphor
+makes the invariant intuitive rather than technical.</li>
+<li><strong>"Chop" operator for division:</strong> <code>int()</code> is
+described as scissors that cut the decimal off and drag the result
+toward zero. Always cut at the moment of division, not at the door on
+the way out.</li>
+<li><strong>Token-detection comparison table:</strong> Five different
+ways to check if a token is a number, side by side with
+<code>"-11"</code> as the test case. The table made the
+<code>isdigit()</code> failure visually undeniable.</li>
+</ul>
+<hr />
+<h2 id="final-complexity">Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time</td>
+<td>O(n)</td>
+<td>One pass. Each token processed exactly once -- pushed or popped,
+never revisited.</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>O(n)</td>
+<td>Stack holds at most all operands. Worst case: n-1 numbers followed
+by one operator that consumes them all.</td>
+</tr>
+<tr>
+<td>BTTC</td>
+<td>O(n)</td>
+<td>Every token must be read at least once to evaluate the expression.
+Cannot do better than O(n). Already optimal.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="self-assessment">Self-Assessment</h2>
+<ul>
+<li><strong>Confidence:</strong> 4/5 -- Pattern recognition was
+immediate, solution was clean. The bugs caught in Teaching Mode are all
+rule-based and preventable. The operand order rule needs one more
+session to become reflexive.</li>
+<li><strong>Revisit:</strong> Operand order (LEFT op RIGHT) -- needs
+drilling with non-commutative expressions. Division float trap -- solid
+after the proof-by-example.</li>
+<li><strong>Pattern Mastery Impact:</strong> Stacks pattern moved to
+<code>competent</code>. Core mechanic (push/pop, LIFO retrieval order)
+is solid. Next step: problems where the stack holds structured data
+(pairs, indices) rather than raw numbers.</li>
+</ul>
+<hr />
+<h2 id="similar-problems">Similar Problems</h2>
+<ul>
+<li><strong>Valid Parentheses (#26)</strong> -- Same "item waits in
+stack, trigger releases it" mechanic. The foundational Stack problem
+that Wiganz used to recognize this pattern.</li>
+<li><strong>Min Stack (#155)</strong> -- Stack problem requiring
+auxiliary tracking alongside the main stack. Extends the data stored per
+stack frame.</li>
+<li><strong>Daily Temperatures (#739)</strong> -- Monotonic Stack
+variant. Numbers wait in the stack, popped when a "better" (warmer)
+element arrives. Extends the waiting-room mechanic to relative
+comparisons.</li>
+</ul>
+<hr />
+<p><em>Hadriel x Wiganz -- 2026-05-08</em> <em>"Whatever you do, work at
+it with all your heart, as working for the Lord." -- Colossians
+3:23</em></p>
+  </div>
+</body>
+</html>

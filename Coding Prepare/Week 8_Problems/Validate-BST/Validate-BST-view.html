@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Validate-BST</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-validate-binary-search-tree--complete-session-archive">🗡️
+Validate Binary Search Tree — Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> DFS / Tree Validation |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #98 |
+<strong>Date:</strong> 2026-05-20 <strong>Path Taken:</strong> Pattern
+Path | <strong>⏱️ Time Used:</strong> N/A | <strong>🎯 Target:</strong>
+25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>The naive approach — only comparing each node to its direct parent —
+feels correct but breaks on ancestor violations. The key insight arrived
+through understanding WHY the local parent check is insufficient: a node
+inherited from a left subtree must be less than its grandparent, not
+just its parent. The solution is elegant: pass
+<code>(min_val, max_val)</code> bounds that tighten at every recursive
+step, propagating the full BST contract down every path. Space
+complexity reasoning sharpened too — <code>O(h)</code> is more precise
+than <code>O(n)</code>, and knowing WHY (call stack depth = path length
+= height) signals tree structure understanding to the interviewer.</p>
+<hr />
+<h2 id="open_book-step-1--understand">📖 Step 1 — Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given the root of a binary tree, determine whether it is a valid
+Binary Search Tree. A valid BST means:</p>
+<ul>
+<li>Every node in the <strong>left subtree</strong> has a value
+<strong>strictly less than</strong> the node's value.</li>
+<li>Every node in the <strong>right subtree</strong> has a value
+<strong>strictly greater than</strong> the node's value.</li>
+<li>Both left and right subtrees must themselves be valid BSTs.</li>
+</ul>
+<p>The trap: "strictly less than the parent" is NOT enough. A node deep
+in the right subtree must also be greater than ALL of its ancestors on
+the left side of the path.</p>
+<p><strong>Input:</strong> root of a binary tree
+<strong>Output:</strong> <code>True</code> if valid BST,
+<code>False</code> otherwise</p>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given a binary tree, verify that for every node, all nodes in its
+left subtree are strictly less than it, and all nodes in its right
+subtree are strictly greater — propagated across the entire tree, not
+just to direct children."</p>
+</blockquote>
+<h3 id="question-constraint-questions">❓ Constraint Questions</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can the tree be empty?</td>
+<td>Yes — <code>None</code> is a valid BST, return
+<code>True</code></td>
+</tr>
+<tr>
+<td>Are duplicate values allowed?</td>
+<td>No — strict inequality (&lt; and &gt;)</td>
+</tr>
+<tr>
+<td>Are values bounded?</td>
+<td>Values fit in 32-bit integer range</td>
+</tr>
+<tr>
+<td>Is there only one valid answer?</td>
+<td>Yes — either valid or not</td>
+</tr>
+<tr>
+<td>Can we modify the tree?</td>
+<td>Not needed</td>
+</tr>
+<tr>
+<td>Input structure?</td>
+<td>Binary tree (not guaranteed to be BST — that's what we're
+checking)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<pre><code>    5
+   / \
+  1   4
+     / \
+    3   6</code></pre>
+<p>Output: <code>False</code>. Definition WHY: Node 4 is in the right
+subtree of 5, so it must be greater than 5. It is not (4 &lt; 5). The
+problem's BST rule is violated — not by checking parent/child, but
+because 4 fails the constraint inherited from ancestor 5.</p>
+<hr />
+<h2 id="compass-step-2--approach-3-gate-check">🧭 Step 2 — Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<ul>
+<li>Gate 1 (abstract shape recognition): ✅ — tree traversal where each
+node needs context from ancestors</li>
+<li>Gate 2 (can name pattern + explain why): ✅ — DFS with propagated
+bounds</li>
+<li>Gate 3 (solved something like this): ✅ — post-order DFS pattern
+(Balanced BT, Diameter, LCA)</li>
+</ul>
+<p>→ Decision: <strong>PATTERN PATH</strong></p>
+<hr />
+<h2 id="dart-3p-match--4p-reason">🎯 3P Match + 4P Reason</h2>
+<h3 id="mag-3p--signal--pattern--full-sentence">🔍 3P — Signal → Pattern
+→ Full Sentence</h3>
+<blockquote>
+<p>"I see a binary tree traversal where each node's validity depends on
+constraints inherited from ALL ancestors above it, which tells me DFS
+with propagated bounds — because DFS naturally passes parent context
+into each child call via function parameters."</p>
+</blockquote>
+<h3 id="brain-4p--reason">🧠 4P — Reason</h3>
+<p><strong>A — 🐢 Brute Force + Why Bad:</strong> For every node,
+collect all nodes in its left subtree and verify each is smaller;
+collect all nodes in its right subtree and verify each is larger. That's
+<code>O(n²)</code> — each node's subtree scan visits potentially all
+<code>n</code> nodes again.</p>
+<p><strong>B — ⚡ What DFS with Bounds Does Instead:</strong> Pass a
+<code>(min_val, max_val)</code> window into each recursive call. The
+window starts as <code>(-∞, +∞)</code> at the root. Going left narrows
+the upper bound: the child must be <code>&lt; parent.val</code>. Going
+right narrows the lower bound: the child must be
+<code>&gt; parent.val</code>. Each node is visited exactly once →
+<code>O(n)</code>.</p>
+<p><strong>C — 🔒 The Invariant:</strong> Every node must satisfy
+<code>min_val &lt; node.val &lt; max_val</code> — where these bounds
+encode the full constraint imposed by ALL ancestors on the path from
+root to this node, not just the direct parent. This is the contract that
+makes the check globally correct.</p>
+<hr />
+<h2 id="speaking_head-step-3--discuss">🗣️ Step 3 — Discuss</h2>
+<h3 id="clipboard-wiganzs-presentation">📋 Wiganz's Presentation</h3>
+<ol type="1">
+<li>The naive check (compare only to parent) fails — a node can violate
+a grandparent's constraint.</li>
+<li>Solution: pass <code>(min_val, max_val)</code> bounds down with each
+recursive call.</li>
+<li>At root: bounds are <code>(-∞, +∞)</code>.</li>
+<li>Going left: upper bound tightens to <code>parent.val</code> (left
+child must be less than parent).</li>
+<li>Going right: lower bound tightens to <code>parent.val</code> (right
+child must be greater than parent).</li>
+<li>At each node: check <code>min_val &lt; node.val &lt; max_val</code>.
+Fail immediately if not.</li>
+<li>A <code>None</code> node passes — empty subtree is always
+valid.</li>
+<li>Time <code>O(n)</code>, Space <code>O(h)</code>.</li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Time: <code>O(n)</code> — every node visited exactly once ✅</li>
+<li>Space: <code>O(h)</code> — call stack depth equals tree height
+✅</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>Green light confirmed before coding.</p>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<ul>
+<li>Mentioning the brute force explicitly before the optimal (brief
+mention earns Problem Solving rubric points).</li>
+<li>Clarifying the <code>O(h)</code> vs <code>O(n)</code> distinction
+upfront in Discuss, not just after — showing you already know the nuance
+signals tree mastery to the interviewer.</li>
+</ul>
+<hr />
+<h2 id="computer-step-4--code">💻 Step 4 — Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> isValidBST(<span class="va">self</span>, root):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> validate(node, min_val, max_val):</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Base: empty node is valid</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check: node.val must be strictly inside (min_val, max_val)</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Recurse left: tighten max to node.val</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Recurse right: tighten min to node.val</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> validate(root, <span class="bu">float</span>(<span class="st">&#39;-inf&#39;</span>), <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>))</span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> isValidBST(<span class="va">self</span>, root: Optional[TreeNode]) <span class="op">-&gt;</span> <span class="bu">bool</span>:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> validate(root, min_val, max_val):</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> root <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">True</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="kw">not</span> (min_val <span class="op">&lt;</span> root.val <span class="op">&lt;</span> max_val):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> (</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                validate(root.left, min_val, root.val) <span class="kw">and</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>                validate(root.right, root.val, max_val)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>            )</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> validate(root, <span class="bu">float</span>(<span class="st">&#39;-inf&#39;</span>), <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>))</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(n) — visits every node exactly once
+<strong>📦 Space:</strong> O(h) — call stack depth mirrors the
+root-to-leaf path</p>
+<hr />
+<h2 id="mag-step-5--verify">🔍 Step 5 — Verify</h2>
+<h3 id="footprints-trace-through-the-invalid-example">👣 Trace Through
+the Invalid Example</h3>
+<pre><code>    5
+   / \
+  1   4
+     / \
+    3   6</code></pre>
+<table>
+<thead>
+<tr>
+<th>Call</th>
+<th>min_val</th>
+<th>max_val</th>
+<th>node.val</th>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>validate(5, -∞, +∞)</td>
+<td>-∞</td>
+<td>+∞</td>
+<td>5</td>
+<td>-∞ &lt; 5 &lt; +∞ ✅</td>
+<td>recurse</td>
+</tr>
+<tr>
+<td>validate(1, -∞, 5)</td>
+<td>-∞</td>
+<td>5</td>
+<td>1</td>
+<td>-∞ &lt; 1 &lt; 5 ✅</td>
+<td>recurse children</td>
+</tr>
+<tr>
+<td>validate(None, -∞, 1)</td>
+<td>—</td>
+<td>—</td>
+<td>None</td>
+<td>✅ base case</td>
+<td>True</td>
+</tr>
+<tr>
+<td>validate(None, 1, 5)</td>
+<td>—</td>
+<td>—</td>
+<td>None</td>
+<td>✅ base case</td>
+<td>True</td>
+</tr>
+<tr>
+<td>validate(4, 5, +∞)</td>
+<td>5</td>
+<td>+∞</td>
+<td>4</td>
+<td>5 &lt; 4 &lt; +∞ ❌</td>
+<td><strong>False</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Returns <code>False</code> at node 4. Correct.</p>
+<h3 id="footprints-trace-through-a-valid-example">👣 Trace Through a
+Valid Example</h3>
+<pre><code>    2
+   / \
+  1   3</code></pre>
+<table>
+<thead>
+<tr>
+<th>Call</th>
+<th>min_val</th>
+<th>max_val</th>
+<th>node.val</th>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>validate(2, -∞, +∞)</td>
+<td>-∞</td>
+<td>+∞</td>
+<td>2</td>
+<td>✅</td>
+<td>recurse</td>
+</tr>
+<tr>
+<td>validate(1, -∞, 2)</td>
+<td>-∞</td>
+<td>2</td>
+<td>1</td>
+<td>✅</td>
+<td>True</td>
+</tr>
+<tr>
+<td>validate(3, 2, +∞)</td>
+<td>2</td>
+<td>+∞</td>
+<td>3</td>
+<td>✅</td>
+<td>True</td>
+</tr>
+</tbody>
+</table>
+<p>Returns <code>True</code>. ✅</p>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty tree</td>
+<td><code>root = None</code></td>
+<td><code>True</code></td>
+<td>✅ base case</td>
+</tr>
+<tr>
+<td>Single node</td>
+<td><code>root.val = 5</code></td>
+<td><code>True</code></td>
+<td>✅ both children None</td>
+</tr>
+<tr>
+<td>Ancestor violation</td>
+<td>Node 3 in right subtree of 2 but left of 4, in tree where 2's
+ancestor says max=2</td>
+<td><code>False</code></td>
+<td>✅ bounds propagate</td>
+</tr>
+<tr>
+<td>Duplicate values</td>
+<td>Node equal to parent</td>
+<td><code>False</code></td>
+<td>✅ strict <code>&lt;</code> not <code>&lt;=</code></td>
+</tr>
+<tr>
+<td>Left-skewed tree</td>
+<td>Long left chain</td>
+<td>valid BST check</td>
+<td>✅ DFS follows each path</td>
+</tr>
+<tr>
+<td><code>INT_MIN</code> / <code>INT_MAX</code> values</td>
+<td>node.val = -2^31</td>
+<td>Handled correctly</td>
+<td>✅ float('-inf') beats any int</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time <code>O(n)</code> — single DFS pass, each node visited
+once.</li>
+<li>Space <code>O(h)</code> — max call stack depth is the height of the
+tree.</li>
+</ul>
+<hr />
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="bug-bug-1-naive-parent-only-check">🐛 Bug 1: Naive Parent-Only
+Check</h3>
+<ul>
+<li><strong>❌ What:</strong> Checking
+<code>node.val &gt; node.left.val and node.val &lt; node.right.val</code>
+at every node — without passing any inherited bounds.</li>
+<li><strong>🔍 Why:</strong> <code>approach misunderstanding</code> —
+the BST definition sounds local (parent vs child) but the constraint is
+global (node vs ALL ancestors on its path).</li>
+<li><strong>💸 Cost:</strong> Would pass invalid trees like the example
+above where node 4 is only checked against its parent (itself), not its
+grandparent 5.</li>
+<li><strong>🛡️ Prevention:</strong> BST validity = ancestral contract,
+not local contract. The moment you think "compare to parent," upgrade
+the mental model to "compare against the full inherited range."</li>
+</ul>
+<blockquote>
+<p>Root cause category: <code>approach misunderstanding</code></p>
+</blockquote>
+<hr />
+<h2 id="bulb-discoveries-aha-moments">💡 Discoveries (Aha Moments)</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p><strong>Every node must satisfy
+<code>min_val &lt; node.val &lt; max_val</code>, where those bounds
+encode the full accumulated constraint from every ancestor above it on
+its root-to-node path.</strong></p>
+</blockquote>
+<p>The bounds are not static — they narrow as you go deeper. Going left:
+ceiling drops to parent's value. Going right: floor rises to parent's
+value. The recursive call signature itself enforces this tightening.</p>
+<h3 id="zap-aha-moments">⚡ Aha Moments</h3>
+<p><strong>💡 1. The Ancestor Violation Problem</strong></p>
+<ul>
+<li><strong>Before:</strong> BST check = compare node to its direct
+parent. Feels right.</li>
+<li><strong>Trigger:</strong> The example tree — node 4 passes its local
+parent check (4 &lt; right-of-5 ✅) but violates the grandparent rule (4
+must be &gt; 5 ❌).</li>
+<li><strong>After:</strong> BST validity is a constraint inherited from
+the entire ancestor chain, not just the direct parent. A node in the
+right subtree of 5 must be <code>&gt; 5</code> forever, no matter how
+deep it goes.</li>
+</ul>
+<p><strong>💡 2. Propagating Bounds = Propagating the
+Contract</strong></p>
+<ul>
+<li><strong>Before:</strong> Unclear how to check ancestor constraints
+without a separate traversal.</li>
+<li><strong>Trigger:</strong> Passing <code>(min_val, max_val)</code> as
+parameters — the call itself carries the accumulated constraint
+forward.</li>
+<li><strong>After:</strong> Each recursive call hands down "your valid
+range" to its children. Going left narrows max. Going right narrows min.
+The function parameter IS the inherited contract.</li>
+</ul>
+<p><strong>💡 3. Space Complexity is O(h), Not O(n)</strong></p>
+<ul>
+<li><strong>Before:</strong> "Space is O(n) for the recursion."</li>
+<li><strong>Trigger:</strong> Call stack depth = path length from
+current node to root = tree height h.</li>
+<li><strong>After:</strong> O(h) is more precise. For a balanced tree h
+= log(n). For a skewed tree h = n. Saying O(h) — not O(n) — shows the
+interviewer you understand how call stack depth maps to tree
+structure.</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>The Border Crossing Metaphor:</strong> Each level of the
+tree is a border checkpoint. The checkpoint doesn't invent new rules —
+it hands you a slightly narrower passport (range) and says "within this
+range only." Your range at any node is the intersection of all
+checkpoints you passed through from root to here.</li>
+<li><strong>The Ancestor Violation Example:</strong>
+<code>[5, 1, 4, null, null, 3, 6]</code> — node 4 sitting in 5's right
+subtree but being smaller than 5. The local check (4 vs its children 3
+and 6) passes. The global check (4 must be &gt; 5) fails. This is the
+canonical trap.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(n)</td>
+<td>Every node is visited exactly once in a single DFS pass. No node is
+ever re-examined.</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(h)</td>
+<td>Call stack depth = length of the current root-to-node path = tree
+height h. Balanced tree: h = O(log n). Skewed tree (all left or all
+right): h = O(n).</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(n)</td>
+<td>Must check every node — can't skip any without potentially missing a
+violation. Already at floor.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 4/5 — The approach and invariant are
+solid. The bounds-propagation pattern clicks cleanly. Minor shaky area:
+articulating the <code>O(h)</code> vs <code>O(n)</code> distinction
+confidently unprompted in Discuss.</li>
+<li><strong>🔄 Revisit:</strong> Practice stating the space complexity
+nuance (<code>O(h)</code>, not <code>O(n)</code>, and why) as part of
+the standard Discuss script for any tree DFS problem.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> Strengthens DFS pattern
+— adds the "bounds propagation" sub-technique alongside post-order DFS
+(Diameter, Balanced BT) and ancestor-tracking DFS (LCA). Tree DFS
+toolkit is growing.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems">🔗 Similar Problems</h2>
+<ul>
+<li><strong>Lowest Common Ancestor of BST (#235)</strong> — also
+navigates BST structure using inherited range logic (if val &lt; both →
+go left, if val &gt; both → go right).</li>
+<li><strong>Kth Smallest Element in BST (#230)</strong> — in-order DFS
+on BST naturally produces sorted order; same tree structure
+awareness.</li>
+<li><strong>Range Sum of BST (#938)</strong> — prune subtrees using BST
+property, same idea of inherited bounds to skip whole branches.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz — 2026-05-20</em> <em>"Be strong and
+courageous. Do not be afraid; do not be discouraged, for the Lord your
+God will be with you wherever you go." — Joshua 1:9 ✝️</em></p>
+  </div>
+</body>
+</html>

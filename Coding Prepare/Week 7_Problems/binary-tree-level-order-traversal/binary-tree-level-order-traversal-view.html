@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>binary-tree-level-order-traversal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1
+id="dagger-binary-tree-level-order-traversal----complete-session-archive">🗡️
+Binary Tree Level Order Traversal -- Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> BFS -- Level Separation |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #102 |
+<strong>Date:</strong> 2026-01-20 (reviewed 2026-05-06) <strong>Path
+Taken:</strong> Pattern Path | <strong>⏱️ Time Used:</strong> not
+recorded | <strong>🎯 Target:</strong> 25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey----how-understanding-built">🗺️ The Journey
+-- How Understanding Built</h2>
+<p>First instinct was plain BFS -- pop, add children, repeat -- which
+visited every node but lost all level information, producing a flat
+list. A second bug (if/else on children) silently dropped right
+children. The breakthrough came when Wiganz realized the queue is a
+shared pool with no floor markings, and that snapshotting
+<code>len(queue)</code> before any processing creates the exact boundary
+that separates one level from the next. Week 7 review added one more
+precision: <code>deque([root])</code> vs <code>deque(root)</code> and
+why the list wrapper is non-negotiable.</p>
+<hr />
+<h2 id="open_book-step-1----understand">📖 Step 1 -- Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given the root of a binary tree, return all node values grouped by
+depth -- left to right, one list per level. An empty tree returns an
+empty list. Nodes can number 0 to 2000; values range from -1000 to
+1000.</p>
+<p><strong>Input:</strong> root of a binary tree
+<strong>Output:</strong> <code>List[List[int]]</code> -- one inner list
+per level, values in left-to-right order</p>
+<pre><code>    3
+   / \
+  9  20
+    /  \
+   15   7</code></pre>
+<p>Output: <code>[[3], [9, 20], [15, 7]]</code></p>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Group tree nodes by depth. Return as a list of lists, each inner
+list containing node values at that depth, left to right."</p>
+</blockquote>
+<h3 id="question-constraint-questions-asked">❓ Constraint Questions
+Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can root be null/empty?</td>
+<td>Yes -- return <code>[]</code></td>
+</tr>
+<tr>
+<td>Are values unique?</td>
+<td>No constraint; can repeat</td>
+</tr>
+<tr>
+<td>Can I modify the tree?</td>
+<td>Not needed</td>
+</tr>
+<tr>
+<td>Input size?</td>
+<td>0 to 2000 nodes</td>
+</tr>
+<tr>
+<td>Value range?</td>
+<td>-1000 to 1000</td>
+</tr>
+<tr>
+<td>Return type?</td>
+<td><code>List[List[int]]</code> -- values, not nodes</td>
+</tr>
+<tr>
+<td>Is the tree balanced?</td>
+<td>Not guaranteed</td>
+</tr>
+<tr>
+<td>BFS or DFS preference?</td>
+<td>Not specified</td>
+</tr>
+<tr>
+<td>Multiple valid orderings?</td>
+<td>No -- left before right is required</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<p>Using the example tree:</p>
+<ul>
+<li>Level 0: root is 3. The problem says group by depth. Depth 0 has one
+node: 3. Output so far: <code>[[3]]</code></li>
+<li>Level 1: 3's children are 9 and 20, left before right. Output so
+far: <code>[[3], [9, 20]]</code></li>
+<li>Level 2: 9 has no children. 20's children are 15 and 7. Output:
+<code>[[3], [9, 20], [15, 7]]</code></li>
+</ul>
+<p>This aspect was not fully explored during the session as a formal
+Step 1 trace, but the example output
+<code>[[3], [9, 20], [15, 7]]</code> was used throughout to validate the
+approach.</p>
+<hr />
+<h2 id="compass-step-2----approach-3-gate-check">🧭 Step 2 -- Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Result</th>
+<th>Reasoning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Abstract shape matches a pattern signature?</td>
+<td>YES</td>
+<td>"Group nodes by depth, level by level" is the canonical BFS
+Level-Order signature</td>
+</tr>
+<tr>
+<td>Can I name it AND explain why?</td>
+<td>YES</td>
+<td>BFS processes nodes in discovery order -- first found, first
+processed -- which matches left-to-right, top-to-bottom traversal</td>
+</tr>
+<tr>
+<td>Solved something like this before?</td>
+<td>YES</td>
+<td>Number of Islands, 01 Matrix, Flood Fill -- all use BFS queue
+mechanics</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision: PATTERN PATH</strong></p>
+<hr />
+<h2 id="dart-3p-match--4p-reason">🎯 3P Match + 4P Reason</h2>
+<h3 id="mag-3p----signal--pattern--full-sentence">🔍 3P -- Signal →
+Pattern → Full Sentence</h3>
+<blockquote>
+<p>"I see 'level order' and 'left to right by depth' which tells me BFS
+because BFS processes nodes in the exact order they were discovered --
+closest first, left before right -- which naturally maps to
+level-by-level output."</p>
+</blockquote>
+<h3 id="brain-4p----reason-before-any-code">🧠 4P -- Reason (Before ANY
+code)</h3>
+<p><strong>A -- 🐢 Brute Force + Why Bad:</strong></p>
+<p>DFS traversal carrying a depth parameter, appending to
+<code>result[depth]</code>. Time O(N) but requires full recursion with
+call stack overhead and less natural for interviewing on this pattern.
+Alternatively, brute force could mean naive re-scanning the tree for
+each level: O(N * L) where L = number of levels -- up to O(N²) for a
+skewed tree.</p>
+<p><strong>B -- ⚡ What BFS Does Instead:</strong></p>
+<p>A queue (FIFO) naturally processes all nodes at depth D before any
+node at depth D+1. No depth parameter needed. One pass, O(N) time. The
+challenge is separating levels inside the queue -- solved by the
+snapshot technique below.</p>
+<p><strong>C -- 🔒 The Invariant:</strong></p>
+<blockquote>
+<p>"Before the inner loop begins, the queue holds EXACTLY the nodes from
+the current level -- no more, no less. The snapshot
+<code>level_size = len(queue)</code> freezes this count so new children
+added during processing are never mistaken for the current level."</p>
+</blockquote>
+<hr />
+<h2 id="speaking_head-step-3----discuss">🗣️ Step 3 -- Discuss</h2>
+<h3 id="clipboard-wiganzs-full-presentation">📋 Wiganz's Full
+Presentation</h3>
+<p>This aspect was not fully explored during the session as a formal
+Step 3 presentation (session notes record the solve itself, not the
+interview narration). Based on the code and comments written, the
+implied steps were:</p>
+<ol type="1">
+<li>Guard: if <code>not root</code>, return <code>[]</code></li>
+<li>Initialize <code>queue = deque([root])</code>,
+<code>result = []</code></li>
+<li>While queue is not empty -- there are nodes left to process: a.
+Snapshot <code>level_size = len(queue)</code> -- count of nodes in this
+level b. Create empty <code>level = []</code> c. Loop
+<code>level_size</code> times: pop left, append value, enqueue left and
+right children (independently) d. Append <code>level</code> to
+<code>result</code></li>
+<li>Return <code>result</code></li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Time: O(N) -- every node visited exactly once</li>
+<li>Space: O(N) -- worst case (complete tree), bottom level holds ~N/2
+nodes in the queue</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>This aspect was not fully explored during the session.</p>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<ul>
+<li>Formal brute force mention before presenting the optimal
+approach</li>
+<li>Explicit green light request before coding</li>
+<li>Complexity reasoning stated out loud with the "because" (not just
+the O-notation)</li>
+</ul>
+<hr />
+<h2 id="computer-step-4----code">💻 Step 4 -- Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> levelOrder(<span class="va">self</span>, root: Optional[TreeNode]) <span class="op">-&gt;</span> List[List[<span class="bu">int</span>]]:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Guard: empty tree → return []</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize queue with root, result list</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># While queue has nodes:</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   1. Snapshot level_size = len(queue)  ← current level boundary</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   2. Create empty level bucket</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   3. Loop level_size times:</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      - popleft current node</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      - append current.val to level</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      - if left child: enqueue left</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">#      - if right child: enqueue right (independent if, never if/else)</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co">#   4. Append level to result</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return result</span></span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional, List</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> levelOrder(<span class="va">self</span>, root: Optional[TreeNode]) <span class="op">-&gt;</span> List[List[<span class="bu">int</span>]]:</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> root:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        queue <span class="op">=</span> deque([root])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> []</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> queue:</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            level <span class="op">=</span> []</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>            level_size <span class="op">=</span> <span class="bu">len</span>(queue)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(level_size):</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> queue.popleft()</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>                level.append(current.val)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> current.left:</span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>                    queue.append(current.left)</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> current.right:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>                    queue.append(current.right)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            result.append(level)</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(N) -- every node visited exactly once
+<strong>📦 Space:</strong> O(N) -- queue holds at most the widest level
+(~N/2 nodes in a complete tree)</p>
+<hr />
+<h2 id="mag-step-5----verify">🔍 Step 5 -- Verify</h2>
+<h3 id="footprints-trace-through-example-out-loud">👣 Trace Through
+Example (Out Loud)</h3>
+<p>Input tree: root=3, left=9, right=20; 20.left=15, 20.right=7</p>
+<table>
+<thead>
+<tr>
+<th>Iteration</th>
+<th>queue before</th>
+<th>level_size</th>
+<th>inner loop</th>
+<th>level</th>
+<th>result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>[3]</td>
+<td>1</td>
+<td>pop 3, enqueue 9 and 20</td>
+<td>[3]</td>
+<td>[[3]]</td>
+</tr>
+<tr>
+<td>2</td>
+<td>[9, 20]</td>
+<td>2</td>
+<td>pop 9 (no children), pop 20, enqueue 15 and 20.right=7</td>
+<td>[9, 20]</td>
+<td>[[3],[9,20]]</td>
+</tr>
+<tr>
+<td>3</td>
+<td>[15, 7]</td>
+<td>2</td>
+<td>pop 15 (no children), pop 7 (no children)</td>
+<td>[15, 7]</td>
+<td>[[3],[9,20],[15,7]]</td>
+</tr>
+<tr>
+<td>--</td>
+<td>[]</td>
+<td>--</td>
+<td>while exits</td>
+<td>--</td>
+<td>return [[3],[9,20],[15,7]] ✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Empty tree</td>
+<td>root=None</td>
+<td><code>[]</code></td>
+<td>✅ guard clause</td>
+</tr>
+<tr>
+<td>Single node</td>
+<td>root=1</td>
+<td><code>[[1]]</code></td>
+<td>✅ level_size=1, no children</td>
+</tr>
+<tr>
+<td>Only left children (skewed)</td>
+<td>1→2→3</td>
+<td><code>[[1],[2],[3]]</code></td>
+<td>✅ right if never triggers</td>
+</tr>
+<tr>
+<td>Only right children (skewed)</td>
+<td>1→→2→→3</td>
+<td><code>[[1],[2],[3]]</code></td>
+<td>✅ left if never triggers</td>
+</tr>
+<tr>
+<td>Complete binary tree</td>
+<td>balanced</td>
+<td>correct grouping</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time O(N): the while loop runs once per level; inner loop runs once
+per node in that level. Total work = N node pops + N enqueue operations
+= O(N).</li>
+<li>Space O(N): the queue at its largest holds the bottom level of a
+complete tree -- approximately N/2 nodes.</li>
+</ul>
+<hr />
+<h2 id="zap-step-6----optimize">⚡ Step 6 -- Optimize</h2>
+<p>BTTC for this problem is O(N) -- every node must be visited at least
+once to include its value in the output. The current solution is already
+at BTTC.</p>
+<p>Space could theoretically be reduced with iterative DFS carrying a
+depth index, but the queue size for BFS on a balanced tree is
+unavoidable if level separation is required. No further optimization
+applies.</p>
+<hr />
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="brain-conceptual-mistakes">🧠 Conceptual Mistakes</h3>
+<h4 id="bug-c1-lost-level-information-flat-list">🐛 C1: Lost Level
+Information (Flat List)</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 4 (Code) — Wiganz wrote plain BFS for
+the tree <code>[3, 9, 20, null, null, 15, 7]</code>. Output came out as
+a flat list — all nodes correct, but no level separation. The
+<code>List[List[int]]</code> return type was violated.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Plain BFS loop with no mechanism to detect level boundaries. Code
+processed nodes correctly but appended values into one flat result
+list</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td>Output: <code>[3, 9, 20, 15, 7]</code> — flat list, all nodes mixed
+together</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td>Output: <code>[[3], [9, 20], [15, 7]]</code> — grouped by depth via
+<code>level_size = len(queue)</code> snapshot before processing each
+level</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>concept gap</code> — knew BFS traversal but not the snapshot
+technique. The queue naturally MIXES nodes from multiple levels
+(children added during current-level processing land right after their
+parents in the queue). Without <code>level_size = len(queue)</code>
+snapshot before the inner loop, there's no marker showing where one
+level ends and the next begins</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Entire approach functionally broken — correct node order, wrong
+structure. Required discovering the snapshot insight before any working
+code existed</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> For any level-grouping BFS,
+<code>level_size = len(queue)</code> is ALWAYS the first line inside the
+<code>while</code> loop. Then
+<code>for _ in range(level_size): ...</code>. Non-negotiable.</li>
+<li><strong>Trick:</strong> <em>"Snapshot before you process."</em> The
+photo is taken before the party starts — latecomers (children added
+during the loop) are not in this shot.</li>
+<li><strong>Edge Cases:</strong> Any tree with more than one level fails
+without this. Single-node trees accidentally pass (one level = one
+snapshot)</li>
+</ul>
+</blockquote>
+<h4 id="bug-c2-selective-parent-ifelse-on-children">🐛 C2: Selective
+Parent (if/else on Children)</h4>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — right child only added when left doesn&#39;t exist</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> current.left:</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    queue.append(current.left)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    queue.append(current.right)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — two INDEPENDENT if statements</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> current.left:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    queue.append(current.left)</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> current.right:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    queue.append(current.right)</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — misread children as
+mutually exclusive, as if a node has left OR right. A binary tree node
+can have both, one, or neither — fully independent</li>
+<li><strong>How it was caught:</strong> Tree
+<code>[3,9,20,null,null,15,7]</code> — node 20 has both 15 and 7;
+if/else silently dropped 7. Output <code>[[3],[9,20],[15]]</code> looks
+plausible but wrong</li>
+<li><strong>Rule to prevent:</strong> Children = two INDEPENDENT
+<code>if</code> statements. Never
+<code>if left ... else right</code></li>
+<li><strong>Trick:</strong> Two doors on a house — they open
+independently. Check Door A AND check Door B. Don't skip Door B because
+Door A was unlocked</li>
+</ul>
+<h3 id="wrench-implementation-mistakes">🔧 Implementation Mistakes</h3>
+<p><strong>1. Appending Node Instead of Value</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — appends TreeNode object, wrong return type</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>level.append(current)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — appends the value</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>level.append(current.val)</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> Return type is <code>List[List[int]]</code> —
+integers required. <code>current</code> is a <code>TreeNode</code>
+object</li>
+<li><strong>How it was caught:</strong> Output
+<code>[[&lt;TreeNode&gt;], [&lt;TreeNode&gt;, &lt;TreeNode&gt;], ...]</code>
+— wrong type, fails comparison against expected</li>
+<li><strong>Rule to prevent:</strong> When building level lists for this
+problem, ALWAYS <code>.val</code> —
+<code>level.append(current.val)</code></li>
+<li><strong>Trick:</strong> <em>"Deliver the package, not the
+truck."</em> The node is the vehicle; <code>.val</code> is the
+cargo</li>
+</ul>
+<p><strong>2. <code>deque(root)</code> instead of
+<code>deque([root])</code></strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — TreeNode is not iterable, raises TypeError</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>queue <span class="op">=</span> deque(root)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — wrap in list so deque can unpack it</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>queue <span class="op">=</span> deque([root])</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>deque(x)</code> iterates over
+<code>x</code>. TreeNode is not iterable →
+<code>TypeError: 'TreeNode' object is not iterable</code></li>
+<li><strong>How it was caught:</strong> Immediate runtime crash before
+any traversal. Clarified during Week 7 review</li>
+<li><strong>Rule to prevent:</strong> Single starting node → ALWAYS
+<code>deque([node])</code>. Multiple starting nodes →
+<code>deque(list_of_nodes)</code></li>
+<li><strong>Trick:</strong> <em><code>deque</code> needs a bag to open.
+<code>[root]</code> is the bag. <code>root</code> alone has no
+zipper.</em></li>
+</ul>
+<h3 id="stopwatch-time-management-mistakes">⏱️ Time Management
+Mistakes</h3>
+<p>None this session ✅</p>
+<h3 id="bar_chart-mistake-summary">📊 Mistake Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Count</th>
+<th>Most Costly</th>
+<th>Pattern Emerging?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠 Conceptual</td>
+<td>2</td>
+<td>C1 — entire approach broken</td>
+<td>Level-grouping BFS needs snapshot technique drilled. C2 if/else trap
+recurring in tree problems</td>
+</tr>
+<tr>
+<td>🔧 Implementation</td>
+<td>2</td>
+<td>Both immediate crashes</td>
+<td>Python deque + TreeNode <code>.val</code> extraction — both atomic
+facts, drill once and own forever</td>
+</tr>
+<tr>
+<td>⏱️ Time Management</td>
+<td>0</td>
+<td>—</td>
+<td>Clean execution</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bulb-discoveries">💡 Discoveries</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p>"Before the inner loop begins, the queue holds EXACTLY the nodes from
+the current level. <code>level_size = len(queue)</code> is the fence
+post: process exactly this many, and everything added after belongs to
+the next level."</p>
+</blockquote>
+<p>The queue is like a building with no floor labels. The snapshot
+<code>level_size = len(queue)</code> stamps a label on the current floor
+before anyone moves. Process exactly that many occupants. Everyone who
+arrives as a child moves into the unmarked section -- they get their own
+stamp next iteration.</p>
+<hr />
+<h3 id="zap-aha-moments">⚡ Aha Moments</h3>
+<p><strong>💡 1. The Snapshot -- How to Separate Floors</strong></p>
+<ul>
+<li><strong>Before:</strong> Knew BFS visits nodes in breadth-first
+order but had no mechanism to know when one level ended and the next
+began. Queue mixes all nodes together.</li>
+<li><strong>Trigger:</strong> Asking "how do you know when one level
+ends?" while tracing: when you start processing <code>[9, 20]</code>,
+you add <code>[15, 7]</code> to the queue. But the queue now has all
+four mixed. How do you stop at exactly two?</li>
+<li><strong>After:</strong> Snapshot the queue length BEFORE processing.
+That number is the exact count of current-level nodes. Everything added
+during the inner loop is a child -- it lands after the snapshot
+boundary.</li>
+<li><strong>🗣️ In his words:</strong> "When we add floor 1 nodes to the
+queue, we capture floor 1 right? Then in the process of processing those
+nodes, we append floor 2's nodes to the queue. But the problem is this
+new queue will be processed on the NEXT run. Which means before any
+iteration we already have the exact number of citizens in that
+floor."</li>
+</ul>
+<p><strong>💡 2. deque([root]) -- The List Wrapper</strong></p>
+<ul>
+<li><strong>Before:</strong> <code>deque(root)</code> -- seemed natural
+to pass the root directly.</li>
+<li><strong>Trigger:</strong> Week 7 review question: "Why
+<code>deque([root])</code> and not <code>deque(root)</code>?"</li>
+<li><strong>After:</strong> <code>deque(x)</code> iterates
+<code>x</code>. A TreeNode is not iterable -- it has no
+<code>__iter__</code>. Wrapping in <code>[root]</code> makes a
+one-element list that deque unpacks into one element correctly.</li>
+<li><strong>🗣️ In his words:</strong> (Week 7 review, May 2026) --
+understood via the contrast: <code>deque([1,2,3])</code> unpacks a list
+into 3 elements; <code>deque("abc")</code> unpacks a string into 3
+chars; <code>deque(root)</code> tries to unpack a TreeNode --
+TypeError.</li>
+</ul>
+<hr />
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>The Building with No Floor Labels:</strong> The queue does
+not know about floors. Every time a new outer loop starts, you stamp the
+current floor: "there are exactly <code>level_size</code> people on this
+floor." Process them. Their children move to an unstamped zone -- they
+get their own stamp next time.</li>
+<li><strong>The Snapshot Contract:</strong>
+<code>level_size = len(queue)</code> is a contract, not a variable.
+"There are exactly this many nodes from the current level. Process
+exactly this many. No more."</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(N)</td>
+<td>Every node is enqueued once and dequeued once. Inner loop total
+across all outer iterations = N.</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(N)</td>
+<td>Queue holds at most one full level. In a complete binary tree the
+bottom level has ~N/2 nodes → O(N). <code>result</code> also holds all N
+values.</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(N)</td>
+<td>Must visit every node to include its value in the output. Cannot do
+better than O(N). Already optimal.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 4/5 -- Template is solid. Can
+reproduce from memory. Snapshot trick is internalized.</li>
+<li><strong>🔄 Revisit:</strong> Variations -- Zigzag Level Order
+(reverse on odd levels), Right Side View (last element per level), Level
+Averages (sum/count per level). All use the same template with one
+changed line.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> This problem is the BFS
+level-separation template. Mastering it means every level-order variant
+(Right Side View, Zigzag, Min/Max Depth) is one changed line away.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems-max-3">🔗 Similar Problems (max 3)</h2>
+<ul>
+<li><strong>Binary Tree Right Side View (#199)</strong> -- Same
+template. Change: <code>result.append(level[-1])</code> instead of
+<code>result.append(level)</code>. Last element per level = rightmost
+visible node.</li>
+<li><strong>Binary Tree Zigzag Level Order (#103)</strong> -- Same
+template. Change: reverse <code>level</code> before appending on
+odd-numbered levels.</li>
+<li><strong>Maximum Depth of Binary Tree (#104)</strong> -- Same BFS
+structure. Change: <code>return len(result)</code> instead of returning
+result. Number of levels = max depth.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz -- 2026-05-23</em> <em>"Those who hope in the
+Lord will renew their strength." -- Isaiah 40:31 ✝️</em></p>
+  </div>
+</body>
+</html>

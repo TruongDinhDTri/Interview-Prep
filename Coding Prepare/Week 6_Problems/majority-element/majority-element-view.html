@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>majority-element</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="fire-leetcode-169--majority-element">🔥 LeetCode 169 — Majority
+Element</h1>
+<blockquote>
+<p><strong>Difficulty:</strong> Easy | <strong>Pattern:</strong> Hash
+Map + Boyer-Moore Voting Algorithm <strong>Date Solved:</strong>
+2026-04-22 | <strong>Time:</strong> ~40 mins (25 min clock +
+continued)</p>
+</blockquote>
+<hr />
+<h2 id="jigsaw-the-problem">🧩 The Problem</h2>
+<blockquote>
+<p>Given an array <code>nums</code> of size <code>n</code>, return the
+<strong>majority element</strong>. The majority element is the element
+that appears <strong>more than ⌊n/2⌋ times</strong>. You may assume the
+majority element <strong>always exists</strong>.</p>
+</blockquote>
+<p><strong>Example 1:</strong></p>
+<pre><code>Input:  [3,2,3]
+Output: 3</code></pre>
+<p><strong>Example 2:</strong></p>
+<pre><code>Input:  [2,2,1,1,1,2,2]
+Output: 2</code></pre>
+<hr />
+<h2 id="clipboard-step-1--understand">📋 STEP 1 — UNDERSTAND</h2>
+<h3 id="clarifying-questions-wiganz-asked">Clarifying Questions Wiganz
+Asked</h3>
+<ol type="1">
+<li>Can there be duplicates? → <strong>YES — that's the whole
+point</strong></li>
+<li>How is input stored? → <strong>Array of integers</strong></li>
+<li>What should I return? → <strong>The VALUE of the majority element
+(not index)</strong></li>
+<li>Is there multiple valid answers? → <strong>NO — exactly one majority
+element guaranteed</strong></li>
+</ol>
+<h3 id="extra-questions-missed-but-important">Extra Questions Missed
+(but important!)</h3>
+<ul>
+<li>Can input be empty? → <strong>No, at least 1 element
+guaranteed</strong></li>
+<li>What's input size? → <strong>Up to 5×10⁴</strong> (so O(n²) might be
+too slow)</li>
+</ul>
+<h3 id="abstract-version">Abstract Version</h3>
+<blockquote>
+<p>"Given an array of size n, return the element whose count is
+<strong>&gt; n/2</strong>."</p>
+</blockquote>
+<h3 id="trace--2211122-n7-threshold--35">Trace —
+<code>[2,2,1,1,1,2,2]</code>, n=7, threshold = 3.5</h3>
+<ul>
+<li>2 appears <strong>4 times</strong> → 4 &gt; 3.5 ✅ → majority
+element</li>
+<li>1 appears <strong>3 times</strong> → 3 &gt; 3.5 ❌</li>
+</ul>
+<p><strong>Answer: 2</strong> ✅</p>
+<p><strong>⚠️ Wiganz's mistake in Step 1:</strong> Said "the highest
+value would be the majority" — WRONG!! It's not the highest VALUE, it's
+the element whose COUNT exceeds n/2. For example, if <code>2</code>
+appeared 4 times but n=100, threshold would be 50 — 4 is NOT majority
+even though it's the highest count.</p>
+<hr />
+<h2 id="world_map-step-2--approach">🗺️ STEP 2 — APPROACH</h2>
+<h3 id="3-gate-result">3-Gate Result</h3>
+<ol type="1">
+<li>Abstract shape matches? → ✅ Counting/frequency</li>
+<li>Can I name it + WHY? → ✅ HashMap — need to track character
+frequency</li>
+<li>Solved something like this before? → ✅ <strong>YES — Longest
+Palindrome</strong> (just solved!)</li>
+</ol>
+<p><strong>→ YES to all 3 → Pattern Path!! 🔥</strong></p>
+<h3 id="4p--reason">4P — Reason</h3>
+<p><strong>A. Brute Force — O(n²):</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(n):        <span class="co"># pick each element</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(n):    <span class="co"># scan ENTIRE array to count it</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> nums[j] <span class="op">==</span> nums[i]:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> count <span class="op">&gt;</span> n <span class="op">//</span> <span class="dv">2</span>:</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> nums[i]</span></code></pre></div>
+<p>Two nested loops = <strong>O(n²)</strong>. Too slow for n=50,000.</p>
+<p><strong>Why Wiganz initially said "HashMap is already brute
+force":</strong> He was right that HashMap is simple — but O(n²) IS the
+actual brute force (count each element by scanning the whole array).
+HashMap eliminates the inner scan by doing it all in one pass.</p>
+<p><strong>B. What HashMap does instead:</strong></p>
+<ul>
+<li>One pass to COUNT all frequencies → O(n)</li>
+<li>One pass through HashMap to FIND the majority → O(1) since at most
+52 keys... wait, this is integers not chars. At most n keys. But still
+O(n) total.</li>
+<li><strong>Total: O(n) time, O(n) space</strong></li>
+</ul>
+<p><strong>C. Invariant:</strong></p>
+<blockquote>
+<p>"The HashMap will ALWAYS contain the majority element after the full
+pass — because the problem guarantees it always exists."</p>
+</blockquote>
+<hr />
+<h2 id="keyboard-solution-1--hashmap-on-time-on-space">⌨️ SOLUTION 1 —
+HashMap (O(n) time, O(n) space)</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> majorityElement(<span class="va">self</span>, nums: List[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        hashmap <span class="op">=</span> Counter(nums)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        threshold <span class="op">=</span> <span class="bu">len</span>(nums) <span class="op">//</span> <span class="dv">2</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> key, value <span class="kw">in</span> hashmap.items():</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> value <span class="op">&gt;</span> threshold:</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> key</span></code></pre></div>
+<h3 id="bugs-wiganz-made">Bugs Wiganz Made:</h3>
+<p><strong>Bug #1 — <code>.values()</code> instead of
+<code>.items()</code>:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, value <span class="kw">in</span> hashmap.values():  <span class="co"># ❌ WRONG</span></span></code></pre></div>
+<p><code>.values()</code> returns ONLY the counts — you can't unpack
+into <code>key, value</code>!</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> key, value <span class="kw">in</span> hashmap.items():   <span class="co"># ✅ CORRECT</span></span></code></pre></div>
+<p><code>.items()</code> returns <code>(key, value)</code> pairs.</p>
+<p><strong>Bug #2 — <code>return 1</code> at the end:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_odd:</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>        count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="dv">1</span>    <span class="co"># ❌ NEVER EXECUTES — remove it!</span></span></code></pre></div>
+<p>Problem guarantees majority always exists. The last
+<code>return 1</code> is unreachable and misleading. <strong>Remove
+unnecessary fallback returns.</strong></p>
+<h3 id="verify-trace--2211122">Verify Trace —
+<code>[2,2,1,1,1,2,2]</code>:</h3>
+<pre><code>Counter: {2:4, 1:3}
+threshold = 7//2 = 3
+Loop:
+  key=2, value=4 → 4 &gt; 3 ✅ → return 2</code></pre>
+<p>✅ Correct!</p>
+<h3 id="edge-cases">Edge Cases:</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Threshold</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[1]</code></td>
+<td>0</td>
+<td>1 ✅</td>
+</tr>
+<tr>
+<td><code>[1,1,2]</code></td>
+<td>1</td>
+<td>1 ✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="complexity">Complexity:</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Time</strong></td>
+<td>O(n)</td>
+<td>One pass to count, one pass through map</td>
+</tr>
+<tr>
+<td><strong>Space</strong></td>
+<td>O(n)</td>
+<td>HashMap stores up to n entries</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="trophy-step-6--optimize-boyer-moore-voting-algorithm">🏆 STEP 6
+— OPTIMIZE: Boyer-Moore Voting Algorithm</h2>
+<h3 id="the-insight--soldiers-fighting-dagger">The Insight — "Soldiers
+Fighting" 🗡️</h3>
+<p>Wiganz's journey to discover this:</p>
+<p><strong>Hadriel asked:</strong> "What if every time you see two
+DIFFERENT elements, they cancel each other out — both die. What element
+would be the last one standing?"</p>
+<p><strong>Wiganz answered:</strong> "2 would still be alive because 2
+has more people."</p>
+<p>EXACTLY!! Majority has <code>&gt;n/2</code> votes. Everything else
+combined has <code>&lt;n/2</code> votes. If every non-majority element
+fights a majority element, the majority element ALWAYS has
+survivors.</p>
+<h3 id="manual-trace-that-unlocked-it-2-2-1-2-1">Manual Trace That
+Unlocked It (<code>[2, 2, 1, 2, 1]</code>):</h3>
+<pre><code>See 2: count=0 → candidate=2, count=1
+See 2: same  → count++ → count=2
+See 1: diff  → count-- → count=1  (2 kills 1, one 2 dies too)
+See 2: same  → count++ → count=2
+See 1: diff  → count-- → count=1
+
+Return candidate = 2 ✅</code></pre>
+<h3 id="the-confusion--why-does-count0-mean-new-candidate">The Confusion
+— "Why does count=0 mean new candidate?"</h3>
+<p><strong>Wiganz asked:</strong> "When 2 and 1 fight and both die → why
+does the next element become candidate? Where does the old candidate
+go?"</p>
+<p><strong>The answer (traced through
+<code>[2, 1, 3]</code>):</strong></p>
+<pre><code>See 2: candidate=2, count=1
+See 1: different → count-- → count=0 → 2 and 1 BOTH DIE ⚔️ no candidate left
+See 3: count=0 → NO active candidate → 3 becomes NEW candidate, count=1</code></pre>
+<p>When <code>count=0</code>, it means the previous candidate has been
+FULLY cancelled out by equal opponents. It's "dead." The next element
+starts fresh as the new contender. The majority element will survive
+this process because it has more votes than all others combined.</p>
+<h3 id="the-3-rules">The 3 Rules:</h3>
+<ol type="1">
+<li><code>count == 0</code> → current element becomes new candidate,
+count = 1</li>
+<li><code>current == candidate</code> → count++ (reinforce the
+army)</li>
+<li><code>current != candidate</code> → count-- (enemies fight, both
+die)</li>
+</ol>
+<hr />
+<h2 id="keyboard-solution-2--boyer-moore-voting-on-time-o1-space">⌨️
+SOLUTION 2 — Boyer-Moore Voting (O(n) time, O(1) space)</h2>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> majorityElement(<span class="va">self</span>, nums: List[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        candidate, count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nums)):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>                candidate <span class="op">=</span> nums[i]</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>                count <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">elif</span> nums[i] <span class="op">!=</span> candidate:</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>                count <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">else</span>:</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>                count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> candidate</span></code></pre></div>
+<h3 id="syntax-bug-wiganz-made">Syntax Bug Wiganz Made:</h3>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>candidate, count <span class="op">=</span> <span class="dv">0</span>   <span class="co"># ❌ Can&#39;t unpack 0 into two variables</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>candidate, count <span class="op">=</span> <span class="dv">0</span>, <span class="dv">0</span>  <span class="co"># ✅ Correct</span></span></code></pre></div>
+<h3 id="verify-trace--2-2-1">Verify Trace — <code>[2, 2, 1]</code>:</h3>
+<pre><code>i=0: count=0 → candidate=2, count=1
+i=1: 2 == candidate → count++ → count=2
+i=2: 1 != candidate → count-- → count=1
+Return candidate = 2 ✅</code></pre>
+<h3 id="complexity-1">Complexity:</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Time</strong></td>
+<td>O(n)</td>
+<td>Single pass through array</td>
+</tr>
+<tr>
+<td><strong>Space</strong></td>
+<td><strong>O(1)</strong></td>
+<td>Only 2 variables: <code>candidate</code> and <code>count</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bar_chart-comparison--both-solutions">📊 COMPARISON — Both
+Solutions</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Time</th>
+<th>Space</th>
+<th>Complexity</th>
+<th>Interview Value</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HashMap</td>
+<td>O(n)</td>
+<td>O(n)</td>
+<td>Simple</td>
+<td>Easy to explain ✅</td>
+</tr>
+<tr>
+<td>Boyer-Moore</td>
+<td>O(n)</td>
+<td><strong>O(1)</strong></td>
+<td>Clever</td>
+<td>Shows depth 🔥</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Interview strategy:</strong> Start with HashMap (easy to
+explain), then say "there's an O(1) space solution using a voting
+approach" and describe Boyer-Moore for bonus Problem Solving points.</p>
+<hr />
+<h2 id="brain-aha-moments">🧠 AHA MOMENTS</h2>
+<ol type="1">
+<li><p><strong>Brute force = nested loops, not HashMap.</strong> HashMap
+IS the smart solution. Don't confuse "simple" with "brute
+force."</p></li>
+<li><p><strong>Threshold is <code>&gt; n/2</code>, not
+<code>== n/2</code>.</strong> If <code>n=7</code>, threshold is
+<code>3.5</code>. An element with count 4 passes
+(<code>4 &gt; 3.5</code>). Using <code>//</code> (floor division) also
+works: <code>4 &gt; 3</code>.</p></li>
+<li><p><strong>Boyer-Moore soldiers insight:</strong> Majority has
+<code>&gt;n/2</code> votes. All others combined have
+<code>&lt;n/2</code>. If they "fight" (cancel out), majority always
+survives. This is the non-obvious leap that unlocks O(1) space.</p></li>
+<li><p><strong><code>count=0</code> means new candidate:</strong> When
+count hits 0, the previous candidate has been fully cancelled. It's
+dead. The next element you see becomes the new contender — starting
+fresh.</p></li>
+<li><p><strong><code>.items()</code> vs <code>.values()</code>:</strong>
+<code>.values()</code> gives only the counts. <code>.items()</code>
+gives <code>(key, value)</code> pairs. If you need both key and value →
+always use <code>.items()</code>.</p></li>
+</ol>
+<hr />
+<h2 id="clipboard-what-to-do-differently-next-time">📋 WHAT TO DO
+DIFFERENTLY NEXT TIME</h2>
+<ol type="1">
+<li><strong>State threshold explicitly in Discuss:</strong> "threshold
+is <code>n//2</code>, element must have count
+<code>&gt; n//2</code>."</li>
+<li><strong>Note input size in clarifying questions</strong> — affects
+whether O(n²) is acceptable.</li>
+<li><strong>Always check <code>.items()</code> vs <code>.values()</code>
+when iterating a dict</strong> — classic mistake.</li>
+<li><strong>Remove unreachable <code>return</code> statements</strong> —
+clean code matters.</li>
+<li><strong>Boyer-Moore is worth mentioning in Optimize even if you
+can't code it</strong> — shows awareness of O(1) space possibility.</li>
+</ol>
+<hr />
+<h2 id="dart-pattern-summary--boyer-moore-voting">🎯 PATTERN SUMMARY —
+Boyer-Moore Voting</h2>
+<p><strong>When to recognize:</strong></p>
+<ul>
+<li>"Find element that appears more than n/2 times"</li>
+<li>"Majority element always exists"</li>
+<li>Follow-up: "Can you do O(1) space?"</li>
+</ul>
+<p><strong>The 3-line intuition:</strong></p>
+<blockquote>
+<p>Pair every non-majority element with a majority element → both die.
+Majority has more soldiers → always survives. The last survivor =
+majority element.</p>
+</blockquote>
+  </div>
+</body>
+</html>

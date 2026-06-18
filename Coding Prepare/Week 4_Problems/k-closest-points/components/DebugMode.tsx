@@ -6,6 +6,22 @@ import { generateSteps } from '../services/algorithm';
 import { SimulationStep } from '../types';
 import { motion } from 'framer-motion';
 
+// --- lightweight Python syntax highlighter (light-theme palette) ---
+const _PYKW = new Set("def return for in if elif else while import from as and or not None True False class with lambda yield break continue pass is raise try except finally global nonlocal del assert await async".split(" "));
+const _PYBI = new Set("len range enumerate print sorted min max abs sum map filter zip reversed int str list dict set tuple float ord chr heappush heappop heapify heapq append pop".split(" "));
+const hlPy = (line: string): React.ReactNode[] => {
+  const P = { kw: '#b5179e', bi: '#b45309', fn: '#2563a8', st: '#558b2f', nu: '#8f3f71', co: '#9a9483', self: '#0e7490' };
+  const re = /(#.*)|("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')|(\b\d+\.?\d*\b)|([A-Za-z_]\w*)|(\s+)|([^\w\s])/g;
+  const out: React.ReactNode[] = []; let m: RegExpExecArray | null; let k = 0;
+  while ((m = re.exec(line))) {
+    const t = m[0]; let c = '';
+    if (m[1]) c = P.co; else if (m[2]) c = P.st; else if (m[3]) c = P.nu;
+    else if (m[4]) { if (_PYKW.has(t)) c = P.kw; else if (_PYBI.has(t)) c = P.bi; else if (t === 'self' || t === 'cls') c = P.self; else if (line[re.lastIndex] === '(') c = P.fn; }
+    out.push(c ? <span key={k++} style={{ color: c, fontWeight: (m[4] && _PYKW.has(t)) ? 600 : undefined }}>{t}</span> : <span key={k++}>{t}</span>);
+  }
+  return out;
+};
+
 export const DebugMode: React.FC = () => {
     const [steps, setSteps] = useState<SimulationStep[]>([]);
     const [currentStepIndex, setCurrentStepIndex] = useState(0);
@@ -53,7 +69,7 @@ export const DebugMode: React.FC = () => {
                     `}
                 >
                     <span className="inline-block w-6 text-slate-300 text-[10px] select-none mr-2 text-right">{lineNum}</span>
-                    {line}
+                    {hlPy(line)}
                 </div>
             );
         });

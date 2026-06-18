@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>01-matrix</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="01-matrix--complete-session-archive">01 Matrix — Complete
+Session Archive</h1>
+<p><strong>Pattern:</strong> Multi-source BFS |
+<strong>Difficulty:</strong> Medium | <strong>Date:</strong>
+2026-04-29</p>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>Started by correctly identifying "shortest path = BFS" but failed
+Gate 3 (never solved THIS type). Went First Principles path. Discovered
+the key insight by tracing the brute force: "BFS from each 1" is
+O((mn)²) — too slow. The flip moment came when Wiganz saw that
+<strong>distance comes FROM the 0s</strong>, not the 1s. Drawing the
+wave visually clicking: start from ALL 0s simultaneously, let the wave
+expand outward, distance = parent + 1. That rule IS the algorithm.</p>
+<hr />
+<h2 id="dart-step-1--understand">🎯 Step 1 — Understand</h2>
+<h3 id="mistake-in-step-1-order-warning">Mistake in Step 1 Order ⚠️</h3>
+<p>Wiganz asked constraint questions BEFORE paraphrasing. Correct order
+is:</p>
+<ol type="1">
+<li>Paraphrase first</li>
+<li>Then constraint questions</li>
+<li>Then strip the story</li>
+<li>Then trace</li>
+</ol>
+<p><strong>Why this matters:</strong> In a real interview, skipping the
+paraphrase signals you didn't fully read the problem. Communication
+score takes a hit.</p>
+<h3 id="paraphrase-wiganzs-words">Paraphrase (Wiganz's words)</h3>
+<blockquote>
+<p>"I'm given a matrix size mxn. I have to return a matrix of the same
+dimension. Each cell holds the distance to its nearest 0."</p>
+</blockquote>
+<h3 id="constraint-questions-asked">Constraint Questions Asked</h3>
+<ul>
+<li>Can values be negative? → Always 0 or 1 (binary matrix)</li>
+<li>At least one 0? → Guaranteed</li>
+<li>What to return? → Matrix of same dimensions, each cell =
+distance</li>
+<li>Can the matrix be empty? → No, m, n ≥ 1 guaranteed</li>
+<li>Can I modify in-place? → Yes</li>
+<li>Size constraints? → 1 ≤ m, n, total cells ≤ 10⁴</li>
+</ul>
+<h3 id="abstract-version-locked-in">Abstract Version (locked-in)</h3>
+<blockquote>
+<p>"Given a 2D grid, find the shortest distance from each cell to its
+nearest 0 cell."</p>
+</blockquote>
+<h3 id="trace-by-hand-example-2">Trace by Hand (Example 2)</h3>
+<pre><code>Input:          Expected:
+0 0 0           0 0 0
+0 1 0    →      0 1 0
+1 1 1           1 2 1</code></pre>
+<ul>
+<li>Cell (2,0): nearest 0 is (1,0), distance = 1 ✅ — Definition WHY:
+<em>"I can SEE it's one step above me"</em></li>
+<li>Cell (2,1): all nearest 0s are 2 steps away, distance = 2 ✅ —
+Definition WHY: <em>"move up then left/right — always 2 steps"</em></li>
+</ul>
+<p><strong>Step 1 WHY rule:</strong> Could a 5-year-old explain by
+pointing at the picture? YES → that's Step 1 WHY. No algorithm needed
+here.</p>
+<hr />
+<h2 id="brain-step-2--approach">🧠 Step 2 — Approach</h2>
+<h3 id="3-gate-check">3-Gate Check</h3>
+<ul>
+<li>Gate 1: Does abstract shape match a pattern? → YES (shortest path =
+BFS)</li>
+<li>Gate 2: Can I name AND explain WHY? → YES: <em>"I see 'shortest path
+of each cell to nearest 0' which tells me BFS because BFS is exploring
+and finding shortest path"</em></li>
+<li>Gate 3: Have I solved something like THIS before? →
+<strong>NO</strong> — knew BFS, but never this specific type</li>
+</ul>
+<p><strong>Gate 3 = NO → First Principles path (3F)</strong></p>
+<hr />
+<h2 id="large_blue_circle-step-3f--first-principles-exploration">🔵 Step
+3F — First Principles Exploration</h2>
+<h3 id="technique-a--visualize--draw-it">Technique A — Visualize / Draw
+It</h3>
+<p>Drew the grid. Key observation Wiganz made:</p>
+<blockquote>
+<p><strong>"Distance comes from the 0."</strong></p>
+</blockquote>
+<p>The 0s are the SOURCE of all distance information. Not the
+destination — the origin.</p>
+<h3 id="technique-b--manual-solve-the-brute-force-trap">Technique B —
+Manual Solve: The Brute Force Trap</h3>
+<p><strong>First instinct:</strong> BFS from each 1 cell to find nearest
+0.</p>
+<p><strong>Tracing the cost:</strong></p>
+<ul>
+<li>How many 1 cells could there be? → O(m×n)</li>
+<li>Each BFS visits how many cells? → O(m×n) in the worst case (4
+neighbors × all cells)</li>
+<li>Total cost = O(m×n) × O(m×n) = <strong>O((m×n)²)</strong></li>
+</ul>
+<p>For 10⁴ cells: <strong>10⁸ operations. Way too slow.</strong></p>
+<h3 id="fire-the-flip-moment">🔥 The Flip Moment</h3>
+<p><strong>Hadriel asked:</strong> "What if instead of starting from the
+1 cells... you flipped it? What if you started from ALL the 0 cells at
+once?"</p>
+<p><strong>Wiganz:</strong> <em>"might work"</em> (too vague — pushed to
+trace it)</p>
+<p><strong>Tracing "start from all 0s":</strong></p>
+<p>Wave 0 — Queue initialized with all 0 cells:</p>
+<pre><code>dist: 0  0  0
+      0  -1  0
+     -1  -1  -1</code></pre>
+<p>Wave 1 — Process the 0 cells, update their -1 neighbors:</p>
+<ul>
+<li>(0,1) dequeued → (1,1) is -1 → distance[1][1] = 0 + 1 = 1</li>
+<li>(1,0) dequeued → (2,0) is -1 → distance[2][0] = 0 + 1 = 1</li>
+<li>(1,2) dequeued → (2,2) is -1 → distance[2][2] = 0 + 1 = 1</li>
+</ul>
+<pre><code>dist: 0  0  0
+      0  1  0
+      1  -1  1</code></pre>
+<p>Wave 2 — Process wave 1 cells:</p>
+<ul>
+<li>(2,0) dequeued → neighbor (2,1) is -1 → distance[2][1] = 1 + 1 =
+2</li>
+</ul>
+<pre><code>dist: 0  0  0
+      0  1  0
+      1  2  1  ✅ Matches expected output!</code></pre>
+<p><strong>Wiganz's AHA moment:</strong> <em>"That looks like a
+wave!"</em> 🔥</p>
+<h3 id="rules-discovered-3f-technique-b">Rules Discovered (3F Technique
+B)</h3>
+<ol type="1">
+<li>All <code>0</code> cells start with distance = 0 — they ARE the base
+case</li>
+<li>Start BFS from ALL <code>0</code> cells simultaneously
+(multi-source, not single-source)</li>
+<li>Wave expands outward level by level</li>
+<li>Cell's distance = parent's distance + 1</li>
+<li>Only update cells where distance == -1 (first write = shortest
+distance; BFS guarantees this)</li>
+<li>Never re-add a cell that's already been set</li>
+</ol>
+<h3 id="why-start-from-0s-gives-omn-instead-of-omn²">Why "start from 0s"
+gives O(m×n) instead of O((m×n)²)</h3>
+<ul>
+<li>Each cell is added to the queue <strong>exactly once</strong> (the
+-1 check prevents re-adding)</li>
+<li>Each cell checks <strong>4 neighbors</strong></li>
+<li>Total operations = 4 × m×n = <strong>O(m×n)</strong></li>
+</ul>
+<p>Wiganz derived this himself: <em>"1 time in queue. 4 neighbors. So 4
+× m×n → O(m×n)"</em></p>
+<hr />
+<h2 id="loudspeaker-step-3--discuss">📢 Step 3 — Discuss</h2>
+<h3 id="wiganzs-full-presentation">Wiganz's Full Presentation</h3>
+<blockquote>
+<p>"I will use BFS starting from all zeros at once. Steps:</p>
+<ol type="1">
+<li>Initialize a queue and distance matrix</li>
+<li>Mark distance matrix as all -1 except 0 positions (distance = 0 for
+0 cells)</li>
+<li>Add all 0 cells to the queue</li>
+<li>Start exploring — dequeue current, explore 4 neighbors</li>
+<li>If neighbor has never been visited (distance == -1), mark it as
+parent's distance + 1, add to queue</li>
+<li>Return the distance matrix</li>
+</ol>
+<p>Time O(mn), Space O(mn). Shall I code it?"</p>
+</blockquote>
+<h3 id="complexity-proof-wiganz-derived">Complexity Proof Wiganz
+Derived</h3>
+<p>Each cell enters queue once → O(mn) entries. Each entry checks 4
+neighbors → 4 × O(mn) = O(mn) total. ✅</p>
+<hr />
+<h2 id="computer-step-4--code">💻 Step 4 — Code</h2>
+<h3 id="evolution-of-the-code-including-all-mistakes">Evolution of the
+Code (including all mistakes)</h3>
+<p><strong>First submission (with all bugs):</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> <span class="dv">0</span><span class="er">1_matrix</span>(mat):                          <span class="co"># ❌ </span><span class="al">BUG</span><span class="co"> 1: invalid function name</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    queue <span class="op">=</span> deque()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    visited <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    directions <span class="op">=</span> [(<span class="dv">0</span>,<span class="dv">1</span>), (<span class="dv">1</span>,<span class="dv">0</span>), (<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>), (<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>)]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    distance <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">if</span> mat[r][c] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">len</span>(mat[<span class="dv">0</span>])] <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">len</span>(mat)]  <span class="co"># ❌ </span><span class="al">BUG</span><span class="co"> 2: missing range()</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat)):</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat[<span class="dv">0</span>])):</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> mat[r][c] <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                queue.append((r,c))</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> queue:</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> queue.popleft()</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> direction <span class="kw">in</span> directions:</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>            neighbor_row <span class="op">=</span> current[<span class="dv">0</span>] <span class="op">+</span> direction[<span class="dv">0</span>]</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>            neighbor_col <span class="op">=</span> current[<span class="dv">1</span>] <span class="op">+</span> direction[<span class="dv">1</span>]</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>            neighbor <span class="op">=</span> (neighbor_row, neighbor_col)</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor_col <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_col <span class="op">&gt;=</span> <span class="bu">len</span>(mat[<span class="dv">0</span>]):</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                continueI di                  <span class="co"># ❌ </span><span class="al">BUG</span><span class="co"> 3: typo, should be `continue`</span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor_row <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_row <span class="op">&gt;=</span> <span class="bu">len</span>(mat):</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor <span class="kw">in</span> visited:</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> distance[neighbor_row][neighbor_col] <span class="op">==</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>                distance[neighbor_row][neighbor_col] <span class="op">=</span> distance[current[<span class="dv">0</span>]][current[<span class="dv">1</span>]] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>                visited.add(neighbor)</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>                queue.add(neighbor)           <span class="co"># ❌ </span><span class="al">BUG</span><span class="co"> 4: deque has no .add(), use .append()</span></span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> distance</span></code></pre></div>
+<h3 id="final-clean-solution">Final Clean Solution</h3>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> updateMatrix(mat):</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    queue <span class="op">=</span> deque()</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    visited <span class="op">=</span> <span class="bu">set</span>()</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    directions <span class="op">=</span> [(<span class="dv">0</span>,<span class="dv">1</span>), (<span class="dv">1</span>,<span class="dv">0</span>), (<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>), (<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>)]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    distance <span class="op">=</span> [[<span class="dv">0</span> <span class="cf">if</span> mat[r][c] <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat[<span class="dv">0</span>]))] <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat))]</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Add all 0 cells to queue as starting points</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> r <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat)):</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> c <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(mat[<span class="dv">0</span>])):</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> mat[r][c] <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                queue.append((r, c))</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># BFS wave expansion from all 0s simultaneously</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> queue:</span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>        current <span class="op">=</span> queue.popleft()</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> direction <span class="kw">in</span> directions:</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>            neighbor_row <span class="op">=</span> current[<span class="dv">0</span>] <span class="op">+</span> direction[<span class="dv">0</span>]</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>            neighbor_col <span class="op">=</span> current[<span class="dv">1</span>] <span class="op">+</span> direction[<span class="dv">1</span>]</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a>            neighbor <span class="op">=</span> (neighbor_row, neighbor_col)</span>
+<span id="cb6-22"><a href="#cb6-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-23"><a href="#cb6-23" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Boundary check</span></span>
+<span id="cb6-24"><a href="#cb6-24" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor_col <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_col <span class="op">&gt;=</span> <span class="bu">len</span>(mat[<span class="dv">0</span>]):</span>
+<span id="cb6-25"><a href="#cb6-25" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb6-26"><a href="#cb6-26" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor_row <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_row <span class="op">&gt;=</span> <span class="bu">len</span>(mat):</span>
+<span id="cb6-27"><a href="#cb6-27" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb6-28"><a href="#cb6-28" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> neighbor <span class="kw">in</span> visited:</span>
+<span id="cb6-29"><a href="#cb6-29" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb6-30"><a href="#cb6-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-31"><a href="#cb6-31" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Only update unvisited cells</span></span>
+<span id="cb6-32"><a href="#cb6-32" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> distance[neighbor_row][neighbor_col] <span class="op">==</span> <span class="op">-</span><span class="dv">1</span>:</span>
+<span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>                distance[neighbor_row][neighbor_col] <span class="op">=</span> distance[current[<span class="dv">0</span>]][current[<span class="dv">1</span>]] <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>                visited.add(neighbor)</span>
+<span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>                queue.append(neighbor)</span>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-37"><a href="#cb6-37" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> distance</span></code></pre></div>
+<p><strong>Time:</strong> O(m×n) — each cell enqueued and dequeued
+exactly once <strong>Space:</strong> O(m×n) — distance matrix +
+queue</p>
+<p><strong>Note:</strong> The <code>visited</code> set is technically
+redundant here — the <code>distance == -1</code> check already prevents
+re-processing. Both work fine together, but you could simplify to just
+the -1 check and remove the visited set entirely.</p>
+<hr />
+<h2 id="x-mistakes-made">❌ Mistakes Made</h2>
+<h3 id="1-wrong-step-1-order--asked-constraints-before-paraphrasing">1.
+Wrong Step 1 Order — Asked Constraints Before Paraphrasing</h3>
+<p><strong>What happened:</strong> Jumped to constraint questions
+without paraphrasing first.</p>
+<p><strong>Why it happened:</strong> Habit of wanting to validate
+assumptions before confirming understanding. Natural but wrong.</p>
+<p><strong>Why it matters:</strong> In a real interview, Communication
+is scored across ALL steps. Starting with constraints before paraphrase
+signals you didn't fully read the problem.</p>
+<p><strong>Fix:</strong> Always paraphrase FIRST. One sentence. Then ask
+constraints.</p>
+<hr />
+<h3 id="2-brute-force-direction--bfs-from-1s-instead-of-0s">2. Brute
+Force Direction — BFS from 1s Instead of 0s</h3>
+<p><strong>What happened:</strong> First instinct was "BFS from each 1
+cell to find nearest 0."</p>
+<p><strong>Why it happened:</strong> Natural instinct is to search FROM
+the unknown (1s, the cells you need to answer) TOWARD the known (0s, the
+reference point). This is how you'd think about it as a human navigating
+the grid.</p>
+<p><strong>Why it's wrong:</strong> This requires O(m×n) separate BFS
+runs, each costing O(m×n) → O((m×n)²) total.</p>
+<p><strong>The fix (the flip):</strong> Reverse the direction. Start
+FROM the known (all 0s) and PUSH answers OUT to the unknown (1 cells).
+Multi-source BFS runs once and covers everything in O(m×n).</p>
+<p><strong>Key insight to remember:</strong> When multiple cells need
+distance-to-source, put ALL sources in the queue at the start and let
+BFS expand outward. The first time BFS reaches a cell = shortest
+distance.</p>
+<hr />
+<h3 id="3-syntax-bug--for-c-in-lenmat0--missing-range">3. Syntax Bug —
+<code>for c in len(mat[0])</code> → Missing <code>range()</code></h3>
+<p><strong>What happened:</strong> <code>for c in len(mat[0])</code>
+inside the list comprehension.</p>
+<p><strong>Why it happened:</strong> <code>len()</code> returns an
+integer. You can't iterate over an integer in Python.
+<code>for c in 5</code> throws
+<code>TypeError: 'int' object is not iterable</code>.</p>
+<p><strong>The fix:</strong> <code>for c in range(len(mat[0]))</code> —
+<code>range()</code> creates an iterable sequence from the integer.</p>
+<p><strong>Why this mistake is common:</strong> Muscle memory from other
+languages where <code>for i in n</code> is valid. In Python, always need
+<code>range()</code>.</p>
+<hr />
+<h3 id="4-wrong-method--queueaddneighbor--deque-has-no-add">4. Wrong
+Method — <code>queue.add(neighbor)</code> → deque has no
+<code>.add()</code></h3>
+<p><strong>What happened:</strong> Called <code>.add()</code> on a
+<code>deque</code> object.</p>
+<p><strong>Why it happened:</strong> Confused <code>deque</code> with
+<code>set</code>. Sets use <code>.add()</code>. Deques use
+<code>.append()</code> (right end) or <code>.appendleft()</code> (left
+end).</p>
+<p><strong>The fix:</strong> <code>queue.append(neighbor)</code></p>
+<p><strong>Memory trick:</strong> | Data Structure | Add method |
+|---|---| | <code>list</code> | <code>.append()</code> | |
+<code>deque</code> | <code>.append()</code> (right) /
+<code>.appendleft()</code> (left) | | <code>set</code> |
+<code>.add()</code> |</p>
+<hr />
+<h3 id="5-invalid-function-name--def-01_matrix">5. Invalid Function Name
+— <code>def 01_matrix</code></h3>
+<p><strong>What happened:</strong> Named the function
+<code>01_matrix</code> which starts with a digit.</p>
+<p><strong>Why it happened:</strong> Copied the problem name literally.
+Python identifiers cannot start with a digit — this is a
+<code>SyntaxError</code>.</p>
+<p><strong>The fix:</strong> <code>updateMatrix</code> (LeetCode's
+official signature) or any valid name like
+<code>zero_one_matrix</code>.</p>
+<p><strong>Rule:</strong> Python identifiers must start with a letter or
+underscore, never a digit.</p>
+<hr />
+<h3 id="6-typo--continuei-di">6. Typo — <code>continueI di</code></h3>
+<p><strong>What happened:</strong> During editing/rewriting,
+accidentally wrote <code>continueI di</code> instead of
+<code>continue</code>.</p>
+<p><strong>Why it happened:</strong> Editing error while rewriting the
+code. Happens when you're typing fast and correcting mistakes
+simultaneously.</p>
+<p><strong>Fix:</strong> Always do a quick scan after editing. This
+would be a <code>SyntaxError</code> that Python catches immediately.</p>
+<hr />
+<h3 id="7-trace-error--row-2-after-first-wave">7. Trace Error — Row 2
+after first wave</h3>
+<p><strong>What happened:</strong> Said row 2 is
+<code>[-1, -1, -1]</code> after first wave of BFS.</p>
+<p><strong>Why it happened:</strong> Forgot that the initial 0 cells
+include (1,0) and (1,2), which are adjacent to (2,0) and (2,2)
+respectively. The "first wave" processes ALL initial 0 cells, not just
+the ones in row 0.</p>
+<p><strong>Correct trace:</strong> After first wave, row 2 is
+<code>[1, -1, 1]</code> because (2,0) is updated by (1,0) and (2,2) is
+updated by (1,2).</p>
+<hr />
+<h2 id="white_check_mark-step-5--verify">✅ Step 5 — Verify</h2>
+<h3 id="trace-through-example-2">Trace Through Example 2</h3>
+<pre><code>Initial queue: [(0,0), (0,1), (0,2), (1,0), (1,2)]
+
+Initial distance:
+0   0   0
+0  -1   0
+-1  -1  -1
+
+After processing (0,1) → (1,1) gets distance 1
+After processing (1,0) → (2,0) gets distance 1
+After processing (1,2) → (2,2) gets distance 1
+
+Queue: [(1,1), (2,0), (2,2)]
+
+Distance after wave 1:
+0  0  0
+0  1  0
+1  -1  1
+
+After processing (2,0) → (2,1) gets distance 2
+
+Final:
+0  0  0
+0  1  0
+1  2  1  ✅ Correct!</code></pre>
+<h3 id="edge-cases">Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>All zeros</td>
+<td><code>[[0,0],[0,0]]</code></td>
+<td><code>[[0,0],[0,0]]</code></td>
+<td>✅ All in queue, no -1 cells to update</td>
+</tr>
+<tr>
+<td>Single cell 0</td>
+<td><code>[[0]]</code></td>
+<td><code>[[0]]</code></td>
+<td>✅ Initialized to 0, queue processes, no neighbors</td>
+</tr>
+<tr>
+<td>Single cell 1</td>
+<td><code>[[1]]</code></td>
+<td>impossible</td>
+<td>✅ Guaranteed at least one 0 in constraints</td>
+</tr>
+<tr>
+<td>1 is surrounded</td>
+<td><code>[[0,0,0],[0,1,0],[0,0,0]]</code></td>
+<td><code>[[0,0,0],[0,1,0],[0,0,0]]</code></td>
+<td>✅ 1 gets distance 1 from adjacent 0s</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="books-key-concepts-for-recall">📚 Key Concepts for Recall</h2>
+<ol type="1">
+<li><strong>Multi-source BFS:</strong> Put ALL sources in the queue at
+the start. BFS expands outward simultaneously. First time a cell is
+reached = shortest distance.</li>
+<li><strong>The Flip:</strong> When solving "distance from each cell to
+nearest source," reverse direction — push FROM sources outward, not FROM
+cells toward sources.</li>
+<li><strong>Why O(m×n):</strong> Each cell is enqueued exactly once (the
+-1 guard). Each entry checks 4 neighbors. Total = 4 × m×n = O(m×n).</li>
+<li><strong>The wave analogy:</strong> BFS from multiple sources looks
+like ripples in water spreading outward at equal speed. Distance = how
+many ripple rings away from the nearest source.</li>
+<li><strong>-1 as unvisited sentinel:</strong> Avoids a separate
+<code>visited</code> set (though having both is also valid). First write
+= shortest distance.</li>
+<li><strong>Boundary check order:</strong> Check col bounds before
+accessing <code>mat[row][col]</code> to avoid index errors. Row bounds
+after.</li>
+<li><strong>deque.append() not .add():</strong> Sets use
+<code>.add()</code>, deques use <code>.append()</code>.</li>
+<li><strong>range() around len():</strong>
+<code>for i in len(arr)</code> → TypeError. Always
+<code>for i in range(len(arr))</code>.</li>
+</ol>
+<hr />
+<h2 id="fire-the-core-insight-in-one-sentence">🔥 The Core Insight in
+One Sentence</h2>
+<blockquote>
+<p>Instead of BFS FROM each 1 TO a 0 (O((mn)²)), put ALL 0s in the queue
+at once and let one BFS wave push distances OUTWARD (O(mn)).</p>
+</blockquote>
+  </div>
+</body>
+</html>

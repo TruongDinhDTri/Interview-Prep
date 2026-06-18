@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MinStack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="lc155---minstack---complete-session-archive">LC155 - MinStack -
+Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Stacks | <strong>Difficulty:</strong>
+Medium | <strong>LeetCode:</strong> #155 | <strong>Date:</strong>
+2026-05-19 <strong>Path Taken:</strong> First Principles |
+<strong>Solved:</strong> Solo (first attempt) | <strong>Status:</strong>
+Proud win</p>
+</blockquote>
+<hr />
+<h2 id="the-journey---how-understanding-built">The Journey - How
+Understanding Built</h2>
+<p>Wiganz encountered MinStack for the first time and arrived at the
+core insight independently: each stack node stores a
+<code>(val, min)</code> tuple, freezing the minimum at push time. The
+approach was correct from the start. The challenge was in the
+implementation -- three bugs appeared during coding, all caught and
+fixed solo before any hints. The debrief revealed that while the fix
+worked, the root cause (two sources of truth) pointed toward a cleaner
+design that eliminates the problem class entirely.</p>
+<hr />
+<h2 id="problem-statement">Problem Statement</h2>
+<p>Design a stack that supports four operations in O(1) time each:</p>
+<ul>
+<li><code>push(val)</code> -- push element onto the stack</li>
+<li><code>pop()</code> -- remove top element</li>
+<li><code>top()</code> -- return top element without removing it</li>
+<li><code>getMin()</code> -- return the current minimum element</li>
+</ul>
+<p>The trick: <code>getMin()</code> must be O(1). A naive approach (scan
+entire stack) is O(n). The challenge is engineering the data structure
+so minimum retrieval costs nothing.</p>
+<p><strong>Input:</strong> a sequence of operations
+<strong>Output:</strong> correct results for <code>top()</code> and
+<code>getMin()</code> at any point <strong>Constraint:</strong> all four
+operations must be O(1) time</p>
+<hr />
+<h2 id="core-insight-found-solo">Core Insight (Found Solo)</h2>
+<p>Each node in the stack stores <code>(val, current_min)</code> -- not
+just the value, but a frozen snapshot of what the minimum was at the
+moment this element was pushed.</p>
+<p>When you pop a node, the node below already has its own correct min
+baked in from when it was pushed. No recalculation. No global state to
+update. <code>getMin()</code> just reads <code>stack[-1][1]</code>.</p>
+<p>This is the entire insight. Everything else is execution.</p>
+<hr />
+<h2 id="wiganzs-solution-solved-solo---first-attempt">Wiganz's Solution
+(Solved Solo - First Attempt)</h2>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MinStack:</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Initialize the stack and min</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stack <span class="op">=</span> deque()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> push(<span class="va">self</span>, val: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check if the stack is empty the min should be reset</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="bu">len</span>(<span class="va">self</span>.stack) <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Check the value with min</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> val <span class="op">&lt;=</span> <span class="va">self</span>.<span class="bu">min</span>:</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> val</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stack.append((val, <span class="va">self</span>.<span class="bu">min</span>))</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pop(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pop the node</span></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>] <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Remove the val&#39;s min itself</span></span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> x[<span class="dv">0</span>] <span class="op">==</span> x[<span class="dv">1</span>] <span class="kw">and</span> <span class="bu">len</span>(<span class="va">self</span>.stack) <span class="op">&gt;=</span> <span class="dv">2</span>:</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Assign previous min</span></span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>            previous <span class="op">=</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">2</span>] <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>            <span class="va">self</span>.<span class="bu">min</span> <span class="op">=</span> previous[<span class="dv">1</span>]</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.stack.pop()</span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> top(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Peek the top</span></span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>][<span class="dv">0</span>] <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> getMin(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Pop the node</span></span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>        x <span class="op">=</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>] <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> <span class="va">None</span></span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Get 2nd value in the node</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> x[<span class="dv">1</span>] <span class="cf">if</span> x <span class="cf">else</span> <span class="va">None</span></span></code></pre></div>
+<p>This solution is correct. All bugs were caught and fixed during the
+session before submission.</p>
+<hr />
+<h2 id="bugs-caught-solo-all-3">Bugs Caught Solo (All 3)</h2>
+<h3 id="bug-1---selfmin-initialized-to-0">Bug 1 - <code>self.min</code>
+Initialized to 0</h3>
+<ul>
+<li><strong>What:</strong> <code>self.min = 0</code> in
+<code>__init__</code>. When pushing positive values like <code>2</code>,
+the condition <code>2 &lt;= 0</code> is <code>False</code>, so min never
+updated. Stack stored wrong min for every positive value.</li>
+<li><strong>Why:</strong> <code>rush</code> +
+<code>edge case blind spot</code> -- initializing to 0 feels natural
+(like initializing a counter), but a running minimum needs a value that
+every real input can beat.</li>
+<li><strong>Cost:</strong> Every positive push stored a wrong min.
+Silent corruption -- no crash, just wrong answers.</li>
+<li><strong>Prevention:</strong> When tracking a running minimum, always
+initialize to <code>float('inf')</code>. When tracking a running
+maximum, always initialize to <code>float('-inf')</code>. The sentinel
+must be beatable by any real input.</li>
+</ul>
+<hr />
+<h3 id="bug-2---stale-selfmin-after-full-empty">Bug 2 - Stale
+<code>self.min</code> After Full Empty</h3>
+<ul>
+<li><strong>What:</strong> After popping all elements and pushing new
+ones, <code>self.min</code> still held the old minimum from the previous
+session. New pushes compared against a stale sentinel.</li>
+<li><strong>Why:</strong> <code>concept gap</code> -- global state that
+persists across logical resets. The stack was empty but
+<code>self.min</code> didn't know that.</li>
+<li><strong>Cost:</strong> Wrong min stored in new pushes. The stack
+"remembered" the old session's minimum even after being fully
+emptied.</li>
+<li><strong>Fix:</strong> Reset <code>self.min = float('inf')</code> at
+the start of <code>push()</code> when
+<code>len(self.stack) == 0</code>.</li>
+<li><strong>Prevention:</strong> Global state that survives logical
+resets is a smell. If a variable should reset when the structure is
+empty, either reset it explicitly or eliminate it entirely.</li>
+</ul>
+<hr />
+<h3 id="bug-3---pop-didnt-update-selfmin-when-minimum-was-removed">Bug 3
+- <code>pop()</code> Didn't Update <code>self.min</code> When Minimum
+Was Removed</h3>
+<ul>
+<li><strong>What:</strong> When popping a node where
+<code>val == min</code> (the current minimum), <code>self.min</code> was
+never updated to reflect the new top. Subsequent <code>getMin()</code>
+calls returned the deleted minimum.</li>
+<li><strong>Why:</strong> <code>concept gap</code> -- two sources of
+truth (<code>self.min</code> global + the tuple's second element)
+diverged on pop. When the authoritative source (the tuple) was removed,
+the global became stale.</li>
+<li><strong>Cost:</strong> <code>getMin()</code> returned a deleted
+value. The stack lied about its minimum.</li>
+<li><strong>Fix:</strong> Before popping, if the node being removed
+carries the current min (<code>x[0] == x[1]</code>), look at the node
+below and grab its min. Reassign <code>self.min</code>.</li>
+<li><strong>Prevention:</strong> Don't store the same information in two
+places. Two sources of truth means two things to keep in sync, and sync
+bugs are the most common class of bugs in stateful systems.</li>
+</ul>
+<blockquote>
+<p>Root cause categories used: <code>rush</code> |
+<code>edge case blind spot</code> | <code>concept gap</code></p>
+</blockquote>
+<hr />
+<h2 id="clean-solution-hadriel">Clean Solution (Hadriel)</h2>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MinStack:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stack <span class="op">=</span> []</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> push(<span class="va">self</span>, val: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        min_val <span class="op">=</span> <span class="bu">min</span>(val, <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]) <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> val</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stack.append((val, min_val))</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> pop(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="va">None</span>:</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.stack.pop()</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> top(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>][<span class="dv">0</span>]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> getMin(<span class="va">self</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]</span></code></pre></div>
+<h3 id="why-this-is-cleaner">Why This Is Cleaner</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Wiganz Solution</th>
+<th>Clean Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sources of truth</td>
+<td>2 (<code>self.min</code> + tuple)</td>
+<td>1 (tuple only)</td>
+</tr>
+<tr>
+<td><code>push</code></td>
+<td>Updates global, then appends</td>
+<td>Computes local min inline, appends</td>
+</tr>
+<tr>
+<td><code>pop</code></td>
+<td>Condition check + global reassign</td>
+<td>One line</td>
+</tr>
+<tr>
+<td>Bug surface</td>
+<td>High -- global can go stale</td>
+<td>Zero -- no global to go stale</td>
+</tr>
+<tr>
+<td>Lines of code</td>
+<td>~30</td>
+<td>~10</td>
+</tr>
+</tbody>
+</table>
+<p>The key line in <code>push</code>:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>min_val <span class="op">=</span> <span class="bu">min</span>(val, <span class="va">self</span>.stack[<span class="op">-</span><span class="dv">1</span>][<span class="dv">1</span>]) <span class="cf">if</span> <span class="va">self</span>.stack <span class="cf">else</span> val</span></code></pre></div>
+<ul>
+<li>Stack has elements: compare new <code>val</code> against the min
+already stored in the top node</li>
+<li>Stack is empty: this value is the only element, so it is the min by
+default</li>
+<li>Result gets sealed into the new node forever</li>
+</ul>
+<p><code>pop</code> becomes a single line because there is nothing to
+sync. No global. No condition. Just remove the top node.</p>
+<h3 id="the-deeper-insight">The Deeper Insight</h3>
+<p>Wiganz's fix for Bug 3 was correct -- check if the min is being
+popped, then reassign the global from the node below. That fix
+<em>works</em>. But the right question is: why does this sync logic need
+to exist at all?</p>
+<p>Answer: because <code>self.min</code> shouldn't exist. It's a
+redundant copy of information that's already in the tuple. The clean
+solution removes the duplicate at the source. When you find yourself
+writing complex sync logic between two variables, that's a signal -- one
+of them shouldn't be there.</p>
+<p><strong>Immutable snapshot pattern:</strong> Each node doesn't say
+"the global min is X." It says "when I was born, the minimum was X --
+and that fact never changes, even after I'm surrounded by different
+elements." Pop is trivially simple because removing a node doesn't
+change anyone else's snapshot.</p>
+<hr />
+<h2 id="complexity">Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Time (all ops)</td>
+<td>O(1)</td>
+<td>push/pop are list append/pop (amortized O(1)); top and getMin read
+index -1 directly</td>
+</tr>
+<tr>
+<td>Space</td>
+<td>O(n)</td>
+<td>Each of n elements stores a 2-tuple -- linear growth, constant
+overhead per node</td>
+</tr>
+<tr>
+<td>BTTC</td>
+<td>O(1) time, O(n) space</td>
+<td>You cannot retrieve min in O(1) without storing it somewhere -- O(n)
+space is the floor</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-takeaways">Key Takeaways</h2>
+<ol type="1">
+<li><p><strong>The tuple per node is the entire insight.</strong>
+<code>(val, current_min)</code> freezes a snapshot of the minimum at
+push time. Pop doesn't need to recalculate anything because the node
+below already has its correct snapshot.</p></li>
+<li><p><strong><code>stack[-1][1]</code> is not "the global
+min."</strong> It is "the min as of the node currently on top." This
+distinction matters -- it's a local frozen fact, not a live
+variable.</p></li>
+<li><p><strong>One source of truth over two.</strong> Every time the
+same fact lives in two places, you need sync logic. Sync logic creates
+sync bugs. Wiganz's solution had <code>self.min</code> and the tuple's
+second element saying the same thing -- and they diverged on
+pop.</p></li>
+<li><p><strong><code>list</code> is better than <code>deque</code> for
+stack.</strong> Python's <code>list.append()</code> and
+<code>list.pop()</code> are both O(1). <code>deque</code> adds overhead
+and import noise with no benefit for stack-only usage.</p></li>
+<li><p><strong>The bug pattern here is classic:</strong> initialize to
+wrong sentinel (Bug 1), stale global on reset (Bug 2), global not
+updated on structural change (Bug 3). All three are variants of "global
+state went out of sync." The clean solution makes this entire bug class
+impossible.</p></li>
+</ol>
+<hr />
+<h2 id="self-assessment">Self-Assessment</h2>
+<ul>
+<li><strong>Confidence:</strong> 4/5 -- Core insight arrived
+independently. Bugs were caught and fixed solo. Understands why the
+clean solution is cleaner. Minor shaky area: articulating the "immutable
+snapshot" framing unprompted.</li>
+<li><strong>Revisit:</strong> The moment when you reach for a global
+variable, ask first: "Is this information already stored somewhere in my
+structure?"</li>
+<li><strong>Pattern Mastery Impact:</strong> Stacks pattern --
+demonstrates the tuple-per-node technique. Directly applicable to any
+"stack with auxiliary info" problem variant.</li>
+</ul>
+<hr />
+<h2 id="similar-problems">Similar Problems</h2>
+<ul>
+<li><strong>Valid Parentheses (#20)</strong> -- Stack stores state at
+push time; pop checks the stored state</li>
+<li><strong>Daily Temperatures (#739)</strong> -- Monotonic stack; each
+node implicitly carries position context</li>
+<li><strong>Evaluate Reverse Polish Notation (#150)</strong> -- Stack as
+computation context; operand order matters on pop</li>
+</ul>
+<hr />
+<p><em>Hadriel x Wiganz -- 2026-05-19</em> <em>"Those who hope in the
+Lord will renew their strength." -- Isaiah 40:31</em></p>
+  </div>
+</body>
+</html>

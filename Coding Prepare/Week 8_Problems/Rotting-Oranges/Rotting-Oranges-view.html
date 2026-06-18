@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotting-Oranges</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-rotting-oranges----complete-session-archive">🗡️ Rotting
+Oranges -- Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> BFS (Multi-Source) |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #994 |
+<strong>Date:</strong> 2026-05-22 <strong>Path Taken:</strong> Pattern
+Path (BFS) | <strong>First solve</strong> | <strong>🎯 Target:</strong>
+25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey----how-understanding-built">🗺️ The Journey
+-- How Understanding Built</h2>
+<p>Wiganz identified this as a BFS problem and correctly applied the
+level-by-level template -- but the session was filled with critical bugs
+that revealed exactly how wrong variable scope, off-by-one minute
+counting, and missing edge cases can silently destroy a correct-looking
+solution. The final solution works, but only after catching 6 distinct
+bugs. Every single one is documented here.</p>
+<hr />
+<h2 id="open_book-step-1----understand">📖 Step 1 -- Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given a 2D grid where each cell is <code>0</code> (empty),
+<code>1</code> (fresh orange), or <code>2</code> (rotten orange). Every
+minute, a rotten orange spreads to all 4-directional fresh neighbors.
+Return the minimum number of minutes until no fresh orange remains. If
+any fresh orange can NEVER rot (isolated by walls/empty cells), return
+-1.</p>
+<p><strong>Inputs:</strong> <code>grid</code> -- 2D integer matrix
+<strong>Output:</strong> Integer (minutes elapsed, or -1)
+<strong>Constraints:</strong> Cells are only 0, 1, or 2. Multiple rotten
+sources. Spreading is simultaneous each minute.</p>
+<p><strong>Traps:</strong></p>
+<ul>
+<li>"Simultaneous" spread means ALL rotten oranges spread at the same
+time each minute -- not sequentially. This forces multi-source BFS.</li>
+<li>An isolated fresh orange (surrounded by 0s, never touched by rot)
+makes the answer -1, NOT 0.</li>
+<li>A grid with zero fresh oranges at the start should immediately
+return 0, even if rotten oranges exist.</li>
+</ul>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given a matrix with multiple infected sources, find the minimum
+steps for infection to reach all reachable cells simultaneously. Return
+-1 if any cell is permanently unreachable."</p>
+</blockquote>
+<h3 id="question-constraint-questions">❓ Constraint Questions</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can grid be empty?</td>
+<td>No, guaranteed at least 1 cell</td>
+</tr>
+<tr>
+<td>Can fresh oranges be isolated?</td>
+<td>Yes -- surrounded by 0s</td>
+</tr>
+<tr>
+<td>Multiple rotten oranges at start?</td>
+<td>Yes -- multi-source</td>
+</tr>
+<tr>
+<td>Diagonal spread?</td>
+<td>No -- 4 directions only</td>
+</tr>
+<tr>
+<td>Does empty cell (0) block spread?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can fresh orange be adjacent to no rotten?</td>
+<td>Yes -- return -1</td>
+</tr>
+<tr>
+<td>Does grid mutate?</td>
+<td>Yes (we use this as visited marker)</td>
+</tr>
+<tr>
+<td>What if no fresh oranges exist?</td>
+<td>Return 0 immediately</td>
+</tr>
+<tr>
+<td>What if no rotten oranges exist but fresh exist?</td>
+<td>Return -1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<pre><code>Grid:
+[[2,1,1],
+ [1,1,0],
+ [0,1,1]]
+
+Minute 0 (initial rotten): (0,0)=2
+Minute 1: (0,0) rots (0,1) and (1,0) → queue: [(0,1),(1,0)]
+Minute 2: (0,1) rots (0,2),(1,1). (1,0) rots (1,1) already → queue: [(0,2),(1,1)]
+Minute 3: (0,2) no new. (1,1) rots (2,1) → queue: [(2,1)]
+Minute 4: (2,1) rots (2,2) → queue: [(2,2)]
+Minute 5: (2,2) no new → queue empty</code></pre>
+<p>Output is 4. The problem says so. (We'll see below why naive code
+returns 5 -- and how to fix it.)</p>
+<hr />
+<h2 id="compass-step-2----approach-3-gate-check">🧭 Step 2 -- Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<ul>
+<li><strong>Gate 1 -- Has this been solved?</strong> No (first
+time)</li>
+<li><strong>Gate 2 -- Which pattern?</strong> BFS -- spreading infection
+level by level = BFS level = 1 minute</li>
+<li><strong>Gate 3 -- Can I apply it?</strong> Yes</li>
+</ul>
+<p>→ Decision: <strong>PATTERN PATH -- BFS (Multi-Source)</strong></p>
+<hr />
+<h2 id="dart-3p-match--4p-reason">🎯 3P Match + 4P Reason</h2>
+<h3 id="mag-3p----signal--pattern--full-sentence">🔍 3P -- Signal →
+Pattern → Full Sentence</h3>
+<p><strong>Signal:</strong> Multiple sources, simultaneous spread, "how
+many steps/minutes" question on a matrix</p>
+<p><strong>Pattern:</strong> Multi-Source BFS</p>
+<blockquote>
+<p>"I see multiple rotten oranges spreading simultaneously each minute,
+which tells me Multi-Source BFS because all sources must be in the queue
+at once and each BFS level = 1 minute of simultaneous spread."</p>
+</blockquote>
+<h3 id="brain-4p----reason-before-any-code">🧠 4P -- Reason (Before ANY
+code)</h3>
+<p><strong>A -- 🐢 Brute Force + Why Bad:</strong> Simulate minute by
+minute by scanning the entire grid each minute to find newly rotten
+oranges. O((m×n)²) -- you scan m×n cells for up to m×n minutes. Terrible
+for large grids.</p>
+<p><strong>B -- ⚡ What BFS Does Instead:</strong> Enqueue ALL initial
+rotten oranges at once. Process level by level -- one level = one
+minute. Each newly rotted orange goes into the queue for the next level.
+O(m×n) -- each cell is visited at most once.</p>
+<p><strong>C -- 🔒 The Invariant:</strong></p>
+<blockquote>
+<p>"Every orange at BFS depth D became rotten at exactly minute D. If we
+count levels (not individual oranges), we count minutes correctly."</p>
+</blockquote>
+<p>The queue snapshot trick -- <code>level_size = len(queue)</code> --
+is what enforces this. Without it, you'd process oranges from different
+minutes in the same loop iteration.</p>
+<hr />
+<h2 id="speaking_head-step-3----discuss">🗣️ Step 3 -- Discuss</h2>
+<h3 id="clipboard-wiganzs-approach">📋 Wiganz's Approach</h3>
+<ol type="1">
+<li>Initialize <code>rows</code>, <code>cols</code>,
+<code>directions</code>, <code>fresh_count = 0</code>,
+<code>minute = 0</code>, <code>queue = deque()</code></li>
+<li>Scan matrix: count fresh oranges, enqueue all rotten oranges</li>
+<li>Edge case: <code>fresh_count == 0</code> → return 0</li>
+<li>Multi-source BFS: <code>while queue</code>, snapshot
+<code>level_size</code>, process each level, increment
+<code>minute</code> only if new oranges spread</li>
+<li>Return <code>minute</code> if <code>fresh_count == 0</code> else
+<code>-1</code></li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Time: O(m×n) -- each cell visited once</li>
+<li>Space: O(m×n) -- queue worst case holds all cells</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>Asked to code after confirming approach.</p>
+<h3 id="warning-what-was-missed-in-discuss">⚠️ What Was Missed in
+Discuss</h3>
+<ul>
+<li>Brute force mention was brief (correct behavior -- brief in Step 2,
+deep in 4P)</li>
+<li>Edge case <code>[[2]]</code> (rotten only, no fresh) should be
+stated explicitly before coding</li>
+</ul>
+<hr />
+<h2 id="computer-step-4----code">💻 Step 4 -- Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> orangesRotting(<span class="va">self</span>, grid):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Initialize rows, cols, directions, minute, fresh_count</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Scan matrix: count fresh oranges, add all rotten to queue</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Edge case: no fresh oranges from the start</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Multi-source BFS from all rotten oranges simultaneously</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Capture current level size</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># For each orange this level, check 4 neighbors</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Skip out of bounds</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>            <span class="co"># Skip empty cells</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="co"># If fresh: rot it, decrement count, add to queue</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Only increment minute if new oranges actually spread</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Return minute if all fresh are gone, else -1</span></span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> deque</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> orangesRotting(<span class="va">self</span>, grid: List[List[<span class="bu">int</span>]]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        rows <span class="op">=</span> <span class="bu">len</span>(grid)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        cols <span class="op">=</span> <span class="bu">len</span>(grid[<span class="dv">0</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        directions <span class="op">=</span> [(<span class="dv">0</span>,<span class="dv">1</span>), (<span class="dv">1</span>,<span class="dv">0</span>), (<span class="dv">0</span>,<span class="op">-</span><span class="dv">1</span>), (<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>)]</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        fresh_count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        minute <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        queue <span class="op">=</span> deque()</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> row <span class="kw">in</span> <span class="bu">range</span>(rows):</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> col <span class="kw">in</span> <span class="bu">range</span>(cols):</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> grid[row][col] <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                    fresh_count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> grid[row][col] <span class="op">==</span> <span class="dv">2</span>:</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>                    queue.append((row, col))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> fresh_count <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>        <span class="cf">while</span> queue:</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>            level_size <span class="op">=</span> <span class="bu">len</span>(queue)</span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(level_size):</span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a>                current <span class="op">=</span> queue.popleft()</span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>                <span class="cf">for</span> direction <span class="kw">in</span> directions:</span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>                    neighbor_row <span class="op">=</span> direction[<span class="dv">0</span>] <span class="op">+</span> current[<span class="dv">0</span>]</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>                    neighbor_col <span class="op">=</span> direction[<span class="dv">1</span>] <span class="op">+</span> current[<span class="dv">1</span>]</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> neighbor_col <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_col <span class="op">&gt;=</span> cols:</span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">continue</span></span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> neighbor_row <span class="op">&lt;</span> <span class="dv">0</span> <span class="kw">or</span> neighbor_row <span class="op">&gt;=</span> rows:</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">continue</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> grid[neighbor_row][neighbor_col] <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>                        <span class="cf">continue</span></span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">if</span> grid[neighbor_row][neighbor_col] <span class="op">==</span> <span class="dv">1</span>:</span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>                        grid[neighbor_row][neighbor_col] <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>                        fresh_count <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>                        queue.append((neighbor_row, neighbor_col))</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> queue:</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>                minute <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> minute <span class="cf">if</span> fresh_count <span class="op">==</span> <span class="dv">0</span> <span class="cf">else</span> <span class="op">-</span><span class="dv">1</span></span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(m×n) -- each cell enqueued and processed
+at most once <strong>📦 Space:</strong> O(m×n) -- queue holds up to all
+cells in worst case</p>
+<hr />
+<h2 id="mag-step-5----verify">🔍 Step 5 -- Verify</h2>
+<h3 id="footprints-trace-through-main-example">👣 Trace Through Main
+Example</h3>
+<pre><code>Grid: [[2,1,1],[1,1,0],[0,1,1]]
+Initial queue: [(0,0)]   fresh_count: 6
+
+Level 1 (level_size=1):
+  Process (0,0): rot (0,1) → fc=5, rot (1,0) → fc=4
+  Queue after level: [(0,1),(1,0)] → non-empty → minute=1
+
+Level 2 (level_size=2):
+  Process (0,1): rot (0,2) → fc=3, rot (1,1) → fc=2
+  Process (1,0): (1,1) already=2, skip
+  Queue after level: [(0,2),(1,1)] → non-empty → minute=2
+
+Level 3 (level_size=2):
+  Process (0,2): no fresh neighbors
+  Process (1,1): rot (2,1) → fc=1
+  Queue after level: [(2,1)] → non-empty → minute=3
+
+Level 4 (level_size=1):
+  Process (2,1): rot (2,2) → fc=0
+  Queue after level: [(2,2)] → non-empty → minute=4
+
+Level 5 (level_size=1):
+  Process (2,2): no fresh neighbors
+  Queue after level: [] → EMPTY → minute stays at 4
+
+fresh_count == 0 → return 4 ✓</code></pre>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No oranges</td>
+<td><code>[[0]]</code></td>
+<td>0</td>
+<td>✅ fresh_count=0, return 0</td>
+</tr>
+<tr>
+<td>One fresh, no rotten</td>
+<td><code>[[1]]</code></td>
+<td>-1</td>
+<td>✅ queue empty, while skipped, fc=1, return -1</td>
+</tr>
+<tr>
+<td>One rotten, no fresh</td>
+<td><code>[[2]]</code></td>
+<td>0</td>
+<td>✅ fresh_count=0, return 0 (guard catches it)</td>
+</tr>
+<tr>
+<td>Isolated fresh</td>
+<td><code>[[0,2,1],[0,0,0],[1,0,0]]</code></td>
+<td>-1</td>
+<td>✅ BFS finishes, fc=2 &gt; 0, return -1</td>
+</tr>
+<tr>
+<td>All rotten</td>
+<td><code>[[2,2],[2,2]]</code></td>
+<td>0</td>
+<td>✅ fresh_count=0, return 0</td>
+</tr>
+<tr>
+<td>All fresh</td>
+<td><code>[[1,1],[1,1]]</code></td>
+<td>-1</td>
+<td>✅ queue empty, while skipped, fc=4, return -1</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time: O(m×n) -- BFS visits each cell once</li>
+<li>Space: O(m×n) -- queue in worst case</li>
+</ul>
+<hr />
+<h2 id="zap-step-6----optimize">⚡ Step 6 -- Optimize</h2>
+<h3 id="redundant-visited-set-removed">Redundant visited set
+removed</h3>
+<p>During coding, a <code>visited = set()</code> was added and used to
+track processed neighbors. This was redundant:</p>
+<ul>
+<li>When a fresh orange is rotted:
+<code>grid[neighbor_row][neighbor_col] = 2</code></li>
+<li>That cell will never pass <code>== 1</code> again in any future
+check</li>
+<li>The grid itself IS the visited structure -- modifying in-place
+removes the need for an external set</li>
+</ul>
+<p><strong>Removed:</strong> <code>visited = set()</code>,
+<code>visited.add(...)</code>,
+<code>if neighbor in visited: continue</code>, and dead variable
+<code>neighbor = (neighbor_row, neighbor_col)</code></p>
+<p><strong>Space improvement:</strong> Saves O(m×n) for the set. Total
+space stays O(m×n) due to queue, but the constant factor is smaller.</p>
+<p>BTTC for this problem: O(m×n) -- you must examine every cell at least
+once to count fresh oranges. Current solution matches BTTC.</p>
+<hr />
+<h2 id="bug-bugs--mistakes-every-single-one">🐛 Bugs &amp; Mistakes
+(Every Single One)</h2>
+<h3 id="bug-bug-1-wrong-variable-in-grid-check-critical">🐛 Bug 1: Wrong
+variable in grid check (critical)</h3>
+<ul>
+<li><strong>❌ What:</strong> Used <code>grid[row][col]</code> and
+<code>queue.append((row, col))</code> inside BFS neighbor loop instead
+of <code>grid[neighbor_row][neighbor_col]</code> and
+<code>queue.append((neighbor_row, neighbor_col))</code></li>
+<li><strong>🔍 Why:</strong> <code>concept gap</code> +
+<code>variable scope confusion</code> -- <code>row</code> and
+<code>col</code> were loop variables from the outer initialization scan.
+After that scan finishes, they hold the last values (e.g.,
+<code>row=2, col=2</code> for a 3x3 grid). Those old variables were
+still in scope inside the BFS loop. Every grid access and every enqueue
+was pointing at that same last-scanned cell instead of the actual
+neighbor.</li>
+<li><strong>💸 Cost:</strong> Entire BFS logic was wrong. The wrong cell
+was being checked and enqueued. Would have produced completely wrong
+results for any grid.</li>
+<li><strong>🛡️ Prevention:</strong> After nested loops, old loop
+variables persist in Python. When using NEW computed variables
+(<code>neighbor_row</code>, <code>neighbor_col</code>), use ONLY those
+-- never fall back to the outer loop names. Rule: inside the BFS loop,
+if you computed <code>neighbor_row</code> and <code>neighbor_col</code>,
+use them EXCLUSIVELY for everything in that scope.</li>
+</ul>
+<h3 id="bug-bug-2-variable-name-inconsistency-minutes-vs-minute">🐛 Bug
+2: Variable name inconsistency (minutes vs minute)</h3>
+<ul>
+<li><strong>❌ What:</strong> Initialized <code>minutes = 0</code>
+(plural), incremented <code>minute += 1</code> (singular), returned
+<code>minutes</code> (plural) -- three different references, only one is
+defined at each point</li>
+<li><strong>🔍 Why:</strong> <code>typo</code> -- created the variable
+with one name, started typing the other name mid-code, mixed them
+freely</li>
+<li><strong>💸 Cost:</strong> <code>NameError</code> at runtime (or
+silent wrong value if Python happened to find an outer scope variable
+named <code>minute</code>)</li>
+<li><strong>🛡️ Prevention:</strong> Pick the variable name BEFORE
+writing the loop. Write it in the blueprint comment. Never rename
+mid-function. For counters, prefer the singular form:
+<code>minute</code>, <code>level</code>, <code>step</code>.</li>
+</ul>
+<h3 id="bug-bug-3-minute--1-inside-inner-for-loop-wrong-indentation">🐛
+Bug 3: minute += 1 inside inner for loop (wrong indentation)</h3>
+<ul>
+<li><strong>❌ What:</strong> <code>minute += 1</code> was indented one
+level too deep -- inside <code>for _ in range(level_size)</code> instead
+of after it</li>
+<li><strong>🔍 Why:</strong> <code>rush</code> -- wrote the increment
+without thinking about where the level boundary is. The
+<code>level_size</code> loop IS the level. The increment belongs AFTER
+it.</li>
+<li><strong>💸 Cost:</strong> minute was incremented for every orange
+processed (up to m×n times), not once per minute. Wildly wrong
+result.</li>
+<li><strong>🛡️ Prevention:</strong> The rule: "one minute = one BFS
+level = one outer iteration of the while loop." The
+<code>for _ in range(level_size)</code> loop is INSIDE the level.
+<code>minute += 1</code> goes AFTER the inner for loop, still inside
+while. Always check indentation of counters against your mental model of
+what "one unit" means.</li>
+</ul>
+<h3 id="bug-bug-4-edge-case-2-returns-1-without-guard">🐛 Bug 4: Edge
+case [[2]] returns 1 without guard</h3>
+<ul>
+<li><strong>❌ What:</strong> For grid <code>[[2]]</code> (one rotten,
+zero fresh), BFS runs: processes (0,0), all neighbors OOB, nothing
+added. But <code>minute += 1</code> fires (at the time, unconditionally)
+→ returns 1. Expected: 0.</li>
+<li><strong>🔍 Why:</strong> <code>edge case blind spot</code> -- the
+assumption was "if there's no fresh orange, the BFS will do nothing."
+But the rotten orange IS in the queue. BFS runs one level for it. The
+minute counter doesn't know it was a wasted level.</li>
+<li><strong>💸 Cost:</strong> Wrong answer for any grid with rotten
+oranges but no fresh oranges.</li>
+<li><strong>🛡️ Prevention:</strong> Ask: "What if fresh_count is already
+0 before BFS runs?" Add the guard
+<code>if fresh_count == 0: return 0</code> BEFORE the while loop. This
+class of bug = "BFS ran but had nothing to accomplish." The guard
+prevents entering BFS unnecessarily.</li>
+</ul>
+<h3 id="bug-bug-5-last-bfs-level-over-counts-minute-by-1">🐛 Bug 5: Last
+BFS level over-counts minute by 1</h3>
+<ul>
+<li><strong>❌ What:</strong> Even with the
+<code>fresh_count == 0</code> guard, the main example returned 5 instead
+of 4. The final rotten orange (2,2) is processed in the last level, has
+no fresh neighbors, adds nothing to queue. But <code>minute += 1</code>
+still fired → extra +1.</li>
+<li><strong>🔍 Why:</strong> <code>edge case blind spot</code> -- same
+class as Bug 4. The last BFS level processes oranges that spread nothing
+new. An unconditional <code>minute += 1</code> counts that wasted level
+as a real minute.</li>
+<li><strong>💸 Cost:</strong> Off-by-one error on the final answer for
+virtually every grid where the last orange processed has no fresh
+neighbors (which is almost always true).</li>
+<li><strong>🛡️ Prevention:</strong> The fix:
+<code>if queue: minute += 1</code> -- only increment if the queue has
+new oranges after the level (meaning spreading actually happened). This
+works because: if new fresh oranges were rotted this level, they were
+added to the queue. If queue is empty after the level, no spreading
+happened -- this was a terminal level, don't count it.</li>
+</ul>
+<h3 id="bug-bug-6-dead-variable-neighbor-left-in-code">🐛 Bug 6: Dead
+variable neighbor left in code</h3>
+<ul>
+<li><strong>❌ What:</strong>
+<code>neighbor = (neighbor_row, neighbor_col)</code> was written and
+then never used anywhere (after removing the visited set)</li>
+<li><strong>🔍 Why:</strong> <code>rush</code> -- wrote the visited set
+logic first, then removed the set but forgot to remove the tuple
+assignment that fed into it</li>
+<li><strong>💸 Cost:</strong> No runtime error, but dead code creates
+confusion. Future reader wonders what <code>neighbor</code> is for.</li>
+<li><strong>🛡️ Prevention:</strong> When removing a feature (visited
+set), scan for ALL lines that referenced it and remove them together.
+Dead variables with no references are always a cleanup item.</li>
+</ul>
+<blockquote>
+<p>Root cause categories used: <code>rush</code> | <code>typo</code> |
+<code>concept gap</code> | <code>edge case blind spot</code></p>
+</blockquote>
+<hr />
+<h2 id="bulb-discoveries-aha-moments-insights--clarity">💡 Discoveries
+(Aha Moments, Insights &amp; Clarity)</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p>"Each BFS level = exactly one minute of simultaneous spread. Count
+levels, not oranges."</p>
+</blockquote>
+<p>The level snapshot <code>level_size = len(queue)</code> enforces
+this. Without it, you'd mix oranges from minute 1 and minute 2 in the
+same processing batch -- and the minute counter would be
+meaningless.</p>
+<h3 id="zap-aha-moments">⚡ Aha Moments</h3>
+<p><strong>💡 1. Queue empty ≠ all fresh oranges rotted</strong></p>
+<ul>
+<li><strong>Before:</strong> "If BFS finishes (queue empty), all
+reachable oranges must have been rotted."</li>
+<li><strong>Trigger:</strong> "What if a fresh orange is surrounded by
+empty cells (0s)?"</li>
+<li><strong>After:</strong> BFS can finish without touching isolated
+fresh oranges. Queue empty only means "no more rotten oranges to spread
+from." The only reliable check is <code>fresh_count == 0</code> after
+BFS.</li>
+</ul>
+<p><strong>💡 2. The <code>if queue: minute += 1</code>
+trick</strong></p>
+<ul>
+<li><strong>Before:</strong> Increment <code>minute</code>
+unconditionally after each level.</li>
+<li><strong>Trigger:</strong> Tracing the main example manually revealed
+minute=5 when expected was 4. The last level (processing (2,2)) ran but
+produced nothing new.</li>
+<li><strong>After:</strong> Only count a minute if the queue has items
+AFTER the level -- meaning at least one fresh orange was actually rotted
+this level. If queue is empty, this was a terminal no-spread level.
+Don't count it.</li>
+<li><strong>In his words:</strong> This is the SAME class of bug as the
+<code>[[2]]</code> edge case -- both are "BFS level ran but accomplished
+nothing."</li>
+</ul>
+<p><strong>💡 3. Grid as its own visited structure</strong></p>
+<ul>
+<li><strong>Before:</strong> Added <code>visited = set()</code> to track
+processed cells.</li>
+<li><strong>Trigger:</strong> Review of the code -- noticed that
+<code>grid[r][c] = 2</code> already marks the cell as rotten, which
+means no future check can return True for <code>== 1</code> on that
+cell.</li>
+<li><strong>After:</strong> The grid mutation IS the visited marker. No
+external set needed. This is a key optimization pattern for grid BFS
+problems where cell state naturally tracks visitation.</li>
+</ul>
+<p><strong>💡 4. Multi-source means ALL sources in queue at minute
+0</strong></p>
+<ul>
+<li><strong>Before:</strong> Could have added one rotten orange and
+BFS'd from there.</li>
+<li><strong>Trigger:</strong> Understanding that all rotten oranges
+spread simultaneously.</li>
+<li><strong>After:</strong> All initial rotten oranges go into the queue
+before BFS starts. This ensures minute 1 processes all of their
+neighbors together -- correct simultaneous spreading.</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>"Spreading infection"</strong> -- The problem itself is a
+perfect metaphor. Multiple infected patients in a room, every minute
+they infect adjacent people. BFS is literally the spread pattern.</li>
+<li><strong>"Level = minute"</strong> -- The BFS level structure maps
+1:1 to the problem's minute structure. This is why BFS solves this
+exactly -- the algorithm's natural unit of work equals the problem's
+natural unit of time.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(m×n)</td>
+<td>Each cell enters the queue at most once (once rotted, grid value =
+2, never re-queued)</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(m×n)</td>
+<td>Queue worst case holds all cells (e.g., all rotten at once)</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(m×n)</td>
+<td>Must scan every cell at least once to count fresh oranges -- cannot
+do better</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 3/5 -- Core BFS structure was
+correct, but 6 bugs shows the execution under pressure is still shaky.
+The variable scope bug (Bug 1) is a serious one to make.</li>
+<li><strong>🔄 Revisit:</strong> The <code>if queue: minute += 1</code>
+logic -- understand WHY before the next similar problem. Also revisit
+Bug 1 (scope confusion) -- this could reappear under interview
+pressure.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> BFS pattern stays at
+competent. Multi-source BFS and level-counting are now explicitly part
+of the toolkit. The "grid as visited marker" optimization is a reusable
+insight for future grid BFS problems.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems-max-3">🔗 Similar Problems (max 3)</h2>
+<ul>
+<li><strong>01 Matrix (#542)</strong> -- BFS from all 0s simultaneously
+to find min distance to 0. Same multi-source pattern, same "enqueue all
+sources first" setup.</li>
+<li><strong>Number of Islands (#200)</strong> -- DFS/BFS on a grid,
+visited tracking, same OOB checks. Single-source but same grid traversal
+structure.</li>
+<li><strong>Walls and Gates (LeetCode #286)</strong> -- Multi-source BFS
+from all gates simultaneously to fill distances. Identical pattern to
+Rotting Oranges.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz -- 2026-05-22</em> <em>"Consider it pure joy,
+my brothers and sisters, whenever you face trials of many kinds." --
+James 1:2 ✝️</em> <em>Six bugs. Fixed all six. That's not failure --
+that's how mastery is forged.</em></p>
+  </div>
+</body>
+</html>

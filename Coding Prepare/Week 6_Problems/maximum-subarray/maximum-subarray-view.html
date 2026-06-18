@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>maximum-subarray</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="maximum-subarray--complete-session-archive">Maximum Subarray —
+Complete Session Archive</h1>
+<p><strong>LeetCode #53</strong> | <strong>Pattern:</strong> Kadane's
+Algorithm (Greedy / Linear DP) | <strong>Difficulty:</strong> Easy |
+<strong>Date:</strong> 2026-04-27 | <strong>Total Time:</strong> ~50
+min</p>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>Started with a wrong pattern instinct (Sliding Window) — and when
+pushed to explain the shrink condition, Wiganz discovered himself that
+Sliding Window doesn't fit. Moved to First Principles (3F), traced
+manually, and found the reset rule from scratch. The key aha moment: "a
+negative running sum is a burden to every future element." Built
+Kadane's Algorithm from zero without being told its name.</p>
+<hr />
+<h2 id="dart-step-1--understand">🎯 Step 1 — Understand</h2>
+<h3 id="paraphrase-wiganzs-words">Paraphrase (Wiganz's words)</h3>
+<blockquote>
+<p>"I'm given an array and I need to find the subarray with the max sum
+and return the sum."</p>
+</blockquote>
+<p>✅ Correct. Clean.</p>
+<h3 id="the-9-constraint-questions">The 9 Constraint Questions</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is input sorted?</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Can values be negative?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can there be duplicates?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can input be empty/null?</td>
+<td>No — guaranteed 1 ≤ n ≤ 10⁵</td>
+</tr>
+<tr>
+<td>Can I modify the input?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>How is input stored?</td>
+<td>Array — already stated in problem</td>
+</tr>
+<tr>
+<td>Expected input size?</td>
+<td>Up to 10⁵</td>
+</tr>
+<tr>
+<td>What to return?</td>
+<td>The integer sum (not the subarray itself)</td>
+</tr>
+<tr>
+<td>One valid answer or multiple?</td>
+<td>One</td>
+</tr>
+</tbody>
+</table>
+<h3 id="warning-mistake-made--move-order">⚠️ Mistake Made — Move
+Order</h3>
+<p>Wiganz jumped straight to constraint questions (Move 2) and skipped
+<strong>Move 1: Paraphrase</strong>.</p>
+<p><strong>Why it matters:</strong> In a real interview, skipping the
+paraphrase loses Communication points. The interviewer sees you as
+reactive, not methodical. Paraphrase first — even one sentence — to show
+you're confirming before assuming.</p>
+<p><strong>The Road's 4 Moves in order:</strong></p>
+<pre><code>1. Paraphrase  ← must come first
+2. Ask 9 constraint questions
+3. Strip the story → abstract
+4. Trace example</code></pre>
+<h3 id="strip-the-story">Strip the Story</h3>
+<p><strong>Discovery moment:</strong> Wiganz said "largest continuous
+subarray" but forgot to include what he was returning.</p>
+<p><strong>Hadriel asked:</strong> "Are you returning the subarray or
+something else?"</p>
+<p><strong>Locked-in abstract version:</strong></p>
+<blockquote>
+<p>"Find the contiguous subarray with the largest sum, return its
+sum."</p>
+</blockquote>
+<p><strong>Key word discovered:</strong> <em>Contiguous</em> — a
+subarray is NOT a subset. You cannot skip elements. When asked "can I
+pick elements 1 and 3 from [1,2,3,4]?" — Wiganz correctly said no. A
+subarray must be connected.</p>
+<h3 id="trace-example">Trace Example</h3>
+<p>Wiganz chose <code>[5, 4, -1, 7, 8]</code> — simpler than the given
+example.</p>
+<p><strong>Correct Definition WHY:</strong> "Everything is positive
+except -1, but even including -1 the total sum is still the maximum. So
+the whole array is the answer. Sum = 23."</p>
+<p><strong>✅ This is Step 1 WHY (Definition WHY)</strong> — used eyes
+and problem definition. Did not describe an algorithm.</p>
+<p><strong>⚠️ Hadriel violated the rule here:</strong> Asked Wiganz to
+trace the harder example <code>[-2,1,-3,4,-1,2,1,-5,4]</code> and find
+which subarray gives 6 — that is <strong>Step 3F territory (algorithm
+discovery)</strong>. Wiganz correctly called this out. Step 1 was
+complete after the simpler trace.</p>
+<hr />
+<h2 id="twisted_rightwards_arrows-step-2--approach">🔀 Step 2 —
+Approach</h2>
+<h3 id="the-3-question-gate">The 3-Question Gate</h3>
+<p><strong>Gate 1:</strong> Does the abstract shape match a pattern? →
+Wiganz said: "Looks like Sliding Window." ✅ (named it)</p>
+<p><strong>Gate 2:</strong> Can you explain WHY it fits? → Hadriel
+asked: "Every Sliding Window has a shrink condition. What is the shrink
+condition here?" → Wiganz reasoned: "The problem is a negative element
+on the RIGHT. But shrinking moves the LEFT pointer." → Then Wiganz
+concluded: "Shrinking from the left does NOT remove the negative that's
+hurting me on the right." → <strong>Gate 2 = FAILED ❌</strong></p>
+<p><strong>Why Sliding Window doesn't fit here:</strong> Sliding Window
+requires a clear constraint that tells you WHEN to shrink the left
+pointer (e.g., "no duplicate characters", "at most K distinct
+elements"). Maximum Subarray has no such constraint — the "problem" is a
+growing negative burden, not a violated window condition.</p>
+<p><strong>Gate 2 failed → First Principles Path (3F)</strong></p>
+<hr />
+<h2 id="question-why-does-sliding-window-feel-right-but-isnt">❓ Why
+Does Sliding Window FEEL Right But Isn't?</h2>
+<h2 id="why-the-instinct-makes-sense">Why the instinct makes sense</h2>
+<p>"Contiguous subarray" are genuine Sliding Window signal words — the
+pattern recognition wasn't wrong. This confusion is extremely
+common.</p>
+<h4 id="what-sliding-window-actually-requires">What Sliding Window
+actually requires</h4>
+<p>Two pointers: a window that <strong>expands</strong> when satisfied,
+<strong>shrinks</strong> when a constraint is violated.</p>
+<p>The shrink condition always answers: <em>"What rule did we break, and
+how does moving left fix it?"</em></p>
+<table>
+<thead>
+<tr>
+<th>Problem</th>
+<th>Shrink When</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Longest Substring No Repeat</td>
+<td>Duplicate found in window</td>
+</tr>
+<tr>
+<td>Fruits Into Baskets</td>
+<td>More than K distinct types</td>
+</tr>
+<tr>
+<td>Min Size Subarray Sum</td>
+<td>Sum already ≥ target</td>
+</tr>
+</tbody>
+</table>
+<h4 id="why-maximum-subarray-breaks-this">Why Maximum Subarray breaks
+this</h4>
+<p>Here there's no violated constraint — just a <strong>growing negative
+burden</strong> . When a negative drags down your total, moving the left
+pointer does nothing, because the problem isn't at the left edge — it's
+accumulated across the whole window.</p>
+<p>What you actually need: <em>"Is my running total helping the next
+element, or hurting it?"</em> If <code>running_sum &lt; 0</code> →
+discard everything, start fresh. That's not shrinking a window — it's
+<strong>abandoning it entirely</strong> (Kadane's greedy reset).</p>
+<h4 id="the-one-question-that-separates-them">The one question that
+separates them</h4>
+<blockquote>
+<p><strong>"If I find a bad element, does shrinking from the left fix
+it?"</strong></p>
+<ul>
+<li>Duplicate char on right → shrink left past first occurrence → ✅
+fixed</li>
+<li>Negative on right → shrink left → ❌ negative is still there</li>
+</ul>
+</blockquote>
+<p>If the answer is <strong>no</strong> — Sliding Window doesn't
+fit.</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Sliding Window</th>
+<th>Kadane's</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Question asked</td>
+<td>"Is a rule broken?"</td>
+<td>"Is my history helping or hurting?"</td>
+</tr>
+<tr>
+<td>Fix</td>
+<td>Move left pointer</td>
+<td>Reset sum to 0</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-signal-that-tells-you-sliding-window-wont-work">The signal
+that tells you Sliding Window won't work</h3>
+<p><strong>Ask yourself: "If I find a bad element, does shrinking from
+the LEFT fix it?"</strong></p>
+<ul>
+<li>Longest Substring No Repeat: found duplicate on right → shrink left
+past the first occurrence → ✅ fixes it</li>
+<li>Maximum Subarray: found negative on right → shrink left → ❌ still
+have the negative on the right</li>
+</ul>
+<p>If the answer is NO — Sliding Window doesn't fit. Go First
+Principles.</p>
+<hr />
+<h2 id="telescope-step-3f--first-principles">🔭 Step 3F — First
+Principles</h2>
+<h3
+id="technique-a-visualize--technique-b-manual-solve-they-blended-naturally">Technique
+A: Visualize + Technique B: Manual Solve (they blended naturally)</h3>
+<p>Wiganz traced the running sum left to right:</p>
+<pre><code>nums:        [-2,  1, -3,  4, -1,  2,  1, -5,  4]
+running_sum:  -2   1  -2   4   3   5   6   1   5</code></pre>
+<p><strong>Rules Discovered by Wiganz:</strong></p>
+<ol type="1">
+<li>When the running sum is negative, it becomes a drag on everything
+after it.</li>
+<li>Adding more elements to a negative running sum always gives a worse
+result than just starting fresh.</li>
+</ol>
+<p><strong>The Aha Moment:</strong> Wiganz first said: "If I'm negative
+and I meet a positive, I should reset to the positive."</p>
+<p>Hadriel pushed: "What if negative meets another negative? Do you wait
+for a positive?"</p>
+<p>Wiganz's refined answer:</p>
+<blockquote>
+<p>"I reset the moment my running sum itself goes negative — because
+when it's negative, it becomes a burden. Even if the next number is
+negative or positive, it's better to start fresh from the next
+element."</p>
+</blockquote>
+<p><strong>✅ That is the exact rule of Kadane's Algorithm — discovered
+from scratch.</strong></p>
+<hr />
+<h2 id="speech_balloon-step-3--discuss">💬 Step 3 — Discuss</h2>
+<h3 id="wiganzs-presented-steps-after-fixing-the-order-bug">Wiganz's
+Presented Steps (after fixing the order bug):</h3>
+<pre><code>1. Initialize max_sum = -infinity, running_sum = 0
+2. Iterate: running_sum += nums[i]
+3. max_sum = max(max_sum, running_sum)  ← check FIRST
+4. if running_sum &lt; 0 → reset to 0    ← reset AFTER
+5. Return max_sum</code></pre>
+<p><strong>Complexity stated:</strong></p>
+<ul>
+<li>Time: O(n)</li>
+<li>Space: O(1)</li>
+</ul>
+<h3 id="warning-critical-mistake--step-order">⚠️ Critical Mistake — Step
+Order</h3>
+<p>Wiganz's <strong>first draft</strong> had the wrong order:</p>
+<pre><code>Step 3: if running_sum &lt; 0 → reset to 0   ← reset FIRST (WRONG)
+Step 4: max_sum = max(max_sum, running_sum) ← check AFTER</code></pre>
+<p><strong>Why this is wrong — the edge case:</strong> Input:
+<code>[-3, -1, -2]</code></p>
+<p>With wrong order:</p>
+<ul>
+<li>running_sum = -3 → reset to 0 → max_sum = max(-inf, 0) = 0 →
+WRONG</li>
+<li>Answer returned: 0 (but correct answer is -1)</li>
+</ul>
+<p>With correct order:</p>
+<ul>
+<li>running_sum = -3 → max_sum = max(-inf, -3) = <strong>-3</strong> →
+then reset to 0</li>
+<li>running_sum = -1 → max_sum = max(-3, -1) = <strong>-1</strong> →
+then reset to 0</li>
+<li>running_sum = -2 → max_sum = max(-1, -2) = <strong>-1</strong> →
+reset to 0</li>
+<li>Answer returned: -1 ✅</li>
+</ul>
+<p><strong>The rule:</strong> Always capture <code>max_sum</code> BEFORE
+resetting <code>running_sum</code>. The reset destroys the value — you
+need to record it first.</p>
+<p><strong>Wiganz also forgot to explain the WHY vs brute force in
+Discuss.</strong> In a real interview, also state:</p>
+<ul>
+<li>"Brute force would check all O(n²) subarrays — O(n²) time."</li>
+<li>"This approach processes each element once — O(n) time."</li>
+<li>"The key insight: a negative running sum never helps future
+elements, so we discard it."</li>
+</ul>
+<hr />
+<h2 id="computer-step-4--code">💻 Step 4 — Code</h2>
+<h3 id="phase-1-blueprint-written-correctly-after-fix">Phase 1:
+Blueprint (written correctly after fix)</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> maxSubArray(<span class="va">self</span>, nums: List[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Initialize max_sum, running_sum</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Iterate through array adding running_sum with nums[i]</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Check running_sum with max_sum  ← FIRST</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. if running_sum &lt; 0 → reset to 0  ← AFTER</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. Return max_sum</span></span></code></pre></div>
+<h3 id="phase-2-implementation">Phase 2: Implementation</h3>
+<p><strong>First draft had a syntax bug:</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>running_sum, max_sum <span class="op">=</span> <span class="dv">0</span>, <span class="op">-</span><span class="bu">float</span>(<span class="bu">int</span>)  <span class="co"># ❌ WRONG</span></span></code></pre></div>
+<p><code>int</code> is a Python type/class, not a number.
+<code>float(int)</code> raises <code>TypeError</code>.</p>
+<p><strong>Fixed:</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>running_sum, max_sum <span class="op">=</span> <span class="dv">0</span>, <span class="bu">float</span>(<span class="st">&#39;-inf&#39;</span>)  <span class="co"># ✅ CORRECT</span></span></code></pre></div>
+<h3 id="final-correct-code">Final Correct Code</h3>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> maxSubArray(<span class="va">self</span>, nums: List[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>        running_sum, max_sum <span class="op">=</span> <span class="dv">0</span>, <span class="bu">float</span>(<span class="st">&#39;-inf&#39;</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nums)):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>            running_sum <span class="op">+=</span> nums[i]</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>            max_sum <span class="op">=</span> <span class="bu">max</span>(max_sum, running_sum)</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> running_sum <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                running_sum <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> max_sum</span></code></pre></div>
+<hr />
+<h2 id="white_check_mark-step-5--verify">✅ Step 5 — Verify</h2>
+<h3 id="full-trace---2-1--3-4--1-2-1--5-4">Full Trace —
+<code>[-2, 1, -3, 4, -1, 2, 1, -5, 4]</code></h3>
+<table>
+<thead>
+<tr>
+<th>i</th>
+<th>nums[i]</th>
+<th>running_sum</th>
+<th>max_sum</th>
+<th>reset?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>-2</td>
+<td>-2</td>
+<td>-2</td>
+<td>✅ → 0</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>1</td>
+<td>no</td>
+</tr>
+<tr>
+<td>2</td>
+<td>-3</td>
+<td>-2</td>
+<td>1</td>
+<td>✅ → 0</td>
+</tr>
+<tr>
+<td>3</td>
+<td>4</td>
+<td>4</td>
+<td>4</td>
+<td>no</td>
+</tr>
+<tr>
+<td>4</td>
+<td>-1</td>
+<td>3</td>
+<td>4</td>
+<td>no</td>
+</tr>
+<tr>
+<td>5</td>
+<td>2</td>
+<td>5</td>
+<td>5</td>
+<td>no</td>
+</tr>
+<tr>
+<td>6</td>
+<td>1</td>
+<td>6</td>
+<td>6</td>
+<td>no</td>
+</tr>
+<tr>
+<td>7</td>
+<td>-5</td>
+<td>1</td>
+<td>6</td>
+<td>no</td>
+</tr>
+<tr>
+<td>8</td>
+<td>4</td>
+<td>5</td>
+<td>6</td>
+<td>no</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Answer: 6 ✅</strong></p>
+<h3 id="edge-cases">Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Expected</th>
+<th>Result</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>[1]</code></td>
+<td>1</td>
+<td>1 ✅</td>
+<td>running=1, max=max(-inf,1)=1</td>
+</tr>
+<tr>
+<td><code>[-3,-1,-2]</code></td>
+<td>-1</td>
+<td>-1 ✅</td>
+<td>max captured before reset each time</td>
+</tr>
+<tr>
+<td><code>[5,4,-1,7,8]</code></td>
+<td>23</td>
+<td>23 ✅</td>
+<td>never resets, whole array is best</td>
+</tr>
+</tbody>
+</table>
+<h3 id="complexity">Complexity</h3>
+<ul>
+<li><strong>Time: O(n)</strong> — one pass through n elements</li>
+<li><strong>Space: O(1)</strong> — only two variables, no extra
+memory</li>
+</ul>
+<hr />
+<h2 id="zap-step-6--optimize">⚡ Step 6 — Optimize</h2>
+<p><strong>BTTC for this problem:</strong> O(n) — you must visit every
+element at least once to know the maximum. Cannot do better.</p>
+<p><strong>Wiganz's statement:</strong></p>
+<blockquote>
+<p>"At least we have to iterate through all elements, so O(n) is already
+the best. O(1) space is already the best."</p>
+</blockquote>
+<p><strong>Already optimal. No further optimization needed.</strong></p>
+<hr />
+<h2 id="brain-what-this-algorithm-is-called">🧠 What This Algorithm Is
+Called</h2>
+<p><strong>Kadane's Algorithm</strong> — named after Joseph Kadane,
+Carnegie Mellon University.</p>
+<p>It is classified as:</p>
+<ul>
+<li><strong>Greedy</strong> — at each step, make the locally optimal
+choice (keep or reset)</li>
+<li><strong>Linear DP</strong> — <code>running_sum</code> implicitly
+stores the answer to "what's the best subarray ending at this
+position?"</li>
+</ul>
+<p>The greedy insight: <em>a negative prefix can never help a future sum
+— discard it immediately.</em></p>
+<hr />
+<h2 id="clipboard-rules-found-in-this-session">📋 Rules Found In This
+Session</h2>
+<table>
+<thead>
+<tr>
+<th>Rule</th>
+<th>Why It's Correct</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Reset when <code>running_sum &lt; 0</code></td>
+<td>A negative sum is a burden — adding it to any future element gives a
+worse result than starting fresh</td>
+</tr>
+<tr>
+<td>Capture <code>max_sum</code> BEFORE resetting</td>
+<td>Reset destroys the negative value — you need to check it against max
+before it's gone</td>
+</tr>
+<tr>
+<td>Initialize <code>max_sum = float('-inf')</code></td>
+<td>Handles all-negative arrays — 0 would be wrong if no positive
+exists</td>
+</tr>
+<tr>
+<td>Initialize <code>running_sum = 0</code></td>
+<td>Start with nothing — let the first element begin the window</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="x-mistakes-log">❌ Mistakes Log</h2>
+<table>
+<thead>
+<tr>
+<th>Mistake</th>
+<th>Why It's Wrong</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skipped Move 1 (Paraphrase)</td>
+<td>Loses Communication points — interviewer sees you as reactive</td>
+<td>Always paraphrase first, even one sentence</td>
+</tr>
+<tr>
+<td>Said "Sliding Window" without a shrink condition</td>
+<td>Sliding Window requires a clear shrink trigger — this problem has
+none</td>
+<td>Use 3-gate properly — if Gate 2 fails, go First Principles</td>
+</tr>
+<tr>
+<td>Wrong step order (reset before max check)</td>
+<td>All-negative arrays return 0 instead of the correct negative
+max</td>
+<td>Swap: capture max FIRST, then reset</td>
+</tr>
+<tr>
+<td><code>-float(int)</code> instead of <code>float('-inf')</code></td>
+<td><code>int</code> is a Python type, not a number — raises
+TypeError</td>
+<td>Always use <code>float('-inf')</code> for negative infinity</td>
+</tr>
+<tr>
+<td>Called the return line after the loop (comment placement)</td>
+<td>Minor readability issue</td>
+<td>Place <code>return</code> before the closing comment</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bulb-key-insights-to-remember">💡 Key Insights To Remember</h2>
+<ol type="1">
+<li><strong>"Contiguous" is the key constraint</strong> — subarrays
+cannot skip elements. This is what makes the problem non-trivial.</li>
+<li><strong>The reset insight</strong> — when your running sum goes
+negative, it will always drag down future elements. Starting fresh from
+the next element is always better.</li>
+<li><strong>Order of operations matters</strong> — in Kadane's, the
+sequence inside the loop is: add → capture max → then reset. Never reset
+before capturing.</li>
+<li><strong>Sliding Window ≠ Kadane's</strong> — Sliding Window needs a
+concrete constraint to shrink on. Kadane's is a greedy reset, not a
+two-pointer window.</li>
+<li><strong>All-negative edge case</strong> — initialize
+<code>max_sum</code> to negative infinity, not 0. This is the most
+common bug beginners make.</li>
+</ol>
+  </div>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Implement-Trie</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1
+id="deciduous_tree-lc-208--implement-trie-prefix-tree--training-reference-card">🌳
+LC 208 — Implement Trie (Prefix Tree) — Training Reference Card</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Trie / Tree Traversal |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #208 |
+<strong>Date:</strong> 2026-05-13 <strong>Mode:</strong> Code Review +
+Debug (not full Socratic) | <strong>Bonus:</strong> <code>delete</code>
++ <code>autocomplete</code></p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>Wiganz came in with an existing Trie implementation and we
+<strong>debugged &amp; reviewed together</strong>. The big breakthroughs
+weren't about "how to invent a Trie" — they were about the
+<strong>mental model</strong>: characters live on <strong>edges, not
+nodes</strong>, and <code>delete</code> is a <strong>post-order
+recursive bubble-up</strong>. Wiganz explained the delete logic back in
+his own words — that's mastery confirmed. 🔥</p>
+<hr />
+<h2 id="brain-the-trie-mental-model-critical--read-this-first">🧠 The
+Trie Mental Model (CRITICAL — Read This First)</h2>
+<h3 id="mirror-the-1-mental-model-shift">🪞 The #1 Mental Model
+Shift</h3>
+<blockquote>
+<p><strong>"Trie nodes don't have names. Characters live on the EDGES,
+not the NODES."</strong></p>
+</blockquote>
+<pre><code>        (root)
+       /  |  \
+      a   b   c        &lt;-- characters are on the EDGES (in children dict keys)
+     / \
+    p   t              &lt;-- &quot;ap&quot; path = root → &#39;a&#39; edge → &#39;p&#39; edge
+   /
+  *  &lt;- is_end_word=True means &quot;a word ends HERE&quot;</code></pre>
+<ul>
+<li>A <strong>TrieNode</strong> is just a <strong>container with two
+things:</strong>
+<ol type="1">
+<li><code>children: dict[char, TrieNode]</code> — the edges going
+out</li>
+<li><code>is_end_word: bool</code> — "Is this position the end of a
+valid word?"</li>
+</ol></li>
+<li>The <strong>character</strong> you traveled to get here is stored in
+the <strong>parent's <code>children</code> dict key</strong>, NOT inside
+the node itself.</li>
+</ul>
+<p>🔥 <strong>Once this clicks, every Trie method becomes
+obvious.</strong></p>
+<hr />
+<h2
+id="hammer_and_wrench-the-five-methods--core-idea--common-mistakes">🛠️
+The Five Methods — Core Idea + Common Mistakes</h2>
+<h3 id="one-insertword--plant-the-path">1️⃣ <code>insert(word)</code> —
+Plant the Path</h3>
+<h4 id="bulb-core-idea">💡 Core Idea</h4>
+<p>Walk from root. For each char: if the edge doesn't exist,
+<strong>create</strong> it. Move down. At the end of the word,
+<strong>mark <code>is_end_word = True</code></strong>.</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> insert(<span class="va">self</span>, word):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    node <span class="op">=</span> <span class="va">self</span>.root</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char <span class="kw">in</span> word:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> node.children:</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            node.children[char] <span class="op">=</span> TrieNode()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> node.children[char]   <span class="co"># ⚠️ MUST move down!</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    node.is_end_word <span class="op">=</span> <span class="va">True</span></span></code></pre></div>
+<h4 id="bug-common-mistakes">🐛 Common Mistakes</h4>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>💥 Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Forgetting
+<code>node = node.children[char]</code></strong></td>
+<td>You stay at root forever — only inserts the LAST char as a child of
+root</td>
+</tr>
+<tr>
+<td><strong>Forgetting <code>is_end_word = True</code> at the
+end</strong></td>
+<td><code>search("apple")</code> returns False because no word is
+"terminated" anywhere</td>
+</tr>
+<tr>
+<td><strong>Setting <code>is_end_word = True</code> inside the
+loop</strong></td>
+<td>Every prefix gets marked as a word — <code>search("ap")</code>
+falsely returns True</td>
+</tr>
+<tr>
+<td><strong>Indenting <code>is_end_word</code> inside the
+<code>if char not in...</code> block</strong></td>
+<td>Only sets the flag when char was missing — re-inserting a word
+silently breaks</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>In Wiganz's posted code:</strong> the line
+<code>node = node.children[char]</code> is missing in
+<code>insert</code>. That's THE classic bug. Without it, the function
+does almost nothing useful.</p>
+</blockquote>
+<hr />
+<h3 id="two-searchword--walk-the-exact-path">2️⃣
+<code>search(word)</code> — Walk the Exact Path</h3>
+<h4 id="bulb-core-idea-1">💡 Core Idea</h4>
+<p>Walk the path. If any edge is missing → False. At the end, return
+<code>is_end_word</code> (NOT just <code>True</code>).</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> search(<span class="va">self</span>, word):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    node <span class="op">=</span> <span class="va">self</span>.root</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char <span class="kw">in</span> word:</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> node.children:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> node.children[char]</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> node.is_end_word</span></code></pre></div>
+<h4 id="bug-common-mistakes-1">🐛 Common Mistakes</h4>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>💥 Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong><code>return True</code> at the end instead of
+<code>return node.is_end_word</code></strong></td>
+<td>"app" returns True even when only "apple" was inserted — that's
+<code>startsWith</code> behavior, not <code>search</code></td>
+</tr>
+<tr>
+<td><strong>Confusing <code>search</code> with
+<code>startsWith</code></strong></td>
+<td>They are 95% identical — the ONLY difference is the final
+<code>return</code> line</td>
+</tr>
+<tr>
+<td><strong>Not checking <code>char not in node.children</code> before
+moving</strong></td>
+<td>KeyError crash on missing chars</td>
+</tr>
+</tbody>
+</table>
+<p>🎯 <strong>Memorize:</strong> <code>search</code> and
+<code>startsWith</code> are TWINS. Only the last line differs.</p>
+<hr />
+<h3
+id="three-startswithprefix--walk-the-path-dont-care-about-endings">3️⃣
+<code>startsWith(prefix)</code> — Walk the Path, Don't Care About
+Endings</h3>
+<h4 id="bulb-core-idea-2">💡 Core Idea</h4>
+<p>Same walk as <code>search</code>, but at the end: <strong>just return
+True</strong>. You only care that the path EXISTS, not that a word
+terminates there.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> startsWith(<span class="va">self</span>, prefix):</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    node <span class="op">=</span> <span class="va">self</span>.root</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char <span class="kw">in</span> prefix:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> node.children:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> node.children[char]</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">True</span></span></code></pre></div>
+<h4 id="bug-common-mistakes-2">🐛 Common Mistakes</h4>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>💥 Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Returning <code>node.is_end_word</code></strong></td>
+<td>"app" returns False when only "apple" inserted — wrong
+semantics</td>
+</tr>
+<tr>
+<td><strong>Forgetting it's case-sensitive by default</strong></td>
+<td>"App" vs "app" — different paths!</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="four-deleteword--the-post-order-bubble-up-fire">4️⃣
+<code>delete(word)</code> — The Post-Order Bubble-Up 🔥</h3>
+<h4 id="bulb-core-idea-the-mental-movie">💡 Core Idea (The Mental
+Movie)</h4>
+<ol type="1">
+<li><strong>Recurse DOWN</strong> to the end of the word.</li>
+<li>At the leaf: turn off <code>is_end_word</code>.</li>
+<li><strong>Bubble UP</strong>: at each node ask — "Am I now useless?
+(no children, not an end-word)" → if YES, tell parent to delete me.</li>
+<li>Stop bubbling the moment you hit a node that's still useful (has
+other children OR is another word's endpoint).</li>
+</ol>
+<p>This is <strong>post-order DFS</strong> — children speak first,
+parent acts on their answer.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> _delete(<span class="va">self</span>, node, word, index):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># BASE CASE — we reached the end</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> index <span class="op">==</span> <span class="bu">len</span>(word):</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> <span class="kw">not</span> node.is_end_word:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">False</span>                       <span class="co"># word wasn&#39;t even there</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>        node.is_end_word <span class="op">=</span> <span class="va">False</span>               <span class="co"># un-mark the word</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(node.children) <span class="op">==</span> <span class="dv">0</span>         <span class="co"># safe to prune me?</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    char <span class="op">=</span> word[index]</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> node.children:</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">False</span>                           <span class="co"># word doesn&#39;t exist, bail</span></span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    should_delete <span class="op">=</span> <span class="va">self</span>._delete(node.children[char], word, index <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> should_delete:</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="kw">del</span> node.children[char]                <span class="co"># ✂️ prune the dead edge</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="bu">len</span>(node.children) <span class="op">==</span> <span class="dv">0</span> <span class="kw">and</span> <span class="kw">not</span> node.is_end_word</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">False</span></span></code></pre></div>
+<h4 id="dart-the-two-conditions-that-stop-the-bubble">🎯 The Two
+Conditions That Stop the Bubble</h4>
+<p>A node refuses to be deleted (returns False) when
+<strong>EITHER</strong>:</p>
+<ul>
+<li>It still has OTHER children (other words branch off here), OR</li>
+<li>It IS itself the end of another word
+(<code>is_end_word == True</code>)</li>
+</ul>
+<blockquote>
+<p>🪞 <strong>Wiganz's words back to Hadriel:</strong> "Mỗi tầng hỏi:
+tao có còn ích lợi không? Nếu không thì bảo cha xóa tao." ✅ That's it.
+Lock it in.</p>
+</blockquote>
+<h4 id="bug-common-mistakes-3">🐛 Common Mistakes</h4>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>💥 Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Inconsistent attribute name (<code>is_end</code> vs
+<code>is_end_word</code>)</strong></td>
+<td>🚨 <strong>THIS WAS WIGANZ'S BUG.</strong> Silent AttributeError or
+wrong logic — pick ONE name, use it everywhere</td>
+</tr>
+<tr>
+<td><strong>Not checking <code>is_end_word</code> on the way up (only
+<code>len(children) == 0</code>)</strong></td>
+<td>Deletes shared prefix nodes that end other words. Delete "app" wipes
+out "apple" too</td>
+</tr>
+<tr>
+<td><strong>Pre-order delete (delete on the way DOWN)</strong></td>
+<td>You destroy the path before knowing if children need it</td>
+</tr>
+<tr>
+<td><strong>Not handling "word doesn't exist"</strong></td>
+<td>Crashes on KeyError instead of gracefully returning</td>
+</tr>
+<tr>
+<td><strong>Forgetting to return False at the base case if not
+<code>is_end_word</code></strong></td>
+<td>Tries to "delete" a word that was never inserted, corrupting the
+trie</td>
+</tr>
+<tr>
+<td><strong>Iterative attempt without a parent-stack</strong></td>
+<td>Way harder than recursion — recursion gives you the bubble-up for
+free</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="five-autocompleteprefix--walk--explode">5️⃣
+<code>autocomplete(prefix)</code> — Walk + Explode</h3>
+<h4 id="bulb-core-idea-3">💡 Core Idea</h4>
+<p>Two phases:</p>
+<ol type="1">
+<li><strong>Walk to the prefix node</strong> (just like
+<code>startsWith</code>). If path breaks → return <code>[]</code>.</li>
+<li><strong>DFS explode</strong> from that node, collecting every word
+that terminates below.</li>
+</ol>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> autocomplete(<span class="va">self</span>, prefix):</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    node <span class="op">=</span> <span class="va">self</span>.root</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> char <span class="kw">in</span> prefix:</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> char <span class="kw">not</span> <span class="kw">in</span> node.children:</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> []</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        node <span class="op">=</span> node.children[char]</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    result <span class="op">=</span> []</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> dfs(current_node, current_path):</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> current_node.is_end_word:</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>            result.append(current_path)</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> char, child <span class="kw">in</span> current_node.children.items():</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>            dfs(child, current_path <span class="op">+</span> char)</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>    dfs(node, prefix)</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> result</span></code></pre></div>
+<h4 id="bug-common-mistakes-4">🐛 Common Mistakes</h4>
+<table>
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>💥 Why it breaks</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Starting DFS from <code>self.root</code> instead of the
+prefix node</strong></td>
+<td>Returns ALL words in the trie, ignoring the prefix</td>
+</tr>
+<tr>
+<td><strong>Passing <code>""</code> instead of <code>prefix</code> as
+initial path</strong></td>
+<td>Returns suffixes only ("ple") instead of full words ("apple")</td>
+</tr>
+<tr>
+<td><strong>Returning early on first
+<code>is_end_word</code></strong></td>
+<td>Misses longer words that branch beyond — must keep DFS-ing</td>
+</tr>
+<tr>
+<td><strong>Forgetting <code>is_end_word</code> check (just collect
+every leaf)</strong></td>
+<td>Wrong if internal nodes are also end-words (e.g., "app" + "apple" —
+"app" is internal but valid)</td>
+</tr>
+<tr>
+<td><strong>Mutating <code>current_path</code> instead of
+<code>current_path + char</code></strong></td>
+<td>Path leaks across branches — backtracking nightmare</td>
+</tr>
+<tr>
+<td><strong>No iteration cap for autocomplete with huge
+dictionary</strong></td>
+<td>Production code should add
+<code>if len(result) &gt;= k: return</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bar_chart-complexity-analysis">📊 Complexity Analysis</h2>
+<p>Let:</p>
+<ul>
+<li><strong>L</strong> = length of the word/prefix</li>
+<li><strong>N</strong> = total number of words in trie</li>
+<li><strong>Σ</strong> = alphabet size (26 for lowercase English)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>⏱️ Time</th>
+<th>📦 Space</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>insert(word)</code></td>
+<td>O(L)</td>
+<td>O(L) new nodes worst case</td>
+</tr>
+<tr>
+<td><code>search(word)</code></td>
+<td>O(L)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>startsWith(prefix)</code></td>
+<td>O(L)</td>
+<td>O(1)</td>
+</tr>
+<tr>
+<td><code>delete(word)</code></td>
+<td>O(L)</td>
+<td>O(L) recursion stack</td>
+</tr>
+<tr>
+<td><code>autocomplete(prefix)</code></td>
+<td>O(L + total chars in matching subtree)</td>
+<td>O(longest word) recursion</td>
+</tr>
+<tr>
+<td><strong>Total Trie storage</strong></td>
+<td>—</td>
+<td>O(N × L × Σ) worst, much less with sharing</td>
+</tr>
+</tbody>
+</table>
+<p>🎯 <strong>The selling point of Trie:</strong> ALL prefix operations
+are <strong>O(L) — independent of N</strong>. A hash set is O(L) for
+<code>search</code> too, but CANNOT do <code>startsWith</code> or
+<code>autocomplete</code> efficiently. <strong>That's why Trie
+exists.</strong></p>
+<hr />
+<h2 id="bulb-key-aha-moments-this-session">💡 Key Aha Moments (This
+Session)</h2>
+<h3 id="bulb-1-characters-live-on-edges-not-nodes">💡 1. Characters live
+on EDGES, not NODES</h3>
+<ul>
+<li><strong>Before:</strong> "What letter does this node store?"</li>
+<li><strong>Trigger:</strong> Drawing the tree and seeing
+<code>children = {'a': TrieNode()}</code> — the 'a' is a DICT KEY in the
+parent</li>
+<li><strong>After:</strong> Nodes are just
+<code>{children, is_end_word}</code> containers. The path TO a node
+tells you the string.</li>
+</ul>
+<h3 id="bulb-2-delete-is-post-order-bubble-up">💡 2. <code>delete</code>
+is post-order bubble-up</h3>
+<ul>
+<li><strong>Before:</strong> "How do I know when to delete a node?"</li>
+<li><strong>Trigger:</strong> Thinking about "apple" + "app" — if I
+delete "apple", I must NOT delete the "app" nodes</li>
+<li><strong>After:</strong> Recurse to the bottom, un-mark, then on the
+way UP each node self-evaluates: "Am I still needed?" Returns true/false
+to parent. The bubble stops at the first useful ancestor.</li>
+</ul>
+<h3
+id="bulb-3-is_end_word-is-the-difference-between-search-and-startswith">💡
+3. <code>is_end_word</code> is the difference between
+<code>search</code> and <code>startsWith</code></h3>
+<ul>
+<li><strong>Before:</strong> Felt like they did the same thing</li>
+<li><strong>After:</strong> Both walk the same path. Only the FINAL
+return line differs. <code>search</code> = "does a word END here?",
+<code>startsWith</code> = "does ANY path continue from here?"</li>
+</ul>
+<h3 id="bulb-4-consistent-attribute-naming-saves-your-life">💡 4.
+Consistent attribute naming saves your life</h3>
+<ul>
+<li>🐛 The bug: <code>is_end_word</code> vs <code>is_end</code> mismatch
+in <code>_delete</code></li>
+<li>🛡️ <strong>Rule:</strong> Pick ONE name in
+<code>TrieNode.__init__</code> and reference it identically everywhere.
+Even a single typo silently breaks recursion.</li>
+</ul>
+<hr />
+<h2 id="bug-bugs-caught-in-wiganzs-code">🐛 Bugs Caught in Wiganz's
+Code</h2>
+<h3 id="bug-bug-1-missing-node--nodechildrenchar-in-insert">🐛 Bug 1:
+Missing <code>node = node.children[char]</code> in
+<code>insert</code></h3>
+<ul>
+<li><strong>❌ What:</strong> Loop creates the child but never descends
+into it → only ever writes to root</li>
+<li><strong>🔍 Why:</strong> <code>syntax confusion</code> /
+<code>concept gap</code> — easy to forget the "move down" step when
+you're focused on the creation step</li>
+<li><strong>💸 Cost:</strong> Trie is effectively broken. Every insert
+is a no-op beyond the first char.</li>
+<li><strong>🛡️ Prevention:</strong> <strong>MEMORIZE the
+rhythm:</strong> <code>check → create if needed → MOVE → repeat</code>.
+The MOVE is non-negotiable.</li>
+</ul>
+<h3 id="bug-bug-2-inconsistent-is_end_word-vs-is_end-in-delete">🐛 Bug
+2: Inconsistent <code>is_end_word</code> vs <code>is_end</code> in
+delete</h3>
+<ul>
+<li><strong>❌ What:</strong> <code>_delete</code> referenced a
+different attribute name than <code>__init__</code> defined</li>
+<li><strong>🔍 Why:</strong> <code>typo</code> under pressure of
+building a complex recursive method</li>
+<li><strong>💸 Cost:</strong> AttributeError at runtime OR silent wrong
+behavior depending on Python version</li>
+<li><strong>🛡️ Prevention:</strong> When defining the class,
+<strong>commit to one name out loud</strong> and grep for it before
+testing. IDE autocomplete is your friend.</li>
+</ul>
+<h3
+id="bug-bug-3-potential-is_end_word--true-outside-the-loop-position-in-insert">🐛
+Bug 3 (potential): <code>is_end_word = True</code> outside the loop
+position in insert</h3>
+<ul>
+<li><strong>❌ What:</strong> In the posted code,
+<code>node.is_end_word = True</code> sits AFTER the <code>if</code>
+block but the descent line is missing — flag gets set on root</li>
+<li><strong>🛡️ Prevention:</strong> Always trace one example by hand:
+<code>insert("ab")</code> should leave
+<code>root.children['a'].children['b'].is_end_word == True</code>.</li>
+</ul>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 4/5 — Wiganz explained delete back
+in his own words clearly. The mental model clicked.</li>
+<li><strong>🔄 Revisit:</strong> Re-implement Trie FROM SCRATCH next
+session, no peeking. Especially the <code>insert</code> move-down line
+and <code>delete</code> post-order bubble-up.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> Opens the door to: Word
+Search II (LC 212), Replace Words (LC 648), Design Add and Search Words
+(LC 211), Longest Word in Dictionary (LC 720).</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems">🔗 Similar Problems</h2>
+<ul>
+<li><strong>Word Search II (#212)</strong> — Trie + DFS backtracking on
+a board. The KILLER follow-up.</li>
+<li><strong>Design Add and Search Words (#211)</strong> — Trie with
+<code>.</code> wildcard → DFS through children</li>
+<li><strong>Replace Words (#648)</strong> — Trie of roots, replace each
+word in a sentence with its shortest root</li>
+<li><strong>Longest Word in Dictionary (#720)</strong> — Build trie,
+BFS/DFS for longest word where every prefix is also a word</li>
+</ul>
+<hr />
+<h2 id="studio_microphone-interview-script--say-this">🎙️ Interview
+Script — "SAY THIS"</h2>
+<blockquote>
+<p>"A Trie is a tree where each edge represents a character. Each node
+holds a children dictionary and an <code>is_end_word</code> flag — the
+character itself is NOT stored in the node, it's the key in the parent's
+children dict.</p>
+<p>For <code>insert</code>, I walk from root, creating missing edges,
+descending each step, then mark the final node as a word ending.</p>
+<p>For <code>search</code>, same walk — but at the end I return
+<code>is_end_word</code>, not just True. For <code>startsWith</code>, I
+just return True because I only care that the path exists.</p>
+<p>Time complexity for all three is O(L) where L is the word length —
+independent of how many words are in the trie. That's the killer feature
+versus a hash set, which can't do prefix queries efficiently.</p>
+<p>If you want, I can also implement <code>delete</code> — that's a fun
+one because it's a post-order recursion that bubbles up deletion
+decisions, only pruning nodes that aren't shared with other words."</p>
+</blockquote>
+<hr />
+<p><em>🔥 Hadriel x Wiganz — 2026-05-13</em> <em>"The fear of the LORD
+is the beginning of wisdom, and knowledge of the Holy One is
+understanding." — Proverbs 9:10</em> ✝️</p>
+  </div>
+</body>
+</html>

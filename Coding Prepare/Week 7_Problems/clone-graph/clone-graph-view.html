@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>clone-graph</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-clone-graph--complete-session-archive">🗡️ Clone Graph —
+Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> DFS + HashMap |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #133 |
+<strong>Date:</strong> 2026-05-07 <strong>Path Taken:</strong> Pattern
+Path (DFS) | <strong>⏱️ Time Used:</strong> ~82 min | <strong>🎯
+Target:</strong> 25 min</p>
+</blockquote>
+<hr />
+<blockquote>
+<p>Wiganz came in not knowing the <em>term</em> "deep copy" — but the
+instant Hadriel asked "if you delete a node from the original, should it
+still exist in the clone?", he answered immediately: <em>"Yeah, of
+course."</em> The vocabulary was missing, not the concept. The harder
+wall was cycles: WHY do they cause infinite loops and HOW does putting
+the node in the hashmap <strong>FIRST</strong> break the cycle? Three
+confusions surfaced — double-add worry, infinite loop mechanism, and
+graph complexity notation. All three resolved. Session ran <strong>57
+minutes over target</strong> 😤 — bulk lost in Step 1 (15 min instead of
+3-4) and complexity notation stumbling.</p>
+</blockquote>
+<hr />
+<h1 id="brain-the-curated-journey">🧠 The Curated Journey</h1>
+<h2
+id="open_book-step-1--understand-deep-copy-was-already-known-bulb">📖
+Step 1 — Understand: <em>"Deep Copy" Was Already Known</em> 💡</h2>
+<p><strong>Problem:</strong> Given one node in a connected undirected
+graph, produce a fully independent deep copy of all reachable nodes and
+their connections. Return the cloned node reference.</p>
+<p><strong>Key constraints:</strong></p>
+<ul>
+<li>Values 1–100 (unique), nodes 0–100</li>
+<li>Graph is <strong>connected</strong> and <strong>undirected</strong>
+= every edge is bidirectional = <strong>cycles are
+guaranteed</strong></li>
+<li>Input can be <code>None</code></li>
+</ul>
+<pre><code>Input:  Node1 → [2, 4]    Node2 → [1, 3]
+        Node3 → [2, 4]    Node4 → [1, 3]
+
+Output: 4 NEW node objects, identical structure.
+        Delete Node3 from original → Node3 still exists in clone.</code></pre>
+<h3 id="speech_balloon-the-deep-copy-dialogue">💬 The "Deep Copy"
+Dialogue</h3>
+<blockquote>
+<p><strong>H:</strong> "If I delete Node 3 from the original after you
+clone it, should Node 3 still exist in the clone?" <strong>W:</strong>
+"Yeah, of course. That's a clone." → He <em>already</em> understood it —
+just needed the label to match the instinct 💡</p>
+</blockquote>
+<p><strong>🧠 The mental model that clicked:</strong></p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Shallow Copy</th>
+<th>Deep Copy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>What happens</strong></td>
+<td>New container, <em>same</em> references inside</td>
+<td>New container, <em>new</em> copies of everything</td>
+</tr>
+<tr>
+<td><strong>Delete original Node3</strong></td>
+<td>Clone's Node3 <strong>disappears</strong> too 😭</td>
+<td>Clone's Node3 <strong>survives</strong> ✅</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>Node1_copy.neighbors</code> still points to original
+<code>Node2</code>, <code>Node3</code></td>
+<td><code>Node1_copy.neighbors = [Node2_copy, Node3_copy]</code> —
+completely independent</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Clone Graph <strong>requires</strong> deep copy — nodes reference
+other nodes via <code>neighbors</code>. Shallow copy would leave the
+clone's neighbor lists pointing at originals, defeating the entire
+problem.</p>
+</blockquote>
+<p>⚠️ <strong>Step 1 took ~15 min.</strong> Target: 3–4 min. The
+discussion drifted from "cycles exist" (constraint ✅) into "cycles
+cause infinite recursion without a hashmap" (algorithm territory ❌ —
+that's Step 2/4P). See Bug T1.</p>
+<hr />
+<h2 id="compass-step-2--approach-right-answer-wrong-reason-triumph">🧭
+Step 2 — Approach: <em>Right Answer, Wrong Reason</em> 😤</h2>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Abstract shape matches pattern?</td>
+<td>✅ "Visit all nodes in connected graph" = graph traversal</td>
+</tr>
+<tr>
+<td>Can name + explain why?</td>
+<td>✅ DFS or BFS — both traverse every reachable node</td>
+</tr>
+<tr>
+<td>Solved similar before?</td>
+<td>✅ Number of Islands, BFS matrix traversal</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>Decision:</strong> PATTERN PATH</p>
+<blockquote>
+<p>😤 <strong>The Signal Trap:</strong> Wiganz justified DFS by surface
+word match — <em>"DFS because the word 'deep' in deep copy."</em></p>
+<p><strong>WRONG reason, right answer.</strong> "Deep copy" (full
+independent clone) and "depth-first" (traversal strategy) share a word
+but live on <strong>completely separate axes</strong>. The actual signal
+is <em>"traverse all nodes in a connected graph."</em></p>
+</blockquote>
+<hr />
+<h2 id="key-3p--4p--why-the-hashmap-breaks-the-cycle">🔑 3P + 4P —
+<em>Why the Hashmap Breaks the Cycle</em></h2>
+<p><strong>3P:</strong> "I see <em>'traverse all nodes in a connected
+graph, handle cycles'</em> → DFS + HashMap because DFS visits every
+reachable node and the hashmap prevents revisiting cycle edges."</p>
+<p><strong>Brute Force:</strong> Naive DFS with no visited tracking →
+<code>Node1→Node2→Node1→Node2→...</code> Stack overflow. O(∞).</p>
+<h3 id="speech_balloon-the-cycle-breaking-dialogue-exploding_head">💬
+The Cycle-Breaking Dialogue 🤯</h3>
+<p>This was the BIG moment. Wiganz was confused — <em>he knew DFS was
+right, but couldn't articulate WHY cycles are dangerous:</em></p>
+<blockquote>
+<p><strong>H:</strong> "What happens if you run naive DFS without
+tracking visited nodes on this graph?" <strong>W:</strong> "Node1 →
+clone Node2 → clone Node1 again → clone Node2 again..." → He traced the
+infinite loop <strong>himself</strong>. Seeing it repeat was the proof
+🤯</p>
+</blockquote>
+<p>Then the fix became obvious: add current node to hashmap <strong>AS
+THE FIRST LINE</strong> of <code>dfs()</code> — <em>before</em>
+iterating neighbors:</p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> dfs(node):</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    hashmap[node] <span class="op">=</span> Node(node.val)  <span class="co"># 👈 FIRST — before ANY neighbor loop</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> neighbor <span class="kw">in</span> node.neighbors:</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> hashmap:  <span class="co"># cycle loops back → already registered → no recursion</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>            dfs(neighbor)</span></code></pre></div>
+<blockquote>
+<p><strong>W:</strong> <em>"Oh, so the hashmap check is what stops the
+loop."</em> 💡 → <strong>Yes.</strong> When the cycle loops back, node
+is already registered → hits else branch → retrieve clone, no recursion.
+Each node visited <strong>exactly once</strong> → O(N+E).</p>
+</blockquote>
+<p><strong>🔒 Invariant:</strong> <em>"At any point during traversal,
+every node already visited has exactly one clone in the
+hashmap."</em></p>
+<blockquote>
+<p>💡 <strong>Dual-purpose insight:</strong> The hashmap IS the visited
+set AND the clone registry. <code>if neighbor not in hashmap</code> does
+both checks in one. No separate <code>visited</code> set needed.</p>
+</blockquote>
+<hr />
+<h2
+id="speaking_head-step-3--discuss-complexity-notation-stumble-triumph">🗣️
+Step 3 — Discuss: <em>Complexity Notation Stumble</em> 😤</h2>
+<p><strong>🗣️ How I'd explain this to an interviewer:</strong></p>
+<ol type="1">
+<li>"I'll use DFS with a hashmap that serves as both visited-tracker and
+clone-registry"</li>
+<li>"For each node: clone it, register in hashmap, then iterate
+neighbors"</li>
+<li>"If neighbor not in hashmap → recurse and append the clone"</li>
+<li>"If neighbor already in hashmap → retrieve existing clone and
+append"</li>
+<li>"Time O(N+E), Space O(N). Shall I code this up?"</li>
+</ol>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># The core logic in 4 lines:</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>clone <span class="op">=</span> Node(node.val)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>hashmap[node] <span class="op">=</span> clone          <span class="co"># register BEFORE neighbor loop</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> neighbor <span class="kw">in</span> node.neighbors:</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> hashmap: dfs(neighbor)  <span class="co"># this IS the visited check</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    clone.neighbors.append(hashmap[neighbor])  <span class="co"># always append the CLONE</span></span></code></pre></div>
+<p><strong>✅ Green light asked and confirmed.</strong></p>
+<blockquote>
+<p>😤 <strong>The stumble:</strong> Wiganz said <code>O(N+V)</code> (V
+also means nodes — redundant) and <code>O(N+EW)</code> (W is not
+standard) before landing on correct <code>O(N+E)</code>. Graph
+complexity vocabulary not drilled. See Bug C2.</p>
+<p><strong>📝 Missed:</strong> Brute force mention was thin — "loops
+forever at O(∞)" not explicitly stated before presenting the optimized
+approach.</p>
+</blockquote>
+<hr />
+<h2 id="computer-step-4--code-three-implementation-bugs-hit-bug">💻 Step
+4 — Code: <em>Three Implementation Bugs Hit</em> 🐛</h2>
+<p><strong>Blueprint written before implementation ✅</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Edge case: node is None → return None</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Initialize hashmap</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. dfs(node): clone current node, add to hashmap IMMEDIATELY</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Iterate neighbors — if not in hashmap: dfs it, append clone</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. If in hashmap: retrieve clone, append</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. dfs(node) then return hashmap[node]</span></span></code></pre></div>
+<p><strong>Three bugs surfaced during coding:</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>🐛 Bug</th>
+<th>❌ Wrong</th>
+<th>✅ Fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>I1</td>
+<td>Clone method</td>
+<td><code>node.copy()</code></td>
+<td><code>Node(node.val)</code> — custom class needs constructor</td>
+</tr>
+<tr>
+<td>I2</td>
+<td>Appended original</td>
+<td><code>append(neighbor)</code></td>
+<td><code>append(hashmap[neighbor])</code> — append the CLONE</td>
+</tr>
+<tr>
+<td>I3</td>
+<td>Return before populate</td>
+<td><code>return hashmap[0]</code> before <code>dfs()</code></td>
+<td>Call <code>dfs(node)</code> first, then
+<code>return hashmap[node]</code></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>😤 <strong>I2 was the dangerous one</strong> — appending the raw
+<code>neighbor</code> (original) instead of
+<code>hashmap[neighbor]</code> (clone) would have built the clone's
+neighbor list with references to originals. That's a <em>shallow copy
+bug</em> that defeats the entire problem.</p>
+</blockquote>
+<h3 id="computer-final-clean-solution">💻 Final Clean Solution</h3>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> typing <span class="im">import</span> Optional</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> cloneGraph(<span class="va">self</span>, node: Optional[<span class="st">&#39;Node&#39;</span>]) <span class="op">-&gt;</span> Optional[<span class="st">&#39;Node&#39;</span>]:</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> node <span class="kw">is</span> <span class="va">None</span>:</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> <span class="va">None</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        hashmap <span class="op">=</span> {}</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> dfs(node):</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>            clone_node <span class="op">=</span> Node(node.val)</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>            hashmap[node] <span class="op">=</span> clone_node</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> neighbor <span class="kw">in</span> node.neighbors:</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> neighbor <span class="kw">not</span> <span class="kw">in</span> hashmap:</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                    dfs(neighbor)</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                hashmap[node].neighbors.append(hashmap[neighbor])</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>        dfs(node)</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> hashmap[node]</span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ <strong>Time</strong></td>
+<td>O(N+E)</td>
+<td>Each node visited once, each edge traversed once</td>
+</tr>
+<tr>
+<td>📦 <strong>Space</strong></td>
+<td>O(N)</td>
+<td>Hashmap N entries + recursion stack up to N deep</td>
+</tr>
+<tr>
+<td>🎯 <strong>BTTC</strong></td>
+<td>O(N+E)</td>
+<td>Must touch every node (can't clone unseen) and every edge (can't
+build neighbor lists without traversing)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mag-step-5--verify-the-double-add-confusion-exploding_head">🔍
+Step 5 — Verify: <em>The Double-Add Confusion</em> 🤯</h2>
+<pre><code>Input: Node1→[2,4]  Node2→[1,3]  Node3→[2,4]  Node4→[1,3]</code></pre>
+<pre><code>dfs(node1) → clone1, hashmap={1:clone1}
+  dfs(node2) → clone2, hashmap={1,2}
+    node1 IN hashmap → clone2.neighbors.append(clone1)  ← no recursion
+    dfs(node3) → clone3, hashmap={1,2,3}
+      node2 IN hashmap → clone3.neighbors.append(clone2)
+      dfs(node4) → clone4, hashmap={1,2,3,4}
+        node1 IN → clone4.neighbors.append(clone1)
+        node3 IN → clone4.neighbors.append(clone3)
+      ← back in dfs(node3): node=node3 → clone3.neighbors.append(clone4)
+    ← back in dfs(node2): node=node2 → clone2.neighbors.append(clone3)
+  ← back in dfs(node1): clone1.neighbors.append(clone2), clone1.neighbors.append(clone4)</code></pre>
+<h3 id="speech_balloon-the-stack-frame-dialogue-bulb">💬 The Stack Frame
+Dialogue 💡</h3>
+<p>Wiganz was confused here — after <code>dfs(node4)</code> returns
+inside <code>dfs(node3)</code>, <em>won't the append line modify clone4
+again?</em> The "double-add" fear:</p>
+<blockquote>
+<p><strong>H:</strong> "After dfs(node4) returns, we're back in
+dfs(node3). What is <code>node</code> at that point?"
+<strong>W:</strong> "...Oh, <code>node</code> is <strong>node3</strong>
+at that point!" 🤯 → <strong>Each <code>dfs()</code> call has its own
+<code>node</code> parameter in its own stack frame.</strong> The outer
+frame's <code>node</code> is untouched while the inner frame runs.
+<code>hashmap[node]</code> resolves to <code>clone3</code>, not
+<code>clone4</code>. <strong>No double-add.</strong> ✅</p>
+</blockquote>
+<p><strong>Edge Cases:</strong></p>
+<ul class="task-list">
+<li><label><input type="checkbox" checked="" /><code>node = None</code>
+→ guard clause at top</label></li>
+<li><label><input type="checkbox" checked="" />Single node, no neighbors
+→ loop doesn't execute</label></li>
+<li><label><input type="checkbox" checked="" />Node1 ↔︎ Node2 (cycle of
+2) → hashmap breaks cycle</label></li>
+<li><label><input type="checkbox" checked="" />Fully connected 4-node
+graph → else branch handles all revisits</label></li>
+</ul>
+<hr />
+<h2 id="zap-step-6--optimize">⚡ Step 6 — Optimize</h2>
+<p>BTTC = O(N+E). Already optimal ✅</p>
+<blockquote>
+<p>💡 <strong>The reasoning:</strong> "Can I clone without seeing every
+node? <strong>No.</strong> Can I build neighbor lists without every
+edge? <strong>No.</strong> Floor = N+E."</p>
+<p>⚠️ BTTC reasoning was accepted but <strong>not fully
+internalized</strong> during session — Wiganz could say it but couldn't
+articulate the WHY from scratch. Flagged for revisit.</p>
+</blockquote>
+<hr />
+<h1 id="clipboard-quick-reference">📋 Quick Reference</h1>
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="brain-conceptual-mistakes">🧠 Conceptual Mistakes</h3>
+<h4 id="bug-c1-pattern-signal--dfs-because-of-the-word-deep">🐛 C1:
+Pattern Signal — <em>"DFS Because of the Word 'Deep'"</em></h4>
+<blockquote>
+<p><strong>Context:</strong> Step 2 (Approach) — Hadriel asked Gate 2:
+<em>"Why DFS for this problem?"</em> Wiganz needed to justify the
+pattern choice from the problem structure.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Justified DFS by surface word match: saw the word "deep" in "deep
+copy" and mapped it to "depth-first search"</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td><em>"DFS because the problem says 'deep copy' — deep maps to
+depth-first"</em> — word association, not structural reasoning</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td><em>"DFS because the abstract shape is 'traverse all nodes in a
+connected graph' — DFS visits every reachable node, and combined with a
+hashmap, handles cycles cleanly"</em></td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>concept gap</code> — "deep copy" (full independent clone) and
+"depth-first" (traversal strategy) share a word but live on completely
+separate axes. One is about INDEPENDENCE of copies, the other is about
+ORDER of traversal</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Right answer, wrong reason — interviewer probing <em>"why DFS
+specifically?"</em> would expose shallow reasoning. Strong No Hire
+signal</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> Pattern selection comes from ABSTRACT SHAPE
+(<em>"traverse all nodes in graph"</em>), never from story words.</li>
+<li><strong>Trick:</strong> <em>"Deep copy ≠ depth-first. Signal is the
+STRUCTURE word (graph, tree, matrix) — not the copy/clone/find
+word."</em></li>
+<li><strong>Edge Cases:</strong> Would also misfire on <em>"shallow
+copy"</em> — neither word maps to any traversal pattern. Watch for any
+problem where a story word coincidentally matches an algorithm
+name.</li>
+</ul>
+</blockquote>
+<h4 id="bug-c2-graph-complexity-notation--nv-new-triumph">🐛 C2: Graph
+Complexity Notation — <em>"N+V", "N+EW"</em> 😤</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 3 (Discuss) — Wiganz needed to state
+time complexity to the interviewer. Standard graph traversal complexity
+is <code>O(N+E)</code> (N = nodes, E = edges).</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Cycled through wrong notations before landing on the standard
+<code>O(N+E)</code>. Showed graph complexity vocabulary wasn't
+drilled</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td><em>"O(N+V)"</em> — V also means nodes, this is redundant. Then
+<em>"O(N+EW)"</em> — W is not standard notation (no one knows what it
+means)</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td><em>"O(N+E)"</em> — N = nodes, E = edges. Standard graph traversal
+complexity. Atomic fact</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>concept gap</code> — graph complexity vocabulary not drilled.
+Confused between common variable letters (V for vertices, N for nodes —
+same thing) and invented notation (EW)</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Lost confidence visibly in Discuss, multiple verbal corrections in
+front of the (imagined) interviewer — poor signal for Communication AND
+Problem Solving rubrics</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> Graph traversal = <code>O(N+E)</code>. N =
+nodes, E = edges. Atomic fact. Always.</li>
+<li><strong>Trick:</strong> <em>"N nodes visited once, E edges traversed
+once. N+E. That's it."</em></li>
+<li><strong>Edge Cases:</strong> Weighted graphs are still O(N+E) for
+traversal — edge weight doesn't change visit count. Disconnected graphs
+would be O(N+E) total across all components.</li>
+</ul>
+</blockquote>
+<h4 id="bug-c3-bttc-not-internalized">🐛 C3: BTTC Not Internalized</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 6 (Optimize) — Hadriel asked Wiganz to
+state the BTTC (Best Theoretical Time Complexity) to confirm whether the
+solution had reached the floor. Wiganz accepted "O(N+E) is BTTC" but
+couldn't explain why.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Could state the BTTC value but couldn't articulate the reasoning for
+WHY it's the floor</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td><em>"BTTC is O(N+E) ... because that's what graph traversal
+costs"</em> — circular reasoning, doesn't prove it's the floor</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td><em>"BTTC is O(N+E) because to clone every node I must TOUCH every
+node (forced N work), and to preserve every edge I must TRAVERSE every
+edge (forced E work). Neither can be skipped — that's the minimum forced
+work"</em></td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>concept gap</code> — BTTC reasoning requires knowing MINIMUM
+FORCED WORK ("what work is impossible to avoid?"), not just naming the
+complexity</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Step 6 (Optimize) was incomplete — couldn't confidently say "already
+at the floor, no further optimization possible"</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> For any copy/traversal on a graph, BTTC =
+O(N+E) because you must touch every node AND every edge. State the
+FORCED WORK, not just the value.</li>
+<li><strong>Trick:</strong> <em>"Can I clone unseen nodes? No. Can I
+skip edges? No. Floor = N+E."</em></li>
+<li><strong>Edge Cases:</strong> For READ-only graph problems (e.g.,
+shortest path), BTTC depends on output size too — sometimes O(V+E) for
+full traversal, sometimes lower if you can early-terminate.</li>
+</ul>
+</blockquote>
+<hr />
+<h3 id="wrench-implementation-mistakes">🔧 Implementation Mistakes</h3>
+<p><strong>1. <code>node.copy()</code> — Custom Class Has No
+<code>.copy()</code> Method</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — AttributeError: &#39;Node&#39; object has no attribute &#39;copy&#39;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>clone <span class="op">=</span> node.copy()</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — call the constructor with the value</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>clone <span class="op">=</span> Node(node.val)</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>syntax confusion</code> — confused
+Python built-in <code>.copy()</code> (dict, list, set) with a custom
+class</li>
+<li><strong>How it was caught:</strong> AttributeError on first run (~2
+min lost)</li>
+<li><strong>Rule to prevent:</strong> <code>.copy()</code> = built-ins
+only. Custom class = constructor always</li>
+<li><strong>Trick:</strong> <em>"If you wrote the class, you call its
+constructor."</em></li>
+</ul>
+<p><strong>2. <code>append(neighbor)</code> Instead of
+<code>append(hashmap[neighbor])</code></strong> 😤</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — appends the ORIGINAL neighbor, produces shallow copy</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> neighbor <span class="kw">in</span> node.neighbors:</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    dfs(neighbor)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    hashmap[node].neighbors.append(neighbor)   <span class="co"># ← original, not clone</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — append the CLONE retrieved from hashmap</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> neighbor <span class="kw">in</span> node.neighbors:</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>    dfs(neighbor)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>    hashmap[node].neighbors.append(hashmap[neighbor])</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>approach misunderstanding</code> —
+forgot <code>neighbor</code> is always the ORIGINAL; the clone lives in
+<code>hashmap[neighbor]</code></li>
+<li><strong>How it was caught:</strong> Tracing the trace table —
+clone's neighbor list pointed to originals</li>
+<li><strong>Rule to prevent:</strong> After <code>dfs(neighbor)</code>,
+ALWAYS retrieve via <code>hashmap[neighbor]</code>. Never append raw
+<code>neighbor</code></li>
+<li><strong>Trick:</strong> <em>"neighbor = original. hashmap[neighbor]
+= clone. Append the CLONE."</em></li>
+</ul>
+<p><strong>3. <code>return hashmap[0]</code> Before
+<code>dfs(node)</code> Call</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — return before dfs runs + integer key on dict</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> hashmap[<span class="dv">0</span>]</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>dfs(node)   <span class="co"># ← dead code, dfs never executes</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — populate first, return with object key</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>dfs(node)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> hashmap[node]</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>rush</code> — wrote return early,
+confused dict key with list index. <code>hashmap[0]</code> treats dict
+like a list</li>
+<li><strong>How it was caught:</strong> KeyError (or wrong node
+returned)</li>
+<li><strong>Rule to prevent:</strong> <code>dfs(node)</code> FIRST to
+populate, THEN <code>return hashmap[node]</code>. Key = node object, not
+integer</li>
+<li><strong>Trick:</strong> <em>"Populate before you return. Object key,
+not index."</em></li>
+</ul>
+<hr />
+<h3 id="stopwatch-time-management-mistakes">⏱️ Time Management
+Mistakes</h3>
+<h4 id="bug-t1-step-1-took-15-min-target-34-triumph">🐛 T1: Step 1 Took
+15 Min (Target: 3–4) 😤</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 1 (Understand) — meant to last 3-4 min
+to confirm the problem contract. Drifted into algorithm-design territory
+because the concept "deep copy" + "cycles" was new and tempting to
+explore.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Step 1 conversation drifted from clarifying the contract into
+designing the algorithm — crossed the Step 1 / Step 2 boundary</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td>Started discussing <em>"cycles cause infinite recursion without a
+hashmap"</em> DURING Step 1 — that's algorithm reasoning (Step 2 / 4P
+territory), not problem clarification</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td>Step 1 should have ended at: <em>"Cycles exist (constraint ✅). Deep
+copy = full independence (definition ✅). Got it — moving to Step
+2."</em> The "WHY cycles are dangerous" discussion belongs in Step 2's
+4P-A (brute force + why bad)</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>concept gap + boundary crossing</code> — "deep copy" was a new
+vocabulary item, which tempted longer exploration. Crossed the Step 1 /
+Step 3F line (see <code>step1-vs-step3f.html</code> reference)</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>11+ min over Step 1 target → in a real 45-min interview, this would
+leave no time for Step 4 (Code). Total session ran 57 min over (82 vs 25
+target)</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> Step 1 ends at Definition WHY. <em>"Cycles
+exist"</em> = constraint ✅. <em>"Cycles cause infinite recursion"</em>
+= algorithm reasoning → belongs in Step 2/4P ❌.</li>
+<li><strong>Trick:</strong> <em>"Can a 5-year-old explain the WHY by
+pointing at the problem definition? Yes → move. No → it's Step 2
+territory, save it."</em></li>
+<li><strong>Edge Cases:</strong> New vocabulary items (deep copy,
+topological sort, monotonic stack) ALWAYS tempt longer Step 1. Hard
+4-min timer + Escape Phrase: <em>"I understand what this is asking.
+Going to Step 2 now."</em></li>
+</ul>
+</blockquote>
+<hr />
+<h3 id="warning-wrong-assumptions">⚠️ Wrong Assumptions</h3>
+<table>
+<thead>
+<tr>
+<th>Assumed</th>
+<th>Reality</th>
+<th>Cost</th>
+<th>Revealed by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>"DFS" signals from the word "deep"</td>
+<td>Signal is "traverse all nodes in graph"</td>
+<td>Interview risk → C1</td>
+<td>Hadriel questioning reasoning</td>
+</tr>
+<tr>
+<td><code>node.copy()</code> clones a custom object</td>
+<td>Only built-ins have <code>.copy()</code></td>
+<td>~2 min → I1</td>
+<td>AttributeError</td>
+</tr>
+<tr>
+<td><code>neighbor</code> holds the clone after <code>dfs()</code></td>
+<td><code>neighbor</code> is always the ORIGINAL</td>
+<td>Would break problem → I2</td>
+<td>Tracing the trace table</td>
+</tr>
+<tr>
+<td><code>hashmap[0]</code> is valid return</td>
+<td>Dict key is node object, not integer</td>
+<td>KeyError → I3</td>
+<td>Writing return line early</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="bar_chart-mistake-summary">📊 Mistake Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Count</th>
+<th>Most Costly</th>
+<th>Pattern?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠 Conceptual</td>
+<td>3</td>
+<td>C2 — confidence collapse in Discuss</td>
+<td>Graph vocab not drilled</td>
+</tr>
+<tr>
+<td>🔧 Implementation</td>
+<td>3</td>
+<td>I2 — would break the whole problem</td>
+<td>Rush + not re-reading invariant</td>
+</tr>
+<tr>
+<td>⏱️ Time Management</td>
+<td>1</td>
+<td>T1 — 11 min over</td>
+<td>New concept = longer Step 1 trap</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bulb-aha-moments-summary">💡 Aha Moments (Summary)</h2>
+<ul>
+<li><strong>💡 1.</strong> Deep Copy = vocabulary for something already
+known — Before: knew intuitively → Trigger: "should clone survive
+deletion?" → After: deep copy = full independence 🔥</li>
+<li><strong>💡 2.</strong> "Add First" breaks the cycle — Before:
+unclear WHY cycles are dangerous → Trigger: traced naive loop himself 🤯
+→ After: register clone BEFORE neighbor loop. ORDER is the fix.</li>
+<li><strong>💡 3.</strong> Stack frames own their own <code>node</code>
+— Before: feared double-add after nested return → Trigger: "what is
+<code>node</code> at that point?" → After: each <code>dfs()</code> has
+its own stack frame 💡</li>
+</ul>
+<hr />
+<h2 id="zap-almost-traps">⚡ Almost Traps</h2>
+<table>
+<thead>
+<tr>
+<th>Looks right</th>
+<th>Actually wrong</th>
+<th>What breaks</th>
+<th>How to catch</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>append(neighbor)</code> after <code>dfs(neighbor)</code></td>
+<td><code>neighbor</code> is still the <strong>original</strong>
+node</td>
+<td>Clone's neighbor list points to originals = shallow copy</td>
+<td>Always use <code>hashmap[neighbor]</code> — the clone</td>
+</tr>
+<tr>
+<td><code>hashmap[0]</code> to get the root clone</td>
+<td>Dict key is the node <strong>object</strong>, not integer 0</td>
+<td><code>KeyError</code> or wrong node returned</td>
+<td>Key is <code>node</code>, not <code>0</code> or
+<code>node.val</code></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="key-unlock-examples">🔑 Unlock Examples</h2>
+<p><strong>🔑 The Cycle-Breaking Trace</strong> — <em>re-run this and
+everything comes back:</em></p>
+<pre><code>Naive DFS (NO hashmap):
+  dfs(node1) → clone Node2 → dfs(node2) → clone Node1 → dfs(node1) → clone Node2 → ...
+  ↑ INFINITE LOOP — no exit condition 💀
+
+WITH hashmap (register FIRST):
+  dfs(node1) → hashmap[node1] = clone1 → visit node2
+    dfs(node2) → hashmap[node2] = clone2 → visit node1
+      node1 IN hashmap → retrieve clone1, NO recursion ✅ ← CYCLE BROKEN
+    → visit node3...</code></pre>
+<blockquote>
+<p>The ORDER matters: <code>hashmap[node] = clone</code> must be the
+<strong>first line</strong> of <code>dfs()</code>, BEFORE the neighbor
+loop. That's the entire trick.</p>
+</blockquote>
+<hr />
+<h2 id="jigsaw-pattern-connections">🧩 Pattern Connections</h2>
+<ul>
+<li><strong>Copy List with Random Pointer (#138)</strong> — <em>exact
+same pattern</em> on a linked list. Deep copy + hashmap. Direct
+structural sibling.</li>
+<li><strong>Number of Islands (#200)</strong> — DFS graph traversal,
+same "visited" tracking but with a set instead of hashmap (no copies
+needed)</li>
+<li><strong>Course Schedule (#207)</strong> — Graph traversal with cycle
+detection. Hashmap/visited set serves the same guard role.</li>
+</ul>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 3/5 — Core algorithm solid. Clone
+logic and cycle-breaking understood. <strong>Weak:</strong> graph
+complexity notation not instant, BTTC not internalized, Step 1 timing
+😤</li>
+<li><strong>🔄 Revisit:</strong> Graph complexity notation
+(<code>O(N+E)</code> must be instant). Recursion stack = O(N) worst
+case. BTTC for graph problems. Step 1 hard 4-min ceiling.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> DFS extends to graph
+transformation problems. <em>"Hashmap as visited + registry"</em> is now
+a transferable tool — any graph problem building clones or
+transformations.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz — 2026-05-07</em> <em>"Call to me and I will
+answer you and tell you great things." — Jeremiah 33:3 ✝️</em></p>
+  </div>
+</body>
+</html>

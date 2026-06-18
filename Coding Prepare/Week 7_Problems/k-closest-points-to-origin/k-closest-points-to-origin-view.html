@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>k-closest-points-to-origin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1
+id="dagger-k-closest-points-to-origin----complete-session-archive">🗡️ K
+Closest Points to Origin -- Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Top K Elements (Heap) |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #973 |
+<strong>Date:</strong> 2026-05-04 <strong>Path Taken:</strong> First
+Principles (Gate 3 failed -- first Top K problem) | <strong>⏱️ Time
+Used:</strong> 25 min | <strong>🎯 Target:</strong> 25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey----how-understanding-built">🗺️ The Journey
+-- How Understanding Built</h2>
+<p>Recognized the Top K pattern signature at Gate 1 and Gate 2, but Gate
+3 failed (never solved a Top K problem before) -- forced onto the First
+Principles path. Through manual visualization and Rules Discovered from
+Technique B, independently confirmed the max-heap approach. Hit 3 bugs
+during coding -- all caught and fixed during the Step 5 scan. Discovered
+Python's list lexicographic comparison as a heap edge case. Missed the
+brute force mention in Discuss. Unlocked the O(n) theoretical floor and
+QuickSelect insight in teaching mode post-solve.</p>
+<hr />
+<h2 id="open_book-step-1----understand">📖 Step 1 -- Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given an array of points <code>[x, y]</code> and an integer
+<code>k</code>, return the <code>k</code> points closest to the origin
+<code>(0, 0)</code>. Distance is Euclidean:
+<code>sqrt(x^2 + y^2)</code>. Order of returned points does not
+matter.</p>
+<p>Wiganz initially gave the general Euclidean formula
+<code>sqrt((x1-x2)^2 + (y1-y2)^2)</code>. Hadriel asked: "One of those
+points is always fixed -- what is it fixed to?" Answer:
+<code>(0,0)</code> -- simplifies to <code>sqrt(x^2 + y^2)</code>. For
+comparison purposes only, <code>x^2 + y^2</code> suffices (no need to
+compute the square root).</p>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given n items each with a computed score -- return the k items with
+the smallest scores."</p>
+</blockquote>
+<p>This took multiple iterations before geometry was fully stripped:</p>
+<ol type="1">
+<li>"Given an array of points, calculate the distance to 0,0 and return
+k closest" -- still has geometry</li>
+<li>"Given an array of items. Calculate the score of each item. Return k
+smallest." -- fully abstract</li>
+</ol>
+<h3 id="question-constraint-questions-asked">❓ Constraint Questions
+Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sorted?</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Negative values?</td>
+<td>Yes -- coordinates can be negative</td>
+</tr>
+<tr>
+<td>Duplicates?</td>
+<td>Yes -- two points can share the same coordinates</td>
+</tr>
+<tr>
+<td>Empty input?</td>
+<td>No -- at least k points exist</td>
+</tr>
+<tr>
+<td>Modify input?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Expected input size?</td>
+<td>1 &lt;= k &lt;= points.length &lt;= 10^4</td>
+</tr>
+<tr>
+<td>Return what?</td>
+<td>The k closest points as <code>[[x,y],...]</code> -- order does not
+matter</td>
+</tr>
+<tr>
+<td>How stored?</td>
+<td>Array of <code>[x, y]</code> pairs</td>
+</tr>
+<tr>
+<td>One valid answer?</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Bonus edge case identified:</strong> k = n means return all
+points -- no selection needed. Flagged for Step 5.</p>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<pre><code>points = [[1,3], [-2,2]],  k = 1</code></pre>
+<table>
+<thead>
+<tr>
+<th>Point</th>
+<th>Distance squared</th>
+<th>Score</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>[1,3]</td>
+<td>1^2 + 3^2</td>
+<td>10</td>
+</tr>
+<tr>
+<td>[-2,2]</td>
+<td>(-2)^2 + 2^2</td>
+<td>8</td>
+</tr>
+</tbody>
+</table>
+<p>k = 1 -- return the 1 point with the <strong>smallest</strong> score
+-- output: <code>[[-2,2]]</code></p>
+<p>The problem says "closest" = smallest distance = smallest score.
+Output is <code>[[-2,2]]</code> because its score (8) is smaller than
+[1,3]'s score (10).</p>
+<hr />
+<h2 id="compass-step-2----approach-3-gate-check">🧭 Step 2 -- Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Question</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate 1</td>
+<td>Abstract shape matches a pattern?</td>
+<td>YES -- "n items, return k smallest" = Top K Elements</td>
+</tr>
+<tr>
+<td>Gate 2</td>
+<td>Name it AND explain WHY?</td>
+<td>YES -- heap of size k is O(n log k) vs sort O(n log n)</td>
+</tr>
+<tr>
+<td>Gate 3</td>
+<td>Solved something like this before?</td>
+<td>NO -- first Top K problem ever</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Gate 3 failed -- Decision: FIRST PRINCIPLES PATH
+(3F)</strong></p>
+<hr />
+<h2 id="mag_right-3f----first-principles-exploration">🔎 3F -- First
+Principles Exploration</h2>
+<h3 id="hammer_and_wrench-techniques-used">🛠️ Techniques Used</h3>
+<p><strong>Technique A -- Visualize:</strong> Visualized each point as a
+dot on a grid and imagined computing distances. Confirmed the scoring
+formula: <code>x^2 + y^2</code>.</p>
+<p><strong>Technique B -- Manual Solve (Rules Discovered):</strong>
+Traced through the example by hand, step by step. Discovered three
+rules:</p>
+<h3 id="triangular_ruler-rules-discovered-from-technique-b">📐 Rules
+Discovered (from Technique B)</h3>
+<pre><code>Rule 1: Maintain a max-heap of size k.
+        If heap size &gt; k → pop the largest (farthest point gets evicted).
+        What remains after all n points processed = the k closest.
+
+Rule 2: Python only has min-heap (heapq).
+        Negate the distance to simulate a max-heap:
+            dis = -(x^2 + y^2)
+        Most negative value = largest original distance = gets popped first.
+
+Rule 3: Push tuple (-distance, point) into the heap -- not just the distance.
+        The problem asks to RETURN the actual points, not just distances.</code></pre>
+<p>Why Rule 2 works:</p>
+<ul>
+<li>Distance 10 stored as -10</li>
+<li>Distance 8 stored as -8</li>
+<li>Python pops the SMALLEST value: -10 &lt; -8 so -10 pops first</li>
+<li>-10 corresponds to distance 10 = the FARTHEST point -- correctly
+evicted</li>
+</ul>
+<h3 id="bulb-the-aha-moment">💡 The AHA Moment</h3>
+<p>Gate 2 required Wiganz to explain WHY the heap fits -- not just name
+it. First attempt was circular:</p>
+<blockquote>
+<p>"Top K uses a heap because Top K uses a heap." -- rejected</p>
+</blockquote>
+<p>Hadriel pushed: "What does a heap give you that sorting all n items
+doesn't?"</p>
+<p>This unlocked the real insight: <strong>you never need to sort all n
+items -- maintaining only k candidates is enough.</strong></p>
+<p>Final Gate 2 sentence:</p>
+<blockquote>
+<p>"I see n items, return k smallest, which tells me Top K Elements
+because Top K allows me to use a heap of size k and the time would be
+O(n log k) instead of sorting O(n log n)."</p>
+</blockquote>
+<hr />
+<h2 id="speaking_head-step-3----discuss">🗣️ Step 3 -- Discuss</h2>
+<h3 id="clipboard-wiganzs-full-presentation">📋 Wiganz's Full
+Presentation</h3>
+<p>Named approach: Max-heap of size k with negated distances.</p>
+<p>Numbered steps:</p>
+<ol type="1">
+<li>Initialize <code>maxheap = []</code></li>
+<li>Calculate distance: <code>dis = -(x*x + y*y)</code> (negated for
+max-heap simulation)</li>
+<li>Push <code>(dis, x, y)</code> tuple onto heap</li>
+<li>If <code>len(maxheap) &gt; k</code> -- pop (evicts the farthest
+point)</li>
+<li>Return all points from the heap</li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Time: <code>O(n log k)</code> -- n points, each heap operation is
+O(log k)</li>
+<li>Space: <code>O(k)</code> -- heap holds at most k points</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>Asked "Does that make sense? Shall I code it?" -- green light
+received.</p>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<p><strong>Brute force mention skipped.</strong> In a real interview,
+even 10 seconds of "brute force would sort everything in O(n log n), but
+we can do better with a heap of size k" earns Problem Solving points.
+This is scored as "multiple solutions with trade-off analysis" -- an
+advanced signal. Never skip it even when you already know the optimal
+answer.</p>
+<hr />
+<h2 id="computer-step-4----code">💻 Step 4 -- Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> kClosest(<span class="va">self</span>, points: List[List[<span class="bu">int</span>]], k: <span class="bu">int</span>) <span class="op">-&gt;</span> List[List[<span class="bu">int</span>]]:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.1 Initialize the heap</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.2 Calculate the distance with -(x*x + y*y)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.3 Add the point and distance to maxheap</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.4 If bigger than size k → pop</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>        <span class="co"># 2.5 Return the points from the heap</span></span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> heapq</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> kClosest(<span class="va">self</span>, points: List[List[<span class="bu">int</span>]], k: <span class="bu">int</span>) <span class="op">-&gt;</span> List[List[<span class="bu">int</span>]]:</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        maxheap <span class="op">=</span> []</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> [x, y] <span class="kw">in</span> points:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>            dis <span class="op">=</span> <span class="op">-</span>(x<span class="op">*</span>x <span class="op">+</span> y<span class="op">*</span>y)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            heapq.heappush(maxheap, (dis, [x, y]))</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> <span class="bu">len</span>(maxheap) <span class="op">&gt;</span> k:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                heapq.heappop(maxheap)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> [[x, y] <span class="cf">for</span> (_, [x, y]) <span class="kw">in</span> maxheap]</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(n log k) -- n points, each
+heappush/heappop costs O(log k) <strong>📦 Space:</strong> O(k) -- heap
+holds at most k tuples at any time</p>
+<hr />
+<h2 id="mag-step-5----verify">🔍 Step 5 -- Verify</h2>
+<h3 id="footprints-trace-through-example-out-loud">👣 Trace Through
+Example (Out Loud)</h3>
+<pre><code>points = [[1,3], [-2,2]],  k = 1</code></pre>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>Action</th>
+<th>maxheap after</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Init</td>
+<td><code>maxheap = []</code></td>
+<td><code>[]</code></td>
+</tr>
+<tr>
+<td>Point [1,3]</td>
+<td>push <code>(-10, [1,3])</code></td>
+<td><code>[(-10, [1,3])]</code></td>
+</tr>
+<tr>
+<td>Size check</td>
+<td>len=1, not &gt; 1</td>
+<td>no pop</td>
+</tr>
+<tr>
+<td>Point [-2,2]</td>
+<td>push <code>(-8, [-2,2])</code></td>
+<td><code>[(-10, [1,3]), (-8, [-2,2])]</code></td>
+</tr>
+<tr>
+<td>Size check</td>
+<td>len=2 &gt; k=1 -- pop</td>
+<td>pops <code>-10</code> (most negative = farthest)</td>
+</tr>
+<tr>
+<td>After pop</td>
+<td><code>[(-8, [-2,2])]</code></td>
+<td></td>
+</tr>
+<tr>
+<td>Return</td>
+<td><code>[[-2,2]]</code></td>
+<td>correct</td>
+</tr>
+</tbody>
+</table>
+<p>Why <code>-10</code> gets popped: Python min-heap pops the smallest
+value. <code>-10 &lt; -8</code>, so <code>-10</code> pops first.
+<code>-10</code> corresponds to distance 10 = the farthest point.
+Farthest evicted, only closest remains.</p>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>k = n</td>
+<td>All points</td>
+<td>Return all</td>
+<td>Yes -- size never exceeds k, no pops</td>
+</tr>
+<tr>
+<td>k = 1</td>
+<td>Any</td>
+<td>Single closest</td>
+<td>Yes -- only last survivor</td>
+</tr>
+<tr>
+<td>Negative coordinates</td>
+<td><code>[-2, 2]</code></td>
+<td>Correct distance</td>
+<td>Yes -- squaring removes sign</td>
+</tr>
+<tr>
+<td>Equidistant points</td>
+<td>Same <code>dis</code> value</td>
+<td>Any valid k</td>
+<td>Yes -- Python compares <code>[x,y]</code> lists lexicographically,
+no crash</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time: O(n log k) -- each of n points triggers at most one push and
+one pop, each O(log k)</li>
+<li>Space: O(k) -- heap bounded to k entries</li>
+</ul>
+<hr />
+<h2 id="zap-step-6----optimize">⚡ Step 6 -- Optimize</h2>
+<p>BTTC for this problem: O(n) average -- any algorithm must examine
+every point at least once since input is unsorted and any point could be
+in the top k. The theoretical floor is O(n).</p>
+<p>Can we hit O(n)? Yes -- with <strong>QuickSelect</strong> (based on
+QuickSort's partition):</p>
+<ul>
+<li>Pick a pivot, partition: points closer than pivot | points
+farther</li>
+<li>Ask: "Are all k closest on the left side?" -- recurse only that
+side</li>
+<li>Average case: O(n). Worst case: O(n^2).</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Time</th>
+<th>Guarantee</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sort all</td>
+<td>O(n log n)</td>
+<td>guaranteed</td>
+</tr>
+<tr>
+<td>Heap of size k (this solution)</td>
+<td>O(n log k)</td>
+<td>guaranteed</td>
+</tr>
+<tr>
+<td>QuickSelect</td>
+<td>O(n) average</td>
+<td>not guaranteed (O(n^2) worst case)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Decision:</strong> Heap solution is the correct interview
+answer. QuickSelect is the impressive bonus if asked to optimize
+further. Current solution is not at BTTC, but the guaranteed O(n log k)
+is the right trade-off for interview reliability.</p>
+<hr />
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="brain-conceptual-mistakes">🧠 Conceptual Mistakes</h3>
+<p>None this session ✅ — the heap approach was derived independently
+via First Principles and was conceptually correct from the start.</p>
+<h3 id="wrench-implementation-mistakes">🔧 Implementation Mistakes</h3>
+<p><strong>1. <code>x</code> and <code>y</code> undefined in the
+loop</strong></p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — `point` binds to whole sublist [x, y], x and y never exist</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> point <span class="kw">in</span> points:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    dis <span class="op">=</span> <span class="op">-</span>(x<span class="op">*</span>x <span class="op">+</span> y<span class="op">*</span>y)   <span class="co"># NameError: x is not defined</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — destructure on the loop header itself</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> [x, y] <span class="kw">in</span> points:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    dis <span class="op">=</span> <span class="op">-</span>(x<span class="op">*</span>x <span class="op">+</span> y<span class="op">*</span>y)</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> Iterating over <code>[[x,y], ...]</code> gives
+whole sublists, not the elements</li>
+<li><strong>How it was caught:</strong> <code>NameError</code> on the
+first iteration</li>
+<li><strong>Rule to prevent:</strong> When iterating over a list of
+pairs, ALWAYS destructure in the loop header —
+<code>for [x, y] in points</code>, never
+<code>for point in points</code> when you need both elements by
+name</li>
+</ul>
+<p><strong>2. <code>heappush</code> argument order reversed</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG attempt 1 — args reversed AND missing closing paren</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>heapq.heappush((dis, [x,y], maxheap)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG attempt 2 — paren fixed but order still wrong</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>heapq.heappush((dis, [x,y]), maxheap)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — heap is ALWAYS the first argument</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>heapq.heappush(maxheap, (dis, [x,y]))</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> Mirrored the mental model "push (item) onto
+(heap)" instead of actual signature
+<code>heappush(heap, item)</code></li>
+<li><strong>How it was caught:</strong> Two wrong attempts (~2-3 min
+lost) before landing on correct form</li>
+<li><strong>Rule to prevent:</strong> Memorize as mantra — <em>"heap
+first, item second"</em>. Same pattern as
+<code>list.append(item)</code>: container always comes first</li>
+</ul>
+<p><strong>3. <code>return</code> statement inside the <code>for</code>
+loop</strong></p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — return indented inside loop, fires after first point</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> [x, y] <span class="kw">in</span> points:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> [[x,y] <span class="cf">for</span> ...]   <span class="co"># ← processes only 1 point, silent wrong answer</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — return dedented to function scope</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> [x, y] <span class="kw">in</span> points:</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    ...</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> [[x,y] <span class="cf">for</span> ...]</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>rush</code> — indentation error from
+copying mental structure without counting levels</li>
+<li><strong>How it was caught:</strong> Silent wrong answer (no crash) —
+hardest category of bug to catch</li>
+<li><strong>Rule to prevent:</strong> After writing any
+<code>return</code> statement, ask: <em>"Is this inside or outside the
+loop?"</em> — visually align <code>for</code> keyword and
+<code>return</code> keyword to confirm scope</li>
+</ul>
+<h3 id="stopwatch-time-management-mistakes">⏱️ Time Management
+Mistakes</h3>
+<p>None this session ✅ — completed in exactly 25 min (at target).</p>
+<h3 id="bar_chart-mistake-summary">📊 Mistake Summary</h3>
+<table>
+<thead>
+<tr>
+<th>Pillar</th>
+<th>Count</th>
+<th>Most Costly</th>
+<th>Pattern Emerging?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🧠 Conceptual</td>
+<td>0</td>
+<td>—</td>
+<td>First Principles path = clean reasoning</td>
+</tr>
+<tr>
+<td>🔧 Implementation</td>
+<td>3</td>
+<td>Bug 3 — silent wrong answer</td>
+<td>All 3 bugs are syntax/scope — not algorithmic. Drill Python heap API
++ indentation discipline</td>
+</tr>
+<tr>
+<td>⏱️ Time Management</td>
+<td>0</td>
+<td>—</td>
+<td>Hit 25-min target exactly</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="bulb-discoveries">💡 Discoveries</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<p><strong>The heap is a bouncer of size k.</strong> Every point tries
+to enter. If the heap exceeds k, the farthest point (the "worst"
+candidate) is immediately evicted. After all n points have been
+processed, only the k closest remain -- because every time someone
+"better" arrived, someone "worse" was thrown out.</p>
+<p>Negation is what makes this work in Python: flip the score so the
+farthest point (highest real distance) has the lowest stored value and
+gets popped by Python's min-heap naturally.</p>
+<h3 id="zap-aha-moments">⚡ Aha Moments</h3>
+<p><strong>💡 1. Strip the story -- the abstract shape unlocks the
+pattern</strong></p>
+<ul>
+<li><strong>Before:</strong> Saw a geometry problem about Euclidean
+distance</li>
+<li><strong>Trigger:</strong> Being pushed to restate in pure math terms
+-- "n items with scores, return k smallest"</li>
+<li><strong>After:</strong> Pattern becomes immediately obvious once
+geometry is removed. The story hides the structure.</li>
+</ul>
+<p><strong>💡 2. Gate 2 must explain WHY, not just name the
+pattern</strong></p>
+<ul>
+<li><strong>Before:</strong> "Top K uses a heap because Top K uses a
+heap" -- circular, no insight</li>
+<li><strong>Trigger:</strong> Hadriel's push: "What does a heap give you
+that sorting all n doesn't?"</li>
+<li><strong>After:</strong> "Heap of size k processes each point in
+O(log k) -- you never need to sort all n items. O(n log k) vs O(n log n)
+-- that's the advantage."</li>
+</ul>
+<p><strong>💡 3. Negate to simulate a max-heap in Python</strong></p>
+<ul>
+<li><strong>Before:</strong> Unsure how to evict the FARTHEST point
+using Python's min-heap</li>
+<li><strong>Trigger:</strong> Tracing manually: "If I store -10 and -8,
+which gets popped?" -- -10 pops, corresponds to distance 10, which IS
+the farthest</li>
+<li><strong>After:</strong> Universal Python pattern -- negate any score
+you want to evict the largest of. <code>dis = -(x^2 + y^2)</code>.</li>
+</ul>
+<p><strong>💡 4. Push tuple, not just the score</strong></p>
+<ul>
+<li><strong>Before:</strong> Only thought about storing the
+distance</li>
+<li><strong>Trigger:</strong> "What does the problem ask you to
+RETURN?"</li>
+<li><strong>After:</strong> Must push <code>(dis, [x, y])</code> -- the
+key sorts the heap, the value is what you return. Always push full data,
+not just the key.</li>
+</ul>
+<p><strong>💡 5. Python list comparison in heaps</strong></p>
+<ul>
+<li><strong>Before:</strong> Assumed equal distances would cause a crash
+or error</li>
+<li><strong>After:</strong> When two tuples have equal first elements,
+Python compares the second element. Lists compare lexicographically:
+<code>[1,0] vs [0,1]</code> compares element by element. No crash. For K
+Closest, any valid k points are acceptable on ties.</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>The Bouncer:</strong> Heap is a club with exactly k VIP
+spots. Every point tries to enter. If the club is full, the person
+standing farthest from the door (farthest from origin) gets kicked out.
+After everyone has tried, the k people remaining ARE the k closest.</li>
+<li><strong>Negation trick as a disguise:</strong> Turn the largest
+number into the smallest so Python's min-heap "sees" it as the most
+urgent to evict. A score of 10 becomes -10 -- the min-heap pops the most
+negative first, which corresponds to the largest original distance.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(n log k)</td>
+<td>Touch every n point; each heappush/heappop = O(log k). k &lt;= n so
+this is better than O(n log n).</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(k)</td>
+<td>Heap holds at most k tuples at any time -- enforced by the pop when
+size exceeds k.</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(n) average</td>
+<td>Must examine every point at least once (unsorted input). QuickSelect
+achieves O(n) average; heap is O(n log k) with a stronger
+guarantee.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 4/5 -- Rules Discovered path was
+clean. Bugs were all caught in verify. Negate trick and tuple structure
+feel solid.</li>
+<li><strong>🔄 Revisit:</strong> QuickSelect implementation (not
+required for interview, but worth knowing). Brute force mention
+discipline -- must become habit before coding, not an afterthought.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> First Top K problem.
+Established the core template: max-heap of size k + negate for Python +
+push tuple not just score. Foundation for all Top K variants.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems-max-3">🔗 Similar Problems (max 3)</h2>
+<ul>
+<li><strong>Top K Frequent Elements (#347)</strong> -- same max-heap of
+size k pattern; frequency replaces Euclidean distance as the score</li>
+<li><strong>K Largest Elements in Array (#215)</strong> -- same pattern;
+value itself is the score, simpler setup</li>
+<li><strong>Find K Pairs with Smallest Sums (#373)</strong> -- harder
+variant; min-heap with pair sums, same "push tuple" principle</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz -- 2026-05-04</em> <em>"Those who hope in the
+Lord will renew their strength." -- Isaiah 40:31 ✝️</em></p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3sum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-3sum----complete-session-archive">🗡️ 3Sum -- Complete
+Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Two Pointers (after sort) |
+<strong>Difficulty:</strong> Medium | <strong>LeetCode:</strong> #15 |
+<strong>Date:</strong> 2026-05-06 <strong>Path Taken:</strong> Pattern
+Path | <strong>⏱️ Time Used:</strong> 78 min | <strong>🎯
+Target:</strong> 25 min</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey----how-understanding-built">🗺️ The Journey
+-- How Understanding Built</h2>
+<p>Wiganz correctly identified the Two Pointers pattern and nailed the
+key rewrite (<code>a+b+c=0 → a+b=-c</code>), but the session went 3x
+over target because of the Verify phase. Step 3 (Discuss) ran past the
+25-minute mark before a single line of code was written. Then 9 bugs
+surfaced during the trace -- almost all in the three-level
+duplicate-skipping logic. The algorithm was understood. The
+implementation details were not. This session is a lesson in knowing the
+pattern vs. knowing every implementation trap inside it.</p>
+<hr />
+<h2 id="open_book-step-1----understand">📖 Step 1 -- Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given an integer array <code>nums</code>, return all unique triplets
+<code>[a, b, c]</code> where <code>a+b+c=0</code> and all three come
+from different positions. The result must contain no duplicate
+triplets.</p>
+<pre><code>Input:  [-1, 0, 1, 2, -1, -4]
+Output: [[-1, -1, 2], [-1, 0, 1]]</code></pre>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given an array of integers, find all unique sets of 3 numbers that
+sum to zero."</p>
+</blockquote>
+<h3 id="question-constraint-questions-asked">❓ Constraint Questions
+Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Is input sorted?</td>
+<td>No -- sort it yourself</td>
+</tr>
+<tr>
+<td>Can values be negative / zero / positive?</td>
+<td>Yes, all three</td>
+</tr>
+<tr>
+<td>Can duplicates exist in input?</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Can input be empty?</td>
+<td>No -- min length is 3</td>
+</tr>
+<tr>
+<td>What to return?</td>
+<td>Array of triplets (values, not indices)</td>
+</tr>
+<tr>
+<td>Multiple valid answers?</td>
+<td>Yes -- return ALL</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<p><code>[-1, 0, 1, 2, -1, -4]</code></p>
+<ul>
+<li><code>[-1, 0, 1]</code> is valid because the problem says find
+triplets where <code>a+b+c=0</code> -- and <code>-1+0+1=0</code>.
+Definition WHY. ✅</li>
+<li><code>[-1, -1, 2]</code> is valid because <code>-1+(-1)+2=0</code>.
+Definition WHY. ✅</li>
+</ul>
+<p>Step 1 took ~8 min. Should be 3-4 min max.</p>
+<hr />
+<h2 id="compass-step-2----approach-3-gate-check">🧭 Step 2 -- Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<table>
+<thead>
+<tr>
+<th>Gate</th>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gate 1: Abstract shape matches a pattern?</td>
+<td>"find pairs summing to target" in the subproblem</td>
+<td>✅ YES</td>
+</tr>
+<tr>
+<td>Gate 2: Can name it AND explain why?</td>
+<td>Fixed number c → find a+b=-c → that's 2Sum via Two Pointers</td>
+<td>✅ YES</td>
+</tr>
+<tr>
+<td>Gate 3: Solved something like this before?</td>
+<td>Yes -- 2Sum with Two Pointers</td>
+<td>✅ YES</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>Decision: PATTERN PATH</strong></p>
+<p><strong>⚡ The Bridge Insight (discovered at Gate 2):</strong></p>
+<p>3Sum looks like it needs 3 pointers. The magic rewrite:</p>
+<pre><code>a + b + c = 0
+→ a + b = -c</code></pre>
+<p>Fix <code>c</code> with an outer loop. Now you have 2Sum: find
+<code>a</code> and <code>b</code> in the remaining array summing to
+<code>-c</code>. Two Pointers handles this in O(n). Total: O(n²).</p>
+<p><strong>Meta discussion captured:</strong> Wiganz asked about Gate 2
+vs. 4P-B feeling similar.</p>
+<ul>
+<li>Gate 2 = one sentence, quick YES/NO, picks the path</li>
+<li>4P-B = full presentation for the interviewer, earns rubric
+points</li>
+<li>Same idea, different depth and audience.</li>
+</ul>
+<hr />
+<h2 id="dart-3p-match--4p-reason">🎯 3P Match + 4P Reason</h2>
+<h3 id="mag-3p----signal--pattern--full-sentence">🔍 3P -- Signal →
+Pattern → Full Sentence</h3>
+<blockquote>
+<p>"I see 'sorted array' and 'find pairs summing to a target' in the
+subproblem, which tells me Two Pointers because once sorted, two
+converging pointers can find a pair sum in O(n) without revisiting
+elements."</p>
+</blockquote>
+<h3 id="brain-4p----reason">🧠 4P -- Reason</h3>
+<p><strong>A -- 🐢 Brute Force + Why Bad:</strong> Three nested loops.
+Check every possible triplet. O(n³). Way too slow for any realistic
+input size.</p>
+<p><strong>B -- ⚡ What Two Pointers Does Instead:</strong></p>
+<ul>
+<li>Sort the array: O(n log n)</li>
+<li>Fix one number with outer loop at index <code>i</code></li>
+<li>For each fixed number, converge <code>left = i+1</code> and
+<code>right = end</code> inward, searching for a pair summing to
+<code>-nums[i]</code></li>
+<li>Sum too big → <code>right--</code>. Sum too small →
+<code>left++</code>. Equal → found triplet, advance both</li>
+<li>Each element visited at most twice per outer iteration → O(n²)
+total</li>
+</ul>
+<p><strong>C -- 🔒 The Invariant:</strong> Once a fixed number
+<code>c</code> has been fully processed, we never revisit it. If a
+triplet existed with that <code>c</code>, the converging pointers would
+have found it. The sorted order guarantees the pointers never miss a
+valid pair.</p>
+<hr />
+<h2 id="speaking_head-step-3----discuss">🗣️ Step 3 -- Discuss</h2>
+<h3 id="clipboard-wiganzs-full-presentation">📋 Wiganz's Full
+Presentation</h3>
+<ol type="1">
+<li>Sort the array. Initialize <code>result = []</code>.</li>
+<li>Iterate with index <code>i</code> (fixed number =
+<code>nums[i]</code>).</li>
+<li>Skip duplicate fixed numbers:
+<code>if i &gt; 0 and nums[i] == nums[i-1]: continue</code></li>
+<li>Two pointers: <code>left = i+1</code>,
+<code>right = len(nums)-1</code>, converge inward searching for
+<code>-nums[i]</code></li>
+<li>Sum too big → <code>right--</code>. Sum too small →
+<code>left++</code>. Equal → append triplet, advance both.</li>
+</ol>
+<h3 id="bar_chart-complexity-stated">📊 Complexity Stated</h3>
+<ul>
+<li>Stated O(n) for time initially -- <strong>incorrect</strong>.
+Correct is O(n²).</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<ul>
+<li>This aspect was not fully explored during the session.</li>
+</ul>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<ul>
+<li>Wrong time complexity stated (O(n) instead of O(n²))</li>
+<li>Did not address duplicate handling for left/right pointers in
+Discuss -- only mentioned the fixed-number skip</li>
+<li>Did not state BTTC or ask "Shall I code it?" explicitly</li>
+<li>Step 3 ran past the 25-minute total target before code was
+written</li>
+</ul>
+<hr />
+<h2 id="computer-step-4----code">💻 Step 4 -- Code</h2>
+<h3 id="building_construction-blueprint-comments-first">🏗️ Blueprint
+(Comments First)</h3>
+<p>⚠️ <strong>Blueprint was skipped.</strong> Wiganz jumped straight to
+full implementation. This is flagged as a bug (see Bug 2 below). The
+correct blueprint would have been:</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> threeSum(<span class="va">self</span>, nums):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 1. Sort array, initialize result</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 2. Iterate i through nums (fixed number)</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 3. Skip duplicate fixed numbers</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 4. Two pointers: left = i+1, right = end</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 5. Converge: adjust pointers, append triplet on match</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 6. Skip duplicate left/right after match</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="co"># 7. Return result</span></span></code></pre></div>
+<h3 id="sparkles-final-clean-solution">✨ Final Clean Solution</h3>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> threeSum(<span class="va">self</span>, nums: <span class="bu">list</span>[<span class="bu">int</span>]) <span class="op">-&gt;</span> <span class="bu">list</span>[<span class="bu">list</span>[<span class="bu">int</span>]]:</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>        nums.sort()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> []</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="bu">len</span>(nums)):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> i <span class="op">&gt;</span> <span class="dv">0</span> <span class="kw">and</span> nums[i] <span class="op">==</span> nums[i<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">continue</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>            left <span class="op">=</span> i <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>            right <span class="op">=</span> <span class="bu">len</span>(nums) <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">while</span> left <span class="op">&lt;</span> right:</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>                temp_sum <span class="op">=</span> nums[left] <span class="op">+</span> nums[right]</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> temp_sum <span class="op">&gt;</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                    right <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                <span class="cf">elif</span> temp_sum <span class="op">&lt;</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                <span class="cf">else</span>:</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                    result.append([nums[left], nums[right], nums[i]])</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>                    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                    right <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                        left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>                    <span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[right] <span class="op">==</span> nums[right<span class="op">+</span><span class="dv">1</span>]:</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                        right <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> result</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(n²) -- outer loop O(n) × two pointers
+O(n) per iteration <strong>📦 Space:</strong> O(1) extra -- sort is
+in-place; output not counted</p>
+<hr />
+<h2 id="mag-step-5----verify">🔍 Step 5 -- Verify</h2>
+<h3 id="footprints-trace-through-example">👣 Trace Through Example</h3>
+<p>Input: <code>[-2, 0, 0, 2, 2]</code> (the critical duplicate test
+case)</p>
+<table>
+<thead>
+<tr>
+<th>Step</th>
+<th>left</th>
+<th>right</th>
+<th>nums[left]+nums[right]</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>i=0, nums[0]=-2, target=2</td>
+<td>1</td>
+<td>4</td>
+<td>0+2=2 ✅</td>
+<td>Append [-2,0,2], advance both</td>
+</tr>
+<tr>
+<td>After advance</td>
+<td>2</td>
+<td>3</td>
+<td>--</td>
+<td>left guard: nums[2]=0==nums[1]=0 → left=3</td>
+</tr>
+<tr>
+<td>left=3 &gt;= right=3</td>
+<td>--</td>
+<td>--</td>
+<td>--</td>
+<td>Inner loop ends. No duplicate! ✅</td>
+</tr>
+</tbody>
+</table>
+<p>Without Level 3 skip: left=2, right=3 → <code>0+2=2</code> → appends
+<code>[-2,0,2]</code> AGAIN. Duplicate triplet.</p>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No valid triplet</td>
+<td><code>[1,2,3]</code></td>
+<td><code>[]</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>All same elements</td>
+<td><code>[0,0,0]</code></td>
+<td><code>[[0,0,0]]</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Multiple zeros</td>
+<td><code>[-1,0,0,0,1]</code></td>
+<td><code>[[-1,0,1],[0,0,0]]</code></td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Minimum input</td>
+<td><code>[0,0,0]</code></td>
+<td><code>[[0,0,0]]</code></td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time: O(n²) -- outer O(n) × inner two-pointer pass O(n)</li>
+<li>Space: O(1) extra -- sorting in-place, output excluded from space
+count</li>
+</ul>
+<hr />
+<h2 id="zap-step-6----optimize">⚡ Step 6 -- Optimize</h2>
+<p><strong>BTTC Analysis:</strong> The output itself can contain O(n²)
+triplets (e.g., many equal elements). Just writing those triplets costs
+O(n²). You cannot do better than O(n²) -- the current solution is
+already optimal.</p>
+<p><strong>6-question checklist:</strong></p>
+<ul>
+<li>BTTC reached? ✅ Yes -- O(n²) is the floor</li>
+<li>Repeated work? No -- each element visited at most twice per outer
+iteration</li>
+<li>Better data structure? No -- sorted array + two pointers is ideal
+here</li>
+<li>Redundant work? No -- duplicate skips ensure no wasted
+iterations</li>
+<li>Space improvement? Already O(1) extra</li>
+<li>Still stuck? N/A</li>
+</ul>
+<p>→ <strong>No optimization possible. Solution is optimal.</strong></p>
+<p><strong>Lesson on BTTC for list-output problems:</strong> Count how
+many items can be in the output. If output is O(n²), the floor is O(n²).
+You cannot write O(n²) items faster than O(n²).</p>
+<hr />
+<h2 id="bug-bugs--mistakes">🐛 Bugs &amp; Mistakes</h2>
+<h3 id="brain-conceptual-mistakes">🧠 Conceptual Mistakes</h3>
+<h4 id="bug-c1-gate-2-answered-with-the-file-says-so">🐛 C1: Gate 2
+Answered With "The File Says So"</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 2 — Hadriel asked Gate 2: <em>"Can you
+name the pattern AND explain WHY it fits 3Sum?"</em> Wiganz needed to
+explain why Two Pointers is the right pattern, in his own words.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Wiganz justified the pattern choice by referencing his pattern cheat
+sheet instead of reasoning from the problem structure</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td><em>"Two Pointers because the file/cheatsheet says sorted-array +
+pair-sum maps to Two Pointers"</em> — recall-based, no internalized
+reasoning</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td><em>"I see 'sorted array' + 'find pairs summing to a target' (after
+the <code>a+b=-c</code> rewrite) → Two Pointers because once sorted, two
+converging pointers find the pair in O(n) without revisiting
+elements"</em></td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>approach misunderstanding</code> — Gate 2 requires
+internalized WHY (signal → pattern → because-reason). Citing the
+cheatsheet shows pattern was memorized, not understood</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Hadriel had to push back and re-ask the question; slowed Step 2. In
+an interview, this would be a <em>Strong No Hire</em> signal for Problem
+Solving</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> Gate 2 answer must come from your own
+reasoning sentence: <em>"I see [signal] → [pattern] because
+[reason]"</em>. If you can't explain it cold, you don't own it yet.</li>
+<li><strong>Trick:</strong> <em>"If you'd need to look it up, you'd fail
+Gate 2 in a real interview."</em> Train the explanation, not the
+fact.</li>
+<li><strong>Edge Cases:</strong> Any pattern problem where the
+signal-to-pattern feels memorized vs reasoned — especially Two Pointers,
+Sliding Window, Top K (the high-frequency patterns most likely to be
+memorized blindly).</li>
+</ul>
+</blockquote>
+<h4 id="bug-c2-infinite-loop--no-pointer-advancement-after-match">🐛 C2:
+Infinite Loop — No Pointer Advancement After Match</h4>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — pointers never moved after triplet found, while loop spins forever</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> temp_sum <span class="op">==</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    result.append([nums[i], nums[left], nums[right]])</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># ← missing left += 1 and right -= 1</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — match → move (always)</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> temp_sum <span class="op">==</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>    result.append([nums[i], nums[left], nums[right]])</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    right <span class="op">-=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>edge case blind spot</code> —
+<code>left &lt; right</code> stays True after a match. Forgot pointers
+must be explicitly moved</li>
+<li><strong>How it was caught:</strong> During Verify trace — would TLE
+/ infinite loop on any input with a valid triplet</li>
+<li><strong>Rule to prevent:</strong> After every match in a two-pointer
+loop, ALWAYS advance both pointers immediately</li>
+<li><strong>Trick:</strong> <em>"Match → move. Always. No
+exceptions."</em></li>
+</ul>
+<h4 id="bug-c3-duplicate-skip-with-if-instead-of-while">🐛 C3: Duplicate
+Skip With <code>if</code> Instead of <code>while</code></h4>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — `if` skips only ONCE, fails on 3+ consecutive duplicates</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — `while` skips until the streak ends</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — <code>if</code> =
+one skip. <code>while</code> = skip until condition false. Three or more
+consecutive duplicates require repeated skipping</li>
+<li><strong>How it was caught:</strong> Trace
+<code>[-2, 0, 0, 0, 2, 2]</code> — left lands on three consecutive 0s,
+<code>if</code> only moves once</li>
+<li><strong>Rule to prevent:</strong> Duplicate skipping ALWAYS uses
+<code>while</code>, never <code>if</code>. Duplicates stack</li>
+<li><strong>Trick:</strong> <em>"Duplicates pile up. You need a
+while-loop bulldozer, not an if-statement nudge."</em></li>
+</ul>
+<h4 id="bug-c4-combined-or-for-both-pointer-skips">🐛 C4: Combined
+<code>or</code> for Both Pointer Skips</h4>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — one loop with `or` advances both even when only one needs to move</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> (nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>] <span class="kw">or</span> nums[right] <span class="op">==</span> nums[right<span class="op">+</span><span class="dv">1</span>]):</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    right <span class="op">-=</span> <span class="dv">1</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — two INDEPENDENT loops</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[right] <span class="op">==</span> nums[right<span class="op">+</span><span class="dv">1</span>]:</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    right <span class="op">-=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — left and right have
+independent duplicate streaks. One might have 3 duplicates, the other 0.
+Combined <code>or</code> advances both wrongly</li>
+<li><strong>How it was caught:</strong> Trace
+<code>[-2, 0, 0, 2, 3]</code> — only left has duplicates, but combined
+loop advances right too</li>
+<li><strong>Rule to prevent:</strong> Always write TWO separate while
+loops — one for left, one for right. Never combine</li>
+<li><strong>Trick:</strong> <em>"Two pointers, two separate cleanup
+loops. They are not a team."</em></li>
+</ul>
+<h4 id="bug-c5-left--right-guard-placed-after-condition">🐛 C5:
+<code>left &lt; right</code> Guard Placed AFTER Condition</h4>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — guard comes second, nums[left-1] may access out-of-bounds before check</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>] <span class="kw">and</span> left <span class="op">&lt;</span> right:</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — guard FIRST, short-circuit protects the access</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>concept gap</code> — Python
+short-circuits left-to-right. If guard comes second, the unsafe access
+happens first</li>
+<li><strong>How it was caught:</strong> Edge case where left and right
+converge — potential index-out-of-bounds</li>
+<li><strong>Rule to prevent:</strong> <code>left &lt; right</code>
+ALWAYS goes first in while condition. Guard protects the access</li>
+<li><strong>Trick:</strong> <em>"Guard first. Access second.
+Always."</em></li>
+</ul>
+<h3 id="wrench-implementation-mistakes">🔧 Implementation Mistakes</h3>
+<p><strong>1. <code>temp_triplet.extends(a, b, c)</code> — Wrong Method
+Name AND Wrong Args</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — method doesn&#39;t exist, args wrong shape</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>temp_triplet.extends(a, b, c)   <span class="co"># AttributeError + TypeError</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — append with list literal is cleanest</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>result.append([a, b, c])</span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>syntax confusion</code> —
+<code>.extend()</code> takes ONE iterable, <code>.extends()</code>
+doesn't exist</li>
+<li><strong>How it was caught:</strong> Immediate runtime error</li>
+<li><strong>Rule to prevent:</strong> Use
+<code>result.append([a, b, c])</code> — simpler, clearer, no method
+confusion</li>
+<li><strong>Trick:</strong> <em>"append + list literal. Never touch
+extend for this problem."</em></li>
+</ul>
+<p><strong>2. <code>right += 1</code> Typo — Wrong
+Direction</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — right pointer moves OUTWARD when sum too big</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> temp_sum <span class="op">&gt;</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    right <span class="op">+=</span> <span class="dv">1</span>   <span class="co"># ← infinite loop, sum keeps growing</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — right shrinks inward to reduce sum</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> temp_sum <span class="op">&gt;</span> <span class="op">-</span>nums[i]:</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    right <span class="op">-=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>typo</code> — simple directional error.
+Right pointer should converge inward when sum is too large</li>
+<li><strong>How it was caught:</strong> Hadriel flagged during code
+review — sum would only grow, never converge</li>
+<li><strong>Rule to prevent:</strong> <em>Too big → shrink right
+(<code>right -= 1</code>). Too small → grow left
+(<code>left += 1</code>).</em> Draw the number line</li>
+<li><strong>Trick:</strong> <em>"Sorted array. Right = bigger. Too big?
+Move right LEFT."</em></li>
+</ul>
+<p><strong>3. Missing <code>and</code> Keyword in While
+Condition</strong></p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — Python doesn&#39;t chain conditions implicitly</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:   <span class="co"># SyntaxError</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT — explicit `and`</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> left <span class="op">&lt;</span> right <span class="kw">and</span> nums[left] <span class="op">==</span> nums[left<span class="op">-</span><span class="dv">1</span>]:</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    left <span class="op">+=</span> <span class="dv">1</span></span></code></pre></div>
+<ul>
+<li><strong>Why:</strong> <code>typo</code> — syntax error, two
+conditions in a while loop require a logical operator</li>
+<li><strong>How it was caught:</strong> Immediate SyntaxError</li>
+<li><strong>Rule to prevent:</strong> Two conditions in while → ALWAYS
+explicit <code>and</code> / <code>or</code>. Python doesn't chain
+implicitly</li>
+<li><strong>Trick:</strong> <em>Read the line aloud. If it sounds like
+two conditions, you need <code>and</code>.</em></li>
+</ul>
+<h3 id="stopwatch-time-management-mistakes">⏱️ Time Management
+Mistakes</h3>
+<h4 id="bug-t1-skipped-blueprint-phase">🐛 T1: Skipped Blueprint
+Phase</h4>
+<blockquote>
+<p><strong>Context:</strong> Step 4 (Code) — after a long Discuss that
+ran past the 25-min mark, Wiganz felt time pressure and skipped Phase 1
+of Step 4 (Blueprint: function signature + numbered comments). Went
+straight to writing full implementation.</p>
+</blockquote>
+<table>
+<tbody>
+<tr>
+<td><strong>What</strong></td>
+<td>Phase 1 of Step 4 (Blueprint — write function signature + numbered
+comments transcribing the Discuss steps) was skipped entirely. Code was
+written without the comment scaffold</td>
+</tr>
+<tr>
+<td><strong>Wrong</strong></td>
+<td>Opened editor → typed <code>def threeSum(self, nums):</code> →
+immediately started writing the sort + outer loop + two pointers logic,
+juggling all of it in working memory</td>
+</tr>
+<tr>
+<td><strong>Right</strong></td>
+<td>Should have written 7 numbered comments first: <em># 1. Sort + init
+result. # 2. Iterate i (fixed number). # 3. Skip duplicate fixed. # 4.
+Two pointers left=i+1, right=end. # 5. Converge: adjust pointers, append
+on match. # 6. Skip duplicate left/right after match. # 7. Return
+result.</em> Then fill in code under each comment</td>
+</tr>
+<tr>
+<td><strong>Why</strong></td>
+<td><code>rush</code> — wanted to get into code fast after a long
+Discuss. Blueprint feels like overhead when already over time. The
+"Spoken → Written → Code" bridge was skipped</td>
+</tr>
+<tr>
+<td><strong>Cost</strong></td>
+<td>Bugs I1-I3 + C2-C5 (7 of 9 bugs) emerged partly because the
+structure wasn't pre-written. Working memory overloaded — couldn't track
+all 3 duplicate-skip levels at once. Also: blank-page freeze risk</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Prevention</strong></p>
+<ul>
+<li><strong>Rule:</strong> ALWAYS write Blueprint Phase 1 first —
+function signature + numbered comments transcribing exactly what was
+said in Discuss. Then implement under each comment.</li>
+<li><strong>Trick:</strong> <em>"Spoken → Written → Code. Skip Written =
+skip the bridge → falls in the river."</em></li>
+<li><strong>Edge Cases:</strong> When already over time, the temptation
+to skip Blueprint is HIGHEST — that's EXACTLY when you need it most
+(overloaded brain + complex multi-step algorithm = bug breeding
+ground).</li>
+</ul>
+</blockquote>
+<hr />
+<h2 id="bulb-discoveries">💡 Discoveries</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p>After sorting, fix one number and search for its complement pair with
+converging pointers -- skipping all duplicates at all three levels to
+guarantee uniqueness.</p>
+</blockquote>
+<p>The three levels are not optional. Each guards a different source of
+duplicate triplets. Missing any one level produces wrong answers.</p>
+<h3 id="zap-aha-moments">⚡ Aha Moments</h3>
+<p><strong>💡 1. The 3Sum → 2Sum Bridge</strong></p>
+<ul>
+<li><strong>Before:</strong> 3Sum looked like it required 3 independent
+pointers or a fundamentally different approach</li>
+<li><strong>Trigger:</strong> Gate 2 question -- "can you explain WHY
+Two Pointers fits?"</li>
+<li><strong>After:</strong> <code>a+b+c=0 → a+b=-c</code>. Fix c with
+outer loop, find a+b with Two Pointers. 3Sum IS 2Sum with a
+wrapper.</li>
+<li><strong>🗣️ In his words:</strong> "a+b+c=0 → fix c, find a+b=-c with
+two pointers. Bridges 3Sum to 2Sum in one rewrite."</li>
+</ul>
+<p><strong>💡 2. Three Levels of Duplicate Handling</strong></p>
+<ul>
+<li><strong>Before:</strong> Knew duplicates needed handling but thought
+one skip at the fixed-number level was enough</li>
+<li><strong>Trigger:</strong> Tracing <code>[-2, 0, 0, 2, 2]</code>
+through the code step by step</li>
+<li><strong>After:</strong> Three completely independent duplicate
+sources exist: the fixed number, the left pointer value, and the right
+pointer value. Miss any one → duplicate triplets.</li>
+<li><strong>🗣️ In his words:</strong> (traced <code>[-2,0,0,2,2]</code>
+→ saw <code>[-2,0,2]</code> appended twice without Level 3 →
+"ohhh")</li>
+</ul>
+<p><strong>💡 3. BTTC for List-Output Problems</strong></p>
+<ul>
+<li><strong>Before:</strong> Thought BTTC was about algorithm structure
+(comparisons, traversals)</li>
+<li><strong>Trigger:</strong> "How many items can the output contain for
+3Sum?"</li>
+<li><strong>After:</strong> If the output itself is O(n²) in size,
+writing it costs O(n²). The floor is the output size. You cannot beat
+what you must write.</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>The <code>[-2, 0, 0, 2, 2]</code> trace:</strong> The
+canonical example that reveals why Level 3 skip is mandatory. Left and
+right both land on duplicate values after the first match. Without the
+while loops, the same triplet is found and appended again. This one
+example makes Level 3 impossible to forget.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(n²)</td>
+<td>Outer loop O(n) × two-pointer pass O(n) per iteration. Sorting is
+O(n log n), dominated by O(n²).</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(1) extra</td>
+<td>Sorting done in-place. Output array not counted in space complexity.
+Only a few pointer variables used.</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(n²)</td>
+<td>The output can contain O(n²) triplets. Writing them costs O(n²).
+This is the theoretical floor -- already optimal.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 2/5 -- Pattern recognized and
+algorithm understood. But implementation (especially the 3 duplicate
+levels) needs muscle memory. Ran 78 min vs. 25 min target.</li>
+<li><strong>🔄 Revisit:</strong> The three-level duplicate handling from
+memory. Blueprint discipline. Complexity statement in Discuss.</li>
+<li><strong>📈 Pattern Mastery Impact:</strong> Two Pointers pattern
+competent. 3Sum specifically flagged for redo -- need to write duplicate
+logic cold in under 25 min.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems-max-3">🔗 Similar Problems (max 3)</h2>
+<ul>
+<li><strong>Two Sum II -- Input Array Is Sorted (#167)</strong> -- The
+inner 2Sum subproblem of 3Sum. Same two-pointer structure, simpler (no
+deduplication needed).</li>
+<li><strong>4Sum (#18)</strong> -- Extends 3Sum by adding one more outer
+loop. Same pattern, same 3-level duplicate concept, one additional
+nesting level.</li>
+<li><strong>3Sum Closest (#16)</strong> -- Same fix-one-iterate pattern,
+but instead of equality check, track minimum distance to target.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz -- 2026-05-06</em> <em>"Be strong and
+courageous. Do not be afraid." -- Joshua 1:9 ✝️</em></p>
+  </div>
+</body>
+</html>

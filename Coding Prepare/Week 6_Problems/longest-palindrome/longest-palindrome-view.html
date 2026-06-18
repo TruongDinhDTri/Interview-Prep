@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>longest-palindrome</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="fire-leetcode-409--longest-palindrome">🔥 LeetCode 409 — Longest
+Palindrome</h1>
+<blockquote>
+<p><strong>Difficulty:</strong> Easy | <strong>Pattern:</strong> Hash
+Map (Frequency Count) <strong>Date Solved:</strong> 2026-04-22 |
+<strong>Time taken:</strong> ~35 mins (25 min clock + continued)</p>
+</blockquote>
+<hr />
+<h2 id="jigsaw-the-problem">🧩 The Problem</h2>
+<blockquote>
+<p>Given a string <code>s</code> which consists of lowercase or
+uppercase letters, return the <strong>length of the longest
+palindrome</strong> that can be <strong>built</strong> with those
+letters. Letters are <strong>case sensitive</strong> — <code>"Aa"</code>
+is NOT <code>"aa"</code>.</p>
+</blockquote>
+<p><strong>Example 1:</strong></p>
+<pre><code>Input:  &quot;abccccdd&quot;
+Output: 7
+Explanation: &quot;dccaccd&quot; → length 7</code></pre>
+<p><strong>Example 2:</strong></p>
+<pre><code>Input:  &quot;a&quot;
+Output: 1</code></pre>
+<hr />
+<h2 id="warning-first-critical-confusion--find-within-vs-build-with">⚠️
+FIRST CRITICAL CONFUSION — "find within" vs "build with"</h2>
+<p><strong>This is the #1 trap for this problem.</strong></p>
+<p>❌ <strong>Wrong understanding (what Wiganz said first):</strong></p>
+<blockquote>
+<p>"Find the longest palindrome <strong>within</strong> that string" →
+This means finding a palindromic <strong>substring</strong> — characters
+must be consecutive. Like finding <code>"cccc"</code> inside
+<code>"abccccdd"</code>.</p>
+</blockquote>
+<p>✅ <strong>Correct understanding:</strong></p>
+<blockquote>
+<p>"Build the longest palindrome <strong>with</strong> those letters" →
+You can <strong>REARRANGE</strong> the letters however you want.
+Position in the original string doesn't matter AT ALL.</p>
+</blockquote>
+<p><strong>Why it matters:</strong> These are two completely different
+problems. "Longest Palindromic Substring" (LeetCode 5) is much harder
+(O(n²) or Manacher's). This problem is just about counting.</p>
+<p><strong>Trigger that fixed it:</strong> Hadriel asked "Is
+<code>dccaccd</code> inside <code>abccccdd</code>?" → NO. It's
+rearranged. Then it clicked.</p>
+<hr />
+<h2 id="bulb-the-key-rule--discovered-through-tracing">💡 THE KEY RULE —
+Discovered Through Tracing</h2>
+<h3 id="the-journey-to-the-rule">The Journey to the Rule</h3>
+<p><strong>Step 1 — First trace of <code>"abccccdd"</code>:</strong></p>
+<ul>
+<li>Wiganz: "I got 4c and 2d, that's 6 letters no matter what for a
+palindrome"</li>
+<li>Hadriel: "What about a and b?"</li>
+<li>Wiganz: "Yeah, 1 of them"</li>
+<li>4 + 2 + 1 = <strong>7</strong> ✅ — matched the example!</li>
+</ul>
+<p><strong>Step 2 — But WHY only 1 of a or b?</strong></p>
+<ul>
+<li>Wiganz tried <code>bccccdd</code> + <code>ddccccb</code> — confused
+himself</li>
+<li>Then found <code>dccaccd</code> — that's the real palindrome</li>
+<li><code>d-c-c-a-c-c-d</code> → d(2): 1 each side, c(4): 2 each side,
+a(1): in the middle</li>
+</ul>
+<p><strong>Step 3 — Testing with <code>"aaabbb"</code> to break wrong
+rule:</strong></p>
+<ul>
+<li>Wrong rule attempt: "any even character + highest odd
+character"</li>
+<li>Wiganz said: "that gives 6"</li>
+<li>But real answer: <code>baaab</code> → length <strong>5</strong></li>
+<li>Why? a(3) → use 2 as pairs + 1 in middle. b(3) → use 2 as pairs
+only.</li>
+<li>YOU CAN'T have 2 characters in the middle simultaneously!</li>
+</ul>
+<p><strong>Step 4 — The click moment 🔥:</strong></p>
+<blockquote>
+<p>"Oh... for b(3), I used only 2 because using all 3 would break the
+palindrome"</p>
+</blockquote>
+<p>That's it. You can only have ONE character in the very center.</p>
+<hr />
+<h2 id="trophy-the-complete-rule-discovered-by-wiganz">🏆 THE COMPLETE
+RULE (Discovered by Wiganz)</h2>
+<pre><code>For ANY character:
+  → Use as many PAIRS as possible (both sides of the palindrome)
+
+For the MIDDLE:
+  → If ANY character has an odd count → you get exactly +1 for the middle
+  → Only ONE character gets the center spot, no matter how many odd-count chars exist</code></pre>
+<p><strong>In code terms:</strong></p>
+<ul>
+<li>Even count → use ALL of them (<code>count += value</code>)</li>
+<li>Odd count → use <code>(value // 2) * 2</code> (floor to even) + mark
+<code>is_odd = True</code></li>
+<li>After loop → if <code>is_odd</code>: <code>count += 1</code></li>
+</ul>
+<h3 id="verifying-the-rule-on-examples">Verifying the rule on
+examples:</h3>
+<table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Counts</th>
+<th>Pairs Used</th>
+<th>Middle</th>
+<th>Total</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"abccccdd"</code></td>
+<td>a:1, b:1, c:4, d:2</td>
+<td>0+0+4+2=6</td>
+<td>+1 (a or b)</td>
+<td><strong>7</strong> ✅</td>
+</tr>
+<tr>
+<td><code>"aabb"</code></td>
+<td>a:2, b:2</td>
+<td>2+2=4</td>
+<td>+0 (no odd)</td>
+<td><strong>4</strong> ✅</td>
+</tr>
+<tr>
+<td><code>"a"</code></td>
+<td>a:1</td>
+<td>0</td>
+<td>+1</td>
+<td><strong>1</strong> ✅</td>
+</tr>
+<tr>
+<td><code>"aaabbb"</code></td>
+<td>a:3, b:3</td>
+<td>2+2=4</td>
+<td>+1</td>
+<td><strong>5</strong> ✅</td>
+</tr>
+<tr>
+<td><code>"abc"</code></td>
+<td>a:1, b:1, c:1</td>
+<td>0+0+0=0</td>
+<td>+1</td>
+<td><strong>1</strong> ✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="world_map-approach--step-2">🗺️ APPROACH — Step 2</h2>
+<h3 id="3-gate-result">3-Gate Result</h3>
+<ol type="1">
+<li>Does the abstract shape match a pattern? → ❌ Not obvious</li>
+<li>Can I name the pattern + explain why? → ❌</li>
+<li>Solved something like this before? → ❌</li>
+</ol>
+<p><strong>→ NO to 3-gate → First Principles Path (3F)</strong></p>
+<h3 id="3f-techniques-used">3F Techniques Used</h3>
+<p><strong>A. Visualize:</strong> Drew <code>dccaccd</code> mentally —
+saw the symmetric structure</p>
+<p><strong>B. Manual Solve:</strong> Traced <code>"abccccdd"</code> step
+by step → discovered the pairs rule</p>
+<p><strong>C. Generate Examples:</strong></p>
+<ul>
+<li>Normal: <code>"aabb"</code> → 4 (no middle)</li>
+<li>Edge: <code>"abc"</code> → 1 (all odd, only middle)</li>
+<li>Tricky: <code>"aaabbb"</code> → broke the "highest odd" rule → found
+the real rule</li>
+</ul>
+<p><strong>D. Data Structures:</strong></p>
+<blockquote>
+<p>"I need to COUNT things → HashMap!"</p>
+</blockquote>
+<p><strong>Pattern identified:</strong> <strong>HashMap (Frequency
+Count)</strong> — count each character's frequency, then apply the pairs
+rule.</p>
+<hr />
+<h2 id="speech_balloon-step-3--discuss-what-to-say-out-loud">💬 STEP 3 —
+DISCUSS (What to say out loud)</h2>
+<blockquote>
+<p>"I'll use a HashMap to count the frequency of each character.</p>
+<p>My steps:</p>
+<ol type="1">
+<li>Initialize <code>Counter(s)</code> to get all frequencies</li>
+<li>Initialize <code>count = 0</code>, <code>is_odd = False</code></li>
+<li>Loop through all values in the HashMap</li>
+<li>If value is even → add all of it to count</li>
+<li>If value is odd → add <code>(value // 2) * 2</code> to count, mark
+<code>is_odd = True</code></li>
+<li>After loop → if <code>is_odd</code>, add 1 to count</li>
+<li>Return count</li>
+</ol>
+<p>Time O(n), Space O(n). Does that make sense? Shall I code it?"</p>
+</blockquote>
+<hr />
+<h2 id="keyboard-final-code">⌨️ FINAL CODE</h2>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> longestPalindrome(s):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    hashmap <span class="op">=</span> Counter(s)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    is_odd <span class="op">=</span> <span class="va">False</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> value <span class="kw">in</span> hashmap.values():</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> value <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>            count <span class="op">+=</span> value</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">else</span>:</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>            count <span class="op">+=</span> (value <span class="op">//</span> <span class="dv">2</span>) <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>            is_odd <span class="op">=</span> <span class="va">True</span></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> is_odd:</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>        count <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> count</span></code></pre></div>
+<hr />
+<h2 id="bug-the-bug-wiganz-made-and-fixed-himself">🐛 THE BUG WIGANZ
+MADE (and fixed himself!)</h2>
+<p><strong>Original buggy version:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> value <span class="op">%</span> <span class="dv">2</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> value <span class="op">/</span> <span class="dv">2</span>      <span class="co"># ❌ </span><span class="al">BUG</span><span class="co">: adds number of PAIRS, not characters</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> value <span class="op">//</span> <span class="dv">2</span>     <span class="co"># ❌ </span><span class="al">BUG</span><span class="co">: same mistake</span></span></code></pre></div>
+<p><strong>Trace of bug with <code>"abccccdd"</code>:</strong></p>
+<pre><code>c(4): even → count += 4/2 = 2  (should be 4!)
+d(2): even → count += 2/2 = 1  (should be 2!)
+a(1): odd  → count += 0
+b(1): odd  → count += 0
+is_odd → +1
+Total = 2 + 1 + 0 + 0 + 1 = 4  ← WRONG, expected 7</code></pre>
+<p><strong>Why the bug?</strong> He was adding the NUMBER OF PAIRS
+instead of the CHARACTERS those pairs represent.</p>
+<p><strong>The fix:</strong> For even → <code>count += value</code> (all
+characters). For odd → <code>count += (value // 2) * 2</code> (pairs × 2
+= actual characters).</p>
+<p><strong>Trace of fixed version:</strong></p>
+<pre><code>c(4): even → count += 4 = 4
+d(2): even → count += 2 = 6
+a(1): odd  → count += 0, is_odd = True
+b(1): odd  → count += 0, is_odd = True
+is_odd → +1
+Total = 4 + 2 + 0 + 0 + 1 = 7 ✅</code></pre>
+<hr />
+<h2 id="bug-bug-2--ifelse-swapped-leetcode-submission-attempt">🐛 BUG #2
+— if/else SWAPPED (LeetCode submission attempt)</h2>
+<p>When submitting on LeetCode, Wiganz wrote:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> value <span class="op">%</span> <span class="dv">2</span>:               <span class="co"># ← looks right but is WRONG</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> value</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>    count <span class="op">+=</span> (value <span class="op">//</span> <span class="dv">2</span>) <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>    is_odd <span class="op">=</span> <span class="va">True</span></span></code></pre></div>
+<p><strong>The bug:</strong> <code>if value % 2:</code> is <strong>True
+when value is ODD</strong> (remainder = 1 = truthy). But the body
+<code>count += value</code> is the <strong>EVEN logic</strong>!</p>
+<p>So the entire if/else was flipped — even logic ran on odd numbers,
+odd logic ran on even numbers.</p>
+<p><strong>How Wiganz caught it:</strong> Hadriel asked "when is
+<code>value % 2</code> True?" → immediately clicked.</p>
+<p><strong>The fix:</strong> <code>if value % 2 == 0:</code> — be
+explicit. Check for even, not truthy remainder.</p>
+<p><strong>Lesson:</strong> <code>if value % 2:</code> is a common
+shorthand that reads like "if there's a remainder" — but it's easy to
+lose track of what the body should do. When in doubt, be explicit:
+<code>if value % 2 == 0:</code> for even, <code>else:</code> for
+odd.</p>
+<hr />
+<h2 id="warning-unnecessary-guard-clause-caught-in-verify">⚠️
+UNNECESSARY GUARD CLAUSE (Caught in Verify!)</h2>
+<p>Wiganz added this:</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> <span class="bu">len</span>(s) <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span>  <span class="co"># NOT NEEDED</span></span></code></pre></div>
+<p><strong>Why it's unnecessary:</strong> Trace <code>"a"</code> through
+the code:</p>
+<ul>
+<li>Counter: <code>{a: 1}</code></li>
+<li>a(1): odd → count += 0, is_odd = True</li>
+<li>is_odd → count += 1</li>
+<li>Returns <strong>1</strong> ✅</li>
+</ul>
+<p>The code handles single characters naturally. Never add guard clauses
+for cases the logic already handles.</p>
+<hr />
+<h2 id="test_tube-step-5--verify-edge-cases">🧪 STEP 5 — VERIFY (Edge
+Cases)</h2>
+<table>
+<thead>
+<tr>
+<th>Test Case</th>
+<th>Expected</th>
+<th>Got</th>
+<th>Pass?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>"abccccdd"</code></td>
+<td>7</td>
+<td>7</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>"a"</code></td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>"aabb"</code></td>
+<td>4</td>
+<td>4</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>"aaabbb"</code></td>
+<td>5</td>
+<td>5</td>
+<td>✅</td>
+</tr>
+<tr>
+<td><code>"abc"</code></td>
+<td>1</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="zap-complexity">⚡ COMPLEXITY</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Time</strong></td>
+<td>O(n)</td>
+<td>One pass through the string to count, one pass through the map (at
+most 52 keys)</td>
+</tr>
+<tr>
+<td><strong>Space</strong></td>
+<td>O(1)</td>
+<td>HashMap has at most 52 keys (26 lower + 26 upper) — bounded
+constant</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Note: O(n) space is also acceptable — the 52-key bound is a
+nuance.</p>
+</blockquote>
+<p><strong>BTTC = O(n)</strong> — you must read every character at least
+once. Already optimal. ✅</p>
+<hr />
+<h2 id="brain-aha-moments">🧠 AHA MOMENTS</h2>
+<ol type="1">
+<li><p><strong>"Build with" ≠ "Find within"</strong> — rearranging is
+totally different from substring search. Don't confuse with Longest
+Palindromic Substring (LeetCode 5).</p></li>
+<li><p><strong>Pairs are the key</strong> — a palindrome is symmetric.
+Every character (except the middle) needs a mirror copy. So you're
+really asking: "how many complete pairs can I form?"</p></li>
+<li><p><strong>Only ONE middle</strong> — no matter how many characters
+have odd counts, only 1 goes in the center. The others waste their
+leftover.</p></li>
+<li><p><strong>Bug revelation</strong> — <code>value / 2</code> gives
+you pairs, not characters. You need <code>value</code> itself (for even)
+or <code>(value // 2) * 2</code> (for odd). This is the #1 mistake for
+this problem.</p></li>
+<li><p><strong>Guard clauses should be earned</strong> — before adding
+<code>if len(s) == 1</code>, TRACE the code first. Often the logic
+already handles edge cases.</p></li>
+</ol>
+<hr />
+<h2 id="dart-pattern-summary--hash-map-frequency-count">🎯 PATTERN
+SUMMARY — Hash Map (Frequency Count)</h2>
+<p><strong>When to recognize this pattern:</strong></p>
+<ul>
+<li>Problem involves characters / elements and their counts</li>
+<li>You need to know "how many of each thing do I have?"</li>
+<li>Building/arranging something using available elements</li>
+</ul>
+<p><strong>Signal words:</strong> "build with", "use letters",
+"frequency", "how many times"</p>
+<p><strong>Template:</strong></p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> collections <span class="im">import</span> Counter</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>freq <span class="op">=</span> Counter(s)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> char, count <span class="kw">in</span> freq.items():</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># use count to calculate answer</span></span></code></pre></div>
+<hr />
+<h2 id="clipboard-what-to-do-differently-next-time">📋 WHAT TO DO
+DIFFERENTLY NEXT TIME</h2>
+<ol type="1">
+<li><strong>Blueprint phase</strong> — write ALL comments first, THEN
+fill in code. Don't mix them.</li>
+<li><strong>Spot "build with" vs "find within"</strong> immediately
+during Step 1 — these are completely different problems.</li>
+<li><strong>State the BTTC in Discuss</strong> — "Since we must see
+every character, O(n) is the floor. My solution hits that."</li>
+<li><strong>Don't add guard clauses without tracing</strong> — check if
+the main logic handles it first.</li>
+</ol>
+  </div>
+</body>
+</html>

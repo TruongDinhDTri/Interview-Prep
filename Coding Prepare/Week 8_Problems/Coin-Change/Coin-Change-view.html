@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coin-Change</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Nunito Sans',sans-serif;color:var(--ink);line-height:1.7;
+    background:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  .topbar{background:linear-gradient(120deg,#2c3a2e,#3f5a44);padding:14px clamp(20px,5vw,48px);position:sticky;top:0;z-index:5;box-shadow:0 2px 14px rgba(28,40,32,.25)}
+  .topbar a{color:var(--gold);text-decoration:none;font-family:'Klee One',cursive;font-size:.9rem}
+  .topbar a:hover{color:#f0d79a}
+  .wrap{max-width:820px;margin:0 auto;padding:clamp(28px,5vw,56px) clamp(20px,5vw,40px) 80px}
+  .badge{display:inline-block;font-family:'Klee One',cursive;font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--clay);margin-bottom:6px}
+  h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.1;margin:.2em 0 .6em;color:var(--ink)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:1.5rem;margin:1.8em 0 .5em;padding-bottom:.2em;border-bottom:2px solid rgba(94,138,99,.25)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.18rem;margin:1.4em 0 .4em;color:#3f5a44}
+  h4{font-family:'Klee One',cursive;font-size:1.05rem;margin:1.2em 0 .3em;color:var(--clay)}
+  p,li{font-size:1.02rem}
+  a{color:var(--moss);text-underline-offset:3px}
+  strong{color:var(--deep)}
+  blockquote{margin:1.2em 0;padding:.6em 1.2em;border-left:4px solid var(--gold);background:rgba(216,178,94,.1);border-radius:0 8px 8px 0;font-style:italic;color:#54675a}
+  ul,ol{padding-left:1.4em}
+  li{margin:.3em 0}
+  code{font-family:'JetBrains Mono',monospace;font-size:.9em;background:#ece2cc;color:#7a4b2e;padding:.15em .45em;border-radius:5px}
+  pre{background:#22302a;color:#e8e0cd;padding:18px 20px;border-radius:12px;overflow-x:auto;box-shadow:0 8px 20px rgba(28,40,32,.18);margin:1.2em 0;border:1px solid rgba(0,0,0,.2)}
+  pre code{background:none;color:inherit;padding:0;font-size:.88rem;line-height:1.55}
+  table{border-collapse:collapse;width:100%;margin:1.2em 0;background:#fffdf7;border-radius:10px;overflow:hidden;box-shadow:0 4px 12px rgba(36,48,38,.08)}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.1)}
+  th{background:var(--moss);color:#fbf7ec;font-weight:600}
+  tr:last-child td{border-bottom:none}
+  hr{border:none;border-top:2px dashed rgba(94,138,99,.3);margin:2em 0}
+  img{max-width:100%;border-radius:10px}
+  /* pandoc syntax highlight tokens */
+  pre.sourceCode .kw{color:#e0a35e}.dt{color:#8fb8c9}.dv,.fl{color:#c9a0dc}.st{color:#a8c97f}.co{color:#7d8c79;font-style:italic}.fu{color:#86c5da}.op{color:#d0c8b0}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important}}
+</style>
+</head>
+<body>
+  <div class="topbar"><a href="../../../index.html">← Về Bản đồ Phiêu lưu</a></div>
+  <div class="wrap">
+    <div class="badge">⚔︎ Conquered Trial</div>
+<h1 id="dagger-coin-change--complete-session-archive">🗡️ Coin Change —
+Complete Session Archive</h1>
+<blockquote>
+<p><strong>Pattern:</strong> Top-Down DP with Memoization (Unbounded
+Knapsack family) | <strong>Difficulty:</strong> Medium |
+<strong>LeetCode:</strong> #322 | <strong>Date:</strong> 2026-05-14
+<strong>Path Taken:</strong> First Principles | <strong>⏱️ Time
+Used:</strong> Phase 1 (no timer) | <strong>🎯 Target:</strong> N/A —
+first encounter</p>
+</blockquote>
+<hr />
+<h2 id="world_map-the-journey--how-understanding-built">🗺️ The Journey —
+How Understanding Built</h2>
+<p>First encounter with DP. Wiganz walked in pattern-blind, manually
+subtracted coins, and noticed "subproblem inside subproblem — very much
+like DP." Through Socratic guidance he discovered the recurrence
+<code>minCoins(amount) = 1 + min(minCoins(amount - coin))</code>,
+wrestled three times with the negative-amount base case before landing
+on <code>infinity</code>, and finally connected pure recursion →
+memoization after realizing <code>minCoins(10)</code> was being
+recomputed many times. Complexity reasoning was shaky and needs
+re-drilling. The aha moment: <strong>the call itself is "1 coin used" —
+you must ADD 1 to the subproblem's answer.</strong></p>
+<hr />
+<h2 id="open_book-step-1--understand">📖 Step 1 — Understand</h2>
+<h3 id="pencil-problem-statement-human-language">📝 Problem Statement
+(Human Language)</h3>
+<p>Given a list of coin denominations (each with infinite supply) and a
+target amount, return the <strong>fewest number of coins</strong> whose
+values sum exactly to the amount. If no combination works, return
+<code>-1</code>. Coins can be reused; order doesn't matter.</p>
+<h3 id="microscope-abstract-story-stripped">🔬 Abstract (Story
+Stripped)</h3>
+<blockquote>
+<p>"Given a set of integer denominations with infinite supply, return
+the minimum number of coins that sum to a target amount, or -1 if
+impossible."</p>
+</blockquote>
+<blockquote>
+<p>⚠️ First abstract said "different integers" — implied each used once.
+Corrected to "infinite supply."</p>
+</blockquote>
+<h3 id="question-constraint-questions-asked">❓ Constraint Questions
+Asked</h3>
+<table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Answer</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Can coins repeat?</td>
+<td>Yes — infinite supply</td>
+</tr>
+<tr>
+<td>Sorted?</td>
+<td>Not guaranteed</td>
+</tr>
+<tr>
+<td>Negative coins?</td>
+<td>No, positive only</td>
+</tr>
+<tr>
+<td>Amount = 0?</td>
+<td>Return 0</td>
+</tr>
+<tr>
+<td>Impossible case?</td>
+<td>Return -1</td>
+</tr>
+<tr>
+<td>Multiple valid combos?</td>
+<td>Return minimum count, not the combo</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raised_hand-trace-by-hand">✋ Trace by Hand</h3>
+<p><code>coins=[1,5,11], amount=15</code> → <code>5+5+5=15</code> →
+output <code>3</code> ✅ (Definition WHY: problem asks for fewest
+coins.)</p>
+<hr />
+<h2 id="compass-step-2--approach-3-gate-check">🧭 Step 2 — Approach
+(3-Gate Check)</h2>
+<h3 id="vertical_traffic_light-3-gate-results">🚦 3-Gate Results</h3>
+<ul>
+<li>Gate 1 (signal recognition): ❌ no</li>
+<li>Gate 2 (pattern match sentence): ❌ no</li>
+<li>Gate 3 (known pattern reflex): ❌ no → Decision: <strong>FIRST
+PRINCIPLES</strong></li>
+</ul>
+<hr />
+<h2 id="mag_right-first-principles--3f-exploration">🔎 First Principles
+— 3F Exploration</h2>
+<h3 id="hammer_and_wrench-techniques-used-in-order">🛠️ Techniques Used
+(in order)</h3>
+<ol type="1">
+<li><strong>Technique B — Manual Solve:</strong> Started subtracting
+coins from 15: <code>15-11=4</code>, <code>15-5=10</code>,
+<code>15-1=14</code>. Noticed each result is a smaller "same-shape"
+problem.</li>
+<li><strong>Pattern recognition by feel:</strong> "it seems like
+subproblem inside subproblem… very much like dynamic programming." But:
+"I don't see any rules yet."</li>
+<li><strong>Socratic rule extraction</strong> (guided by Hadriel) led to
+the recurrence + base cases.</li>
+</ol>
+<h3 id="triangular_ruler-rules-discovered">📐 Rules Discovered</h3>
+<ol type="1">
+<li><code>minCoins(0) = 0</code> — zero coins make zero.</li>
+<li><code>minCoins(negative) = ∞</code> — impossible branch; using
+infinity keeps <code>min()</code> correct (returning -1 here corrupts
+the math: <code>1 + (-1) = 0</code> would falsely claim 0 coins
+work).</li>
+<li><code>minCoins(amt) = min over all coins c of (1 + minCoins(amt - c))</code>
+— the <code>+1</code> accounts for the coin used in THIS step.</li>
+<li>Pure recursion recomputes the same subproblem many times → memoize
+with a cache keyed by <code>amt</code>.</li>
+</ol>
+<h3 id="bulb-the-flip--aha-moment">💡 The Flip / AHA Moment</h3>
+<p><strong>Hadriel:</strong> "When you did <code>15-11=4</code>, what
+question did you ask about 4?" <strong>Wiganz:</strong> "Can I make any
+combination to come up to 4 with those coins?" <strong>Hadriel:</strong>
+"Is that the same TYPE of question as the original problem about 15?"
+<strong>Wiganz:</strong> <em>"Yeah same type."</em> 🔥</p>
+<p>Then immediately after: <strong>Hadriel:</strong> "If
+<code>minCoins(4) = 4</code>, what's the total to make 15 via coin 11?"
+<strong>Wiganz:</strong> "2." ❌ (forgot to count the 11 itself)
+<strong>Hadriel:</strong> "You used coin 11 — that's 1 coin. Plus 4 more
+for the 4. So?" <strong>Wiganz:</strong> "Oh — <code>1 + 4 = 5</code>
+coins." ✅</p>
+<p>That <code>+1</code> is the heart of the recurrence.</p>
+<hr />
+<h2 id="speaking_head-step-3--discuss">🗣️ Step 3 — Discuss</h2>
+<h3 id="clipboard-wiganzs-presentation">📋 Wiganz's Presentation</h3>
+<ol type="1">
+<li>Brute force: try every coin recursively → exponential.</li>
+<li>Observation: same subproblems repeat → memoize.</li>
+<li>Recurrence:
+<code>dp(amt) = min(1 + dp(amt - c)) for c in coins</code>.</li>
+<li>Base cases: <code>dp(0)=0</code>, <code>dp(&lt;0)=∞</code>.</li>
+<li>Final: return <code>-1</code> if result is <code>∞</code> else
+result.</li>
+</ol>
+<h3 id="bar_chart-complexity-stated-warning-heavy-guidance-needed">📊
+Complexity Stated (⚠️ HEAVY GUIDANCE NEEDED)</h3>
+<ul>
+<li>Subproblems: didn't know → guided → <code>0..amount</code> →
+<code>O(S)</code>.</li>
+<li>Work per subproblem: didn't know → guided → loop over coins →
+<code>O(n)</code>.</li>
+<li>Total: <code>O(S × n)</code> ✅</li>
+<li>Space: <code>O(S)</code> for cache + call stack ✅</li>
+</ul>
+<h3 id="white_check_mark-green-light">✅ Green Light</h3>
+<p>Asked "Shall I code it?" after rules surfaced — yes.</p>
+<h3 id="warning-what-was-missed">⚠️ What Was Missed</h3>
+<ul>
+<li>Didn't mention exponential brute force complexity explicitly until
+prompted.</li>
+<li>Didn't articulate why memoization changes the complexity class.</li>
+</ul>
+<hr />
+<h2 id="computer-step-4--code">💻 Step 4 — Code</h2>
+<h3
+id="building_construction-blueprint-warning-vague--needs-tighter-practice">🏗️
+Blueprint (⚠️ Vague — needs tighter practice)</h3>
+<pre><code># 1. cache dict
+# 2. dp(amt) recursive helper
+#    - base: amt==0 -&gt; 0
+#    - base: amt&lt;0 -&gt; inf
+#    - memo check
+#    - try every coin, take min, store
+# 3. call dp(amount), convert inf -&gt; -1</code></pre>
+<h3 id="sparkles-final-clean-solution--top-down-memoization">✨ Final
+Clean Solution — Top-Down (Memoization)</h3>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> coinChange(<span class="va">self</span>, coins: List[<span class="bu">int</span>], amount: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>        cache <span class="op">=</span> {}</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="kw">def</span> dp(amt):</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> amt <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="dv">0</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> amt <span class="op">&lt;</span> <span class="dv">0</span>:</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>            <span class="cf">if</span> amt <span class="kw">in</span> cache:</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>                <span class="cf">return</span> cache[amt]</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            cache[amt] <span class="op">=</span> <span class="bu">min</span>(<span class="dv">1</span> <span class="op">+</span> dp(amt <span class="op">-</span> coin) <span class="cf">for</span> coin <span class="kw">in</span> coins)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="cf">return</span> cache[amt]</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        result <span class="op">=</span> dp(amount)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">if</span> result <span class="op">==</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">else</span> result</span></code></pre></div>
+<h3 id="sparkles-bottom-up-tabulation--alternative">✨ Bottom-Up
+(Tabulation) — Alternative</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> coinChange(<span class="va">self</span>, coins: List[<span class="bu">int</span>], amount: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        dp <span class="op">=</span> [<span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>)] <span class="op">*</span> (amount <span class="op">+</span> <span class="dv">1</span>)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>        dp[<span class="dv">0</span>] <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> amt <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">1</span>, amount <span class="op">+</span> <span class="dv">1</span>):</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>            <span class="cf">for</span> coin <span class="kw">in</span> coins:</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>                <span class="cf">if</span> coin <span class="op">&lt;=</span> amt:</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                    dp[amt] <span class="op">=</span> <span class="bu">min</span>(dp[amt], <span class="dv">1</span> <span class="op">+</span> dp[amt <span class="op">-</span> coin])</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="op">-</span><span class="dv">1</span> <span class="cf">if</span> dp[amount] <span class="op">==</span> <span class="bu">float</span>(<span class="st">&#39;inf&#39;</span>) <span class="cf">else</span> dp[amount]</span></code></pre></div>
+<p><strong>⏱️ Time:</strong> O(S × n) — S subproblems × n coins each
+<strong>📦 Space:</strong> O(S) — cache (top-down) or dp array
+(bottom-up)</p>
+<hr />
+<h2 id="mag-step-5--verify">🔍 Step 5 — Verify</h2>
+<h3 id="footprints-trace-coins125-amount11">👣 Trace
+<code>coins=[1,2,5], amount=11</code></h3>
+<ul>
+<li>dp(11) → min(1+dp(10), 1+dp(9), 1+dp(6))</li>
+<li>dp(6) → min(1+dp(5), 1+dp(4), 1+dp(1)) = min(1+1, 1+2, 1+1) = 2</li>
+<li>dp(10) = 2, dp(11) = 1+2 = 3 ✅ (5+5+1)</li>
+</ul>
+<h3 id="test_tube-edge-cases">🧪 Edge Cases</h3>
+<table>
+<thead>
+<tr>
+<th>Case</th>
+<th>Input</th>
+<th>Expected</th>
+<th>Handled?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount=0</td>
+<td>coins=[1], 0</td>
+<td>0</td>
+<td>✅ base case</td>
+</tr>
+<tr>
+<td>impossible</td>
+<td>coins=[2], amount=3</td>
+<td>-1</td>
+<td>✅ infinity check</td>
+</tr>
+<tr>
+<td>amount==coin</td>
+<td>coins=[1,2,5], 5</td>
+<td>1</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>greedy trap</td>
+<td>coins=[1,3,4], 6</td>
+<td>2 (3+3)</td>
+<td>✅ DP not greedy</td>
+</tr>
+</tbody>
+</table>
+<h3 id="white_check_mark-complexity-confirmed">✅ Complexity
+Confirmed</h3>
+<ul>
+<li>Time <code>O(S × n)</code>. Space <code>O(S)</code>.</li>
+</ul>
+<hr />
+<h2 id="zap-step-6--optimize">⚡ Step 6 — Optimize</h2>
+<h3 id="why-bttc--os--n-is-the-floor">Why BTTC = O(S × n) is the
+floor</h3>
+<ul>
+<li><strong>Must solve every subproblem</strong> — example
+<code>coins=[1,3,4], amount=6</code>: greedy gives <code>4+1+1=3</code>
+but optimal is <code>3+3=2</code>. Without computing <code>dp(3)</code>,
+the optimum is invisible.</li>
+<li><strong>Must try every coin per subproblem</strong> — no a-priori
+way to pick the right one.</li>
+<li>Therefore <code>S × n</code> is the minimum unavoidable work. ✅
+Already at BTTC.</li>
+</ul>
+<hr />
+<h2 id="bug-bugs--mistakes-every-single-one">🐛 Bugs &amp; Mistakes
+(Every Single One)</h2>
+<h3 id="bug-bug-1-wrong-abstract--different-integers">🐛 Bug 1: Wrong
+abstract — "different integers"</h3>
+<ul>
+<li><strong>❌ What:</strong> "fewest number of different integers that
+sum to amount" → implied each coin used once.</li>
+<li><strong>🔍 Why:</strong> <code>concept gap</code> — confused
+"different denominations" (problem's wording about the set) with "use
+each at most once."</li>
+<li><strong>💸 Cost:</strong> Would have led to bounded knapsack, not
+unbounded.</li>
+<li><strong>🛡️ Prevention:</strong> When abstracting, restate
+constraints explicitly: "infinite supply" must appear if reuse is
+allowed.</li>
+</ul>
+<h3 id="bug-bug-2-forgot-the-1-in-the-recurrence">🐛 Bug 2: Forgot the
+<code>+1</code> in the recurrence</h3>
+<ul>
+<li><strong>❌ What:</strong> Said
+<code>minCoins(15) via coin 11 = minCoins(4) = 4</code> → total 2.
+Forgot 11 itself counts.</li>
+<li><strong>🔍 Why:</strong> <code>concept gap</code> — treated the
+recursive call as the entire answer, ignored the coin "spent" to make
+the call.</li>
+<li><strong>💸 Cost:</strong> Would have produced wrong recurrence.</li>
+<li><strong>🛡️ Prevention:</strong> Every recursive call represents ONE
+decision — always ask "what did this step cost?" The <code>+1</code> is
+the cost of the coin chosen now.</li>
+</ul>
+<h3 id="bug-bug-3-negative-amount-base-case-wrong-twice">🐛 Bug 3:
+Negative-amount base case wrong twice</h3>
+<ul>
+<li><strong>❌ What:</strong> First said <code>dp(&lt;0) = 0</code>,
+then <code>dp(&lt;0) = -1</code>.</li>
+<li><strong>🔍 Why:</strong> <code>edge case blind spot</code> — didn't
+simulate how the base value would propagate through
+<code>1 + dp(...)</code> and <code>min(...)</code>.</li>
+<li><strong>💸 Cost:</strong> <code>1 + (-1) = 0</code> would falsely
+claim "0 coins make amount 3 with coin 5."</li>
+<li><strong>🛡️ Prevention:</strong> For "impossible" branches in a
+<code>min()</code> recurrence, the sentinel MUST be <code>∞</code> (or a
+value that loses every comparison). Always trace one step of propagation
+before committing to a base case.</li>
+</ul>
+<h3 id="bug-bug-4-floatinf-instead-of-floatinf">🐛 Bug 4:
+<code>float(inf)</code> instead of <code>float('inf')</code></h3>
+<ul>
+<li><strong>❌ What:</strong> Wrote <code>float(inf)</code> —
+<code>NameError</code>.</li>
+<li><strong>🔍 Why:</strong> <code>syntax confusion</code> — infinity
+needs the string <code>'inf'</code>.</li>
+<li><strong>💸 Cost:</strong> Runtime error.</li>
+<li><strong>🛡️ Prevention:</strong> Muscle memory:
+<code>float('inf')</code> always quoted.</li>
+</ul>
+<h3 id="bug-bug-5-result---declared-outside-recursive-helper">🐛 Bug 5:
+<code>result = []</code> declared OUTSIDE recursive helper</h3>
+<ul>
+<li><strong>❌ What:</strong> Mutable accumulator shared across
+recursion levels.</li>
+<li><strong>🔍 Why:</strong> <code>data structure misuse</code> —
+confused "collect results" with "compute min from candidates."</li>
+<li><strong>💸 Cost:</strong> Cross-branch pollution, wrong
+answers.</li>
+<li><strong>🛡️ Prevention:</strong> Local per-call state for candidates;
+cache only for memoization.</li>
+</ul>
+<h3 id="bug-bug-6-called-mincoinsamount-without-capturing-return">🐛 Bug
+6: Called <code>minCoins(amount)</code> without capturing return</h3>
+<ul>
+<li><strong>❌ What:</strong> Forgot to assign + return result.</li>
+<li><strong>🔍 Why:</strong> <code>rush</code> — moved to the
+<code>-1</code> conversion without binding.</li>
+<li><strong>🛡️ Prevention:</strong> Function call → variable → transform
+→ return. Always.</li>
+</ul>
+<h3 id="bug-bug-7-forgot-to-convert-inf---1-at-the-end">🐛 Bug 7: Forgot
+to convert <code>inf</code> → <code>-1</code> at the end</h3>
+<ul>
+<li><strong>❌ What:</strong> Returned <code>float('inf')</code> instead
+of <code>-1</code>.</li>
+<li><strong>🔍 Why:</strong> <code>edge case blind spot</code>.</li>
+<li><strong>🛡️ Prevention:</strong> When using sentinels internally,
+always normalize on output.</li>
+</ul>
+<hr />
+<h2 id="bulb-discoveries-aha-moments">💡 Discoveries (Aha Moments)</h2>
+<h3 id="lock-core-invariant--rule">🔒 Core Invariant / Rule</h3>
+<blockquote>
+<p><strong>Every recursive call represents using ONE coin.</strong> The
+answer to <code>dp(amt)</code> is
+<code>1 + min(dp(amt - c) over all c)</code>. The <code>+1</code> is
+non-negotiable — it's the coin you just spent.</p>
+</blockquote>
+<h3 id="zap-aha-moments-in-order">⚡ Aha Moments (in order)</h3>
+<p><strong>💡 1. Subproblem inside subproblem</strong></p>
+<ul>
+<li><strong>Before:</strong> "I see I'm subtracting coins but I don't
+see any rules."</li>
+<li><strong>Trigger:</strong> Hadriel's question — "Is asking about 4
+the same TYPE of question as asking about 15?"</li>
+<li><strong>After:</strong> "Yeah same type" → recognized the recursive
+shape of DP.</li>
+<li><strong>🗣️ In his words:</strong> <em>"very much like dynamic
+programming"</em></li>
+</ul>
+<p><strong>💡 2. The <code>+1</code> is the coin you just
+used</strong></p>
+<ul>
+<li><strong>Before:</strong> Said total = <code>dp(subproblem)</code>
+only.</li>
+<li><strong>Trigger:</strong> "You used coin 11 — that's 1 coin. Plus
+the 4 for what's left."</li>
+<li><strong>After:</strong> Recurrence locked in:
+<code>1 + dp(amt - coin)</code>.</li>
+</ul>
+<p><strong>💡 3. Why negative base must be <code>∞</code>, not
+<code>-1</code> or <code>0</code></strong></p>
+<ul>
+<li><strong>Before:</strong> Tried <code>0</code>, then
+<code>-1</code>.</li>
+<li><strong>Trigger:</strong> Hadriel walked through propagation:
+<code>1 + (-1) = 0</code> falsely claims "0 coins make amount 3."</li>
+<li><strong>After:</strong> Sentinels for "impossible" in a
+<code>min()</code> recurrence must lose every comparison →
+<code>∞</code>.</li>
+</ul>
+<p><strong>💡 4. Memoization isn't optional — it changes the complexity
+class</strong></p>
+<ul>
+<li><strong>Before:</strong> Wrote pure recursion, didn't see the
+issue.</li>
+<li><strong>Trigger:</strong> "Is <code>dp(10)</code> called more than
+once?" → "Yes, many times."</li>
+<li><strong>After:</strong> Cache it → exponential collapses to
+<code>O(S × n)</code>.</li>
+</ul>
+<h3 id="art-key-metaphors--examples">🎨 Key Metaphors &amp;
+Examples</h3>
+<ul>
+<li><strong>Greedy trap example</strong>
+<code>coins=[1,3,4], amount=6</code>: greedy → 3, optimal → 2. Proves
+you can't shortcut and must check every coin at every subproblem.</li>
+<li><strong>Sentinel propagation trace:</strong> explicitly showing how
+<code>-1</code> poisons the min — most powerful argument for
+<code>∞</code>.</li>
+</ul>
+<hr />
+<h2 id="bar_chart-final-complexity">📊 Final Complexity</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Complexity</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>⏱️ Time</td>
+<td>O(S × n)</td>
+<td>S subproblems (0..amount), each tries n coins. Memo guarantees each
+subproblem solved once.</td>
+</tr>
+<tr>
+<td>📦 Space</td>
+<td>O(S)</td>
+<td>Top-down: cache + call stack depth ≈ amount. Bottom-up: dp array of
+size S+1.</td>
+</tr>
+<tr>
+<td>🎯 BTTC</td>
+<td>O(S × n)</td>
+<td>Greedy fails → must solve all subproblems. No coin can be skipped
+a-priori → must try all n. Already at floor.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="mirror-self-assessment">🪞 Self-Assessment</h2>
+<ul>
+<li><strong>💪 Confidence:</strong> 3/5 — recurrence clicked; base case
++ complexity still shaky.</li>
+<li><strong>🔄 Revisit:</strong>
+<ul>
+<li>Complexity articulation (needed heavy guidance to get to
+<code>O(S × n)</code>)</li>
+<li>Negative base case reasoning (failed 3 times before infinity)</li>
+<li>Blueprint tightness — comments were vague</li>
+</ul></li>
+<li><strong>📈 Pattern Mastery Impact:</strong> First DP problem. Moves
+DP / 0-1 Knapsack family from <code>beginner</code> toward
+<code>competent</code>. Need 2-3 more problems (Climbing Stairs already
+done; next: House Robber, Longest Increasing Subsequence) to
+solidify.</li>
+</ul>
+<hr />
+<h2 id="link-similar-problems">🔗 Similar Problems</h2>
+<ul>
+<li><strong>Climbing Stairs (#70)</strong> — simpler 1D DP, same shape
+<code>dp(n) = dp(n-1) + dp(n-2)</code> (already solved).</li>
+<li><strong>Coin Change II (#518)</strong> — counts combinations instead
+of minimum; same state space, different recurrence.</li>
+<li><strong>Perfect Squares (#279)</strong> — identical pattern with
+<code>coins = [1,4,9,16,...]</code>.</li>
+</ul>
+<hr />
+<p><em>🔥 Hadriel x Wiganz — 2026-05-14</em> <em>"Call to me and I will
+answer you, and tell you great and unsearchable things you do not know."
+— Jeremiah 33:3 ✝️</em></p>
+  </div>
+</body>
+</html>
