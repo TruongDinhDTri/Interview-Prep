@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Counting Sort &amp; Dutch Flag — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);
+    --red:#c0584a;--white:#e9ddc4;--blue:#5a7c93;}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.4rem,9vw,5.2rem);line-height:.96;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:34ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}.lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}.eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}.core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}.pin b{color:var(--sage-deep);}
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.78rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.a{border-color:var(--sky);}.shape.b{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.a .tag{background:var(--sky-deep);}.shape.b .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}.lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}.alt b{color:var(--clay-deep);}
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  .arr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:34px 0 8px;}
+  .cell{width:50px;height:50px;border-radius:11px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;position:relative;transition:transform .45s cubic-bezier(.34,1.56,.64,1),background .45s,border-color .45s,color .45s;}
+  .cell.v0{background:var(--red);border-color:#9c4338;color:#fff;}
+  .cell.v1{background:var(--white);border-color:#cdbb95;color:#7a6a4a;}
+  .cell.v2{background:var(--blue);border-color:#46606f;color:#fff;}
+  .cell .ptr{position:absolute;top:-23px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.6rem;white-space:nowrap;opacity:0;transition:.3s;}
+  .cell.pL .ptr,.cell.pM .ptr,.cell.pR .ptr,.cell.pLM .ptr,.cell.cur .ptr{opacity:1;}
+  .cell.cur{box-shadow:0 0 0 3px var(--gold);transform:translateY(-7px);}
+  .regionbar{display:flex;gap:8px;justify-content:center;margin:6px 0 2px;font-family:'Spline Sans Mono',monospace;font-size:.6rem;}
+  .rg{padding:2px 10px;border-radius:6px;}
+  .rg.r0{background:var(--red);color:#fff;}.rg.ru{background:#ece0c0;color:var(--ink-soft);}.rg.r2{background:var(--blue);color:#fff;}
+  .counts{display:flex;gap:14px;justify-content:center;margin:14px 0 4px;}
+  .ct{border:1.5px solid var(--line);border-radius:10px;padding:8px 16px;background:#fbf5e6;font-family:'Spline Sans Mono',monospace;font-size:.9rem;transition:.3s;}
+  .ct.b0{border-color:#9c4338;color:var(--red);}.ct.b1{border-color:#cdbb95;}.ct.b2{border-color:#46606f;color:var(--blue);}
+  .ct.bump{box-shadow:0 0 0 3px var(--gold);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:8px 0 14px;flex-wrap:wrap;}.pbar i{width:16px;height:4px;border-radius:2px;background:var(--paper-deep);transition:.3s;}.pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5em;font-size:1.02rem;line-height:1.55;}.exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--clay-deep);display:block;margin-bottom:4px;}.exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}.btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">Pattern 18</p>
+    <h1 class="title"><span class="l1">Counting Sort</span><span class="l2">&amp; Dutch Flag.</span></h1>
+    <p class="lede">The classic problem: an array of only <b>0s, 1s and 2s</b> (🟥 red, ⬜ white, 🟦 blue). Sort it in place. Press step and watch the colours fall into bands.</p>
+  </header>
+
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>You already <em>know</em> what sorted looks like.</h2>
+    <p>Here is the exact problem (LeetCode #75, “Sort Colors”). You hold an array where <b>every element is 0, 1, or 2</b> — nothing else:</p>
+    <div style="margin:18px 0;">
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px;">messy input</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span class="cell v2" style="width:42px;height:42px;font-size:1.05rem;">2</span><span class="cell v0" style="width:42px;height:42px;font-size:1.05rem;">0</span><span class="cell v2" style="width:42px;height:42px;font-size:1.05rem;">2</span><span class="cell v1" style="width:42px;height:42px;font-size:1.05rem;">1</span><span class="cell v0" style="width:42px;height:42px;font-size:1.05rem;">0</span><span class="cell v1" style="width:42px;height:42px;font-size:1.05rem;">1</span>
+      </div>
+      <div style="font-family:'Spline Sans Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-deep);margin:14px 0 6px;">the sorted shape — known in advance</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <span class="cell v0" style="width:42px;height:42px;font-size:1.05rem;">0</span><span class="cell v0" style="width:42px;height:42px;font-size:1.05rem;">0</span><span class="cell v1" style="width:42px;height:42px;font-size:1.05rem;">1</span><span class="cell v1" style="width:42px;height:42px;font-size:1.05rem;">1</span><span class="cell v2" style="width:42px;height:42px;font-size:1.05rem;">2</span><span class="cell v2" style="width:42px;height:42px;font-size:1.05rem;">2</span>
+        <span style="font-family:'Spline Sans Mono',monospace;font-size:.7rem;color:var(--ink-soft);margin-left:8px;">all 0s · all 1s · all 2s</span>
+      </div>
+    </div>
+    <p class="core">Normal sorting <b>compares</b> pairs to <i>discover</i> the order — O(n log n). But here the order is <b>no mystery</b>: there are only three values, so the answer is always “all 0s, then all 1s, then all 2s.” You never need to compare anything — you only need to <b>shove each value into its band</b>.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>Tiny known value-set ⇒ you don't sort, you sweep into buckets.</b> O(n), no comparisons. Two tools do it — pick by the constraint you're given:</div>
+    <table style="width:100%;border-collapse:collapse;margin:8px 0;border:2px solid var(--ink);border-radius:12px;overflow:hidden;font-size:.98rem;">
+      <tr style="background:var(--ink);color:var(--paper);font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;"><th style="text-align:left;padding:11px 16px;font-weight:400;">Tool</th><th style="text-align:left;padding:11px 16px;font-weight:400;">When</th><th style="text-align:left;padding:11px 16px;font-weight:400;">Cost</th></tr>
+      <tr><td style="padding:11px 16px;border-top:1.5px solid var(--line);"><b style="color:var(--sky-deep)">① Counting sort</b></td><td style="padding:11px 16px;border-top:1.5px solid var(--line);">the easy first answer — count, then repaint</td><td style="padding:11px 16px;border-top:1.5px solid var(--line);">2 passes · O(k) space</td></tr>
+      <tr style="background:#f6edd7;"><td style="padding:11px 16px;border-top:1.5px solid var(--line);"><b style="color:var(--sage-deep)">② Dutch Flag</b></td><td style="padding:11px 16px;border-top:1.5px solid var(--line);">the follow-up — “one pass, O(1) space”</td><td style="padding:11px 16px;border-top:1.5px solid var(--line);">1 pass · O(1) space</td></tr>
+    </table>
+  </section>
+
+  <!-- SHAPE 1 -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>Counting sort</em> — count, then paint.</h2>
+    <div class="shape a">
+      <span class="tag">Tally · 2 passes</span>
+      <h3>Counting sort</h3>
+      <p class="one">Pass 1: tally how many of each value. Pass 2: overwrite the array in <b>the order you choose</b> — all 0s, then 1s, then 2s. The sorted order comes from <b>your write-order</b>, not from any comparison.</p>
+      <p class="lbl">The idea</p>
+      <p style="margin:0">One shared write-cursor marches across the array, painting count[0] zeros, then count[1] ones, then count[2] twos. The cursor <b>never resets</b> — a fresh loop per value would restart at 0 and overwrite your work.</p>
+      <p class="lbl">The movement — count, then repaint</p>
+      <p class="muted" style="margin:0 0 4px">Sort colours <code class="inl">2 0 2 1 0</code> by counting.</p>
+      <div class="player" id="p1">
+        <div class="arr"></div>
+        <div class="counts"></div>
+        <div class="pbar" style="margin-top:8px"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">from</span> collections <span class="k">import</span> Counter
+<span class="k">def</span> sort_colors(nums):
+    c = Counter(nums)
+    i = <span class="s">0</span>
+    <span class="k">for</span> v <span class="k">in</span> (<span class="s">0</span>, <span class="s">1</span>, <span class="s">2</span>):        <span class="c"># WE choose the order</span>
+        <span class="k">for</span> _ <span class="k">in</span> range(c[v]):
+            nums[i] = v; i += <span class="s">1</span>   <span class="c"># ONE cursor, never reset</span></pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> sort a tiny value-set · character bucketing · the simple first answer before the O(1) follow-up.</p>
+    </div>
+  </section>
+
+  <!-- SHAPE 2 -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>Dutch National Flag</em> — one pass, in place.</h2>
+    <div class="shape b">
+      <span class="tag">3 pointers · O(1) space</span>
+      <h3>Dutch National Flag</h3>
+      <p class="one">The follow-up: one pass, no extra space. Picture the array splitting into <b>three growing zones</b> — push 0s to the far left, 2s to the far right, and the 1s end up in the middle by themselves.</p>
+      <div style="margin:14px 0;display:flex;border:2px solid var(--ink);border-radius:10px;overflow:hidden;font-family:'Spline Sans Mono',monospace;font-size:.7rem;text-align:center;">
+        <div style="flex:1;background:var(--red);color:#fff;padding:8px;">◀ 0s done<br><b>left</b></div>
+        <div style="flex:1.4;background:#ece0c0;color:var(--ink-soft);padding:8px;">unknown — being scanned<br><b>mid →</b></div>
+        <div style="flex:1;background:var(--blue);color:#fff;padding:8px;">2s done ▶<br><b>right</b></div>
+      </div>
+      <p class="lbl">The idea — one scanner, three outcomes</p>
+      <p style="margin:0">Only <b>one pointer does the looking: <code class="inl">mid</code></b>. It walks through the unknown middle. <code class="inl">left</code> marks where the 0-zone ends, <code class="inl">right</code> marks where the 2-zone begins. For each value <code class="inl">mid</code> lands on:</p>
+      <ul style="margin:10px 0 0;padding-left:20px;">
+        <li style="margin:5px 0;">sees a <b style="color:#9c4338">0</b> → it belongs far left → <b>swap it down to the left zone</b>, grow that zone (<code class="inl">left++</code>), and <code class="inl">mid++</code>.</li>
+        <li style="margin:5px 0;">sees a <b style="color:#7a6a4a">1</b> → it's already in the right place (the middle) → just <code class="inl">mid++</code>.</li>
+        <li style="margin:5px 0;">sees a <b style="color:#46606f">2</b> → it belongs far right → <b>swap it up to the right zone</b>, grow that zone (<code class="inl">right−−</code>), but <b><code class="inl">mid</code> does NOT move</b>.</li>
+      </ul>
+      <p class="lbl">The movement — three regions grow</p>
+      <p class="muted" style="margin:0 0 4px">Sort <code class="inl">2 0 2 1 0 1</code> in one pass.</p>
+      <div class="player" id="p2">
+        <div class="regionbar"><span class="rg r0">left: 0s</span><span class="rg ru">mid: unknown</span><span class="rg r2">right: 2s</span></div>
+        <div class="arr"></div>
+        <div class="pbar" style="margin-top:8px"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+      <p class="lbl">The code</p>
+      <pre><span class="k">def</span> sort_colors(nums):
+    left, mid, right = <span class="s">0</span>, <span class="s">0</span>, len(nums) - <span class="s">1</span>
+    <span class="k">while</span> mid &lt;= right:                  <span class="c"># &lt;= : process the LAST slot too</span>
+        <span class="k">if</span>   nums[mid] == <span class="s">1</span>: mid += <span class="s">1</span>
+        <span class="k">elif</span> nums[mid] == <span class="s">0</span>:
+            nums[left], nums[mid] = nums[mid], nums[left]
+            left += <span class="s">1</span>; mid += <span class="s">1</span>          <span class="c"># newcomer already scanned → mid advances</span>
+        <span class="k">else</span>:                            <span class="c"># == 2</span>
+            nums[right], nums[mid] = nums[mid], nums[right]
+            right -= <span class="s">1</span>                     <span class="c"># newcomer UNSEEN → mid STAYS</span></pre>
+      <div class="alt"><span class="h">Why mid stays after a 2-swap</span>
+        <p style="margin:.3em 0 0">A 0-swap pulls a value from <i>behind</i> mid (already scanned, safe) → mid moves on. A 2-swap pulls a value from the <i>unexplored right</i> → it's never been looked at, so mid must <b>re-examine the same slot</b>. Advance mid there and you'd skip an unchecked value. (And the loop is <code class="inl">mid &lt;= right</code>, not <code class="inl">&lt;</code> — else the final slot is left unsorted.)</p>
+      </div>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Counting sort</b> = tally then repaint (2 passes, O(k) space — the easy answer). <b style="color:var(--sage-deep)">Dutch Flag</b> = three pointers, one pass, O(1) space (the follow-up). Same root: <b>a tiny value-set → partition, don't compare.</b></div>
+  </section>
+
+  <section class="reveal">
+    <p class="eyebrow">You own it when…</p>
+    <h2>The <em>test</em>.</h2>
+    <ul class="check">
+      <li>Core idea in one line: <b>few possible values → bucket, don't compare</b>.</li>
+      <li>Counting sort: <b>one shared cursor</b>, write-order is yours, don't clear the array first.</li>
+      <li>Dutch Flag: <b>mid stays after a 2-swap</b>, advances after a 0-swap; loop is <code class="inl">mid &lt;= right</code>.</li>
+      <li>You compare <code class="inl">nums[mid]</code> (the value), never <code class="inl">mid</code> (the index).</li>
+    </ul>
+  </section>
+  <footer>
+    <p class="verse">“Though your sins are like scarlet, they shall be as white as snow.” — Isaiah 1:18</p>
+    🔥 HADRIEL × WIGANZ · Counting Sort &amp; Dutch Flag · Pattern 18
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  // ---- counting sort player ----
+  (function(){
+    const root=document.getElementById('p1');
+    const arr=root.querySelector('.arr'),countsEl=root.querySelector('.counts'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const n=5;const cells=[];for(let k=0;k<n;k++){const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v"></span>';arr.appendChild(c);cells.push(c);}
+    countsEl.innerHTML='<div class="ct b0">0: <b class="c0">0</b></div><div class="ct b1">1: <b class="c1">0</b></div><div class="ct b2">2: <b class="c2">0</b></div>';
+    const frames=[
+      {vals:[2,0,2,1,0],cur:0,cnt:[0,0,1],bump:2,tag:'count pass · see 2',exp:'Pass 1 — tally. A 2 → count[2] = 1.'},
+      {vals:[2,0,2,1,0],cur:1,cnt:[1,0,1],bump:0,tag:'count · see 0',exp:'count[0] = 1.'},
+      {vals:[2,0,2,1,0],cur:2,cnt:[1,0,2],bump:2,tag:'count · see 2',exp:'count[2] = 2.'},
+      {vals:[2,0,2,1,0],cur:3,cnt:[1,1,2],bump:1,tag:'count · see 1',exp:'count[1] = 1.'},
+      {vals:[2,0,2,1,0],cur:4,cnt:[2,1,2],bump:0,tag:'count · see 0',exp:'count[0] = 2. Tally done: <b>two 0s, one 1, two 2s</b>.'},
+      {vals:[0,0,2,1,0],paint:[0,1],cnt:[2,1,2],tag:'paint · write 0s',exp:'Pass 2 — one cursor marches. Write count[0]=2 zeros into slots 0,1.'},
+      {vals:[0,0,1,1,0],paint:[0,1,2],cnt:[2,1,2],tag:'paint · write 1s',exp:'Same cursor continues — write count[1]=1 one into slot 2. <b>Never reset the cursor.</b>'},
+      {vals:[0,0,1,2,2],paint:[0,1,2,3,4],cnt:[2,1,2],done:true,tag:'paint · write 2s · DONE',exp:'Cursor finishes with count[2]=2 twos in slots 3,4 → <b>[0,0,1,2,2]</b>. Sorted by write-order, zero comparisons.'}
+    ];
+    for(let f=0;f<frames.length;f++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i];
+      cells.forEach((c,idx)=>{const v=f.vals[idx];c.className='cell v'+v+((f.cur===idx)?' cur':'')+((f.paint&&f.paint.includes(idx))?' ':'');c.querySelector('.v').textContent=v;
+        c.querySelector('.ptr').textContent=(f.cur===idx)?'count':'';});
+      root.querySelector('.c0').textContent=f.cnt[0];root.querySelector('.c1').textContent=f.cnt[1];root.querySelector('.c2').textContent=f.cnt[2];
+      ['b0','b1','b2'].forEach((b,x)=>root.querySelector('.'+b).classList.toggle('bump',f.bump===x));
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,x)=>d.classList.toggle('on',x<=i));stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};resetB.onclick=()=>{i=0;apply();};apply();
+  })();
+
+  // ---- dutch flag player ----
+  (function(){
+    const root=document.getElementById('p2');
+    const arr=root.querySelector('.arr'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    const n=6;const cells=[];for(let k=0;k<n;k++){const c=document.createElement('div');c.className='cell';c.innerHTML='<span class="ptr"></span><span class="v"></span>';arr.appendChild(c);cells.push(c);}
+    // hand-simulated frames of Dutch flag on [2,0,2,1,0,1]
+    const frames=[
+      {vals:[2,0,2,1,0,1],L:0,M:0,R:5,tag:'start · mid=0 sees 2',exp:'left=0, mid=0, right=5. nums[mid]=<b>2</b> → swap to the right zone (idx 5). <b>mid STAYS</b> — the value coming back is unexamined.'},
+      {vals:[1,0,2,1,0,2],L:0,M:0,R:4,tag:'after 2-swap · mid=0 sees 1',exp:'A 1 came back from the right. nums[mid]=<b>1</b> → already home → just mid++.'},
+      {vals:[1,0,2,1,0,2],L:0,M:1,R:4,tag:'mid=1 sees 0',exp:'nums[mid]=<b>0</b> → swap to the left zone (idx 0). left++ and mid++ (newcomer already scanned).'},
+      {vals:[0,1,2,1,0,2],L:1,M:2,R:4,tag:'mid=2 sees 2',exp:'nums[mid]=<b>2</b> → swap to right (idx 4). right−−, <b>mid STAYS</b>.'},
+      {vals:[0,1,0,1,2,2],L:1,M:2,R:3,tag:'after 2-swap · mid=2 sees 0',exp:'A 0 came in. nums[mid]=<b>0</b> → swap to left (idx 1). left++, mid++.'},
+      {vals:[0,0,1,1,2,2],L:2,M:3,R:3,tag:'mid=3 sees 1',exp:'nums[mid]=<b>1</b> → home → mid++. Now mid=4 &gt; right=3.'},
+      {vals:[0,0,1,1,2,2],L:2,M:4,R:3,done:true,tag:'mid &gt; right · DONE',exp:'Loop ends → <b>[0,0,1,1,2,2]</b>. One pass, O(1) space — three regions grew until the unknown middle vanished.'}
+    ];
+    for(let f=0;f<frames.length;f++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i];
+      cells.forEach((c,idx)=>{const v=f.vals[idx];let cls='cell v'+v;
+        let lab='';
+        if(idx===f.M&&idx===f.L){cls+=' pLM cur';lab='L·mid';}
+        else if(idx===f.M){cls+=' pM cur';lab='mid';}
+        else if(idx===f.L){cls+=' pL';lab='left';}
+        if(idx===f.R){cls+=(idx===f.M?'':' pR');lab=(lab?lab+'·right':'right');}
+        c.className=cls;c.querySelector('.v').textContent=v;c.querySelector('.ptr').textContent=lab;});
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,x)=>d.classList.toggle('on',x<=i));stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};resetB.onclick=()=>{i=0;apply();};apply();
+  })();
+</script>
+</body>
+</html>

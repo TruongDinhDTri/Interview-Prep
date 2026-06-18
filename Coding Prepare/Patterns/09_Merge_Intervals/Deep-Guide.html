@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Merge Intervals — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+  header.hero{min-height:78vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.7rem,10vw,6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:33ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}.lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  section{margin-top:88px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}.eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}.core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.1rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}.pin b{color:var(--sage-deep);}
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.a{border-color:var(--sky);}.shape.b{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.a .tag{background:var(--sky-deep);}.shape.b .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:30px 0 8px;display:flex;align-items:center;gap:10px;}.lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
+  /* timeline */
+  .tl{position:relative;margin:24px 4px 6px;height:auto;}
+  .axis{position:relative;height:26px;border-bottom:2px solid var(--line);margin-top:8px;}
+  .tick{position:absolute;bottom:-22px;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.66rem;color:var(--ink-soft);}
+  .bar{position:absolute;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:#fff7e8;transition:left .5s,width .5s,opacity .4s,background .4s;}
+  .bar.in{background:var(--sky);}
+  .bar.res{background:var(--sage-deep);}
+  .bar.cur{box-shadow:0 0 0 3px var(--gold);}
+  .bar.faint{opacity:.32;}
+  .counter{font-family:'Spline Sans Mono',monospace;font-size:.84rem;text-align:center;margin-top:10px;color:var(--clay-deep);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:8px 0 14px;flex-wrap:wrap;}.pbar i{width:18px;height:4px;border-radius:2px;background:var(--paper-deep);transition:.3s;}.pbar i.on{background:var(--clay);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:5em;font-size:1.02rem;line-height:1.55;}.exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.76rem;color:var(--clay-deep);display:block;margin-bottom:4px;}.exp b{color:var(--ink);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.78rem;letter-spacing:.06em;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px 22px;border-radius:999px;cursor:pointer;transition:transform .2s;}.btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.4;cursor:default;transform:none;}.btn.ghost{background:transparent;color:var(--ink);}
+  .check{list-style:none;padding:0;margin:18px 0;}
+  .check li{padding:10px 0 10px 38px;position:relative;border-bottom:1.5px dashed var(--line);font-size:1.04rem;}.check li:last-child{border-bottom:0;}
+  .check li::before{content:"✓";position:absolute;left:6px;top:8px;width:24px;height:24px;background:var(--sage);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <p class="kicker">Pattern 09</p>
+    <h1 class="title"><span class="l1">Merge</span><span class="l2">Intervals.</span></h1>
+    <p class="lede">One core idea — <b>sort by start, and every interval only touches its neighbour</b>. Press step and watch the bars merge.</p>
+  </header>
+
+  <section class="reveal">
+    <p class="eyebrow">The core idea</p>
+    <h2>Sort first — then chaos becomes a <em>line</em>.</h2>
+    <p>Thrown together, any interval could overlap any other — checking all pairs is O(n²). But there's a hidden order you can impose for free.</p>
+    <p class="core">Once you <b>sort by start time</b>, the intervals line up left to right. Now a new interval can <b>only</b> overlap the one <i>just before it</i> — never anything earlier. So one left-to-right pass, comparing each to the last, settles everything.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>Sort by start → each interval only meets its predecessor.</b> Overlap test: <code class="inl">curr.start &lt;= prev.end</code>. One sweep merges or appends. <b>O(n log n)</b> (the sort dominates; the sweep is O(n)).</div>
+  </section>
+
+  <!-- SHAPE 1 -->
+  <section class="reveal">
+    <p class="eyebrow">Shape one of two</p>
+    <h2>① <em>Merge</em> — fuse what overlaps.</h2>
+    <div class="shape a">
+      <span class="tag">Combine overlaps</span>
+      <h3>Sort &amp; merge</h3>
+      <p class="one">Walk the sorted intervals. If the current one starts before the last result ends, they overlap — <b>stretch the result's end</b>. Otherwise it's a fresh interval — <b>append it</b>.</p>
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Keep a result list; its last entry is the “live” interval. For each next interval: overlap (<code class="inl">curr[0] &lt;= prev[1]</code>) → extend with <code class="inl">prev[1] = max(prev[1], curr[1])</code> (the <b>max</b> matters — curr might sit fully inside prev). No overlap → start a new live interval.</p>
+      <p class="lbl">The movement — watch overlaps fuse</p>
+      <p class="muted" style="margin:0 0 4px">Merge <code class="inl">[1,3] [2,6] [8,10] [9,12]</code> (already sorted by start).</p>
+      <div class="player" id="p1">
+        <div class="tl"><div class="bars"></div><div class="axis"></div></div>
+        <div class="pbar" style="margin-top:34px"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+      <p class="lbl">The code</p>
+      <pre class="opp"><span class="k">def</span> merge(intervals):
+    intervals.sort(key=<span class="k">lambda</span> x: x[<span class="s">0</span>])     <span class="c"># sort by start — always first</span>
+    res = [intervals[<span class="s">0</span>]]
+    <span class="k">for</span> curr <span class="k">in</span> intervals[<span class="s">1</span>:]:
+        prev = res[-<span class="s">1</span>]
+        <span class="k">if</span> curr[<span class="s">0</span>] &lt;= prev[<span class="s">1</span>]:           <span class="c"># overlap</span>
+            prev[<span class="s">1</span>] = max(prev[<span class="s">1</span>], curr[<span class="s">1</span>])  <span class="c"># extend (max!)</span>
+        <span class="k">else</span>:
+            res.append(curr)              <span class="c"># fresh interval</span>
+    <span class="k">return</span> res</pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> merge overlapping · insert interval · “any meeting conflict?” (Meeting Rooms I).</p>
+    </div>
+  </section>
+
+  <!-- SHAPE 2 -->
+  <section class="reveal">
+    <p class="eyebrow">Shape two of two</p>
+    <h2>② <em>Line sweep</em> — count what's concurrent.</h2>
+    <div class="shape b">
+      <span class="tag">Events · concurrency</span>
+      <h3>Line sweep (±1 events)</h3>
+      <p class="one">When you need <b>how many overlap at once</b> (not which), forget the intervals — split each into two events: <b>+1 at start</b>, <b>−1 at end</b>. Sort all events by time, sweep, track the running total.</p>
+      <p class="lbl">The idea</p>
+      <p style="margin:0">Meeting Rooms II (min rooms): each <code class="inl">+1</code> is someone arriving, each <code class="inl">−1</code> is leaving. Sweeping left to right, the running counter is the number of <b>concurrent</b> meetings; its <b>peak</b> is the rooms you need.</p>
+      <p class="lbl">The movement — watch the counter peak</p>
+      <p class="muted" style="margin:0 0 4px">Rooms for <code class="inl">[1,5] [2,6] [4,7]</code> — sweep the start/end events.</p>
+      <div class="player" id="p2">
+        <div class="tl"><div class="bars"></div><div class="axis"></div></div>
+        <div class="counter"></div>
+        <div class="pbar" style="margin-top:6px"></div><div class="exp"></div>
+        <div class="ctrls"><button class="btn step">Step ▸</button><button class="btn ghost reset">Reset ↺</button></div>
+      </div>
+      <p class="lbl">The code</p>
+      <pre><span class="k">def</span> min_rooms(intervals):
+    events = []
+    <span class="k">for</span> s, e <span class="k">in</span> intervals:
+        events.append((s, <span class="s">1</span>))   <span class="c"># +1 arrive</span>
+        events.append((e, -<span class="s">1</span>))  <span class="c"># -1 leave</span>
+    events.sort()
+    curr = peak = <span class="s">0</span>
+    <span class="k">for</span> _, delta <span class="k">in</span> events:
+        curr += delta
+        peak = max(peak, curr)        <span class="c"># the answer = the peak</span>
+    <span class="k">return</span> peak</pre>
+      <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> Meeting Rooms II · max concurrent events · CPU/airport load.</p>
+    </div>
+
+    <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Merge</b> answers “what are the combined intervals?” — sweep &amp; extend. <b style="color:var(--sage-deep)">Line sweep</b> answers “how many overlap at the busiest moment?” — ±1 events &amp; a running peak. Same root: <b>sort by time, then one pass.</b></div>
+  </section>
+
+  <section class="reveal">
+    <p class="eyebrow">You own it when…</p>
+    <h2>The <em>test</em>.</h2>
+    <ul class="check">
+      <li>Core idea in one line: <b>sort by start, each interval only meets its predecessor</b>.</li>
+      <li>You always <b>sort first</b>, and merge with <code class="inl">max(prev.end, curr.end)</code> (curr may be contained).</li>
+      <li>“Which combined intervals?” → merge. “How many concurrent / min rooms?” → line sweep.</li>
+      <li>You can split intervals into <b>±1 events</b> and read the peak.</li>
+    </ul>
+  </section>
+  <footer>
+    <p class="verse">“There is a time for every matter under heaven.” — Ecclesiastes 3:1</p>
+    🔥 HADRIEL × WIGANZ · Merge Intervals · Pattern 09
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+  const TMIN=0,TMAX=13; // timeline domain
+  function xpct(t){return (t-TMIN)/(TMAX-TMIN)*100;}
+
+  // ---- MERGE player ----
+  (function(){
+    const root=document.getElementById('p1');
+    const barsEl=root.querySelector('.bars'),axisEl=root.querySelector('.axis'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    [0,2,4,6,8,10,12].forEach(t=>{const k=document.createElement('div');k.className='tick';k.style.left=xpct(t)+'%';k.textContent=t;axisEl.appendChild(k);});
+    // input bars (top rows) and result bars (bottom)
+    const input=[[1,3],[2,6],[8,10],[9,12]];
+    const rows=[18,52,86,120];
+    barsEl.parentElement.style.height='150px';
+    const inEls=input.map((iv,idx)=>{const b=document.createElement('div');b.className='bar in';b.style.top=rows[idx]+'px';b.style.left=xpct(iv[0])+'%';b.style.width=(xpct(iv[1])-xpct(iv[0]))+'%';b.textContent='['+iv[0]+','+iv[1]+']';barsEl.appendChild(b);return b;});
+    // result bar (single, at bottom-ish, we'll animate). We'll create up to 2 result bars.
+    const resEls=[];function resBar(){const b=document.createElement('div');b.className='bar res';b.style.top='124px';barsEl.appendChild(b);resEls.push(b);return b;}
+    const frames=[
+      {tag:'result = [1,3]',cur:[0],res:[[1,3]],exp:'Seed the result with the first interval <b>[1,3]</b>.'},
+      {tag:'[2,6]: 2 ≤ 3 → overlap',cur:[1],res:[[1,6]],exp:'Next is [2,6]. Its start 2 ≤ result end 3 → <b>overlap</b>. Stretch the end: max(3,6)=6 → result becomes <b>[1,6]</b>.'},
+      {tag:'[8,10]: 8 &gt; 6 → no overlap',cur:[2],res:[[1,6],[8,10]],exp:'[8,10] starts at 8 &gt; 6 → no overlap. <b>Append</b> a fresh interval [8,10].'},
+      {tag:'[9,12]: 9 ≤ 10 → overlap',cur:[3],res:[[1,6],[8,12]],exp:'[9,12] starts at 9 ≤ 10 → overlap with the live [8,10]. Extend: max(10,12)=12 → <b>[8,12]</b>.'},
+      {tag:'DONE → [1,6] [8,12]',cur:[],res:[[1,6],[8,12]],exp:'One pass, sorted order. Final merged set: <b>[1,6] and [8,12]</b>.'}
+    ];
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i];
+      inEls.forEach((b,idx)=>{b.classList.toggle('cur',f.cur.includes(idx));b.classList.toggle('faint',i===frames.length-1);});
+      resEls.forEach(b=>b.remove());resEls.length=0;
+      f.res.forEach(iv=>{const b=resBar();b.style.left=xpct(iv[0])+'%';b.style.width=(xpct(iv[1])-xpct(iv[0]))+'%';b.textContent='['+iv[0]+','+iv[1]+']';});
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};resetB.onclick=()=>{i=0;apply();};apply();
+  })();
+
+  // ---- LINE SWEEP player ----
+  (function(){
+    const root=document.getElementById('p2');
+    const barsEl=root.querySelector('.bars'),axisEl=root.querySelector('.axis'),counter=root.querySelector('.counter'),bar=root.querySelector('.pbar'),exp=root.querySelector('.exp'),
+          stepB=root.querySelector('.step'),resetB=root.querySelector('.reset');
+    [0,2,4,6,8,10,12].forEach(t=>{const k=document.createElement('div');k.className='tick';k.style.left=xpct(t)+'%';k.textContent=t;axisEl.appendChild(k);});
+    const input=[[1,5],[2,6],[4,7]];const rows=[18,52,86];
+    barsEl.parentElement.style.height='118px';
+    const inEls=input.map((iv,idx)=>{const b=document.createElement('div');b.className='bar in';b.style.top=rows[idx]+'px';b.style.left=xpct(iv[0])+'%';b.style.width=(xpct(iv[1])-xpct(iv[0]))+'%';b.textContent='m'+(idx+1);barsEl.appendChild(b);return b;});
+    // sweep line
+    const line=document.createElement('div');line.style.position='absolute';line.style.top='0';line.style.height='118px';line.style.width='2px';line.style.background='var(--clay)';line.style.transition='left .5s';line.style.left='0';barsEl.appendChild(line);
+    // events sorted: (1,+1),(2,+1),(4,+1),(5,-1),(6,-1),(7,-1)
+    const frames=[
+      {t:1,c:1,hi:[0],tag:'t=1 · m1 arrives (+1)',exp:'First event. curr = 1 room in use. peak = 1.'},
+      {t:2,c:2,hi:[0,1],tag:'t=2 · m2 arrives (+1)',exp:'m2 starts while m1 still runs → curr = 2. peak = <b>2</b>.'},
+      {t:4,c:3,hi:[0,1,2],tag:'t=4 · m3 arrives (+1)',exp:'All three overlap now → curr = <b>3</b>. peak = <b>3</b> 🎯 — this is the busiest moment.'},
+      {t:5,c:2,hi:[1,2],tag:'t=5 · m1 leaves (−1)',exp:'m1 ends → curr = 2. peak stays 3.'},
+      {t:6,c:1,hi:[2],tag:'t=6 · m2 leaves (−1)',exp:'curr = 1.'},
+      {t:7,c:0,hi:[],tag:'t=7 · m3 leaves · DONE',exp:'All gone → curr = 0. <b>The peak was 3 → 3 rooms needed.</b> Never compared intervals pairwise — just swept ±1 events.'}
+    ];
+    for(let k=0;k<frames.length;k++)bar.appendChild(document.createElement('i'));
+    let i=0;
+    function apply(){const f=frames[i];
+      line.style.left=xpct(f.t)+'%';
+      inEls.forEach((b,idx)=>b.classList.toggle('cur',f.hi.includes(idx)));
+      counter.innerHTML='concurrent = <b>'+f.c+'</b> &nbsp;·&nbsp; peak = <b>'+Math.max(...frames.slice(0,i+1).map(x=>x.c))+'</b>';
+      exp.innerHTML='<span class="tg">'+f.tag+'</span>'+f.exp;
+      [...bar.children].forEach((d,k)=>d.classList.toggle('on',k<=i));stepB.disabled=i>=frames.length-1;}
+    stepB.onclick=()=>{if(i<frames.length-1){i++;apply();}};resetB.onclick=()=>{i=0;apply();};apply();
+  })();
+</script>
+</body>
+</html>
