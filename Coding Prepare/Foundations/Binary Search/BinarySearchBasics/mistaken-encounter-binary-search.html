@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Mistaken Encounter — Binary Search</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:860px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+  header.hero{min-height:74vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,11vw,6rem);line-height:.92;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:38ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}.lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  section{margin-top:92px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}.eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.4rem,3.6vw,2rem);line-height:1.32;margin:6px 0;}.core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.08rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}.pin b{color:var(--sage-deep);}
+
+  /* ---- Interactive Player ---- */
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;margin-top:30px;}
+  .target-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:20px;font-family:'Spline Sans Mono',monospace;font-size:.9rem;color:var(--ink-soft);}
+  .target-pill{background:var(--clay-deep);color:#f4ecd8;font-weight:600;padding:5px 14px;border-radius:20px;font-size:1rem;}
+  .arr{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:34px 0 8px;}
+  .cell{position:relative;width:52px;height:52px;border-radius:10px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.2rem;color:var(--ink-soft);transition:.35s;}
+  .cell .idx{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.6rem;color:var(--ink-soft);opacity:.6;}
+  .cell.in{border-color:var(--sage);background:#e6eddf;color:var(--sage-deep);}
+  .cell.out{opacity:.28;}
+  .cell.mid{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);transform:translateY(-8px) scale(1.06);box-shadow:0 6px 0 rgba(192,104,72,.22);}
+  .cell.found{border-color:var(--gold);background:#f7edcf;color:var(--clay-deep);box-shadow:0 0 0 3px rgba(212,154,58,.4);}
+  .cell .ptr{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.62rem;letter-spacing:.06em;white-space:nowrap;font-weight:600;}
+  .cell .ptr.l{color:var(--sky-deep);}.cell .ptr.r{color:var(--clay-deep);}.cell .ptr.m{color:var(--clay-deep);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:4.5em;font-size:1.04rem;line-height:1.55;margin-top:26px;}.exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--clay-deep);display:block;margin-bottom:4px;letter-spacing:.1em;}.exp b{color:var(--ink);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap;}.pbar i{width:16px;height:4px;border-radius:2px;background:var(--paper-deep);transition:.3s;}.pbar i.on{background:var(--clay);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;border:2px solid var(--ink);background:var(--ink);color:#f4ecd8;padding:11px 22px;border-radius:9px;cursor:pointer;transition:.2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .btn.ghost{background:transparent;color:var(--ink);}
+  .chip-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:6px;}
+  .chip{font-family:'Spline Sans Mono',monospace;font-size:.72rem;border:1.5px solid var(--line);background:#fbf5e6;color:var(--ink-soft);padding:6px 12px;border-radius:18px;cursor:pointer;transition:.2s;}
+  .chip.on{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);font-weight:600;}
+
+  /* ---- Mistake cards ---- */
+  .mistake{border:2px solid var(--line);border-radius:18px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);padding:28px;margin-top:34px;position:relative;border-left:6px solid var(--clay);}
+  .mistake .num{position:absolute;top:-18px;left:24px;background:var(--clay-deep);color:#f7edcf;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.14em;padding:6px 14px;border-radius:5px;}
+  .mistake h3{font-family:'Fraunces',serif;font-size:1.7rem;margin:6px 0 4px;}
+  .mistake .sub{font-style:italic;color:var(--ink-soft);margin:0 0 16px;}
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:16px 18px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.82rem;line-height:1.6;margin:12px 0;box-shadow:4px 5px 0 var(--shadow);}
+  pre.bad{border-left:5px solid var(--clay);}
+  pre.good{border-left:5px solid var(--sage);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .x{color:#e57a5c;font-weight:600;}pre .ok{color:#9fc48a;font-weight:600;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;margin:18px 0 4px;display:flex;align-items:center;gap:10px;}.lbl.bad{color:var(--clay-deep);}.lbl.good{color:var(--sage-deep);}.lbl::before{content:"";width:16px;height:2px;}.lbl.bad::before{background:var(--clay);}.lbl.good::before{background:var(--sage);}
+  .why{background:#f7e9e4;border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;padding:14px 18px;margin:16px 0;}.why .h{font-family:'Spline Sans Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);margin-bottom:4px;}
+  .mini{display:flex;gap:6px;justify-content:center;margin:14px 0 4px;}
+  .mini .c{width:42px;height:42px;border-radius:9px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;color:var(--ink-soft);position:relative;}
+  .mini .c .t{position:absolute;top:-22px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.58rem;font-weight:600;}
+  .mini .c.lr{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);}.mini .c .t.lr{color:var(--clay-deep);}
+
+  ul.check{list-style:none;padding:0;}
+  ul.check li{position:relative;padding-left:34px;margin:14px 0;font-size:1.1rem;}
+  ul.check li::before{content:"✓";position:absolute;left:0;top:0;width:22px;height:22px;background:var(--sage-deep);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-family:'Spline Sans Mono',monospace;}
+  footer{margin-top:96px;padding-top:30px;border-top:1.5px solid var(--line);text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.78rem;color:var(--ink-soft);letter-spacing:.06em;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.05rem;color:var(--sage-deep);margin-bottom:14px;letter-spacing:0;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Foundations · Binary Search</p>
+    <h1 class="title"><span class="l1">The Mistaken</span><span class="l2">Encounter.</span></h1>
+    <p class="lede">Binary search is three lines of logic and a <b>thousand ways to bleed</b>. Three classic wounds — watch each one happen, then heal it.</p>
+  </header>
+
+  <!-- ===== THE RIGHT WAY ===== -->
+  <section class="reveal">
+    <p class="eyebrow">First, the correct encounter</p>
+    <h2>Walk it <em>once</em>, properly.</h2>
+    <p class="muted">A sorted shelf. You halve the search space each step by comparing the middle to your target. Pick a target, then step through — watch <code class="inl">left</code>, <code class="inl">mid</code>, and <code class="inl">right</code> close in.</p>
+
+    <div class="player" id="player">
+      <div class="target-row">
+        <span>looking for</span>
+        <span class="target-pill" id="tgt">7</span>
+        <span>in a sorted array</span>
+      </div>
+      <div class="chip-row" id="chips"></div>
+      <div class="arr" id="arr"></div>
+      <div class="pbar" id="pbar"></div>
+      <div class="exp" id="exp"></div>
+      <div class="ctrls">
+        <button class="btn ghost" id="reset">↺ Reset</button>
+        <button class="btn" id="step">Step ▸</button>
+      </div>
+    </div>
+
+    <div class="pin" data-l="THE TEMPLATE"><b>left = 0, right = len-1.</b> While <code class="inl">left &lt;= right</code>: compute <code class="inl">mid</code> <b>inside</b> the loop, compare, then move the boundary <i>past</i> mid. Three rules — and each mistake below breaks exactly one of them.</div>
+  </section>
+
+  <!-- ===== MISTAKE 1 ===== -->
+  <section class="reveal">
+    <p class="eyebrow">Wound #1</p>
+    <h2>The <em>frozen</em> middle.</h2>
+    <p class="core"><code class="inl">mid</code> computed <b>once</b>, before the loop.</p>
+
+    <div class="mistake">
+      <span class="num">MISTAKE 01</span>
+      <h3>Mid never moves</h3>
+      <p class="sub">The boundaries shrink, but the spotlight stays put.</p>
+
+      <p class="lbl bad">The bug</p>
+      <pre class="bad"><span class="x">mid = (left + right) // 2</span>   <span class="c"># ← computed ONCE, before the loop</span>
+<span class="k">while</span> left &lt;= right:
+    <span class="k">if</span> nums[mid] == target:   <span class="c"># mid never changes!</span>
+        <span class="k">return</span> mid
+    <span class="c"># left/right move… but mid is stuck forever</span></pre>
+
+      <div class="why"><div class="h">Why it bleeds</div><b>Infinite loop.</b> You keep narrowing <code class="inl">left</code> and <code class="inl">right</code>, but you keep checking the <i>same</i> cell. The answer is never re-examined, the boundaries oscillate, the loop spins forever.</div>
+
+      <p class="lbl good">The fix</p>
+      <pre class="good"><span class="k">while</span> left &lt;= right:
+    <span class="ok">mid = left + (right - left) // 2</span>   <span class="c"># ← recompute EVERY iteration</span></pre>
+      <p class="muted" style="margin-top:10px;font-size:.98rem;"><code class="inl">left + (right - left)//2</code> over <code class="inl">(left+right)//2</code> also dodges integer overflow in languages with fixed-width ints — a free habit worth keeping.</p>
+    </div>
+  </section>
+
+  <!-- ===== MISTAKE 2 ===== -->
+  <section class="reveal">
+    <p class="eyebrow">Wound #2</p>
+    <h2>The <em>off-by-one</em> door.</h2>
+    <p class="core">Looping on <code class="inl">left &lt; right</code> instead of <b><code class="inl">left &lt;= right</code></b>.</p>
+
+    <div class="mistake">
+      <span class="num">MISTAKE 02</span>
+      <h3>The single element slips through</h3>
+      <p class="sub">When the search space narrows to one cell, the door closes too early.</p>
+
+      <p class="lbl bad">The bug</p>
+      <pre class="bad"><span class="k">while</span> left <span class="x">&lt;</span> right:   <span class="c"># misses the last candidate</span></pre>
+
+      <div class="why"><div class="h">Watch it fail · nums = [5], target = 5</div>
+        <div class="mini">
+          <div class="c lr"><span class="t lr">left = right = 0</span>5</div>
+        </div>
+        <p style="margin:14px 0 0;font-size:1rem;"><code class="inl">left = 0, right = 0</code> → <code class="inl">left &lt; right</code> is <b>False</b> → loop body never runs → returns <code class="inl">-1</code>. But 5 <i>is</i> right there. ❌</p>
+      </div>
+
+      <p class="lbl good">The fix</p>
+      <pre class="good"><span class="k">while</span> left <span class="ok">&lt;=</span> right:   <span class="c"># include the case left == right</span></pre>
+      <p class="muted" style="margin-top:10px;font-size:.98rem;">With <code class="inl">&lt;=</code>, the moment <code class="inl">left == right</code> you still inspect that one surviving cell. That cell is often <i>the answer</i>.</p>
+    </div>
+  </section>
+
+  <!-- ===== MISTAKE 3 ===== -->
+  <section class="reveal">
+    <p class="eyebrow">Wound #3</p>
+    <h2>The <em>phantom</em> index.</h2>
+    <p class="core"><code class="inl">right = len(nums)</code> — one step past the edge of the world.</p>
+
+    <div class="mistake">
+      <span class="num">MISTAKE 03</span>
+      <h3>Right starts out of bounds</h3>
+      <p class="sub">The shelf has indices 0…len-1. Reach for len, and you grab air.</p>
+
+      <p class="lbl bad">The bug</p>
+      <pre class="bad">right = <span class="x">len(nums)</span>   <span class="c"># index len is OUT OF BOUNDS</span>
+<span class="c"># first mid can land on len-ish → nums[mid] → IndexError</span></pre>
+
+      <div class="why"><div class="h">Why it bleeds</div>For a length-N array, valid indices run <code class="inl">0</code> to <code class="inl">N-1</code>. Starting <code class="inl">right = N</code> means <code class="inl">mid</code> can point at a cell that doesn't exist → <b>IndexError</b> (or a silent wrong read in C-like languages).</div>
+
+      <p class="lbl good">The fix</p>
+      <pre class="good">right = <span class="ok">len(nums) - 1</span>   <span class="c"># the last VALID index</span></pre>
+      <p class="muted" style="margin-top:10px;font-size:.98rem;">Note: the <code class="inl">len(nums)-1</code> + <code class="inl">left &lt;= right</code> pairing is one consistent template (closed interval <code class="inl">[left, right]</code>). The <i>other</i> valid template uses <code class="inl">right = len(nums)</code> with <code class="inl">left &lt; right</code> (half-open <code class="inl">[left, right)</code>). Pick one and never mix them — mixing is where these bugs are born.</p>
+    </div>
+  </section>
+
+  <!-- ===== TAKEAWAYS ===== -->
+  <section class="reveal">
+    <p class="eyebrow">Carry these out</p>
+    <h2>The three <em>vows</em>.</h2>
+    <ul class="check">
+      <li>Always recompute <code class="inl">mid</code> <b>inside</b> the loop — a frozen mid is an infinite loop.</li>
+      <li>Use <code class="inl">while left &lt;= right</code> for the closed-interval template — so the lone surviving cell still gets checked.</li>
+      <li>Set <code class="inl">right = len(nums) - 1</code> — the last <i>real</i> index, never one past the edge.</li>
+      <li>Bonus: <code class="inl">left + (right-left)//2</code> beats <code class="inl">(left+right)//2</code> — same answer, no overflow.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“Let all things be done decently and in order.” — 1 Corinthians 14:40</p>
+    🔥 HADRIEL × WIGANZ · Binary Search Foundation · The Mistaken Encounter
+  </footer>
+
+</div>
+
+<script>
+  // ---- Reveal on scroll ----
+  const io = new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
+
+  // ---- Interactive binary search stepper ----
+  const NUMS = [1, 3, 5, 7, 9, 11, 13, 15];
+  const TARGETS = [7, 1, 15, 8];   // last (8) is a "not found" case
+  let target = TARGETS[0];
+
+  const arrEl = document.getElementById('arr');
+  const expEl = document.getElementById('exp');
+  const barEl = document.getElementById('pbar');
+  const tgtEl = document.getElementById('tgt');
+  const chipsEl = document.getElementById('chips');
+  const stepB = document.getElementById('step');
+  const resetB = document.getElementById('reset');
+
+  let frames = [], i = 0;
+
+  function buildFrames(){
+    frames = [];
+    let left = 0, right = NUMS.length - 1;
+    frames.push({left,right,mid:null,found:null,
+      note:`Set <b>left = 0</b>, <b>right = ${right}</b> (last valid index). The whole array is in play.`});
+    let guard = 0;
+    while(left <= right && guard++ < 20){
+      const mid = left + ((right - left) >> 1);
+      if(NUMS[mid] === target){
+        frames.push({left,right,mid,found:mid,
+          note:`<b>mid = ${mid}</b>, nums[${mid}] = <b>${NUMS[mid]}</b> — that's the target. Found it. ✓`});
+        break;
+      } else if(NUMS[mid] < target){
+        frames.push({left,right,mid,found:null,
+          note:`<b>mid = ${mid}</b>, nums[${mid}] = ${NUMS[mid]} &lt; ${target}. Target is to the right → move <b>left = ${mid+1}</b>.`});
+        left = mid + 1;
+      } else {
+        frames.push({left,right,mid,found:null,
+          note:`<b>mid = ${mid}</b>, nums[${mid}] = ${NUMS[mid]} &gt; ${target}. Target is to the left → move <b>right = ${mid-1}</b>.`});
+        right = mid - 1;
+      }
+    }
+    if(!frames.some(f=>f.found!==null)){
+      frames.push({left,right,mid:null,found:null,done:true,
+        note:`<b>left (${left}) &gt; right (${right})</b> — search space empty. ${target} is not in the array → return <b>-1</b>.`});
+    } else {
+      frames[frames.length-1].done = true;
+    }
+    barEl.innerHTML='';
+    frames.forEach(()=>barEl.appendChild(document.createElement('i')));
+  }
+
+  function render(){
+    const f = frames[i];
+    arrEl.innerHTML='';
+    NUMS.forEach((v,idx)=>{
+      const c = document.createElement('div');
+      let cls = 'cell';
+      const inRange = (f.left!==null && idx>=f.left && idx<=f.right);
+      if(f.found===idx) cls+=' found';
+      else if(f.mid===idx) cls+=' mid';
+      else if(inRange) cls+=' in';
+      else cls+=' out';
+      c.className = cls;
+      let ptrs = '';
+      if(idx===f.left && idx===f.right && f.left!==null) ptrs = `<span class="ptr l">L=R</span>`;
+      else if(idx===f.left && f.left!==null) ptrs = `<span class="ptr l">L</span>`;
+      else if(idx===f.right && f.right!==null) ptrs = `<span class="ptr r">R</span>`;
+      if(f.mid===idx) ptrs = `<span class="ptr m">▼ mid</span>`;
+      c.innerHTML = `${ptrs}${v}<span class="idx">${idx}</span>`;
+      arrEl.appendChild(c);
+    });
+    expEl.innerHTML = `<span class="tg">${f.done?'RESULT':'STEP '+(i+1)+' / '+frames.length}</span>${f.note}`;
+    [...barEl.children].forEach((d,x)=>d.classList.toggle('on',x<=i));
+    stepB.disabled = i >= frames.length-1;
+  }
+
+  function reset(){ i=0; buildFrames(); render(); }
+
+  stepB.onclick = ()=>{ if(i<frames.length-1){ i++; render(); } };
+  resetB.onclick = reset;
+
+  // target chips
+  TARGETS.forEach((t,idx)=>{
+    const ch = document.createElement('div');
+    ch.className = 'chip' + (idx===0?' on':'');
+    ch.textContent = (t===8 ? 'find 8 (absent)' : 'find '+t);
+    ch.onclick = ()=>{
+      target = t; tgtEl.textContent = t;
+      [...chipsEl.children].forEach(x=>x.classList.remove('on'));
+      ch.classList.add('on');
+      reset();
+    };
+    chipsEl.appendChild(ch);
+  });
+
+  reset();
+</script>
+</body>
+</html>
