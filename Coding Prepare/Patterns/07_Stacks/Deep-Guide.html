@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Stacks &amp; Monotonic — Core Idea &amp; The Two Shapes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18.5px;line-height:1.74;overflow-x:hidden;background-image:radial-gradient(circle at 16% 8%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 86% 14%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:830px;margin:0 auto;padding:0 26px 110px;position:relative;z-index:2;}
+  header.hero{min-height:74vh;display:flex;flex-direction:column;justify-content:center;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.4em;text-transform:uppercase;color:var(--sage-deep);margin:0 0 20px;opacity:0;animation:fadeUp .9s .1s forwards;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.7rem,11vw,6.2rem);line-height:.92;letter-spacing:-.02em;margin:0;}
+  h1.title .l1{display:block;opacity:0;animation:fadeUp 1s .2s forwards;}
+  h1.title .l2{display:block;color:var(--clay-deep);font-style:italic;font-weight:600;margin-left:.3em;opacity:0;animation:fadeUp 1s .4s forwards;}
+  .lede{font-size:1.28rem;max-width:36ch;margin:30px 0 0;color:var(--ink-soft);opacity:0;animation:fadeUp 1s .6s forwards;}.lede b{color:var(--ink);font-weight:600;}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+  section{margin-top:92px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:14px;}.eyebrow::before{content:"";width:32px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(2rem,5.2vw,3rem);line-height:1.05;letter-spacing:-.01em;margin:.35em 0 .3em;}
+  h2 em{font-style:italic;color:var(--sage-deep);}
+  p{margin:.8em 0;}.muted{color:var(--ink-soft);}strong{font-weight:600;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.86em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .core{font-family:'Fraunces',serif;font-style:italic;font-weight:500;font-size:clamp(1.5rem,3.8vw,2.2rem);line-height:1.32;margin:6px 0;}.core b{font-style:normal;color:var(--clay-deep);}
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:18px 22px;margin:22px 0;position:relative;font-size:1.08rem;}
+  .pin::before{content:attr(data-l);position:absolute;top:-11px;left:16px;background:var(--sage-deep);color:#f4ecd8;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;padding:3px 9px;border-radius:3px;}.pin b{color:var(--sage-deep);}
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:18px 20px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:14px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sage);}
+  pre.opp{border-left-color:var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}
+
+  /* two shapes */
+  .shape{border:2px solid var(--line);border-radius:20px;padding:30px;background:#f7eed9;box-shadow:6px 8px 0 var(--shadow);position:relative;margin-top:28px;}
+  .shape.a{border-color:var(--sky);}.shape.b{border-color:var(--sage);}
+  .shape .tag{position:absolute;top:-16px;left:26px;font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;padding:6px 14px;border-radius:4px;color:#fff7e8;}
+  .shape.a .tag{background:var(--sky-deep);}.shape.b .tag{background:var(--sage-deep);}
+  .shape h3{font-family:'Fraunces',serif;font-size:2rem;margin:8px 0 0;}
+  .shape .one{font-style:italic;color:var(--ink-soft);font-size:1.16rem;margin:.3em 0 0;}
+  .lbl{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;color:var(--clay-deep);margin:26px 0 8px;display:flex;align-items:center;gap:10px;}.lbl::before{content:"";width:18px;height:2px;background:var(--clay);}
+  .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
+  .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}.alt b{color:var(--clay-deep);}
+
+  /* ---- interactive monotonic stepper ---- */
+  .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;margin-top:30px;}
+  .ptitle{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-bottom:8px;}
+  .row-lbl{font-family:'Spline Sans Mono',monospace;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin:18px 0 6px;}
+  .arr{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin:8px 0;}
+  .cell{position:relative;width:48px;height:48px;border-radius:9px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem;color:var(--ink-soft);transition:.3s;}
+  .cell .idx{position:absolute;bottom:-19px;left:50%;transform:translateX(-50%);font-family:'Spline Sans Mono',monospace;font-size:.58rem;color:var(--ink-soft);opacity:.6;}
+  .cell.cur{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);transform:translateY(-6px) scale(1.05);box-shadow:0 6px 0 rgba(192,104,72,.2);}
+  .cell.done{opacity:.4;}
+  .cell.instk{border-color:var(--sky);background:#e8f0f4;color:var(--sky-deep);}
+  .res .cell.filled{border-color:var(--gold);background:#f7edcf;color:var(--clay-deep);}
+  .stackbox{min-height:72px;display:flex;gap:8px;justify-content:center;align-items:flex-end;flex-wrap:wrap;border:1.5px dashed var(--sky);border-radius:12px;background:#eef4f7;padding:14px;margin-top:6px;}
+  .stackbox .empty{font-family:'Spline Sans Mono',monospace;font-size:.7rem;color:var(--sky-deep);opacity:.6;align-self:center;}
+  .scell{width:52px;border-radius:9px;border:2px solid var(--sky);background:#fbf5e6;text-align:center;padding:6px 0;font-family:'Fraunces',serif;font-weight:600;color:var(--sky-deep);transition:.3s;}
+  .scell .si{display:block;font-family:'Spline Sans Mono',monospace;font-size:.56rem;color:var(--ink-soft);opacity:.7;}
+  .scell.popping{border-color:var(--clay);background:#f6e3da;color:var(--clay-deep);}
+  .exp{background:#fbf5e6;border:1.5px solid var(--line);border-radius:11px;padding:14px 18px;min-height:4.5em;font-size:1.02rem;line-height:1.55;margin-top:20px;}.exp .tg{font-family:'Spline Sans Mono',monospace;font-size:.72rem;color:var(--clay-deep);display:block;margin-bottom:4px;letter-spacing:.1em;}.exp b{color:var(--ink);}
+  .pbar{display:flex;gap:4px;justify-content:center;margin:14px 0 4px;flex-wrap:wrap;}.pbar i{width:15px;height:4px;border-radius:2px;background:var(--paper-deep);transition:.3s;}.pbar i.on{background:var(--clay);}
+  .ctrls{display:flex;gap:12px;justify-content:center;margin-top:16px;}
+  .btn{font-family:'Spline Sans Mono',monospace;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;border:2px solid var(--ink);background:var(--ink);color:#f4ecd8;padding:11px 22px;border-radius:9px;cursor:pointer;transition:.2s;}
+  .btn:hover{transform:translateY(-2px);}.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;}
+  .btn.ghost{background:transparent;color:var(--ink);}
+
+  ul.check{list-style:none;padding:0;}
+  ul.check li{position:relative;padding-left:34px;margin:14px 0;font-size:1.1rem;}
+  ul.check li::before{content:"✓";position:absolute;left:0;top:0;width:22px;height:22px;background:var(--sage-deep);color:#f4ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-family:'Spline Sans Mono',monospace;}
+  .deeper{display:inline-flex;align-items:center;gap:12px;margin-top:14px;text-decoration:none;font-family:'Fraunces',serif;font-weight:600;font-size:1.25rem;color:#f4ecd8;background:var(--clay-deep);padding:16px 26px;border-radius:4px 16px 4px 16px;box-shadow:5px 6px 0 var(--shadow);transition:transform .2s;}
+  .deeper:hover{transform:translateY(-3px);}
+  footer{margin-top:96px;padding-top:30px;border-top:1.5px solid var(--line);text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.78rem;color:var(--ink-soft);letter-spacing:.06em;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.05rem;color:var(--sage-deep);margin-bottom:14px;letter-spacing:0;}
+  .reveal{opacity:0;transform:translateY(28px);transition:opacity .8s,transform .8s;}.reveal.in{opacity:1;transform:none;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <p class="kicker">Pattern 07 · Stacks &amp; Monotonic</p>
+    <h1 class="title"><span class="l1">Last in,</span><span class="l2">first out.</span></h1>
+    <p class="lede">A stack is a memory of <b>what's still waiting</b>. The top guards the order — and that single rule splits into two shapes that solve half your interview.</p>
+  </header>
+
+  <!-- CORE IDEA -->
+  <section class="reveal">
+    <p class="eyebrow">The one idea</p>
+    <h2>It holds the <em>unresolved</em>.</h2>
+    <p class="core">A stack keeps the items that <b>haven't been answered yet</b> — newest on top, because the newest is the first that can be resolved.</p>
+    <p class="muted">An open <code class="inl">(</code> waits for its <code class="inl">)</code>. A number waits for its operator. A bar waits for the next taller bar. Every stack problem is the same heartbeat: <strong>push what's pending, pop the moment it's resolved.</strong> Each element is pushed once and popped once → <strong>O(N)</strong>.</p>
+    <div class="pin" data-l="THE HEARTBEAT"><b>Push</b> when an item must wait. <b>Pop</b> when the thing it was waiting for arrives. The top is always the most-recent unresolved item — that's why LIFO is the right tool.</div>
+  </section>
+
+  <!-- THE TWO SHAPES -->
+  <section class="reveal">
+    <p class="eyebrow">Two shapes, one breath</p>
+    <h2>Which stack are you <em>holding</em>?</h2>
+
+    <div class="shape a">
+      <span class="tag">Shape A · Regular Stack</span>
+      <h3>Pending matches</h3>
+      <p class="one">"Things wait in order, and resolve in reverse."</p>
+      <p>Signals: <code class="inl">balanced / valid parentheses</code>, <code class="inl">postfix / RPN / evaluate expression</code>, <code class="inl">operator fires on the previous operands</code>. You push items as they arrive; when a closer/operator shows up, it consumes the top.</p>
+      <p class="lbl">RPN — operand order is the trap</p>
+      <pre class="opp"><span class="k">for</span> token <span class="k">in</span> tokens:
+    <span class="k">if</span> token <span class="k">not in</span> ops:        <span class="c"># isdigit() breaks on "-11" — use this</span>
+        stack.append(int(token))
+    <span class="k">else</span>:
+        right = stack.pop()       <span class="c"># top is the RIGHT operand</span>
+        left  = stack.pop()
+        stack.append(ops[token](left, right))   <span class="c"># LEFT op RIGHT — order matters</span>
+<span class="k">return</span> stack.pop()</pre>
+      <div class="alt"><span class="h">Trap</span> Division: <b>int(a/b)</b> truncates toward zero; <b>a//b</b> floors — different for negatives. And use a plain <b>list</b>: append + pop are O(1).</div>
+    </div>
+
+    <div class="shape b">
+      <span class="tag">Shape B · Monotonic Stack</span>
+      <h3>Waiting for an answer</h3>
+      <p class="one">"Each element waits until a bigger (or smaller) one resolves it."</p>
+      <p>Signals: <code class="inl">next greater / smaller</code>, <code class="inl">previous greater / smaller</code>, <code class="inl">days until warmer</code>, <code class="inl">span</code>. The stack holds <strong>indices of unresolved elements</strong>; when a new element beats the top, it <em>answers</em> everyone it's bigger than.</p>
+      <p class="lbl">Next Greater — the core</p>
+      <pre><span class="k">def</span> nextGreater(nums):
+    res = [-1] * len(nums)
+    stack = []                       <span class="c"># INDICES, not values</span>
+    <span class="k">for</span> i, num <span class="k">in</span> enumerate(nums):
+        <span class="k">while</span> stack <span class="k">and</span> num > nums[stack[-1]]:
+            res[stack.pop()] = num    <span class="c"># num answers the one waiting</span>
+        stack.append(i)
+    <span class="k">return</span> res</pre>
+      <div class="alt"><span class="h">The flip</span> Want <b>greater</b> → keep a <b>decreasing</b> stack (pop when curr &gt; top). Want <b>smaller</b> → keep an <b>increasing</b> stack (pop when curr &lt; top).</div>
+    </div>
+  </section>
+
+  <!-- INTERACTIVE -->
+  <section class="reveal">
+    <p class="eyebrow">Watch it resolve</p>
+    <h2>The monotonic stack, <em>breathing</em>.</h2>
+    <p class="muted">Finding the <strong>next greater element</strong> for each. Step through — watch indices pile onto the stack while they wait, then get <em>answered</em> and popped the instant a bigger number arrives.</p>
+
+    <div class="player" id="player">
+      <div class="ptitle">next greater element · pop when current &gt; nums[top]</div>
+      <div class="row-lbl">array — current element highlighted</div>
+      <div class="arr" id="arr"></div>
+      <div class="row-lbl" style="margin-top:24px;">stack (indices waiting for a bigger neighbour) · top →</div>
+      <div class="stackbox" id="stack"></div>
+      <div class="row-lbl" style="margin-top:24px;">result — next greater (−1 = none)</div>
+      <div class="arr res" id="res"></div>
+      <div class="pbar" id="pbar"></div>
+      <div class="exp" id="exp"></div>
+      <div class="ctrls">
+        <button class="btn ghost" id="reset">↺ Reset</button>
+        <button class="btn" id="step">Step ▸</button>
+      </div>
+    </div>
+    <div class="pin" data-l="WHY O(N)"><b>Each index is pushed exactly once and popped at most once.</b> The inner <code class="inl">while</code> looks scary, but across the whole run it can't pop more than N times total — so the two loops together are still linear.</div>
+  </section>
+
+  <!-- GO DEEPER -->
+  <section class="reveal">
+    <p class="eyebrow">Go deeper · interactive</p>
+    <h2>The full <em>monotonic</em> lab.</h2>
+    <p class="muted">Once the heartbeat clicks, go drill it — the complete companion walks every monotonic-stack variant, the decreasing/increasing flip, and the classic problems, step by step.</p>
+    <a class="deeper" href="Monotonic-Stack-Guide.html">📚 The Monotonic Stack Guide <span style="font-family:'Spline Sans Mono',monospace;font-size:.9rem;">→</span></a>
+  </section>
+
+  <!-- THE TEST -->
+  <section class="reveal">
+    <p class="eyebrow">You own it when…</p>
+    <h2>The <em>test</em>.</h2>
+    <ul class="check">
+      <li>Core idea in one line: <b>a stack holds what's still unresolved; top = newest pending</b>.</li>
+      <li>You pick the shape: <b>matching/RPN → regular stack; next-greater/smaller → monotonic</b>.</li>
+      <li>Monotonic: you store <b>indices</b>, you check <code class="inl">stack and …</code> first, and you know <b>greater → decreasing, smaller → increasing</b>.</li>
+      <li>RPN: <b>LEFT op RIGHT</b> (top is the right operand), and <code class="inl">int(a/b)</code> not <code class="inl">a//b</code>.</li>
+      <li>You can say why it's <b>O(N)</b>: each element pushed once, popped once.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <p class="verse">“To everything there is a season… a time to keep, and a time to cast away.” — Ecclesiastes 3:1,6</p>
+    🔥 HADRIEL × WIGANZ · Stacks &amp; Monotonic · Pattern 07
+  </footer>
+
+</div>
+
+<script>
+  const io = new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(s=>io.observe(s));
+
+  // ---- Monotonic "next greater" stepper ----
+  const NUMS = [2, 1, 5, 3, 8, 4];
+  const arrEl   = document.getElementById('arr');
+  const stkEl   = document.getElementById('stack');
+  const resEl   = document.getElementById('res');
+  const expEl   = document.getElementById('exp');
+  const barEl   = document.getElementById('pbar');
+  const stepB   = document.getElementById('step');
+  const resetB  = document.getElementById('reset');
+
+  let frames = [], i = 0;
+
+  function buildFrames(){
+    frames = [];
+    const res = Array(NUMS.length).fill(-1);
+    const stack = [];
+    const snap = (cur, popping, note) => frames.push({
+      cur, popping: popping==null? -1 : popping,
+      stack:[...stack], res:[...res], note
+    });
+    snap(-1, null, `Start. <b>result = [-1,…]</b>, stack empty. The stack will hold <b>indices</b> still waiting for a bigger number.`);
+    for(let idx=0; idx<NUMS.length; idx++){
+      const num = NUMS[idx];
+      snap(idx, null, `Arriving: index ${idx}, value <b>${num}</b>. Does it beat the top of the stack?`);
+      while(stack.length && num > NUMS[stack[stack.length-1]]){
+        const top = stack[stack.length-1];
+        snap(idx, top, `<b>${num} &gt; nums[${top}] = ${NUMS[top]}</b> → ${num} is the next greater for index ${top}. Answer it &amp; pop.`);
+        res[top] = num;
+        stack.pop();
+      }
+      stack.push(idx);
+      snap(idx, null, stack.length===1
+        ? `Nothing left to answer. Push index ${idx} — it now waits on top.`
+        : `<b>${num}</b> didn't beat nums[${stack[stack.length-2]}] = ${NUMS[stack[stack.length-2]]}. Push index ${idx} on top to wait.`);
+    }
+    snap(-1, null, `Stream done. Anything still on the stack never found a bigger neighbour → stays <b>-1</b>. result = <b>[${res.join(', ')}]</b>.`);
+    barEl.innerHTML='';
+    frames.forEach(()=>barEl.appendChild(document.createElement('i')));
+  }
+
+  function render(){
+    const f = frames[i];
+    // array row
+    arrEl.innerHTML='';
+    NUMS.forEach((v,idx)=>{
+      let cls='cell';
+      if(idx===f.cur) cls+=' cur';
+      else if(f.stack.includes(idx)) cls+=' instk';
+      else if(idx<f.cur || (f.cur===-1)) cls+=' done';
+      const c=document.createElement('div');c.className=cls;
+      c.innerHTML=`${v}<span class="idx">${idx}</span>`;arrEl.appendChild(c);
+    });
+    // stack (bottom→top left→right)
+    stkEl.innerHTML='';
+    if(!f.stack.length){ stkEl.innerHTML='<span class="empty">— empty —</span>'; }
+    else f.stack.forEach(idx=>{
+      const s=document.createElement('div');
+      s.className='scell'+(idx===f.popping?' popping':'');
+      s.innerHTML=`${NUMS[idx]}<span class="si">i=${idx}</span>`;stkEl.appendChild(s);
+    });
+    // result row
+    resEl.innerHTML='';
+    f.res.forEach((v,idx)=>{
+      const c=document.createElement('div');
+      c.className='cell'+(v!==-1?' filled':'');
+      c.innerHTML=`${v}<span class="idx">${idx}</span>`;resEl.appendChild(c);
+    });
+    expEl.innerHTML=`<span class="tg">${i===frames.length-1?'RESULT':'STEP '+(i+1)+' / '+frames.length}</span>${f.note}`;
+    [...barEl.children].forEach((d,x)=>d.classList.toggle('on',x<=i));
+    stepB.disabled = i>=frames.length-1;
+  }
+
+  function reset(){ i=0; buildFrames(); render(); }
+  stepB.onclick=()=>{ if(i<frames.length-1){ i++; render(); } };
+  resetB.onclick=reset;
+  reset();
+</script>
+</body>
+</html>
