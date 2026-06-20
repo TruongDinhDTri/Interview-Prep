@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Binary Search - Foundation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Klee+One:wght@400;600&family=Patrick+Hand&family=Indie+Flower&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky: #7ec8e3;
+            --parchment: #fef6e4;
+            --parchment-warm: #fae8cc;
+            --ink: #4a3728;
+            --earth: #7a5c42;
+            --rose: #c45d6a;
+            --gold: #d4a84b;
+            --teal: #35bcd6;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Klee One', 'Patrick Hand', cursive;
+            background:
+                linear-gradient(180deg, #7ec8e3 0%, #c8ebf5 45%, #fdf5e8 72%, #f8d4a8 100%);
+            color: var(--ink);
+            padding: 3rem 1.5rem;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='paper'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='5' result='noise'/%3E%3CfeDiffuseLighting in='noise' lighting-color='%23fffef8' surfaceScale='2'%3E%3CfeDistantLight azimuth='45' elevation='55'/%3E%3C/feDiffuseLighting%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23paper)' opacity='0.16'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: min(980px, 100%);
+            margin: 0 auto;
+        }
+
+        .back-link {
+            display: inline-flex;
+            margin-bottom: 2rem;
+            color: var(--earth);
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.1rem;
+            text-decoration: none;
+        }
+
+        .hero {
+            background: linear-gradient(145deg, #fffefa 0%, var(--parchment) 55%, var(--parchment-warm) 100%);
+            border-radius: 8px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 25px 70px rgba(74, 55, 40, 0.2), inset 0 0 80px rgba(255, 252, 245, 0.7);
+            position: relative;
+        }
+
+        .hero::before,
+        .resource-card::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M 2,3 Q 25,1 50,3 T 98,2 Q 99,25 98,50 T 99,98 Q 75,99 50,97 T 2,99 Q 1,75 2,50 T 2,3' fill='none' stroke='%237a5c42' stroke-width='0.8' stroke-linecap='round'/%3E%3C/svg%3E") 0 0/100% 100%;
+            pointer-events: none;
+            opacity: 0.55;
+        }
+
+        .icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 1.2rem;
+            background: #fffefa;
+            border: 3px solid var(--teal);
+            font-size: 2.2rem;
+            box-shadow: 0 10px 25px rgba(74, 55, 40, 0.16);
+        }
+
+        h1 {
+            font-family: 'Caveat', cursive;
+            font-size: clamp(2.4rem, 8vw, 4rem);
+            text-align: center;
+            margin-bottom: 0.8rem;
+        }
+
+        .intro {
+            max-width: 720px;
+            margin: 0 auto;
+            text-align: center;
+            color: var(--earth);
+            line-height: 1.8;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.4rem;
+        }
+
+        .resource-card {
+            position: relative;
+            display: block;
+            min-height: 180px;
+            padding: 1.6rem;
+            color: var(--ink);
+            text-decoration: none;
+            background: linear-gradient(155deg, #fffefa 0%, #fdfaf2 50%, #faf5e8 100%);
+            border-radius: 8px;
+            box-shadow: 0 10px 28px rgba(74, 55, 40, 0.13);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px) rotate(-0.5deg);
+            box-shadow: 0 16px 38px rgba(74, 55, 40, 0.18);
+        }
+
+        .resource-title {
+            font-family: 'Caveat', cursive;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .resource-text {
+            color: var(--earth);
+            line-height: 1.65;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.8rem;
+            border-radius: 999px;
+            background: var(--teal);
+            color: white;
+            font-family: 'Patrick Hand', cursive;
+            font-size: 0.85rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .badge.viz { background: var(--rose); }
+        .badge.pattern { background: var(--gold); }
+
+        @media (max-width: 640px) {
+            body { padding: 2rem 1rem; }
+            .hero { padding: 2rem 1.2rem; }
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <a class="back-link" href="../../../index.html">← Back to the Atlas</a>
+
+        <section class="hero">
+            <div class="icon">🎯</div>
+            <h1>Binary Search</h1>
+            <p class="intro">
+                Halve the search space every step — from O(n) to O(log n). Start by learning
+                where binary search <em>bleeds</em> (the three classic bugs), then drill the
+                full pattern and its templates.
+            </p>
+        </section>
+
+        <section class="grid" aria-label="Binary Search resources">
+            <a class="resource-card" href="BinarySearchBasics/mistaken-encounter-binary-search.html">
+                <div class="resource-title">The Mistaken Encounter</div>
+                <p class="resource-text">Interactive stepper + the 3 classic bugs (frozen mid, &lt; vs &lt;=, right=len) shown failing, then fixed.</p>
+                <span class="badge viz">Visualization</span>
+            </a>
+
+            <a class="resource-card" href="../../Patterns/04_Binary_Search/Deep-Guide.html">
+                <div class="resource-title">Binary Search Pattern</div>
+                <p class="resource-text">Core idea, the search-space templates, and how to recognize binary search in interviews.</p>
+                <span class="badge pattern">Pattern</span>
+            </a>
+        </section>
+    </main>
+</body>
+</html>
