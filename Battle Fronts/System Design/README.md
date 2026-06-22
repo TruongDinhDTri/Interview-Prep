@@ -7,7 +7,7 @@ This folder contains all system design interview preparation materials for Wigan
 ## Folder Structure
 
 ```
-System Design Prep/
+Battle Fronts/System Design/
 ├── README.md (this file)
 ├── Reference/                # Reference materials (ByteByteGo, guides)
 ├── Common Questions/         # Practice designs for common interview questions

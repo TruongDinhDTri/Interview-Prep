@@ -13,7 +13,7 @@ Open **[behavioral-prep.html](behavioral-prep.html)** in your browser — it's t
 ## Folder Structure
 
 ```
-Behavioral Prep/
+Battle Fronts/Behavioral/
 ├── behavioral-prep.html                    ← MAIN PAGE (open in browser)
 ├── CONTEXT.md                              ← Hadriel's session memory
 ├── README.md                               ← This file

@@ -873,9 +873,9 @@ Mirror the LeetCode post-solve protocol from CLAUDE.md. Execute after EVERY SD s
 → Wait for answers. Execute ONLY what was approved.
 
 ### Step 3: Execute Approved Artifacts ⚙️
-- HTML → Save in: `System Design Prep/[System Name]/[system]-architecture.html`
-- Archive → Save in: `System Design Prep/[System Name]/[system]-archive.md`
-- Anki → Save in: `System Design Prep/[System Name]/Anki-Cards/[system]-cards.csv`
+- HTML → Save in: `Battle Fronts/System Design/[System Name]/[system]-architecture.html`
+- Archive → Save in: `Battle Fronts/System Design/[System Name]/[system]-archive.md`
+- Anki → Save in: `Battle Fronts/System Design/[System Name]/Anki-Cards/[system]-cards.csv`
 
 ### Step 4: Update Progress 📊
 Update `memory/system-design-progress.json`:

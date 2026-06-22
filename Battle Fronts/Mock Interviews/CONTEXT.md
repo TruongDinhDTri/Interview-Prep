@@ -86,7 +86,7 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 | **Technical Competency** | Correct implementation, proper data structures, clean code, time/space complexity |
 | **Testing** | Identifies edge cases, writes test cases, verifies solution systematically |
 
-### Behavioral Round (7 Dimensions)
+### Behavioral Round (8 Dimensions)
 *Source: Tech Interview Handbook — Behavioral Interview Rubrics*
 
 | Dimension | What It Measures |
@@ -96,6 +96,7 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 | **Unstructured Environment** | Handling ambiguity, making decisions with incomplete info |
 | **Perseverance** | Pushing through difficulty, not giving up on hard problems |
 | **Conflict Resolution** | Handling disagreements professionally, finding common ground |
+| **Empathy** | Understanding others' perspectives, motivations, and feelings; adjusting approach to others' needs |
 | **Growth Mindset** | Learning from failure, seeking feedback, continuous improvement |
 | **Communication** | Clear storytelling, structured answers (STAR), concise and compelling |
 
@@ -104,10 +105,10 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 
 | Dimension | What It Measures |
 |-----------|-----------------|
-| **Requirements Gathering** | Clarifies scope, identifies functional/non-functional requirements, asks good questions |
+| **Requirements** | Clarifies scope, identifies functional/non-functional requirements, asks good questions |
 | **Architecture** | Appropriate component selection, clear data flow, reasonable tech choices |
 | **Deep Dive** | Depth on chosen component, handles edge cases, understands internals |
-| **Trade-offs & Scaling** | CAP theorem awareness, horizontal vs vertical scaling, caching/sharding decisions |
+| **Trade-offs** | CAP theorem awareness, horizontal vs vertical scaling, caching/sharding decisions |
 
 ### Backend Deep Dive Round (4 Dimensions)
 *Custom rubric based on Backend Talking Points sessions*
@@ -118,6 +119,16 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 | **Practical Knowledge** | Real-world experience — deployment, debugging, performance tuning |
 | **Problem Diagnosis** | Given a bug/issue scenario, systematic debugging approach |
 | **Communication** | Explains technical concepts clearly, uses appropriate level of detail |
+
+### Frontend Deep Dive Round (4 Dimensions)
+*Custom rubric (Wiganz's picks) — grounded in GreatFrontEnd front-end evaluation axes*
+
+| Dimension | What It Measures |
+|-----------|-----------------|
+| **Component Design** | Composition, reusability, clear responsibilities, prop/state boundaries |
+| **State Management** | Right state location (local/lifted/global), clean data flow, tool choice |
+| **Rendering & Performance** | Re-renders, memoization, bundle size, Core Web Vitals, loading states |
+| **API Integration** | Data fetching with loading/error/empty states, caching, race conditions |
 
 ### Scoring Scale (All Rounds)
 | Score | Label | Meaning |
@@ -148,7 +159,7 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 - **29 General Questions:** Tech Interview Handbook behavioral question bank
   - Source: https://www.techinterviewhandbook.org/behavioral-interview-questions/
 - **Company-Specific:** Amazon Leadership Principles, Airbnb Core Values, etc.
-- **STAR Stories:** 5 stories from `Behavioral Prep/STAR-stories/STAR_Workshop.md`
+- **STAR Stories:** 5 stories from `Battle Fronts/Behavioral/STAR-stories/STAR_Workshop.md`
   1. Jarvis-Bot: The 3,000-Hour Automation (Initiative, Technical Innovation)
   2. JS-Injection: Hacking the Dev Cycle (Problem-Solving, Developer Experience)
   3. Second Brain: AI-Powered Knowledge Retrieval (AI Implementation, Full-Stack)
@@ -156,13 +167,13 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
   5. The Failure: The Dependency Trap (Growth Mindset, Resilience)
 
 ### Backend Questions
-- **Session 1 (8 Qs):** Django/DRF Core — `Backend Talking Points Prep/Session 1/02-Practice-Questions-Answers.md`
-- **Session 2 (6 Qs):** Authentication & Security — `Backend Talking Points Prep/Session 2/02-Practice-Questions-Answers.md`
-- **Session 3 (8 Qs):** Database & ORM — `Backend Talking Points Prep/Session 3/02-Practice-Questions-Answers.md`
+- **Session 1 (8 Qs):** Django/DRF Core — `Battle Fronts/Technical/Backend/Session 1/02-Practice-Questions-Answers.md`
+- **Session 2 (6 Qs):** Authentication & Security — `Battle Fronts/Technical/Backend/Session 2/02-Practice-Questions-Answers.md`
+- **Session 3 (8 Qs):** Database & ORM — `Battle Fronts/Technical/Backend/Session 3/02-Practice-Questions-Answers.md`
 - **Sessions 4-6:** Additional topics in respective session folders
 
 ### System Design Problems
-- **10 Problems (Easy→Hard):** `System Design Prep/README.md`
+- **10 Problems (Easy→Hard):** `Battle Fronts/System Design/README.md`
   1. URL Shortener (Easy) | 2. Social Media Feed (Medium) | 3. Chat System (Medium)
   4. Video Streaming (Hard) | 5. Rate Limiter (Easy) | 6. Key-Value Store (Medium)
   7. Notification System (Medium) | 8. Search System (Hard) | 9. File Storage (Hard)
@@ -232,6 +243,11 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 
 ### CRITICAL: Interviewer Mode vs Trainer Mode
 
+> 🔗 **Canonical source:** the two Roles are defined ONCE in `reusable-prompts/coding-prep-follow-road.md`
+> (Role 1 Hardass Interviewer / Role 2 Guardian Angel) and operated for mocks by
+> `reusable-prompts/mock-run-the-battle.md`. The notes below are the mock-specific *tuning*, not a
+> separate definition — if they ever conflict with the canonical Roles, the canonical file wins.
+
 During the mock (Phases 1 & 2):
 - **Stay in character as interviewer.** Professional, neutral tone.
 - **Do NOT help, hint, or teach.** This is evaluation, not training.
@@ -266,14 +282,14 @@ During debrief (Phase 3):
 
 | System | File | Purpose |
 |--------|------|---------|
-| README | `Mock Interview Prep/README.md` | Wiganz's entry point — workflow, how to start |
+| README | `Battle Fronts/Mock Interviews/README.md` | Wiganz's entry point — workflow, how to start |
 | Mock Performance | `memory/mock-performance.json` | Session scores, progression tracking |
 | Coding Progress | `memory/coding-progress.json` | Pattern mastery → informs problem selection |
 | Behavioral Prep | `memory/behavioral-prep.json` | STAR story readiness → informs question selection |
 | System Design Progress | `memory/system-design-progress.json` | Concept mastery → informs topic selection |
 | Roadmap | `Daily Reference and Roadmap/roadmap.html` | Weekly schedule context |
-| Protocol | `Mock Interview Prep/Mock-Interview-Protocol.md` | Detailed scripts and rubrics |
-| Timer | `Mock Interview Prep/mock-interview-timer.html` | Interactive session timer |
+| Protocol | `Battle Fronts/Mock Interviews/Mock-Interview-Protocol.md` | Detailed scripts and rubrics |
+| Timer | `Battle Fronts/Mock Interviews/mock-interview-timer.html` | Interactive session timer |
 
 ---
 

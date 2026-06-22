@@ -6,6 +6,28 @@ Your complete mock interview training system. 18 hours of structured practice ac
 
 ---
 
+## ⚔️ Pick Your Fight — How to Start Each Mock
+
+Hadriel loads files on-demand, so **what you SAY is what triggers the right battle.** Four ways to mock:
+
+| Mock | Say to Hadriel | Rubric / runbook |
+|------|----------------|------------------|
+| ⚔️ **Full Combined** (Format A / B / Dress) | *"Hadriel, let's do a full mock"* | `Mock-Interview-Protocol.md` + `CONTEXT.md` |
+| 🗣️ **Behavioral-only** | *"let's do a behavioral mock"* | `Behavioral/Mock-Behavioral-Guide.md` |
+| ⚙️ **Technical-only** (Backend / Frontend) | *"let's do a technical mock"* | `Technical/Mock-Technical-Guide.md` |
+| 🏗️ **System Design-only** | *"let's do a system design mock"* | `System Design/Mock-SystemDesign-Guide.md` |
+
+Each fight keeps its **OWN rubric** — they do *not* share one. This arena only shares the *shell*: the
+timer, the interviewer→debrief ritual, and your score history in `../memory/mock-performance.json`.
+
+> 🤖 **Behind the scenes (you don't need to touch this):** when you speak a trigger above, Hadriel loads
+> his battle operating-manual `reusable-prompts/mock-run-the-battle.md` — which flips him to *Role 1
+> maxed, Role 2 = scoring penalty, zero teaching*. You just say the phrase; he handles the rest. In a
+> fresh/manual session, you *can* paste that file to **force** battle-mode (same way you'd paste
+> `coding-prep-follow-road.md` to force drill-mode).
+
+---
+
 ## How THE BATTLE Works — The Two Modes
 
 During regular practice, Hadriel is your **trainer** — he hints, teaches, asks guiding questions, creates "aha moments." But real interviews don't have trainers. They have **interviewers** who evaluate silently.

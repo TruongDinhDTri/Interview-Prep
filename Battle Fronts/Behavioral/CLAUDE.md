@@ -15,7 +15,7 @@
 - **Elevator pitch** drafted in `Self-Introduction/Elevator-Pitch.md`
 - **Questions to ask** interviewers in `Self-Introduction/Questions-To-Ask.md`
 - **Story-dimension matrix** in `STAR-stories/Story-Dimension-Matrix.md`
-- **Mock interview guide** in `Mock-Interview/Mock-Behavioral-Guide.md`
+- **Mock interview guide** moved to the arena: `../Mock Interviews/Behavioral/Mock-Behavioral-Guide.md`
 - **Company prep template** in `Company-Research/Company-Prep-Template.md`
 - **Flashcards CSV** regenerated with rubric, self-intro, and STAR(R) cards
 
@@ -83,7 +83,7 @@
 ## File Map
 
 ```
-Behavioral Prep/
+Battle Fronts/Behavioral/
 ├── CLAUDE.md                               ← THIS FILE (Hadriel's memory)
 ├── README.md                               ← Overview + folder structure
 ├── behavioral-prep.html                    ← Main interactive battle page
@@ -97,8 +97,8 @@ Behavioral Prep/
 │   ├── STAR_Workshop.md                    ← All 5 STAR(R) stories
 │   ├── STAR_Stories_Flashcards.csv         ← Anki flashcards
 │   └── Story-Dimension-Matrix.md           ← Rubric coverage analysis
-├── Mock-Interview/
-│   └── Mock-Behavioral-Guide.md            ← Mock structure + scoring
 └── Company-Research/
     └── Company-Prep-Template.md            ← Template for company-specific prep
 ```
+
+> 📌 The mock guide moved to the arena: `../Mock Interviews/Behavioral/Mock-Behavioral-Guide.md`

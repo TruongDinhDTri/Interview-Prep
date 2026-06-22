@@ -56,7 +56,7 @@
 - Final questions to ask interviewers
 
 **Deliverables:**
-- 5 polished STAR stories (saved in `Behavioral Prep/`)
+- 5 polished STAR stories (saved in `Battle Fronts/Behavioral/`)
 - Answers to 20+ common questions
 - Self-introduction script
 - Questions to ask interviewers
@@ -91,7 +91,7 @@
 - ByteByteGo Big Archive 2024
 
 **Common Questions to Master:**
-(Stored in `System Design Prep/Common Questions/`)
+(Stored in `Battle Fronts/System Design/Common Questions/`)
 - Design Twitter/Social Media Feed
 - Design URL Shortener
 - Design Chat System

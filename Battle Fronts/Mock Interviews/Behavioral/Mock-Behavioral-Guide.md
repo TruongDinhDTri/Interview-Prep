@@ -2,7 +2,7 @@
 
 Use this guide to run mock behavioral interviews with Hadriel or a practice partner.
 
-*Sources: [TIH Behavioral Rubrics](https://www.techinterviewhandbook.org/behavioral-interview-rubrics/) · [TIH Behavioral Guide](https://www.techinterviewhandbook.org/behavioral-interview/) · [Mock Interview Protocol](../../Mock%20Interview%20Prep/Mock-Interview-Protocol.md) · [Meta Behavioral Evaluation](https://interviewing.io/blog/how-software-engineering-behavioral-interviews-are-evaluated-meta)*
+*Sources: [TIH Behavioral Rubrics](https://www.techinterviewhandbook.org/behavioral-interview-rubrics/) · [TIH Behavioral Guide](https://www.techinterviewhandbook.org/behavioral-interview/) · [Mock Interview Protocol](../Mock-Interview-Protocol.md) · [Meta Behavioral Evaluation](https://interviewing.io/blog/how-software-engineering-behavioral-interviews-are-evaluated-meta)*
 
 ---
 
@@ -18,7 +18,7 @@ Use this guide to run mock behavioral interviews with Hadriel or a practice part
 | **"Questions for us?"** | 5 min | Ask 2-3 thoughtful questions |
 | **Curveball** | 3 min | "If you could change one thing about your career..." |
 
-> **Note:** For Format B (People Battle) mocks during Weeks 5/7/9/11, this is followed by a 50-min Coding Under Pressure round and a 20-min debrief. See [Mock-Interview-Protocol.md](../../Mock%20Interview%20Prep/Mock-Interview-Protocol.md) for full Format B details.
+> **Note:** For Format B (People Battle) mocks during Weeks 5/7/9/11, this is followed by a 50-min Coding Under Pressure round and a 20-min debrief. See [Mock-Interview-Protocol.md](../Mock-Interview-Protocol.md) for full Format B details.
 
 ---
 
@@ -35,7 +35,7 @@ Follow this 4-component structure (keep under 2 minutes, ideally ~60 seconds):
 
 **KISS Principle:** Keep It Short and Simple. Lead with your most impressive metric.
 
-> **Full draft:** `../Self-Introduction/Elevator-Pitch.md`
+> **Full draft:** `../../Behavioral/Self-Introduction/Elevator-Pitch.md`
 
 ---
 
@@ -102,7 +102,7 @@ For each mock, pick questions that test different dimensions. Map each to one of
 | 4 | **The Conflict** | Conflict questions | Conflict Resolution, Empathy, Communication |
 | 5 | **Dependency Trap** | Failure/growth questions | Growth, Perseverance, Unstructured Env |
 
-> **Full stories:** `../STAR-stories/STAR_Workshop.md` · **Full 30-question bank:** `../Common-Questions/30-Questions-Arsenal.md`
+> **Full stories:** `../../Behavioral/STAR-stories/STAR_Workshop.md` · **Full 30-question bank:** `../../Behavioral/Common-Questions/30-Questions-Arsenal.md`
 
 **Session Rotation Guide:** Pick 3 questions per session from different categories. Rotate so all 5 stories get practiced across sessions.
 
@@ -235,7 +235,7 @@ Always prepare 3-5 questions. Pick from categories relevant to the role/company:
 - Salary/benefits in the first interview (unless they bring it up)
 - "Do you have any concerns about my candidacy?" — too aggressive for most cultures
 
-> **Full list:** `../Self-Introduction/Questions-To-Ask.md`
+> **Full list:** `../../Behavioral/Self-Introduction/Final-Questions-To-Ask.md`
 
 ---
 
@@ -381,9 +381,9 @@ Top companies weight dimensions differently:
 | **Airbnb** | "Belong Anywhere" — empathy and culture contribution | Champion the Mission, Be a Host |
 | **ByteDance** | Adaptability, speed, cross-cultural collaboration | Fast-paced, globally distributed context |
 
-> **Company prep template:** `../Company-Research/Company-Prep-Template.md`
+> **Company prep template:** `../../Behavioral/Company-Research/Company-Prep-Template.md`
 
 ---
 
 *Guide Version: 2.0 | Created: 2026-03-15 | Updated: 2026-05-11*
-*Aligned with [Mock-Interview-Protocol.md](../../Mock%20Interview%20Prep/Mock-Interview-Protocol.md) and [TIH Behavioral Rubrics](https://www.techinterviewhandbook.org/behavioral-interview-rubrics/)*
+*Aligned with [Mock-Interview-Protocol.md](../Mock-Interview-Protocol.md) and [TIH Behavioral Rubrics](https://www.techinterviewhandbook.org/behavioral-interview-rubrics/)*

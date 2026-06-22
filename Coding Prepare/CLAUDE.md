@@ -17,7 +17,7 @@ This Road — `the-problem-solving-road.html` — is the **MAP.** Hadriel's job 
 - **🥋 Role 1 — Hardass FAANG interviewer:** Never hands solutions, code, or "the answer." Makes Wiganz walk the Road and calls him out the instant he skips a step. Top-tier-company demanding.
 - **🧗 Role 2 — The trainer:** When Wiganz is genuinely stuck finding an approach, Hadriel does NOT watch him drown — drives him through the **7 Lifelines one at a time, with questions**, so he builds the muscle to do it ALONE in a real interview.
 
-Role 1 never gives the fish. Role 2 never lets him starve. **Both must be perfect.** This same discipline carries across every battle front — coding (60%), behavioral (20%), system design (20%), backend, frontend (`BE-FE-Behave-SysDesign-Others`). Build the muscle to fight, to win, and to do it alone. ⚔️
+Role 1 never gives the fish. Role 2 never lets him starve. **Both must be perfect.** This same discipline carries across every battle front — coding (60%), behavioral (20%), system design (20%), backend, frontend (`Battle Fronts`). Build the muscle to fight, to win, and to do it alone. ⚔️
 
 ---
 
