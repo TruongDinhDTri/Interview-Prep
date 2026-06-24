@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gốc 3 — SOLID · Deep Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
+    --r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px;--bad:#cf6a4a;--good:#5e8a63}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit;text-decoration:none}::selection{background:rgba(216,178,94,.4)}
+  .back,.home{position:fixed;top:18px;z-index:30;font-family:'Klee One',cursive;font-size:.84rem;
+    background:rgba(253,250,242,.92);backdrop-filter:blur(6px);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);transition:transform .2s}
+  .back{left:20px}.home{right:20px}.back:hover{transform:translateX(-3px);color:var(--clay)}.home:hover{transform:translateY(-2px);color:var(--clay)}
+  .hero{padding:var(--s6) clamp(20px,5vw,56px) var(--s3);text-align:center;background:radial-gradient(130% 90% at 50% 0%,#eef3e6 0%,var(--paper) 60%)}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.28em;text-transform:uppercase;font-size:.8rem;color:var(--clay);margin-bottom:var(--s2)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.2rem)}
+  .hero h1 em{font-style:italic;color:var(--moss)}
+  .hero .canon{margin-top:var(--s2);font-size:.86rem;color:#8a9a8c;font-style:italic}
+  .secnav{position:sticky;top:0;z-index:20;background:rgba(245,239,225,.93);backdrop-filter:blur(8px);border-bottom:1px solid rgba(36,48,38,.1);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px}
+  .secnav a{font-size:.76rem;letter-spacing:.06em;padding:7px 14px;border-radius:18px;color:#5a6f5d;transition:background .18s}
+  .secnav a:hover{background:#e7ddc8;color:var(--ink)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+  section{padding:var(--s5) 0;scroll-margin-top:60px}
+  .label{font-family:'Klee One',cursive;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;color:var(--clay);display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+  .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
+  ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
+  .solid{margin-top:var(--s2);display:flex;flex-direction:column;gap:10px}
+  .sl{display:grid;grid-template-columns:54px 1fr;gap:14px;background:#fffdf7;border:1px solid rgba(36,48,38,.09);border-radius:12px;padding:14px 18px;box-shadow:0 4px 12px rgba(36,48,38,.05)}
+  .sl .L{font-family:'Fraunces',serif;font-weight:700;font-size:1.6rem;color:var(--clay);text-align:center}
+  .sl .nm{font-weight:700}.sl .ex{font-size:.86rem;color:#6b7d6e;margin-top:2px}
+  .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .code.bad .hd{background:#3a2420;color:#e6a48a}.code.good .hd{background:#22301f;color:#a8cdac}
+  .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
+  .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .pair{display:grid;grid-template-columns:1fr;gap:14px;margin-top:var(--s2)}
+  @media(min-width:780px){.pair{grid-template-columns:1fr 1fr}}
+  .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
+  .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
+  .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed rgba(36,48,38,.16)}
+  .step:last-child{border-bottom:none}.step .lv{font-family:'Fraunces',serif;font-weight:600;color:var(--clay);text-align:center}
+  .step .q{font-weight:700;color:var(--ink)}.step .a{font-size:.86rem;color:#6b7d6e;margin-top:4px}
+  .mockbox{margin-top:var(--s3);background:var(--deep);color:#f1ece0;border-radius:14px;padding:var(--s3) var(--s4)}
+  .mockbox .k{font-family:'Klee One',cursive;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--gold)}.mockbox p{color:#d3dac9}
+  footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+</style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Lò rèn</a>
+  <a class="home" href="../../../index.html">🗺️ Overworld</a>
+
+  <header class="hero">
+    <div class="eyebrow">Gốc 3 / 8 · Craftsmanship</div>
+    <h1><em>SOLID</em> & Principles</h1>
+    <div class="canon">📖 Neo canon: <i>Clean Architecture</i> — Robert C. Martin · <i>Pragmatic Programmer</i> (DRY)</div>
+  </header>
+
+  <nav class="secnav">
+    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Smell → Fix</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="concept">
+      <div class="label">① Khái niệm (framework-agnostic)</div>
+      <h2>5 nguyên tắc để quản lý THAY ĐỔI</h2>
+      <p>SOLID không phải để code "đúng" — code sai vẫn chạy. Nó để code <b>dễ đổi mà không gãy</b>. Sợi chỉ xuyên suốt cả 5: <b>quản lý phụ thuộc và sự thay đổi.</b></p>
+      <div class="solid">
+        <div class="sl"><div class="L">S</div><div><div class="nm">Single Responsibility</div><div class="ex">Một class chỉ có MỘT lý do để thay đổi. (một trách nhiệm)</div></div></div>
+        <div class="sl"><div class="L">O</div><div><div class="nm">Open–Closed</div><div class="ex">Mở để mở rộng, đóng để sửa đổi. Thêm tính năng = thêm code, không sửa code cũ.</div></div></div>
+        <div class="sl"><div class="L">L</div><div><div class="nm">Liskov Substitution</div><div class="ex">Class con thay được class cha mà không phá hành vi. (subtype đáng tin)</div></div></div>
+        <div class="sl"><div class="L">I</div><div><div class="nm">Interface Segregation</div><div class="ex">Nhiều interface nhỏ, chuyên biệt — đừng ép ai implement method họ không cần.</div></div></div>
+        <div class="sl"><div class="L">D</div><div><div class="nm">Dependency Inversion</div><div class="ex">Phụ thuộc vào ABSTRACTION, không vào implementation cụ thể. (NestJS DI sinh ra cho cái này)</div></div></div>
+      </div>
+      <blockquote>🧠 Quan trọng nhất cho interview: <b>SRP</b> (god class vi phạm nó) và <b>DIP</b> (lý do tồn tại của Dependency Injection).</blockquote>
+    </section>
+
+    <section id="smell-to-fix">
+      <div class="label">② Smell → Fix (thấy tận mắt)</div>
+      <h2>Vi phạm → tuân thủ</h2>
+
+      <h3>S — Single Responsibility</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ 2 lý do để đổi</div><pre><span class="kw">class</span> <span class="badt">Report</span> {
+  calculate() {...}   <span class="cmt">// đổi khi logic đổi</span>
+  saveAsPdf() {...}   <span class="cmt">// đổi khi format đổi</span>
+}</pre></div>
+        <div class="code good"><div class="hd">✅ Tách trách nhiệm</div><pre><span class="kw">class</span> <span class="goodt">Report</span>       { calculate() }
+<span class="kw">class</span> <span class="goodt">PdfExporter</span>  { export(report) }</pre></div>
+      </div>
+
+      <h3>O — Open/Closed (bỏ if/else theo type)</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Mỗi loại mới phải sửa hàm</div><pre>area(shape) {
+  <span class="kw">if</span> (shape.type===<span class="str">'circle'</span>) ...
+  <span class="kw">if</span> (shape.type===<span class="str">'square'</span>) ...
+  <span class="cmt">// thêm 'triangle' → sửa ở đây 😱</span>
+}</pre></div>
+        <div class="code good"><div class="hd">✅ Polymorphism</div><pre><span class="kw">interface</span> <span class="goodt">Shape</span> { area(): number }
+<span class="kw">class</span> Circle <span class="kw">implements</span> Shape {...}
+<span class="cmt">// thêm Triangle = thêm class mới,</span>
+<span class="cmt">// KHÔNG sửa code cũ</span></pre></div>
+      </div>
+
+      <h3>D — Dependency Inversion (đất của NestJS)</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Bám implementation cụ thể</div><pre><span class="kw">class</span> <span class="badt">OrderService</span> {
+  mailer = <span class="kw">new</span> SendGridMailer(); <span class="cmt">// cứng</span>
+}
+<span class="cmt">// đổi sang SES = sửa class, khó test</span></pre></div>
+        <div class="code good"><div class="hd">✅ Inject abstraction</div><pre><span class="kw">class</span> <span class="goodt">OrderService</span> {
+  <span class="kw">constructor</span>(<span class="kw">private</span> mailer: IMailer) {}
+}
+<span class="cmt">// đổi provider = đổi binding,</span>
+<span class="cmt">// test = inject mock</span></pre></div>
+      </div>
+    </section>
+
+    <section id="in-your-code">
+      <div class="label">③ Trong code THẬT của anh</div>
+      <h2>Soi SOLID trong Asset_Platform</h2>
+      <div class="hunt">
+        <h3>🔍 Săn 2 con mồi (20 phút)</h3>
+        <p>Mở <span class="path">/Users/tritdd/Work/Asset_Platform/apps/api</span> (NestJS — đầy DI sẵn). Tìm:</p>
+        <ul>
+          <li><b>Vi phạm SRP</b> — một service có >1 lý do để đổi (business + persistence + notification trộn). Vẽ ra: nếu format email đổi, anh phải mở file nào? Nếu rule nghiệp vụ đổi, mở file nào? Cùng một file = vi phạm SRP.</li>
+          <li><b>Cơ hội DIP</b> — chỗ nào <span class="path">new SomethingConcrete()</span> bên trong service thay vì inject qua constructor? Hoặc service phụ thuộc thẳng vào một class hạ tầng (mailer, http client) thay vì interface.</li>
+        </ul>
+        <p>→ Ghi Scar-Journal: vi phạm nguyên tắc nào, ở đâu, sửa theo hướng nào.</p>
+      </div>
+    </section>
+
+    <section id="why-ladder">
+      <div class="label">④ Why-Ladder (cho Mock)</div>
+      <h2>Interviewer đào sâu thế nào</h2>
+      <div class="ladder">
+        <div class="step"><div class="lv">1</div><div><div class="q">"SOLID là gì?"</div><div class="a">→ 5 nguyên tắc thiết kế OOP để code dễ đổi mà không gãy. Đọc tên 5 chữ. (định nghĩa)</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Giải thích SRP bằng lời của anh."</div><div class="a">→ Một class một lý do để thay đổi. Liên hệ thẳng god class (gốc 2). (lý do)</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Kể một class anh từng thấy vi phạm SRP."</div><div class="a">→ DẪN SẸO Asset_Platform: "service ôm business + DB + email, đổi email phải mở file business..." (kinh nghiệm)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Service này new-up SendGrid bên trong. Vấn đề gì? Nguyên tắc nào?"</div><div class="a">→ Vi phạm DIP: bám implementation cụ thể → khó đổi, khó test. Inject IMailer. (áp dụng tại chỗ)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"DIP có phải overkill cho app nhỏ không?"</div><div class="a">→ Đôi khi CÓ — YAGNI. DIP đáng khi cái phụ thuộc thật sự hay đổi hoặc cần mock để test. Trừu tượng hóa MỌI thứ = over-engineering. Đây là phán đoán, không phải luật cứng. (bedrock)</div></div></div>
+      </div>
+      <div class="mockbox">
+        <div class="k">Đậu gốc này khi</div>
+        <p>Anh chỉ ra vi phạm SRP/DIP tại chỗ (tầng 4) + dẫn sẹo thật (tầng 3) + biết DIP không phải lúc nào cũng đáng, cân với YAGNI (tầng 5 — đây là dấu hiệu hiểu thật, không học vẹt).</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>Gốc 3 / 8 — giờ anh biết VÌ SAO code đẹp lại đẹp. 🏛️</div>
+    <div class="verse">"Every house is built by someone, but God is the builder of everything." — Hebrews 3:4</div>
+  </footer>
+</body>
+</html>

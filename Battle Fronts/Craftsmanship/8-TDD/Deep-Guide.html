@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gốc 8 — TDD · Deep Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
+    --red:#cf6a4a;--green:#5e8a63;--r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit;text-decoration:none}::selection{background:rgba(216,178,94,.4)}
+  .back,.home{position:fixed;top:18px;z-index:30;font-family:'Klee One',cursive;font-size:.84rem;
+    background:rgba(253,250,242,.92);backdrop-filter:blur(6px);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);transition:transform .2s}
+  .back{left:20px}.home{right:20px}.back:hover{transform:translateX(-3px);color:var(--clay)}.home:hover{transform:translateY(-2px);color:var(--clay)}
+  .hero{padding:var(--s6) clamp(20px,5vw,56px) var(--s3);text-align:center;background:radial-gradient(130% 90% at 50% 0%,#eef3e6 0%,var(--paper) 60%)}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.28em;text-transform:uppercase;font-size:.8rem;color:var(--clay);margin-bottom:var(--s2)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.2rem)}
+  .hero h1 em{font-style:italic;color:var(--moss)}
+  .hero .canon{margin-top:var(--s2);font-size:.86rem;color:#8a9a8c;font-style:italic}
+  .secnav{position:sticky;top:0;z-index:20;background:rgba(245,239,225,.93);backdrop-filter:blur(8px);border-bottom:1px solid rgba(36,48,38,.1);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px}
+  .secnav a{font-size:.76rem;letter-spacing:.06em;padding:7px 14px;border-radius:18px;color:#5a6f5d;transition:background .18s}
+  .secnav a:hover{background:#e7ddc8;color:var(--ink)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+  section{padding:var(--s5) 0;scroll-margin-top:60px}
+  .label{font-family:'Klee One',cursive;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;color:var(--clay);display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+  .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
+  ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
+  /* rgr cycle */
+  .cycle{margin-top:var(--s3);display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
+  .cs{border-radius:14px;padding:18px 22px;text-align:center;color:#fff;min-width:160px;box-shadow:0 6px 16px rgba(36,48,38,.16)}
+  .cs b{font-size:1.1rem;display:block}.cs small{font-size:.8rem;opacity:.92;display:block;margin-top:4px}
+  .cs.red{background:linear-gradient(120deg,#c2543a,#cf6a4a)}
+  .cs.green{background:linear-gradient(120deg,#4d7a52,#5e8a63)}
+  .cs.refac{background:linear-gradient(120deg,#c89a3e,#d8b25e)}
+  .carr{font-size:1.5rem;color:var(--clay)}
+  .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .code.red .hd{background:#3a2420;color:#e6a48a}.code.green .hd{background:#22301f;color:#a8cdac}.code.refac .hd{background:#3a3320;color:#e6cf8a}
+  .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
+  .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
+  .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
+  .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed rgba(36,48,38,.16)}
+  .step:last-child{border-bottom:none}.step .lv{font-family:'Fraunces',serif;font-weight:600;color:var(--clay);text-align:center}
+  .step .q{font-weight:700;color:var(--ink)}.step .a{font-size:.86rem;color:#6b7d6e;margin-top:4px}
+  .mockbox{margin-top:var(--s3);background:var(--deep);color:#f1ece0;border-radius:14px;padding:var(--s3) var(--s4)}
+  .mockbox .k{font-family:'Klee One',cursive;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--gold)}.mockbox p{color:#d3dac9}
+  .capstone{margin-top:var(--s4);background:linear-gradient(120deg,#2a3a30,#1c2820);color:#f1ece0;border-radius:18px;padding:var(--s4);text-align:center;box-shadow:0 16px 40px rgba(28,40,32,.3)}
+  .capstone .k{font-family:'Klee One',cursive;letter-spacing:.2em;text-transform:uppercase;font-size:.76rem;color:var(--gold);margin-bottom:var(--s2)}
+  .capstone p{color:#d3dac9;max-width:600px;margin:var(--s2) auto 0}
+  .capstone .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:var(--s3)}
+  .capstone .chip{background:rgba(216,178,94,.18);color:#e6cf8a;font-size:.76rem;padding:5px 12px;border-radius:14px}
+  footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+</style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Lò rèn</a>
+  <a class="home" href="../../../index.html">🗺️ Overworld</a>
+
+  <header class="hero">
+    <div class="eyebrow">Gốc 8 / 8 · Craftsmanship · CAPSTONE</div>
+    <h1><em>TDD</em></h1>
+    <div class="canon">📖 Neo canon: <i>TDD by Example</i> — Kent Beck · <i>Clean Craftsmanship</i> — Robert C. Martin</div>
+  </header>
+
+  <nav class="secnav">
+    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Vòng lặp</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="concept">
+      <div class="label">① Khái niệm (framework-agnostic)</div>
+      <h2>Viết test TRƯỚC — để thiết kế, không phải để kiểm tra</h2>
+      <p>TDD đảo ngược thứ tự: <b>test trước, code sau</b>. Nhưng bí mật lớn nhất — và là điều interview muốn nghe — là: <b>TDD không phải kỹ thuật testing, nó là kỹ thuật THIẾT KẾ.</b> Viết test trước ép anh nghĩ về interface, về cách dùng, trước khi nghĩ về implementation.</p>
+
+      <h3>Red → Green → Refactor</h3>
+      <div class="cycle">
+        <div class="cs red"><b>🔴 RED</b><small>Viết test cho hành vi chưa có → nó FAIL</small></div>
+        <div class="carr">→</div>
+        <div class="cs green"><b>🟢 GREEN</b><small>Viết code TỐI THIỂU để test pass</small></div>
+        <div class="carr">→</div>
+        <div class="cs refac"><b>🟡 REFACTOR</b><small>Dọn cho đẹp, test vẫn xanh</small></div>
+      </div>
+      <p style="text-align:center;color:var(--clay);font-family:'Klee One',cursive;margin-top:var(--s2)">↻ lặp lại cho hành vi tiếp theo</p>
+      <blockquote>🧠 Vì sao mỗi bước quan trọng: <b>RED</b> chứng minh test thật sự test cái gì đó (test luôn pass = test vô dụng). <b>GREEN</b> tối thiểu = không viết code thừa (YAGNI). <b>REFACTOR</b> = giờ có lưới rồi, dọn an toàn.</blockquote>
+    </section>
+
+    <section id="smell-to-fix">
+      <div class="label">② Vòng lặp (thấy tận mắt)</div>
+      <h2>Một vòng RGR đầy đủ</h2>
+      <p class="desc">Ví dụ: hàm tính phí có giảm giá. Theo đúng 3 nhịp.</p>
+
+      <div class="code red"><div class="hd">🔴 RED — test trước, chạy → FAIL (chưa có hàm)</div><pre>it(<span class="str">'giảm 10% khi total &gt; 1tr'</span>, () => {
+  expect(applyDiscount(<span class="str">1_200_000</span>)).toBe(<span class="str">1_080_000</span>);
+});
+<span class="cmt">// ❌ FAIL: applyDiscount is not defined — TỐT, test có ý nghĩa</span></pre></div>
+
+      <div class="code green"><div class="hd">🟢 GREEN — code tối thiểu để pass</div><pre><span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+  <span class="kw">if</span> (total &gt; <span class="str">1_000_000</span>) <span class="kw">return</span> total * <span class="str">0.9</span>;
+  <span class="kw">return</span> total;
+}
+<span class="cmt">// ✅ PASS. Không thêm gì thừa.</span></pre></div>
+
+      <div class="code refac"><div class="hd">🟡 REFACTOR — dọn, test vẫn xanh</div><pre><span class="kw">const</span> DISCOUNT_THRESHOLD = <span class="str">1_000_000</span>;
+<span class="kw">const</span> DISCOUNT_RATE = <span class="str">0.1</span>;
+<span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+  <span class="kw">const</span> eligible = total &gt; DISCOUNT_THRESHOLD;
+  <span class="kw">return</span> eligible ? total * (<span class="str">1</span> - DISCOUNT_RATE) : total;
+}
+<span class="cmt">// ✅ vẫn PASS — tên rõ (gốc 1), an toàn (gốc 6-7)</span></pre></div>
+
+      <p>Thấy không brother? Một vòng TDD <b>dùng cả Clean Code (tên), Testing (lưới), Refactoring (dọn)</b>. Đây là lý do nó là capstone.</p>
+    </section>
+
+    <section id="in-your-code">
+      <div class="label">③ Trong code THẬT của anh</div>
+      <h2>Build một feature bằng TDD trong Asset_Platform</h2>
+      <div class="hunt">
+        <h3>🔨 Vết sẹo capstone — build MỚI bằng TDD (40 phút)</h3>
+        <p>Mấy gốc trước anh đào sẹo trong code CŨ. Gốc này tạo sẹo MỚI: chọn một hàm thuần nhỏ cần thêm vào Asset_Platform (vd: tính phí, validate một rule, format một giá trị) và làm <b>đúng TDD</b>:</p>
+        <ul>
+          <li><b>🔴</b> Viết test cho 1 hành vi → chạy → thấy nó FAIL (đỏ thật).</li>
+          <li><b>🟢</b> Viết code tối thiểu → test PASS (xanh).</li>
+          <li><b>🟡</b> Refactor → test vẫn xanh.</li>
+          <li>↻ Lặp cho hành vi/edge-case tiếp theo (total = đúng ngưỡng? số âm? 0?).</li>
+        </ul>
+        <p>→ Cảm cái khác biệt: viết test trước ép anh nghĩ "hàm này NÊN dùng thế nào" trước khi viết ruột. Ghi Scar-Journal: TDD đổi cách anh thiết kế thế nào?</p>
+      </div>
+      <blockquote>⚠️ Sân tập: nhánh riêng. Nếu Asset_Platform khó áp TDD (code dính chặt) → đó cũng là một bài học: code khó test = thiếu DIP (gốc 3).</blockquote>
+    </section>
+
+    <section id="why-ladder">
+      <div class="label">④ Why-Ladder (cho Mock)</div>
+      <h2>Interviewer đào sâu thế nào</h2>
+      <div class="ladder">
+        <div class="step"><div class="lv">1</div><div><div class="q">"TDD là gì? Red-Green-Refactor?"</div><div class="a">→ Viết test trước (red/fail), code tối thiểu cho pass (green), rồi dọn (refactor). (định nghĩa)</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Tại sao viết test TRƯỚC? Có vẻ ngược."</div><div class="a">→ Vì TDD là kỹ thuật THIẾT KẾ, không phải testing. Test trước ép nghĩ về interface/cách dùng trước implementation. (lý do — câu chốt)</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Anh từng làm TDD thật chưa? Kể đi."</div><div class="a">→ DẪN SẸO Asset_Platform: build hàm phí/validate bằng RGR, cảm giác test-first đổi thiết kế ra sao. (kinh nghiệm — chỗ nhiều người fake bị lộ)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Tại sao bước RED quan trọng — sao không viết code luôn?"</div><div class="a">→ RED chứng minh test thật sự fail được. Test không bao giờ đỏ = có thể test sai/vô dụng, cho cảm giác an toàn giả. (áp dụng)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"TDD có hợp MỌI tình huống không?"</div><div class="a">→ Không. Hợp với logic rõ ràng (business rules, thuật toán). Khó hơn với UI khám phá, prototype, code spike. TDD là công cụ, không phải tôn giáo — biết khi nào dùng mới là senior. (bedrock)</div></div></div>
+      </div>
+      <div class="mockbox">
+        <div class="k">Đậu gốc này khi</div>
+        <p>Anh nói được "TDD là thiết kế, không phải testing" (tầng 2), dẫn được một lần làm RGR thật trong Asset_Platform (tầng 3), giải thích vì sao RED quan trọng (tầng 4), và biết TDD không hợp mọi chỗ (tầng 5).</p>
+      </div>
+    </section>
+
+    <section>
+      <div class="capstone">
+        <div class="k">🎓 Capstone — gốc cuối gói cả 8</div>
+        <p>Một vòng TDD chạm vào TẤT CẢ những gì anh đã học. Khi anh làm được TDD trôi chảy, nghĩa là 7 gốc kia đã nằm trong tay.</p>
+        <div class="chips">
+          <span class="chip">RED → tên test rõ = Clean Code</span>
+          <span class="chip">code tối thiểu = YAGNI/SOLID</span>
+          <span class="chip">mock = DIP</span>
+          <span class="chip">test = Testing</span>
+          <span class="chip">dọn = Refactoring</span>
+          <span class="chip">đẹp = không Smell</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>Gốc 8 / 8 — HOÀN TẤT. Craft của anh giờ là một vòng lặp sống. 🔴🟢🟡</div>
+    <div class="verse">"Whatever you do, work at it with all your heart, as working for the Lord." — Colossians 3:23</div>
+  </footer>
+</body>
+</html>

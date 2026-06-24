@@ -539,6 +539,11 @@ textarea.debrief-notes:focus { border-color: var(--lavender); }
         <span class="label">Full Dress</span>
         <span class="desc">Week 12 Only<br/>All Rounds</span>
       </button>
+      <button class="format-btn" data-format="Craft" onclick="selectFormat('Craft')">
+        <span class="emoji">🎨</span>
+        <span class="label">Craftsmanship</span>
+        <span class="desc">Bậc 3 · Why-Ladder<br/>SOLID · Testing · TDD</span>
+      </button>
     </div>
 
     <div class="week-row">
@@ -732,9 +737,25 @@ function getPhases(format, week) {
     { name: 'Follow-up / Optimization', minutes: 5 },
   ];
 
+  const craftsmanshipSteps = [
+    { name: 'Keyword #1 — climb the 5-rung why-ladder', minutes: 8 },
+    { name: 'Keyword #2 — climb the 5-rung why-ladder', minutes: 8 },
+    { name: 'Keyword #3 — climb the 5-rung why-ladder', minutes: 8 },
+    { name: 'Keyword #4 — climb the 5-rung why-ladder', minutes: 8 },
+    { name: 'Keyword #5 / cross-root combo', minutes: 8 },
+  ];
+  const craftsmanshipDims = ['Synthesis', 'Floor Depth', 'Real Scars', 'Communication'];
+
   const debrief = { name: 'Debrief', steps: [{ name: 'Review scores, strengths, improvements, drills', minutes: 20 }], dims: [] };
 
   const w = parseInt(week);
+
+  if (format === 'Craft') {
+    return [
+      { name: 'Craftsmanship Deep Dive (Why-Ladder)', steps: craftsmanshipSteps, dims: craftsmanshipDims, scoreKey: 'craftsmanship' },
+      debrief,
+    ];
+  }
 
   if (format === 'A') {
     const isSD = (w === 4 || w === 8);
@@ -779,7 +800,9 @@ document.getElementById('week-select').addEventListener('change', (e) => {
 });
 
 function checkReady() {
-  document.getElementById('start-btn').disabled = !(selectedFormat && selectedWeek);
+  // Craftsmanship fight is quality-gated, not week-scheduled → no week required
+  const ready = selectedFormat === 'Craft' ? !!selectedFormat : !!(selectedFormat && selectedWeek);
+  document.getElementById('start-btn').disabled = !ready;
 }
 
 function startBattle() {

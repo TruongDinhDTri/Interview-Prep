@@ -130,6 +130,22 @@ Mock interviews begin **Week 4** (not earlier). Weeks 1-3 are pure skill buildin
 | **Rendering & Performance** | Re-renders, memoization, bundle size, Core Web Vitals, loading states |
 | **API Integration** | Data fetching with loading/error/empty states, caching, race conditions |
 
+### Craftsmanship Deep Dive Round (4 Dimensions) — Bậc 3 · Why-Ladder
+*Custom rubric. The tier that failed Wiganz in a real interview (SOLID, god class, test pyramid, TDD).*
+*Runbook: `Craftsmanship/Mock-Craftsmanship-Guide.md` · Questions: `../Craftsmanship/<gốc>/Deep-Guide.html#why-ladder`.*
+*Format: drop a Bậc-3 keyword, climb a 5-rung why-ladder (definition → reason → experience → apply → bedrock).*
+
+| Dimension | What It Measures |
+|-----------|-----------------|
+| **Synthesis** | Derives answers from first principles vs reciting a memorized script. The core thing this tier tests. |
+| **Floor Depth** | How far down the why-ladder before hitting air (rung 1 definition → rung 5 bedrock "when NOT to use"). |
+| **Real Scars** | Cites concrete examples from his own code (Asset_Platform) at rung 3, not generic textbook cases. |
+| **Communication** | Structured, admits trade-offs, "it depends" with justification — not buzzword-dropping. |
+
+> **Killer signal:** rung 3 (real scar) + rung 5 (bedrock) together = pass. A polished definition that
+> freezes at rung 2 = recall, not synthesis = fail. This is the recall-vs-synthesis distinction the
+> whole Craftsmanship Battle Front exists to fix.
+
 ### Scoring Scale (All Rounds)
 | Score | Label | Meaning |
 |-------|-------|---------|

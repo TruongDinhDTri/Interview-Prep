@@ -16,6 +16,7 @@ Hadriel loads files on-demand, so **what you SAY is what triggers the right batt
 | 🗣️ **Behavioral-only** | *"let's do a behavioral mock"* | `Behavioral/Mock-Behavioral-Guide.md` |
 | ⚙️ **Technical-only** (Backend / Frontend) | *"let's do a technical mock"* | `Technical/Mock-Technical-Guide.md` |
 | 🏗️ **System Design-only** | *"let's do a system design mock"* | `System Design/Mock-SystemDesign-Guide.md` |
+| 🎨 **Craftsmanship (Bậc 3)** | *"let's do a craftsmanship mock"* | `Craftsmanship/Mock-Craftsmanship-Guide.md` |
 
 Each fight keeps its **OWN rubric** — they do *not* share one. This arena only shares the *shell*: the
 timer, the interviewer→debrief ritual, and your score history in `../memory/mock-performance.json`.

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gốc 6 — Testing · Deep Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
+    --r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit;text-decoration:none}::selection{background:rgba(216,178,94,.4)}
+  .back,.home{position:fixed;top:18px;z-index:30;font-family:'Klee One',cursive;font-size:.84rem;
+    background:rgba(253,250,242,.92);backdrop-filter:blur(6px);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);transition:transform .2s}
+  .back{left:20px}.home{right:20px}.back:hover{transform:translateX(-3px);color:var(--clay)}.home:hover{transform:translateY(-2px);color:var(--clay)}
+  .hero{padding:var(--s6) clamp(20px,5vw,56px) var(--s3);text-align:center;background:radial-gradient(130% 90% at 50% 0%,#eef3e6 0%,var(--paper) 60%)}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.28em;text-transform:uppercase;font-size:.8rem;color:var(--clay);margin-bottom:var(--s2)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.2rem)}
+  .hero h1 em{font-style:italic;color:var(--moss)}
+  .hero .canon{margin-top:var(--s2);font-size:.86rem;color:#8a9a8c;font-style:italic}
+  .secnav{position:sticky;top:0;z-index:20;background:rgba(245,239,225,.93);backdrop-filter:blur(8px);border-bottom:1px solid rgba(36,48,38,.1);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px}
+  .secnav a{font-size:.76rem;letter-spacing:.06em;padding:7px 14px;border-radius:18px;color:#5a6f5d;transition:background .18s}
+  .secnav a:hover{background:#e7ddc8;color:var(--ink)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+  section{padding:var(--s5) 0;scroll-margin-top:60px}
+  .label{font-family:'Klee One',cursive;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;color:var(--clay);display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+  .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
+  ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
+  /* pyramid */
+  .pyr{margin:var(--s3) auto 0;max-width:440px;display:flex;flex-direction:column;align-items:center;gap:6px}
+  .pl{color:#fff;border-radius:8px;padding:12px 16px;text-align:center;box-shadow:0 5px 14px rgba(36,48,38,.14)}
+  .pl b{font-size:1rem}.pl small{display:block;opacity:.9;font-size:.76rem;margin-top:2px}
+  .pe2e{width:46%;background:linear-gradient(100deg,#b06a4a,#cf8a63)}
+  .pint{width:70%;background:linear-gradient(100deg,#c89a3e,#d8b25e)}
+  .punit{width:100%;background:linear-gradient(100deg,#5e8a63,#74a17a)}
+  .firstgrid{margin-top:var(--s2);display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+  .fc{background:#fffdf7;border:1px solid rgba(36,48,38,.09);border-radius:10px;padding:10px 12px;font-size:.82rem}
+  .fc b{color:var(--moss)}
+  .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .code.bad .hd{background:#3a2420;color:#e6a48a}.code.good .hd{background:#22301f;color:#a8cdac}
+  .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
+  .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .pair{display:grid;grid-template-columns:1fr;gap:14px;margin-top:var(--s2)}
+  @media(min-width:780px){.pair{grid-template-columns:1fr 1fr}}
+  .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
+  .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
+  .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed rgba(36,48,38,.16)}
+  .step:last-child{border-bottom:none}.step .lv{font-family:'Fraunces',serif;font-weight:600;color:var(--clay);text-align:center}
+  .step .q{font-weight:700;color:var(--ink)}.step .a{font-size:.86rem;color:#6b7d6e;margin-top:4px}
+  .mockbox{margin-top:var(--s3);background:var(--deep);color:#f1ece0;border-radius:14px;padding:var(--s3) var(--s4)}
+  .mockbox .k{font-family:'Klee One',cursive;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--gold)}.mockbox p{color:#d3dac9}
+  footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+</style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Lò rèn</a>
+  <a class="home" href="../../../index.html">🗺️ Overworld</a>
+
+  <header class="hero">
+    <div class="eyebrow">Gốc 6 / 8 · Craftsmanship</div>
+    <h1><em>Testing</em></h1>
+    <div class="canon">📖 Neo canon: Test Pyramid (Mike Cohn) · <i>Working Effectively with Legacy Code</i> (Feathers)</div>
+  </header>
+
+  <nav class="secnav">
+    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Smell → Fix</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="concept">
+      <div class="label">① Khái niệm (framework-agnostic)</div>
+      <h2>Tấm lưới để anh dám đổi code</h2>
+      <p>Test không phải để "chứng minh code đúng". Nó là <b>tấm lưới an toàn</b>: nó cho anh <b>can đảm refactor</b> mà không sợ phá thứ khác. Không có test = mỗi lần sửa là một canh bạc.</p>
+
+      <h3>Test Pyramid — cái họ vả anh hôm phỏng vấn</h3>
+      <div class="pyr">
+        <div class="pl pe2e"><b>E2E</b><small>ít · chậm · giòn · qua cả hệ thống</small></div>
+        <div class="pl pint"><b>Integration</b><small>vừa · nhiều module ráp nhau (DB, API)</small></div>
+        <div class="pl punit"><b>Unit</b><small>NHIỀU · nhanh · rẻ · một đơn vị cô lập</small></div>
+      </div>
+      <blockquote>🧠 Ý nghĩa kim tự tháp: <b>nhiều unit (đáy), ít E2E (đỉnh).</b> Vì unit nhanh+rẻ+ổn định; E2E chậm+đắt+flaky. Lật ngược (nhiều E2E) = "ice cream cone" anti-pattern: chạy 20 phút, hay đỏ vu vơ.</blockquote>
+
+      <h3>F.I.R.S.T — dấu hiệu unit test tốt</h3>
+      <div class="firstgrid">
+        <div class="fc"><b>F</b>ast — chạy mili giây</div>
+        <div class="fc"><b>I</b>solated — không phụ thuộc test khác</div>
+        <div class="fc"><b>R</b>epeatable — chạy đâu cũng cùng kết quả</div>
+        <div class="fc"><b>S</b>elf-validating — pass/fail rõ, không đọc tay</div>
+        <div class="fc"><b>T</b>imely — viết đúng lúc (lý tưởng: trước code — gốc 8 TDD)</div>
+      </div>
+      <blockquote>📌 Mocking: thay phụ thuộc thật (DB, API, mailer) bằng đồ giả để test đơn vị <b>cô lập</b>. Mock nhiều quá = test dính chặt implementation, dễ vỡ. Mock đúng ranh giới (I/O, external).</blockquote>
+    </section>
+
+    <section id="smell-to-fix">
+      <div class="label">② Smell → Fix (thấy tận mắt)</div>
+      <h2>Test dở → test tốt</h2>
+
+      <h3>A. Cấu trúc AAA (Arrange–Act–Assert)</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Test rối, test nhiều thứ</div><pre>it(<span class="str">'works'</span>, () => {
+  <span class="kw">const</span> r = svc.register(dto);
+  expect(r.id).toBeDefined();
+  expect(mailer.sent).toBe(<span class="kw">true</span>);
+  expect(db.count()).toBe(<span class="str">1</span>);
+  <span class="cmt">// tên vô nghĩa, 3 assert 3 lý do fail</span>
+})</pre></div>
+        <div class="code good"><div class="hd">✅ AAA, một hành vi/test</div><pre>it(<span class="str">'tạo user khi dto hợp lệ'</span>, () => {
+  <span class="cmt">// Arrange</span>
+  <span class="kw">const</span> dto = makeValidDto();
+  <span class="cmt">// Act</span>
+  <span class="kw">const</span> user = svc.register(dto);
+  <span class="cmt">// Assert</span>
+  expect(user.id).toBeDefined();
+})</pre></div>
+      </div>
+
+      <h3>B. Mocking đúng ranh giới</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Gọi DB/mail thật trong unit test</div><pre>it(<span class="str">'register'</span>, <span class="kw">async</span> () => {
+  <span class="kw">await</span> svc.register(dto);
+  <span class="cmt">// chạm Postgres + SendGrid thật</span>
+  <span class="cmt">// → chậm, flaky, gửi mail thật 😱</span>
+})</pre></div>
+        <div class="code good"><div class="hd">✅ Mock phụ thuộc ngoài</div><pre><span class="kw">const</span> mailer = { send: jest.fn() };
+<span class="kw">const</span> svc = <span class="kw">new</span> UserService(repo, mailer);
+<span class="kw">await</span> svc.register(dto);
+expect(mailer.send).toHaveBeenCalled();
+<span class="cmt">// nhanh, cô lập, lặp lại được</span></pre></div>
+      </div>
+      <p>👉 Để mock được dễ thế này, <span class="path">UserService</span> phải nhận phụ thuộc qua constructor — đó chính là <b>DIP (gốc 3)</b>. Thấy các gốc nối nhau chưa?</p>
+    </section>
+
+    <section id="in-your-code">
+      <div class="label">③ Trong code THẬT của anh</div>
+      <h2>Soi test trong Asset_Platform</h2>
+      <div class="hunt">
+        <h3>🔍 Săn + Build (25 phút)</h3>
+        <p>Asset_Platform đã có sẵn <span class="path">apps/api/test</span>, <span class="path">apps/web/e2e</span>, <span class="path">apps/mobile/__tests__</span>, <span class="path">__mocks__/</span>. Làm:</p>
+        <ul>
+          <li><b>Đếm hình dạng pyramid</b> — anh đang có bao nhiêu unit vs integration vs E2E? Nó là kim tự tháp hay ice-cream-cone (ngược)?</li>
+          <li><b>Build một unit test thật</b> — chọn MỘT service method chưa có test, viết unit test cho nó (mock phụ thuộc ngoài). Cảm cái khó: nếu khó mock → đó là tín hiệu code dính chặt (thiếu DIP). ĐÓ là vết sẹo.</li>
+        </ul>
+        <p>→ Ghi Scar-Journal: viết test thấy gì? Chỗ nào khó test → chỗ đó thiết kế cần sửa.</p>
+      </div>
+    </section>
+
+    <section id="why-ladder">
+      <div class="label">④ Why-Ladder (cho Mock)</div>
+      <h2>Interviewer đào sâu thế nào</h2>
+      <div class="ladder">
+        <div class="step"><div class="lv">1</div><div><div class="q">"Test pyramid là gì?"</div><div class="a">→ Nhiều unit (đáy), ít integration (giữa), rất ít E2E (đỉnh). (định nghĩa)</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Tại sao nhiều unit, ít E2E?"</div><div class="a">→ Unit nhanh/rẻ/ổn định; E2E chậm/đắt/flaky. Tối ưu feedback nhanh + chi phí thấp. (lý do)</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Kể lần anh viết test cho một feature."</div><div class="a">→ DẪN SẸO Asset_Platform: viết unit test cho service X, phải mock repo/mailer, chỗ nào khó mock. (kinh nghiệm)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Service này khó test vì new-up DB bên trong. Sao sửa?"</div><div class="a">→ Inject phụ thuộc (DIP) để mock được. Khó test = tín hiệu thiết kế xấu. (áp dụng — nối gốc 3)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"100% coverage có phải mục tiêu không?"</div><div class="a">→ Không. Coverage là chỉ số, không phải mục tiêu. Test giá trị (logic phức tạp, edge case) quan trọng hơn test getter/setter cho đủ %. Test để tự tin refactor, không để khoe số. (bedrock)</div></div></div>
+      </div>
+      <div class="mockbox">
+        <div class="k">Đậu gốc này khi</div>
+        <p>Anh giải thích pyramid + lý do (tầng 2), dẫn được lần viết test thật (tầng 3), nối "khó test = thiết kế xấu" sang DIP (tầng 4), và hiểu coverage không phải mục tiêu (tầng 5).</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>Gốc 6 / 8 — có lưới rồi, giờ dám dọn code mà không sợ ngã. 🛡️</div>
+    <div class="verse">"Well done, good and faithful servant!" — Matthew 25:21</div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gốc 2 — Code Smells · Deep Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
+    --r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px;--bad:#cf6a4a;--good:#5e8a63}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit;text-decoration:none}::selection{background:rgba(216,178,94,.4)}
+  .back,.home{position:fixed;top:18px;z-index:30;font-family:'Klee One',cursive;font-size:.84rem;
+    background:rgba(253,250,242,.92);backdrop-filter:blur(6px);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);transition:transform .2s}
+  .back{left:20px}.home{right:20px}.back:hover{transform:translateX(-3px);color:var(--clay)}.home:hover{transform:translateY(-2px);color:var(--clay)}
+  .hero{padding:var(--s6) clamp(20px,5vw,56px) var(--s3);text-align:center;background:radial-gradient(130% 90% at 50% 0%,#eef3e6 0%,var(--paper) 60%)}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.28em;text-transform:uppercase;font-size:.8rem;color:var(--clay);margin-bottom:var(--s2)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.2rem)}
+  .hero h1 em{font-style:italic;color:var(--moss)}
+  .hero .canon{margin-top:var(--s2);font-size:.86rem;color:#8a9a8c;font-style:italic}
+  .secnav{position:sticky;top:0;z-index:20;background:rgba(245,239,225,.93);backdrop-filter:blur(8px);border-bottom:1px solid rgba(36,48,38,.1);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px}
+  .secnav a{font-size:.76rem;letter-spacing:.06em;padding:7px 14px;border-radius:18px;color:#5a6f5d;transition:background .18s}
+  .secnav a:hover{background:#e7ddc8;color:var(--ink)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+  section{padding:var(--s5) 0;scroll-margin-top:60px}
+  .label{font-family:'Klee One',cursive;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;color:var(--clay);display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+  .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
+  ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
+  .smelltable{width:100%;border-collapse:collapse;margin-top:var(--s2);background:#fffdf7;border-radius:var(--r);overflow:hidden;box-shadow:0 6px 16px rgba(36,48,38,.06);font-size:.88rem}
+  .smelltable th,.smelltable td{padding:11px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.07)}
+  .smelltable th{background:#efe7d4;font-family:'Klee One',cursive;font-weight:600}
+  .smelltable tr:last-child td{border-bottom:none}
+  .smelltable td:first-child{font-weight:700;color:var(--clay)}
+  .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .code.bad .hd{background:#3a2420;color:#e6a48a}.code.good .hd{background:#22301f;color:#a8cdac}
+  .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
+  .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .pair{display:grid;grid-template-columns:1fr;gap:14px;margin-top:var(--s2)}
+  @media(min-width:780px){.pair{grid-template-columns:1fr 1fr}}
+  .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
+  .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
+  .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed rgba(36,48,38,.16)}
+  .step:last-child{border-bottom:none}.step .lv{font-family:'Fraunces',serif;font-weight:600;color:var(--clay);text-align:center}
+  .step .q{font-weight:700;color:var(--ink)}.step .a{font-size:.86rem;color:#6b7d6e;margin-top:4px}
+  .mockbox{margin-top:var(--s3);background:var(--deep);color:#f1ece0;border-radius:14px;padding:var(--s3) var(--s4)}
+  .mockbox .k{font-family:'Klee One',cursive;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--gold)}.mockbox p{color:#d3dac9}
+  footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+</style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Lò rèn</a>
+  <a class="home" href="../../../index.html">🗺️ Overworld</a>
+
+  <header class="hero">
+    <div class="eyebrow">Gốc 2 / 8 · Craftsmanship</div>
+    <h1>Code <em>Smells</em></h1>
+    <div class="canon">📖 Neo canon: <i>Refactoring</i> — Martin Fowler (catalog of smells)</div>
+  </header>
+
+  <nav class="secnav">
+    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Smell → Fix</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="concept">
+      <div class="label">① Khái niệm (framework-agnostic)</div>
+      <h2>Mùi hôi — triệu chứng, không phải bệnh</h2>
+      <p>Code smell <b>không phải bug</b> — code vẫn chạy. Nó là <b>triệu chứng bề mặt</b> báo hiệu một vấn đề sâu hơn về thiết kế. Học gốc này = học <b>NGỬI</b> trước khi học dọn (gốc Refactoring sẽ dọn).</p>
+      <blockquote>"If it stinks, change it." — Fowler. Smell không bắt buộc phải sửa ngay, nhưng nó là tín hiệu để DỪNG và NHÌN.</blockquote>
+
+      <h3>Danh mục mùi hay gặp nhất (interview yêu thích)</h3>
+      <table class="smelltable">
+        <tr><th>Mùi</th><th>Là gì</th><th>Hướng dọn</th></tr>
+        <tr><td>God Class / Large Class</td><td>Một class ôm quá nhiều việc, biết quá nhiều</td><td>Extract Class — tách theo trách nhiệm</td></tr>
+        <tr><td>Long Method</td><td>Hàm quá dài, nhiều mức trừu tượng</td><td>Extract Method</td></tr>
+        <tr><td>Long Parameter List</td><td>Hàm nhận 4-5+ tham số</td><td>Introduce Parameter Object</td></tr>
+        <tr><td>Duplicated Code</td><td>Cùng logic lặp ở nhiều nơi</td><td>Extract Function / pull up</td></tr>
+        <tr><td>Feature Envy</td><td>Hàm dùng dữ liệu của class khác nhiều hơn của mình</td><td>Move Method tới nơi nó "ghen"</td></tr>
+        <tr><td>Primitive Obsession</td><td>Dùng string/number thô thay vì kiểu có ý nghĩa</td><td>Replace với Value Object</td></tr>
+        <tr><td>Shotgun Surgery</td><td>Một thay đổi nhỏ bắt sửa rải rác 10 chỗ</td><td>Gom trách nhiệm về một chỗ</td></tr>
+      </table>
+      <blockquote>🧠 Mẹo nhớ god class: <b>"Class này nếu phải kể tên công việc của nó mà cần chữ 'VÀ' nhiều lần → nó đang ôm đồm."</b></blockquote>
+    </section>
+
+    <section id="smell-to-fix">
+      <div class="label">② Smell → Fix (thấy tận mắt)</div>
+      <h2>Ngửi ra mùi → chỉ tay vào nó</h2>
+
+      <h3>A. God Class — class biết quá nhiều</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Smell</div><pre><span class="kw">class</span> <span class="badt">UserService</span> {
+  validateEmail() {...}
+  hashPassword() {...}
+  saveToDb() {...}
+  sendEmail() {...}
+  generateInvoice() {...}
+  exportCsv() {...}
+  callPaymentGateway() {...}
+  <span class="cmt">// 15 methods, 5 domains 😱</span>
+}</pre></div>
+        <div class="code good"><div class="hd">✅ Hướng dọn (Extract Class)</div><pre><span class="kw">class</span> <span class="goodt">UserService</span>     { create, update }
+<span class="kw">class</span> <span class="goodt">PasswordHasher</span>   { hash, verify }
+<span class="kw">class</span> <span class="goodt">UserNotifier</span>     { sendWelcome }
+<span class="kw">class</span> <span class="goodt">InvoiceService</span>   { generate, export }
+<span class="cmt">// mỗi class một trách nhiệm</span></pre></div>
+      </div>
+      <p>God class = nam châm của thay đổi. Mỗi domain đổi đều phải mở nó ra → rủi ro cao, khó test, khó chia việc.</p>
+
+      <h3>B. Long Parameter List</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Smell</div><pre>createBooking(
+  userId, roomId, start, end,
+  guests, note, promoCode, currency
+) {...}</pre></div>
+        <div class="code good"><div class="hd">✅ Parameter Object</div><pre>createBooking(dto: <span class="goodt">CreateBookingDto</span>) {...}
+<span class="cmt">// 8 tham số → 1 object có tên,</span>
+<span class="cmt">// dễ validate, dễ mở rộng</span></pre></div>
+      </div>
+    </section>
+
+    <section id="in-your-code">
+      <div class="label">③ Trong code THẬT của anh</div>
+      <h2>Đi ngửi mùi trong Asset_Platform</h2>
+      <div class="hunt">
+        <h3>🔍 Săn 2 con mồi (15 phút)</h3>
+        <p>Mở <span class="path">/Users/tritdd/Work/Asset_Platform/apps/api</span>. Tìm:</p>
+        <ul>
+          <li><b>Một god service</b> — NestJS service nào có nhiều method chạm nhiều domain (auth + DB + email + payment...). Kể tên việc của nó — đếm chữ "VÀ".</li>
+          <li><b>Duplicated code</b> — đoạn logic (map DTO, format, check quyền) lặp ở 2-3 service/controller. Đánh dấu chỗ trùng.</li>
+        </ul>
+        <p>→ Chưa cần dọn (gốc Refactoring lo). Gốc này chỉ cần <b>NGỬI ĐÚNG và GỌI TÊN</b>. Ghi vào Scar-Journal: mùi gì, ở đâu.</p>
+      </div>
+    </section>
+
+    <section id="why-ladder">
+      <div class="label">④ Why-Ladder (cho Mock)</div>
+      <h2>Interviewer đào sâu thế nào</h2>
+      <div class="ladder">
+        <div class="step"><div class="lv">1</div><div><div class="q">"Code smell là gì?"</div><div class="a">→ Triệu chứng bề mặt, không phải bug, báo hiệu vấn đề thiết kế sâu hơn.</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Kể vài mùi anh biết."</div><div class="a">→ God class, long method, duplicated code, long param list, feature envy... (gọi tên trôi chảy).</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Kể một god class anh từng gặp."</div><div class="a">→ DẪN SẸO từ Asset_Platform: "service X ôm validate + DB + email + payment, một thay đổi nhỏ bắt mở cả file..." (kinh nghiệm)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Class này có 12 method chạm 4 domain — mùi gì? Sửa sao?"</div><div class="a">→ God class. Extract Class theo trách nhiệm. (áp dụng tại chỗ)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"Duplication có phải LÚC NÀO cũng xấu?"</div><div class="a">→ Không. Rule of Three: lặp 2 lần còn chịu được; lặp 3 lần mới trừu tượng hóa. Trừu tượng SAI còn tệ hơn duplication (Sandi Metz). (bedrock)</div></div></div>
+      </div>
+      <div class="mockbox">
+        <div class="k">Đậu gốc này khi</div>
+        <p>Anh ngửi và gọi tên được mùi tại chỗ (tầng 4) + dẫn được 1 god class thật từ Asset_Platform (tầng 3) + hiểu duplication không phải lúc nào cũng xấu (tầng 5).</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>Gốc 2 / 8 — ngửi được cái dơ rồi, gốc sau mới biết vì sao nó dơ. 👃</div>
+    <div class="verse">"Get wisdom, get understanding." — Proverbs 4:5</div>
+  </footer>
+</body>
+</html>

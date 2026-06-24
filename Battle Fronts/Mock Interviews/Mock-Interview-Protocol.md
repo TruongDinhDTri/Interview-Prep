@@ -518,6 +518,12 @@ The ultimate test. Simulates a real full-day interview pipeline.
 | **System Design Round**   | 45 min | Hard problem (Video Streaming, Ride-Sharing, or Search). |
 | **Comprehensive Debrief** | 20 min | All three rounds scored. Final assessment.               |
 
+> 🎨 **Optional Craftsmanship round (Bậc 3 · Why-Ladder):** since the Craftsmanship tier is what
+> failed Wiganz in a real interview, you may add a 40-min Craftsmanship Deep Dive to the Full Dress
+> (or swap it in for one round). Drop Bậc-3 keywords (god class, SOLID, test pyramid, TDD) and climb
+> the 5-rung why-ladder. Runbook: `Craftsmanship/Mock-Craftsmanship-Guide.md` · Rubric: Synthesis,
+> Floor Depth, Real Scars, Communication (see `CONTEXT.md`).
+
 **Debrief Template — Full Dress:**
 
 ```
@@ -564,6 +570,7 @@ The ultimate test. Simulates a real full-day interview pipeline.
 | System Design | Requirements, Architecture, Deep Dive, Trade-offs                                                           |
 | Backend       | Conceptual Depth, Practical Knowledge, Problem Diagnosis, Communication                                     |
 | Frontend      | Component Design, State Management, Rendering & Performance, API Integration                                |
+| Craftsmanship | Synthesis, Floor Depth, Real Scars, Communication  *(Bậc 3 · Why-Ladder — runbook: `Craftsmanship/Mock-Craftsmanship-Guide.md`)* |
 
 ### Target Progression
 

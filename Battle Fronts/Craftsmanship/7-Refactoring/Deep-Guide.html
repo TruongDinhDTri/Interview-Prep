@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gốc 7 — Refactoring · Deep Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
+    --r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit;text-decoration:none}::selection{background:rgba(216,178,94,.4)}
+  .back,.home{position:fixed;top:18px;z-index:30;font-family:'Klee One',cursive;font-size:.84rem;
+    background:rgba(253,250,242,.92);backdrop-filter:blur(6px);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);transition:transform .2s}
+  .back{left:20px}.home{right:20px}.back:hover{transform:translateX(-3px);color:var(--clay)}.home:hover{transform:translateY(-2px);color:var(--clay)}
+  .hero{padding:var(--s6) clamp(20px,5vw,56px) var(--s3);text-align:center;background:radial-gradient(130% 90% at 50% 0%,#eef3e6 0%,var(--paper) 60%)}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.28em;text-transform:uppercase;font-size:.8rem;color:var(--clay);margin-bottom:var(--s2)}
+  .hero h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2rem,5vw,3.2rem)}
+  .hero h1 em{font-style:italic;color:var(--moss)}
+  .hero .canon{margin-top:var(--s2);font-size:.86rem;color:#8a9a8c;font-style:italic}
+  .secnav{position:sticky;top:0;z-index:20;background:rgba(245,239,225,.93);backdrop-filter:blur(8px);border-bottom:1px solid rgba(36,48,38,.1);display:flex;gap:6px;justify-content:center;flex-wrap:wrap;padding:12px}
+  .secnav a{font-size:.76rem;letter-spacing:.06em;padding:7px 14px;border-radius:18px;color:#5a6f5d;transition:background .18s}
+  .secnav a:hover{background:#e7ddc8;color:var(--ink)}
+  .wrap{max-width:880px;margin:0 auto;padding:0 clamp(20px,5vw,56px)}
+  section{padding:var(--s5) 0;scroll-margin-top:60px}
+  .label{font-family:'Klee One',cursive;letter-spacing:.22em;text-transform:uppercase;font-size:.78rem;color:var(--clay);display:flex;align-items:center;gap:10px;margin-bottom:var(--s2)}
+  .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
+  h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
+  ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
+  .flow{margin-top:var(--s2);display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+  .fbox{background:#fffdf7;border:1px solid rgba(36,48,38,.1);border-radius:10px;padding:10px 16px;font-weight:700;box-shadow:0 4px 10px rgba(36,48,38,.05)}
+  .fbox.g{border-color:rgba(94,138,99,.5);color:var(--moss)}
+  .farr{color:var(--clay);font-size:1.2rem}
+  .cat{width:100%;border-collapse:collapse;margin-top:var(--s2);background:#fffdf7;border-radius:var(--r);overflow:hidden;box-shadow:0 6px 16px rgba(36,48,38,.06);font-size:.88rem}
+  .cat th,.cat td{padding:11px 14px;text-align:left;border-bottom:1px solid rgba(36,48,38,.07)}
+  .cat th{background:#efe7d4;font-family:'Klee One',cursive;font-weight:600}
+  .cat tr:last-child td{border-bottom:none}.cat td:first-child{font-weight:700;color:var(--clay)}
+  .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .code.bad .hd{background:#3a2420;color:#e6a48a}.code.good .hd{background:#22301f;color:#a8cdac}
+  .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
+  .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .pair{display:grid;grid-template-columns:1fr;gap:14px;margin-top:var(--s2)}
+  @media(min-width:780px){.pair{grid-template-columns:1fr 1fr}}
+  .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
+  .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
+  .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
+  .step{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:14px 0;border-bottom:1px dashed rgba(36,48,38,.16)}
+  .step:last-child{border-bottom:none}.step .lv{font-family:'Fraunces',serif;font-weight:600;color:var(--clay);text-align:center}
+  .step .q{font-weight:700;color:var(--ink)}.step .a{font-size:.86rem;color:#6b7d6e;margin-top:4px}
+  .mockbox{margin-top:var(--s3);background:var(--deep);color:#f1ece0;border-radius:14px;padding:var(--s3) var(--s4)}
+  .mockbox .k{font-family:'Klee One',cursive;letter-spacing:.16em;text-transform:uppercase;font-size:.74rem;color:var(--gold)}.mockbox p{color:#d3dac9}
+  footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+</style>
+</head>
+<body>
+  <a class="back" href="../index.html">← Lò rèn</a>
+  <a class="home" href="../../../index.html">🗺️ Overworld</a>
+
+  <header class="hero">
+    <div class="eyebrow">Gốc 7 / 8 · Craftsmanship</div>
+    <h1><em>Refactoring</em></h1>
+    <div class="canon">📖 Neo canon: <i>Refactoring</i> — Martin Fowler · <i>Working Effectively with Legacy Code</i> — Feathers</div>
+  </header>
+
+  <nav class="secnav">
+    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Smell → Fix</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+  </nav>
+
+  <div class="wrap">
+
+    <section id="concept">
+      <div class="label">① Khái niệm (framework-agnostic)</div>
+      <h2>Đổi cấu trúc, KHÔNG đổi hành vi</h2>
+      <p>Refactoring là <b>cải thiện cấu trúc bên trong mà KHÔNG thay đổi hành vi bên ngoài</b>. Input ra sao, output vẫn vậy — chỉ ruột đẹp hơn. Đây là gốc <b>gom cả 6 gốc trước lại</b>: anh ngửi smell (gốc 2), áp SOLID/OOP/patterns (3-5), và test (gốc 6) là tấm lưới để dọn an toàn.</p>
+      <blockquote>⚠️ Quy tắc vàng (interview test ngay): <b>"Refactor và thêm feature là HAI việc tách rời. Không bao giờ làm cùng lúc."</b> Trộn chung = không biết bug do refactor hay do feature mới.</blockquote>
+
+      <h3>Điều kiện tiên quyết: TEST trước</h3>
+      <div class="flow">
+        <div class="fbox">Có test xanh ✅</div><div class="farr">→</div>
+        <div class="fbox">Refactor từng bước nhỏ</div><div class="farr">→</div>
+        <div class="fbox g">Test vẫn xanh ✅</div>
+      </div>
+      <p>Không có test = không phải refactoring, mà là <b>"đập ra sửa và cầu nguyện"</b>. Test là cái phân biệt refactor an toàn với canh bạc. (Legacy code = code không có test — Feathers.)</p>
+
+      <h3>Vài "nước đi" có tên (Fowler)</h3>
+      <table class="cat">
+        <tr><th>Move</th><th>Làm gì</th></tr>
+        <tr><td>Extract Function/Method</td><td>Tách đoạn code thành hàm có tên</td></tr>
+        <tr><td>Extract Class</td><td>Tách god class thành nhiều class (gốc 2)</td></tr>
+        <tr><td>Rename</td><td>Đổi tên cho tiết lộ ý định (gốc 1)</td></tr>
+        <tr><td>Replace Conditional w/ Polymorphism</td><td>if/else theo type → Strategy (gốc 5)</td></tr>
+        <tr><td>Introduce Parameter Object</td><td>Gom param list dài thành object</td></tr>
+      </table>
+    </section>
+
+    <section id="smell-to-fix">
+      <div class="label">② Smell → Fix (thấy tận mắt)</div>
+      <h2>Dọn theo từng bước nhỏ, an toàn</h2>
+
+      <h3>Extract Method — từng bước, test sau mỗi bước</h3>
+      <div class="pair">
+        <div class="code bad"><div class="hd">❌ Trước</div><pre>printOwing(invoice) {
+  printBanner();
+  <span class="cmt">// tính total</span>
+  <span class="kw">let</span> total = <span class="str">0</span>;
+  <span class="kw">for</span> (<span class="kw">const</span> o <span class="kw">of</span> invoice.orders)
+    total += o.amount;
+  <span class="cmt">// in chi tiết</span>
+  console.log(<span class="str">`name: ${invoice.name}`</span>);
+  console.log(<span class="str">`total: ${total}`</span>);
+}</pre></div>
+        <div class="code good"><div class="hd">✅ Sau (hành vi y hệt)</div><pre>printOwing(invoice) {
+  printBanner();
+  <span class="kw">const</span> total = calcTotal(invoice.orders);
+  printDetails(invoice, total);
+}
+<span class="cmt">// mỗi hàm một việc, đọc như mục lục</span>
+<span class="cmt">// test cũ vẫn xanh = an toàn</span></pre></div>
+      </div>
+      <p>Mỗi bước nhỏ → chạy test → xanh → bước tiếp. Không "dọn hết một phát". Đó là kỷ luật refactoring.</p>
+    </section>
+
+    <section id="in-your-code">
+      <div class="label">③ Trong code THẬT của anh</div>
+      <h2>Refactor thật trong Asset_Platform</h2>
+      <div class="hunt">
+        <h3>🔨 Vòng lặp build→fail→refactor đầy đủ (30 phút)</h3>
+        <p>Đây là gốc của capstone — làm trọn vòng:</p>
+        <ul>
+          <li><b>1. Chọn</b> một con mồi anh đã đánh dấu ở gốc 2 (god class / long method) trong <span class="path">apps/api</span>.</li>
+          <li><b>2. Lưới</b> — viết/đảm bảo có test cho hành vi hiện tại (gốc 6). Chạy → xanh.</li>
+          <li><b>3. Dọn</b> — Extract Method/Class từng bước nhỏ, chạy test sau mỗi bước.</li>
+          <li><b>4. Xác nhận</b> — test vẫn xanh = hành vi không đổi = refactor thành công.</li>
+        </ul>
+        <p>→ Đây là <b>vết sẹo đậm nhất</b>. Ghi Scar-Journal đầy đủ: trước/sau, áp gốc nào, test cứu anh ra sao. Câu chuyện này dùng được cho cả Why-Ladder của gốc 2, 3, 6, 7.</p>
+      </div>
+      <blockquote>⚠️ Sân tập: làm trên branch riêng / copy. Mục tiêu là HỌC vòng lặp, không phải ship.</blockquote>
+    </section>
+
+    <section id="why-ladder">
+      <div class="label">④ Why-Ladder (cho Mock)</div>
+      <h2>Interviewer đào sâu thế nào</h2>
+      <div class="ladder">
+        <div class="step"><div class="lv">1</div><div><div class="q">"Refactoring là gì?"</div><div class="a">→ Cải thiện cấu trúc bên trong mà không đổi hành vi bên ngoài. (định nghĩa)</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Tại sao cần test trước khi refactor?"</div><div class="a">→ Test là lưới: đảm bảo hành vi không đổi. Không test = canh bạc, không phải refactor. (lý do — nối gốc 6)</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Kể một lần anh refactor code thật."</div><div class="a">→ DẪN SẸO Asset_Platform: god service → extract class, có test bọc, từng bước nhỏ. (kinh nghiệm)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Anh vừa refactor VÀ thêm feature trong một PR — ổn không?"</div><div class="a">→ Không. Tách hai việc: nếu bug, không biết do refactor hay feature. Commit/PR riêng. (áp dụng)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"Code chạy tốt, sao phải refactor? Không phải phí thời gian?"</div><div class="a">→ Refactor trả "nợ kỹ thuật" — code dễ đổi = mọi feature sau rẻ hơn. Nhưng cân với deadline: refactor cơ hội (khi đang sửa vùng đó) hợp lý hơn refactor toàn bộ tùy hứng. Đây là phán đoán kỹ sư. (bedrock)</div></div></div>
+      </div>
+      <div class="mockbox">
+        <div class="k">Đậu gốc này khi</div>
+        <p>Anh nối refactoring với test (tầng 2), dẫn vòng lặp build→fail→refactor thật (tầng 3), biết tách refactor khỏi feature (tầng 4), và cân nhắc nợ kỹ thuật vs deadline (tầng 5).</p>
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <div>Gốc 7 / 8 — dọn an toàn rồi. Gốc cuối gói tất cả thành một vòng lặp. ♻️</div>
+    <div class="verse">"Consider it pure joy... the testing of your faith produces perseverance." — James 1:2-3</div>
+  </footer>
+</body>
+</html>

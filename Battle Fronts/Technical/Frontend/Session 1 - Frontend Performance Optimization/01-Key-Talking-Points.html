@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Key Talking Points · Frontend Performance Optimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,500&family=Klee+One:wght@400;600&family=Nunito+Sans:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#243026;
+    --moss:#5e8a63;
+    --gold:#d8b25e;
+    --clay:#cf8a63;
+    --paper:#f5efe1;
+    --deep:#1c2820;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;max-width:100%;overflow-x:hidden;}
+  body{
+    font-family:'Nunito Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.7;
+    font-size:17px;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* soft paper texture via gradient */
+  body{
+    background-image:radial-gradient(circle at 18% 12%,rgba(216,178,94,.06),transparent 40%),
+                     radial-gradient(circle at 82% 78%,rgba(94,138,99,.06),transparent 42%);
+    background-attachment:fixed;
+  }
+
+  /* ─── Nav ─── */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;justify-content:space-between;
+    padding:14px 22px;
+    pointer-events:none;
+  }
+  .nav a{
+    pointer-events:auto;
+    font-family:'Klee One',cursive;
+    font-size:.92rem;
+    text-decoration:none;
+    color:var(--ink);
+    background:rgba(245,239,225,.92);
+    border:1px solid rgba(94,138,99,.4);
+    padding:8px 16px;
+    border-radius:999px;
+    box-shadow:0 4px 12px rgba(36,48,38,.1);
+    backdrop-filter:blur(6px);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+  }
+  .nav a:hover{
+    transform:translateY(-2px);
+    background:var(--gold);
+    color:var(--deep);
+    box-shadow:0 6px 18px rgba(36,48,38,.18);
+  }
+
+  /* ─── Layout ─── */
+  .wrap{
+    max-width:900px;
+    margin:0 auto;
+    padding:96px 22px 0;
+  }
+
+  /* ─── Typography ─── */
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:2.6rem;
+    line-height:1.1;
+    color:var(--deep);
+    margin:0 0 14px;
+    letter-spacing:-.01em;
+  }
+  .subtitle{
+    font-size:1.05rem;
+    color:#46564a;
+    margin:0 0 4px;
+    padding:18px 22px;
+    background:linear-gradient(100deg,rgba(94,138,99,.1),rgba(216,178,94,.1));
+    border-left:4px solid var(--moss);
+    border-radius:10px;
+  }
+  h2{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.75rem;
+    color:var(--deep);
+    margin:64px 0 18px;
+    padding-bottom:12px;
+    border-bottom:2px solid rgba(216,178,94,.45);
+    letter-spacing:-.01em;
+  }
+  h3{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:1.28rem;
+    color:var(--moss);
+    margin:38px 0 12px;
+  }
+  h4{
+    font-family:'Klee One',cursive;
+    font-weight:600;
+    font-size:1.08rem;
+    color:var(--clay);
+    margin:26px 0 10px;
+  }
+  p{margin:0 0 16px;}
+  strong,b{color:var(--deep);font-weight:700;}
+  em{color:#46564a;}
+  a{color:var(--moss);}
+
+  ul,ol{margin:0 0 18px;padding-left:26px;}
+  li{margin:6px 0;}
+  li::marker{color:var(--gold);}
+
+  hr{
+    border:none;
+    height:1px;
+    background:linear-gradient(90deg,transparent,rgba(94,138,99,.4),transparent);
+    margin:48px 0;
+  }
+
+  /* ─── Inline code ─── */
+  code{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.86em;
+    background:rgba(94,138,99,.14);
+    color:#3a5a40;
+    padding:.12em .42em;
+    border-radius:5px;
+    word-break:break-word;
+  }
+
+  /* ─── Code blocks ─── */
+  .codeblock{
+    background:var(--deep);
+    border-radius:14px;
+    margin:0 0 22px;
+    box-shadow:0 8px 24px rgba(28,40,32,.25);
+    overflow:hidden;
+    border:1px solid rgba(216,178,94,.18);
+  }
+  .codeblock .bar{
+    display:flex;align-items:center;gap:7px;
+    padding:11px 16px;
+    background:rgba(255,255,255,.04);
+    border-bottom:1px solid rgba(255,255,255,.07);
+  }
+  .codeblock .bar span{
+    width:11px;height:11px;border-radius:50%;display:inline-block;
+  }
+  .codeblock .bar .r{background:#cf6f5e;}
+  .codeblock .bar .y{background:var(--gold);}
+  .codeblock .bar .g{background:var(--moss);}
+  .codeblock .bar em{
+    margin-left:8px;font-style:normal;
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;color:rgba(245,239,225,.5);
+  }
+  .codeblock pre{
+    margin:0;
+    padding:18px 20px;
+    overflow-x:auto;
+  }
+  .codeblock code{
+    background:none;
+    color:#e8e4d6;
+    padding:0;
+    font-size:.84rem;
+    line-height:1.65;
+    font-family:'JetBrains Mono',monospace;
+    white-space:pre;
+    word-break:normal;
+  }
+
+  /* ─── Tables ─── */
+  .table-wrap{
+    overflow-x:auto;
+    margin:0 0 24px;
+    border-radius:12px;
+    box-shadow:0 6px 18px rgba(36,48,38,.08);
+    border:1px solid rgba(94,138,99,.18);
+  }
+  table{
+    border-collapse:collapse;
+    width:100%;
+    min-width:480px;
+    background:#fff;
+    font-size:.92rem;
+  }
+  thead th{
+    background:linear-gradient(100deg,var(--clay),var(--gold));
+    color:#3a2a18;
+    font-family:'Klee One',cursive;
+    font-weight:600;
+    text-align:left;
+    padding:12px 16px;
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:11px 16px;
+    border-top:1px solid rgba(94,138,99,.14);
+    vertical-align:top;
+  }
+  tbody tr:nth-child(even){background:#faf6ec;}
+  tbody tr:hover{background:rgba(216,178,94,.1);}
+
+  /* ─── Blockquote ─── */
+  blockquote{
+    margin:0 0 22px;
+    padding:14px 22px;
+    background:rgba(216,178,94,.12);
+    border-left:4px solid var(--gold);
+    border-radius:0 10px 10px 0;
+    font-style:italic;
+    color:#46564a;
+  }
+  blockquote p:last-child{margin-bottom:0;}
+
+  /* ─── Footer ─── */
+  footer{
+    margin-top:80px;
+    padding:54px 22px 60px;
+    background:linear-gradient(180deg,var(--paper),#e4dcc6 55%,var(--deep));
+    text-align:center;
+  }
+  footer .verse{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-size:1.3rem;
+    color:var(--deep);
+    max-width:640px;
+    margin:0 auto 10px;
+    line-height:1.5;
+  }
+  footer .ref{
+    font-family:'Klee One',cursive;
+    color:var(--clay);
+    font-size:.95rem;
+  }
+
+  @media (max-width:600px){
+    body{font-size:16px;}
+    h1{font-size:2rem;}
+    h2{font-size:1.45rem;}
+    .wrap{padding-top:84px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="../../../index.html">&larr; Workshop</a>
+  <a href="../../../index.html">🗺️ Overworld</a>
+</nav>
+
+<div class="wrap">
+
+  <h1>📝 Key Talking Points: Frontend Performance Optimization</h1>
+  <p class="subtitle"><strong>Goal:</strong> Không chỉ biết tên kỹ thuật — mà giải thích được <em>tại sao</em>, <em>khi nào</em>, và <em>đánh đổi gì</em> khi dùng mỗi kỹ thuật. Đây là phần "client-side scalability" của system design — khi interviewer hỏi "How do you make this fast for the user?", đây là arsenal bro cần.</p>
+
+  <!-- ═══ TIER LENS (retrofit Pha 3) ═══ -->
+    <div style="margin:24px 0 32px;border-radius:14px;overflow:hidden;border:1px solid rgba(216,178,94,.45);box-shadow:0 6px 18px rgba(36,48,38,.08);font-family:system-ui,-apple-system,'Segoe UI',sans-serif;">
+      <div style="background:linear-gradient(100deg,#5e8a63,#74a17a);color:#fff;padding:10px 18px;font-size:.82rem;font-weight:700;letter-spacing:.04em;">🌍 BẬC 2 — Domain Principles (Frontend) · <span style="opacity:.85;font-weight:400;">half-life ~2.5–7 năm · sống qua đổi framework, chết khi đổi mảng</span></div>
+      <div style="background:#fbf8ef;padding:16px 18px;color:#3f4a41;font-size:.9rem;line-height:1.55;">
+        <div style="margin-bottom:10px;"><b style="color:#a06a12;">🎯 Cách dùng trang này:</b> Mục tiêu KHÔNG phải học thuộc câu trả lời — mà <b>hiểu gốc để tự suy ra</b>. Recall gãy trước Why-Ladder; synthesis thì không. (Xem <a href="../../../THE-TOWER.html" style="color:#5e8a63;font-weight:600;">cái tháp 5 bậc →</a>)</div>
+        <div><b style="color:#a06a12;">🧪 Framework-Agnostic Core:</b> Với mỗi kỹ thuật dưới đây, tự hỏi <i>"nếu đổi từ React sang Vue/Svelte/Angular, điều gì VẪN ĐÚNG?"</i> Phần còn lại = Bậc 2 thật. Phần biến mất = chỉ là API Bậc 1.
+        <br>→ Core Web Vitals (LCP/CLS/INP), code splitting, lazy loading, tree shaking, SSR/SSG/CSR/ISR trade-offs, prefetch vs preload, minification/compression — đúng ở MỌI framework. Cú pháp <code>React.lazy</code>, <code>getServerSideProps</code> cụ thể = Bậc 1 (chết khi rời React/Next).
+        <br><b>Bài kiểm:</b> giải thích cách tối ưu LCP và rendering strategy mà KHÔNG nói chữ "React" hay "Next" một lần nào.</div>
+      </div>
+    </div>
+    <!-- ═══ END TIER LENS ═══ -->
+
+  <hr>
+
+  <h2>Trước khi bắt đầu: Core Web Vitals — "Ngôn ngữ của Performance"</h2>
+  <p>Trước khi nói đến kỹ thuật, bro cần hiểu <strong>thước đo</strong>. Interviewer giỏi sẽ không hỏi "How do you optimize performance?" — họ hỏi "How do you improve LCP?" Biết metrics = biết ngôn ngữ của người sẽ chấm bro.</p>
+
+  <h3>The Big 3 (Google's Core Web Vitals)</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Viết tắt</th><th>Đo cái gì</th><th>Good</th><th>Needs Work</th><th>Poor</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Largest Contentful Paint</strong></td><td>LCP</td><td>Tốc độ load content chính</td><td>&lt; 2.5s</td><td>2.5–4s</td><td>&gt; 4s</td></tr>
+        <tr><td><strong>First Input Delay</strong> (→ INP)</td><td>FID/INP</td><td>Độ phản hồi khi user click</td><td>&lt; 100ms</td><td>100–300ms</td><td>&gt; 300ms</td></tr>
+        <tr><td><strong>Cumulative Layout Shift</strong></td><td>CLS</td><td>Trang có bị "nhảy" không</td><td>&lt; 0.1</td><td>0.1–0.25</td><td>&gt; 0.25</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>Và 2 metrics bổ sung quan trọng:</strong></p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Metric</th><th>Viết tắt</th><th>Đo cái gì</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>First Contentful Paint</strong></td><td>FCP</td><td>Thời gian tới lần đầu thấy BẤT KỲ content nào</td></tr>
+        <tr><td><strong>Time to Interactive</strong></td><td>TTI</td><td>Thời gian tới khi page có thể respond user actions</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Mental Model: Trải nghiệm người dùng theo thời gian</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>timeline</em></div>
+    <pre><code>T=0ms        T=500ms      T=1.5s       T=2.5s       T=3.5s
+  |            |            |            |            |
+User types  FCP fires    LCP fires   TTI fires   User gives up
+URL       (thấy gì đó) (content lớn) (click work) (bounce 40%)
+                              ↑
+                     THIS is what Google measures for SEO ranking</code></pre>
+  </div>
+
+  <blockquote><p>"Every 100ms improvement in LCP increases conversion rate by ~1%." — Google research</p></blockquote>
+
+  <h3>Tại sao CLS quan trọng?</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>scenario</em></div>
+    <pre><code>User đang đọc: "Mua ngay với giá..."
+→ Image loads → page shifts → user accidentally clicks "Cancel Order"
+CLS score: 0.3 (Poor)</code></pre>
+  </div>
+  <p>Đây là real UX nightmare. CLS bị ảnh hưởng bởi: images không có width/height, ads inject sau render, web fonts load late.</p>
+
+  <hr>
+
+  <h2>Section 1: Code Splitting — "Đừng bắt user load cả menu khi họ chỉ muốn gọi 1 món"</h2>
+
+  <h3>The Story: Bữa tối 10 món</h3>
+  <p>Tưởng tượng bro vào nhà hàng và người phục vụ ra ngay với <strong>tất cả 10 món cùng một lúc</strong>. Không ai ăn hết 10 món cùng lúc — nhưng bro phải chờ bếp nấu xong hết trước khi ăn được món đầu tiên.</p>
+  <p>Đây chính xác là vấn đề của <strong>monolithic bundle</strong> — JavaScript build ra 1 file duy nhất, user phải download tất cả code của <code>/dashboard</code>, <code>/settings</code>, <code>/admin</code> dù họ chỉ vào trang <code>/login</code>.</p>
+
+  <h3>Bundle Size Reality Check</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>bundle</em></div>
+    <pre><code>Typical React SPA bundle (NO splitting):
+┌─────────────────────────────────────────────────┐
+│  main.bundle.js                        2.4 MB   │
+│  ├── React + ReactDOM                  130 KB   │
+│  ├── React Router                       50 KB   │
+│  ├── Home page                          80 KB   │
+│  ├── Dashboard (heavy charts)          400 KB   │
+│  ├── Admin panel                       300 KB   │
+│  ├── Settings                          150 KB   │
+│  ├── lodash                             70 KB   │
+│  └── ... other dependencies          1.2 MB    │
+└─────────────────────────────────────────────────┘
+User visits Home page → must download ALL 2.4MB before seeing anything</code></pre>
+  </div>
+
+  <h3>How Code Splitting Works</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// ❌ BEFORE: Static import — bundled together regardless of usage
+import HeavyDashboard from './HeavyDashboard'      // 400KB
+import AdminPanel from './AdminPanel'               // 300KB
+import SettingsPage from './SettingsPage'           // 150KB
+
+// ✅ AFTER: Dynamic import — separate chunk, loaded on demand
+const HeavyDashboard = React.lazy(() => import('./HeavyDashboard'))
+const AdminPanel = React.lazy(() => import('./AdminPanel'))
+const SettingsPage = React.lazy(() => import('./SettingsPage'))
+
+// React Router v6 with code splitting
+import { Suspense, lazy } from 'react'
+
+const Dashboard = lazy(() => import('./pages/Dashboard'))
+const Admin = lazy(() => import('./pages/Admin'))
+
+function App() {
+  return (
+    &lt;Suspense fallback={&lt;PageSkeleton /&gt;}&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/dashboard" element={&lt;Dashboard /&gt;} /&gt;
+        &lt;Route path="/admin" element={&lt;Admin /&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  )
+}</code></pre>
+  </div>
+
+  <h3>After Code Splitting — What Actually Gets Downloaded</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>chunks</em></div>
+    <pre><code>Initial load (visiting Home):
+  main.chunk.js           180 KB  ← React + Router + Home only
+  vendors.chunk.js         80 KB  ← React, ReactDOM (separate cache)
+
+User navigates to /dashboard:
+  dashboard.chunk.js      400 KB  ← Downloaded ONLY when needed
+
+User navigates to /admin:
+  admin.chunk.js          300 KB  ← Downloaded ONLY when needed</code></pre>
+  </div>
+  <p>Result: <strong>Initial load drops from 2.4MB → 260KB</strong> → FCP dramatically faster.</p>
+
+  <h3>3 Levels of Code Splitting</h3>
+
+  <h4>Level 1 — Route-based (Most Common)</h4>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Split by page/route — every page is its own chunk
+const LoginPage = lazy(() => import('./pages/Login'))
+const DashboardPage = lazy(() => import('./pages/Dashboard'))</code></pre>
+  </div>
+
+  <h4>Level 2 — Component-based (For Heavy Components)</h4>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Heavy UI components that aren't needed on initial render
+const RichTextEditor = lazy(() => import('./components/RichTextEditor'))  // 800KB Quill
+const DataChart = lazy(() => import('./components/DataChart'))             // 200KB Chart.js
+const PDFViewer = lazy(() => import('./components/PDFViewer'))             // 1.2MB PDF.js</code></pre>
+  </div>
+
+  <h4>Level 3 — Vendor splitting (For Caching)</h4>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>webpack.config.js</em></div>
+    <pre><code>// webpack.config.js — split node_modules into separate chunks
+optimization: {
+  splitChunks: {
+    cacheGroups: {
+      vendor: {
+        test: /[\\/]node_modules[\\/]/,
+        name: 'vendors',        // React, ReactDOM → vendors.chunk.js
+        chunks: 'all'
+        // Why? Vendors change rarely → browser caches them across deploys
+        // Your app code changes every deploy → new hash → cache busted
+        // But vendors.chunk.js keeps same hash → still from cache ✅
+      }
+    }
+  }
+}</code></pre>
+  </div>
+
+  <h3>Trade-off: Waterfall Requests</h3>
+  <p>Code splitting creates a new problem: <strong>navigation waterfall</strong>.</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>flow</em></div>
+    <pre><code>User clicks /dashboard
+  → Browser sees component is lazy
+  → Starts fetching dashboard.chunk.js
+  → User sees loading spinner for 200-500ms
+  → Chunk arrives, component renders</code></pre>
+  </div>
+  <p><strong>Fix:</strong> Prefetch the chunk before user navigates (covered in Section 6).</p>
+
+  <hr>
+
+  <h2>Section 2: Lazy Loading — "Load khi mắt thấy, không phải khi trang load"</h2>
+
+  <h3>The Story: Tờ báo với 200 ảnh</h3>
+  <p>Hãy nghĩ về một tờ báo điện tử có 200 bài với ảnh minh họa. Nếu load tất cả 200 ảnh khi user mở trang → <strong>200 × 500KB = 100MB</strong> chỉ cho ảnh — chỉ để user đọc 5 bài đầu tiên.</p>
+  <p>Lazy loading = chỉ load ảnh khi user <strong>sắp scroll tới</strong> nó.</p>
+
+  <h3>Browser Native Lazy Loading (HTML)</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- ❌ BEFORE: All images download immediately on page load --&gt;
+&lt;img src="article-1.jpg" alt="Article 1"&gt;
+&lt;img src="article-2.jpg" alt="Article 2"&gt;
+&lt;!-- ... 198 more images, all loading simultaneously --&gt;
+
+&lt;!-- ✅ AFTER: Images load only when near viewport --&gt;
+&lt;img src="article-1.jpg" loading="lazy" alt="Article 1"&gt;
+&lt;img src="article-2.jpg" loading="lazy" alt="Article 2"&gt;
+
+&lt;!-- IMPORTANT: Hero image should NOT be lazy! It's above the fold. --&gt;
+&lt;img src="hero.jpg" alt="Hero"
+     loading="eager"           &lt;!-- or just omit loading attribute --&gt;
+     fetchpriority="high"&gt;     &lt;!-- Tell browser: prioritize this --&gt;</code></pre>
+  </div>
+
+  <blockquote><p><strong>Anti-pattern:</strong> Adding <code>loading="lazy"</code> to the LCP image. This delays your most important image and tanks your LCP score. Lazy loading is for <strong>below-the-fold</strong> content only.</p></blockquote>
+
+  <h3>IntersectionObserver — Under the Hood</h3>
+  <p>When browser doesn't support <code>loading="lazy"</code> (older browsers), you implement it manually:</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// IntersectionObserver watches when elements enter the viewport
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      // Element is now visible (or close to viewport)
+      const img = entry.target
+      img.src = img.dataset.src      // Swap data-src → src → triggers download
+      img.classList.remove('lazy')
+      observer.unobserve(img)        // Stop watching — no need anymore
+    }
+  })
+}, {
+  rootMargin: '200px'  // Start loading 200px BEFORE entering viewport
+                       // This is the "trigger distance" — prevents visible pop-in
+})
+
+// Attach observer to all lazy images
+document.querySelectorAll('img.lazy').forEach(img => {
+  imageObserver.observe(img)
+})
+
+// HTML: use data-src instead of src so browser doesn't load it
+// &lt;img class="lazy" data-src="photo.jpg" src="placeholder.jpg" alt="..."&gt;</code></pre>
+  </div>
+
+  <h3>React Component Lazy Loading Pattern</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>import { useState, useEffect, useRef } from 'react'
+
+function LazyComponent({ children }) {
+  const [isVisible, setIsVisible] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '100px' }
+    )
+    if (ref.current) observer.observe(ref.current)
+    return () => observer.disconnect()
+  }, [])
+
+  return (
+    &lt;div ref={ref}&gt;
+      {isVisible ? children : &lt;Skeleton /&gt;}
+    &lt;/div&gt;
+  )
+}
+
+// Usage: Heavy analytics chart only renders when scrolled into view
+&lt;LazyComponent&gt;
+  &lt;HeavyAnalyticsChart data={data} /&gt;
+&lt;/LazyComponent&gt;</code></pre>
+  </div>
+
+  <h3>Metrics Impact</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Without Lazy Loading</th><th>With Lazy Loading</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>100MB initial download (200 images)</td><td>2MB initial (10 above-fold images)</td></tr>
+        <tr><td>LCP: 8s (waiting for all images)</td><td>LCP: 1.2s (only hero image)</td></tr>
+        <tr><td>Bandwidth wasted on unseen images</td><td>Bandwidth only for viewed content</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr>
+
+  <h2>Section 3: SSR vs SSG vs CSR — "Rendering Strategy là Architecture Decision"</h2>
+
+  <h3>The Story: Ba tiệm bánh</h3>
+  <p>Hãy nghĩ về 3 cách phục vụ bánh mì:</p>
+  <ul>
+    <li><strong>CSR</strong> = Tiệm bánh giao cho bạn <em>nguyên liệu thô</em>. Bạn về nhà tự nướng.<br>→ Linh hoạt, nhưng bạn phải tốn thời gian nướng trước khi ăn.</li>
+    <li><strong>SSR</strong> = Mỗi khi có đơn, đầu bếp <em>nướng bánh fresh</em> theo yêu cầu.<br>→ Bánh luôn tươi, nhưng cần thời gian để nướng mỗi đơn.</li>
+    <li><strong>SSG</strong> = Buổi sáng sớm, tiệm <em>nướng sẵn 1,000 ổ</em> bánh. Khi có khách → lấy ngay.<br>→ Nhanh nhất, nhưng không thể customize từng ổ.</li>
+  </ul>
+
+  <h3>CSR — Client-Side Rendering</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>timeline</em></div>
+    <pre><code>Timeline:
+T=0     → Browser requests page
+T=100ms → Server sends: &lt;div id="root"&gt;&lt;/div&gt; (empty HTML + JS bundle link)
+T=100ms → Browser starts downloading bundle.js (1-2MB)
+T=1.5s  → JS downloaded, React hydrates, component renders
+T=1.5s  → FCP fires ← user sees first content HERE
+T=1.8s  → API calls fire, data loads
+T=2.5s  → Full content visible, TTI ready
+
+User experience: blank white screen for 1.5 seconds
+Crawler experience: sees empty HTML → can't index content → SEO broken</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// CSR: React creates and manages all HTML in the browser
+// index.html
+&lt;div id="root"&gt;&lt;/div&gt;  &lt;!-- This is literally all the server sends --&gt;
+
+// main.jsx
+ReactDOM.createRoot(document.getElementById('root')).render(&lt;App /&gt;)
+// Everything is JavaScript-driven, nothing is server-rendered</code></pre>
+  </div>
+  <p><strong>Use when:</strong> Admin dashboards, internal tools, authenticated apps where:</p>
+  <ul>
+    <li>SEO is irrelevant (login-gated content)</li>
+    <li>Users are power users who tolerate initial load</li>
+    <li>You need rich interactivity with complex client state</li>
+  </ul>
+
+  <h3>SSR — Server-Side Rendering</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>timeline</em></div>
+    <pre><code>Timeline:
+T=0     → Browser requests /products/123
+T=0     → Server: runs React, fetches data from DB, renders full HTML
+T=300ms → Server sends: fully-populated HTML (user sees content immediately)
+T=300ms → FCP fires ← user sees first content HERE (3x faster than CSR!)
+T=300ms → Browser starts downloading hydration JS (smaller than full bundle)
+T=800ms → Hydration complete → page is interactive (TTI)
+
+User experience: sees real content at 300ms
+Crawler experience: sees complete HTML → full SEO ✅</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Next.js SSR: getServerSideProps runs on server, per request
+export async function getServerSideProps(context) {
+  const { id } = context.params
+  const product = await db.products.findById(id)   // Real DB call, server-side
+  const reviews = await db.reviews.findByProduct(id)
+
+  return {
+    props: { product, reviews }  // Injected into page as props
+  }
+}
+
+export default function ProductPage({ product, reviews }) {
+  // Renders with real data already available — no loading states needed
+  return (
+    &lt;div&gt;
+      &lt;h1&gt;{product.name}&lt;/h1&gt;          {/* Not empty — real data */}
+      &lt;p&gt;{product.description}&lt;/p&gt;
+      &lt;ReviewList reviews={reviews} /&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+  </div>
+  <p><strong>Trade-offs:</strong></p>
+  <ul>
+    <li>✅ Fast FCP, good SEO, works with personalized/dynamic data</li>
+    <li>❌ Server must handle rendering load (CPU expensive at scale)</li>
+    <li>❌ TTFB slightly higher (server must fetch data before responding)</li>
+    <li>❌ Cannot be served from pure CDN (needs a Node.js server)</li>
+  </ul>
+  <p><strong>Use when:</strong> Product pages, news articles, search results — dynamic + needs SEO.</p>
+
+  <h3>SSG — Static Site Generation</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>timeline</em></div>
+    <pre><code>Build time (once, not per-request):
+  → Build script runs, fetches all data, renders ALL pages
+  → Outputs static HTML files: /products/1.html, /products/2.html, ...
+  → Deploy to CDN
+
+Runtime:
+T=0     → Browser requests /products/123
+T=50ms  → CDN serves pre-built products-123.html (no server computation)
+T=50ms  → FCP fires ← instant!
+T=200ms → Hydration JS loads → interactive</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Next.js SSG: getStaticProps runs at BUILD TIME, not per request
+export async function getStaticProps({ params }) {
+  const product = await db.products.findById(params.id)
+  return {
+    props: { product },
+    revalidate: 60  // ISR: Rebuild this page every 60 seconds (optional)
+  }
+}
+
+// getStaticPaths: Tell Next.js which pages to pre-build
+export async function getStaticPaths() {
+  const products = await db.products.findAll({ limit: 1000 })
+  return {
+    paths: products.map(p => ({ params: { id: p.id } })),
+    fallback: 'blocking'  // Pages not pre-built: SSR on first request, then cached
+  }
+}</code></pre>
+  </div>
+  <p><strong>Trade-offs:</strong></p>
+  <ul>
+    <li>✅ Fastest possible (CDN-served static HTML)</li>
+    <li>✅ Scales infinitely (CDN handles load, no origin server needed)</li>
+    <li>✅ Cheapest hosting</li>
+    <li>❌ Content is stale until rebuild (unless using ISR)</li>
+    <li>❌ 10,000 products = 10,000 HTML files built at deploy time</li>
+    <li>❌ No personalization (same HTML for all users)</li>
+  </ul>
+  <p><strong>Use when:</strong> Marketing pages, blog posts, documentation, landing pages.</p>
+
+  <h3>ISR — Incremental Static Regeneration (Next.js)</h3>
+  <p>The hybrid: pre-build pages, but automatically rebuild in background when content changes. Best of SSG (speed) + SSR (freshness).</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>explanation</em></div>
+    <pre><code>revalidate: 60 means:
+  - First request after 60s → serve stale page, trigger background rebuild
+  - Next request → serve freshly rebuilt page
+  - Result: max 60s stale, but always fast (no blocking rebuild)</code></pre>
+  </div>
+
+  <h3>Decision Framework</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>decision-tree</em></div>
+    <pre><code>Does this page need SEO?
+  └── No → CSR (dashboard, admin, authenticated features)
+  └── Yes →
+        Is the content the same for every user?
+          └── Yes →
+                Does content change frequently? (&lt; every few minutes)
+                  └── No  → SSG (blog, docs, marketing)
+                  └── Yes → SSR with aggressive CDN caching
+          └── No (personalized per user) → SSR</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Section 4: Minification — "Xóa những thứ máy tính không cần nhưng con người cần"</h2>
+
+  <h3>What Gets Removed</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// BEFORE minification — 312 bytes (human-readable)
+/**
+ * Calculate the total price including tax
+ * @param {number} price - The base price
+ * @param {number} taxRate - Tax rate as decimal (e.g., 0.1 for 10%)
+ * @returns {number} Total price with tax
+ */
+function calculateTotalPrice(price, taxRate) {
+  const taxAmount = price * taxRate;
+  const totalPrice = price + taxAmount;
+  return totalPrice;
+}
+
+// AFTER minification — 52 bytes (61% reduction)
+function c(p,t){return p+(p*t)}</code></pre>
+  </div>
+  <p>What was removed:</p>
+  <ul>
+    <li>Comments (3 lines of JSDoc = ~200 bytes)</li>
+    <li>Whitespace and newlines</li>
+    <li>Long variable names → single letters</li>
+    <li>Unnecessary braces and syntax sugar</li>
+  </ul>
+
+  <h3>Compression Stack: The Full Picture</h3>
+  <p>Minification is just step 1. The real magic is the <strong>compression stack</strong>:</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>compression</em></div>
+    <pre><code>Source code: 500 KB
+  → Minification:      350 KB  (30% reduction)
+  → Gzip compression:   90 KB  (74% reduction from minified)
+  → Brotli compression: 75 KB  (15% better than Gzip, 85% from minified)
+
+What gets sent over the network: 75 KB instead of 500 KB → 85% smaller</code></pre>
+  </div>
+
+  <p><strong>Gzip vs Brotli:</strong></p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th></th><th>Gzip</th><th>Brotli</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Browser support</td><td>100%</td><td>~95% (all modern browsers)</td></tr>
+        <tr><td>Compression ratio</td><td>Baseline</td><td>15-25% better than Gzip</td></tr>
+        <tr><td>Speed</td><td>Fast</td><td>Slightly slower to compress (but pre-compressed for static files)</td></tr>
+        <tr><td>Use case</td><td>Dynamic content (generated per request)</td><td>Static files (pre-compress at build time)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p><strong>In practice:</strong> Your build tool (Webpack, Vite) minifies. Your server (Nginx) or CDN applies Brotli/Gzip automatically. You configure once, benefit forever.</p>
+
+  <h3>Who Does This Automatically?</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>bash</em></div>
+    <pre><code># Vite (modern default)
+vite build  # Outputs minified JS/CSS with source maps stripped
+
+# webpack with TerserPlugin (default in production mode)
+mode: 'production'  # Automatically enables TerserPlugin for JS, CSSMinimizerPlugin for CSS
+
+# You don't need to think about this — just run production builds</code></pre>
+  </div>
+
+  <h3>CSS Minification Tricks</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>css</em></div>
+    <pre><code>/* BEFORE: 180 bytes */
+.button {
+  margin-top: 10px;
+  margin-right: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  background-color: #ff0000;
+  font-weight: bold;
+}
+
+/* AFTER: 60 bytes (67% reduction) */
+.button{margin:10px;background:#f00;font-weight:700}</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Section 5: Tree Shaking — "Chỉ đóng gói code bro THỰC SỰ dùng"</h2>
+
+  <h3>The Lodash Trap — A Real Story</h3>
+  <p>Câu chuyện này xảy ra ở hàng nghìn projects:</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Developer muốn dùng debounce — chỉ 1 function thôi
+import _ from 'lodash'     // ← imports ENTIRE lodash library: 71KB
+
+// Used in code:
+_.debounce(handler, 300)   // Only debounce is actually used</code></pre>
+  </div>
+  <p>Bundle size added: <strong>71KB</strong> — for 1 function.</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// Tree-shaking friendly alternative:
+import debounce from 'lodash-es/debounce'  // ← Only: 2.3KB
+
+// OR with named imports from ES module version:
+import { debounce } from 'lodash-es'       // Tree shaker removes everything else</code></pre>
+  </div>
+  <p>Bundle size added: <strong>2.3KB</strong> — 97% reduction.</p>
+
+  <h3>How Tree Shaking Works</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// math-utils.js
+export function add(a, b) { return a + b }          // USED
+export function subtract(a, b) { return a - b }     // NOT USED
+export function multiply(a, b) { return a * b }     // NOT USED
+export function complexAlgorithm(data) {            // NOT USED
+  // 500 lines of complex code
+}
+
+// app.js
+import { add } from './math-utils'    // Only imports add
+
+// What webpack/Rollup includes in bundle:
+// → add function ONLY
+// → subtract, multiply, complexAlgorithm → REMOVED (tree shaken)</code></pre>
+  </div>
+
+  <h3>Critical Requirement: ES Modules</h3>
+  <p>Tree shaking <strong>only works with ES Modules (<code>import</code>/<code>export</code>)</strong>. It does NOT work with CommonJS (<code>require</code>/<code>module.exports</code>).</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// ❌ CommonJS — tree shaking impossible
+const { debounce } = require('lodash')  // require() is dynamic, analyzed at runtime
+                                         // Bundler can't know what you'll use
+
+// ✅ ES Modules — tree shaking works
+import { debounce } from 'lodash-es'   // Static import analyzed at build time
+                                        // Bundler knows exactly what's used</code></pre>
+  </div>
+  <p><strong>Why does this matter?</strong> Many old npm packages ship CommonJS. Always look for:</p>
+  <ul>
+    <li><code>lodash-es</code> instead of <code>lodash</code></li>
+    <li><code>date-fns</code> (ES modules native) instead of <code>moment</code> (CommonJS, 70KB)</li>
+    <li><code>nanoid</code> instead of <code>uuid</code> (tree-shakeable)</li>
+  </ul>
+
+  <h3>Side Effects Trap</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>package.json</em></div>
+    <pre><code>// package.json
+{
+  "sideEffects": false    // ← This tells tree shaker: "All files are safe to remove if unused"
+}
+
+// If you don't set this, webpack is conservative and keeps everything
+// (Can't remove something that might have side effects it doesn't know about)</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Section 6: Prefetch vs Preload — "Tài nguyên đúng chỗ, đúng lúc"</h2>
+
+  <h3>The Story: Quản gia và quần áo</h3>
+  <p>Bạn có một quản gia. Hai kịch bản:</p>
+  <p><strong>Preload:</strong> Bạn đang chuẩn bị cho buổi họp 9 giờ sáng. Bạn nói: <em>"Lấy bộ vest của tôi NGAY BÂY GIỜ — tôi cần nó trong 5 phút."</em> Quản gia bỏ hết việc khác, mang vest tới ngay.</p>
+  <p><strong>Prefetch:</strong> Tối qua, bạn nói: <em>"Ngày mai tôi có tiệc tối lúc 7 giờ. Khi nào rảnh, hãy chuẩn bị bộ đồ tối hôm đó."</em> Quản gia làm khi đang rảnh, không cần rush.</p>
+
+  <h3>Preload — "Tôi cần cái này NGAY cho trang này"</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- Fonts: Without preload, font loads AFTER CSS parsed → FOUT (Flash of Unstyled Text) --&gt;
+&lt;link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin&gt;
+
+&lt;!-- Hero image: Critical for LCP --&gt;
+&lt;link rel="preload" href="/images/hero.jpg" as="image"&gt;
+
+&lt;!-- Critical CSS for above-the-fold content --&gt;
+&lt;link rel="preload" href="/css/critical.css" as="style"&gt;
+
+&lt;!-- What "as" attribute does: tells browser the resource TYPE so it can:
+     - Set correct Accept header
+     - Apply correct Content-Security-Policy
+     - Prioritize correctly (font &gt; image in some cases) --&gt;</code></pre>
+  </div>
+
+  <p><strong>How it improves LCP:</strong></p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>comparison</em></div>
+    <pre><code>Without preload for hero image:
+  HTML parsing → CSS parsing → image tag discovered → fetch image → LCP: 3.2s
+
+With preload:
+  &lt;link rel="preload"&gt; → fetch starts IMMEDIATELY → image ready when tag discovered → LCP: 1.8s
+  (fetch happened in parallel with HTML/CSS parsing, not after)</code></pre>
+  </div>
+
+  <p><strong>Warning:</strong> Over-preloading = wasted bandwidth + bandwidth contention</p>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- ❌ Preloading everything defeats the purpose --&gt;
+&lt;link rel="preload" href="/js/dashboard.js" as="script"&gt;    &lt;!-- Not needed on homepage! --&gt;
+&lt;link rel="preload" href="/images/product-1.jpg" as="image"&gt; &lt;!-- Below the fold! --&gt;
+&lt;link rel="preload" href="/images/product-2.jpg" as="image"&gt; &lt;!-- Below the fold! --&gt;</code></pre>
+  </div>
+
+  <h3>Prefetch — "Tôi CÓ THỂ cần cái này cho trang tiếp theo"</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- User is on /products list page — likely to click a product next --&gt;
+&lt;link rel="prefetch" href="/js/product-detail.chunk.js"&gt;
+&lt;link rel="prefetch" href="/images/product-placeholder.jpg"&gt;
+
+&lt;!-- In React Router: use React.lazy + prefetch hint --&gt;</code></pre>
+  </div>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// React Router prefetch on hover (before user clicks)
+function ProductLink({ productId }) {
+  const handleMouseEnter = () => {
+    // Start prefetching chunk when user HOVERS — they haven't clicked yet!
+    const chunk = import('./pages/ProductDetail')  // Fires prefetch
+  }
+
+  return (
+    &lt;Link to={`/products/${productId}`} onMouseEnter={handleMouseEnter}&gt;
+      View Product
+    &lt;/Link&gt;
+  )
+}
+// Typical hover → click time: 200-400ms
+// Chunk download time: 200-600ms
+// Result: chunk often arrives before user clicks → instant navigation</code></pre>
+  </div>
+
+  <h3>Comparison Table</h3>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th></th><th>Preload</th><th>Prefetch</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Priority</td><td><strong>High</strong> — browser fetches ASAP</td><td><strong>Idle</strong> — browser fetches when nothing else to do</td></tr>
+        <tr><td>When to use</td><td>Current page, above-the-fold, LCP resources</td><td>Next likely page's resources</td></tr>
+        <tr><td>Risk if unused</td><td>Bandwidth wasted (high cost, high priority fetch)</td><td>Bandwidth wasted (low cost, idle fetch)</td></tr>
+        <tr><td><code>&lt;link&gt;</code> attribute</td><td><code>rel="preload"</code></td><td><code>rel="prefetch"</code></td></tr>
+        <tr><td>Impact on LCP</td><td>Improves (fetches critical resources early)</td><td>No impact on current page</td></tr>
+        <tr><td>Impact on next page</td><td>No impact</td><td>Improves (resource already cached)</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>DNS Prefetch and Preconnect (Bonus)</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- For 3rd party domains you'll connect to --&gt;
+&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://analytics.example.com" crossorigin&gt;
+&lt;link rel="dns-prefetch" href="https://api.example.com"&gt;
+
+&lt;!-- preconnect: DNS + TCP + TLS handshake (full connection setup, 100-300ms saved)
+     dns-prefetch: DNS only (10-100ms saved, lighter weight) --&gt;</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Section 7: Putting It All Together — The Full Interview Answer Framework</h2>
+
+  <h3>Khi interviewer hỏi: "How would you optimize this React application's performance?"</h3>
+  <p><strong>Đừng liệt kê kỹ thuật. Hãy nói về PROCESS.</strong></p>
+
+  <h4>Step 1: Measure First (không optimize blind)</h4>
+  <blockquote><p>"Before anything else, I'd run Lighthouse and look at Core Web Vitals — specifically LCP, CLS, and TTI. I need to know what the actual bottleneck is. Is it a massive JS bundle? Render-blocking resources? Slow API responses? The fix is completely different depending on the diagnosis."</p></blockquote>
+
+  <h4>Step 2: Network Optimization (giảm bytes gửi qua mạng)</h4>
+  <blockquote>
+    <p>"If I find a large bundle, I'd analyze it with webpack-bundle-analyzer to see what's taking up space. Most of the time it's either: one or two heavy libraries that can be tree-shaken or replaced with lighter alternatives, or pages loading code they don't need yet — which I'd solve with route-based code splitting.</p>
+    <p>I'd also ensure minification and Brotli compression are enabled in the CDN — this alone typically reduces payload by 80%."</p>
+  </blockquote>
+
+  <h4>Step 3: Loading Strategy (load thông minh hơn)</h4>
+  <blockquote>
+    <p>"For loading strategy, I'd preload critical resources — specifically the LCP image and any web fonts that affect above-the-fold content, since those directly impact Core Web Vitals scores. For images below the fold, native lazy loading with <code>loading='lazy'</code>.</p>
+    <p>For navigation performance, I'd add prefetch hints for likely next pages — most of our users follow predictable patterns through the funnel."</p>
+  </blockquote>
+
+  <h4>Step 4: Rendering Strategy (chọn đúng rendering mode)</h4>
+  <blockquote><p>"Finally, I'd question whether we're using the right rendering strategy. Product pages and content that needs SEO should be SSR or SSG with ISR — there's no reason to have a blank screen while React loads if the content is the same for every visitor. Dashboards and authenticated features stay CSR since SEO isn't a concern there."</p></blockquote>
+
+  <h4>Step 5: Monitor Continuously</h4>
+  <blockquote><p>"And I'd set up Real User Monitoring — Lighthouse measures lab conditions, but real users on slow 3G connections or old Android phones behave differently. I'd track Core Web Vitals with tools like Datadog RUM or web-vitals.js, and set alerts if P75 LCP degrades."</p></blockquote>
+
+  <hr>
+
+  <h2>Section 8: Common Anti-Patterns — "What NOT to Do"</h2>
+
+  <h3>1. Lazy loading the LCP image</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- ❌ Kills LCP score — browser delays fetching most important image --&gt;
+&lt;img src="hero.jpg" loading="lazy" alt="Hero"&gt;
+
+&lt;!-- ✅ Hero is above-the-fold → eager load + preload hint --&gt;
+&lt;link rel="preload" href="hero.jpg" as="image"&gt;
+&lt;img src="hero.jpg" loading="eager" fetchpriority="high" alt="Hero"&gt;</code></pre>
+  </div>
+
+  <h3>2. Importing full lodash with CommonJS</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>javascript</em></div>
+    <pre><code>// ❌ 71KB for one function — tree shaking won't save you here (CommonJS)
+const _ = require('lodash')
+_.debounce(fn, 300)
+
+// ✅ 2.3KB — tree shaking works on ES modules
+import { debounce } from 'lodash-es'</code></pre>
+  </div>
+
+  <h3>3. SSR everything (even content that doesn't need it)</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>reasoning</em></div>
+    <pre><code>User profile dashboard → SSR makes no sense
+  - Content is auth-gated (no SEO benefit)
+  - Data is unique per user (can't cache on CDN)
+  - You're spending server CPU to render what could be CSR
+
+Only SSR when you gain something: SEO, faster FCP for public content</code></pre>
+  </div>
+
+  <h3>4. Preloading resources from future pages</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- ❌ Preloading dashboard.js on the homepage wastes high-priority bandwidth --&gt;
+&lt;link rel="preload" href="/js/dashboard.chunk.js" as="script"&gt;
+
+&lt;!-- ✅ Prefetch (idle, low cost) if user is likely to go to dashboard --&gt;
+&lt;link rel="prefetch" href="/js/dashboard.chunk.js"&gt;</code></pre>
+  </div>
+
+  <h3>5. Not setting width/height on images (CLS killer)</h3>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>html</em></div>
+    <pre><code>&lt;!-- ❌ Browser doesn't know image dimensions → layout shifts when image loads --&gt;
+&lt;img src="product.jpg" alt="Product"&gt;
+
+&lt;!-- ✅ Reserve space upfront → no layout shift → CLS: 0 --&gt;
+&lt;img src="product.jpg" width="400" height="300" alt="Product"&gt;
+&lt;!-- OR: aspect-ratio CSS as modern alternative --&gt;
+&lt;img src="product.jpg" style="aspect-ratio: 4/3; width: 100%" alt="Product"&gt;</code></pre>
+  </div>
+
+  <hr>
+
+  <h2>Quick Reference Card</h2>
+  <div class="codeblock">
+    <div class="bar"><span class="r"></span><span class="y"></span><span class="g"></span><em>cheat-sheet</em></div>
+    <pre><code>MEASURE FIRST: Lighthouse → LCP target &lt; 2.5s, CLS &lt; 0.1, TTI &lt; 3.8s
+
+CODE SPLITTING:
+  → React.lazy(() => import('./Page'))  +  &lt;Suspense fallback={&lt;Spinner/&gt;}&gt;
+  → Route-based: each page = 1 chunk
+  → Vendor splitting: node_modules → separate cached chunk
+
+LAZY LOADING:
+  → Images below fold: &lt;img loading="lazy"&gt;
+  → Hero/LCP image: &lt;img loading="eager" fetchpriority="high"&gt;
+  → Components: IntersectionObserver or React.lazy
+
+RENDERING STRATEGY:
+  → CSR  = auth/dashboard (no SEO needed)
+  → SSR  = product pages, search results (SEO + dynamic)
+  → SSG  = blog, docs, marketing (SEO + static content)
+  → ISR  = SSG + auto-rebuild = best of both
+
+MINIFICATION: Automatic in production build (Vite/Webpack). Gzip=baseline, Brotli=15% better.
+
+TREE SHAKING:
+  → Requires ES Modules (import/export, NOT require)
+  → lodash → lodash-es | moment → date-fns | uuid → nanoid
+  → "sideEffects": false in package.json
+
+PRELOAD  = "I need this NOW for current page" (fonts, hero image, critical CSS)
+PREFETCH = "I might need this for NEXT page" (next route chunk, next page data)
+
+TOP ANTI-PATTERNS:
+  ❌ loading="lazy" on LCP/hero image
+  ❌ import _ from 'lodash' (CommonJS, no tree shaking)
+  ❌ SSR for authenticated dashboards (no SEO gain, wastes server)
+  ❌ Images without width/height (CLS)
+  ❌ Preloading resources from other pages (wasted high-priority bandwidth)</code></pre>
+  </div>
+
+</div>
+
+<footer>
+  <p class="verse">"Whatever you do, do it for the glory of God."</p>
+  <p class="ref">— 1 Corinthians 10:31</p>
+</footer>
+
+</body>
+</html>
