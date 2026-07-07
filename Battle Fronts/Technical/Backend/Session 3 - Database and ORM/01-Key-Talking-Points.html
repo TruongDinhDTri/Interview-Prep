@@ -676,11 +676,17 @@ customer_id=501 → order_id=???  ❌ (1 customer has N orders — ambiguous)</c
             <div class="callout callout-purple">
                 <span class="callout-emoji">💡</span>
                 <div class="callout-content">
-                    <p><strong>AHA — Transitive Dependency:</strong> <code>customer_city</code> depends on <code>customer_id</code>, not on <code>order_id</code>. But <code>customer_id</code> is NOT the PK — it's a non-key column!</p>
+                    <p><strong>AHA — Transitive Dependency:</strong> The trap is reading "depends on" like Vietnamese "phụ thuộc" = "có thể suy ra từ." In databases, it means <strong>functional dependency</strong>: knowing the left side uniquely determines the right side.</p>
+                    <p>If you know <code>order_id = 1</code>, you can answer: the city is HCMC. So <code>order_id → customer_city</code> is <strong>true</strong>. Nothing wrong there.</p>
+                    <p>But <code>customer_city</code> also has a closer source: <code>customer_id → customer_city</code>. And since <code>order_id → customer_id</code>, we get:</p>
 <pre><code>order_id ──→ customer_id ──→ customer_city
    PK          non-key            non-key
               (middleman)</code></pre>
-                    <p><code>customer_city</code> reaches PK only <strong>indirectly</strong> — through <code>customer_id</code> as a middleman.</p>
+                    <p>That means <code>order_id → customer_city</code> is true <strong>transitively</strong>: <code>A → B</code> and <code>B → C</code>, therefore <code>A → C</code>.</p>
+                    <p>3NF is not saying <code>order_id → customer_city</code> is false. It is saying: remove dependencies that go through a <strong>non-key middleman</strong>: <code>PK → non-key → non-key</code>.</p>
+                    <p><strong>Better wording:</strong> <code>customer_city</code> is <strong>directly functionally determined</strong> by <code>customer_id</code>, and therefore only <strong>transitively determined</strong> by <code>order_id</code>.</p>
+                    <p><strong>Tiếng Việt:</strong> <code>customer_city</code> được xác định trực tiếp bởi <code>customer_id</code>; còn <code>order_id</code> chỉ xác định <code>customer_city</code> thông qua <code>customer_id</code>.</p>
+                    <p><strong>Real-life check:</strong> <code>EmployeeID → DepartmentID → DepartmentName</code>. Knowing EmployeeID tells you the department name, but the department name is really decided by DepartmentID.</p>
                 </div>
             </div>
 
@@ -968,158 +974,272 @@ orders = Order.objects.select_related(<span class="str">'customer'</span>).all()
     <div class="callout callout-blue">
         <span class="callout-emoji">🎯</span>
         <div class="callout-content">
-            <p><strong>Talking Point:</strong> "Following a FK to 1 parent? → select_related (JOIN). Getting a list of N children? → prefetch_related (2 queries, Python join)."</p>
+            <p><strong>Core idea:</strong> The real difference is not "1 query vs 2 queries." It is <strong>how the related objects get attached</strong>: the database attaches them with a JOIN, or Django attaches them later in RAM.</p>
         </div>
     </div>
 
-    <p>👉 <code>select_related</code> = SQL JOIN — best for ForeignKey, OneToOne (1→1)</p>
-    <p>👉 <code>prefetch_related</code> = 2 separate queries — best for ManyToMany, reverse FK (1→N)</p>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>The real rule is NOT:</strong> ForeignKey → <code>select_related()</code>.</p>
+            <p><strong>The real rule is:</strong> If each object connects to exactly <strong>one</strong> related object (Many → One or One → One), JOIN is usually optimal → <code>select_related()</code>.</p>
+            <p>If each object can connect to <strong>many</strong> related objects (One → Many or Many → Many), JOIN can multiply rows → <code>prefetch_related()</code>.</p>
+        </div>
+    </div>
 
     <details open>
-        <summary>🔍 Why select_related FAILS for 1→N (RAM Duplication Problem)</summary>
+        <summary>🎯 The Confusing Part: "But the Result Looks the Same?"</summary>
         <div class="toggle-content">
-            <p>Scenario: Get all customers and their orders. Wiganz has 1000 orders.</p>
+            <p>Yes. For a normal ForeignKey like <code>Order → Customer</code>, <code>select_related("customer")</code> and <code>prefetch_related("customer")</code> can produce almost the same <strong>final Python experience</strong>.</p>
 
-            <p>If we use <code>select_related</code> (JOIN) on a 1→N relationship:</p>
-<pre><code>| customer_name | customer_city | order_id | quantity |
-|---------------|---------------|----------|----------|
-| Wiganz        | HCMC          | 1        | 2        |  ← Wiganz × 1
-| Wiganz        | HCMC          | 2        | 5        |  ← Wiganz × 2
-| Wiganz        | HCMC          | 3        | 1        |  ← Wiganz × 3
-... × 1000 times  ← "Wiganz", "HCMC" copied 1000 times in RAM! 💀</code></pre>
+<pre><code><span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)  <span class="cm"># no extra query in both cases</span></code></pre>
 
-            <div class="callout callout-red">
-                <span class="callout-emoji">💀</span>
-                <div class="callout-content">
-                    <p><strong>RAM explosion:</strong> Every customer field (<code>name</code>, <code>city</code>, <code>email</code>...) gets duplicated into every order row. 1000 orders = waste RAM × 1000. For M2M this gets even worse.</p>
-                </div>
-            </div>
+            <p>That is what "almost the same result" means: after fetching, each <code>Order</code> object has a usable <code>.customer</code>. It does <strong>not</strong> mean the database work was the same.</p>
+
+<pre><code>Customer A
+ ├── 500 Orders
+
+Customer B
+ └── 500 Orders</code></pre>
+
+            <p>In both strategies, Django still ends up with about 1000 <code>Order</code> objects. The difference is the path used to attach the <code>Customer</code> object to each <code>Order</code>.</p>
         </div>
     </details>
 
     <details open>
-        <summary>✅ prefetch_related — The "2 Tờ Giấy" Solution</summary>
+        <summary>1️⃣ Cách 1 — select_related(): Database JOINs</summary>
         <div class="toggle-content">
-            <p><code>prefetch_related</code> runs <strong>2 separate queries</strong>, stores <strong>2 separate lists in RAM</strong>:</p>
-<pre><code><span class="cm">-- Query 1: fetch all customers</span>
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> customers
+<pre><code>orders = Order.objects.select_related(<span class="str">"customer"</span>)</code></pre>
 
-<span class="cm">-- Query 2: fetch ALL their orders in ONE bulk request (the magic)</span>
-<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders <span class="kw">WHERE</span> customer_id <span class="kw">IN</span> (<span class="num">501</span>, <span class="num">502</span>, ...)</code></pre>
+            <p>Django asks the database to JOIN first:</p>
+<pre><code><span class="kw">SELECT</span> *
+<span class="kw">FROM</span> orders
+<span class="kw">JOIN</span> customers
+  <span class="kw">ON</span> orders.customer_id = customers.id;</code></pre>
 
-            <div class="callout callout-yellow">
-                <span class="callout-emoji">🔑</span>
-                <div class="callout-content">
-                    <p><strong>The <code>IN (...)</code> is the magic — this is why it's always exactly 2 queries, not N:</strong></p>
-<pre><code>❌ Without prefetch (N+1 for reverse FK):
-SELECT * FROM orders WHERE customer_id = 501   ← 1 query for Wiganz
-SELECT * FROM orders WHERE customer_id = 502   ← 1 query for Triết
-... × 100 customers = 100 extra queries 💀
+            <p>The database returns <strong>one result set</strong>:</p>
+<pre><code>| order_id | customer_id | customer_name |
+|----------|-------------|---------------|
+| 1        | 1           | A             |
+| 2        | 1           | A             |
+| 3        | 2           | B             |</code></pre>
 
-✅ prefetch_related — 1 bulk query for ALL:
-SELECT * FROM orders WHERE customer_id IN (501, 502, 503, ...)
-           ↑ Django collected ALL customer IDs from Query 1,
-             then asked the DB for everything in ONE shot</code></pre>
-                    <p>100 customers or 10,000 customers → <strong>always exactly 2 total queries</strong>. The <code>IN()</code> clause is what makes this possible.</p>
-                </div>
-            </div>
-
-            <div class="callout callout-purple">
-                <span class="callout-emoji">📄</span>
-                <div class="callout-content">
-                    <p><strong>Metaphor — 2 Tờ Giấy (2 Sheets of Paper):</strong></p>
-<pre><code>📄 Sheet 1 — CUSTOMER LIST (Query 1):
-┌───────────────────────────────────┐
-│ 501 | Wiganz | HCMC | ...        │  ← full info, 1 time only!
-│ 502 | Triết  | Hanoi | ...       │  ← full info, 1 time only!
-└───────────────────────────────────┘
-
-📄 Sheet 2 — ORDER LIST (Query 2):
-┌──────────────────────────────┐
-│ order 1 | 501 | qty: 2      │  ← just the NUMBER 501 (tiny integer)
-│ order 2 | 502 | qty: 1      │  ← just the NUMBER 502
-│ order 3 | 501 | qty: 5      │  ← just the NUMBER 501 again (tiny!)
-└──────────────────────────────┘</code></pre>
-                    <p>Sheet 2 has <code>501</code> twice — but <code>501</code> is just one small integer! Wiganz's full data (<code>name</code>, <code>city</code>, <code>email</code>...) lives exactly ONCE on Sheet 1.</p>
-                </div>
-            </div>
-
-            <h4>Django stores 2 lists in RAM:</h4>
-<pre><code><span class="cm"># List 1 — from Query 1:</span>
-customers_in_ram = [
-    Customer(id=<span class="num">501</span>, name=<span class="str">"Wiganz"</span>, city=<span class="str">"HCMC"</span>),
-    Customer(id=<span class="num">502</span>, name=<span class="str">"Triết"</span>,  city=<span class="str">"Hanoi"</span>),
-]
-
-<span class="cm"># List 2 — from Query 2:</span>
-orders_in_ram = [
-    Order(id=<span class="num">1</span>, customer_id=<span class="num">501</span>, quantity=<span class="num">2</span>),
-    Order(id=<span class="num">2</span>, customer_id=<span class="num">502</span>, quantity=<span class="num">1</span>),
-    Order(id=<span class="num">3</span>, customer_id=<span class="num">501</span>, quantity=<span class="num">5</span>),
+            <p>Then Django builds:</p>
+<pre><code>[
+    Order(<span class="num">1</span>, customer=A),
+    Order(<span class="num">2</span>, customer=A),
+    Order(<span class="num">3</span>, customer=B),
 ]</code></pre>
 
-            <h4>In the for loop — filter in Python, NOT in DB:</h4>
-<pre><code><span class="kw">for</span> customer <span class="kw">in</span> customers:
-    customer.orders.all()
-    <span class="cm"># Django does: filter orders_in_ram WHERE customer_id == customer.id</span>
-    <span class="cm"># Same as WHERE clause — but in Python list, NO DB query!</span>
-    <span class="cm"># customer = Wiganz (501) → [Order(id=1), Order(id=3)]  ✅ from RAM</span></code></pre>
+            <div class="callout callout-green">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p><strong>Key:</strong> the database attached customer data while returning the rows. Django just reads the joined result and creates objects.</p>
+                </div>
+            </div>
         </div>
     </details>
 
-    <details>
-        <summary>📊 Full Comparison — select_related vs prefetch_related</summary>
+    <details open>
+        <summary>2️⃣ Cách 2 — prefetch_related(): Django Maps in RAM</summary>
         <div class="toggle-content">
+            <p>This also works for a ForeignKey:</p>
+<pre><code>orders = Order.objects.prefetch_related(<span class="str">"customer"</span>)</code></pre>
+
+            <p>But now Django does <strong>not</strong> ask the database to JOIN. It asks for separate result sets:</p>
+<pre><code><span class="cm">-- Query 1</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders;
+
+<span class="cm">-- Query 2</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> customers
+<span class="kw">WHERE</span> id <span class="kw">IN</span> (<span class="num">1</span>, <span class="num">2</span>);</code></pre>
+
+            <p>Those result sets become separate Python objects:</p>
+<pre><code>orders_in_ram = [
+    Order(<span class="num">1</span>, customer_id=<span class="num">1</span>),
+    Order(<span class="num">2</span>, customer_id=<span class="num">1</span>),
+    Order(<span class="num">3</span>, customer_id=<span class="num">2</span>),
+]
+
+customers_in_ram = [
+    Customer(<span class="num">1</span>, <span class="str">"A"</span>),
+    Customer(<span class="num">2</span>, <span class="str">"B"</span>),
+]</code></pre>
+
+            <p>Then Django builds a lookup and attaches them in RAM:</p>
+<pre><code>customer_map = {
+    <span class="num">1</span>: Customer(<span class="num">1</span>, <span class="str">"A"</span>),
+    <span class="num">2</span>: Customer(<span class="num">2</span>, <span class="str">"B"</span>),
+}
+
+Order(<span class="num">1</span>).customer = customer_map[<span class="num">1</span>]
+Order(<span class="num">2</span>).customer = customer_map[<span class="num">1</span>]
+Order(<span class="num">3</span>).customer = customer_map[<span class="num">2</span>]</code></pre>
+
+            <p>Final Python result:</p>
+<pre><code>[
+    Order(<span class="num">1</span>, customer=A),
+    Order(<span class="num">2</span>, customer=A),
+    Order(<span class="num">3</span>, customer=B),
+]</code></pre>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">🎯</span>
+                <div class="callout-content">
+                    <p><strong>This is the "gần như cùng kết quả" part:</strong> the final objects look the same, and <code>order.customer.name</code> does not fire extra queries. But <code>select_related()</code> got there with a database JOIN; <code>prefetch_related()</code> got there with separate queries plus Python mapping.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>❓ So Why Prefer select_related() for ForeignKey?</summary>
+        <div class="toggle-content">
+            <p>Because this relationship is simple:</p>
+<pre><code>Order  ── customer_id ──→  Customer
+Many                         One</code></pre>
+
+            <p>Each <code>Order</code> points to exactly one <code>Customer</code>. The JOIN condition is just:</p>
+<pre><code>orders.customer_id = customers.id</code></pre>
+
+            <p>Databases are extremely good at this. If you use <code>prefetch_related("customer")</code> instead, Django has to do extra work:</p>
+            <ul>
+                <li>run a second query for customers</li>
+                <li>build a dictionary like <code>{customer_id: Customer}</code></li>
+                <li>attach each customer to each order in Python</li>
+            </ul>
+
+            <p>So for <strong>Many → One</strong>, both can work, but <code>select_related()</code> is usually the cleaner and faster route.</p>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💡</span>
+                <div class="callout-content">
+                    <p><strong>1000-order example:</strong> if A has 500 orders and B has 500 orders, both approaches still deal with 1000 <code>Order</code> objects. <code>select_related()</code> lets the database attach customer data to those 1000 rows. <code>prefetch_related()</code> loads 1000 orders + 2 customers separately, then Django attaches them in RAM. Same final experience, more Python-side work.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🧨 The Reverse Direction: Where JOIN Explodes</summary>
+        <div class="toggle-content">
+            <p>Now the base objects are <strong>customers</strong>, and each customer may have many orders:</p>
+<pre><code>Customer
+   ↓
+Many Orders</code></pre>
+
+<pre><code>customers = Customer.objects.prefetch_related(<span class="str">"orders"</span>)</code></pre>
+
+            <p>If you tried to JOIN this into one result set, Customer A repeats once per order:</p>
+<pre><code>| customer | order |
+|----------|-------|
+| A        | 1     |
+| A        | 2     |
+| A        | 3     |
+| ...      | ...   |
+| A        | 500   |
+| B        | 501   |
+| B        | 502   |
+| ...      | ...   |
+| B        | 1000  |</code></pre>
+
+            <p>You wanted <strong>2 customers</strong>, but the JOIN result became <strong>1000 rows</strong>. Customer name, email, phone, address, and every customer column are repeated again and again.</p>
+
+            <p>That is <strong>row explosion</strong>. It is exactly what <code>prefetch_related()</code> avoids:</p>
+<pre><code><span class="cm">-- Query 1: customers once</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> customers;
+
+<span class="cm">-- Query 2: all related orders once</span>
+<span class="kw">SELECT</span> * <span class="kw">FROM</span> orders
+<span class="kw">WHERE</span> customer_id <span class="kw">IN</span> (<span class="num">1</span>, <span class="num">2</span>);</code></pre>
+
+<pre><code>Customer A
+ ├── Order 1
+ ├── Order 2
+ └── ...
+
+Customer B
+ ├── Order 501
+ └── ...</code></pre>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔁 ManyToMany: Same Reason, Bigger Blast Radius</summary>
+        <div class="toggle-content">
+            <p>ManyToMany can multiply rows from both sides:</p>
+<pre><code>| student | course  |
+|---------|---------|
+| A       | Math    |
+| A       | Physics |
+| A       | English |
+| B       | Math    |
+| B       | Biology |</code></pre>
+
+            <p>If a student has many courses and a course has many students, a JOIN can grow very quickly. So <code>prefetch_related()</code> is the natural tool: load the sets separately, then let Django map relationships in RAM.</p>
+        </div>
+    </details>
+
+    <details open>
+        <summary>🔥 The Rule You Should Actually Remember</summary>
+        <div class="toggle-content">
+            <p>Do not ask first:</p>
+<pre><code>"ForeignKey hay Reverse ForeignKey?"</code></pre>
+
+            <p>Ask this:</p>
+<pre><code>"JOIN này có làm số dòng kết quả tăng lên mạnh không?"</code></pre>
+
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th></th><th>select_related</th><th>prefetch_related</th></tr></thead>
+                    <thead><tr><th>Relationship shape</th><th>JOIN effect</th><th>Use</th><th>Why</th></tr></thead>
                     <tbody>
-                        <tr><td><strong>SQL</strong></td><td>1 JOIN query</td><td>2 separate queries</td></tr>
-                        <tr><td><strong>RAM</strong></td><td>1 merged list (duplicates)</td><td>2 separate lists (no duplicate)</td></tr>
-                        <tr><td><strong>Customer data</strong></td><td>Copied into every order row</td><td>Exists exactly once</td></tr>
-                        <tr><td><strong>In-loop behavior</strong></td><td>Read from merged RAM</td><td>Filter Python list by customer_id</td></tr>
-                        <tr><td><strong>Best for</strong></td><td>ForeignKey / OneToOne (1→1)</td><td>ManyToMany / reverse FK (1→N)</td></tr>
-                        <tr><td><strong>Wrong use</strong></td><td>RAM explosion with 1→N</td><td>Slightly inefficient for 1→1 (2 queries instead of 1)</td></tr>
+                        <tr><td><strong>Many → One</strong><br><code>Order → Customer</code></td><td>Does not increase beyond the order rows</td><td><code>select_related()</code></td><td>DB JOIN is simple and efficient</td></tr>
+                        <tr><td><strong>One → One</strong></td><td>Does not multiply rows</td><td><code>select_related()</code></td><td>One object connects to one object</td></tr>
+                        <tr><td><strong>One → Many</strong><br><code>Customer → Orders</code></td><td>Can turn 2 customers into 1000 joined rows</td><td><code>prefetch_related()</code></td><td>Avoid row explosion</td></tr>
+                        <tr><td><strong>Many ↔ Many</strong></td><td>Can multiply from both sides</td><td><code>prefetch_related()</code></td><td>Separate result sets are safer</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <h4>🎯 Decision Rule — 1 sentence to remember:</h4>
-<pre><code>1 order → 1 customer  (ForeignKey, forward)    →  select_related
-1 customer → N orders (reverse FK, backward)   →  prefetch_related
-Book ↔ Author         (ManyToMany)              →  prefetch_related</code></pre>
+            <p><strong>Short version:</strong> if each object connects to one object, JOIN. If each object can connect to many objects, prefetch.</p>
         </div>
     </details>
 
     <details>
         <summary>🐍 Code — Both Tools in Action</summary>
         <div class="toggle-content">
-<pre><code><span class="cm"># ForeignKey — order belongs to 1 customer → select_related</span>
-orders = Order.objects.select_related(<span class="str">'customer'</span>)
+<pre><code><span class="cm"># Many → One: order belongs to one customer → select_related</span>
+orders = Order.objects.select_related(<span class="str">"customer"</span>)
 <span class="kw">for</span> order <span class="kw">in</span> orders:
     print(order.customer.name)  <span class="cm"># 0 extra queries</span>
 
-<span class="cm"># Reverse FK — customer has many orders → prefetch_related</span>
-customers = Customer.objects.prefetch_related(<span class="str">'orders'</span>)
+<span class="cm"># Also works, but usually extra work for a FK:</span>
+orders = Order.objects.prefetch_related(<span class="str">"customer"</span>)
+<span class="kw">for</span> order <span class="kw">in</span> orders:
+    print(order.customer.name)  <span class="cm"># same final object access, different fetch strategy</span>
+
+<span class="cm"># One → Many: customer has many orders → prefetch_related</span>
+customers = Customer.objects.prefetch_related(<span class="str">"orders"</span>)
 <span class="kw">for</span> customer <span class="kw">in</span> customers:
-    print(customer.orders.all())  <span class="cm"># 0 extra queries, filters RAM list</span>
+    print(customer.orders.all())  <span class="cm"># 0 extra queries, reads prefetched cache</span>
 
 <span class="cm"># ManyToMany → prefetch_related</span>
-books = Book.objects.prefetch_related(<span class="str">'authors'</span>)
+books = Book.objects.prefetch_related(<span class="str">"authors"</span>)
 <span class="kw">for</span> book <span class="kw">in</span> books:
     print(book.authors.all())  <span class="cm"># 0 extra queries</span>
 
-<span class="cm"># Chaining — follow FK + get reverse collection</span>
-applications = Application.objects.select_related(<span class="str">'user'</span>, <span class="str">'job__company'</span>).all()
+<span class="cm"># Chaining FK paths → select_related can follow many→one repeatedly</span>
+applications = Application.objects.select_related(<span class="str">"user"</span>, <span class="str">"job__company"</span>)
 <span class="kw">for</span> app <span class="kw">in</span> applications:
-    print(app.user.name)         <span class="cm"># no extra query</span>
-    print(app.job.company.name)  <span class="cm"># no extra query (chained FK)</span></code></pre>
+    print(app.user.name)
+    print(app.job.company.name)</code></pre>
         </div>
     </details>
 
     <h3>🗣️ Interview-ready Answer</h3>
     <div class="interview-answer">
-        <p>"Both fix the N+1 problem by loading related data into RAM before the loop. <code>select_related</code> uses a SQL JOIN — best for ForeignKey and OneToOne because it's 1 query and customer data is a single row. <code>prefetch_related</code> fires two separate queries then stitches results in Python — best for ManyToMany and reverse ForeignKey, avoiding RAM duplication when one customer has thousands of orders. The rule of thumb: following a ForeignKey to one parent → <code>select_related</code>. Getting a collection of many children → <code>prefetch_related</code>."</p>
+        <p>"The real difference is how related objects get attached. <code>select_related()</code> uses a database JOIN and returns one result set, so it is best when each object points to one related object, like <code>Order → Customer</code>. <code>prefetch_related()</code> runs separate queries, gets separate result sets, then Django maps objects in RAM. For a ForeignKey, prefetch can still work and the final Python objects look almost the same, but it is usually extra work because the database can JOIN that case efficiently. For reverse FK and ManyToMany, a JOIN can multiply rows badly, so prefetch avoids row explosion. I decide by asking: will this JOIN make the result set much bigger than the objects I actually want?"</p>
     </div>
 
     <hr>
@@ -1603,7 +1723,7 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
     <div class="callout callout-green">
         <span class="callout-emoji">⚡</span>
         <div class="callout-content">
-            <p><strong>select_related vs prefetch_related:</strong> <span class="key-phrase">"select_related = JOIN (1 query, 1→1/FK). prefetch_related = 2 queries + Python filter (1→N/M2M). Wrong choice → RAM explosion."</span></p>
+            <p><strong>select_related vs prefetch_related:</strong> <span class="key-phrase">"Not FK vs reverse FK. Real rule: one related object → JOIN/select_related; many related objects → row explosion risk → prefetch_related."</span></p>
         </div>
     </div>
 
@@ -1643,8 +1763,8 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
                 <tr><td><strong>2NF</strong></td><td>Non-key depends on partial composite PK</td><td>Split table by that PK part → ForeignKey</td></tr>
                 <tr><td><strong>3NF</strong></td><td>Non-key depends on another non-key</td><td>Split that entity out → ForeignKey</td></tr>
                 <tr><td><strong>N+1</strong></td><td>FK attribute accessed inside for loop</td><td><code>select_related()</code> → 1 JOIN query</td></tr>
-                <tr><td><strong>select_related</strong></td><td>1→1, FK (forward)</td><td>JOIN — load parent into RAM once</td></tr>
-                <tr><td><strong>prefetch_related</strong></td><td>1→N, M2M (reverse)</td><td>2 queries → 2 lists → Python filter</td></tr>
+                <tr><td><strong>select_related</strong></td><td>Each object points to one related object</td><td>DB JOIN → 1 result set</td></tr>
+                <tr><td><strong>prefetch_related</strong></td><td>Each object may have many related objects</td><td>Separate result sets → Python mapping</td></tr>
                 <tr><td><strong>Indexing</strong></td><td>Slow WHERE/ORDER BY</td><td>B-Tree index on filter columns; respect leftmost prefix for composite</td></tr>
                 <tr><td><strong>Through Model</strong></td><td>Relationship data gets "???" in A or B</td><td>Explicit junction model with FKs + extra fields</td></tr>
             </tbody>
@@ -1658,7 +1778,7 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
             <p>"Normalize first, denormalize when needed."</p>
             <p>"Every column should serve exactly one entity — if it doesn't, split it out with ForeignKey."</p>
             <p>"Fix N+1 before touching indexes — it's usually the fastest win."</p>
-            <p>"select_related for FKs, prefetch_related for collections."</p>
+            <p>"Don't memorize FK vs reverse FK; ask whether JOIN will multiply rows."</p>
             <p>"Index based on real query patterns, not assumptions."</p>
             <p>"Through model = the structure you naturally arrive at when data needs to know BOTH sides."</p>
             <p><span class="key-phrase">"Measure, don't guess."</span></p>
