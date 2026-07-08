@@ -159,7 +159,7 @@
 
         /* ═══ Main Content ═══ */
         .main-content {
-            max-width: calc(900px + var(--sidebar-width));
+            max-width: calc(1400px + var(--sidebar-width));
             margin: 0 auto;
             padding: 0 60px 80px calc(var(--sidebar-width) + 60px);
         }
@@ -480,7 +480,7 @@
 
         /* ═══ Mobile Menu Toggle ═══ */
         .menu-toggle {
-            display: none;
+            display: flex;
             position: fixed;
             top: 16px;
             left: 16px;
@@ -543,6 +543,13 @@
             details { break-inside: avoid; }
             details[open] > .toggle-content { display: block; }
         }
+
+        /* ═══ sidebar collapse toggle (added) ═══ */
+        .main-content { transition: padding 0.3s ease; }
+        .menu-toggle { transition: all 0.3s; }
+        body.nav-closed .sidebar { transform: translateX(-100%); }
+        body.nav-closed .main-content { padding-left: 60px; }
+        @media (max-width: 900px) { body.nav-closed .main-content { padding-left: 24px; } .menu-toggle { display: flex; } }
     </style>
 </head>
 <body>
@@ -1722,7 +1729,11 @@ urlpatterns = router.urls
     // ═══ Mobile Menu Toggle ═══
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    if (localStorage.getItem('nav-closed') === '1' && window.innerWidth > 900) { document.body.classList.add('nav-closed'); }
+    menuToggle.addEventListener('click', () => {
+        if (window.innerWidth <= 900) { sidebar.classList.toggle('open'); }
+        else { document.body.classList.toggle('nav-closed'); localStorage.setItem('nav-closed', document.body.classList.contains('nav-closed') ? '1' : '0'); }
+    });
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
             sidebar.classList.remove('open');

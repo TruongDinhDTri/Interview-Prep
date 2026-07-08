@@ -109,7 +109,7 @@
         }
         .sidebar a:hover { color: var(--text-primary); background: var(--bg-hover); }
         .sidebar a.active { color: var(--accent-blue); font-weight: 500; border-left-color: var(--accent-blue); background: rgba(37,99,235,0.04); }
-        .main-content { max-width: calc(1260px + var(--sidebar-width)); margin: 0 auto; padding: 0 40px 80px calc(var(--sidebar-width) + 40px); }
+        .main-content { max-width: calc(1400px + var(--sidebar-width)); margin: 0 auto; padding: 0 40px 80px calc(var(--sidebar-width) + 40px); }
         .breadcrumbs { padding: 16px 0 8px; font-size: 0.82em; color: var(--text-muted); }
         .breadcrumbs a { color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
         .breadcrumbs a:hover { color: var(--accent-blue); }
@@ -176,7 +176,7 @@
         .step-content p:first-child { margin-top: 0; }
         .theme-toggle { position: fixed; top: 16px; right: 20px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1em; transition: all 0.3s; box-shadow: var(--shadow-sm); }
         .theme-toggle:hover { box-shadow: var(--shadow-md); }
-        .menu-toggle { display: none; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
+        .menu-toggle { display: flex; position: fixed; top: 16px; left: 16px; z-index: 200; width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--border); background: var(--bg-primary); cursor: pointer; align-items: center; justify-content: center; font-size: 1.1em; box-shadow: var(--shadow-sm); }
         strong { font-weight: 600; }
         .interview-answer { background: var(--bg-secondary); border-left: 3px solid var(--accent-blue); padding: 16px 20px; margin: 12px 0; border-radius: 0 6px 6px 0; font-style: italic; }
         .interview-answer strong { font-style: normal; }
@@ -196,6 +196,13 @@
             .sidebar, .theme-toggle, .menu-toggle, .progress-bar { display: none !important; }
             .main-content { margin-left: 0; max-width: 100%; }
         }
+
+        /* ═══ sidebar collapse toggle (added) ═══ */
+        .main-content { transition: padding 0.3s ease; }
+        .menu-toggle { transition: all 0.3s; }
+        body.nav-closed .sidebar { transform: translateX(-100%); }
+        body.nav-closed .main-content { padding-left: 60px; }
+        @media (max-width: 900px) { body.nav-closed .main-content { padding-left: 24px; } .menu-toggle { display: flex; } }
     </style>
 </head>
 <body>
@@ -1538,11 +1545,142 @@ Wiganz          grade: 9.5           Python
             <p>Only makes sense when you know <strong>BOTH</strong>: "iPhone IN Order #1" → quantity = 2 ✅</p>
 
             <h4>Why not just add product_id to Order table?</h4>
-<pre><code>| order_id | order_date | quantity | product_id |
-|----------|------------|----------|------------|
-| 1        | 15/01      | 2        | 1 (iPhone) |
-| 1        | 15/01      | 1        | 2 (AirPods)| ← order_date duplicated!</code></pre>
-            <p>Change order date → must update 2 rows. Miss one → data inconsistency. This IS a through model structure already! Just formalize it properly.</p>
+            <p>Tempting. Wiganz mua 2 sản phẩm trong 1 order → nhét thẳng vào bảng Order:</p>
+<pre><code>| order_id | order_date | product_id | quantity |
+|----------|------------|------------|----------|
+| 1        | 15/01      | iPhone     | 2        |
+| 1        | 15/01      | AirPods    | 1        |   ← order_date lặp lại!</code></pre>
+            <p>Nhìn thì chạy được. Nhưng nó <strong>vi phạm chuẩn hóa</strong> — và để thấy tại sao, đừng học thuộc định nghĩa. Chỉ hỏi đúng 1 câu: <em>"cột này cần biết gì để xác định giá trị?"</em></p>
+
+            <h4>Bước 1 — Primary Key là gì? (ai quyết định 1 dòng?)</h4>
+            <p>Muốn tìm đúng <strong>1 dòng</strong>, dùng <code>order_id</code> được không? Không — <code>order_id = 1</code> ra tận <strong>2 dòng</strong> (iPhone + AirPods). Vậy để định danh 1 dòng, phải dùng cả hai:</p>
+<pre><code>PK = (order_id, product_id)
+
+(1, iPhone)  → 1 dòng
+(1, AirPods) → 1 dòng khác</code></pre>
+
+            <h4>Bước 2 — Tra từng cột: nó phụ thuộc TOÀN BỘ key, hay chỉ MỘT PHẦN?</h4>
+            <div class="columns">
+                <div class="callout callout-green" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong><code>quantity</code> → cần CẢ HAI ✅</strong></p>
+                        <p>"Quantity của dòng này là bao nhiêu?" Biết <code>order_id = 1</code> chưa đủ — Order 1 có iPhone <em>và</em> AirPods, số lượng khác nhau. Phải biết luôn <code>product_id</code>.</p>
+<pre><code>(order_id, product_id) → quantity</code></pre>
+                        <p>Phụ thuộc <strong>toàn bộ</strong> PK. Đúng chỗ. ✅</p>
+                    </div>
+                </div>
+                <div class="callout callout-red" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong><code>order_date</code> → chỉ cần MỘT PHẦN ⚠️</strong></p>
+                        <p>"Order date là bao nhiêu?" Biết <code>order_id = 1</code> là đủ → 15/01. Cần biết iPhone hay AirPods không? <strong>Không.</strong></p>
+<pre><code>order_id → order_date
+(không cần product_id!)</code></pre>
+                        <p>Chỉ phụ thuộc <strong>một phần</strong> của PK. Đây là chỗ gãy. ⚠️</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">📛</span>
+                <div class="callout-content">
+                    <p><strong>Đây gọi là <em>partial dependency</em> — và nó chính là điều 2NF cấm.</strong></p>
+                    <p>Tiếng Việt cho dễ nhớ: <em>"một cột không cần TOÀN BỘ khóa chính để xác định giá trị của nó."</em> <code>order_date</code> chỉ bám vào <code>order_id</code>, trong khi PK là <code>(order_id, product_id)</code>. → Vi phạm <strong>2NF</strong>.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p><strong>Mnemonic cực dễ — khỏi thuộc định nghĩa:</strong></p>
+                    <p>PK là <code>(order_id, product_id)</code> → thử <strong>bỏ <code>product_id</code></strong> đi, còn xác định được giá trị không?</p>
+                    <p>• <code>order_date</code>: bỏ <code>product_id</code> vẫn biết ngày → <strong>SAI</strong>, cột này không thuộc bảng này.<br>
+                    • <code>quantity</code>: bỏ <code>product_id</code> thì Order 1 có 2 sản phẩm, không biết qty của cái nào → <strong>ĐÚNG</strong>, phải cần cả key.</p>
+                </div>
+            </div>
+
+            <h4>Đừng nhầm với 3NF — 2 lỗi khác nhau</h4>
+            <div class="columns">
+                <div class="callout callout-purple" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>2NF — lỗi của bảng Order này</strong></p>
+<pre><code>(order_id, product_id)
+        ↓
+    order_date
+
+...nhưng thật ra:
+order_id → order_date
+(chỉ cần MỘT PHẦN của PK)</code></pre>
+                        <p>Cột phụ thuộc <strong>một phần</strong> composite key.</p>
+                    </div>
+                </div>
+                <div class="callout callout-purple" style="margin:0">
+                    <div class="callout-content">
+                        <p><strong>3NF — lỗi kiểu "ông trung gian"</strong></p>
+<pre><code>order_id → customer_id → customer_city</code></pre>
+                        <p><code>customer_city</code> không do PK quyết định trực tiếp, mà do một <strong>non-key</strong> khác (<code>customer_id</code>) quyết định. Đây là <em>transitive dependency</em> → 3NF.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">🌟</span>
+                <div class="callout-content">
+                    <p><strong>Cú twist quan trọng nhất — chuẩn hóa đi theo BUSINESS RULE, không nhìn hình dạng bảng!</strong></p>
+
+                    <p><strong>Chốt trước cho dễ nhớ:</strong> 2NF chỉ đánh vào <em>partial dependency</em> — mà "partial" = "một PHẦN của khóa". Muốn có phần thiếu thì khóa phải có <strong>nhiều phần</strong> (composite key). Vậy nên:</p>
+<pre><code>PK 1 cột      →  không có "phần" nào để thiếu  →  2NF auto PASS ✅
+PK nhiều cột  →  mới có cửa partial dependency  →  phải đi kiểm tra 2NF</code></pre>
+                    <p><em>Nhìn PK trước. Single-column? Gạt 2NF qua một bên luôn, khỏi xét.</em></p>
+
+                    <p>Giờ áp vào cùng cái bảng "phẳng" đó — đổi <em>luật nghiệp vụ</em> thì PK đổi, và kết luận đảo ngược:</p>
+<pre><code>| order_id | order_date | product_id | quantity |
+| 1        | 15/01      | iPhone     | 2        |
+| 2        | 15/01      | AirPods    | 1        |</code></pre>
+
+                    <p><strong>Cái quyết định KHÔNG phải tấm bảng bạn thấy, mà là câu hỏi:</strong> <em>"1 order CÓ ĐƯỢC PHÉP mua nhiều product không?"</em> — chỉ business rule trả lời được. Nó kéo theo cả dây:</p>
+<pre><code>BUSINESS RULE            order_id có       PK là            2NF
+(1 order mấy product?)   lặp dòng không?   gì?              phán quyết
+──────────────────────────────────────────────────────────────────────
+1 order = 1 product   →  KHÔNG lặp      →  order_id      →  ✅ PASS
+                         (mỗi order 1 dòng) (1 cột!)         (single PK)
+
+1 order = N product   →  CÓ lặp         →  (order_id,    →  ❌ FAIL
+                         (order 1 → N dòng) product_id)      (order_date chỉ
+                                            (composite!)      bám 1 phần PK)</code></pre>
+
+                    <p>Cùng một hình dạng bảng, hai kết luận trái ngược — vì <strong>luật khác → order_id lặp hay không khác → PK khác → phán quyết khác.</strong> Chuẩn hóa không đọc được từ cái bảng; nó đọc từ <strong>functional dependencies</strong> mà business rule quy định. Luôn hỏi <em>"business rule là gì?"</em> TRƯỚC, rồi mới xét normal form.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-blue">
+                <span class="callout-emoji">🏹</span>
+                <div class="callout-content">
+                    <p><strong>Khoan — "functional dependency" là gì? → một MŨI TÊN.</strong></p>
+                    <p><code>X → Y</code> đọc là <em>"biết X thì suy ra ĐÚNG MỘT Y."</em> Biết X là <em>pin chặt</em> được Y.</p>
+<pre><code>order_id   → order_date     ✅ (1 order, đúng 1 ngày)
+product_id → product_name   ✅ (1 product, đúng 1 tên)
+order_date → order_id       ❌ (1 ngày ra CẢ ĐỐNG order — không pin được)</code></pre>
+                    <p>Mũi tên là một <strong>LỜI HỨA</strong> ("hễ X thì LUÔN đúng 1 Y"), áp cho mọi khoảnh khắc — <strong>không phải</strong> "trong đám data này tình cờ nó unique." Vì thế data một mình không cho biết mũi tên; data chỉ là ảnh chụp, còn lời hứa là luật.</p>
+                    <p><strong>Ai phát ra lời hứa? → business rule.</strong> Mũi tên gây tranh cãi <code>order_id → product_id</code>: <em>1 order 1 product</em> → CÓ mũi tên; <em>1 order N product</em> → KHÔNG. Cùng 2 cột đó, mũi tên có hay không là do LUẬT, không do dữ liệu.</p>
+                    <p><strong>Nối lại nguyên câu:</strong> muốn chuẩn hóa, bạn cần <em>tập các mũi tên</em> — mà mũi tên nào tồn tại thì business rule đẻ ra. Rồi cả trò chỉ là: <strong>sắp bảng sao cho mỗi cột non-key có mũi tên bắt đầu từ ĐÚNG nguyên cái PK</strong> — không thiếu (2NF), không qua trung gian (3NF).</p>
+                </div>
+            </div>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🧪</span>
+                <div class="callout-content">
+                    <p><strong>Test — trả lời không nhìn bảng:</strong> mũi tên <code>customer_id → customer_city</code> có tồn tại không, và <code>customer_city</code> nên nằm bảng nào?</p>
+                    <p>✅ CÓ — biết customer #501 thì biết đúng 1 thành phố. Nhưng <code>customer_city</code> mô tả <strong>Customer</strong>, không mô tả Order. Trong bảng Orders nó chỉ "đi ké" qua <code>customer_id</code> (transitive) → phải dời về bảng <strong>Customers</strong>, Orders chỉ giữ FK <code>customer_id</code>. Đó chính là 3NF.</p>
+                </div>
+            </div>
+
+            <h4>Đó là lý do e-commerce LUÔN tách 2 bảng</h4>
+<pre><code>Order                 OrderItem
+-----                 ---------
+id                    order_id   (FK → Order)
+date                  product_id (FK → Product)
+                      quantity</code></pre>
+            <p>Không phải vì Django thích thế. Mà vì: <code>order_date</code> là thuộc tính của <strong>Order</strong>; <code>quantity</code> là thuộc tính của <strong>mối quan hệ</strong> giữa Order và Product. Mỗi cột về đúng nhà của nó → hết partial dependency → 2NF sạch. Update ngày order? Sửa <strong>1 dòng</strong> trong bảng Order, không sợ sót.</p>
 
             <div class="callout callout-purple">
                 <span class="callout-emoji">🔥</span>
@@ -1802,7 +1940,11 @@ enrollments = Enrollment.objects.filter(student=wiganz).select_related(<span cla
     });
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    if (localStorage.getItem('nav-closed') === '1' && window.innerWidth > 900) { document.body.classList.add('nav-closed'); }
+    menuToggle.addEventListener('click', () => {
+        if (window.innerWidth <= 900) { sidebar.classList.toggle('open'); }
+        else { document.body.classList.toggle('nav-closed'); localStorage.setItem('nav-closed', document.body.classList.contains('nav-closed') ? '1' : '0'); }
+    });
     document.addEventListener('click', (e) => {
         if (window.innerWidth <= 900 && !sidebar.contains(e.target) && e.target !== menuToggle) {
             sidebar.classList.remove('open');
