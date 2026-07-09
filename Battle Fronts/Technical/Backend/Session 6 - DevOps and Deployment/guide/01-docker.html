@@ -313,53 +313,120 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="section-header" id="part3"><span>🏗️</span> Part 3: Multi-Stage Builds</div>
 
   <div class="concept-card">
-    <p style="margin-bottom:20px; color:#666;"><strong>Why:</strong> Python packages like psycopg2, cryptography, and Pillow have C extensions that require gcc and build tools to compile. You need them to BUILD but NOT in the final production image.</p>
+    <!-- ONE-SENTENCE IDEA -->
+    <p style="margin-bottom:20px; color:#444; font-size:1rem; line-height:1.7;"><strong>The whole idea in one sentence:</strong> a multi-stage build puts <strong>two images inside one Dockerfile</strong> — a heavy <span style="color:#c62828;font-weight:700;">builder</span> that owns the compilers, and a lean <span style="color:#1b5e20;font-weight:700;">runtime</span> that ships. You <strong>compile in the builder, then copy ONLY the finished packages into the runtime.</strong> The builder — <code>gcc</code> and all — is thrown in the trash. <strong>The image you ship never contained a compiler.</strong></p>
+
+    <!-- METAPHOR -->
+    <div style="background:#fff8e1; border-left:4px solid #f39c12; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:24px; font-size:0.92rem; line-height:1.65;">
+      🪚 <strong>The workshop metaphor:</strong> You build a chair in a <em>workshop</em> full of saws, drills and sawdust. You don't mail the whole <em>workshop</em> to the customer — you ship <em>only the finished chair</em>. Multi-stage = <strong>"build in the messy workshop (builder stage), deliver only the clean product (runtime stage)."</strong> The workshop stays behind.
+    </div>
+
+    <!-- WHY TWO STAGES -->
+    <h3 style="color:var(--dark); margin-bottom:10px; font-size:1.05rem;">① Why you even need two stages</h3>
+    <p style="margin-bottom:20px; color:#666; line-height:1.7;">Python packages like <code>psycopg2</code>, <code>cryptography</code> and <code>Pillow</code> ship <strong>C code that must be compiled</strong>. Compiling needs <code>gcc</code> + dev headers — roughly <strong>200&nbsp;MB of tools</strong>. You need those tools to <strong>build</strong> the package… but once it's compiled into a <code>.so</code> file, that file runs <strong>on its own at runtime</strong>. Keeping the compiler around after the build is pure dead weight: <strong>bigger image → slower pulls → larger attack surface.</strong></p>
 
     <div class="two-col">
       <div>
-        <h3 style="margin-bottom:10px; color:#666;">Without Multi-Stage</h3>
+        <h3 style="margin-bottom:10px; color:#666;">❌ Single-stage (compiler stays)</h3>
         <div style="background:#ffebee; border-radius:10px; padding:20px; text-align:center;">
           <div style="font-size:2rem; margin-bottom:8px;">📦</div>
           <div style="font-size:1.5rem; font-weight:800; color:#c62828;">~900 MB</div>
-          <div style="font-size:0.85rem; color:#666; margin-top:8px;">Includes gcc, make, build-essential, header files — all the compilers. Larger image = slower pull, larger attack surface.</div>
+          <div style="font-size:0.85rem; color:#666; margin-top:8px;">gcc, make, build-essential, header files — the whole toolchain rides along into production. Slow to pull, more to attack.</div>
         </div>
       </div>
       <div>
-        <h3 style="margin-bottom:10px; color:#666;">With Multi-Stage</h3>
+        <h3 style="margin-bottom:10px; color:#666;">✅ Multi-stage (compiler discarded)</h3>
         <div style="background:#e8f5e9; border-radius:10px; padding:20px; text-align:center;">
           <div style="font-size:2rem; margin-bottom:8px;">🪶</div>
           <div style="font-size:1.5rem; font-weight:800; color:#1b5e20;">~85 MB</div>
-          <div style="font-size:0.85rem; color:#666; margin-top:8px;">Only compiled .so files, Python runtime, and your app code. No compilers. ~91% smaller.</div>
+          <div style="font-size:0.85rem; color:#666; margin-top:8px;">Only the compiled <code>.so</code> files, the Python runtime, and your app code. Zero compilers. <strong>~91% smaller.</strong></div>
         </div>
       </div>
     </div>
 
-<div class="code-block"><span class="c"># Stage 1: Builder — has all the build tools</span>
-<span class="k">FROM</span> <span class="v">python:3.12-slim AS builder</span>
+    <!-- THE TWO STAGES VISUAL -->
+    <h3 style="color:var(--dark); margin:28px 0 14px; font-size:1.05rem;">② How the two stages talk to each other</h3>
+    <div style="display:flex; flex-direction:column; align-items:center; gap:0; margin:8px 0 4px;">
+
+      <!-- Stage 1 -->
+      <div style="width:100%; max-width:640px; background:#fff5f5; border:2px solid #e74c3c; border-radius:14px; padding:18px 22px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="font-size:1.6rem;">🏭</span>
+          <div>
+            <div style="font-weight:800; color:#c62828;">STAGE 1 — <code>builder</code></div>
+            <div style="font-size:0.78rem; color:#888;">FROM python:3.12-slim <strong>AS builder</strong></div>
+          </div>
+          <span style="margin-left:auto; background:#ffcdd2; color:#b71c1c; font-size:0.72rem; font-weight:800; padding:4px 10px; border-radius:20px;">HAS gcc + headers</span>
+        </div>
+        <div style="font-size:0.86rem; color:#555; line-height:1.6;">Installs <code>gcc libpq-dev python3-dev</code> → runs <code>pip install --prefix=/install</code>. Every compiled package lands in one tidy folder: <code style="background:#ffe0e0; padding:1px 5px; border-radius:4px;">/install</code>.</div>
+      </div>
+
+      <!-- Bridge -->
+      <div style="text-align:center; padding:6px 0;">
+        <div style="font-size:1.5rem; color:#8e44ad; line-height:1;">⬇</div>
+        <div style="background:#f3e8ff; border:2px dashed #8e44ad; color:#6a1b9a; border-radius:20px; padding:6px 16px; font-size:0.82rem; font-weight:700; font-family:'Consolas',monospace;">COPY --from=builder /install /usr/local</div>
+        <div style="font-size:0.78rem; color:#888; margin-top:4px; max-width:420px;">Reaches back into stage 1 and grabs <strong>only</strong> the compiled folder. gcc is left behind.</div>
+        <div style="font-size:1.5rem; color:#8e44ad; line-height:1; margin-top:4px;">⬇</div>
+      </div>
+
+      <!-- Stage 2 -->
+      <div style="width:100%; max-width:640px; background:#f0faf4; border:2px solid #27ae60; border-radius:14px; padding:18px 22px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+          <span style="font-size:1.6rem;">🚀</span>
+          <div>
+            <div style="font-weight:800; color:#1b5e20;">STAGE 2 — <code>runtime</code> (this is what ships)</div>
+            <div style="font-size:0.78rem; color:#888;">FROM python:3.12-slim <strong>AS runtime</strong> — a brand-new, clean image</div>
+          </div>
+          <span style="margin-left:auto; background:#c8e6c9; color:#1b5e20; font-size:0.72rem; font-weight:800; padding:4px 10px; border-radius:20px;">NO compilers</span>
+        </div>
+        <div style="font-size:0.86rem; color:#555; line-height:1.6;">Starts fresh from slim, receives the compiled packages via <code>COPY --from=builder</code>, adds app code + non-root user. <strong>Never saw gcc in its life.</strong></div>
+      </div>
+
+      <!-- Discarded note -->
+      <div style="margin-top:14px; background:#fafafa; border:1px dashed #bbb; border-radius:10px; padding:10px 16px; font-size:0.85rem; color:#777;">
+        🗑️ <strong>What happens to Stage 1?</strong> Once the build finishes, Docker <strong>discards the entire builder stage</strong> — gcc, headers, pip cache, all of it. It's not a layer in your final image; it never leaves the build machine.
+      </div>
+    </div>
+
+    <!-- ANNOTATED CODE -->
+    <h3 style="color:var(--dark); margin:28px 0 14px; font-size:1.05rem;">③ The full Dockerfile, annotated</h3>
+<div class="code-block"><span class="c"># ═══ STAGE 1: builder — the messy workshop (compilers live here) ═══</span>
+<span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS builder</span>   <span class="c"># ← name this stage "builder"</span>
 
 <span class="k">RUN</span> <span class="s">apt-get update && apt-get install -y \
     gcc libpq-dev python3-dev \
-    && rm -rf /var/lib/apt/lists/*</span>
+    && rm -rf /var/lib/apt/lists/*</span>       <span class="c"># the compilers — needed ONLY to build</span>
 
 <span class="k">COPY</span> requirements.txt .
 <span class="k">RUN</span> <span class="s">pip install --no-cache-dir --prefix=/install -r requirements.txt</span>
+<span class="c">#                                    ▲ --prefix=/install collects every</span>
+<span class="c">#                                      compiled package into ONE folder we can copy</span>
 
-<span class="c"># Stage 2: Runtime — lean and clean</span>
-<span class="k">FROM</span> <span class="v">python:3.12-slim AS runtime</span>
+<span class="c"># ═══ STAGE 2: runtime — the delivery truck (starts clean, ships) ═══</span>
+<span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS runtime</span>   <span class="c"># ← a FRESH image. gcc is NOT here.</span>
 
-<span class="c"># Copy compiled packages FROM builder — no compilers come with them</span>
-<span class="k">COPY --from=builder</span> /install /usr/local
+<span class="h">COPY --from=builder /install /usr/local</span>  <span class="c"># ← THE MAGIC LINE: pull compiled</span>
+<span class="c">#                                         packages across, leave gcc behind</span>
 
 <span class="k">WORKDIR</span> /app
 <span class="k">COPY</span> . .
 
-<span class="c"># Non-root user</span>
-<span class="k">RUN</span> <span class="s">useradd --create-home appuser</span>
+<span class="k">RUN</span> <span class="s">useradd --create-home appuser</span>       <span class="c"># non-root — smaller blast radius</span>
 <span class="k">USER</span> appuser
 
-<span class="k">CMD</span> ["gunicorn", "config.wsgi", <span class="s">"--bind"</span>, <span class="s">"0.0.0.0:8000"</span>]
-<span class="c"># The final image has ZERO compilers, ZERO build tools — just the compiled output</span>
+<span class="k">CMD</span> [<span class="s">"gunicorn"</span>, <span class="s">"config.wsgi"</span>, <span class="s">"--bind"</span>, <span class="s">"0.0.0.0:8000"</span>]
+<span class="c"># Final image = compiled packages + runtime + your code. ZERO build tools.</span>
 </div>
+
+    <div style="background:#f3e8ff; border-left:4px solid #8e44ad; border-radius:0 8px 8px 0; padding:14px 18px; margin-top:16px; font-size:0.9rem; line-height:1.65;">
+      🔑 <strong>The one line that makes it work: <code>COPY --from=builder</code>.</strong> Normal <code>COPY</code> pulls from your build context (your source folder). <code>COPY --from=builder</code> pulls from <em>another stage's filesystem</em>. That's the entire trick — it lets the clean runtime reach into the dirty builder and take <strong>only the finished goods.</strong>
+    </div>
+
+    <!-- SAY THIS -->
+    <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59); border-radius:12px; padding:22px; color:white; margin-top:20px;">
+      <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:10px;">🔥 SAY THIS IN THE INTERVIEW (60-second answer)</div>
+      <p style="font-style:italic; line-height:1.8; opacity:0.95;">"Multi-stage builds use two <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">FROM</code> statements in one Dockerfile. The first stage — I name it <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">builder</code> — installs gcc and the dev headers and compiles the C-extension packages like psycopg2 into a prefix folder. The second stage starts fresh from a slim image and uses <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> to pull in <em>only</em> the compiled packages. The builder stage is discarded, so the final image has no compilers — that's how we go from ~900&nbsp;MB down to ~85&nbsp;MB, with a smaller attack surface. The key line is <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> — it copies from another stage's filesystem instead of the build context."</p>
+    </div>
   </div>
 
   <!-- PART 4: EXIT CODES -->

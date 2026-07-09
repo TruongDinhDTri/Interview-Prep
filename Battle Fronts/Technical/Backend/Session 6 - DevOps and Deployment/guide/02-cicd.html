@@ -440,14 +440,8 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
   .comparison { grid-template-columns: 1fr; }
 }
 
-/* PHASE LINK */
-.phase-group-label{cursor:pointer;transition:opacity 0.15s;}
-.phase-group-label:hover{opacity:0.8;}
-.phase-group-label::after{content:" ↓";font-size:0.7em;opacity:0.7;}
-.phase-section{transition:box-shadow 0.2s;}
-.phase-highlighted{animation:phaseGlow 2s ease;}
-@keyframes phaseGlow{0%,100%{outline:none;}15%,85%{outline:3px solid #f39c12;border-radius:10px;}}
-.pipeline-bridge{text-align:center;padding:10px 0 4px;font-size:0.82rem;color:#888;font-style:italic;}
+/* PHASE LABEL (static header, no longer a jump link) */
+.phase-group-label{cursor:default;}
 
 /* ── PHASE FLOW (Part 2 redesign) ── */
 .phase-legend {
@@ -612,6 +606,45 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
   line-height: 1.65;
   color: #333;
 }
+.fdp-focus {
+  grid-column: 1 / -1;
+  background: #fffbea;
+  border: 1px solid #f6d365;
+  border-left: 4px solid #f39c12;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-size: 0.87rem;
+  line-height: 1.65;
+  color: #5c4600;
+}
+.fdp-focus strong { color: #b36b00; }
+.fdp-code {
+  grid-column: 1 / -1;
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 16px 18px;
+  border-radius: 10px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.82rem;
+  line-height: 1.65;
+  white-space: pre;
+  overflow-x: auto;
+}
+.fdp-code .cc { color: #64748b; }
+.fdp-body code {
+  background: rgba(0,0,0,0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.85em;
+}
+.fdp-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #999;
+  font-style: italic;
+  padding: 22px 10px;
+}
 /* RIGHT SIDEBAR */
 .rsidebar-toggle{position:fixed;right:16px;top:16px;z-index:201;background:var(--primary);color:white;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;font-size:0.9rem;font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,0.2);transition:background 0.2s;}
 .rsidebar-toggle:hover{background:var(--dark);}
@@ -706,7 +739,7 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
   </div>
 
   <div class="concept-card">
-    <p style="margin-bottom:16px; color:#666; font-size:0.95rem;">This is what you say when asked: <em>"Describe what happens between <code>git push</code> and the user seeing the change."</em> <strong style="color:#333;">Click a phase label to jump to its detailed steps below. Click a node to see what it does.</strong></p>
+    <p style="margin-bottom:16px; color:#666; font-size:0.95rem;">This is the exact story you tell when asked: <em>"Describe what happens between <code>git push</code> and the user seeing the change."</em> <strong style="color:#333;">👉 Click any step below</strong> to open its detail card — <span style="color:#1976d2; font-weight:700;">What happens</span>, <span style="color:#8e44ad; font-weight:700;">How it works</span>, <span style="color:#b36b00; font-weight:700;">🎯 what to focus on in the interview</span>, and the real code.</p>
 
     <!-- Phase legend -->
     <div class="phase-legend">
@@ -721,30 +754,30 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
       <span class="phase-pill" style="background:#e8f5e9; color:#2e7d32;">⬤ LIVE</span>
     </div>
 
-    <!-- Phase-grouped horizontal flow -->
+    <!-- Phase-grouped horizontal flow — EVERY step is clickable -->
     <div class="phase-flow-outer">
       <div class="phase-flow">
 
         <!-- LOCAL DEV -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#6c757d;" onclick="jumpToPhase('local-dev')">LOCAL DEV</div>
+          <div class="phase-group-label" style="background:#6c757d;">LOCAL DEV</div>
           <div class="phase-group-nodes" style="border-color:#6c757d; background:#f8f9fa;">
-            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('developer', this)">
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showStep('developer', this)">
               <span class="pn-icon">👨‍💻</span>
               <div class="pn-label">Developer</div>
-              <div class="pn-sub">Writes code locally</div>
+              <div class="pn-sub">writes code</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#6c757d;">→</span>
-            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('git-commit', this)">
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showStep('git-commit', this)">
               <span class="pn-icon">📝</span>
               <div class="pn-label">git commit</div>
-              <div class="pn-sub">feature/my-branch</div>
+              <div class="pn-sub">feature branch</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#6c757d;">→</span>
-            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showFlowDetail('git-push', this)">
+            <div class="phase-node" style="--pn-color:#6c757d;" onclick="showStep('git-push', this)">
               <span class="pn-icon">⬆️</span>
               <div class="pn-label">git push</div>
-              <div class="pn-sub">to remote</div>
+              <div class="pn-sub">to GitHub</div>
             </div>
           </div>
         </div>
@@ -753,18 +786,18 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- TRIGGER -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#e74c3c;" onclick="jumpToPhase('trigger')">TRIGGER</div>
+          <div class="phase-group-label" style="background:#e74c3c;">TRIGGER</div>
           <div class="phase-group-nodes" style="border-color:#e74c3c; background:#fff5f5;">
-            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showFlowDetail('github-pr', this)">
+            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showStep('github-pr', this)">
               <span class="pn-icon">🐙</span>
-              <div class="pn-label">GitHub PR</div>
-              <div class="pn-sub">Webhook fires</div>
+              <div class="pn-label">Open PR</div>
+              <div class="pn-sub">webhook fires</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#e74c3c;">→</span>
-            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showFlowDetail('ci-trigger', this)">
+            <div class="phase-node" style="--pn-color:#e74c3c;" onclick="showStep('ci-trigger', this)">
               <span class="pn-icon">⚡</span>
-              <div class="pn-label">CI Trigger</div>
-              <div class="pn-sub">Actions Runner</div>
+              <div class="pn-label">CI Runner</div>
+              <div class="pn-sub">clean VM boots</div>
             </div>
           </div>
         </div>
@@ -773,23 +806,23 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- SETUP -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#546e7a;" onclick="jumpToPhase('setup')">SETUP</div>
+          <div class="phase-group-label" style="background:#546e7a;">SETUP</div>
           <div class="phase-group-nodes" style="border-color:#546e7a; background:#eceff1;">
-            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('checkout', this)">
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showStep('checkout', this)">
               <span class="pn-icon">📥</span>
-              <div class="pn-label">Checkout</div>
-              <div class="pn-sub">actions/checkout@v4</div>
+              <div class="pn-label">1 · Checkout</div>
+              <div class="pn-sub">clone the code</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#546e7a;">→</span>
-            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('setup-python', this)">
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showStep('setup-python', this)">
               <span class="pn-icon">🐍</span>
-              <div class="pn-label">Setup Python</div>
+              <div class="pn-label">2 · Setup Python</div>
               <div class="pn-sub">+ pip cache</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#546e7a;">→</span>
-            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showFlowDetail('install-deps', this)">
+            <div class="phase-node" style="--pn-color:#546e7a;" onclick="showStep('install-deps', this)">
               <span class="pn-icon">📦</span>
-              <div class="pn-label">Install Deps</div>
+              <div class="pn-label">3 · Install Deps</div>
               <div class="pn-sub">requirements.txt</div>
             </div>
           </div>
@@ -799,18 +832,36 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- QUALITY -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#1976d2;" onclick="jumpToPhase('quality')">QUALITY</div>
+          <div class="phase-group-label" style="background:#1976d2;">QUALITY GATES</div>
           <div class="phase-group-nodes" style="border-color:#1976d2; background:#e3f2fd;">
-            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showFlowDetail('lint-test', this)">
-              <span class="pn-icon">✅</span>
-              <div class="pn-label">Lint + Test</div>
-              <div class="pn-sub">vs real Postgres</div>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showStep('lint', this)">
+              <span class="pn-icon">🔍</span>
+              <div class="pn-label">4 · Lint</div>
+              <div class="pn-sub">ruff / black</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#1976d2;">→</span>
-            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showFlowDetail('security-scan-flow', this)">
-              <span class="pn-icon">🔒</span>
-              <div class="pn-label">Security Scan</div>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showStep('typecheck', this)">
+              <span class="pn-icon">🏷️</span>
+              <div class="pn-label">5 · Type Check</div>
+              <div class="pn-sub">mypy</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#1976d2;">→</span>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showStep('security-scan', this)">
+              <span class="pn-icon">🔐</span>
+              <div class="pn-label">6 · Security Scan</div>
               <div class="pn-sub">pip-audit, bandit</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#1976d2;">→</span>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showStep('django-check', this)">
+              <span class="pn-icon">⚙️</span>
+              <div class="pn-label">7 · Deploy Check</div>
+              <div class="pn-sub">check --deploy</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#1976d2;">→</span>
+            <div class="phase-node" style="--pn-color:#1976d2;" onclick="showStep('migration-check', this)">
+              <span class="pn-icon">🗄️</span>
+              <div class="pn-label">8 · Migration Check</div>
+              <div class="pn-sub">--check --dry-run</div>
             </div>
           </div>
         </div>
@@ -819,38 +870,53 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- TEST -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#27ae60;" onclick="jumpToPhase('test')">TEST</div>
+          <div class="phase-group-label" style="background:#27ae60;">TEST</div>
           <div class="phase-group-nodes" style="border-color:#27ae60; background:#e8f5e9;">
-            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('pg-service', this)">
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showStep('pg-service', this)">
               <span class="pn-icon">🐘</span>
-              <div class="pn-label">Spin Up Postgres</div>
+              <div class="pn-label">9 · Spin Up Postgres</div>
               <div class="pn-sub">service container</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#27ae60;">→</span>
-            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('pytest', this)">
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showStep('pg-health', this)">
+              <span class="pn-icon">❤️</span>
+              <div class="pn-label">10 · Wait Ready</div>
+              <div class="pn-sub">pg_isready</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#27ae60;">→</span>
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showStep('pytest', this)">
               <span class="pn-icon">🧪</span>
-              <div class="pn-label">pytest</div>
+              <div class="pn-label">11 · pytest</div>
               <div class="pn-sub">real DB — not SQLite</div>
             </div>
           </div>
         </div>
 
-        <div class="phase-between-arrow"><span>→</span></div>
+        <div class="phase-between-arrow" style="align-items:center; padding-bottom:0;">
+          <span style="font-size:1.5rem; color:#e74c3c;">⛔→</span>
+          <span style="font-size:0.62rem; color:#e74c3c; font-weight:700; max-width:90px; text-align:center; line-height:1.3; margin-top:2px;">Any step 1–11 fails → pipeline STOPS. No image. No deploy.</span>
+        </div>
 
         <!-- BUILD -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#8e44ad;" onclick="jumpToPhase('build')">BUILD</div>
+          <div class="phase-group-label" style="background:#8e44ad;">BUILD</div>
           <div class="phase-group-nodes" style="border-color:#8e44ad; background:#f3e5f5;">
-            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showFlowDetail('build-image', this)">
+            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showStep('docker-build', this)">
               <span class="pn-icon">🐳</span>
-              <div class="pn-label">Build Image</div>
-              <div class="pn-sub">Docker multi-stage</div>
+              <div class="pn-label">12 · Docker Build</div>
+              <div class="pn-sub">multi-stage</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#8e44ad;">→</span>
-            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showFlowDetail('tag-push', this)">
+            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showStep('tag-sha', this)">
               <span class="pn-icon">🏷️</span>
-              <div class="pn-label">Tag + Push</div>
-              <div class="pn-sub">sha-abc123 → ECR</div>
+              <div class="pn-label">13 · Tag Git SHA</div>
+              <div class="pn-sub">rollback point</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#8e44ad;">→</span>
+            <div class="phase-node" style="--pn-color:#8e44ad;" onclick="showStep('push-ecr', this)">
+              <span class="pn-icon">☁️</span>
+              <div class="pn-label">14 · Push to ECR</div>
+              <div class="pn-sub">image registry</div>
             </div>
           </div>
         </div>
@@ -859,24 +925,36 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- DEPLOY -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#e65100;" onclick="jumpToPhase('deploy')">DEPLOY</div>
+          <div class="phase-group-label" style="background:#e65100;">DEPLOY</div>
           <div class="phase-group-nodes" style="border-color:#e65100; background:#fff3e0;">
-            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('run-migration-flow', this)">
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showStep('run-migration', this)">
               <span class="pn-icon">🗄️</span>
-              <div class="pn-label">Run Migration</div>
-              <div class="pn-sub">ECS one-off task</div>
+              <div class="pn-label">15 · Run Migrations</div>
+              <div class="pn-sub">before new code</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
-            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('rolling-deploy', this)">
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showStep('rolling-update', this)">
               <span class="pn-icon">🔄</span>
-              <div class="pn-label">Rolling Deploy</div>
+              <div class="pn-label">16 · Rolling Update</div>
               <div class="pn-sub">ECS new tasks</div>
             </div>
             <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
-            <div class="phase-node" style="--pn-color:#e65100;" onclick="showFlowDetail('health-check-flow', this)">
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showStep('health-check', this)">
               <span class="pn-icon">❤️</span>
-              <div class="pn-label">Health Check</div>
+              <div class="pn-label">17 · Health Check</div>
               <div class="pn-sub">/health/ → 200</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showStep('drain-old', this)">
+              <span class="pn-icon">🗑️</span>
+              <div class="pn-label">18 · Drain Old</div>
+              <div class="pn-sub">finish in-flight</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#e65100;">→</span>
+            <div class="phase-node" style="--pn-color:#e65100;" onclick="showStep('notify', this)">
+              <span class="pn-icon">📢</span>
+              <div class="pn-label">19 · Notify</div>
+              <div class="pn-sub">Slack / email</div>
             </div>
           </div>
         </div>
@@ -885,12 +963,18 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 
         <!-- LIVE -->
         <div class="phase-group">
-          <div class="phase-group-label" style="background:#27ae60;" onclick="jumpToPhase('live')">LIVE 🎉</div>
+          <div class="phase-group-label" style="background:#27ae60;">LIVE 🎉</div>
           <div class="phase-group-nodes" style="border-color:#27ae60; background:#e8f5e9;">
-            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showFlowDetail('user-sees', this)">
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showStep('alb-route', this)">
+              <span class="pn-icon">🔀</span>
+              <div class="pn-label">ALB → 100%</div>
+              <div class="pn-sub">traffic to new</div>
+            </div>
+            <span class="inline-node-arrow" style="--pn-color:#27ae60;">→</span>
+            <div class="phase-node" style="--pn-color:#27ae60;" onclick="showStep('user-sees', this)">
               <span class="pn-icon">👤</span>
-              <div class="pn-label">User Sees</div>
-              <div class="pn-sub">Zero downtime</div>
+              <div class="pn-label">User Sees It</div>
+              <div class="pn-sub">zero downtime ✅</div>
             </div>
           </div>
         </div>
@@ -899,115 +983,11 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
     </div><!-- end .phase-flow-outer -->
 
     <!-- Click-to-expand detail panel -->
-    <div id="flow-node-detail" class="flow-detail-panel"></div>
+    <div id="flow-node-detail" class="flow-detail-panel visible" style="--fdp-color:#cbd5e0;">
+      <div class="fdp-hint">👆 Click any step above to open its detail card — What happens · How it works · 🎯 Focus · the code.</div>
+    </div>
   </div>
 
-  <div class="pipeline-bridge">↕ Each phase above maps directly to a section below — click any phase label to jump</div>
-
-  <!-- PIPELINE PHASES DETAILED -->
-  <div class="pipeline-container">
-    <div class="pipeline-title">🔍 Phase Detail — What Happens Inside Each Phase (click any step)</div>
-
-    <div id="phase-local-dev" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="--phase-color:#6c757d; background:#6c757d;">LOCAL DEV</div>
-        <div class="phase-steps" style="--phase-color:#6c757d; --phase-bg:#f8f9fa;">
-          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">👨‍💻 Write Code (feature branch)</div>
-          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">📝 git commit</div>
-          <div class="step-chip" style="background:#e9ecef; border-color:#6c757d; color:#343a40;">⬆️ git push → GitHub</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-trigger" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="--phase-color:#e74c3c; background:#e74c3c;">TRIGGER</div>
-        <div class="phase-steps" style="--phase-color:#e74c3c; --phase-bg:#fff5f5;">
-          <div class="step-chip" style="background:#ffcdd2; border-color:#e74c3c; color:#c62828;">🐙 Webhook fires (on: push / pull_request)</div>
-          <div class="step-chip" style="background:#ffcdd2; border-color:#e74c3c; color:#c62828;">⚡ Actions runner starts (clean ubuntu-latest VM)</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-setup" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="--phase-color:#546e7a; background:#546e7a;">SETUP</div>
-        <div class="phase-steps" style="--phase-color:#546e7a; --phase-bg:#eceff1;">
-          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('checkout')">📥 1. Checkout Code</div>
-          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('setup-python')">🐍 2. Setup Python + Cache</div>
-          <div class="step-chip" style="background:#cfd8dc; border-color:#546e7a; color:#263238;" onclick="showDetail('install-deps')">📦 3. Install Dependencies</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-quality" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="background:#1976d2;">QUALITY</div>
-        <div class="phase-steps" style="--phase-color:#1976d2; --phase-bg:#e3f2fd;">
-          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('lint')">🔍 4. Lint (ruff / black)</div>
-          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('typecheck')">🏷️ 5. Type Check (mypy)</div>
-          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('security-scan')">🔐 6. Security Scan</div>
-          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('django-check')">⚙️ 7. manage.py check --deploy</div>
-          <div class="step-chip" style="background:#bbdefb; border-color:#1976d2; color:#0d47a1;" onclick="showDetail('migration-check')">🗄️ 8. makemigrations --check</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-test" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="background:#27ae60;">TEST</div>
-        <div class="phase-steps" style="--phase-color:#27ae60; --phase-bg:#e8f5e9;">
-          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pg-service')">🐘 9. Spin Up PostgreSQL Service</div>
-          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pg-health')">❤️ 10. Wait: pg_isready</div>
-          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;" onclick="showDetail('pytest')">🧪 11. pytest (real DB)</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓ <span style="color:#e74c3c; font-size:0.85rem; font-weight:700;">(If ANY step above fails → pipeline STOPS. No image built. No deploy.)</span></div>
-    </div>
-
-    <div id="phase-build" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="background:#8e44ad;">BUILD</div>
-        <div class="phase-steps" style="--phase-color:#8e44ad; --phase-bg:#f3e5f5;">
-          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('docker-build')">🐳 12. Docker Build (multi-stage)</div>
-          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('tag-sha')">🏷️ 13. Tag with Git SHA</div>
-          <div class="step-chip" style="background:#e1bee7; border-color:#8e44ad; color:#4a148c;" onclick="showDetail('push-ecr')">☁️ 14. Push to ECR</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-deploy" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="background:#e65100;">DEPLOY</div>
-        <div class="phase-steps" style="--phase-color:#e65100; --phase-bg:#fff3e0;">
-          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('run-migration')">🗄️ 15. Run Migrations (ECS task)</div>
-          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('rolling-update')">🔄 16. Rolling Update ECS Service</div>
-          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('health-check')">❤️ 17. Health Check /health/</div>
-          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('drain-old')">🗑️ 18. Drain + Kill Old Tasks</div>
-          <div class="step-chip" style="background:#ffe0b2; border-color:#e65100; color:#bf360c;" onclick="showDetail('notify')">📢 19. Notify Slack/Email</div>
-        </div>
-      </div>
-      <div class="arrow-down">↓</div>
-    </div>
-
-    <div id="phase-live" class="phase-section">
-      <div class="phase-row">
-        <div class="phase-label" style="background:#27ae60;">LIVE 🎉</div>
-        <div class="phase-steps" style="--phase-color:#27ae60; --phase-bg:#e8f5e9;">
-          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;">🔀 ALB routes 100% traffic to new tasks</div>
-          <div class="step-chip" style="background:#c8e6c9; border-color:#27ae60; color:#1b5e20;">👤 User sees the change — zero downtime ✅</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Detail Panel -->
-    <div id="step-detail-panel" class="step-detail" style="margin-top:20px;"></div>
-  </div>
 
   <!-- ============================================================ -->
   <!-- PART 3: THE GITHUB ACTIONS YAML ANNOTATED -->
@@ -1432,224 +1412,193 @@ body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); co
 </div>
 
 <script>
-const stepDetails = {
-  'checkout': {
-    title: '📥 Step 1: Checkout Code',
-    body: 'GitHub Actions clones your repository onto the runner VM. Uses <code>actions/checkout@v4</code>.\n\nWhy it matters: The runner starts with a clean VM every time. This is why builds are reproducible — no leftover state from previous runs.',
-    code: '- uses: actions/checkout@v4\n  with:\n    fetch-depth: 0  # Full history for git-based tools'
-  },
-  'setup-python': {
-    title: '🐍 Step 2: Setup Python + Cache Dependencies',
-    body: 'Installs Python and enables pip dependency caching. The cache key is the hash of requirements.txt — if the file hasn\'t changed, all packages are restored from cache. This reduces install time from 2-4 minutes to ~20 seconds on cache hit.',
-    code: '- uses: actions/setup-python@v5\n  with:\n    python-version: \'3.12\'\n    cache: \'pip\'  # Caches ~/.cache/pip based on requirements hash'
-  },
-  'install-deps': {
-    title: '📦 Step 3: Install Dependencies',
-    body: 'Installs all Python packages. With caching active, this is fast. Use --no-cache-dir in Docker but NOT here — caching in CI is a feature.',
-    code: '- run: pip install -r requirements.txt\n\n# Optional: faster with uv\n# - run: pip install uv && uv pip install -r requirements.txt'
-  },
-  'lint': {
-    title: '🔍 Step 4: Lint Check',
-    body: 'ruff checks for style violations and common bugs. black --check verifies formatting. These are fast (seconds) and catch real bugs — for example, ruff catches unused imports, undefined names, and security anti-patterns.',
-    code: '- name: Lint\n  run: |\n    ruff check .\n    black --check .\n    # Fail fast — no point running tests if code won\'t even parse'
-  },
-  'typecheck': {
-    title: '🏷️ Step 5: Type Check (mypy)',
-    body: 'Static type checking. Catches a class of bugs that tests might miss — wrong argument types, None values, missing methods. For Django projects: use django-stubs for better coverage.',
-    code: '- run: mypy . --ignore-missing-imports\n\n# mypy.ini or pyproject.toml configures strictness\n# [mypy]\n# plugins = mypy_django_plugin.main\n# django_settings_module = config.settings.test'
-  },
-  'security-scan': {
-    title: '🔐 Step 6: Security Scans',
-    body: '<strong>pip-audit</strong>: Checks all installed packages against PyPI Advisory Database for known CVEs. Catches "your requests version has a SSRF vulnerability".\n\n<strong>bandit</strong>: Static analysis for Python security anti-patterns — hardcoded passwords, SQL injection via string formatting, shell injection, etc.\n\n<strong>gitleaks</strong>: Scans git history for accidentally committed secrets (API keys, passwords, tokens).',
-    code: '- run: pip-audit              # CVE scan\n- run: bandit -r . -x ./tests  # Security linting\n- run: gitleaks detect --source . --no-git  # Secret scanning'
-  },
-  'django-check': {
-    title: '⚙️ Step 7: manage.py check --deploy',
-    body: 'Django\'s built-in deployment readiness checker. It validates:\n• DEBUG is False\n• ALLOWED_HOSTS is set\n• SESSION_COOKIE_SECURE is True\n• CSRF_COOKIE_SECURE is True\n• SECURE_SSL_REDIRECT is True\n• HSTS headers configured\n\nIf any check fails, the pipeline fails. This prevents DEBUG=True from slipping into a production build.',
-    code: '- run: python manage.py check --deploy\n  env:\n    DJANGO_SETTINGS_MODULE: config.settings.production\n    DATABASE_URL: postgres://...  # Use production-like settings'
-  },
-  'migration-check': {
-    title: '🗄️ Step 8: makemigrations --check --dry-run',
-    body: 'This fails the build if Django detects that a model has changed but the corresponding migration file was not committed. The most common deploy bomb: developer changes a model, forgets to run makemigrations, pushes — prod explodes on startup when Django sees the model state doesn\'t match migration history.',
-    code: '- run: python manage.py makemigrations --check --dry-run\n\n# Exit code 1 if any migrations would be generated.\n# This means: "You changed a model without committing the migration."\n# CI catches it before it reaches production.'
-  },
-  'pg-service': {
-    title: '🐘 Step 9: Spin Up PostgreSQL Service Container',
-    body: 'GitHub Actions spins up a real PostgreSQL container alongside the test runner. This is NOT a mock — it\'s a real database. This is critical because SQLite and PostgreSQL behave differently for JSON fields, transactions, date arithmetic, and more.\n\nPin to a specific version: postgres:15, not postgres:latest — so a PostgreSQL release can\'t silently break your CI.',
-    code: 'services:\n  postgres:\n    image: postgres:15        # PINNED version\n    env:\n      POSTGRES_DB: testdb\n      POSTGRES_USER: testuser\n      POSTGRES_PASSWORD: testpass\n    ports:\n      - 5432:5432'
-  },
-  'pg-health': {
-    title: '❤️ Step 10: Wait for pg_isready',
-    body: 'The PostgreSQL container starts booting, but it takes 5-10 seconds to be ready to accept connections. Without a health check, your tests run immediately and get "Connection Refused" errors. The options block tells the runner to poll pg_isready every 10 seconds and only proceed once the DB is accepting connections.',
-    code: 'options: >-\n  --health-cmd pg_isready\n  --health-interval 10s\n  --health-timeout 5s\n  --health-retries 5\n\n# The runner waits here until pg_isready returns 0.\n# Without this: tests start → DB not ready → "Connection Refused" → CI fails for wrong reason'
-  },
-  'pytest': {
-    title: '🧪 Step 11: Run Tests (pytest vs real PostgreSQL)',
-    body: 'Run the full test suite against the real PostgreSQL service. Use --tb=short for concise failure output. Set DATABASE_URL to point to the service container.\n\nFor parallelism on large suites: pytest-xdist with -n auto runs tests across multiple workers.',
-    code: '- run: pytest --tb=short -q\n  env:\n    DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb\n    DJANGO_SETTINGS_MODULE: config.settings.test\n    SECRET_KEY: ci-test-secret-key-not-real'
-  },
-  'docker-build': {
-    title: '🐳 Step 12: Docker Build (Multi-stage)',
-    body: 'Build the production Docker image. Multi-stage: builder stage compiles C extensions (psycopg2, cryptography), runtime stage only has the compiled artifacts. This keeps the image small (no gcc in production) and secure (smaller attack surface).\n\nThis step only runs if ALL test jobs passed — enforced by needs: [test].',
-    code: '# Dockerfile (multi-stage)\nFROM python:3.12-slim AS builder\nRUN pip install --no-cache-dir psycopg2-binary cryptography\n\nFROM python:3.12-slim AS runtime\nCOPY --from=builder /usr/local/lib/python3.12/site-packages ...\n# Final image has no gcc, no build tools'
-  },
-  'tag-sha': {
-    title: '🏷️ Step 13: Tag Image with Git SHA',
-    body: 'Tag the Docker image with the exact git commit SHA. This is the KEY to zero-regret rollback — any future rollback is just "point ECS at the previous SHA\'s image." No rebuild, no CI run, just deploy a known-good image.\n\nAlso tag with :latest for convenience, but SHA is what rollback uses.',
-    code: '- run: |\n    IMAGE="$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}"\n    LATEST="$ECR_REGISTRY/$ECR_REPO:latest"\n    docker build -t $IMAGE -t $LATEST .\n    docker push $IMAGE\n    docker push $LATEST\n    echo "IMAGE=$IMAGE" >> $GITHUB_ENV'
-  },
-  'push-ecr': {
-    title: '☁️ Step 14: Push to ECR',
-    body: 'Push the tagged image to Amazon Elastic Container Registry (ECR). This is a private image registry — only your ECS service can pull from it via its IAM role.\n\nAlternatives: Docker Hub (public/private), GitHub Container Registry, GCR (Google), ACR (Azure). ECR integrates naturally with ECS + IAM.',
-    code: '- uses: aws-actions/amazon-ecr-login@v2\n\n- run: docker push $IMAGE\n\n# ECR stores images indefinitely (until lifecycle policy expires them)\n# Each SHA becomes a rollback point\n# Old images: set lifecycle policy to keep last 10'
-  },
-  'run-migration': {
-    title: '🗄️ Step 15: Run Migrations BEFORE New Code',
-    body: 'This is the most important ordering rule in zero-downtime deployment: migrations run BEFORE new code starts handling traffic.\n\nIn ECS: run migrations as a one-off ECS task (not in entrypoint). The task runs, applies migrations, exits. Then the new service tasks start.\n\nAll migrations must be BACKWARD COMPATIBLE with the currently running code — old tasks keep running during the rolling deploy and must be able to use the new schema.',
-    code: '# Run as separate ECS task (not in app entrypoint)\naws ecs run-task \\\n  --cluster production \\\n  --task-definition migrate-task \\\n  --overrides \'{"containerOverrides":[{"name":"app","command":["python","manage.py","migrate","--noinput"]}]}\'\n\n# Wait for task to complete before deploying new service'
-  },
-  'rolling-update': {
-    title: '🔄 Step 16: Rolling Update ECS Service',
-    body: 'ECS replaces tasks one-by-one (or in batches). For each new task:\n1. ECS starts the new task\n2. New task must pass health check at /health/ (returns 200 + checks DB + cache)\n3. ALB starts sending traffic to the new task\n4. Old task is drained (existing connections finish)\n5. Old task is killed\n\nDuring the roll, old and new code run simultaneously — this is WHY migrations must be backward-compatible.',
-    code: 'aws ecs update-service \\\n  --cluster production \\\n  --service my-django-service \\\n  --task-definition my-django-service:42  # new task def with new image\n  --deployment-configuration \\\n    "minimumHealthyPercent=100,maximumPercent=200"\n\n# minimumHealthyPercent=100 → never go below current capacity\n# maximumPercent=200 → allow running 2x tasks during rollout'
-  },
-  'health-check': {
-    title: '❤️ Step 17: Health Check at /health/',
-    body: 'Every new ECS task must pass the ALB health check before receiving traffic. The /health/ endpoint should:\n• Return HTTP 200\n• Check database connectivity (simple SELECT 1)\n• Check cache connectivity (Redis PING)\n• Respond within 5 seconds\n\nIf /health/ doesn\'t return 200 within the timeout, ECS marks the task as unhealthy, kills it, and rolls back automatically.',
-    code: '# Django health check view\nfrom django.db import connection\nfrom django.core.cache import cache\n\ndef health(request):\n    try:\n        connection.ensure_connection()\n        cache.set("health", "ok", 10)\n    except Exception as e:\n        return JsonResponse({"status": "unhealthy", "error": str(e)}, status=503)\n    return JsonResponse({"status": "ok"})'
-  },
-  'drain-old': {
-    title: '🗑️ Step 18: Drain and Kill Old Tasks',
-    body: 'After the new tasks are healthy and receiving traffic, the old tasks are "drained" — the ALB stops sending NEW connections to them, but in-flight requests are allowed to complete (connection draining period, typically 30-60 seconds). After draining, the old tasks are terminated.',
-    code: '# ALB connection draining ensures:\n# - No new requests go to draining tasks\n# - Existing requests finish (up to deregistration_delay seconds)\n# - Users don\'t see connection resets during deploy\n\n# aws_lb_target_group deregistration_delay = 30 (Terraform)\n# ECS respects this before killing the task'
-  },
-  'notify': {
-    title: '📢 Step 19: Notify Team',
-    body: 'After successful deployment, send a notification to Slack/email/PagerDuty with:\n• What SHA was deployed\n• Which environment\n• Link to the deployment\n• How long it took\n\nOn failure: alert on-call, include direct link to failing step, include rollback command.',
-    code: '- name: Notify Slack\n  if: always()  # Run even on failure\n  uses: slackapi/slack-github-action@v1\n  with:\n    payload: |\n      {"text": "${{ job.status == \'success\' && \'✅\' || \'❌\' }} Deploy ${{ github.sha }} to production: ${{ job.status }}"}\n  env:\n    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}'
-  }
+
+/* ─── ONE unified dataset: every pipeline step → what / how / focus / code ─── */
+const P = {
+  local:  { phase:'LOCAL DEV',   color:'#6c757d', bg:'#f8f9fa' },
+  trig:   { phase:'TRIGGER',     color:'#e74c3c', bg:'#fff5f5' },
+  setup:  { phase:'SETUP',       color:'#546e7a', bg:'#eceff1' },
+  qual:   { phase:'QUALITY GATE',color:'#1976d2', bg:'#e3f2fd' },
+  test:   { phase:'TEST',        color:'#27ae60', bg:'#e8f5e9' },
+  build:  { phase:'BUILD',       color:'#8e44ad', bg:'#f3e5f5' },
+  deploy: { phase:'DEPLOY',      color:'#e65100', bg:'#fff3e0' },
+  live:   { phase:'LIVE 🎉',     color:'#27ae60', bg:'#e8f5e9' },
 };
 
-/* ─── Flow node detail data ─── */
-const flowNodeData = {
-  'developer': {
-    title: '👨‍💻 Developer — Writes Code Locally',
-    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
-    what: 'The developer writes feature code on their local machine — a new Django view, API endpoint, or model change. They run a local dev server connected to a local PostgreSQL instance to test changes before committing.',
-    how: 'Code lives on a feature branch (e.g. <code>feature/add-payment-flow</code>). Git tracks every change. The developer iterates locally until the feature is ready, then stages and commits.'
-  },
-  'git-commit': {
-    title: '📝 git commit — Save a Checkpoint',
-    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
-    what: 'The developer commits their changes locally. This creates an immutable snapshot with a unique SHA hash (e.g. <code>abc1234f</code>). Every commit is a potential rollback point — the SHA is the fingerprint that follows the code all the way to production.',
-    how: '<code>git add . && git commit -m "feat: add payment endpoint"</code>. Conventional commit format (feat/fix/chore) helps generate changelogs. Commits live locally until pushed. Small, atomic commits = easier debugging with <code>git bisect</code>.'
-  },
-  'git-push': {
-    title: '⬆️ git push — Sends Code to GitHub',
-    phase: 'LOCAL DEV', phaseColor: '#6c757d', phaseBg: '#f8f9fa',
-    what: 'The developer pushes their local branch to the remote repository on GitHub. This is the moment code leaves their machine and enters the shared, automated system.',
-    how: '<code>git push origin feature/my-branch</code>. GitHub receives the commits and stores them. Critically: GitHub immediately fires a webhook event to GitHub Actions — this is what starts the CI pipeline. The push itself does not run CI; the webhook does.'
-  },
-  'github-pr': {
-    title: '🐙 GitHub PR — Opens the Quality Gate',
-    phase: 'TRIGGER', phaseColor: '#e74c3c', phaseBg: '#fff5f5',
-    what: 'The developer opens a Pull Request to merge their feature branch into <code>main</code>. GitHub fires a <code>pull_request</code> webhook event to GitHub Actions runners immediately.',
-    how: 'The CI workflow\'s <code>on: pull_request: branches: [main]</code> trigger fires. With "Required status checks" configured on the main branch, the PR <strong>cannot merge</strong> until CI passes — no bypass possible without admin override.'
-  },
-  'ci-trigger': {
-    title: '⚡ CI Trigger — GitHub Actions Spins Up a Runner',
-    phase: 'TRIGGER', phaseColor: '#e74c3c', phaseBg: '#fff5f5',
-    what: 'GitHub Actions picks up the webhook event and provisions a fresh <code>ubuntu-latest</code> VM (the "runner"). This VM is completely clean — no leftover state from any previous run. The workflow YAML defines every step that follows.',
-    how: 'GitHub\'s infrastructure allocates the runner in seconds. Multiple jobs in the same workflow run on separate, isolated VMs in parallel. Clean state = reproducible builds = CI catches "works on my machine" bugs.'
-  },
-  'lint-test': {
-    title: '✅ Lint + Test — Quality & Test Gates',
-    phase: 'QUALITY → TEST', phaseColor: '#1976d2', phaseBg: '#e3f2fd',
-    what: 'The runner executes all checks sequentially: ruff/black (style), mypy (types), pip-audit/bandit (security), Django deployment checks, migration committed check — then spins up a real PostgreSQL 15 container and runs <code>pytest</code> against it.',
-    how: 'Each step is sequential. If ruff fails, mypy never runs. pytest receives a <code>DATABASE_URL</code> pointing to the <code>postgres:15</code> service container. Tests use real SQL, real transactions, real constraints — NOT SQLite.'
-  },
-  'security-scan-flow': {
-    title: '🔒 Security Scan — CVE + Static Analysis',
-    phase: 'QUALITY', phaseColor: '#1976d2', phaseBg: '#e3f2fd',
-    what: '<strong>pip-audit</strong> scans all installed packages against the PyPI Advisory Database for known CVEs. <strong>bandit</strong> runs static analysis catching security anti-patterns: SQL injection via string formatting, hardcoded passwords, shell injection risks.',
-    how: '<code>pip-audit</code> exits non-zero if any CVE above severity threshold is found. <code>bandit -r . -x ./tests</code> excludes test files. Both run as required steps — a critical CVE fails the build before any Docker image is built.'
-  },
-  'build-image': {
-    title: '🐳 Build Image — Docker Multi-stage',
-    phase: 'BUILD', phaseColor: '#8e44ad', phaseBg: '#f3e5f5',
-    what: 'This step <strong>only runs if all test jobs passed</strong> (enforced by <code>needs: [test]</code>). Docker builds the production image using a multi-stage Dockerfile: a builder stage compiles C extensions (psycopg2, cryptography); the runtime stage is a slim Python image with only compiled artifacts — no gcc in production.',
-    how: '<code>docker build -t $IMAGE .</code> The multi-stage approach keeps the final image small and secure. The <code>needs: [test]</code> dependency is the pipeline\'s safety lock — test failure = this step skipped entirely = no bad code ever becomes an image.'
-  },
-  'tag-push': {
-    title: '🏷️ Tag + Push — SHA Tag → ECR',
-    phase: 'BUILD', phaseColor: '#8e44ad', phaseBg: '#f3e5f5',
-    what: 'The image is tagged with the exact Git SHA (e.g. <code>:abc1234f</code>) and pushed to Amazon ECR. This SHA tag is the key to instant rollback — any future rollback is just "re-point ECS at the previous SHA\'s image."',
-    how: '<code>IMAGE="$ECR_REGISTRY/$REPO:${{ github.sha }}"</code>. OIDC credentials authenticate to ECR — no long-lived AWS keys stored anywhere. ECR stores every image as a rollback point. Also tags <code>:latest</code> for convenience, but SHA is what rollback uses.'
-  },
-  'run-migration-flow': {
-    title: '🗄️ Run Migrations — BEFORE Traffic Shifts',
-    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
-    what: 'Before any new app code handles traffic, the database schema is updated. Migrations run as a one-off ECS task: it runs <code>manage.py migrate</code>, then exits. Only after success does the rolling deploy start.',
-    how: '<code>aws ecs run-task --overrides run manage.py migrate</code>. The deploy script waits for task completion. All migrations must be <strong>backward compatible</strong> — old containers keep running during the rolling deploy and must work with the new schema.'
-  },
-  'rolling-deploy': {
-    title: '🔄 Rolling Deploy — Zero-Downtime Switch',
-    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
-    what: 'ECS replaces old tasks with new tasks one-by-one. At no point does service drop below its minimum healthy task count. Old tasks keep serving traffic while new tasks warm up and pass health checks.',
-    how: '<code>minimumHealthyPercent=100, maximumPercent=200</code>. For each new task: ECS starts it → /health/ must return 200 → ALB routes traffic to it → old task drains → old task killed. During this window, old AND new code run simultaneously — exactly why migrations must be backward compatible.'
-  },
-  'health-check-flow': {
-    title: '❤️ Health Check — Gate Before Receiving Traffic',
-    phase: 'DEPLOY', phaseColor: '#e65100', phaseBg: '#fff3e0',
-    what: 'Every new ECS task must pass the ALB health check before receiving production traffic. The <code>/health/</code> endpoint verifies: HTTP 200, database connectivity (<code>SELECT 1</code>), cache connectivity (Redis PING), all within 5 seconds.',
-    how: 'ALB polls <code>/health/</code> every 10s. 200 = healthy = starts receiving traffic. 503 = ECS marks task unhealthy, stops the rolling deploy, can auto-rollback to the previous task definition before more users are affected.'
-  },
-  'user-sees': {
-    title: '👤 User Sees the Change — Zero Downtime',
-    phase: 'LIVE 🎉', phaseColor: '#27ae60', phaseBg: '#e8f5e9',
-    what: 'The new version is live. Users experience the change with zero downtime — no maintenance window, no 503 errors, no dropped connections. The entire journey from <code>git push</code> to live typically takes 5–15 minutes.',
-    how: 'ALB routes 100% of traffic to the new tasks once rolling deploy completes. Old tasks have been drained and terminated. ECR still holds the previous SHA image for instant rollback (~90 seconds) if anything goes wrong post-deploy.'
-  }
+const pipelineSteps = {
+  'developer': { g:'local', title:'👨‍💻 Developer — Writes Code Locally',
+    what: "A developer builds a feature on their own machine — a new Django view, endpoint, or model change — running a local dev server against a local Postgres to sanity-check it before it ever leaves the laptop.",
+    how: "Work lives on a <strong>feature branch</strong> (e.g. <code>feature/add-payment</code>), never straight on <code>main</code>. Git tracks every change so it can be reviewed and reverted.",
+    focus: "Interviewers want to hear <strong>feature-branch workflow</strong>, not committing to main. That one word signals you've worked on a real team." },
+
+  'git-commit': { g:'local', title:'📝 git commit — Save an Immutable Checkpoint',
+    what: "The developer snapshots their work into an <strong>immutable commit</strong> with a unique SHA (e.g. <code>abc1234f</code>). That SHA is the fingerprint that follows this exact code all the way to production.",
+    how: "<code>git add . && git commit -m 'feat: add payment endpoint'</code>. Small, atomic commits make <code>git bisect</code> and rollback surgical.",
+    focus: "Tie the commit SHA to <strong>rollback</strong>: 'the same SHA tags the Docker image, so rollback is just re-deploying a known SHA.' That connection is the senior signal." },
+
+  'git-push': { g:'local', title:'⬆️ git push — Code Leaves the Laptop',
+    what: "Code leaves the laptop and lands on GitHub. This is the handoff from human to the automated system.",
+    how: "<code>git push origin feature/my-branch</code>. GitHub stores the commits and — critically — <strong>fires a webhook</strong> to GitHub Actions.",
+    focus: "The subtle point that impresses: <strong>the push itself runs nothing</strong>. A webhook event is what triggers the pipeline — cause and effect, not magic." },
+
+  'github-pr': { g:'trig', title:'🐙 Open PR — The Quality Gate Opens',
+    what: "The developer opens a Pull Request to merge the feature branch into <code>main</code>. GitHub fires a <code>pull_request</code> webhook to the Actions runners immediately.",
+    how: "The workflow's <code>on: pull_request</code> trigger matches. With <strong>Required status checks</strong> on <code>main</code>, the PR physically <strong>cannot merge</strong> until CI is green — no bypass without admin override.",
+    focus: "Say <strong>'required status checks'</strong> — that's the mechanism that turns CI from a suggestion into an enforced gate.",
+    code: "on:\n  push:\n    branches: [main]\n  pull_request:\n    branches: [main]" },
+
+  'ci-trigger': { g:'trig', title:'⚡ CI Runner — A Fresh, Clean VM Boots',
+    what: "GitHub Actions provisions a <strong>fresh ubuntu-latest VM</strong> (the 'runner'). It is completely clean — zero leftover state from any previous run.",
+    how: "The runner is allocated in seconds. Each job runs on its own isolated VM, in parallel. Clean state = reproducible builds = kills 'works on my machine' bugs.",
+    focus: "Emphasize <strong>ephemeral, clean VM</strong>. Reproducibility is why CI catches bugs your laptop hides.",
+    code: "jobs:\n  test:\n    runs-on: ubuntu-latest   # fresh, disposable VM every run" },
+
+  'checkout': { g:'setup', title:'📥 Step 1 · Checkout — Clone the Repo onto the Runner',
+    what: "GitHub Actions clones your repository onto the clean runner VM using <code>actions/checkout@v4</code>.",
+    how: "Because the VM starts empty, checkout is what puts your code there. <code>fetch-depth: 0</code> pulls full git history when tools (changelogs, tagging) need it.",
+    focus: "Small, but know the action name — <code>actions/checkout@v4</code>. Pinning to <code>@v4</code> (not a floating tag) is the detail interviewers probe.",
+    code: "- uses: actions/checkout@v4\n  with:\n    fetch-depth: 0   # full history for git-based tools" },
+
+  'setup-python': { g:'setup', title:'🐍 Step 2 · Setup Python + Cache Dependencies',
+    what: "Installs Python and turns on <strong>pip dependency caching</strong>. The cache key is the hash of <code>requirements.txt</code> — an unchanged file means every package restores from cache.",
+    how: "Cache hit drops install from 2–4 minutes to ~20 seconds. This is the single biggest CI speed win for Python projects.",
+    focus: "The line that lands: <strong>'cache keyed on the requirements hash'</strong> — shows you understand cache invalidation, the same idea as Docker layers.",
+    code: "- uses: actions/setup-python@v5\n  with:\n    python-version: '3.12'\n    cache: 'pip'   # caches ~/.cache/pip by requirements hash" },
+
+  'install-deps': { g:'setup', title:'📦 Step 3 · Install Dependencies',
+    what: "Installs all Python packages from <code>requirements.txt</code>. With caching active, this is near-instant on a hit.",
+    how: "Note the contrast with Docker: use <code>--no-cache-dir</code> <em>in the Dockerfile</em>, but <strong>DO</strong> cache in CI — caching is a feature here, dead weight there.",
+    focus: "The Docker-vs-CI caching contrast is a great flex: same word 'cache', opposite decision, and you know exactly why.",
+    code: "- run: pip install -r requirements.txt\n\n# faster alt: pip install uv && uv pip install -r requirements.txt" },
+
+  'lint': { g:'qual', title:'🔍 Step 4 · Lint (ruff / black)',
+    what: "<code>ruff</code> catches style violations and real bugs (unused imports, undefined names, security anti-patterns). <code>black --check</code> verifies formatting without changing files.",
+    how: "Runs in seconds and <strong>fails fast</strong> — no point running slow tests if the code won't even parse cleanly. Ordered first on purpose.",
+    focus: "Frame linters as <strong>bug catchers, not style police</strong> — ruff flags undefined names and shadowing, which are actual defects.",
+    code: "- name: Lint\n  run: |\n    ruff check .\n    black --check ." },
+
+  'typecheck': { g:'qual', title:'🏷️ Step 5 · Type Check (mypy)',
+    what: "<code>mypy</code> does static type checking — catches wrong argument types, <code>None</code> where an object is expected, missing methods, before any test runs.",
+    how: "For Django, add <code>django-stubs</code> so mypy understands models and querysets. Catches a class of bugs tests often miss.",
+    focus: "Position mypy as catching bugs <strong>tests can't</strong> — a null passed three layers down that no test happens to exercise.",
+    code: "- run: mypy . --ignore-missing-imports\n\n# pyproject: plugins = mypy_django_plugin.main" },
+
+  'security-scan': { g:'qual', title:'🔐 Step 6 · Security Scan',
+    what: "<code>pip-audit</code> checks every installed package against the PyPI Advisory DB for known CVEs. <code>bandit</code> statically scans YOUR code for anti-patterns — SQL injection via string formatting, hardcoded passwords, shell injection.",
+    how: "<code>pip-audit</code> exits non-zero on a CVE above threshold. <code>bandit -r . -x ./tests</code> skips test files. A critical CVE fails the build <strong>before any image is built</strong>.",
+    focus: "Name both and say what each covers: <strong>pip-audit = your dependencies, bandit = your code</strong>. Bonus: <code>gitleaks</code> for committed secrets.",
+    code: "- run: pip-audit                 # CVE scan of your deps\n- run: bandit -r . -x ./tests     # static analysis of your code\n- run: gitleaks detect --source . --no-git" },
+
+  'django-check': { g:'qual', title:'⚙️ Step 7 · manage.py check --deploy',
+    what: "Django's built-in production-readiness audit. It fails if DEBUG=True, ALLOWED_HOSTS is empty, cookies aren't Secure, or SSL redirect / HSTS aren't set.",
+    how: "Run it with production-like settings so it evaluates the real config. One failed check fails the pipeline — this is what stops <code>DEBUG=True</code> reaching prod.",
+    focus: "This is the exact check that catches a 'DEBUG=True in production' incident. Mentioning it says you've been burned and built prevention.",
+    code: "- run: python manage.py check --deploy\n  env:\n    DJANGO_SETTINGS_MODULE: config.settings.production" },
+
+  'migration-check': { g:'qual', title:'🗄️ Step 8 · makemigrations --check --dry-run',
+    what: "Fails the build if a model changed but its migration file wasn't committed.",
+    how: "Exit code 1 means 'you changed a model without committing the migration.' It catches the #1 deploy bomb: prod explodes on startup because model state ≠ migration history.",
+    focus: "The single best 'prevention I added after an incident' line. Pair it with SHA-tag rollback — both are things you only build after getting burned.",
+    code: "- run: python manage.py makemigrations --check --dry-run\n# exit 1 = a model changed but no migration was committed" },
+
+  'pg-service': { g:'test', title:'🐘 Step 9 · Spin Up PostgreSQL Service Container',
+    what: "GitHub Actions spins up a <strong>real PostgreSQL container</strong> next to the test runner. Not a mock — a real DB — because SQLite and Postgres differ on JSON fields, transactions, and date math.",
+    how: "Pin the version: <code>postgres:15</code>, never <code>:latest</code>, so a Postgres release can't silently break CI between two runs of the same commit.",
+    focus: "The killer line: <strong>'we test against real Postgres, not SQLite'</strong> — plus <em>why</em>: different engines guarantee eventual prod-only bugs.",
+    code: "services:\n  postgres:\n    image: postgres:15        # PINNED — never :latest\n    env:\n      POSTGRES_DB: testdb\n      POSTGRES_USER: testuser\n      POSTGRES_PASSWORD: testpass\n    ports: ['5432:5432']" },
+
+  'pg-health': { g:'test', title:'❤️ Step 10 · Wait for pg_isready',
+    what: "The Postgres container boots but takes 5–10s to accept connections. A health check makes the runner <strong>wait</strong> until it's actually ready.",
+    how: "<code>--health-cmd pg_isready</code> polls every 10s; the runner blocks here until it passes. Skip this and tests start too early → 'Connection Refused' → CI fails for the wrong reason.",
+    focus: "Mentioning the health check unprompted shows you've hit the race condition — the difference between 'I copied a template' and 'I debugged this.'",
+    code: "options: >-\n  --health-cmd pg_isready\n  --health-interval 10s\n  --health-timeout 5s\n  --health-retries 5" },
+
+  'pytest': { g:'test', title:'🧪 Step 11 · pytest vs Real PostgreSQL',
+    what: "Runs the full suite against the real Postgres service. <code>DATABASE_URL</code> points at the service container; <code>--tb=short</code> keeps failures readable.",
+    how: "For big suites, <code>pytest-xdist</code> with <code>-n auto</code> parallelizes across CPU cores. A dedicated test settings module keeps prod config out.",
+    focus: "If asked to speed up CI: <strong>cache deps + parallelize with xdist</strong>. Two concrete levers beat 'buy a bigger runner.'",
+    code: "- run: pytest --tb=short -q\n  env:\n    DATABASE_URL: postgres://testuser:testpass@localhost:5432/testdb\n    DJANGO_SETTINGS_MODULE: config.settings.test" },
+
+  'docker-build': { g:'build', title:'🐳 Step 12 · Docker Build (multi-stage)',
+    what: "Builds the production image with a <strong>multi-stage</strong> Dockerfile: a builder stage compiles C extensions, the runtime stage keeps only the compiled artifacts — no gcc in prod.",
+    how: "This step <strong>only runs if every test job passed</strong>, enforced by <code>needs: [test]</code>. Multi-stage keeps the image ~85MB and the attack surface tiny.",
+    focus: "Connect to the Docker page: multi-stage = build in the workshop, ship only the chair. <code>needs: [test]</code> is the safety lock — no green tests, no image.",
+    code: "# runs ONLY after every test job passes (needs: [test])\ndocker build -t $IMAGE ." },
+
+  'tag-sha': { g:'build', title:'🏷️ Step 13 · Tag with the Git SHA',
+    what: "Tags the image with the exact <strong>Git SHA</strong> (e.g. <code>:abc1234f</code>). This is the key to zero-regret rollback.",
+    how: "Any future rollback = 'point ECS at the previous SHA's image.' No rebuild, no CI re-run. Also tag <code>:latest</code> for convenience, but SHA is what rollback uses.",
+    focus: "SHA tagging IS your rollback story: 'rollback is re-deploying a previous SHA in ~90 seconds, never a git-revert-and-rebuild.'",
+    code: "IMAGE=\"$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}\"\ndocker build -t $IMAGE -t $ECR_REGISTRY/$ECR_REPO:latest .\ndocker push $IMAGE" },
+
+  'push-ecr': { g:'build', title:'☁️ Step 14 · Push to ECR',
+    what: "Pushes the tagged image to Amazon ECR — a private registry only your ECS service can pull from, via its IAM role.",
+    how: "Every SHA becomes a durable rollback point. A lifecycle policy keeps, say, the last 10 images so ECR doesn't grow forever.",
+    focus: "Know the alternatives (Docker Hub, GHCR, GCR, ACR) and why ECR: native to ECS + IAM, so auth is just a role — no stored registry password.",
+    code: "- uses: aws-actions/amazon-ecr-login@v2\n- run: docker push $IMAGE" },
+
+  'run-migration': { g:'deploy', title:'🗄️ Step 15 · Run Migrations BEFORE New Code',
+    what: "Before any new code serves traffic, the schema is migrated. Migrations run as a <strong>one-off ECS task</strong>: it runs <code>manage.py migrate</code>, then exits. Only on success does the rollout start.",
+    how: "Migrations must be <strong>backward compatible</strong> — old containers keep running during the rolling deploy and must still work against the new schema. Never run migrations in the app entrypoint.",
+    focus: "The ordering rule is the whole answer: <strong>migrate BEFORE new code, and make it backward-compatible</strong> (expand-contract). This is the zero-downtime crux.",
+    code: "aws ecs run-task --cluster production \\\n  --task-definition migrate-task \\\n  --overrides '{\"containerOverrides\":[{\"name\":\"app\",\"command\":[\"python\",\"manage.py\",\"migrate\",\"--noinput\"]}]}'" },
+
+  'rolling-update': { g:'deploy', title:'🔄 Step 16 · Rolling Update ECS Service',
+    what: "ECS replaces old tasks with new ones a batch at a time, never dropping below the minimum healthy count. Old tasks keep serving while new tasks warm up.",
+    how: "<code>minimumHealthyPercent=100, maximumPercent=200</code>. Per task: start → pass /health/ → ALB routes to it → old task drains → old task killed. During the window, old AND new code run at once.",
+    focus: "'Old and new run simultaneously' is <em>why</em> migrations must be backward-compatible. Linking those two shows real understanding, not memorization.",
+    code: "aws ecs update-service --cluster production \\\n  --service my-django-service \\\n  --task-definition my-django-service:42 \\\n  --deployment-configuration \"minimumHealthyPercent=100,maximumPercent=200\"" },
+
+  'health-check': { g:'deploy', title:'❤️ Step 17 · Health Check at /health/',
+    what: "Every new task must pass the ALB health check at <code>/health/</code> before receiving traffic: HTTP 200, DB reachable (<code>SELECT 1</code>), cache reachable (Redis PING), within ~5s.",
+    how: "ALB polls every 10s. 200 = healthy = gets traffic. 503 = ECS kills the task and can <strong>auto-rollback</strong> to the previous task definition before users are affected.",
+    focus: "A real health check tests <strong>dependencies</strong> (DB, cache), not just 'returns 200'. That distinction is what makes auto-rollback trustworthy.",
+    code: "def health(request):\n    try:\n        connection.ensure_connection()\n        cache.set('health', 'ok', 10)\n    except Exception as e:\n        return JsonResponse({'status':'unhealthy','error':str(e)}, status=503)\n    return JsonResponse({'status':'ok'})" },
+
+  'drain-old': { g:'deploy', title:'🗑️ Step 18 · Drain + Kill Old Tasks',
+    what: "Once new tasks are healthy and serving, the old tasks are <strong>drained</strong> — ALB stops sending them NEW connections but lets in-flight requests finish (typically 30–60s), then terminates them.",
+    how: "Controlled by the target group's <code>deregistration_delay</code>. This is what makes deploys invisible: no user mid-request gets a connection reset.",
+    focus: "'Connection draining / deregistration delay' is the term. It's why zero-downtime means zero <em>dropped requests</em>, not just zero seconds of downtime.",
+    code: "# target group setting\nderegistration_delay = 30   # seconds to let in-flight requests finish" },
+
+  'notify': { g:'deploy', title:'📢 Step 19 · Notify Slack / Email',
+    what: "On success (or failure), the pipeline notifies Slack / email / PagerDuty: which SHA deployed, which environment, a link, and how long it took.",
+    how: "<code>if: always()</code> makes it run even when a prior step failed. On failure it should alert on-call with a direct link to the failing step and the rollback command.",
+    focus: "<code>if: always()</code> is the detail — a naive pipeline only notifies on success and stays silent exactly when you need the alert most.",
+    code: "- name: Notify Slack\n  if: always()   # runs even on failure\n  uses: slackapi/slack-github-action@v1\n  env:\n    SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}" },
+
+  'alb-route': { g:'live', title:'🔀 ALB Routes 100% Traffic to New Tasks',
+    what: "With all new tasks healthy and old ones drained, the Application Load Balancer now routes <strong>100% of traffic</strong> to the new version.",
+    how: "There's no flip-the-switch moment for users — traffic shifted gradually as each new task passed its health check. The change is already live by the time the last old task dies.",
+    focus: "Zero downtime isn't one atomic switch — it's <strong>gradual, health-gated shifting</strong>. That's the mental model to convey." },
+
+  'user-sees': { g:'live', title:'👤 User Sees the Change — Zero Downtime',
+    what: "The new version is fully live. Users experience the change with <strong>zero downtime</strong> — no maintenance window, no 503s, no dropped connections. End to end, <code>git push</code> → live is typically 5–15 minutes.",
+    how: "ECR still holds the previous SHA image, so if anything looks wrong post-deploy, rollback is ~90 seconds — re-deploy the old SHA. Old tasks are already gone.",
+    focus: "Close the loop: 'and if it misbehaves in prod, the previous SHA is one 90-second deploy away.' A great answer <em>ends</em> on the rollback safety net." },
 };
 
-function showFlowDetail(key, nodeEl) {
-  const data = flowNodeData[key];
-  if (!data) return;
+function showStep(key, nodeEl) {
+  const d = pipelineSteps[key];
+  if (!d) return;
+  const ph = P[d.g];
   document.querySelectorAll('.phase-node').forEach(n => n.classList.remove('active-node'));
   if (nodeEl) nodeEl.classList.add('active-node');
   const panel = document.getElementById('flow-node-detail');
-  panel.style.setProperty('--fdp-color', data.phaseColor);
-  panel.style.setProperty('--fdp-bg', data.phaseBg);
-  panel.innerHTML = `
-    <div class="fdp-header" style="background:${data.phaseColor};">
-      <span class="fdp-phase-badge">${data.phase}</span>
-      <span class="fdp-title">${data.title}</span>
-    </div>
-    <div class="fdp-body">
-      <div class="fdp-section">
-        <h5>🔍 What happens</h5>
-        <p>${data.what}</p>
-      </div>
-      <div class="fdp-section">
-        <h5>⚙️ How it works</h5>
-        <p>${data.how}</p>
-      </div>
-    </div>
-  `;
+  panel.style.setProperty('--fdp-color', ph.color);
+  panel.style.setProperty('--fdp-bg', ph.bg);
+  panel.innerHTML =
+    '<div class="fdp-header" style="background:' + ph.color + ';">' +
+      '<span class="fdp-phase-badge">' + ph.phase + '</span>' +
+      '<span class="fdp-title">' + d.title + '</span>' +
+    '</div>' +
+    '<div class="fdp-body">' +
+      '<div class="fdp-section"><h5>🔍 What happens</h5><p>' + d.what + '</p></div>' +
+      '<div class="fdp-section"><h5>⚙️ How it works</h5><p>' + d.how + '</p></div>' +
+      '<div class="fdp-focus">🎯 <strong>Focus in the interview:</strong> ' + d.focus + '</div>' +
+      (d.code ? '<div class="fdp-code">' + d.code + '</div>' : '') +
+    '</div>';
   panel.classList.add('visible');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-}
-
-function showDetail(key) {
-  const panel = document.getElementById('step-detail-panel');
-  const data = stepDetails[key];
-  if (!data) return;
-  panel.innerHTML = `
-    <h4>${data.title}</h4>
-    <p>${data.body.replace(/\n/g, '<br>')}</p>
-    ${data.code ? `<code>${data.code}</code>` : ''}
-  `;
-  panel.classList.add('active');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -1659,13 +1608,6 @@ function toggleQA(header) {
   const isOpen = body.classList.contains('open');
   body.classList.toggle('open', !isOpen);
   toggle.classList.toggle('rotated', !isOpen);
-}
-function jumpToPhase(id) {
-  const el = document.getElementById('phase-' + id);
-  if (!el) return;
-  el.scrollIntoView({behavior:'smooth', block:'center'});
-  el.classList.add('phase-highlighted');
-  setTimeout(() => el.classList.remove('phase-highlighted'), 2000);
 }
 function toggleRSidebar() {
   document.getElementById('rsidebar').classList.toggle('open');
@@ -1689,11 +1631,11 @@ document.addEventListener('click', function(e) {
     <div class="rsidebar-group-title">📐 Visual Concepts</div>
     <a href="#part1">🔑 CI vs CD (Delivery) vs CD (Deploy)</a>
     <a href="#part2">🏗️ Full Pipeline — Clickable Flow</a>
-    <a href="#part2" onclick="showFlowDetail('git-push', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#e9ecef;color:#495057;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">LOCAL</span> Dev → git push</a>
-    <a href="#part2" onclick="showFlowDetail('ci-trigger', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#fee2e2;color:#c0392b;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">TRIGGER</span> PR → CI Runner</a>
-    <a href="#part2" onclick="showFlowDetail('lint-test', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#dbeafe;color:#1565c0;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">QUALITY</span> Lint, Test, Scan</a>
-    <a href="#part2" onclick="showFlowDetail('build-image', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#f3e8ff;color:#6a1b9a;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">BUILD</span> Docker → ECR</a>
-    <a href="#part2" onclick="showFlowDetail('rolling-deploy', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#ffe0b2;color:#bf360c;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">DEPLOY</span> Migrate → Health</a>
+    <a href="#part2" onclick="showStep('git-push', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#e9ecef;color:#495057;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">LOCAL</span> Dev → git push</a>
+    <a href="#part2" onclick="showStep('ci-trigger', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#fee2e2;color:#c0392b;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">TRIGGER</span> PR → CI Runner</a>
+    <a href="#part2" onclick="showStep('pytest', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#dbeafe;color:#1565c0;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">QUALITY</span> Lint, Test, Scan</a>
+    <a href="#part2" onclick="showStep('docker-build', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#f3e8ff;color:#6a1b9a;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">BUILD</span> Docker → ECR</a>
+    <a href="#part2" onclick="showStep('rolling-update', null)" style="padding-left:28px; font-size:0.78rem; color:#888;">↳ <span style="background:#ffe0b2;color:#bf360c;border-radius:3px;padding:1px 5px;font-size:0.65rem;font-weight:800;">DEPLOY</span> Migrate → Health</a>
     <a href="#part3">📄 GitHub Actions YAML Annotated</a>
     <a href="#part4">🎯 All Interview Q&amp;A</a>
   </div>
