@@ -136,6 +136,7 @@
     <a href="#monolith">Monolith — The Pizza Shop</a>
     <a href="#microservices">Microservices Architecture</a>
     <a href="#when-to-use">When to USE Microservices</a>
+    <a href="#conway">Conway's Law</a>
     <a href="#when-not">When NOT to Use</a>
     <a href="#api-gateway">API Gateway &amp; BFF</a>
     <a href="#db-per-service">Database Per Service</a>
@@ -181,42 +182,270 @@
     <h2 id="monolith">🍕 Monolith — "The Single Chef Pizza Shop"</h2>
 
     <div class="callout callout-yellow">
-        <span class="callout-emoji">💡</span>
+        <span class="callout-emoji">🍕</span>
         <div class="callout-content">
-            <p><strong>The Story:</strong> Imagine a small pizza shop with one chef who does everything: knead dough, spread sauce, add toppings, bake, cut, deliver. With 5 orders/day → perfect. With 500 orders/day → chaos.</p>
-            <p>One problem in any step → ALL steps blocked. Want to upgrade the oven (one part)? Shut down the entire restaurant.</p>
-            <p><span class="key-phrase">This is monolith. Perfect at small scale. Reveals weakness at scale.</span></p>
+            <p><strong>Câu chuyện:</strong> Một quán pizza. <strong>MỘT ông đầu bếp.</strong> Ổng làm HẾT: nhồi bột → phết sốt → rắc topping → nướng → cắt → giao.</p>
+            <p><strong>5 đơn/ngày</strong> → ngon lành. 😌 &nbsp;·&nbsp; <strong>500 đơn/ngày</strong> → loạn cào cào. 😱</p>
+            <p>🔥 <strong>Lò nướng hư</strong> → ông Ba đứng khựng → <em>KHÔNG đơn nào chạy nữa</em>, kể cả đơn mới chỉ cần nhồi bột.<br>
+               🔧 <strong>Muốn thay cái lò xịn hơn</strong> → phải <em>đóng cửa CẢ QUÁN</em>.</p>
+            <p><span class="key-phrase">Monolith = tất cả code nằm trong MỘT chương trình, chạy MỘT process. Nhỏ thì hoàn hảo. To thì lòi điểm yếu.</span></p>
         </div>
     </div>
 
-    <h3>💪 Strengths of Monolith — Don't Forget These!</h3>
-    <div class="callout callout-green">
-        <span class="callout-emoji">✅</span>
+    <h3>💪 Điểm mạnh của Monolith — ĐỪNG QUÊN, đây là cái bẫy phỏng vấn</h3>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">⚠️</span>
         <div class="callout-content">
-            <p><strong>Interviewers bait candidates who only say negatives about monolith:</strong></p>
-            <ul>
-                <li>Simple local function calls — no network overhead (nanoseconds vs milliseconds)</li>
-                <li>ACID transactions across ALL modules trivially</li>
-                <li>Easy to debug — one process, one log stream</li>
-                <li>Simple deployment — one artifact, one CI/CD pipeline</li>
-                <li>No distributed systems complexity</li>
-            </ul>
+            <p><strong>Interviewer CỐ TÌNH dụ anh nói xấu monolith.</strong> Ai chỉ biết chê monolith = người chưa từng đau vì microservices. <strong>Rớt.</strong></p>
         </div>
     </div>
 
-    <h3>❌ When Monolith Breaks Down</h3>
+    <p>Vì ông Ba làm <strong>một mình</strong>, ổng có 5 siêu năng lực:</p>
+
     <div class="table-wrap">
         <table>
-            <tr><th>Problem</th><th>What Happens</th></tr>
-            <tr><td>50+ engineers, one codebase</td><td>Merge conflicts, deployment bottlenecks every Friday</td></tr>
-            <tr><td>One module needs 10x resources</td><td>Must scale ENTIRE app — wasteful and expensive</td></tr>
-            <tr><td>Payment team wants to deploy 2am</td><td>Requires redeploying whole app — high risk</td></tr>
-            <tr><td>Buggy Search deploy</td><td>Crashes Payment service too — same process</td></tr>
+            <tr><th>Điểm mạnh</th><th>Nghĩa là gì (đời thường)</th></tr>
+            <tr>
+                <td>🏃 <strong>Local function call</strong><br><span class="tag tag-green">nanosecond</span></td>
+                <td>Ông Ba tự nói với chính mình. Microservices phải <strong>gọi điện thoại qua network</strong> → chậm gấp <strong>cả triệu lần</strong> (ns → ms).</td>
+            </tr>
+            <tr>
+                <td>🔒 <strong>ACID transaction dễ ợt</strong></td>
+                <td>Trừ kho + tạo đơn + trừ tiền → <strong>một phát ăn cả, một phát rollback hết</strong>. Vì cùng 1 database.</td>
+            </tr>
+            <tr>
+                <td>🐛 <strong>Debug dễ</strong></td>
+                <td>Một process, một dòng log. Lỗi ở đâu → nhìn stack trace là ra.</td>
+            </tr>
+            <tr>
+                <td>🚀 <strong>Deploy dễ</strong></td>
+                <td>Một artifact, một CI/CD pipeline. Xong.</td>
+            </tr>
+            <tr>
+                <td>😌 <strong>Không có distributed hell</strong></td>
+                <td>Không service discovery, không retry, không circuit breaker, không trace ID.</td>
+            </tr>
         </table>
     </div>
 
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "Monolith isn't wrong — it's the right <em>default</em>. You move off it when the pain of the <em>organization</em> outgrows the pain of <em>distribution</em>."
+    </div>
+
+    <!-- ═══════════ GIẢI NGHĨA CÁC THUẬT NGỮ ═══════════ -->
+    <h3>📖 Mở hộp 4 thuật ngữ trước khi đi tiếp</h3>
+
+    <details>
+        <summary>🔒 ACID transaction là gì? — ví dụ chuyển 100k</summary>
+        <div class="toggle-content">
+            <p>Anh chuyển <strong>100k</strong> cho Neriah. Máy phải làm 2 việc:</p>
+            <pre><code>① Trừ ví anh:      500k → 400k
+② Cộng ví Neriah:  200k → 300k</code></pre>
+            <p><strong>Transaction = cái bọc quanh ① và ②</strong>, để 4 tai nạn sau KHÔNG xảy ra. Mỗi chữ cái = một tai nạn bị chặn:</p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Chữ</th><th>😱 Tai nạn</th><th>✅ ACID chặn thế nào</th></tr>
+                    <tr>
+                        <td><strong>A</strong>tomicity<br><span class="tag tag-red">mất nửa chừng</span></td>
+                        <td>Làm xong ① thì server sập. <strong>100k bốc hơi.</strong></td>
+                        <td><strong>Hủy sạch ①</strong>, ví anh về 500k. <em>Làm hết, hoặc không làm gì.</em></td>
+                    </tr>
+                    <tr>
+                        <td><strong>C</strong>onsistency<br><span class="tag tag-orange">sai luật</span></td>
+                        <td>Ví anh chỉ có 50k mà vẫn trừ được → ví <strong>âm −50k</strong>.</td>
+                        <td>Chặn ngay. Luật "ví không được âm" luôn đúng, trước và sau.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>I</strong>solation<br><span class="tag tag-purple">hai người cùng lúc</span></td>
+                        <td>Anh chuyển 100k, <strong>cùng lúc</strong> vợ rút 450k. Hai bên cùng đọc "còn 500k" → cùng thấy đủ → <strong>rút ra 550k từ ví 500k</strong>.</td>
+                        <td>Bắt xếp hàng. Người sau thấy số <strong>đã cập nhật</strong>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>D</strong>urability<br><span class="tag tag-blue">mất điện</span></td>
+                        <td>Máy báo "thành công" ✅, 1 giây sau <strong>mất điện</strong> → giao dịch biến mất.</td>
+                        <td>Đã báo thành công = <strong>đã khắc vào đĩa</strong>. Bật lại vẫn còn.</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="callout callout-red">
+                <span class="callout-emoji">💥</span>
+                <div class="callout-content">
+                    <p><strong>Chỗ dính tới Monolith:</strong> ví anh + ví Neriah <strong>cùng 1 database</strong> → Postgres tự lo cả 4 chữ. Anh viết <code>with transaction.atomic():</code> là xong.</p>
+                    <p>Tách microservices: ví anh ở <strong>DB của Service A</strong>, ví Neriah ở <strong>DB của Service B</strong>. Server sập sau bước ①? → <strong>Postgres của B không biết A tồn tại. Không ai undo giùm.</strong></p>
+                    <p><span class="key-phrase">ACID chỉ MIỄN PHÍ bên trong MỘT database. Chia DB ra là mất — phải tự code lại (Saga pattern).</span></p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>😈 "Distributed hell" là gì?</summary>
+        <div class="toggle-content">
+            <p><strong>Distributed = code chạy trên NHIỀU MÁY, nói chuyện qua mạng.</strong></p>
+            <pre><code># Monolith — gọi hàm. LUÔN chạy. 0.000001 giây.
+result = payment.charge(100)
+
+# Microservices — gọi qua MẠNG.
+result = requests.post("http://payment-service/charge")</code></pre>
+            <p>Nhìn giống nhau. Nhưng dòng dưới có thể:</p>
+            <ul>
+                <li>Payment <strong>đang chết</strong> (máy sập, đang deploy)</li>
+                <li>Payment <strong>đang bận</strong> — 5 giây chưa trả lời</li>
+                <li><strong>Mạng rớt</strong> — gói tin bay mất</li>
+                <li>💀 <strong>Payment trả lời rồi nhưng anh không nhận được</strong> → tiền ĐÃ trừ, anh tưởng thất bại → <strong>trừ lần 2</strong></li>
+            </ul>
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">🔥</span>
+                <div class="callout-content">
+                    <p><span class="key-phrase">"Địa ngục phân tán" = khi anh gọi một hàm, anh không còn biết chắc nó có chạy hay không.</span></p>
+                    <p>Cái dòng cuối (💀) <strong>không tồn tại trong monolith</strong>. Để sống sót, anh phải xây cả một bộ đồ nghề: service discovery, retry, circuit breaker, trace ID, idempotency key...</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <details>
+        <summary>🧭 Service Discovery — "làm sao tìm được số điện thoại của Payment?"</summary>
+        <div class="toggle-content">
+            <p><strong>Monolith:</strong> Payment nằm ngay trong nhà. <code>import payment</code>. Xong.</p>
+            <p><strong>Microservices:</strong> Payment nằm ở máy nào? IP gì?</p>
+            <pre><code>Hôm nay:  Payment ở  10.0.3.17
+          (server chết, hệ thống tự sinh máy mới)
+Ngày mai: Payment ở  10.0.9.42     ← IP ĐỔI RỒI</code></pre>
+            <p>❌ Hardcode IP vào code → mai chết.</p>
+            <p>✅ <strong>Service Discovery = quyển danh bạ tự cập nhật.</strong></p>
+            <pre><code>Search:   "Cho tôi số của Payment"
+Danh bạ:  "10.0.9.42, và 10.0.9.43 nữa — cả hai đều sống"</code></pre>
+            <p>Mỗi service khi khởi động thì <strong>tự đăng ký tên + IP</strong> vào danh bạ. Chết thì bị <strong>xóa tên</strong>.</p>
+            <p><em>Thực tế:</em> <span class="tag tag-gray">Kubernetes DNS</span> <span class="tag tag-gray">Consul</span> <span class="tag tag-gray">AWS Cloud Map</span></p>
+            <p>💡 Nó tồn tại vì <strong>địa chỉ trong hệ phân tán luôn thay đổi.</strong></p>
+        </div>
+    </details>
+
+    <details>
+        <summary>⚡ Circuit Breaker — "cầu dao điện"</summary>
+        <div class="toggle-content">
+            <p><strong>Cầu dao trong nhà anh làm gì?</strong> Điện chập → tự NGẮT. Không phải để phá anh — mà để <strong>cháy 1 ổ cắm, đừng cháy cả nhà.</strong></p>
+            <p><strong>😱 Nếu KHÔNG có cầu dao:</strong> Payment chết. Search vẫn cứ gọi Payment.</p>
+            <pre><code>Search gọi Payment  →  chờ 30 giây  →  timeout  →  lỗi
+Search gọi Payment  →  chờ 30 giây  →  timeout  →  lỗi
+        ...×1000 request đang treo...
+
+Mỗi request đang chờ = 1 thread của Search bị treo.
+Thread cạn  →  SEARCH CHẾT LUÔN.  💀
+Rồi ai gọi Search cũng treo  →  chết dây chuyền (cascading failure)</code></pre>
+            <p><strong>✅ Circuit Breaker — 3 trạng thái:</strong></p>
+            <pre><code>🟢 CLOSED      → cho gọi bình thường. Đếm lỗi.
+                    ↓ (5 lỗi liên tiếp)
+🔴 OPEN        → CẮT. Không gọi nữa. Fail NGAY (0 giây, không chờ 30s)
+                    ↓ (sau 30 giây, thử lại)
+🟡 HALF-OPEN   → cho 1 request đi thử.  OK → về 🟢  ·  Lỗi → về 🔴</code></pre>
+            <div class="callout callout-green">
+                <span class="callout-emoji">🔑</span>
+                <div class="callout-content">
+                    <p><span class="key-phrase">Ý tưởng cốt lõi: thà FAIL NHANH còn hơn CHỜ CHẾT.</span></p>
+                    <p>Payment chết → Search trả ngay "Payment tạm ngưng" — và <strong>Search vẫn sống</strong>. Đây chính là <strong>fault isolation dựng thủ công qua network</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══════════ KHI MONOLITH GÃY ═══════════ -->
+    <h3>❌ Khi Monolith gãy — hiểu CƠ CHẾ, đừng học thuộc</h3>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th style="width:30%">Vấn đề</th><th>Chuyện gì xảy ra</th></tr>
+            <tr><td>1️⃣ 50+ kỹ sư, một codebase</td><td>Merge conflict, kẹt deploy mỗi thứ Sáu</td></tr>
+            <tr><td>2️⃣ Một module cần gấp 10 tài nguyên</td><td>Phải scale CẢ APP — vô ích, tốn tiền</td></tr>
+            <tr><td>3️⃣ Team Payment muốn deploy lúc 2h sáng</td><td>Phải deploy lại toàn bộ app — rủi ro cao</td></tr>
+            <tr><td>4️⃣ Search deploy có bug</td><td>Payment <strong>chết theo</strong> — cùng một process</td></tr>
+        </table>
+    </div>
+
+    <h4>1️⃣ 50 kỹ sư, một codebase</h4>
+    <p>50 người <strong>sửa chung một quyển sổ</strong>. Ai cũng phải chờ ai. Muốn ra bản mới → phải gom hết 50 người xong việc đã. → <strong>Deploy chậm, rủi ro dồn cục.</strong></p>
+
+    <h4>2️⃣ Một module cần 10× tài nguyên → phải nhân bản CẢ APP</h4>
+    <p><strong>Trước hết, "scale" nghĩa là gì?</strong> Search quá tải = CPU 100%, user chờ 10 giây. Giải pháp duy nhất: chạy <strong>nhiều bản sao</strong> để chia tải.</p>
+    <p><strong>Nhưng cái gì được nhân bản?</strong> Đây là chỗ hay vướng. 🎯</p>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Đơn vị nhỏ nhất mà anh có thể nhân bản là MỘT PROCESS.</strong> Không phải "một class", không phải "một function".</p>
+        </div>
+    </div>
+    <p>Trong monolith, Search / Payment / Email <strong>KHÔNG phải 3 chương trình</strong>. Chúng là <strong>3 thư mục trong CÙNG MỘT chương trình</strong>:</p>
+    <pre><code>            ONE PROCESS (một app đang chạy)
+    ┌────────────────────────────────────────┐
+    │  📂 search/    📂 payment/   📂 email/  │
+    └────────────────────────────────────────┘</code></pre>
+    <p>Nên khi anh gõ lệnh "chạy thêm 9 bản", <strong>hệ điều hành không hiểu "9 bản Search"</strong> — nó chỉ biết chạy thêm 9 bản của <em>cái chương trình đó</em>:</p>
+    <pre><code>Bản 1:  [search][payment][email]   ← search bận 100%, payment ngồi chơi
+Bản 2:  [search][payment][email]   ← search bận 100%, payment ngồi chơi
+  ...
+Bản 10: [search][payment][email]   ← search bận 100%, payment ngồi chơi
+
+➡️  CÓ 10× Search        (điều anh cần ✅)
+➡️  Cũng phải nuôi 10× Payment + 10× Email   (RAM + tiền server 💸 vô ích)</code></pre>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🍕</span>
+        <div class="callout-content">
+            <p>Đơn nướng bánh đang dồn. Anh muốn <strong>thêm 10 cái lò</strong>. Nhưng "ông Ba" là một <strong>con người trọn gói</strong> — nhồi bột + nướng + giao, không tách rời được. Nên để có 10 cái lò, anh phải <strong>thuê 10 ông Ba</strong>. Và 10 ông đó đem theo 10 bộ đồ nhồi bột + 10 xe giao hàng — mà anh <strong>chẳng cần</strong>. 💸</p>
+            <p><span class="key-phrase">Anh không scale được một PHẦN của một process. Anh chỉ scale được nguyên con.</span></p>
+        </div>
+    </div>
+
+    <h4>3️⃣ Team Payment muốn deploy 2h sáng</h4>
+    <p>Chỉ sửa <strong>1 dòng</strong> trong Payment. Nhưng artifact là <strong>một cục</strong>. → Deploy Payment = deploy luôn code chưa test của Search, Email. → <strong>Rủi ro cao.</strong></p>
+
+    <h4>4️⃣ Search deploy bug → Payment chết theo (Fault Isolation)</h4>
+    <p><strong>Isolation = CÁCH LY.</strong> Như bệnh viện cách ly người bệnh. <strong>Fault isolation = lỗi ở đâu, chết ở đó. Không lây.</strong></p>
+    <p>Vì sao monolith KHÔNG cách ly được? Vì Search, Payment, Email <strong>dùng chung một cơ thể</strong>: chung RAM, chung CPU, <strong>chung một process</strong>.</p>
+    <pre><code>Search vừa deploy, có bug rò rỉ bộ nhớ:
+
+10:00   Search ngốn 2GB RAM   →  app còn thở
+10:05   Search ngốn 6GB RAM   →  app ì ạch
+10:07   Search ngốn 8GB RAM   →  HẾT RAM
+10:07   Hệ điều hành: "thằng này ngốn quá"  →  GIẾT CẢ PROCESS 💀</code></pre>
+    <div class="callout callout-red">
+        <span class="callout-emoji">😱</span>
+        <div class="callout-content">
+            <p><strong>Câu quan trọng nhất cả bảng:</strong> Hệ điều hành <strong>không giết "Search"</strong>. Nó giết <strong>CẢ CÁI PROCESS</strong>. Mà Payment nằm trong process đó.</p>
+            <p><strong>Payment không viết sai một dòng nào. Payment vẫn chết.</strong></p>
+        </div>
+    </div>
+    <pre><code>       ┌──────── MỘT CĂN PHÒNG ────────┐
+       │   Search    Payment    Email   │
+       └───────────────────────────────┘
+
+  Search hút thuốc → phòng cháy → CẢ BA cùng chết. 🔥
+  Payment vô tội. Nhưng CÙNG PHÒNG = CÙNG SỐ PHẬN.</code></pre>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🧠</span>
+        <div class="callout-content">
+            <p><strong>Cả 4 dòng đều quy về MỘT nguyên nhân duy nhất: coupling.</strong></p>
+            <ul>
+                <li><strong>Chung CODEBASE</strong> → coupling con người (dòng 1️⃣ và 3️⃣)</li>
+                <li><strong>Chung PROCESS</strong> → coupling tài nguyên (2️⃣) và coupling số phận (4️⃣)</li>
+            </ul>
+            <p><span class="key-phrase">2️⃣ và 4️⃣ là CÙNG MỘT SỰ THẬT nhìn từ 2 phía: lúc bình thường thì không scale riêng được, lúc sự cố thì không chết riêng được.</span></p>
+        </div>
+    </div>
+
     <!-- Section 2: Microservices -->
-    <h2 id="microservices">⚙️ Microservices — "Each Chef Has Their Own Kitchen"</h2>
+    <h2 id="microservices">⚙️ Microservices — "Mỗi đầu bếp một cái bếp riêng"</h2>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">👨‍🍳</span>
+        <div class="callout-content">
+            <p><strong>Ý tưởng:</strong> đừng thuê 1 ông Ba làm hết. Thuê <strong>5 ông</strong>, mỗi ông <strong>một cái bếp riêng, một cái kho riêng, một cái cửa riêng</strong>.</p>
+            <p>Ông nướng bánh cháy bếp → <strong>4 ông kia vẫn nấu.</strong> Đơn nướng dồn → <strong>thuê thêm 10 ông nướng thôi</strong>, không cần thêm ông giao hàng.</p>
+        </div>
+    </div>
 
     <pre><code>[Auth Service]      → Auth DB (Postgres)
        ↕ REST/gRPC
@@ -226,95 +455,614 @@
        ↕ async via Kafka
 [Payment Service]   → Payment DB (Postgres)
        ↕
-[Notification Svc]  → (stateless — no DB needed)
+[Notification Svc]  → (stateless — không cần DB)
 
-Each box = independent process, independent DB, independent deployment</code></pre>
+Mỗi cái hộp = 1 process riêng, 1 DB riêng, 1 lần deploy riêng</code></pre>
 
-    <h3>Conway's Law — "Architecture = Org Chart"</h3>
-    <div class="callout callout-purple">
-        <span class="callout-emoji">🏢</span>
-        <div class="callout-content">
-            <p><em>"Any organization that designs a system will inevitably produce a design whose structure is a copy of the organization's communication structure."</em> — Melvin Conway, 1967</p>
-        </div>
-    </div>
-
+    <h3>🔍 Ba chữ "riêng" — cái nào quan trọng nhất?</h3>
     <div class="table-wrap">
         <table>
-            <tr><th>Team Structure</th><th>Resulting Architecture</th></tr>
-            <tr><td>1 team</td><td>Monolith (natural)</td></tr>
-            <tr><td>Teams organized by function (Frontend / Backend / Data)</td><td>N-tier architecture (3 monolithic layers)</td></tr>
-            <tr><td>Teams organized by domain (Amazon model: Checkout / Search / Reviews)</td><td>Microservices naturally</td></tr>
+            <tr><th>"Riêng" cái gì</th><th>Nó mua cho anh điều gì</th><th>Nếu thiếu thì sao?</th></tr>
+            <tr>
+                <td>⚙️ <strong>Process riêng</strong></td>
+                <td>Scale riêng ✅ &nbsp;+&nbsp; Chết riêng ✅<br><em>(giải quyết 2️⃣ và 4️⃣)</em></td>
+                <td>Vẫn là monolith — chỉ là chia thư mục đẹp hơn</td>
+            </tr>
+            <tr>
+                <td>🗄️ <strong>Database riêng</strong></td>
+                <td>Team tự đổi schema, không hỏi ai</td>
+                <td>😱 <strong>Distributed monolith</strong> — chia service nhưng chung DB → tệ hơn monolith, vì có đủ nhược điểm của cả hai</td>
+            </tr>
+            <tr>
+                <td>🚀 <strong>Deploy riêng</strong></td>
+                <td>Team Payment ship 2h sáng, không đụng ai<br><em>(giải quyết 1️⃣ và 3️⃣)</em></td>
+                <td>Vẫn kẹt hàng chờ deploy → mất gần hết lợi ích</td>
+            </tr>
         </table>
     </div>
 
-    <div class="callout callout-blue">
-        <span class="callout-emoji">📦</span>
+    <div class="callout callout-red">
+        <span class="callout-emoji">💀</span>
         <div class="callout-content">
-            <p><strong>Jeff Bezos's famous mandate:</strong> Every team must expose functionality via a service API. No direct DB access. No shared memory. Teams communicate ONLY via APIs. This forced Conway's Law → architecture mirrored autonomous team structure.</p>
-            <p><strong>Two-pizza rule:</strong> If a team can't be fed with two pizzas, it's too big (≈ 6-8 people). Each microservice owned by one two-pizza team.</p>
+            <p><strong>Sai lầm chết người nhất:</strong> tách service nhưng <strong>vẫn chung một database</strong>. Nó có tên: <span class="key-phrase">Distributed Monolith</span>.</p>
+            <p>Anh trả <em>đủ</em> cái giá của microservices (network chậm, mất ACID, khó debug) nhưng <strong>không nhận được</strong> lợi ích nào (vẫn không tự đổi schema, vẫn kẹt deploy). <strong>Tệ hơn monolith thuần.</strong> Nói được câu này = ăn điểm lớn.</p>
         </div>
     </div>
 
-    <!-- Section 3: When to Use -->
-    <h2 id="when-to-use">✅ When to USE Microservices — The 4 Signals</h2>
+    <h3>💰 Nhưng microservices ĐỔI CHÁC cái gì?</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th></th><th>🍕 Monolith</th><th>⚙️ Microservices</th></tr>
+            <tr><td>Gọi hàm</td><td>✅ nanosecond, luôn chạy</td><td>❌ millisecond, có thể fail</td></tr>
+            <tr><td>Transaction</td><td>✅ ACID miễn phí</td><td>❌ Phải tự code Saga</td></tr>
+            <tr><td>Debug</td><td>✅ 1 stack trace</td><td>❌ Cần distributed tracing</td></tr>
+            <tr><td>Scale riêng</td><td>❌ Không thể</td><td>✅ Được</td></tr>
+            <tr><td>Chết riêng (fault isolation)</td><td>❌ Không thể</td><td>✅ Được</td></tr>
+            <tr><td>Deploy riêng</td><td>❌ Không thể</td><td>✅ Được</td></tr>
+        </table>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "Microservices is not an upgrade — it's a <strong>trade</strong>. You give up ACID, low-latency calls and easy debugging, to buy independent scaling, independent deployment and fault isolation. If you don't need what you're buying, you're just paying."
+    </div>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🧠</span>
+        <div class="callout-content">
+            <p><strong>Đối xứng hoàn hảo:</strong> 5 điểm mạnh của monolith <em>chính là</em> 5 điểm yếu của microservices, và ngược lại. <strong>Không bên nào thắng</strong> — chỉ có <strong>anh đang đau ở đâu</strong>.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════ CONWAY'S LAW ═══════════ -->
+    <h2 id="conway">🏢 Conway's Law — "Kiến trúc = Sơ đồ tổ chức"</h2>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">📜</span>
+        <div class="callout-content">
+            <p><em>"Any organization that designs a system will inevitably produce a design whose structure is a copy of the organization's communication structure."</em> — Melvin Conway, 1967</p>
+            <p>Dịch ra tiếng người: <span class="key-phrase">Code của anh sẽ có hình dạng giống sơ đồ tổ chức công ty anh. Anh không chọn. Nó tự xảy ra.</span></p>
+        </div>
+    </div>
+
+    <h3>🎬 Đừng học định nghĩa — nghe hai cảnh phim này</h3>
 
     <div class="step-card">
         <div class="step-num">1</div>
         <div class="step-content">
-            <p><strong>Independent Scaling Requirements</strong></p>
-            <p>Black Friday: Search needs 100x, Order needs 50x, User Profile needs 2x. Monolith solution: scale ENTIRE app 100x → wasteful. Microservices: scale each independently → 60-70% cost reduction.</p>
+            <p><strong>Cảnh 1: Anh và Nam ngồi CHUNG BÀN</strong></p>
+            <p>Anh viết phần <strong>Giỏ hàng</strong>. Nam viết phần <strong>Thanh toán</strong>. Anh cần lấy giá tiền từ code của Nam.</p>
+            <p>Anh làm gì? Anh <strong>quay qua nói</strong>: <em>"Ê Nam, cho tao gọi cái hàm <code>tinhGia()</code> nha."</em> — Nam: <em>"Ừ gọi đi."</em></p>
+            <p>⏱️ <strong>5 giây.</strong> Xong.</p>
+            <p>Vài tháng sau: anh gọi hàm của Nam 40 chỗ, Nam gọi hàm của anh 30 chỗ. <strong>Không ai tách ra được nữa.</strong></p>
+            <p>👉 <strong>Một cục. 🍕 Monolith.</strong></p>
         </div>
     </div>
 
     <div class="step-card">
         <div class="step-num">2</div>
         <div class="step-content">
-            <p><strong>Multiple Teams Working Simultaneously</strong></p>
-            <p>50 engineers × 1 codebase → merge conflict hell, "why is main broken?", deployment bottleneck. 50 engineers × 8 services → each team deploys independently, no cross-team conflicts.</p>
+            <p><strong>Cảnh 2: Nam chuyển ra Hà Nội, sang công ty con</strong></p>
+            <p>Giờ anh cần thêm 1 hàm từ Nam:</p>
+            <ul>
+                <li>Nhắn Slack → 4 tiếng sau Nam mới rep</li>
+                <li>Phải <strong>đặt lịch họp</strong></li>
+                <li>Nam: <em>"tuần sau tao mới làm được, đang chạy sprint"</em></li>
+            </ul>
+            <p>😩 Đau quá. <strong>Lần sau anh sẽ NÉ.</strong> Anh nói:</p>
+            <p><em>"Thôi Nam, mày cho tao cái <strong>API</strong> đi. <code>GET /gia?id=5</code> trả về giá. Tao không đụng code mày, mày cũng đừng đụng tao."</em></p>
+            <p>👉 <strong>Hai cục. ⚙️ Hai service.</strong></p>
         </div>
     </div>
 
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">😮</span>
+        <div class="callout-content">
+            <p><strong>Nhìn lại đi.</strong> Anh có ngồi họp bàn <em>"nên chọn monolith hay microservices"</em> không? <strong>KHÔNG.</strong> Anh chưa bao giờ quyết định cái đó.</p>
+            <p>Cái <strong>duy nhất</strong> thay đổi là: <strong>Nam ngồi gần hay ngồi xa.</strong></p>
+            <p><span class="key-phrase">Đó là Conway's Law. Người nói chuyện DỄ với nhau → code DÍNH vào nhau. Người nói chuyện KHÓ với nhau → code TÁCH ra.</span></p>
+            <p>Kiến trúc <strong>không phải anh chọn</strong>. Nó là <strong>cái bóng</strong> của sơ đồ chỗ ngồi.</p>
+        </div>
+    </div>
+
+    <h3>🧲 Vì sao nó CHẮC CHẮN xảy ra?</h3>
+    <p>Vì lập trình viên luôn chọn <strong>đường ít đau nhất</strong>:</p>
+    <pre><code>Gọi hàm của người ngồi cạnh   →  dễ   →  ai cũng làm  →  DÍNH
+Xin API của người ở xa        →  khó  →  né tối đa    →  TÁCH</code></pre>
+    <p>Anh không cần ép ai. <strong>Chi phí giao tiếp tự ép.</strong></p>
+
+    <h3>📊 Giờ mới đọc được cái bảng này</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Công ty chia team kiểu</th><th>Code sẽ TỰ thành</th></tr>
+            <tr>
+                <td>👤 <strong>1 team ngồi chung</strong></td>
+                <td>🍕 <strong>Monolith.</strong> Ai cũng gọi hàm của ai.</td>
+            </tr>
+            <tr>
+                <td>🥞 <strong>Chia theo CHỨC NĂNG</strong><br>Frontend / Backend / QA</td>
+                <td><strong>3 tầng bánh (N-tier).</strong> Muốn ra 1 cái nút bấm → phải <strong>xin cả 3 team</strong>, xếp hàng 3 lần. 🐌</td>
+            </tr>
+            <tr>
+                <td>⚙️ <strong>Chia theo DOMAIN</strong><br>Checkout / Search / Reviews <em>(kiểu Amazon)</em></td>
+                <td><strong>Microservices — tự nhiên mà ra.</strong> Mỗi team làm từ giao diện xuống database, không xin ai.</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🪤</span>
+        <div class="callout-content">
+            <p><strong>Dòng giữa là cái bẫy phổ biến nhất.</strong> Chia team theo <em>kỹ năng</em> nghe rất hợp lý (gom người cùng skill lại mà!) — cho tới khi một feature nhỏ phải chui qua <strong>3 hàng chờ</strong>.</p>
+        </div>
+    </div>
+
+    <h3>🔄 Cú lật của Bezos — "Inverse Conway Maneuver"</h3>
+    <div class="callout callout-blue">
+        <span class="callout-emoji">📦</span>
+        <div class="callout-content">
+            <p>Bezos đọc xong nghĩ: <em>"Ơ... nếu <strong>tổ chức đẻ ra kiến trúc</strong>, thì tao <strong>sửa tổ chức</strong> là kiến trúc tự đẻ ra đúng ý tao."</em></p>
+            <p><strong>Mệnh lệnh (~2002):</strong></p>
+            <ul>
+                <li>Mỗi team <strong>chỉ được nói chuyện qua API</strong></li>
+                <li><strong>Cấm</strong> đụng database của team khác</li>
+                <li><strong>Cấm</strong> gọi hàm nội bộ, cấm chia sẻ memory</li>
+                <li><em>"Ai không làm, nghỉ việc."</em> 😅</li>
+            </ul>
+            <p>Bezos <strong>không hề</strong> bảo ai "đi xây microservices". Ổng chỉ làm cho <strong>việc nói chuyện trực tiếp trở nên bất hợp pháp.</strong></p>
+            <p>Kết quả: các team <strong>bắt buộc</strong> phải né nhau → code <strong>tự tách</strong> → <strong>microservices rơi ra như hệ quả.</strong></p>
+            <p>🤯 <em>Mấy cái API đó, vài năm sau, bán được cho người ngoài. Tên nó là</em> <strong>AWS</strong>.</p>
+        </div>
+    </div>
+
+    <h3>🍕 Two-Pizza Rule — cùng một logic</h3>
+    <div class="callout callout-green">
+        <span class="callout-emoji">🍕</span>
+        <div class="callout-content">
+            <p>Team nào <strong>ăn không hết 2 cái pizza</strong> = quá đông (≈ 6-8 người). Mỗi microservice thuộc về <strong>một two-pizza team</strong>.</p>
+            <p><strong>Vì sao 6-8?</strong> Đếm số <strong>cặp người phải nói chuyện</strong>:</p>
+            <pre><code> 5 người →  10 cặp
+10 người →  45 cặp
+20 người → 190 cặp     ← chết ngạt vì họp</code></pre>
+            <p>Team nhỏ → nói chuyện <strong>rẻ</strong> → code bên trong <strong>dính chặt</strong> ✅ <em>(high cohesion)</em><br>
+               Giữa các team → nói chuyện <strong>đắt</strong> → code giữa chúng <strong>tách bạch</strong> ✅ <em>(loose coupling)</em></p>
+            <p><span class="key-phrase">Anh không cần dạy dev "viết code loose coupling". Anh chỉ cần cho họ ngồi xa nhau.</span></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "Conway's Law says architecture mirrors org structure. So if you want microservices, <strong>don't start by splitting the code — start by splitting the teams</strong>, and give each one ownership from UI down to the database. That's the Inverse Conway Maneuver. Otherwise you get 8 repos that still deploy together — <strong>a distributed monolith</strong>."
+    </div>
+
+    <!-- Section 3: When to Use -->
+    <h2 id="when-to-use">✅ Khi nào NÊN dùng Microservices — 4 Tín Hiệu</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🩺</span>
+        <div class="callout-content">
+            <p><strong>Đọc 4 tín hiệu này như bác sĩ đọc triệu chứng.</strong> Microservices là <em>thuốc</em>. Thuốc không có triệu chứng = <strong>ngộ độc</strong>.</p>
+            <p><span class="key-phrase">Đừng hỏi "microservices có tốt không?". Hỏi: "tôi đang đau ở đâu, và cái này có chữa đúng chỗ đó không?"</span></p>
+        </div>
+    </div>
+
+    <p>Nhớ lại 4 vết đau của monolith? <strong>4 tín hiệu này chính là 4 vết đau đó khi chúng đủ nặng.</strong></p>
+
+    <p><strong>Cách đọc mỗi signal — luôn hỏi 3 câu:</strong></p>
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🧭</span>
+        <div class="callout-content">
+            <p>❌ <strong>Monolith chặn tôi ở chỗ nào?</strong> &nbsp;→&nbsp; ✅ <strong>Microservices mở khóa cái gì?</strong> &nbsp;→&nbsp; 🔑 <strong>Vì sao đó là giới hạn THẬT, không phải chuyện code dở?</strong></p>
+        </div>
+    </div>
+
+    <!-- ─── SIGNAL 1 ─── -->
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>⚖️ Cần scale riêng từng phần</strong> &nbsp;<span class="tag tag-purple">chữa vết đau 2️⃣</span></p>
+
+            <p>🎬 <strong>Chuyện gì đang xảy ra:</strong> Black Friday, đo tải:</p>
+            <pre><code>Search        →  cần 100× sức
+Order         →  cần  50× sức
+User Profile  →  cần   2× sức</code></pre>
+
+            <p>❌ <strong>Monolith chặn anh chỗ nào?</strong><br>
+            Search / Order / Profile nằm <strong>chung một process</strong>. Anh không thể bảo máy <em>"nhân riêng phần Search"</em>. Máy chỉ biết nhân <strong>nguyên con app</strong>.</p>
+            <pre><code>Để Search đủ 100×  →  phải chạy 100 bản CỦA CẢ APP
+
+100 bản Search   ← cần        ✅
+100 bản Profile  ← chỉ cần 2  💸  đốt tiền cho phần đang rảnh</code></pre>
+
+            <p>✅ <strong>Microservices mở khóa gì?</strong><br>
+            Search là <strong>process riêng</strong> → nhân 100 bản Search, Profile vẫn 2 bản. <strong>Giảm 60-70% tiền hạ tầng.</strong></p>
+
+            <p>🔑 <strong>Vì sao là signal?</strong> Vì đây là thứ monolith <strong>KHÔNG THỂ LÀM ĐƯỢC, dù anh code giỏi cỡ nào.</strong> Giới hạn <strong>vật lý</strong> của một process, không phải chuyện kỹ năng.</p>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">⚠️</span>
+                <div class="callout-content">
+                    <p><strong>Signal chỉ bật khi các phần có TẢI KHÁC NHAU.</strong> Nếu mọi thứ tăng/giảm đều nhau → scale nguyên con cũng đúng thôi, chẳng phí gì. <strong>Signal tắt.</strong></p>
+                    <p><span class="key-phrase">Signal 1 là bài toán TIỀN, không phải bài toán TỐC ĐỘ.</span> Tách service <strong>không</strong> làm Search nhanh hơn 1 mili giây. Nó chỉ làm anh <strong>ngừng trả tiền cho phần đang rảnh.</strong></p>
+                    <p>Interviewer sẽ vặn: <em>"Sao không cache đi?"</em> — Nếu Search chậm vì thiếu index / thiếu cache → <strong>sửa cái đó trước.</strong> Microservices không chữa được cái đó.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── SIGNAL 2 ─── -->
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>👥 Nhiều team làm song song</strong> &nbsp;<span class="tag tag-red">MẠNH NHẤT</span> <span class="tag tag-purple">chữa vết đau 1️⃣ + 3️⃣</span></p>
+
+            <p>🎬 <strong>Chuyện gì đang xảy ra:</strong></p>
+            <pre><code>50 kỹ sư   ·   1 codebase   ·   1 nút deploy
+
+· Merge conflict mỗi ngày
+· "Ai làm hư main rồi?"
+· Payment sửa xong 10h sáng → chờ Search test xong
+  → chờ Email fix bug → thứ Sáu mới deploy được</code></pre>
+            <p><strong>Payment không sai gì cả. Payment vẫn phải chờ.</strong></p>
+
+            <p>❌ <strong>Monolith chặn anh chỗ nào?</strong><br>
+            Vì chỉ có <strong>MỘT artifact, MỘT nút deploy</strong>. Muốn bấm nút → <strong>mọi người phải xong.</strong></p>
+            <pre><code>một cái nút  →  một hàng chờ  →  50 người xếp hàng</code></pre>
+
+            <p>✅ <strong>Microservices mở khóa gì?</strong><br>
+            <strong>8 service = 8 cái nút deploy.</strong> Team Payment bấm nút của mình lúc 2h sáng. Không ai biết, không ai quan tâm.</p>
+
+            <p>🔑 <strong>Vì sao là signal MẠNH NHẤT?</strong></p>
+            <div class="callout callout-red">
+                <span class="callout-emoji">😤</span>
+                <div class="callout-content">
+                    <p><strong>Vì 3 signal kia đều có thuốc RẺ HƠN. Signal này thì KHÔNG.</strong></p>
+                    <div class="table-wrap">
+                        <table>
+                            <tr><th>Signal</th><th>Chữa rẻ được không?</th></tr>
+                            <tr><td>1️⃣ Scale</td><td>✅ cache, read replica, tách worker</td></tr>
+                            <tr><td>3️⃣ Công nghệ</td><td>✅ tách <strong>đúng 1</strong> service, giữ nguyên phần còn lại</td></tr>
+                            <tr><td>4️⃣ Fault</td><td>✅ bulkhead, timeout, tách queue</td></tr>
+                            <tr><td><strong>2️⃣ Người chờ nhau</strong></td><td>❌ <strong>Không có cache nào chữa được "50 người chờ merge"</strong></td></tr>
+                        </table>
+                    </div>
+                    <p>Chỉ có <strong>tách nút deploy</strong> mới làm người ta ngừng chờ nhau. <strong>Không có đường vòng.</strong></p>
+                </div>
+            </div>
+
+            <div class="callout callout-purple">
+                <span class="callout-emoji">🔗</span>
+                <div class="callout-content">
+                    <p><strong>Đây là chỗ nối thẳng vào Conway's Law.</strong> Signal này <strong>không phải vấn đề kỹ thuật — nó là vấn đề CON NGƯỜI.</strong></p>
+                    <p>Microservices sinh ra <strong>không phải để code chạy nhanh</strong> — mà để <strong>các nhóm người ngừng chặn nhau.</strong> Đó chính xác là điều Conway nói. <span class="key-phrase">Conway's Law và Signal 2 là cùng một thứ.</span></p>
+                </div>
+            </div>
+
+            <p>⚠️ <strong>Ngưỡng thực tế:</strong> dưới ~15-20 kỹ sư → <strong>chưa ai chờ ai.</strong> Signal tắt. Team 4 người mà tách 8 service = <strong>tự đào hố.</strong></p>
+        </div>
+    </div>
+
+    <!-- ─── SIGNAL 3 ─── -->
     <div class="step-card">
         <div class="step-num">3</div>
         <div class="step-content">
-            <p><strong>Different Technology Requirements</strong></p>
-            <p>ML Recommendation: Python + PyTorch + GPUs. Payments: Java + Kafka + compliance. Real-time Chat: Node.js + WebSockets. In monolith: stuck with one language/framework. Microservices: each team picks what fits.</p>
+            <p><strong>🛠️ Cần công nghệ khác nhau</strong> &nbsp;<span class="tag tag-gray">YẾU NHẤT</span></p>
+
+            <p>🎬 <strong>Chuyện gì đang xảy ra:</strong></p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Phần</th><th>Cần gì</th></tr>
+                    <tr><td>🤖 ML gợi ý sản phẩm</td><td>Python + PyTorch + <strong>GPU</strong></td></tr>
+                    <tr><td>💬 Chat realtime</td><td>Node.js + WebSocket, giữ <strong>50.000 kết nối treo</strong></td></tr>
+                    <tr><td>💳 Payment</td><td>Java + Kafka + tuân thủ compliance</td></tr>
+                </table>
+            </div>
+
+            <p>❌ <strong>Monolith chặn anh chỗ nào?</strong><br>
+            Monolith của anh là <strong>Django, chạy trên server thường.</strong></p>
+            <ul>
+                <li>Không nhét được <strong>GPU</strong> vào cái server đang chạy Django ORM</li>
+                <li>Django <strong>không</strong> giữ nổi 50.000 WebSocket treo</li>
+            </ul>
+            <p>Đây là <strong>ràng buộc vật lý.</strong> Code giỏi cỡ nào cũng không lách.</p>
+
+            <p>✅ <strong>Microservices mở khóa gì?</strong><br>
+            Cục ML ra process riêng, chạy trên máy có GPU. Cục Chat ra riêng, chạy Node.</p>
+
+            <p>🔑 <strong>Vì sao là signal?</strong> Vì <strong>một process chỉ chạy được MỘT runtime.</strong> Muốn 2 ngôn ngữ → <strong>bắt buộc 2 process.</strong></p>
+
+            <div class="callout callout-red">
+                <span class="callout-emoji">🎯</span>
+                <div class="callout-content">
+                    <p><strong>Nhưng vì sao YẾU NHẤT? Tự vặn mình câu này:</strong></p>
+                    <p><em>"Tôi cần GPU cho ML. Vậy tôi có cần tách <strong>Auth, Order, Email, Notification</strong> ra service riêng không?"</em></p>
+                    <p><strong>KHÔNG.</strong> 😤 Anh chỉ cần tách <strong>đúng một cục ML.</strong> Còn lại vẫn monolith. Vẫn ổn.</p>
+                    <p><span class="key-phrase">Signal 3 chứng minh "phần X phải ra ở riêng". Nó KHÔNG chứng minh "cả hệ thống phải là microservices."</span></p>
+                    <p>Đó là ngụy biện phổ biến nhất trong phòng interview.</p>
+                </div>
+            </div>
+
+            <div class="callout callout-yellow">
+                <span class="callout-emoji">💀</span>
+                <div class="callout-content">
+                    <p><strong>Bẫy chết người:</strong> <em>"Tôi muốn thử Go"</em> → <strong>KHÔNG phải signal.</strong> Đó là <strong>résumé-driven development.</strong></p>
+                    <p>Mỗi ngôn ngữ mới = thêm 1 CI pipeline, 1 bộ thư viện, 1 nhóm người phải tuyển, 1 cách monitor.</p>
+                    <p><strong>Polyglot là cái GIÁ anh trả, không phải phần thưởng anh nhận.</strong> Signal 3 chỉ bật khi có <strong>ràng buộc vật lý thật</strong> — GPU, realtime, thư viện chỉ tồn tại ở ngôn ngữ khác.</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- ─── SIGNAL 4 ─── -->
     <div class="step-card">
         <div class="step-num">4</div>
         <div class="step-content">
-            <p><strong>Fault Isolation Requirements</strong></p>
-            <p>Without: Recommendation service memory leak → OOMKilled → ENTIRE app down → Payments can't process. With: Recommendation crashes → homepage shows no recommendations → Checkout, Payments, Search continue working. Blast radius: degraded UX on homepage only.</p>
+            <p><strong>🛡️ Cần cách ly lỗi (Fault Isolation)</strong> &nbsp;<span class="tag tag-purple">chữa vết đau 4️⃣</span></p>
+
+            <p>🎬 <strong>Chuyện gì đang xảy ra:</strong> Recommendation vừa deploy, có bug rò rỉ RAM.</p>
+            <pre><code>10:00   Recommendation ngốn 2GB   →  app còn thở
+10:07   Recommendation ngốn 8GB   →  HẾT RAM
+10:07   Hệ điều hành giết CẢ PROCESS  💀</code></pre>
+
+            <p>❌ <strong>Monolith chặn anh chỗ nào?</strong><br>
+            Hệ điều hành <strong>không biết "Recommendation" là ai.</strong> Nó chỉ thấy <strong>một process ngốn RAM</strong> → giết cả process. Mà <strong>Payment nằm trong process đó.</strong></p>
+            <pre><code>Recommendation hư  →  CẢ APP CHẾT
+                   →  Payment không xử lý được đơn nào
+                   →  MẤT TIỀN THẬT  💸</code></pre>
+            <p><strong>Payment không viết sai một dòng nào. Payment vẫn chết.</strong></p>
+
+            <p>✅ <strong>Microservices mở khóa gì?</strong></p>
+            <pre><code>┌─ Recommend ─┐   ┌─ Payment ─┐   ┌─ Search ─┐
+│   🔥 CHẾT   │   │  ✅ SỐNG  │   │ ✅ SỐNG  │
+└─────────────┘   └───────────┘   └──────────┘
+       mỗi thằng MỘT PHÒNG RIÊNG (process riêng)</code></pre>
+            <p>Chỉ container Recommendation bị giết. Payment <strong>không hề hay biết</strong>, tiếp tục nhận tiền. 💰<br>
+            <strong>Trang chủ mất phần gợi ý 3 phút. Nhưng vẫn bán được hàng.</strong></p>
+
+            <p>🔑 <strong>Vì sao là signal?</strong> Vì <span class="key-phrase">cùng process = cùng số phận.</span> Lại là <strong>giới hạn vật lý</strong>, không phải chuyện code.</p>
+
+            <div class="callout callout-green">
+                <span class="callout-emoji">🔥</span>
+                <div class="callout-content">
+                    <p>Người ta không tách microservices vì nó <em>ngầu</em>. Người ta tách vì muốn <strong>giới hạn thiệt hại khi một mảnh gãy.</strong></p>
+                    <p>Tên của lợi ích này: <span class="key-phrase">blast radius</span> — bán kính vụ nổ. Anh muốn <strong>thu nhỏ</strong> nó.</p>
+                </div>
+            </div>
+
+            <p>⚠️ <strong>Signal bật khi:</strong> app có phần <strong>sống-còn</strong> (Payment) đứng cạnh phần <strong>hỏng-cũng-được</strong> (Recommendation). Nếu <strong>mọi phần đều sống còn như nhau</strong> → tách chẳng cứu được gì, mảnh nào chết cũng chết cả. <strong>Signal yếu đi.</strong></p>
         </div>
     </div>
 
-    <!-- Section 4: When NOT to Use -->
-    <h2 id="when-not">❌ When NOT to Use Microservices — The 4 Anti-Signals</h2>
+    <!-- ─── GÓI CẢ 4 LẠI ─── -->
+    <h3>🧠 Gói cả 4 lại — chúng chỉ là MỘT câu hỏi</h3>
 
-    <div class="callout callout-red">
-        <span class="callout-emoji">⚠️</span>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">❓</span>
         <div class="callout-content">
-            <p><strong>"Small team, early stage, unclear boundaries, no DevOps maturity → monolith is the right answer."</strong></p>
+            <p style="font-size:1.1em;"><strong>"Cái gì đang bị buộc chung, mà đáng lẽ phải rời ra?"</strong></p>
         </div>
     </div>
 
     <div class="table-wrap">
         <table>
-            <tr><th>Anti-Signal</th><th>Why It Kills You</th></tr>
-            <tr><td><strong>Small team (&lt;10 engineers)</strong></td><td>2 weeks setting up Kubernetes/service discovery → 0 features shipped. Monolith: 10+ features in 2 weeks.</td></tr>
-            <tr><td><strong>Unclear domain boundaries</strong></td><td>Wrong service boundaries = expensive refactoring 6 months later when you understand the domain.</td></tr>
-            <tr><td><strong>No DevOps maturity</strong></td><td>Need: Kubernetes, service discovery, centralized logging, distributed tracing, health monitoring, N CI/CD pipelines. Without: can't debug anything.</td></tr>
-            <tr><td><strong>Complex cross-service transactions</strong></td><td>Business logic requiring atomic ops across 5 services → must implement Saga. 10x harder than a single ACID transaction.</td></tr>
+            <tr><th>Signal</th><th>Cái gì đang bị buộc chung</th><th>Loại giới hạn</th></tr>
+            <tr><td>1️⃣ Scale riêng</td><td><strong>Tài nguyên</strong> (CPU / RAM) bị buộc chung</td><td>⚙️ Vật lý — 1 process = 1 khối tài nguyên</td></tr>
+            <tr><td>2️⃣ Nhiều team</td><td><strong>Nút deploy</strong> bị buộc chung</td><td>👥 <strong>Xã hội</strong> — 1 nút = 1 hàng chờ</td></tr>
+            <tr><td>3️⃣ Khác công nghệ</td><td><strong>Runtime / ngôn ngữ</strong> bị buộc chung</td><td>⚙️ Vật lý — 1 process = 1 runtime</td></tr>
+            <tr><td>4️⃣ Fault isolation</td><td><strong>Số phận</strong> (sống chết) bị buộc chung</td><td>⚙️ Vật lý — 1 process = 1 số phận</td></tr>
         </table>
     </div>
 
-    <h3>🌳 Strangler Fig — How to Migrate Safely</h3>
-    <div class="callout callout-yellow">
-        <span class="callout-emoji">💡</span>
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🧵</span>
         <div class="callout-content">
-            <p><strong>Never do a Big Bang rewrite</strong> — historically fatal. Use the Strangler Fig: new features → build as separate services. Existing features → extract one-by-one, starting with clearest boundaries. Route through API Gateway to either monolith or new service. Over 12-18 months, strangle the monolith.</p>
+            <p>Tất cả có <strong>một cái tên duy nhất: COUPLING.</strong></p>
+            <p>Microservices <strong>không thêm tính năng gì.</strong> Nó chỉ <strong>cắt dây.</strong> Và mỗi sợi dây cắt đi, anh <strong>phải trả bằng</strong> network chậm + mất ACID + khó debug.</p>
+            <p>🔑 Chú ý: signal 1, 3, 4 là <strong>giới hạn VẬT LÝ</strong> — có thể lách một phần bằng cache/bulkhead. Signal 2 là <strong>giới hạn XÃ HỘI</strong> — <span class="key-phrase">anh mua thêm được RAM, nhưng không mua được sự kiên nhẫn của 50 kỹ sư.</span></p>
+        </div>
+    </div>
+
+    <h3>🎯 Bảng quyết định — nhớ 4 dòng này là đủ</h3>
+    <pre><code>👥  Người chờ nhau?              →  TÁCH. Không có cách khác.
+💸  Trả tiền cho phần đang rảnh?  →  Thử cache trước. Không xong → tách.
+🔥  Một mảnh gãy giết cả nhà?     →  Thử bulkhead trước. Không xong → tách.
+🖥️  Cần GPU / realtime?           →  Tách ĐÚNG phần đó. Đừng tách hết.</code></pre>
+
+    <h3>🧮 Cách chấm điểm — đừng ĐẾM, hãy CÂN</h3>
+    <div class="table-wrap">
+        <table>
+            <tr><th>Tín hiệu</th><th>Sức nặng</th><th>Vì sao</th></tr>
+            <tr><td>2️⃣ Nhiều team</td><td><span class="tag tag-red">MẠNH NHẤT</span></td><td>Là vấn đề con người. Không có cách nào khác chữa được ngoài tách deploy.</td></tr>
+            <tr><td>1️⃣ Scale độc lập</td><td><span class="tag tag-orange">Mạnh</span></td><td>Nhưng thử <strong>caching / read replica</strong> trước đã — rẻ hơn nhiều.</td></tr>
+            <tr><td>4️⃣ Fault isolation</td><td><span class="tag tag-orange">Mạnh</span></td><td>Nhưng <strong>bulkhead / rate limit / worker riêng</strong> trong monolith cũng cứu được phần nào.</td></tr>
+            <tr><td>3️⃣ Công nghệ khác nhau</td><td><span class="tag tag-gray">YẾU NHẤT</span></td><td>Thường là cái cớ. Chỉ bật khi có ràng buộc vật lý thật.</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>Quy tắc vàng:</strong> <span class="key-phrase">1 tín hiệu bật → chưa đủ. 2-3 tín hiệu cùng bật, và anh đã thử cách rẻ hơn mà không xong → lúc đó mới tách.</span></p>
+            <p>Và tách <strong>từng miếng một</strong> (Strangler Fig ở phần dưới), không đập cả monolith xây lại. Đập-xây-lại là <strong>cách chết nổi tiếng nhất</strong> ngành này.</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "I'd look for the signals before reaching for microservices. The strongest one is <strong>organizational</strong> — multiple teams blocking each other on deploys. Independent scaling and fault isolation are real too, but I'd first try cheaper fixes: caching, read replicas, bulkheads. <strong>'Different tech' is the weakest signal</strong> — it's usually résumé-driven. And when the signals do fire, I'd strangle the monolith one bounded context at a time, never a big-bang rewrite."
+    </div>
+
+    <!-- Section 4: When NOT to Use -->
+    <h2 id="when-not">❌ Khi nào KHÔNG dùng Microservices — 4 Tín Hiệu NGƯỢC</h2>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">💊</span>
+        <div class="callout-content">
+            <p>Nhớ lại: microservices là <strong>một cuộc ĐỔI CHÁC.</strong> Anh <strong>trả</strong> bằng network chậm + mất ACID + khó debug, để <strong>mua</strong> scale riêng / deploy riêng / chết riêng.</p>
+            <p><span class="key-phrase">4 tín hiệu ngược = 4 tình huống anh TRẢ ĐỦ GIÁ nhưng KHÔNG NHẬN được gì.</span></p>
+            <p>Đó là lý do chúng giết anh. Không phải vì microservices sai — mà vì <strong>anh mua thứ mình không cần.</strong></p>
+        </div>
+    </div>
+
+    <!-- ─── ANTI 1 ─── -->
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>👤 Team nhỏ (&lt; 10 kỹ sư)</strong> — <em>signal 2 TẮT</em></p>
+            <p>🎬 <strong>Chuyện gì xảy ra:</strong></p>
+            <pre><code>Team 5 người, tách 6 service:
+  · 2 tuần dựng Kubernetes + service discovery + logging tập trung
+  · Ship được: 0 feature
+
+Team 5 người, giữ monolith:
+  · Ship được: 10+ feature trong 2 tuần  ✅</code></pre>
+            <p>🔑 <strong>Vì sao chết?</strong> Signal 2 (người chờ nhau) là <strong>signal MẠNH NHẤT</strong>. Nhưng 5 người thì <strong>chưa ai chờ ai.</strong></p>
+            <p>Anh trả giá bằng network + Saga + debug khó… để mua <strong>"không phải chờ nhau"</strong> — thứ anh <strong>đã có sẵn miễn phí.</strong> 💸</p>
+            <div class="callout callout-red">
+                <span class="callout-emoji">😱</span>
+                <div class="callout-content">
+                    <p><strong>Tệ hơn nữa:</strong> 5 người mà nuôi 6 service = <strong>mỗi người gánh hơn 1 service.</strong> Không ai hiểu toàn hệ thống. Một người nghỉ = một service thành hộp đen.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── ANTI 2 ─── -->
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>🌫️ Chưa rõ ranh giới nghiệp vụ (domain boundaries)</strong> — <em>nguy hiểm nhất</em></p>
+            <p>🎬 <strong>Chuyện gì xảy ra:</strong> Startup mới. Anh chưa biết <em>"Order"</em> và <em>"Cart"</em> là 2 thứ hay 1 thứ. Anh đoán, rồi vẽ ranh giới service.</p>
+            <p>6 tháng sau anh hiểu ra: chúng phải chung một chỗ.</p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th></th><th>Sửa ranh giới sai</th></tr>
+                    <tr><td>🍕 <strong>Trong monolith</strong></td><td>Kéo thả file, đổi tên. <strong>Nửa buổi chiều.</strong> ✅</td></tr>
+                    <tr><td>⚙️ <strong>Giữa 2 service</strong></td><td>Gộp 2 database, viết migration xuyên service, sửa API, sửa client, deploy đồng bộ. <strong>Vài tháng.</strong> 💀</td></tr>
+                </table>
+            </div>
+            <p>🔑 <strong>Vì sao chết?</strong> Ranh giới service là <strong>bê tông</strong>, ranh giới module là <strong>phấn viết bảng.</strong></p>
+            <div class="callout callout-purple">
+                <span class="callout-emoji">🎨</span>
+                <div class="callout-content">
+                    <p><strong>Nghịch lý cay đắng:</strong> lúc anh <em>biết rõ</em> ranh giới đúng thì anh <strong>đã không cần tách nữa</strong> (monolith có module rõ ràng chạy tốt lắm). Lúc anh <em>chưa biết</em> thì tách là <strong>đóng băng một cái sai.</strong></p>
+                    <p>Vì vậy: <span class="key-phrase">Monolith trước → hiểu domain → rồi mới tách theo đường đã LỘ RA, không theo đường mình ĐOÁN.</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── ANTI 3 ─── -->
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>🧰 Chưa đủ trưởng thành về DevOps</strong></p>
+            <p>🎬 <strong>Chuyện gì xảy ra:</strong> Anh tách 8 service. Có bug. User báo <em>"đặt hàng bị lỗi"</em>. Anh SSH vào… <strong>service nào?</strong> 😰</p>
+            <p><strong>Microservices bắt buộc đi kèm cả một bộ đồ nghề:</strong></p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Cần gì</th><th>Không có thì sao</th></tr>
+                    <tr><td>Kubernetes / orchestration</td><td>Deploy 8 service bằng tay → sai lệch phiên bản</td></tr>
+                    <tr><td>🧭 Service discovery</td><td>Hardcode IP → mai IP đổi → chết</td></tr>
+                    <tr><td>📜 Logging tập trung</td><td>Log nằm rải 8 chỗ, container chết là log bay</td></tr>
+                    <tr><td>🔎 Distributed tracing</td><td><strong>Không biết request đi qua đâu, chết ở đâu</strong></td></tr>
+                    <tr><td>⚡ Circuit breaker / health check</td><td>1 service chậm → treo thread cả hệ → chết dây chuyền</td></tr>
+                    <tr><td>🚀 N cái CI/CD pipeline</td><td>Deploy thành nỗi kinh hoàng</td></tr>
+                </table>
+            </div>
+            <p>🔑 <strong>Vì sao chết?</strong> Trong monolith, một cái <strong>stack trace</strong> cho anh biết mọi thứ. Trong microservices, <strong>stack trace đứt ở biên giới network.</strong></p>
+            <div class="callout callout-red">
+                <span class="callout-emoji">💀</span>
+                <div class="callout-content">
+                    <p>Không có bộ đồ nghề này, anh <strong>vẫn trả đủ giá</strong> (mọi thứ đã phân tán) nhưng <strong>mất luôn khả năng debug</strong> — thứ monolith cho anh <strong>miễn phí.</strong></p>
+                    <p><span class="key-phrase">Microservices không phải quyết định kiến trúc. Nó là quyết định VẬN HÀNH.</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── ANTI 4 ─── -->
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>🔒 Nghiệp vụ cần transaction xuyên nhiều service</strong></p>
+            <p>🎬 <strong>Chuyện gì xảy ra:</strong> Đặt hàng phải làm <strong>đồng thời</strong>: trừ kho + trừ tiền + tạo đơn + tính điểm thưởng. Cả 4 nằm ở 4 service khác nhau.</p>
+            <pre><code>🍕 MONOLITH — cùng 1 database:
+    with transaction.atomic():
+        trừ_kho(); trừ_tiền(); tạo_đơn(); cộng_điểm()
+    → Bước 3 nổ?  Postgres UNDO sạch cả 3 bước trước.  MIỄN PHÍ. ✅
+
+⚙️ MICROSERVICES — 4 database khác nhau:
+    Kho đã trừ (DB-A)  ·  Tiền đã trừ (DB-B)  ·  Đơn nổ (DB-C)
+    → Ai undo giùm?  Postgres của C KHÔNG BIẾT A và B tồn tại. 💀
+    → Anh phải TỰ CODE cái undo đó:  Saga pattern</code></pre>
+            <p>🔑 <strong>Vì sao chết?</strong> Nhớ lại: <span class="key-phrase">ACID chỉ miễn phí bên trong MỘT database.</span> Chia DB ra là mất — và mất <strong>cả 4 chữ</strong>:</p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Chữ</th><th>Mất đi nghĩa là gì</th></tr>
+                    <tr><td><strong>A</strong>tomicity</td><td>Không còn "làm hết hoặc không làm gì" → phải tự viết <strong>compensating transaction</strong> (hoàn tiền, trả kho…)</td></tr>
+                    <tr><td><strong>I</strong>solation</td><td>Có lúc kho đã trừ mà tiền chưa trừ → <strong>người khác NHÌN THẤY trạng thái nửa vời</strong></td></tr>
+                </table>
+            </div>
+            <div class="callout callout-red">
+                <span class="callout-emoji">😤</span>
+                <div class="callout-content">
+                    <p>Saga <strong>khó hơn ~10 lần</strong> một câu <code>transaction.atomic()</code>. Và nó không phải "code thêm chút" — nó là <strong>một mô hình tư duy khác</strong> về tính đúng đắn.</p>
+                    <p>Nếu nghiệp vụ của anh <strong>đầy rẫy</strong> loại thao tác này → ranh giới service của anh <strong>đang cắt sai chỗ.</strong> Thứ hay đi cùng nhau thì phải <strong>ở cùng nhau.</strong></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── GÓI 4 ANTI-SIGNAL ─── -->
+    <h3>🧠 Gói cả 4 lại — vẫn là một câu hỏi duy nhất</h3>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>Anti-Signal</th><th>Anh TRẢ gì</th><th>Anh NHẬN được gì</th></tr>
+            <tr><td>1️⃣ Team nhỏ</td><td>Network, Saga, 6 pipeline</td><td>❌ Không gì — <strong>chưa ai chờ ai</strong></td></tr>
+            <tr><td>2️⃣ Ranh giới mờ</td><td>Ranh giới bê tông, không sửa nổi</td><td>❌ Không gì — <strong>đóng băng một cái sai</strong></td></tr>
+            <tr><td>3️⃣ Thiếu DevOps</td><td>Mọi thứ phân tán</td><td>❌ <strong>Âm</strong> — mất luôn khả năng debug</td></tr>
+            <tr><td>4️⃣ Transaction xuyên service</td><td>Mất ACID, viết Saga</td><td>❌ <strong>Âm</strong> — đúng đắn dữ liệu bị đe dọa</td></tr>
+        </table>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚖️</span>
+        <div class="callout-content">
+            <p><strong>4 Signal hỏi:</strong> <em>"Cái gì đang bị buộc chung, mà đáng lẽ phải rời ra?"</em></p>
+            <p><strong>4 Anti-Signal hỏi ngược:</strong> <em>"Cái gì đang ở đúng chỗ, mà tôi sắp xé toạc ra một cách vô ích?"</em></p>
+            <p><span class="key-phrase">Cùng một trục: COUPLING. Signal = coupling THỪA. Anti-signal = coupling CẦN THIẾT mà anh nhầm là thừa.</span></p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">✅</span>
+        <div class="callout-content">
+            <p><strong>Câu trả lời an toàn nhất, cũng là câu ĐÚNG nhất:</strong></p>
+            <p style="font-size:1.05em;"><strong>"Team nhỏ, giai đoạn đầu, ranh giới chưa rõ, chưa có nền DevOps → <span class="key-phrase">MONOLITH LÀ CÂU TRẢ LỜI ĐÚNG.</span>"</strong></p>
+            <p>Và không phải "monolith tạm bợ" — mà <strong>monolith có module rõ ràng</strong> (modular monolith). Ranh giới vẽ bằng <strong>phấn</strong>, không phải bê tông. Khi signal bật thật, ranh giới đó <strong>đã sẵn sàng</strong> để cắt.</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "Microservices is a trade, so the anti-signals are the cases where you <strong>pay the full price and get nothing back</strong>. Small team? You buy 'teams don't block each other' — but nobody was blocking. Unclear boundaries? You <strong>cast a guess in concrete</strong>. No DevOps maturity? You go distributed and lose the one thing a monolith gives you for free: a stack trace. Cross-service transactions everywhere? That's not an anti-signal about microservices — <strong>that's your domain telling you the boundary is in the wrong place</strong>. I'd start with a <strong>modular monolith</strong> and let the seams reveal themselves."
+    </div>
+
+    <h3>🌳 Strangler Fig — Cách di cư an toàn</h3>
+    <div class="callout callout-red">
+        <span class="callout-emoji">💀</span>
+        <div class="callout-content">
+            <p><strong>ĐỪNG BAO GIỜ đập đi xây lại (Big Bang rewrite).</strong> Đó là <strong>cách chết nổi tiếng nhất</strong> của ngành này. Trong lúc anh xây bản mới 18 tháng, đối thủ ship 200 feature.</p>
+        </div>
+    </div>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🌳</span>
+        <div class="callout-content">
+            <p><strong>Cây đa bóp cổ (strangler fig)</strong> mọc quấn quanh cây chủ, lớn dần, cho tới khi cây chủ mục đi — <strong>mà rừng chưa bao giờ có một khoảng trống.</strong></p>
+            <p>Áp dụng: feature <strong>mới</strong> → xây thành service riêng. Feature <strong>cũ</strong> → bóc <strong>từng cái một</strong>, bắt đầu từ cái có ranh giới rõ nhất. <strong>API Gateway</strong> đứng trước, định tuyến về monolith <em>hoặc</em> service mới — client không hề hay biết.</p>
+            <p>Sau 12-18 tháng, monolith bị bóp nghẹt. <span class="key-phrase">Không có ngày nào hệ thống ngừng chạy.</span></p>
         </div>
     </div>
 
@@ -329,243 +1077,811 @@ Month 18:  [API Gateway] → All services
     <!-- Section 5: API Gateway -->
     <h2 id="api-gateway">🚪 API Gateway &amp; BFF Pattern</h2>
 
-    <h3>What Problem It Solves</h3>
-    <div class="columns">
-        <div class="callout callout-red">
-            <span class="callout-emoji">❌</span>
-            <div class="callout-content">
-                <p><strong>Without Gateway</strong></p>
-                <p>Mobile app must know: User Service = port 3001, Orders = port 3002, ML = port 3003. Separate auth, CORS, rate limit per service. Client config breaks when services move.</p>
-            </div>
-        </div>
-        <div class="callout callout-green">
-            <span class="callout-emoji">✅</span>
-            <div class="callout-content">
-                <p><strong>With Gateway</strong></p>
-                <p>All requests → <code>gateway.api.company.com</code>. Gateway handles: routing, auth, rate limiting, CORS. Internal services hidden behind it.</p>
-            </div>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🧭</span>
+        <div class="callout-content">
+            <p><strong>Đừng học định nghĩa. Cả hai thứ này chỉ là câu trả lời cho MỘT nỗi đau:</strong></p>
+            <p><span class="key-phrase">"Tôi vừa tách 8 service. Bây giờ app của tôi phải gọi AI?"</span></p>
         </div>
     </div>
 
-    <h3>What API Gateway Does</h3>
+    <!-- ═══════════ NỖI ĐAU ═══════════ -->
+    <h3>🎬 Nỗi đau — khi KHÔNG có gì đứng trước</h3>
+
+    <pre><code>📱 App mobile phải NHỚ hết:
+     User Service     →  api.shop.com:3001
+     Order Service    →  api.shop.com:3002
+     Payment Service  →  api.shop.com:3003
+     Search Service   →  api.shop.com:3004
+     ... 8 cái</code></pre>
+
+    <p>Bốn thảm họa xuất hiện ngay lập tức:</p>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>💀 App biết quá nhiều</strong></p>
+            <p>Anh đổi port, đổi tên service, gộp 2 service → <strong>phải cập nhật app.</strong> Mà app mobile thì <strong>user không chịu update.</strong> Anh kẹt với kiến trúc cũ <strong>vĩnh viễn.</strong></p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>🕳️ Mỗi service phải tự làm bảo vệ</strong></p>
+            <pre><code>User Service     → tự check token, rate limit, CORS, log
+Order Service    → tự check token, rate limit, CORS, log
+Payment Service  → tự check token, rate limit, CORS, log
+   ... ×8, copy-paste 8 lần</code></pre>
+            <p>Sửa logic auth → <strong>sửa 8 chỗ.</strong> Quên 1 chỗ → <strong>lỗ hổng bảo mật.</strong></p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>🚪 8 service phơi ra Internet</strong></p>
+            <p>Nhớ <strong>attack surface</strong> ở Session 6 không? Đây là <strong>8 cánh cửa</strong> ra ngoài đời, thay vì <strong>1 cửa.</strong></p>
+        </div>
+    </div>
+
+    <div class="step-card">
+        <div class="step-num">4</div>
+        <div class="step-content">
+            <p><strong>🐌 App phải gọi 5 lần cho 1 màn hình</strong></p>
+            <p><em>(Nỗi đau này để dành — nó chính là lý do BFF ra đời, nói ở dưới.)</em></p>
+        </div>
+    </div>
+
+    <!-- ═══════════ API GATEWAY ═══════════ -->
+    <h3>🚪 API Gateway = "Lễ tân của tòa nhà"</h3>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🏢</span>
+        <div class="callout-content">
+            <p>Tòa nhà 8 tầng, 8 công ty. Khách đến <strong>KHÔNG</strong> đi thẳng vào từng tầng. Khách đi qua <strong>một cái cửa duy nhất</strong> → gặp <strong>lễ tân.</strong></p>
+        </div>
+    </div>
+
+    <pre><code>                        ┌───────────────┐
+📱 App  ───────────────►│   LỄ TÂN      │──► User Service
+🖥️ Web  ───────────────►│  (Gateway)    │──► Order Service
+                        │ MỘT CỬA DUY   │──► Payment Service
+                        │    NHẤT       │──► ... 8 service ẩn bên trong
+                        └───────────────┘</code></pre>
+
+    <h4>Lễ tân làm gì?</h4>
     <div class="table-wrap">
         <table>
-            <tr><th>Responsibility</th><th>Detail</th></tr>
-            <tr><td><strong>Routing</strong></td><td><code>/api/users/*</code> → User Service, <code>/api/orders/*</code> → Order Service</td></tr>
-            <tr><td><strong>Authentication (centralized)</strong></td><td>Verify JWT once → forward user context headers. Invalid → 401 immediately, never reaches downstream.</td></tr>
-            <tr><td><strong>Rate Limiting (centralized)</strong></td><td>100 req/min per IP — not implemented in every service separately.</td></tr>
-            <tr><td><strong>Protocol Translation</strong></td><td>Client speaks REST → internal services speak gRPC → Gateway translates.</td></tr>
-            <tr><td><strong>Aggregation (BFF)</strong></td><td>Single client request → call multiple services → aggregate → one response.</td></tr>
+            <tr><th>🏢 Lễ tân đời thật</th><th>🚪 API Gateway</th></tr>
+            <tr>
+                <td>🎫 Kiểm tra thẻ ra vào</td>
+                <td><strong>Authentication</strong> — verify JWT <strong>một lần</strong>. Sai → trả <code>401</code> ngay, không service nào bị làm phiền.</td>
+            </tr>
+            <tr>
+                <td>🧭 <em>"Anh tìm phòng Kế toán? Tầng 3."</em></td>
+                <td><strong>Routing</strong> — <code>/api/orders/*</code> → Order Service</td>
+            </tr>
+            <tr>
+                <td>🚫 <em>"Anh vào 100 lần trong 1 phút rồi, ngồi xuống."</em></td>
+                <td><strong>Rate limiting</strong> — 100 req/phút mỗi IP, viết <strong>một chỗ</strong></td>
+            </tr>
+            <tr>
+                <td>📒 Ghi sổ ai vào ra lúc mấy giờ</td>
+                <td><strong>Logging</strong> + gắn <code>request_id</code> để trace về sau</td>
+            </tr>
+            <tr>
+                <td>🗣️ Khách nói tiếng Việt, bên trong nói tiếng Anh</td>
+                <td><strong>Protocol translation</strong> — client nói REST, nội bộ nói gRPC</td>
+            </tr>
+            <tr>
+                <td>🔒 Chỉ cửa này mở ra đường</td>
+                <td>8 service <strong>giấu kín</strong> trong mạng nội bộ. <strong>1 cửa thay vì 8.</strong></td>
+            </tr>
         </table>
     </div>
 
-    <h3>BFF Pattern — Backend for Frontend</h3>
-    <pre><code>               ┌──────────────────┐
-iOS/Android ──→│   Mobile BFF     │──→ User Service
-               └──────────────────┘──→ Order Service
-                                   (lean response — no analytics)
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔥</span>
+        <div class="callout-content">
+            <p><strong>Cái được lớn nhất:</strong> App <strong>chỉ biết MỘT địa chỉ</strong>: <code>api.shop.com</code>.</p>
+            <p>Bên trong anh muốn đổi port, gộp service, đổi ngôn ngữ, dời sang máy khác — <strong>app không hề hay biết.</strong></p>
+            <p><span class="key-phrase">Gateway là một lớp CHE (indirection). Nó tách "client biết gì" khỏi "hệ thống thật sự trông ra sao".</span></p>
+            <p>Và auth / rate-limit / logging <strong>viết MỘT lần ở lễ tân</strong>, không copy 8 lần.</p>
+        </div>
+    </div>
 
-               ┌──────────────────┐
-Web Browser ──→│    Web BFF       │──→ User Service + Order Service
-               └──────────────────┘──→ Analytics Service
-                                   (full response)</code></pre>
+    <!-- ═══════════ ANTI-PATTERN ═══════════ -->
+    <h4>🚨 Anti-pattern: Gateway béo phì</h4>
 
     <div class="callout callout-red">
         <span class="callout-emoji">🚨</span>
         <div class="callout-content">
-            <p><strong>Anti-pattern:</strong> Don't put business logic in the API Gateway. It should be a dumb router + authenticator. Gateway knows <em>WHERE</em> to send requests, not <em>WHAT</em> to do with the data.</p>
+            <p><strong>Đừng nhét business logic vào API Gateway.</strong> Nó phải là một <strong>dumb router + authenticator</strong>. Gateway biết <em>WHERE</em> — gửi đi đâu. Nó <strong>không</strong> biết <em>WHAT</em> — làm gì với dữ liệu.</p>
         </div>
+    </div>
+
+    <p><strong>Dịch ra đời thường:</strong></p>
+    <ul>
+        <li>✅ Lễ tân được phép nói: <em>"Phòng Kế toán ở tầng 3, mời anh lên."</em></li>
+        <li>❌ Lễ tân <strong>KHÔNG</strong> được: mở phong bì của anh ra, tính lại con số, rồi <strong>sửa hợp đồng giùm.</strong></li>
+    </ul>
+
+    <p><strong>Vì sao cấm?</strong> Giả sử Gateway biết <em>"đơn hàng trên 500k thì giảm 10%"</em> → giờ <strong>luật kinh doanh nằm ở 2 nơi</strong>: Order Service <strong>và</strong> Gateway.</p>
+
+    <pre><code>😱 Hậu quả:
+   · Sửa luật  →  phải nhớ sửa cả Gateway
+   · MỌI team đều phải deploy Gateway
+   · → Gateway thành NÚT THẮT CỔ CHAI mới</code></pre>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🔗</span>
+        <div class="callout-content">
+            <p><strong>Nghe quen không?</strong> Anh vừa tách 8 service để <strong>hết chờ nhau</strong>… giờ <strong>cả 8 team lại xếp hàng chờ deploy Gateway.</strong></p>
+            <p><span class="key-phrase">Đó chính là Signal 2 / Conway's Law tái xuất.</span> Bất cứ thứ gì <strong>mọi team đều phải sửa</strong> đều biến thành hàng chờ deploy.</p>
+            <p>💀 <strong>Gateway béo phì = anh vừa tái tạo lại monolith, chỉ là đặt nó ở cửa trước.</strong></p>
+            <p>🔑 Vì vậy luật <em>"dumb router"</em> <strong>không phải luật kỹ thuật — nó là luật TỔ CHỨC.</strong></p>
+        </div>
+    </div>
+
+    <!-- ═══════════ BFF ═══════════ -->
+    <h3>📱 BFF = <em>Backend For Frontend</em> — "Backend dành riêng cho một cái Frontend"</h3>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📖</span>
+        <div class="callout-content">
+            <p><strong>BFF</strong> = một <strong>service trung gian nhỏ</strong>, viết <strong>riêng cho MỘT loại client.</strong></p>
+            <p>App mobile có backend riêng của app mobile. Web có backend riêng của web.</p>
+        </div>
+    </div>
+
+    <h4>🐌 Nỗi đau thứ 4 — cái em để dành ở trên</h4>
+
+    <p>Màn hình <strong>Trang chủ app mobile</strong> cần: <strong>tên user + 3 đơn gần nhất + số điểm thưởng.</strong></p>
+
+    <pre><code>❌ KHÔNG có BFF — app tự gọi 3 lần qua mạng 4G:
+   📱 → User Service     (200ms)
+   📱 → Order Service    (250ms)
+   📱 → Points Service   (180ms)
+                         ───────
+                         ~630ms  →  màn hình trắng gần 1 giây 😩
+                         và app phải tự ghép dữ liệu</code></pre>
+
+    <p>Tệ hơn: mỗi response trả về <strong>cả đống field app không dùng</strong>:</p>
+    <pre><code>{"id":1, "name":"Wiganz", "email":"...", "address":"...",
+ "tax_id":"...", "created_at":"...", "preferences":{ ...40 field nữa... }}
+
+App chỉ cần:  "name"      →  📉 đốt 4G của user vô ích</code></pre>
+
+    <h4>✅ Có BFF — app gọi ĐÚNG 1 lần</h4>
+
+    <pre><code>📱 → [Mobile BFF] → gọi 3 service (nội bộ, ~15ms, song song)
+                  → 1️⃣ GỘP lại thành 1 gói
+                  → 2️⃣ CẮT bỏ 40 field app không xài
+   ← trả về 1 gói nhỏ xíu
+
+   1 lần gọi  ·  ~50ms  ·  2KB     ✅
+   (thay vì 3 lần · 630ms · 40KB)</code></pre>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><span class="key-phrase">BFF = thằng đứng giữa, làm ĐÚNG 2 việc: GỘP nhiều service lại, và CẮT gọt dữ liệu cho vừa cái màn hình.</span></p>
+        </div>
+    </div>
+
+    <h4>🍽️ Vì sao gọi là "cho Frontend"? — Người phục vụ riêng cho từng loại khách</h4>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>👨‍👩‍👧 Khách gia đình <em>(Web)</em></th><th>🏃 Khách mang đi <em>(Mobile)</em></th></tr>
+            <tr>
+                <td>Ngồi lâu, bàn rộng. Muốn <strong>đủ món</strong>: khai vị, món chính, tráng miệng, bảng thống kê calo.</td>
+                <td>Vội, cầm tay, đi bộ. Chỉ muốn <strong>1 hộp gọn</strong> — không cần dĩa sứ, không cần khăn ăn.</td>
+            </tr>
+            <tr>
+                <td>Màn to, mạng khỏe → cần <strong>full response</strong> + biểu đồ</td>
+                <td>Màn nhỏ, 4G yếu → cần <strong>lean response</strong></td>
+            </tr>
+        </table>
+    </div>
+
+    <p>Nếu chỉ có <strong>một người phục vụ chung</strong> → hoặc khách gia đình bị phục vụ thiếu, hoặc khách mang đi phải ôm cả bộ dĩa sứ. <strong>Cả hai đều khổ.</strong> 🍽️</p>
+    <p><strong>Giải pháp: hai người phục vụ</strong>, mỗi người hiểu một loại khách.</p>
+
+    <h4>Giờ đọc lại cái sơ đồ này sẽ thấy rõ</h4>
+    <pre><code>               ┌──────────────────┐
+📱 iOS/Android→│   Mobile BFF     │──→ User Service
+               └──────────────────┘──→ Order Service
+                                   (lean response — không kèm analytics)
+
+               ┌──────────────────┐
+🖥️ Web Browser→│    Web BFF       │──→ User Service + Order Service
+               └──────────────────┘──→ Analytics Service
+                                   (full response — đủ hết)</code></pre>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🔗</span>
+        <div class="callout-content">
+            <p><strong>Cái nhìn cốt lõi:</strong> mỗi loại client có <strong>NHU CẦU khác nhau.</strong> Nhét tất cả vào một API chung = <strong>làm khổ tất cả.</strong></p>
+            <p><strong>Không có BFF thì sao?</strong> Team mobile xin thêm field → API chung phình ra → team web phải test lại → <strong>hai team lại chờ nhau.</strong></p>
+            <p>😮 <strong>Nghe quen không?</strong> Đó <strong>chính là Signal 2 / Conway's Law</strong>, chỉ là xuất hiện ở tầng API.</p>
+            <p>🔥 <span class="key-phrase">BFF = mỗi team frontend SỞ HỮU cái backend riêng của mình.</span> Team mobile đổi Mobile BFF — không hỏi ai. Team web đổi Web BFF — không hỏi ai.</p>
+            <p>🧵 Lại là <strong>cắt coupling.</strong> Sợi chỉ đỏ của cả Session 7.</p>
+        </div>
+    </div>
+
+    <!-- ═══════════ PHÂN BIỆT ═══════════ -->
+    <h3>🆚 Gateway vs BFF — câu hay bị hỏi vặn</h3>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th></th><th>🚪 API Gateway</th><th>📱 BFF</th></tr>
+            <tr><td><strong>Có bao nhiêu cái?</strong></td><td><strong>MỘT</strong> cho cả hệ thống</td><td><strong>Một cái cho MỖI loại client</strong></td></tr>
+            <tr><td><strong>Nhiệm vụ</strong></td><td>Auth, routing, rate limit, che địa chỉ</td><td><strong>GỘP</strong> nhiều service + <strong>CẮT GỌT</strong> dữ liệu</td></tr>
+            <tr><td><strong>Biết business logic?</strong></td><td>❌ <strong>Không</strong> — dumb router</td><td>⚠️ Biết chút — <em>logic hiển thị</em>, KHÔNG phải <em>luật kinh doanh</em></td></tr>
+            <tr><td><strong>Ai sở hữu?</strong></td><td>Team Platform / Infra</td><td><strong>Team frontend tương ứng</strong></td></tr>
+            <tr><td><strong>Trả lời câu hỏi</strong></td><td><em>"Gửi đi ĐÂU?"</em></td><td><em>"Màn hình này cần GÌ?"</em></td></tr>
+            <tr><td><strong>Chữa nỗi đau</strong></td><td>🔧 <strong>VẬN HÀNH</strong> (auth ở đâu, ai được vào)</td><td>🎨 <strong>SẢN PHẨM</strong> (màn này cần đúng dữ liệu gì)</td></tr>
+        </table>
+    </div>
+
+    <p><strong>Chúng KHÔNG thay thế nhau.</strong> Thực tế xếp chồng lên nhau:</p>
+    <pre><code>📱 App ──► 🚪 Gateway (auth, rate limit) ──► 📱 Mobile BFF ──► services
+🖥️ Web ──► 🚪 Gateway (auth, rate limit) ──► 🖥️ Web BFF    ──► services</code></pre>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">⚠️</span>
+        <div class="callout-content">
+            <p><strong>BFF cũng có cái GIÁ:</strong> 3 loại client → <strong>3 BFF phải nuôi.</strong> Code lặp lại giữa các BFF. Thêm 1 hop mạng.</p>
+            <p>💡 <span class="key-phrase">1-2 loại client, nhu cầu giống nhau → chỉ cần Gateway. ĐỪNG vẽ BFF.</span></p>
+            <p>BFF chỉ bật khi nhu cầu các client <strong>thật sự PHÂN KỲ</strong> (mobile cần gọn, smart TV cần khác, web cần đủ).</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "They look similar but solve different pains. The <strong>Gateway</strong> solves an <strong>operational</strong> pain — one entry point, centralized auth and rate limiting, and it hides the internal topology so clients don't couple to it. The <strong>BFF</strong> solves a <strong>product</strong> pain — each client needs a different shape of data, so each frontend team owns its own aggregation layer instead of negotiating over one shared API. And I'd keep the Gateway <strong>dumb</strong>: the moment business logic lands there, every team has to deploy through it — <strong>you've rebuilt the monolith at the front door</strong>."
     </div>
 
     <!-- Section 6: DB Per Service -->
     <h2 id="db-per-service">🗄️ Database Per Service</h2>
 
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📖</span>
+        <div class="callout-content">
+            <p><strong>Luật chỉ có một câu:</strong> <span class="key-phrase">Mỗi service có database RIÊNG. Và KHÔNG service nào được thò tay vào database của service khác.</span></p>
+        </div>
+    </div>
+
+    <pre><code>[Order Service]    →  🗄️ Order DB
+[Payment Service]  →  🗄️ Payment DB
+[User Service]     →  🗄️ User DB
+
+❌ CẤM:  Order Service viết thẳng  SELECT ... FROM payments
+✅ PHẢI: Order muốn biết về payment  →  GỌI API của Payment Service</code></pre>
+
+    <h3>🏠 Vì sao? — cái tủ lạnh riêng của mỗi bếp</h3>
+    <p>Nhớ <strong>"mỗi đầu bếp một cái bếp riêng"</strong> không? Database riêng = <strong>cái tủ lạnh riêng.</strong> Giả sử em cho Order Service thò tay vào Payment DB:</p>
+    <pre><code>Order Service viết:  SELECT * FROM payments WHERE user_id = 5</code></pre>
+    <p>Nghe tiện. Nhưng khi team Payment muốn <strong>đổi tên cột</strong> <code>amount</code> → <code>total_amount</code>:</p>
+    <div class="callout callout-red">
+        <span class="callout-emoji">😱</span>
+        <div class="callout-content">
+            <p><strong>Payment DB đổi → Order Service GÃY.</strong> Mà team Payment còn <strong>không biết</strong> Order đang đọc lén bảng của mình!</p>
+            <p>Anh vừa tách 2 service để chúng <strong>độc lập</strong> — nhưng chung DB thì chúng <strong>vẫn dính vào nhau qua cái bảng.</strong> Đây chính xác là <span class="key-phrase">Distributed Monolith</span> mình đã nói: tách service mà chung DB = <strong>tệ hơn monolith.</strong></p>
+        </div>
+    </div>
+    <p>🔑 Luật "DB riêng" tồn tại để bảo vệ <strong>một thứ duy nhất: quyền tự do đổi schema mà không hỏi ai.</strong></p>
+
     <div class="columns">
         <div class="callout callout-red">
             <span class="callout-emoji">❌</span>
             <div class="callout-content">
-                <p><strong>WRONG: Shared Database</strong></p>
-                <p>User/Order/Product Services all access same DB. Order Service adds column to users table → breaks User Service. User Service migration → must coordinate ALL teams. "Loosely coupled" in theory, tightly coupled via shared DB.</p>
+                <p><strong>SAI: Chung một Database</strong></p>
+                <p>User / Order / Product cùng đọc-ghi một DB. Order thêm cột vào bảng <code>users</code> → <strong>làm gãy User Service.</strong> User Service migration → <strong>phải họp cả 3 team.</strong> Mang tiếng "loosely coupled" nhưng thực chất <strong>dính chặt qua cái DB dùng chung.</strong></p>
             </div>
         </div>
         <div class="callout callout-green">
             <span class="callout-emoji">✅</span>
             <div class="callout-content">
-                <p><strong>RIGHT: Each Service Owns Its Data</strong></p>
-                <p>User Service → users_db (Postgres). Order Service → orders_db (Postgres). Search → Elasticsearch. Cart → Redis. Changes to users_db: User Service team's decision alone.</p>
+                <p><strong>ĐÚNG: Mỗi service SỞ HỮU dữ liệu của mình</strong></p>
+                <p>User → <code>users_db</code> (Postgres). Order → <code>orders_db</code> (Postgres). Search → Elasticsearch. Cart → Redis. <strong>Đổi <code>users_db</code> = quyết định RIÊNG của team User, không hỏi ai.</strong></p>
             </div>
         </div>
     </div>
 
-    <h3>Cross-Service Data Access (The Hard Part)</h3>
+    <h3>💥 Cái giá đắng nhất — mất <code>JOIN</code>, mất <code>transaction</code></h3>
+    <p>Trong monolith, lấy "tên user + đơn hàng của user đó" = <strong>một câu</strong>, vì cùng một DB:</p>
+    <pre><code><span class="kw">SELECT</span> u.name, o.total
+<span class="kw">FROM</span> users u <span class="kw">JOIN</span> orders o <span class="kw">ON</span> u.id = o.user_id</code></pre>
+    <p>Giờ microservices: <code>users</code> ở <strong>User DB</strong>, <code>orders</code> ở <strong>Order DB</strong> — hai database, hai máy khác nhau.</p>
+    <div class="callout callout-red">
+        <span class="callout-emoji">💀</span>
+        <div class="callout-content">
+            <p>Câu <code>JOIN</code> đó <strong>KHÔNG chạy được nữa.</strong> Không có <code>JOIN</code> nào bắc cầu qua 2 database trên 2 máy.</p>
+            <p>Anh phải làm tay: ① gọi Order Service lấy đơn (có <code>user_id</code>) → ② gom các <code>user_id</code> → ③ gọi User Service lấy tên → ④ tự ghép trong code.</p>
+        </div>
+    </div>
+    <p>🔑 <span class="key-phrase">Đây là cái giá THẬT của Database Per Service: mất <code>JOIN</code>, mất luôn <code>transaction</code> xuyên bảng.</span> Và mất transaction chính là chỗ <strong>Saga</strong> bước vào (phần dưới).</p>
+
+    <h3>🔀 Vậy muốn lấy dữ liệu của service khác thì làm sao? — 2 đường</h3>
     <div class="table-wrap">
         <table>
-            <tr><th>Option</th><th>How</th><th>Pro</th><th>Con</th></tr>
-            <tr><td><strong>Sync API call</strong></td><td><code>GET /users/{id}/email</code></td><td>Always fresh data</td><td>Order depends on User Service being up</td></tr>
-            <tr><td><strong>Event-driven replication</strong></td><td>User publishes <code>UserEmailChanged</code> → Order caches copy</td><td>Order is fully autonomous</td><td>Eventual consistency (1-2s stale)</td></tr>
+            <tr><th>Cách</th><th>Làm thế nào</th><th>✅ Được</th><th>❌ Mất</th></tr>
+            <tr>
+                <td><strong>📞 Gọi API đồng bộ</strong><br><em>(hỏi trực tiếp lúc cần)</em></td>
+                <td><code>GET /users/{id}/email</code> — cần thì gọi Payment/User Service hỏi ngay</td>
+                <td>Dữ liệu <strong>luôn mới nhất</strong></td>
+                <td>Order <strong>phụ thuộc</strong> User Service phải sống. User chết → Order cũng kẹt.</td>
+            </tr>
+            <tr>
+                <td><strong>📮 Nhân bản qua sự kiện</strong><br><em>(nghe tin, giữ bản sao)</em></td>
+                <td>User đổi email → hét <code>UserEmailChanged</code> → Order <strong>nghe và lưu bản sao</strong> vào DB của mình</td>
+                <td>Order <strong>hoàn toàn tự trị</strong> — User chết Order vẫn chạy</td>
+                <td><strong>Eventual consistency</strong> — bản sao trễ 1-2 giây so với gốc</td>
+            </tr>
         </table>
+    </div>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">⚖️</span>
+        <div class="callout-content">
+            <p>Lại là một cuộc <strong>đánh đổi tự-trị</strong>: 📞 API đồng bộ = luôn đúng nhưng dính nhau. 📮 Event = tách rời nhưng chấp nhận dữ liệu <strong>trễ vài giây.</strong></p>
+            <p>🔑 <span class="key-phrase">"Eventual consistency" = chấp nhận sai trong tích tắc, để đổi lấy sự độc lập.</span> Đây là lựa chọn mặc định trong microservices — vì tính độc lập đáng giá hơn sự chính xác tức thời (với hầu hết dữ liệu, không phải tiền).</p>
+        </div>
     </div>
 
     <!-- Section 7: Saga Pattern -->
     <h2 id="saga">🔄 Saga Pattern — Distributed Transactions</h2>
 
-    <h3>The Problem: Why Monolith Transactions Don't Work in Microservices</h3>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🔗</span>
+        <div class="callout-content">
+            <p><strong>Saga sinh ra từ vết thương của phần trên.</strong> Database Per Service <strong>giết chết <code>transaction</code> xuyên service</strong> → Saga là cách vá lại cái transaction đã mất.</p>
+        </div>
+    </div>
+
+    <h3>🎬 Đặt lại vấn đề — cái ung nhọt</h3>
+    <p>Đặt hàng cần làm <strong>3 việc, ở 3 service, 3 database khác nhau</strong>:</p>
     <div class="columns">
         <div>
-            <p style="font-size:0.85em;font-weight:600;color:var(--accent-green);margin-bottom:8px;">✅ Monolith — Trivial ACID Transaction</p>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-green);margin-bottom:8px;">✅ Monolith — ACID miễn phí</p>
             <pre><code><span class="kw">with</span> db.<span class="fn">transaction</span>():
     order = Order.<span class="fn">create</span>(...)
     payment = Payment.<span class="fn">charge</span>(...)
     inventory.<span class="fn">reduce</span>(...)
     notification.<span class="fn">send</span>(...)
-<span class="cm"># ANY failure → entire rollback atomically</span></code></pre>
+<span class="cm"># Bất kỳ bước nào lỗi</span>
+<span class="cm"># → Postgres UNDO sạch CẢ 4. Miễn phí.</span></code></pre>
+            <p style="font-size:0.85em;">Nhớ chữ <strong>A</strong> (Atomicity) ở Session 6 không? Đây chính là nó.</p>
         </div>
         <div>
-            <p style="font-size:0.85em;font-weight:600;color:var(--accent-red);margin-bottom:8px;">❌ Microservices — Cannot Span 4 DBs</p>
-            <pre><code><span class="cm"># Order created ✅</span>
-<span class="cm"># Payment charged ✅</span>
-<span class="cm"># Inventory update FAILS ❌</span>
-<span class="cm"># → User paid for out-of-stock item</span>
-<span class="cm"># → Inconsistent state</span></code></pre>
+            <p style="font-size:0.85em;font-weight:600;color:var(--accent-red);margin-bottom:8px;">❌ Microservices — 4 DB khác nhau</p>
+            <pre><code><span class="cm"># ① Order created  ✅ (Order DB)</span>
+<span class="cm"># ② Payment charged ✅ (Payment DB)</span>
+<span class="cm">#    → tiền RA KHỎI ví THẬT rồi</span>
+<span class="cm"># ③ Inventory FAILS ❌ HẾT HÀNG!</span>
+<span class="cm">#</span>
+<span class="cm"># Ai undo ① và ② giùm?</span>
+<span class="cm"># → KHÔNG AI CẢ. 3 DB không biết nhau.</span></code></pre>
+            <p style="font-size:0.85em;">💸 <strong>Khách bị trừ tiền cho món hết hàng.</strong></p>
         </div>
     </div>
 
+    <h3>💊 Saga = "chuỗi việc, mỗi việc có nút HOÀN TÁC riêng"</h3>
+    <p>Không ai undo tự động → anh phải <strong>TỰ VIẾT hành động undo cho từng bước.</strong> Nó có tên:</p>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">↩️</span>
+        <div class="callout-content">
+            <p><span class="key-phrase">Compensating transaction = "giao dịch đền bù" = nút Ctrl+Z THỦ CÔNG cho một bước đã lỡ làm.</span></p>
+        </div>
+    </div>
+    <pre><code>Bước xuôi              Bước đền bù (nếu sau đó có đứa gãy)
+─────────────          ──────────────────────────────────
+① tạo đơn         →    ①' hủy đơn
+② trừ tiền        →    ②' HOÀN tiền
+③ trừ kho ❌      →    (không cần — nó có làm được đâu)
+
+Khi ③ gãy → Saga chạy ngược:  ②' hoàn tiền → ①' hủy đơn → sạch.</code></pre>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><strong>Khác biệt cốt tử với ACID:</strong></p>
+            <p>🔵 <strong>ACID rollback</strong> = như thể <strong>chưa hề xảy ra</strong> (xóa sạch lịch sử).</p>
+            <p>🟠 <strong>Saga compensate</strong> = <strong>KHÔNG xóa được</strong> (tiền đã trừ THẬT rồi!) → phải <strong>làm THÊM một hành động ngược lại</strong> để bù. <span class="key-phrase">Đền bù, không phải xóa.</span></p>
+            <p>😅 Hệ quả cay: có một khoảnh khắc <strong>tiền đã trừ mà đơn chưa xong</strong> → người khác nhìn vào <strong>thấy trạng thái nửa vời.</strong> Đó là chữ <strong>I</strong> (Isolation) mình đã mất khi chia DB.</p>
+        </div>
+    </div>
+
+    <h3>🎭 Ai điều phối chuỗi này? — 2 kiểu (chỗ hay bị hỏi nhất)</h3>
     <h3>Saga: Choreography vs Orchestration</h3>
 
-    <details>
-        <summary>🎭 Choreography-based Saga (Event-driven)</summary>
+    <details open>
+        <summary>🎭 Choreography — "vũ đoàn KHÔNG có biên đạo"</summary>
         <div class="toggle-content">
-            <p>Services communicate via events — no central coordinator.</p>
-            <pre><code>Order Svc: creates order → publishes "OrderCreated"
-Payment Svc: listens → charges card → publishes "PaymentSucceeded"
-Inventory Svc: listens → reserves item → publishes "ItemReserved"
-Notification Svc: listens → sends "Order Confirmed" email
+            <p><strong>Không ai chỉ huy.</strong> Mỗi service <strong>tự nghe tin, tự làm, rồi la lên</strong> cho đứa sau nghe. Giống một điệu nhảy tập thể: không có biên đạo đứng ngoài — mỗi vũ công thấy người bên cạnh nhúc nhích thì mình nhúc nhích theo.</p>
+            <pre><code>Order:     tạo đơn   → hét "OrderCreated!"
+Payment:   nghe thấy → trừ tiền → hét "PaymentSucceeded!"
+Inventory: nghe thấy → trừ kho  → hét "ItemReserved!"
+Notification: nghe thấy → gửi email "Đơn đã xác nhận"
 
-FAILURE CASE: Inventory out of stock
-Inventory Svc: publishes "InventoryFailed"
-Payment Svc: listens → refunds → publishes "PaymentRefunded"
-Order Svc: listens → cancels → publishes "OrderCancelled"</code></pre>
+❌ KHI LỖI: Inventory hết hàng
+Inventory: hét "InventoryFailed!"
+Payment:   nghe → HOÀN tiền → hét "PaymentRefunded!"   (đền bù)
+Order:     nghe → hủy đơn   → hét "OrderCancelled!"    (đền bù)</code></pre>
             <div class="table-wrap">
                 <table>
-                    <tr><th>✅ Pros</th><th>❌ Cons</th></tr>
-                    <tr><td>Fully decoupled</td><td>Hard to track overall saga state</td></tr>
-                    <tr><td>No single point of failure</td><td>Risk of cyclic dependencies</td></tr>
-                    <tr><td>Maximum autonomy</td><td>Debugging events across 5 services = pain</td></tr>
+                    <tr><th>✅ Được</th><th>❌ Mất</th></tr>
+                    <tr><td>Cực kỳ <strong>tách rời</strong> (không có ông chủ)</td><td><strong>Không ai thấy toàn cảnh</strong> — saga đang ở bước nào?</td></tr>
+                    <tr><td>Không có điểm chết trung tâm</td><td>Nguy cơ các service nghe-hét lẫn lộn thành vòng lặp</td></tr>
+                    <tr><td>Mỗi team tự trị tối đa</td><td>Debug 5 service hét qua hét lại = <strong>địa ngục</strong></td></tr>
                 </table>
             </div>
         </div>
     </details>
 
-    <details>
-        <summary>🎯 Orchestration-based Saga (Command-driven)</summary>
+    <details open>
+        <summary>🎯 Orchestration — "có một ông NHẠC TRƯỞNG"</summary>
         <div class="toggle-content">
-            <p>A central Saga Orchestrator service coordinates the flow.</p>
-            <pre><code>[Order Orchestrator] → "PaymentService.charge(123, 999)"
-[Payment Service]    → returns success/failure
-[Order Orchestrator] → "InventoryService.reserve(456, 1)"
-[Inventory Service]  → FAILS
-[Order Orchestrator] → "PaymentService.refund(123, 999)"  ← compensating tx
-[Order Orchestrator] → "NotificationService.send('out-of-stock')"</code></pre>
+            <p><strong>Có một service điều phối</strong> (Orchestrator) đứng giữa, <strong>ra lệnh từng bước</strong> và chờ kết quả. Giống nhạc trưởng dàn nhạc: chỉ tay vào ai thì người đó chơi — và nhạc trưởng <strong>nhìn thấy toàn bộ bản nhạc.</strong></p>
+            <pre><code>[Orchestrator] → bảo Payment:   "trừ tiền đi"
+[Payment]      → "xong ✅"
+[Orchestrator] → bảo Inventory: "trừ kho đi"
+[Inventory]    → "HẾT HÀNG ❌"
+[Orchestrator] → bảo Payment:   "hoàn tiền đi"   ← nó CHỦ ĐỘNG gọi đền bù
+[Orchestrator] → bảo Notification: "báo hết hàng"</code></pre>
             <div class="table-wrap">
                 <table>
-                    <tr><th>✅ Pros</th><th>❌ Cons</th></tr>
-                    <tr><td>Single place to see entire flow</td><td>Orchestrator = single point of failure</td></tr>
-                    <tr><td>Easier to add/modify steps</td><td>Creates coupling to Orchestrator</td></tr>
-                    <tr><td>Clear error handling</td><td>Can become a bottleneck</td></tr>
+                    <tr><th>✅ Được</th><th>❌ Mất</th></tr>
+                    <tr><td><strong>Một chỗ duy nhất</strong> nhìn thấy cả luồng</td><td>Orchestrator = <strong>điểm chết trung tâm</strong></td></tr>
+                    <tr><td>Dễ thêm / sửa bước</td><td>Các service <strong>dính vào</strong> Orchestrator</td></tr>
+                    <tr><td>Xử lý lỗi rõ ràng</td><td>Có thể thành <strong>nút thắt cổ chai</strong></td></tr>
                 </table>
             </div>
         </div>
     </details>
 
     <div class="callout callout-yellow">
-        <span class="callout-emoji">💡</span>
+        <span class="callout-emoji">🔑</span>
         <div class="callout-content">
-            <p><strong>When to use each:</strong><br>
-            Choreography → Simple flows, 2-3 services, want maximum decoupling<br>
-            Orchestration → Complex flows, many steps, need visibility, business-critical</p>
+            <p><strong>Chọn cái nào?</strong></p>
+            <pre><code>Luồng ĐƠN GIẢN, 2-3 service, muốn tách rời tối đa    →  🎭 Choreography
+Luồng PHỨC TẠP, nhiều bước, cần NHÌN THẤY, quan trọng →  🎯 Orchestration</code></pre>
         </div>
     </div>
 
-    <!-- Section 8: Communication -->
-    <h2 id="communication">📡 Sync vs Async Communication</h2>
-
-    <div class="table-wrap">
-        <table>
-            <tr><th></th><th>REST (HTTP/1.1 + JSON)</th><th>gRPC (HTTP/2 + Protobuf)</th></tr>
-            <tr><td><strong>Format</strong></td><td>JSON (human-readable, larger)</td><td>Binary (smaller, faster)</td></tr>
-            <tr><td><strong>Speed</strong></td><td>Baseline</td><td>5-10x faster serialization</td></tr>
-            <tr><td><strong>Schema</strong></td><td>Optional (OpenAPI)</td><td>Required (.proto files)</td></tr>
-            <tr><td><strong>Browser support</strong></td><td>Native</td><td>Needs grpc-web proxy</td></tr>
-            <tr><td><strong>Best for</strong></td><td>Public APIs, external clients</td><td>Internal service-to-service</td></tr>
-        </table>
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🧵</span>
+        <div class="callout-content">
+            <p><strong>Lại đúng cái trục Conway:</strong> Choreography = <strong>phi tập trung</strong> (tự trị, nhưng không ai thấy toàn cảnh). Orchestration = <strong>có trung tâm</strong> (nhìn rõ, nhưng tạo coupling + nút thắt). <span class="key-phrase">Cùng một đánh đổi tự-trị-vs-kiểm-soát</span>, chỉ mặc bộ đồ khác.</p>
+        </div>
     </div>
 
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "Once each service owns its own database, you lose cross-service ACID — there's no transaction that spans four DBs. A Saga replaces it with a sequence of local transactions, each paired with a <strong>compensating transaction</strong>. The key difference from a rollback: you can't erase what happened — the money already left the wallet — so you <strong>issue a reversing action</strong> instead. <strong>Choreography</strong> (services react to events) is great for simple flows and max decoupling; <strong>Orchestration</strong> (a central coordinator) wins when the flow is complex and you need visibility. The trade-off I'd call out: Saga gives up isolation — <strong>there's a window where the system is observably half-done</strong>."
+    </div>
+
+    <!-- Section 8: Communication -->
+    <h2 id="communication">📡 Sync vs Async + REST vs gRPC</h2>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">⚠️</span>
+        <div class="callout-content">
+            <p><strong>Cẩn thận cái bẫy: đây là HAI câu hỏi KHÁC NHAU, đừng trộn.</strong></p>
+            <div class="table-wrap">
+                <table>
+                    <tr><th>Câu hỏi</th><th>Là về gì</th></tr>
+                    <tr><td><strong>REST vs gRPC</strong></td><td>Nói bằng <strong>NGÔN NGỮ gì?</strong> (định dạng gói tin)</td></tr>
+                    <tr><td><strong>Sync vs Async</strong></td><td>Có <strong>ĐỨNG CHỜ trả lời không?</strong> (kiểu chờ đợi)</td></tr>
+                </table>
+            </div>
+            <p>Hai trục <strong>vuông góc</strong> nhau — có thể REST-sync, REST-async, gRPC-sync... trộn kiểu gì cũng được.</p>
+        </div>
+    </div>
+
+    <!-- ─── TRỤC 1: SYNC vs ASYNC ─── -->
+    <h3>🗣️ Trục 1 — Sync vs Async: "Có đứng chờ không?"</h3>
+
+    <div class="columns">
+        <div class="callout callout-blue">
+            <span class="callout-emoji">☎️</span>
+            <div class="callout-content">
+                <p><strong>Synchronous = GỌI ĐIỆN THOẠI</strong></p>
+                <p>Gọi Neriah hỏi "mai rảnh không?". Anh <strong>cầm máy, đứng im, CHỜ</strong> tới khi có câu trả lời. Chưa trả lời → không làm gì khác được.</p>
+                <pre><code>Order gọi Payment: "trừ tiền đi"
+Order:   ⏳ ĐỨNG CHỜ... (đứng im)
+Payment: "xong ✅"
+Order:   tiếp tục</code></pre>
+                <p>🔑 <span class="key-phrase">"Tôi CẦN câu trả lời TRƯỚC KHI đi tiếp."</span></p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">📮</span>
+            <div class="callout-content">
+                <p><strong>Asynchronous = NHẮN TIN / thả thư vào hòm</strong></p>
+                <p>Nhắn Neriah "mai đi cà phê nha" rồi <strong>cất máy, đi làm việc khác.</strong> Neriah rảnh lúc nào đọc lúc đó.</p>
+                <pre><code>Order thả tin vào hòm (Kafka): "OrderCreated!"
+Order:   đi tiếp NGAY (không chờ)
+Email:   rảnh thì lấy tin ra, gửi mail lúc nào cũng được</code></pre>
+                <p>🔑 <span class="key-phrase">"Tôi chỉ cần NÓI là chuyện đã xảy ra. Ai xử lý lúc nào kệ."</span></p>
+            </div>
+        </div>
+    </div>
+
+    <p><strong>Khi nào dùng cái nào? Hỏi đúng 1 câu:</strong> <em>"Tôi có cần câu trả lời NGAY để đi tiếp không?"</em></p>
     <div class="table-wrap">
         <table>
-            <tr><th>Pattern</th><th>Use When</th></tr>
-            <tr><td><strong>Synchronous (REST/gRPC)</strong></td><td>Payment confirmation, authentication, reads — need immediate answer</td></tr>
-            <tr><td><strong>Asynchronous (Kafka/RabbitMQ)</strong></td><td>Email notifications, fan-out (1 event → many consumers), different processing speeds, resilience</td></tr>
+            <tr><th>☎️ CẦN ngay → Synchronous</th><th>📮 KHÔNG cần ngay → Asynchronous</th></tr>
+            <tr><td>💳 Xác nhận thanh toán (trừ được tiền mới cho đặt đơn)</td><td>📧 Gửi email xác nhận</td></tr>
+            <tr><td>🔐 Đăng nhập (đúng mật khẩu mới cho vào)</td><td>📊 Ghi log, thống kê</td></tr>
+            <tr><td>📖 Đọc dữ liệu để hiển thị</td><td>📢 Fan-out: 1 sự kiện → 10 service cùng nghe</td></tr>
         </table>
     </div>
 
     <div class="callout callout-purple">
-        <span class="callout-emoji">⚡</span>
+        <span class="callout-emoji">🔗</span>
         <div class="callout-content">
-            <p><strong>Rule of thumb:</strong><br>
-            Synchronous = "I need the answer before I can continue"<br>
-            Asynchronous = "I just need to say it happened, you handle it whenever"</p>
+            <p>Cái <strong>hòm thư</strong> (Kafka / RabbitMQ) chính là thứ làm <strong>Choreography Saga</strong> ở trên chạy được. Service "hét sự kiện" = thả tin vào hòm; service "nghe" = lấy tin ra. <span class="key-phrase">Async không chỉ là "gửi email" — nó là xương sống của giao tiếp phi tập trung.</span></p>
         </div>
+    </div>
+
+    <!-- ─── TRỤC 2: REST vs gRPC ─── -->
+    <h3>📦 Trục 2 — REST vs gRPC: "Nói bằng ngôn ngữ gì?"</h3>
+    <p>Cả hai đều là cách 2 service <strong>nói chuyện</strong>. Khác nhau ở <strong>định dạng gói tin.</strong></p>
+
+    <div class="columns">
+        <div class="callout callout-blue">
+            <span class="callout-emoji">📜</span>
+            <div class="callout-content">
+                <p><strong>REST = thư tiếng người (JSON)</strong></p>
+                <pre><code>{"user_id": 5, "amount": 100000}</code></pre>
+                <p>Con người <strong>ĐỌC được</strong>, gói tin <strong>tự giải thích chính nó.</strong> Nhưng dài dòng, nặng.</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">⚡</span>
+            <div class="callout-content">
+                <p><strong>gRPC = mật mã nén (Protobuf)</strong></p>
+                <pre><code>0x08 0x05 0x10 0xA0 0x8D   ← không đọc nổi</code></pre>
+                <p>Nhỏ xíu, máy đọc nhanh 5-10×. Nhưng cần <strong>"từ điển" (.proto)</strong> cài trước ở CẢ 2 bên.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th></th><th>📜 REST</th><th>⚡ gRPC</th></tr>
+            <tr><td>Định dạng</td><td>JSON — người đọc được, nặng</td><td>Nhị phân — nhỏ, nhanh</td></tr>
+            <tr><td>Tốc độ</td><td>Chuẩn</td><td>Nhanh 5-10×</td></tr>
+            <tr><td>Từ điển (schema)</td><td>Không bắt buộc</td><td><strong>Bắt buộc</strong> — file <code>.proto</code></td></tr>
+            <tr><td>Trình duyệt</td><td>Chạy thẳng ✅</td><td>Cần proxy grpc-web</td></tr>
+            <tr><td><strong>Hợp cho</strong></td><td>🌍 <strong>API công khai, client ngoài</strong></td><td>🏠 <strong>Service nội bộ gọi nhau</strong></td></tr>
+        </table>
+    </div>
+
+    <!-- ─── KIỂM SOÁT 2 ĐẦU ─── -->
+    <h3>🗝️ Mấu chốt: "kiểm soát 2 đầu" nghĩa là gì?</h3>
+    <p>Mỗi cuộc gọi có 2 đầu: <strong>đầu GỌI (client)</strong> và <strong>đầu NHẬN (service)</strong>. Câu hỏi sống còn: <em>ai viết ra 2 đầu này?</em></p>
+
+    <div class="columns">
+        <div class="callout callout-red">
+            <span class="callout-emoji">🌍</span>
+            <div class="callout-content">
+                <p><strong>API công khai — anh chỉ sở hữu 1 đầu</strong></p>
+                <pre><code>[App iPhone của khách]  ─►
+[App bên thứ 3]         ─►  [ API của anh ]
+[Dev lạ ở Brazil]       ─►
+[Trình duyệt Chrome]    ─►</code></pre>
+                <p>Anh viết <strong>đầu NHẬN</strong>. Nhưng <strong>đầu GỌI thì thiên hạ viết</strong> — anh không kiểm soát. Dev Brazil dùng gì anh chịu. 🤷</p>
+                <p>🔑 Không kiểm soát đầu gọi → phải chọn thứ <strong>ai cũng dùng được, không cần chuẩn bị</strong> = <strong>REST/JSON</strong> (tự giải thích).</p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">🏠</span>
+            <div class="callout-content">
+                <p><strong>Service nội bộ — anh sở hữu CẢ 2 đầu</strong></p>
+                <pre><code>[ Order Service ]  ─►  [ Payment Service ]
+   (anh viết)            (anh viết)</code></pre>
+                <p>Anh viết <strong>cả đầu gọi LẪN đầu nhận</strong> → biết chính xác cả 2 chạy gì.</p>
+                <p>🔑 Kiểm soát cả 2 → ép cả 2 dùng chung <strong>một "từ điển bí mật"</strong> để nói nhanh = <strong>gRPC</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📖</span>
+        <div class="callout-content">
+            <p><strong>Vì sao gRPC BẮT BUỘC kiểm soát 2 đầu?</strong> Chuỗi <code>0x08 0x05...</code> tự nó vô nghĩa. Muốn hiểu, <strong>cả 2 đầu phải có cùng cuốn từ điển <code>.proto</code></strong> (số 1 = user_id, số 2 = amount). Từ điển khác nhau → giải mã ra rác.</p>
+            <p>💥 Ông dev Brazil làm sao có từ điển của anh? Không thể ép người ngoài → <strong>gRPC chỉ dùng nội bộ.</strong> REST thì gói tin tự giải thích, ai gửi cũng được → hợp cho người lạ.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🍽️</span>
+        <div class="callout-content">
+            <p><strong>Ẩn dụ chốt hạ:</strong></p>
+            <p>📜 <strong>REST = nói tiếng Anh</strong> — ai cũng hiểu, nhưng dài. Dùng với <strong>người lạ, khách ngoài.</strong></p>
+            <p>⚡ <strong>gRPC = tiếng lóng của 2 anh em</strong> — cực nhanh, người ngoài đứng hình. Dùng với <strong>anh em ruột trong nhà</strong>, và cả 2 <strong>phải học chung bộ tiếng lóng trước.</strong></p>
+            <p><span class="key-phrase">Không nói lóng với khách lạ (họ không hiểu). Không nói trịnh trọng với em ruột (phí thời gian).</span></p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "These are two orthogonal decisions. <strong>Sync vs async</strong> is about whether I block for the answer — sync for payments and auth where I need the result to continue, async (a message broker) for emails and fan-out. <strong>REST vs gRPC</strong> is about wire format. I use <strong>REST at the edge</strong> because I don't control external clients, so I need something self-describing that any client and any browser can call. I use <strong>gRPC internally</strong> because I own both ends and can ship a shared <code>.proto</code> contract, which buys me a much faster binary protocol."
     </div>
 
     <!-- Section 9: Service Discovery -->
     <h2 id="service-discovery">🔍 Service Discovery</h2>
 
     <div class="callout callout-yellow">
-        <span class="callout-emoji">🤔</span>
+        <span class="callout-emoji">🎬</span>
         <div class="callout-content">
-            <p><strong>The problem:</strong> Order Service needs to call Payment Service. In Kubernetes, Payment Service might be at 10.0.1.42:8080 (Pod 1), 10.0.1.87:8080 (Pod 2 just spun up), and Pod 1 just crashed → 10.0.1.42 is gone. How does Order Service know the current addresses?</p>
+            <p><strong>Vấn đề — địa chỉ không bao giờ đứng yên.</strong> Order muốn gọi Payment. Payment ở IP nào?</p>
+            <pre><code>Payment Pod 1:  10.0.1.42:8080
+Payment Pod 2:  10.0.1.87:8080   (vừa mới sinh ra)
+💥 Pod 1 crash  →  10.0.1.42 BIẾN MẤT</code></pre>
+            <p>Trong Kubernetes, container (pod) <strong>sinh ra và chết liên tục</strong> — mỗi lần một IP mới. ❌ Hardcode IP → <strong>chết ngay ngày mai.</strong></p>
         </div>
     </div>
 
-    <div class="table-wrap">
-        <table>
-            <tr><th>Approach</th><th>How</th><th>Best For</th></tr>
-            <tr><td><strong>Client-Side (Consul/Eureka)</strong></td><td>Services register on startup → caller queries registry → load balances</td><td>Non-Kubernetes, full control over LB logic</td></tr>
-            <tr><td><strong>Server-Side (Kubernetes DNS)</strong></td><td>Stable DNS: <code>payment-service.default.svc.cluster.local</code> → kube-proxy LBs automatically</td><td>Kubernetes-native, language-agnostic</td></tr>
-        </table>
+    <p>💡 Lời giải: một <strong>"danh bạ SỐNG"</strong> — service sinh ra thì tự ghi tên+IP vào, chết thì bị xóa tên. Ai muốn gọi thì hỏi danh bạ để lấy số <strong>mới nhất, đang sống.</strong></p>
+    <p>Có 2 kiểu, khác nhau <strong>DUY NHẤT một điểm:</strong> <span class="key-phrase">AI là người CẦM danh bạ đi tra?</span></p>
+
+    <div class="columns">
+        <div class="callout callout-blue">
+            <span class="callout-emoji">🙋</span>
+            <div class="callout-content">
+                <p><strong>Kiểu 1: Client-Side — "Order TỰ đi tra"</strong></p>
+                <pre><code>① Order → hỏi Consul: "Payment ở đâu?"
+② Consul → ".87 và .91, cả 2 đang sống"
+③ Order → TỰ chọn một cái (.87)
+④ Order → tự gọi 10.0.1.87</code></pre>
+                <p>Order phải <strong>tự viết code</strong> cho bước ①②③.</p>
+                <p>✅ Order <strong>toàn quyền</strong> chọn gọi ai<br>
+                   ❌ <strong>MỖI service</strong> phải viết lại đống này → 8 service = 8 lần<br>
+                   🏷️ <strong>Consul, Eureka</strong> · hợp khi <strong>KHÔNG dùng K8s</strong></p>
+                <p><em>Ẩn dụ: anh tự mở danh bạ, tự dò số, tự bấm gọi.</em></p>
+            </div>
+        </div>
+        <div class="callout callout-green">
+            <span class="callout-emoji">🏢</span>
+            <div class="callout-content">
+                <p><strong>Kiểu 2: Server-Side — "gọi một cái tên, có người tra giùm"</strong></p>
+                <pre><code>Order → gọi:  payment-service
+              ↑ cái TÊN này BẤT BIẾN (không phải IP!)
+
+Đằng sau (K8s tự lo, Order không thấy):
+   → tra danh bạ → chọn pod sống → nối máy</code></pre>
+                <p>Order <strong>không biết, không cần biết</strong> IP thật.</p>
+                <p>✅ Order <strong>cực đơn giản</strong> — chỉ nhớ 1 cái tên<br>
+                   ✅ <strong>Ngôn ngữ nào cũng xài</strong> (logic tra nằm ở hạ tầng)<br>
+                   🏷️ <strong>Kubernetes DNS</strong> · mặc định thời nay</p>
+                <p><em>Ẩn dụ: gọi tổng đài "cho gặp phòng Kế toán" — tổng đài tự nối.</em></p>
+            </div>
+        </div>
+    </div>
+
+    <pre><code>🙋 CLIENT-SIDE:  Order [cầm danh bạ, tự dò, tự gọi] ──► Payment
+                      (Order gánh việc)
+
+🏢 SERVER-SIDE:  Order ──► [tổng đài K8s: tra &amp; nối giùm] ──► Payment
+                      (hạ tầng gánh việc, Order chỉ đọc tên)</code></pre>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><span class="key-phrase">Client-side = anh TỰ tra. Server-side = anh gọi tên bất biến, hạ tầng tra giùm.</span> Cùng giải một bài (IP luôn đổi), chỉ khác ai làm việc nặng.</p>
+            <p>🧵 Server-side discovery = <strong>cùng trick với API Gateway</strong>: giấu cái hay-đổi (IP) sau một cái bất biến (một cái tên). Càng ít thứ client phải biết → client càng ít gãy. <strong>Indirection — sợi chỉ đỏ của cả session.</strong></p>
+        </div>
     </div>
 
     <!-- Section 10: Distributed Tracing -->
     <h2 id="tracing">🔎 Distributed Tracing</h2>
 
+    <h3>🎬 Vì sao monolith KHÔNG có vấn đề này?</h3>
+    <p>Trong monolith, một request chạy <strong>trong MỘT process, ghi vào MỘT file log</strong> → lỗi thì nhìn <strong>một stack trace</strong> là thấy hết đường đi. 🎯</p>
+
+    <h3>😱 Giờ là microservices — cơn ác mộng</h3>
+    <p>Một cú "Đặt hàng" <strong>nhảy qua 5 service, trên 5 máy khác nhau</strong>, mỗi thằng ghi vào <strong>file log RIÊNG</strong>:</p>
+    <pre><code>📱 User: "Đặt hàng!"
+   → Gateway    (máy 1, log riêng)
+   → Order      (máy 2, log riêng)
+   → Payment    (máy 3, log riêng)
+   → Inventory  (máy 4, log riêng)
+   → Redis lock (máy 5, log riêng)
+
+💥 Đơn LỖI. Nhưng lỗi ở máy nào trong 5 máy???</code></pre>
+
     <div class="callout callout-red">
         <span class="callout-emoji">😱</span>
         <div class="callout-content">
-            <p><strong>The nightmare without tracing:</strong> User reports "My order failed." Every service logs look OK individually. WHERE did it fail? Without distributed tracing: 2 hours of grepping through 5 log files.</p>
+            <p><strong>Chỗ đau nhất:</strong> trong log của Order Service <strong>không chỉ có request của anh</strong> — nó có <strong>HÀNG NGHÌN request</strong> của user khác, <strong>trộn lẫn</strong>, cùng lúc.</p>
+            <pre><code>Order Service log (10:03:22):
+   [??] user 5 tạo đơn
+   [??] user 88 tạo đơn
+   [??] user 5 gọi payment    ← DÒNG NÀO của anh???
+   [??] user 12 lỗi
+   ...5000 dòng trộn lộn...</code></pre>
+            <p>Nhân với <strong>5 file log</strong> ở 5 máy = <strong>2 tiếng grep bằng tay.</strong> Đây chính là <em>"NEVER grep raw text"</em> ở Session 6.</p>
         </div>
     </div>
 
-    <h3>Correlation ID Pattern</h3>
-    <pre><code><span class="cm"># API Gateway: generate correlation ID for every request</span>
+    <h3>📦 Lời giải: Mã vận đơn (Correlation ID / Trace ID)</h3>
+    <div class="callout callout-blue">
+        <span class="callout-emoji">📦</span>
+        <div class="callout-content">
+            <p>Ship một kiện hàng qua GHN, nó đi qua <strong>5 kho.</strong> Lúc gửi, dán <strong>MỘT mã vận đơn duy nhất</strong>: <code>SPX-abc-123</code>. <strong>Mỗi kho đều quét CÙNG mã đó.</strong> Gõ mã lên web → thấy toàn bộ hành trình:</p>
+            <pre><code>SPX-abc-123:
+   Kho Sài Gòn   ✅ 8:00
+   Kho Đồng Nai  ✅ 9:30
+   Kho Hà Nội    ❌ KẸT Ở ĐÂY     ← thấy ngay!</code></pre>
+        </div>
+    </div>
+
+    <p>Áp vào microservices — <strong>y hệt</strong>: tại cửa (Gateway) sinh <strong>MỘT mã duy nhất</strong> cho request, rồi <strong>truyền cái mã đó đi theo</strong> xuống mọi service. Mỗi service ghi log đều <strong>kèm cái mã đó</strong>.</p>
+
+    <pre><code><span class="cm"># Tại Gateway: đẻ ra mã cho MỖI request</span>
 <span class="kw">import</span> uuid
 
 <span class="kw">def</span> <span class="fn">handle_request</span>(request):
     correlation_id = request.headers.<span class="fn">get</span>(<span class="str">'X-Correlation-ID'</span>) <span class="kw">or</span> str(uuid.<span class="fn">uuid4</span>())
-    logger.<span class="fn">info</span>(<span class="str">f"[{correlation_id}] Processing order for user {user_id}"</span>)
-    <span class="cm"># Forward to downstream with same header</span>
+    logger.<span class="fn">info</span>(<span class="str">f"[{correlation_id}] Xử lý đơn cho user {user_id}"</span>)
+    <span class="cm"># GỬI KÈM cái mã xuống service sau — truyền tiếp</span>
     requests.<span class="fn">post</span>(<span class="str">'http://payment-service/charge'</span>,
                   headers={<span class="str">'X-Correlation-ID'</span>: correlation_id}, ...)</code></pre>
 
-    <p>Query all logs by <code>X-Correlation-ID = "abc-123"</code> → see ALL log lines across ALL services → timeline showing exactly where and when the failure occurred.</p>
+    <p>Payment nhận → ghi log kèm <code>abc-123</code> → truyền tiếp cho Inventory → ... <strong>cả 5 service dùng CHUNG một mã.</strong></p>
 
-    <h3>Jaeger/Zipkin Visualization</h3>
-    <pre><code>Trace for request "abc-123-xyz":
+    <div class="callout callout-green">
+        <span class="callout-emoji">🪄</span>
+        <div class="callout-content">
+            <p><strong>Phép màu:</strong> lọc tất cả log của tất cả service theo <code>X-Correlation-ID = "abc-123"</code>:</p>
+            <pre><code>[abc-123] Gateway   nhận request     10:03:22.001
+[abc-123] Order     tạo đơn          10:03:22.050
+[abc-123] Payment   trừ tiền ✅       10:03:22.110
+[abc-123] Inventory trừ kho...        10:03:22.160
+[abc-123] Redis     ❌ TIMEOUT        10:03:22.900</code></pre>
+            <p>5000 dòng rác biến mất. Chỉ còn <strong>đúng hành trình của request anh cần</strong>, xếp theo thời gian, xuyên 5 máy. Lỗi lòi ra ngay: <strong>Redis timeout.</strong></p>
+            <p>🔑 <span class="key-phrase">Trace ID = sợi chỉ khâu các mảnh log rời rạc ở 5 máy thành MỘT câu chuyện liền mạch.</span></p>
+        </div>
+    </div>
 
-Order Svc (0-100ms)
-  ├── Payment Svc call (10-60ms) ✅
-  └── Inventory Svc call (60-100ms)
-        └── DB query (60-90ms) ✅
-        └── Redis lock (90-100ms) ❌ TIMEOUT ← root cause visible instantly</code></pre>
+    <h3>📊 Jaeger / Zipkin — biến sợi chỉ thành hình</h3>
+    <p>Lọc ra một đống dòng vẫn khó đọc. Jaeger/Zipkin vẽ thành <strong>biểu đồ thác nước</strong> — mỗi thanh là một chặng, dài = tốn thời gian:</p>
+    <pre><code>Trace "abc-123":
+
+Order Svc          ├────────────────────────┤  (0–100ms)
+  ├─ Payment call  │  ├──────┤                  (10–60ms)  ✅
+  └─ Inventory     │            ├────────────┤  (60–100ms)
+       ├─ DB query │            ├────────┤      (60–90ms)  ✅
+       └─ Redis    │                    ├──┤    (90–100ms) ❌ TIMEOUT
+                                                 ↑ thủ phạm, nhìn phát ra</code></pre>
+    <p>Nhìn cái là biết: <strong>90% thời gian ổn, chết ở khúc Redis lock cuối.</strong> Không cần grep gì.</p>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">📖</span>
+        <div class="callout-content">
+            <p><strong>2 từ vựng để nói cho pro:</strong></p>
+            <p>🧵 <strong>Trace</strong> = <strong>cả hành trình</strong> của một request (cả cái mã vận đơn <code>abc-123</code>).<br>
+               📏 <strong>Span</strong> = <strong>một chặng</strong> trong hành trình (một cái thanh — "Payment call", "DB query").</p>
+            <p>Một <strong>trace</strong> chứa nhiều <strong>span.</strong> Vậy thôi.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🔗</span>
+        <div class="callout-content">
+            <p>Cái mã này <strong>sinh ra ở Gateway</strong> — đúng cái "lễ tân" mình đã dựng. Nhớ dòng <em>"Logging + gắn request_id"</em> trong bảng lễ tân không? <span class="key-phrase">Đó CHÍNH LÀ trace ID này.</span> Monolith cho anh stack trace miễn phí; microservices bắt anh <strong>tự khâu lại</strong> bằng ID truyền tay.</p>
+        </div>
+    </div>
+
+    <div class="interview-answer">
+        <strong>🔥 NÓI CÂU NÀY TRONG INTERVIEW:</strong><br>
+        "In a monolith one request is one stack trace. Once it fans out across five services on five machines, each writes to its own log — interleaved with thousands of other requests — so 'where did it fail?' becomes hours of grepping. The fix is a <strong>correlation ID</strong>: generate one at the gateway, propagate it on every downstream call, and log it everywhere. Then I can filter every service's logs by that one ID and reconstruct the whole timeline. Tools like Jaeger render it as a <strong>span waterfall</strong>, so the slow or failing hop is obvious instantly."
+    </div>
 
     <!-- Quick Reference -->
     <h2 id="quick-ref" style="display:none;">Quick Reference</h2>
