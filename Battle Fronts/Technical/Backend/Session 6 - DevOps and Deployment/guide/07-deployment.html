@@ -150,6 +150,65 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="section-header" id="part2"><span>🔄</span> Part 2: Blue-Green vs Rolling — Visual Comparison</div>
 
 <div class="concept-card">
+
+  <!-- ═══ PRIMER: THE PROBLEM + THE ALB ═══ -->
+  <div style="background:#f8f4ec;border:1px solid var(--border);border-radius:12px;padding:22px 24px;margin-bottom:24px;">
+    <div style="font-weight:800;color:var(--dark);margin-bottom:10px;font-size:1.05rem;">🎯 The problem both strategies solve</div>
+    <p style="font-size:0.92rem;line-height:1.75;color:#555;">Your app runs on <strong>3 servers</strong> (called <em>instances</em>). You have new code. How do you swap it in?</p>
+    <div style="background:#ffebee;border-left:4px solid #c62828;border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:0.9rem;">
+      <strong style="color:#c62828;">❌ The dumb way:</strong> shut all 3 down, install new code, boot up → <strong>5 minutes of dead website.</strong>
+    </div>
+    <p style="font-size:0.92rem;line-height:1.75;color:#555;">So we need something smarter. There are exactly <strong>two ways</strong>, and this whole section just compares them.</p>
+
+    <div style="background:#fff;border:1px dashed #c9bfa8;border-radius:10px;padding:14px 18px;margin-top:16px;">
+      <strong>🚦 First — what is a Load Balancer (ALB)?</strong>
+      <div style="font-size:0.9rem;line-height:1.75;color:#555;margin-top:8px;">
+        <strong>The ALB is a doorman standing at the entrance, pointing customers to a server.</strong>
+<div style="font-family:'Consolas',monospace;font-size:0.84rem;background:#1e293b;color:#e2e8f0;padding:12px 14px;border-radius:6px;margin:10px 0;white-space:pre;overflow-x:auto;">user → 🚦 ALB → <span style="color:#93c5fd;">"go to that server over there"</span></div>
+        This doorman <strong>points wherever you tell him to.</strong> That's all you need to know — he is the main character of this whole page. 👮
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ THE TWO METAPHORS ═══ -->
+  <div class="two-col" style="margin-bottom:24px;">
+    <div style="background:#e3f2fd;border:2px solid #1976d2;border-radius:12px;padding:18px 20px;">
+      <div style="font-weight:800;color:#1565c0;margin-bottom:10px;">🔵🟢 Blue-Green = <em>"build a second shop next door"</em></div>
+      <div style="font-size:0.88rem;line-height:1.75;color:#37474f;">
+        You run a noodle shop (<strong>BLUE</strong>) and want a new menu.
+        <ol style="margin:10px 0 0 18px;line-height:1.9;">
+          <li>Build <strong>a whole second shop</strong> (GREEN) with the new menu. Customers keep eating at BLUE, oblivious.</li>
+          <li>Taste-test GREEN yourself (<em>smoke tests</em>). Terrible? Tear it down — <strong>customers never knew.</strong> 😎</li>
+          <li>Good? The doorman 👮 <strong>flips his sign: "everyone goes to GREEN now."</strong> ← instant.</li>
+          <li>BLUE stays standing (not demolished yet).</li>
+        </ol>
+      </div>
+    </div>
+    <div style="background:#fff3e0;border:2px solid #e65100;border-radius:12px;padding:18px 20px;">
+      <div style="font-weight:800;color:#e65100;margin-bottom:10px;">🔄 Rolling = <em>"renovate one table at a time"</em></div>
+      <div style="font-size:0.88rem;line-height:1.75;color:#37474f;">
+        <strong>One shop only.</strong> 3 tables (3 instances). Swap them one by one:
+<div style="font-family:'Consolas',monospace;font-size:0.8rem;background:#1e293b;color:#e2e8f0;padding:12px 14px;border-radius:6px;margin:10px 0;white-space:pre;overflow-x:auto;">start:  [<span style="color:#fca5a5;">old</span>] [<span style="color:#fca5a5;">old</span>] [<span style="color:#fca5a5;">old</span>]
+step 1: [<span style="color:#fca5a5;">old</span>] [<span style="color:#fca5a5;">old</span>] [<span style="color:#86efac;">NEW</span>]  <span style="color:#64748b;">← tables 1,2 still old menu</span>
+step 2: [<span style="color:#fca5a5;">old</span>] [<span style="color:#86efac;">NEW</span>] [<span style="color:#86efac;">NEW</span>]
+step 3: [<span style="color:#86efac;">NEW</span>] [<span style="color:#86efac;">NEW</span>] [<span style="color:#86efac;">NEW</span>]  <span style="color:#64748b;">← done</span></div>
+        That's exactly the red/green boxes you see below. 🎨
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SIDE BY SIDE TABLE ═══ -->
+  <table style="width:100%;border-collapse:collapse;font-size:0.88rem;margin-bottom:24px;">
+    <thead><tr style="background:var(--dark);color:#fff;"><th style="padding:10px 14px;text-align:left;"></th><th style="padding:10px 14px;text-align:left;">🔵🟢 Blue-Green</th><th style="padding:10px 14px;text-align:left;">🔄 Rolling</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:10px 14px;border:1px solid var(--border);"><strong>Infrastructure</strong></td><td style="padding:10px 14px;border:1px solid var(--border);"><strong>2 full sets</strong> (costs 2×) 💸</td><td style="padding:10px 14px;border:1px solid var(--border);">1 set (cheap) 💰</td></tr>
+      <tr style="background:#fafaf8;"><td style="padding:10px 14px;border:1px solid var(--border);"><strong>The switch</strong></td><td style="padding:10px 14px;border:1px solid var(--border);">one flip, instant</td><td style="padding:10px 14px;border:1px solid var(--border);">gradual, batch by batch</td></tr>
+      <tr><td style="padding:10px 14px;border:1px solid var(--border);"><strong>Rollback</strong></td><td style="padding:10px 14px;border:1px solid var(--border);">⚡ <strong>seconds</strong> — the doorman flips back (BLUE is still standing!)</td><td style="padding:10px 14px;border:1px solid var(--border);">🐌 roll backwards, table by table. <strong>No undo button.</strong></td></tr>
+      <tr style="background:#fafaf8;"><td style="padding:10px 14px;border:1px solid var(--border);"><strong>Old + new run together?</strong></td><td style="padding:10px 14px;border:1px solid var(--border);">No <em>(in theory — see the bomb below)</em></td><td style="padding:10px 14px;border:1px solid var(--border);"><strong>Yes</strong>, for minutes</td></tr>
+      <tr><td style="padding:10px 14px;border:1px solid var(--border);"><strong>Use when</strong></td><td style="padding:10px 14px;border:1px solid var(--border);">big, <strong>risky</strong> releases</td><td style="padding:10px 14px;border:1px solid var(--border);">everyday default (ECS/K8s)</td></tr>
+    </tbody>
+  </table>
+
   <div class="two-col">
     <div>
       <h3 style="color:#1976d2;margin-bottom:14px;">🔵🟢 Blue-Green Deployment</h3>
@@ -208,6 +267,124 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 
   <div style="background:#fff3e0;border-radius:10px;padding:18px;border-left:4px solid #e65100;margin-top:12px;">
     <strong>⚠️ The Critical Misunderstanding:</strong> "We do blue-green, so migrations aren't a concern." WRONG. Blue-green still means you have old code (the Blue environment) running and pointing to the same database during and right after the flip. If your migration removed a column Blue was using, Blue breaks. Backward-compatible migrations are required for BOTH strategies.
+  </div>
+
+  <!-- ═══════════ DEEP DIVE: WHY THE MISUNDERSTANDING IS FATAL ═══════════ -->
+  <h3 style="color:var(--dark);margin:36px 0 6px;font-size:1.15rem;">💀 Unpacking that warning — the hardest idea on this page</h3>
+  <p style="color:#666;font-size:0.9rem;margin-bottom:18px;">Most people nod at that box without understanding it. Here it is, step by step.</p>
+
+  <!-- STEP 1: WHAT GETS DUPLICATED -->
+  <div style="border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;background:#fff;">
+    <div style="font-weight:800;color:var(--dark);margin-bottom:10px;">① What gets duplicated — and what does NOT</div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;">Blue-green duplicates the <strong>servers running your code.</strong> It does <strong>NOT</strong> duplicate the <strong>database.</strong></p>
+<div style="font-family:'Consolas',monospace;font-size:0.84rem;background:#1e293b;color:#e2e8f0;padding:16px 18px;border-radius:8px;margin:12px 0;white-space:pre;overflow-x:auto;text-align:center;">   <span style="color:#93c5fd;">🔵 BLUE</span>              <span style="color:#86efac;">🟢 GREEN</span>
+  <span style="color:#64748b;">(old code)</span>           <span style="color:#64748b;">(new code)</span>
+       │                     │
+       └────────┬────────────┘
+                ▼
+         <span style="color:#fbbf24;">🗄️  DATABASE</span>
+       <span style="color:#fca5a5;">(THERE IS ONLY ONE)</span></div>
+    <div style="background:#fff8e1;border-left:4px solid #f39c12;border-radius:0 8px 8px 0;padding:12px 16px;font-size:0.89rem;line-height:1.7;">
+      🍳 <strong>Two shops — but ONE kitchen.</strong> Why not duplicate the DB too? Because <strong>the data would instantly diverge</strong>: customer A orders at BLUE → the order lands in BLUE's database. Customer B orders at GREEN → it lands in GREEN's. <strong>Now your orders live in two different places.</strong> Who merges them? 😱 So: two shops, <strong>one shared kitchen.</strong> Mandatory.
+    </div>
+  </div>
+
+  <!-- STEP 2: WHY BLUE IS STILL ALIVE -->
+  <div style="border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:14px;background:#fff;">
+    <div style="font-weight:800;color:var(--dark);margin-bottom:10px;">② Why is BLUE still running after the flip?</div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;">This is where people get lost. <strong>"Flipping the doorman's sign" is NOT the same as shutting BLUE down.</strong></p>
+<div style="font-family:'Consolas',monospace;font-size:0.84rem;background:#1e293b;color:#e2e8f0;padding:14px 18px;border-radius:8px;margin:12px 0;white-space:pre;overflow-x:auto;">before:  👮 sends users → <span style="color:#93c5fd;">🔵 BLUE</span>     <span style="color:#64748b;">(GREEN idle, but ALIVE)</span>
+after:   👮 sends users → <span style="color:#86efac;">🟢 GREEN</span>    <span style="color:#64748b;">(BLUE has no users, but STILL ALIVE)</span></div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;">The doorman only <strong>redirects people</strong>. Both shops still have the lights on, and <strong>both are still plugged into the kitchen.</strong></p>
+    <div style="background:#e3f2fd;border-left:4px solid #1976d2;border-radius:0 8px 8px 0;padding:12px 16px;font-size:0.89rem;line-height:1.7;margin-top:8px;">
+      🔙 <strong>Why not kill BLUE immediately?</strong> Because <strong>BLUE <em>is</em> your rollback button.</strong> If GREEN misbehaves you flip back in 2 seconds. Kill BLUE and you've thrown away your undo. So BLUE lives on for <strong>hours or days</strong> — still connected to the database. ⚡
+    </div>
+  </div>
+
+  <!-- STEP 3: THE BOMB -->
+  <div style="border:2px solid #c62828;border-radius:12px;padding:20px 22px;margin-bottom:14px;background:#fff;">
+    <div style="font-weight:800;color:#c62828;margin-bottom:10px;">③ Now you can see the bomb 💥</div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;">You run a migration that <strong>drops the <code>phone</code> column.</strong> Watch the timeline:</p>
+<div style="font-family:'Consolas',monospace;font-size:0.83rem;background:#1e293b;color:#e2e8f0;padding:16px 18px;border-radius:8px;margin:12px 0;white-space:pre;overflow-x:auto;line-height:1.8;"><span style="color:#93c5fd;">🕐 10:00</span>  DB has the `phone` column.  BLUE is serving customers.
+
+<span style="color:#93c5fd;">🕑 10:05</span>  You run the migration:  <span style="color:#fca5a5;">DROP COLUMN phone</span>
+         🗄️ The DB no longer has `phone`.
+
+         But BLUE (old code) is <span style="color:#fbbf24;">STILL RUNNING, STILL SERVING USERS.</span>
+         BLUE asks the DB:  <span style="color:#93c5fd;">"give me the phone column"</span>
+         DB replies:        <span style="color:#fca5a5;">"what phone? I don't have that."</span>
+         → <span style="color:#fca5a5;">💥 BLUE EXPLODES. Site down.</span>
+
+         <span style="color:#64748b;">(and you haven't even flipped to GREEN yet!)</span></div>
+    <div style="background:#ffebee;border-left:4px solid #c62828;border-radius:0 8px 8px 0;padding:12px 16px;font-size:0.89rem;line-height:1.7;">
+      The migration ran against the <strong>shared kitchen</strong> — so it <strong>wrecked the shop that was still serving customers.</strong> Blue-green cannot save you, because <strong>it duplicates the shops, not the kitchen.</strong> 🍳
+    </div>
+  </div>
+
+  <!-- STEP 4: THE FIX -->
+  <div style="border:2px solid #27ae60;border-radius:12px;padding:20px 22px;margin-bottom:14px;background:#fff;">
+    <div style="font-weight:800;color:#1b5e20;margin-bottom:10px;">④ The fix — split it into two deploys</div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;margin-bottom:10px;"><strong>Never delete something that currently-running code still needs.</strong></p>
+<div style="font-family:'Consolas',monospace;font-size:0.83rem;background:#1e293b;color:#e2e8f0;padding:16px 18px;border-radius:8px;margin:12px 0;white-space:pre;overflow-x:auto;line-height:1.8;"><span style="color:#86efac;">📅 Deploy #1 — change CODE only, don't touch the DB</span>
+   → new code stops using `phone`
+   → ship it. The `phone` column <span style="color:#fbbf24;">still exists</span> (just sits there unused)
+   → old code still reads phone ✅   new code ignores it ✅
+     <span style="color:#93c5fd;">BOTH can live with this database.</span>   ← the bridge
+
+<span style="color:#86efac;">📅 Deploy #2 — days later, once the old code is fully dead</span>
+   → nobody asks for `phone` anymore
+   → <span style="color:#fca5a5;">NOW</span> you drop the column. Safe. ✅</div>
+    <div style="background:#e8f5e9;border-left:4px solid #1b5e20;border-radius:0 8px 8px 0;padding:12px 16px;font-size:0.89rem;line-height:1.7;">
+      🎯 <strong>"Backward-compatible" simply means:</strong> after the migration runs, <strong>the OLD code still works.</strong> In Deploy #1 the column is still there, so the old code is happy. That's it.
+    </div>
+  </div>
+
+  <!-- STEP 5: SAME PATTERN AS EXPAND-CONTRACT -->
+  <div style="border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:18px;background:#fff;">
+    <div style="font-weight:800;color:var(--dark);margin-bottom:6px;">⑤ Wait — this is the same shape as Expand–Contract 🤯</div>
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;margin-bottom:14px;">Put the two stories side by side. In <a href="03-migrations.html" style="color:var(--primary);font-weight:600;">Part 3: Migrations</a> we were <strong>adding</strong> a column. Here we are <strong>dropping</strong> one. Same skeleton:</p>
+
+    <table style="width:100%;border-collapse:collapse;font-size:0.86rem;">
+      <thead><tr style="background:var(--dark);color:#fff;"><th style="padding:10px 12px;text-align:left;"></th><th style="padding:10px 12px;text-align:left;">A. ADD a column <em>(Migrations)</em></th><th style="padding:10px 12px;text-align:left;">B. DROP a column <em>(Deployment)</em></th></tr></thead>
+      <tbody>
+        <tr><td style="padding:10px 12px;border:1px solid var(--border);"><strong>Who is "the old"?</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">old <strong>rows</strong> (still empty)</td><td style="padding:10px 12px;border:1px solid var(--border);">old <strong>code</strong> (BLUE)</td></tr>
+        <tr style="background:#fafaf8;"><td style="padding:10px 12px;border:1px solid var(--border);"><strong>Who is "the new"?</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">new rows (filled in)</td><td style="padding:10px 12px;border:1px solid var(--border);">new code (GREEN)</td></tr>
+        <tr><td style="padding:10px 12px;border:1px solid var(--border);"><strong>First beat</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">add column, <strong>allow empty</strong> → old rows still valid</td><td style="padding:10px 12px;border:1px solid var(--border);">ship new code, <strong>keep the column</strong> → old code still runs</td></tr>
+        <tr style="background:#e8f5e9;"><td style="padding:10px 12px;border:1px solid var(--border);"><strong>What it creates</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">🤝 a phase where <strong>old + new both work</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">🤝 a phase where <strong>old + new both work</strong></td></tr>
+        <tr><td style="padding:10px 12px;border:1px solid var(--border);"><strong>Final beat</strong></td><td style="padding:10px 12px;border:1px solid var(--border);">enforce <code>NOT NULL</code></td><td style="padding:10px 12px;border:1px solid var(--border);">drop the column</td></tr>
+        <tr style="background:#fafaf8;"><td style="padding:10px 12px;border:1px solid var(--border);"><strong>Allowed only when…</strong></td><td style="padding:10px 12px;border:1px solid var(--border);"><strong>the old has vanished</strong> (no empty rows)</td><td style="padding:10px 12px;border:1px solid var(--border);"><strong>the old has vanished</strong> (old code dead)</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-size:0.9rem;line-height:1.75;color:#555;margin:16px 0 10px;"><strong>Same mould.</strong> Story A worries about old <em>data</em>; story B worries about old <em>code</em>. Both refuse to jump straight from old to new — <strong>they always insert a bridge:</strong></p>
+
+<div style="font-family:'Consolas',monospace;font-size:0.83rem;background:#1e293b;color:#e2e8f0;padding:16px 18px;border-radius:8px;margin:12px 0;white-space:pre;overflow-x:auto;line-height:1.8;"><span style="color:#fca5a5;">❌ FORBIDDEN:</span>                    <span style="color:#86efac;">✅ ALWAYS:</span>
+
+ [ OLD ] ───💥──► [ NEW ]      [ OLD ] ──► [ <span style="color:#fbbf24;">OLD + NEW</span> ] ──► [ NEW ]
+   jumping straight = boom                       ▲
+                                    <span style="color:#64748b;">the BRIDGE: both can live here.</span>
+                                    <span style="color:#64748b;">Stay until the OLD is fully dead.</span></div>
+
+    <div style="background:#f3e5f5;border-left:4px solid #9b59b6;border-radius:0 8px 8px 0;padding:14px 18px;font-size:0.9rem;line-height:1.75;">
+      🌉 <strong>Why must there be a bridge?</strong> Because <strong>you cannot change the code and the database at the same instant.</strong> One always moves first. During that gap, old and new are <em>forced</em> to coexist.<br>
+      <strong>·</strong> Migrations: the <strong>DB moves first</strong>, old rows aren't filled yet → the column must allow empty.<br>
+      <strong>·</strong> Deployment: the <strong>code moves first</strong>, old code isn't dead yet → the column must stay.<br>
+      <em>Same truth. Same cure.</em> 🔥
+    </div>
+  </div>
+
+  <!-- THE PILL -->
+  <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59);border-radius:12px;padding:22px 24px;color:white;">
+    <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;opacity:0.7;margin-bottom:12px;">💊 The pill to remember</div>
+    <p style="font-size:1.05rem;line-height:1.8;font-weight:700;margin-bottom:12px;">ADDING is free. DELETING, TIGHTENING or RENAMING must WAIT.</p>
+    <ul style="margin-left:20px;line-height:2;font-size:0.92rem;opacity:0.95;">
+      <li><strong>Add</strong> a column / add room → breaks nobody → do it now.</li>
+      <li><strong>Delete / tighten / rename</strong> → breaks whoever is still using it → <strong>wait until they're gone.</strong></li>
+    </ul>
+    <p style="margin-top:14px;font-size:0.95rem;line-height:1.8;opacity:0.95;">That <em>is</em> <strong>Expand</strong> (widen, free) → <strong>Contract</strong> (tighten, must wait). Both stories are the same pattern.</p>
+    <div style="border-top:1px solid rgba(255,255,255,0.2);margin-top:16px;padding-top:14px;font-size:0.95rem;line-height:1.8;">
+      🧵 <strong>The closing line for the interview:</strong> "Blue-green and rolling solve <em>code</em> downtime. <strong>Neither solves <em>database</em> downtime</strong> — because the database is always shared between old and new. So <strong>backward-compatible migrations are mandatory for both strategies.</strong>"
+    </div>
   </div>
 </div>
 

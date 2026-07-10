@@ -88,6 +88,9 @@
         pre code { background: none; padding: 0; color: var(--text-primary); font-size: 0.85em; line-height: 1.6; }
         .kw { color: #d73a49; } .fn { color: #6f42c1; } .str { color: #032f62; } .cm { color: #6a737d; font-style: italic; } .num { color: #005cc5; } .dec { color: #e36209; } .cls { color: #6f42c1; }
         [data-theme="dark"] .kw { color: #ff7b72; } [data-theme="dark"] .fn { color: #d2a8ff; } [data-theme="dark"] .str { color: #a5d6ff; } [data-theme="dark"] .cm { color: #8b949e; } [data-theme="dark"] .num { color: #79c0ff; } [data-theme="dark"] .dec { color: #ffa657; } [data-theme="dark"] .cls { color: #d2a8ff; }
+        /* Terminal-style code block (matches guide/02-cicd.html) — always dark in both themes */
+        .code-block { background:#1e293b; color:#e2e8f0; padding:20px 22px; border-radius:8px; font-family:'Fira Code','Consolas','Monaco',monospace; font-size:0.8em; line-height:1.7; overflow-x:auto; margin:12px 0; white-space:pre; border:1px solid #334155; }
+        .code-block .code-comment { color:#64748b; } .code-block .code-key { color:#93c5fd; } .code-block .code-val { color:#86efac; } .code-block .code-str { color:#fca5a5; }
         .table-wrap { overflow-x: auto; margin: 12px 0; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
         th { text-align: left; padding: 10px 14px; background: var(--bg-secondary); font-weight: 600; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-secondary); border-bottom: 2px solid var(--border); }
@@ -403,6 +406,10 @@
         </table>
     </div>
 
+    <div style="background:var(--bg-secondary); border:1px solid var(--border); border-left:3px solid var(--accent-orange); border-radius:4px; padding:14px 18px; margin:12px 0 8px; font-size:0.92em;">
+        <strong>🚪 What "attack surface" means:</strong> picture the image as a house — every program inside is a <strong>door a hacker could try</strong>. <code>gcc</code>, compilers, shells and package managers are all extra doors. If an attacker breaks into a container that <em>has gcc</em>, they can compile malware right there; a lean 85 MB image hands them nothing. So <strong>fewer programs = fewer doors = safer</strong> — size and attack surface shrink together, for the same reason: you dropped the build tools.
+    </div>
+
     <h3 id="docker-exitcodes">Docker Exit Codes — Know These Cold</h3>
     <div class="table-wrap">
         <table>
@@ -568,56 +575,104 @@
     }
     </script>
 
-<pre><code><span class="cm"># .github/workflows/ci.yml — production-grade Django pipeline</span>
-name: CI Pipeline
+<div class="code-block"><span class="code-comment"># .github/workflows/ci.yml</span>
+<span class="code-key">name:</span> <span class="code-str">CI/CD Pipeline</span>
 
-on: push: branches: [main]
-    pull_request: branches: [main]
+<span class="code-key">on:</span>
+  <span class="code-key">push:</span>
+    <span class="code-key">branches:</span> [<span class="code-str">main</span>]          <span class="code-comment"># Run on merge to main</span>
+  <span class="code-key">pull_request:</span>
+    <span class="code-key">branches:</span> [<span class="code-str">main</span>]          <span class="code-comment"># Run on every PR targeting main</span>
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15
-        env:
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: testdb
-        options: >-
+<span class="code-key">jobs:</span>
+  <span class="code-key">test:</span>
+    <span class="code-key">runs-on:</span> <span class="code-str">ubuntu-latest</span>
+
+    <span class="code-comment"># ── STEP 1: Spin up PostgreSQL service container ──</span>
+    <span class="code-key">services:</span>
+      <span class="code-key">postgres:</span>
+        <span class="code-key">image:</span> <span class="code-str">postgres:15</span>             <span class="code-comment"># PINNED version — no surprises</span>
+        <span class="code-key">env:</span>
+          <span class="code-key">POSTGRES_DB:</span> <span class="code-str">testdb</span>
+          <span class="code-key">POSTGRES_USER:</span> <span class="code-str">testuser</span>
+          <span class="code-key">POSTGRES_PASSWORD:</span> <span class="code-str">testpass</span>
+        <span class="code-key">options:</span> <span class="code-str">&gt;-         # Health check — wait for DB ready</span>
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        <span class="code-key">ports:</span>
+          - <span class="code-str">5432:5432</span>
 
-    steps:
-      - uses: actions/checkout@v4
+    <span class="code-key">steps:</span>
+      <span class="code-comment"># ── STEP 2: Checkout code ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/checkout@v4</span>
 
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
+      <span class="code-comment"># ── STEP 3: Setup Python with dep caching ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/setup-python@v5</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">python-version:</span> <span class="code-str">'3.12'</span>
+          <span class="code-key">cache:</span> <span class="code-str">'pip'</span>              <span class="code-comment"># Cache ~/.cache/pip by requirements hash</span>
 
-      <span class="cm"># Cache deps on lockfile hash — skips re-install if unchanged</span>
-      - uses: actions/cache@v3
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('requirements*.txt') }}
+      <span class="code-comment"># ── STEP 4: Install deps ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pip install -r requirements.txt</span>
 
-      - run: pip install -r requirements.txt
+      <span class="code-comment"># ── STEP 5: Lint ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">ruff check . &amp;&amp; black --check .</span>
 
-      - run: ruff check . && black --check .          <span class="cm"># lint</span>
-      - run: pytest --reuse-db -x                     <span class="cm"># test vs real Postgres</span>
-      - run: python manage.py check --deploy          <span class="cm"># security audit</span>
-      - run: python manage.py makemigrations --check --dry-run  <span class="cm"># fail if migration missing</span>
+      <span class="code-comment"># ── STEP 6: Type check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">mypy .</span>
 
-  build-and-push:
-    needs: [test]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build &amp; tag with Git SHA
-        run: |
-          IMAGE="$ECR_REGISTRY/myapp:${{ github.sha }}"
+      <span class="code-comment"># ── STEP 7: Security scan ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pip-audit &amp;&amp; bandit -r . -x ./tests</span>
+
+      <span class="code-comment"># ── STEP 8: Django deployment check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">python manage.py check --deploy</span>
+
+      <span class="code-comment"># ── STEP 9: Migration committed check ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">python manage.py makemigrations --check --dry-run</span>
+        <span class="code-comment"># Fails if model changed but migration not committed — catches deploy bombs</span>
+
+      <span class="code-comment"># ── STEP 10: Run tests vs REAL PostgreSQL ──</span>
+      - <span class="code-key">run:</span> <span class="code-str">pytest --tb=short -q</span>
+        <span class="code-key">env:</span>
+          <span class="code-key">DATABASE_URL:</span> <span class="code-str">postgres://testuser:testpass@localhost:5432/testdb</span>
+          <span class="code-key">DJANGO_SETTINGS_MODULE:</span> <span class="code-str">config.settings.test</span>
+
+  <span class="code-key">build-and-push:</span>
+    <span class="code-key">needs:</span> [<span class="code-str">test</span>]                  <span class="code-comment"># ← THIS is the gate. No test pass = no image</span>
+    <span class="code-key">if:</span> <span class="code-str">github.ref == 'refs/heads/main'</span>  <span class="code-comment"># Only build on main</span>
+    <span class="code-key">runs-on:</span> <span class="code-str">ubuntu-latest</span>
+
+    <span class="code-key">permissions:</span>
+      <span class="code-key">id-token:</span> <span class="code-str">write</span>              <span class="code-comment"># For OIDC — no long-lived AWS keys</span>
+      <span class="code-key">contents:</span> <span class="code-str">read</span>
+
+    <span class="code-key">steps:</span>
+      - <span class="code-key">uses:</span> <span class="code-str">actions/checkout@v4</span>
+
+      <span class="code-comment"># ── OIDC: Get temporary AWS credentials (no stored keys!) ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/configure-aws-credentials@v4</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">role-to-assume:</span> <span class="code-str">arn:aws:iam::123456789:role/github-actions-role</span>
+          <span class="code-key">aws-region:</span> <span class="code-str">ap-southeast-1</span>
+
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/amazon-ecr-login@v2</span>
+
+      <span class="code-comment"># ── Build + tag with Git SHA for exact rollback ──</span>
+      - <span class="code-key">run:</span> |
+          IMAGE="$ECR_REGISTRY/$ECR_REPO:${{ github.sha }}"
           docker build -t $IMAGE .
-          docker push $IMAGE         <span class="cm"># SHA tag = rollback in seconds</span></code></pre>
+          docker push $IMAGE
+          echo "IMAGE=$IMAGE" &gt;&gt; $GITHUB_ENV
+
+      <span class="code-comment"># ── Deploy to ECS ──</span>
+      - <span class="code-key">uses:</span> <span class="code-str">aws-actions/amazon-ecs-deploy-task-definition@v1</span>
+        <span class="code-key">with:</span>
+          <span class="code-key">task-definition:</span> <span class="code-str">task-def.json</span>
+          <span class="code-key">service:</span> <span class="code-str">my-django-service</span>
+          <span class="code-key">cluster:</span> <span class="code-str">production</span>
+          <span class="code-key">wait-for-service-stability:</span> <span class="code-str">true</span></div>
 
     <div class="callout callout-red">
         <span class="callout-emoji">🪤</span>
@@ -991,6 +1046,171 @@ migrations.RunSQL(<span class="str">"ALTER TABLE orders VALIDATE CONSTRAINT chk_
                     <li><span class="answer-bullet red">4</span><span>Last resort: replicate prod state in staging with a redacted DB dump. <span class="badge badge-red">NEVER grep raw text</span> — if that's your only option, the real fix is <strong>JSON logging + request-ID middleware</strong>, not better grep skills.</span></li>
                 </ul>
             </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <!-- DEEP DIVE: the debug flow, explained from zero               -->
+    <!-- ════════════════════════════════════════════════════════════ -->
+    <h3 id="logging-debugflow-deep">🔍 The Debug Flow, explained from zero</h3>
+
+    <p style="color:var(--text-secondary); margin-bottom:16px;">The cards above are the script you recite. Here is <em>why</em> each rung exists — so you can defend it under follow-up questions.</p>
+
+    <!-- WHY WEAK IS WEAK -->
+    <div class="callout callout-red">
+        <span class="callout-emoji">🩸</span>
+        <div class="callout-content">
+            <p><strong>Why the weak answer sinks you</strong></p>
+            <p style="margin-top:6px"><em>"I check the logs and reproduce locally."</em> — Two holes:</p>
+            <ol style="margin:8px 0 8px 20px; line-height:1.9;">
+                <li>Check the logs <strong>where?</strong> Production logs are <strong>millions of lines a day.</strong> How do you even find your bug?</li>
+                <li><em>"I SSH in and grep the log file"</em> is <strong>worse</strong>: production runs <strong>10 containers</strong>, each with its own log — grep which one? A container dies and <strong>its logs die with it.</strong> And letting devs SSH into prod is a security hole (one bad command = outage).</li>
+            </ol>
+            <p style="margin-top:6px">🩸 <em>It's like a murder investigation where you crawl around inspecting bricks with your bare eyes — while real detectives have <strong>cameras, fingerprints and case files.</strong></em></p>
+        </div>
+    </div>
+
+    <!-- THE LADDER IDEA -->
+    <div class="callout callout-purple">
+        <span class="callout-emoji">🪜</span>
+        <div class="callout-content">
+            <p><strong>The core idea: the debug flow is a LADDER</strong></p>
+            <p style="margin-top:6px"><strong>Start with the tool that hands you the answer. Only climb down to cruder tools when the higher rung goes silent.</strong> Interviewers aren't testing whether you know the word "Sentry" — they're testing whether you <strong>descend in the right order</strong>, and whether you know that <em>"I had to grep"</em> is a symptom of missing tooling.</p>
+        </div>
+    </div>
+
+    <!-- ── RUNG 1: SENTRY ── -->
+    <h4 style="margin:26px 0 10px; font-size:1.02em; font-weight:700;">1️⃣ Sentry first — <em>"check the security camera"</em> 🎥</h4>
+
+    <p style="margin-bottom:10px;"><strong>What is Sentry?</strong> A service that <strong>automatically captures every exception</strong> your app throws and turns them into readable reports. Your app crashes → Sentry has already recorded it.</p>
+
+    <div class="table-wrap">
+        <table>
+            <tr><th>What Sentry hands you</th><th>What it means in plain words</th></tr>
+            <tr><td><strong>Groups duplicate exceptions</strong></td><td>5,000 crashes from one bug get collapsed into <strong>one issue</strong>. You never drown in the log ocean.</td></tr>
+            <tr><td><strong>Which release introduced it</strong></td><td>It tells you flat out: <em>"first seen in release <code>abc123</code>."</em> 🎯</td></tr>
+            <tr><td><strong>Affected users</strong></td><td>3 users or 30,000? That decides how hard your heart beats.</td></tr>
+            <tr><td><strong>Breadcrumbs</strong> 🍞</td><td>The <strong>trail leading up to the crash</strong>: the SQL that just ran, the HTTP call just made. Like replaying <strong>the last 10 seconds before the car crash.</strong></td></tr>
+        </table>
+    </div>
+
+    <p style="margin:14px 0 10px;"><strong>📈 "Error spiked after a deploy? That diff is the smoking gun." — unpacked:</strong></p>
+
+<div class="code-block"><span class="code-comment">errors/hour</span>
+  │
+30│                        ┌────   <span class="code-str">← 😱 the SPIKE</span>
+  │                        │
+10│                        │
+ 2│──────────────────┐     │
+  │   <span class="code-comment">(normal)</span>      └─────┘
+  └────────────────────────────────► time
+                     ▲
+                <span class="code-key">14:32 — we deployed a new version</span></div>
+
+    <ul style="margin:12px 0 12px 20px; line-height:1.9;">
+        <li><strong>Spike</strong> = errors jump from 2/hour to 30/hour — and the jump lands exactly at <strong>14:32</strong>, the moment you deployed.</li>
+        <li><strong>Diff</strong> = <em>the code that changed in that deploy.</em> Three commits, five files touched → <strong>those five files ARE the diff</strong> (<code>git diff old new</code>).</li>
+        <li><strong>Smoking gun</strong> = evidence you cannot argue with. The logic is arithmetic:
+            <div class="callout callout-green" style="margin-top:8px;">
+                <span class="callout-emoji">🔫</span>
+                <div class="callout-content"><p>Before the deploy: <strong>no errors.</strong> After the deploy: <strong>errors everywhere.</strong> The deploy changed <strong>only those 5 files.</strong><br>➡️ <strong>The bug is inside those 5 files.</strong> You just shrank the search space from <strong>10,000 files to 5.</strong> 😎</p></div>
+            </div>
+        </li>
+    </ul>
+
+    <div class="callout callout-blue">
+        <span class="callout-emoji">🎥</span>
+        <div class="callout-content">
+            <p><strong>So what does "check the camera first" actually mean?</strong></p>
+            <p style="margin-top:6px"><strong>Without Sentry</strong> you play detective the hard way: <em>"Where's this from? New code? The database? The server? A user typing garbage? Let me read a million log lines…"</em> 😵 → <strong>half a day gone.</strong></p>
+            <p style="margin-top:6px"><strong>With Sentry</strong> the footage is already rolling: <em>"Started 14:32. Release <code>abc123</code>. Hit 4,200 users. Here's the SQL that ran right before the crash."</em> You: <em>"14:32 is my deploy. Open that diff."</em> → <strong>2 minutes.</strong> ⚡</p>
+            <p style="margin-top:6px">The camera doesn't arrest the culprit for you — it just <strong>points straight at his face</strong> so you don't search the whole city.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">🔑</span>
+        <div class="callout-content">
+            <p><strong>But the camera only works if you set ONE thing: <code>release=GIT_SHA</code></strong></p>
+            <p style="margin-top:6px"><strong>Without it:</strong> Sentry only says <em>"30 errors."</em> Which deploy caused them? 🤷 → <strong>a camera with no timestamp.</strong><br>
+            <strong>With it:</strong> Sentry says <em>"first seen in release <code>abc123</code>"</em> → you open exactly that diff. 🎯 → <strong>a camera that stamps the time.</strong></p>
+            <p style="margin-top:6px">That's why it's called <strong>the single highest-leverage Sentry configuration</strong>: one config line turns "hunt for half a day" into "read five files."</p>
+        </div>
+    </div>
+
+    <!-- ── RUNG 2: STRUCTURED LOGS ── -->
+    <h4 style="margin:26px 0 10px; font-size:1.02em; font-weight:700;">2️⃣ Not in Sentry? → query <strong>structured logs</strong> — <em>"pull the case file by ID"</em> 🗄️</h4>
+
+    <p style="margin-bottom:10px;">Sentry only catches <strong>crashes</strong>. But some bugs <strong>never crash</strong> — like <em>"the order total came out wrong."</em> Nothing threw; Sentry saw nothing. Now you go to the logs. But the logs must be <strong>structured</strong>:</p>
+
+<div class="code-block"><span class="code-comment">❌ Plain text log:</span>
+"User 42 failed to pay, order 991"
+   <span class="code-str">→ to find it you can only grep strings and guess</span>
+
+<span class="code-comment">✅ Structured (JSON) log:</span>
+{<span class="code-key">"user_id"</span>: <span class="code-str">42</span>, <span class="code-key">"order_id"</span>: <span class="code-str">991</span>, <span class="code-key">"event"</span>: <span class="code-str">"payment_failed"</span>}
+   <span class="code-str">→ you ASK: "give me every line where user_id = 42"</span></div>
+
+    <ul style="margin:12px 0 0 20px; line-height:1.9;">
+        <li><strong>Why is structured stronger?</strong> Because it's <strong>labelled data, not prose.</strong> You <strong>query it like a database</strong> instead of grepping and guessing.</li>
+        <li><code>request_id</code> / <code>user_id</code> are <strong>ID tags stamped on every request.</strong> With them you can pull <strong>the entire journey of one exact request</strong> → that's what <em>"fast, targeted, no guessing"</em> means. 🎯</li>
+        <li>🗄️ <em>Looking up a case file by its number — instead of reading the whole archive.</em></li>
+    </ul>
+
+    <!-- ── RUNG 3: TRACE ID ── -->
+    <h4 style="margin:26px 0 10px; font-size:1.02em; font-weight:700;">3️⃣ Distributed tracing → follow the <strong>trace ID</strong> — <em>"the parcel tracking number"</em> 📦</h4>
+
+    <p style="margin-bottom:10px;">When your app isn't one lump, but a chain of services calling each other:</p>
+
+<div class="code-block">User → [<span class="code-key">API</span>] → [<span class="code-key">Payment service</span>] → [<span class="code-key">Email service</span>] → [<span class="code-key">DB</span>]</div>
+
+    <p style="margin:10px 0;">The request took 3 seconds. <strong>Slow WHERE?</strong> No idea. A <strong>trace ID</strong> is <strong>one unique tag stamped on the request that travels with it through EVERY service.</strong> Then Jaeger/Datadog draws this:</p>
+
+<div class="code-block"><span class="code-key">API</span>           ▓ 50ms
+<span class="code-key">Payment</span>       ▓▓▓▓▓▓▓▓▓▓▓▓▓▓ 2,800ms   <span class="code-str">← 🎯 THERE'S YOUR CULPRIT</span>
+<span class="code-key">Email</span>         ▓ 100ms
+<span class="code-key">DB</span>            ▓ 50ms</div>
+
+    <ul style="margin:12px 0 0 20px; line-height:1.9;">
+        <li>You instantly see which service ate the 3 seconds.</li>
+        <li><strong>Sentry already carries the trace ID in the event</strong> — so you can jump straight from rung 1 to rung 3.</li>
+        <li>📦 <em>A parcel tracking number: the package passes 5 warehouses; scan the code and you know exactly which warehouse it's stuck in.</em></li>
+    </ul>
+
+    <!-- ── RUNG 4: LAST RESORT ── -->
+    <h4 style="margin:26px 0 10px; font-size:1.02em; font-weight:700;">4️⃣ Last resort: replicate in staging — and what "NEVER grep raw text" really says 🔧</h4>
+
+    <p style="margin-bottom:10px;">Only when all three rungs came back silent: copy production data (with sensitive fields <strong>redacted</strong>) into staging and reproduce it there.</p>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">🔧</span>
+        <div class="callout-content">
+            <p><strong>Read this line carefully — it's the whole point of the section:</strong></p>
+            <p style="margin-top:6px">If grepping raw text is your <strong>only</strong> option, the problem is <strong>not your grep skills.</strong> The problem is that <strong>your system lacks the instruments.</strong> The real fix is <strong>JSON logging + request-ID middleware</strong>.</p>
+            <p style="margin-top:6px"><em>Don't sharpen the knife — buy the chainsaw.</em></p>
+        </div>
+    </div>
+
+    <!-- ── THE LADDER SUMMARY ── -->
+    <h4 style="margin:26px 0 10px; font-size:1.02em; font-weight:700;">🪜 The whole thing on one ladder — climb down, never up</h4>
+
+<div class="code-block"><span class="code-key">1. Sentry</span>          → "just give me the answer"        <span class="code-comment">(fastest — always first)</span>
+<span class="code-key">2. Structured logs</span> → "let me query it"                <span class="code-comment">(when Sentry is silent)</span>
+<span class="code-key">3. Trace ID</span>        → "show me which hop is slow"       <span class="code-comment">(when many services)</span>
+<span class="code-key">4. Staging repro</span>   → "I'll rebuild it myself"          <span class="code-comment">(true last resort)</span>
+        ↓
+   <span class="code-str">grep raw text</span>  → ❌ <span class="code-comment">a symptom that the system lacks tooling</span></div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">🎯</span>
+        <div class="callout-content">
+            <p><strong>What is the interviewer actually scoring?</strong></p>
+            <p style="margin-top:6px">Not that you can name Sentry. That you <strong>descend from powerful tools to crude ones in the right order</strong> — and that you recognise <em>"I had to grep"</em> as evidence the system is under-instrumented.</p>
+            <p style="margin-top:10px">💡 Two extra points worth saying out loud:</p>
+            <ul style="margin:6px 0 0 20px; line-height:1.9;">
+                <li>The weak answer dies because it reveals you picture prod as <strong>one server</strong>. Real prod is <strong>many ephemeral containers</strong> — logs must be <strong>shipped out</strong> (Sentry/CloudWatch), not read in place.</li>
+                <li><strong>Small, frequent deploys beat big, rare ones</strong> — because a small diff means a small suspect list. That's the deep reason behind Continuous Delivery.</li>
+            </ul>
         </div>
     </div>
 

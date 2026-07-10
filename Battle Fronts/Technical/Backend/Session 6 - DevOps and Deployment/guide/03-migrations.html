@@ -12,10 +12,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .topnav a{color:rgba(255,255,255,0.7);text-decoration:none;font-size:0.9rem;}
 .topnav .current{color:white;font-weight:600;}
 .header{background:linear-gradient(135deg,#7d5a00 0%,#c97d00 50%,#f39c12 100%);color:white;padding:50px 40px;}
-.header-inner{max-width:1400px;margin:0 auto;}
+.header-inner{max-width:1900px;margin:0 auto;}
 .header h1{font-size:2.6rem;font-weight:800;margin-bottom:10px;}
 .header p{font-size:1.1rem;opacity:0.85;max-width:800px;}
-.container{max-width:1400px;margin:0 auto;padding:50px 40px;}
+.container{max-width:1900px;margin:0 auto;padding:50px 40px;}
 .section-header{font-size:1.6rem;font-weight:800;color:var(--dark);margin:50px 0 24px;padding-bottom:14px;border-bottom:3px solid var(--primary);display:flex;align-items:center;gap:12px;}
 .concept-card{background:white;border-radius:16px;padding:32px;margin-bottom:28px;border:1px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,0.06);}
 .back-btn{display:inline-flex;align-items:center;gap:8px;background:white;border:1px solid var(--border);border-radius:8px;padding:8px 16px;font-size:0.85rem;text-decoration:none;color:var(--text);margin-bottom:30px;transition:all 0.2s;}
@@ -47,8 +47,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .trap-box strong{color:#e65100;}
 
 /* EXPAND-CONTRACT VISUAL */
-.deploy-timeline{display:flex;gap:0;margin:24px 0;overflow-x:auto;}
-.deploy-phase{flex:1;min-width:280px;border-radius:12px;padding:22px;position:relative;}
+.deploy-timeline{display:flex;gap:0;margin:24px 0;align-items:stretch;}
+.deploy-phase{flex:1 1 0;min-width:0;border-radius:12px;padding:22px;position:relative;}
+.deploy-phase pre,.deploy-phase code{word-break:break-word;}
+@media(max-width:1200px){.deploy-timeline{flex-direction:column;}.phase-arrow{transform:rotate(90deg);padding:10px 0;justify-content:center;}}
 .deploy-phase h3{font-size:1rem;font-weight:800;margin-bottom:12px;}
 .deploy-phase p{font-size:0.85rem;line-height:1.6;}
 .phase-arrow{display:flex;align-items:center;padding:0 10px;color:#aaa;font-size:1.5rem;flex-shrink:0;}
@@ -110,6 +112,38 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="concept-card">
   <p style="margin-bottom:16px; color:#666;">The root of every migration disaster: you didn't know which SQL operation acquires which lock.</p>
 
+  <!-- ═══ THE NOODLE SHOP METAPHOR ═══ -->
+  <div style="background:#f8f4ec; border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:24px;">
+    <div style="font-weight:800; color:var(--dark); margin-bottom:12px; font-size:1.05rem;">🍜 First, forget SQL — think of a noodle shop</div>
+
+    <p style="font-size:0.92rem; line-height:1.75; color:#555; margin-bottom:16px;">Your <code>orders</code> table is a <strong>packed noodle shop</strong>.
+      <strong>Customers</strong> = your app reading &amp; writing rows (<code>SELECT</code>, <code>INSERT</code>) — happening every second.
+      <strong>A repairman</strong> = your migration, changing the shop's structure.
+      When someone works, they hang a <strong>sign on the door</strong>. That sign <em>is</em> the lock. There are three signs:</p>
+
+    <!-- SIGN 1 -->
+    <div style="background:#ffebee; border:1px solid #ef9a9a; border-left:5px solid #c62828; border-radius:0 10px 10px 0; padding:14px 18px; margin-bottom:10px;">
+      <div style="font-weight:800; color:#c62828; margin-bottom:4px;">🔴 ACCESS EXCLUSIVE — <em>"SHOP CLOSED. EVERYONE OUT."</em></div>
+      <div style="font-size:0.88rem; line-height:1.65; color:#555;">The repairman is jackhammering the floor. <strong>Diners already eating must leave. Nobody new gets in.</strong> No reads, no writes — <strong>your website is down.</strong> Hung by <code>ALTER TABLE</code>, <code>DROP TABLE</code> — anything that changes the table's <em>shape</em>. The dangerous sign.</div>
+    </div>
+
+    <!-- SIGN 2 -->
+    <div style="background:#fff8e1; border:1px solid #ffd54f; border-left:5px solid #e65100; border-radius:0 10px 10px 0; padding:14px 18px; margin-bottom:10px;">
+      <div style="font-weight:800; color:#e65100; margin-bottom:4px;">🟡 SHARE UPDATE EXCLUSIVE — <em>"PAINTER AT WORK"</em></div>
+      <div style="font-size:0.88rem; line-height:1.65; color:#555;">Someone is painting the side wall. <strong>Customers keep eating, totally unaffected.</strong> The only person blocked is <em>another repairman</em> (so two migrations don't trip over each other). Reads ✅ writes ✅ — the safe sign.</div>
+    </div>
+
+    <!-- SIGN 3 -->
+    <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-left:5px solid #1b5e20; border-radius:0 10px 10px 0; padding:14px 18px; margin-bottom:16px;">
+      <div style="font-weight:800; color:#1b5e20; margin-bottom:4px;">🟢 ROW EXCLUSIVE — <em>"THIS TABLE IS TAKEN"</em></div>
+      <div style="font-size:0.88rem; line-height:1.65; color:#555;">You sit at table #5 and put a sign on <strong>table #5 only</strong>. The other 99 tables run as normal. This is what your app hangs on <em>every single</em> <code>UPDATE</code>. Harmless.</div>
+    </div>
+
+    <div style="background:#fff; border:1px dashed #c9bfa8; border-radius:10px; padding:14px 18px; font-size:0.92rem; line-height:1.7; color:#555;">
+      🎯 <strong>So where's the disaster?</strong> <strong>A migration is the repairman — and repairmen love hanging the 🔴 CLOSED sign, then working for three minutes.</strong> The whole art of safe migrations is one sentence: <strong>never hold the red sign for long.</strong>
+    </div>
+  </div>
+
   <table class="lock-table">
     <thead><tr><th>Lock Type</th><th>What It Blocks</th><th>When It Happens</th><th>Risk</th></tr></thead>
     <tbody>
@@ -137,6 +171,15 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div style="background:#fff3e0;border-radius:10px;padding:18px;border-left:4px solid #e65100;">
     <strong>💡 The Key Insight:</strong> PostgreSQL 11+ changed <code>ADD COLUMN</code> with a constant default to be metadata-only (no ACCESS EXCLUSIVE). But <code>ADD COLUMN NOT NULL</code> without a default (or with a non-constant default) still rewrites the table. This is why you always add as nullable first on large tables.
   </div>
+
+  <!-- WHY NOT NULL IS THE KILLER -->
+  <div style="background:#fff; border:1px dashed #c9bfa8; border-radius:10px; padding:16px 20px; margin-top:14px; font-size:0.92rem; line-height:1.75; color:#555;">
+    <strong>🔍 In plain words — why <code>NOT NULL</code> is the killer:</strong>
+    <div style="margin-top:10px; font-family:'Consolas',monospace; font-size:0.85rem; line-height:1.9; background:#1e293b; color:#e2e8f0; padding:14px 16px; border-radius:8px; white-space:pre; overflow-x:auto;">ADD COLUMN status VARCHAR(20)           <span style="color:#86efac;">→ just edits the catalog. milliseconds. SAFE ✅</span>
+ADD COLUMN status VARCHAR(20) NOT NULL  <span style="color:#fca5a5;">→ must go FILL all 50M old rows. minutes. DEATH ❌</span></div>
+    <div style="margin-top:12px;"><code>NOT NULL</code> means <em>"this column may never be empty."</em> Postgres panics: <em>"I have 50 million old rows sitting there empty — you say empty is banned? Then I must go write a value into every single one of them first."</em> So it hangs the 🔴 red sign and rewrites the whole table.</div>
+    <div style="margin-top:10px;">👉 <strong>The rule: on a big table, ALWAYS add the column as nullable first.</strong> That is the seed of the entire Expand–Contract pattern below.</div>
+  </div>
 </div>
 
 <div class="section-header" id="part2"><span>🔄</span> Part 2: The Expand-Contract Pattern — 3 Deploys for Zero Downtime</div>
@@ -144,38 +187,355 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 <div class="concept-card">
   <p style="margin-bottom:20px; color:#666;">The answer to "How do you add a non-nullable column to a 50M-row table without downtime?" — the single most asked migration question:</p>
 
-  <div class="deploy-timeline">
-    <div class="deploy-phase" style="background:#e3f2fd;border:2px solid #1976d2;">
-      <h3 style="color:#1565c0;">🔵 Deploy 1: EXPAND</h3>
-      <p><strong>What:</strong> Add the column as <code>null=True</code> (no NOT NULL constraint).<br><br>
-      <strong>SQL:</strong> <code>ALTER TABLE orders ADD COLUMN status VARCHAR(20)</code><br><br>
-      <strong>Why safe:</strong> In Postgres 11+, adding a nullable column with no default is metadata-only — milliseconds, no table rewrite, no lock.<br><br>
-      <strong>App state:</strong> New code can write both old format (no status) and new format (with status). Old code still works — column is nullable so it can be NULL.</p>
+  <!-- ═══ THE SETUP ═══ -->
+  <div style="background:#f8f4ec; border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:20px;">
+    <div style="font-weight:800; color:var(--dark); margin-bottom:12px; font-size:1.05rem;">🎬 The concrete scenario (same noodle shop)</div>
+    <p style="font-size:0.92rem; line-height:1.75; color:#555; margin-bottom:14px;">Table <code>orders</code> has <strong>50 million rows</strong>. Your boss says: <em>"Add a <code>status</code> column. And <strong>every order MUST have one</strong> — empty is forbidden."</em> That "empty is forbidden" is <code>NOT NULL</code> — and it's what blows everything up. 💥</p>
+
+    <div style="background:#ffebee; border-left:4px solid #c62828; border-radius:0 8px 8px 0; padding:14px 18px; font-size:0.9rem; line-height:1.7;">
+      <strong style="color:#c62828;">❌ The naive way (all in one shot):</strong> "Add column <code>status</code>, and forbid empty!"<br>
+      Postgres freaks out: <em>"I have 50M old rows, they're all empty, and you're banning empty?! Then I must go fill every single one first."</em> → hangs the 🔴 <strong>CLOSED sign</strong> → grinds for 3 minutes → <strong>3 minutes of dead website.</strong> Customers rage. Boss calls. 😱
     </div>
-    <div class="phase-arrow">→</div>
-    <div class="deploy-phase" style="background:#fff3e0;border:2px solid #e65100;">
-      <h3 style="color:#e65100;">🟡 Deploy 2: BACKFILL</h3>
-      <p><strong>What:</strong> Backfill historical rows with a management command. NOT inside a migration file.<br><br>
-      <strong>Why separate:</strong> Django wraps migrations in a transaction. A RunPython over 50M rows holds an ACCESS EXCLUSIVE lock for the entire backfill duration = downtime.<br><br>
-      <strong>How:</strong> Batch updates of 5,000 rows in separate transactions:<br>
-      <code>Orders.objects.filter(status__isnull=True).values_list('id',flat=True)[:5000]</code><br><br>
-      <strong>Verify:</strong> Check zero NULL rows before proceeding.</p>
-    </div>
-    <div class="phase-arrow">→</div>
-    <div class="deploy-phase" style="background:#e8f5e9;border:2px solid #27ae60;">
-      <h3 style="color:#1b5e20;">🟢 Deploy 3: CONTRACT</h3>
-      <p><strong>What:</strong> Add the NOT NULL constraint using NOT VALID + VALIDATE pattern.<br><br>
-      <strong>SQL:</strong><br>
-      <code>ALTER TABLE orders ADD CONSTRAINT status_not_null CHECK (status IS NOT NULL) NOT VALID;</code><br>
-      Then:<br>
-      <code>ALTER TABLE orders VALIDATE CONSTRAINT status_not_null;</code><br><br>
-      <strong>Why NOT VALID:</strong> Skips full-table scan. Only takes SHARE UPDATE EXCLUSIVE lock — reads/writes continue.<br><br>
-      <strong>Django 5+:</strong> Prefer <code>db_default</code> over <code>default</code> — db_default is a real DB default, no Python-level rewrite.</p>
+
+    <div style="background:#e8f5e9; border-left:4px solid #1b5e20; border-radius:0 8px 8px 0; padding:14px 18px; margin-top:12px; font-size:0.93rem; line-height:1.75;">
+      <strong style="color:#1b5e20;">✅ The core idea — read this twice:</strong><br>
+      <strong>Never change the shape AND fill the data at the same time.</strong> Changing shape → red sign. Filling data → takes forever. <strong>Glue them together = red sign held forever = death.</strong> Split them apart and both become harmless.
     </div>
   </div>
 
+  <!-- ═══ WHAT THE TABLE LOOKS LIKE AFTER DEPLOY 1 ═══ -->
+  <div style="margin-bottom:20px;">
+    <p style="font-size:0.9rem; color:#666; margin-bottom:8px;">📋 After <strong>Deploy 1</strong>, the table looks like this — column exists, but it's <strong>completely empty</strong>:</p>
+<div style="background:#1e293b; color:#e2e8f0; padding:16px 20px; border-radius:10px; font-family:'Consolas',monospace; font-size:0.82rem; line-height:1.75; white-space:pre; overflow-x:auto;">orders
+┌────┬──────────┬────────┐
+│ id │ customer │ status │  <span style="color:#93c5fd;">← the NEW column, currently empty</span>
+├────┼──────────┼────────┤
+│  1 │ An       │  <span style="color:#fca5a5;">NULL</span>  │  <span style="color:#64748b;">NULL = an empty cell</span>
+│  2 │ Bình     │  <span style="color:#fca5a5;">NULL</span>  │
+│  3 │ Cường    │  <span style="color:#fca5a5;">NULL</span>  │
+│ .. │ ...      │  <span style="color:#fca5a5;">NULL</span>  │  <span style="color:#64748b;">(50 million rows — ALL empty)</span>
+└────┴──────────┴────────┘</div>
+  </div>
+
+  <div class="deploy-timeline">
+
+    <!-- ══ DEPLOY 1 ══ -->
+    <div class="deploy-phase" style="background:#e3f2fd;border:2px solid #1976d2;">
+      <h3 style="color:#1565c0;">🔵 Deploy 1: EXPAND <span style="font-weight:500;font-style:italic;">— "widen the table"</span></h3>
+
+      <p><strong>Do:</strong> add the <code>status</code> column, but <strong>allow it to be empty</strong> (<code>null=True</code>).</p>
+      <div style="background:#1e293b;color:#e2e8f0;border-radius:6px;padding:10px 12px;font-family:'Consolas',monospace;font-size:0.78rem;margin:10px 0;white-space:pre;overflow-x:auto;">ALTER TABLE orders
+  ADD COLUMN status VARCHAR(20)</div>
+
+      <p style="margin-bottom:10px;"><strong>Why it's safe:</strong> Postgres shrugs — <em>"Empty is allowed? Then I don't touch a single one of the 50M old rows. I just write one line in the catalog."</em></p>
+      <p style="margin-bottom:10px;">⚡ <strong>Milliseconds.</strong> Zero rows touched. The 🔴 red sign <em>is</em> hung — but it's gone in a blink, so nobody notices.</p>
+
+      <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:10px 12px;margin-top:10px;font-size:0.82rem;line-height:1.6;">
+        🤝 <strong>The bridge it creates:</strong> old code (doesn't know <code>status</code>) and new code (writes <code>status</code>) <strong>both work now</strong> — the column allows empty, so old code just leaves it blank. <strong>That coexistence IS what makes zero-downtime possible.</strong>
+      </div>
+      <p style="margin-top:10px;font-size:0.82rem;color:#1565c0;"><strong>Why "EXPAND"?</strong> You <strong>widen</strong> the table — make room — without forcing anything on anybody yet.</p>
+    </div>
+
+    <div class="phase-arrow">→</div>
+
+    <!-- ══ DEPLOY 2 ══ -->
+    <div class="deploy-phase" style="background:#fff3e0;border:2px solid #e65100;">
+      <h3 style="color:#e65100;">🟡 Deploy 2: BACKFILL <span style="font-weight:500;font-style:italic;">— "fill it up"</span></h3>
+
+      <p><strong>Do:</strong> write <code>'pending'</code> into those 50 million empty cells.</p>
+
+      <div style="background:#ffebee;border-left:3px solid #c62828;border-radius:0 6px 6px 0;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.6;">
+        😱 <strong>One shot = death:</strong> <code>UPDATE orders SET status='pending'</code> touches all 50M rows in <strong>one go, holding the lock till the last row</strong> (~3 min). 🚚 <em>Like carrying a 1-ton boulder — it jams the whole road.</em>
+      </div>
+
+      <div style="background:#e8f5e9;border-left:3px solid #1b5e20;border-radius:0 6px 6px 0;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.6;">
+        ✅ <strong>Batches instead:</strong>
+<div style="font-family:'Consolas',monospace;font-size:0.75rem;line-height:1.7;margin:6px 0;color:#37474f;">UPDATE 5,000 rows → RELEASE LOCK → breathe
+UPDATE 5,000 rows → RELEASE LOCK → breathe
+   ⋮  (10,000 times = 50M rows)</div>
+        🧱 <em>10,000 small bricks, not one boulder.</em> Each batch holds only the harmless 🟢 sign, for ~1 second. <strong>The road is never blocked.</strong>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.7);border-radius:8px;padding:10px 12px;font-size:0.82rem;line-height:1.6;">
+        🔑 <strong>Why it must live OUTSIDE the migration file:</strong> Django wraps <strong>a whole migration file in ONE transaction</strong> — it runs everything, <em>then</em> releases the lock once. So batching inside a migration is <strong>pointless</strong>; Django fuses all 10,000 batches into one 3-minute lock.<br><br>
+        👉 <strong>Batching only helps if each batch releases its lock — and to release it, you must escape the migration.</strong> Use a <strong>management command.</strong>
+      </div>
+
+      <p style="margin-top:10px;font-size:0.82rem;"><strong>✔️ Verify:</strong> count the empty cells. Any left? <strong>Do not proceed.</strong> Zero left? Safe — because Deploy 3 bans empty, and one leftover would make it <strong>explode</strong>. 💥</p>
+    </div>
+
+    <div class="phase-arrow">→</div>
+
+    <!-- ══ DEPLOY 3 ══ -->
+    <div class="deploy-phase" style="background:#e8f5e9;border:2px solid #27ae60;">
+      <h3 style="color:#1b5e20;">🟢 Deploy 3: CONTRACT <span style="font-weight:500;font-style:italic;">— "tighten the rule"</span></h3>
+
+      <p><strong>Do:</strong> now enforce <em>"status may never be empty."</em></p>
+
+      <div style="background:#ffebee;border-left:3px solid #c62828;border-radius:0 6px 6px 0;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.6;">
+        😱 <strong>The direct way</strong> (<code>SET NOT NULL</code>): Postgres must <strong>scan all 50M rows</strong> to check — <strong>while holding the 🔴 red sign.</strong> Cruel irony: the data is <em>already correct</em>, but checking means locking.
+      </div>
+
+      <div style="background:rgba(255,255,255,0.75);border-radius:8px;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.6;">
+        😷 <strong>The mask analogy:</strong> you announce <em>"everyone must wear a mask"</em> — but 50M customers are already seated. That's <strong>two separate jobs</strong>:<br>
+        <strong>A.</strong> Post the rule on the door → <span style="color:#1b5e20;font-weight:700;">⚡ 1 second</span><br>
+        <strong>B.</strong> Inspect the 50M already seated → <span style="color:#e65100;font-weight:700;">🐌 slow</span>
+      </div>
+
+      <div style="background:#1e293b;color:#e2e8f0;border-radius:6px;padding:10px 12px;font-family:'Consolas',monospace;font-size:0.75rem;margin:10px 0;white-space:pre;overflow-x:auto;"><span style="color:#fbbf24;">-- Beat 1 = job A: post the rule, don't inspect</span>
+ADD CONSTRAINT status_not_null
+  CHECK (status IS NOT NULL) <span style="color:#fbbf24;">NOT VALID</span>;   <span style="color:#86efac;">⚡ 🔴 blink</span>
+
+<span style="color:#fbbf24;">-- Beat 2 = job B: now go inspect old rows</span>
+<span style="color:#fbbf24;">VALIDATE</span> CONSTRAINT status_not_null;      <span style="color:#86efac;">🐌 but 🟡 yellow!</span></div>
+
+      <div style="background:#fff8e1;border-left:3px solid #f39c12;border-radius:0 6px 6px 0;padding:10px 12px;margin:10px 0;font-size:0.82rem;line-height:1.6;">
+        ⚠️ <code>NOT VALID</code> does <strong>NOT</strong> mean "the rule is invalid." It means <strong>"I haven't checked the OLD rows yet."</strong> The rule is <em>already live</em> — every <strong>new</strong> row is rejected from this instant.
+      </div>
+
+      <div style="background:rgba(255,255,255,0.75);border-radius:8px;padding:10px 12px;font-size:0.82rem;line-height:1.6;">
+        🤔 <strong>Why does VALIDATE only need the yellow sign?</strong> A lock exists to stop others from <strong>ruining your work.</strong><br><br>
+        🔴 <em>Direct way:</em> no rule posted → a user sneaks in an empty row <strong>behind the scan</strong> 😈 → the scan's "all clean!" is a lie. <strong>Must block everyone.</strong><br><br>
+        🟡 <em>After NOT VALID:</em> <strong>the gate is already shut</strong> → nobody can sneak one in → the scan can't be ruined → <strong>no need to block anyone.</strong> (Bonus: VALIDATE only <em>reads</em>. 📖)
+      </div>
+
+      <p style="margin-top:10px;font-size:0.82rem;color:#1b5e20;"><strong>Why "CONTRACT"?</strong> You <strong>tighten</strong> the rule back down — empty is no longer allowed.</p>
+      <p style="margin-top:8px;font-size:0.8rem;color:#555;"><strong>Django 5+ tip:</strong> prefer <code>db_default</code> over <code>default</code> — <code>db_default</code> is a real DB-level default, so no Python-level row rewrite.</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <!-- 🎮 INTERACTIVE DEMO — play the noodle shop                    -->
+  <!-- ═══════════════════════════════════════════════════════════ -->
+  <h3 style="color:var(--dark); margin:34px 0 6px; font-size:1.15rem;">🎮 Play it yourself — the noodle shop simulator</h3>
+  <p style="color:#666; font-size:0.9rem; margin-bottom:16px;">Run the <strong>naive way</strong> and watch the shop close for 3 minutes. Then run <strong>Expand–Contract</strong> and watch customers never notice. Same goal, same data.</p>
+
+  <div id="ec-demo" style="border:2px solid var(--border); border-radius:16px; overflow:hidden; background:#fff; margin-bottom:28px;">
+
+    <!-- MODE TABS -->
+    <div style="display:flex; background:#f8f4ec; border-bottom:1px solid var(--border);">
+      <button class="ec-tab" data-mode="naive" style="flex:1; padding:14px; border:none; background:none; cursor:pointer; font-size:0.92rem; font-weight:800; font-family:inherit; color:#c62828; border-bottom:3px solid transparent;">❌ The Naive Way (1 shot)</button>
+      <button class="ec-tab" data-mode="ec" style="flex:1; padding:14px; border:none; background:none; cursor:pointer; font-size:0.92rem; font-weight:800; font-family:inherit; color:#1b5e20; border-bottom:3px solid transparent;">✅ Expand–Contract (3 deploys)</button>
+    </div>
+
+    <div style="padding:22px 24px;">
+
+      <!-- THE SHOP -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:18px;">
+
+        <!-- SIGN + CUSTOMERS -->
+        <div>
+          <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#999; margin-bottom:8px;">🚪 The sign on the door</div>
+          <div id="ec-sign" style="border-radius:12px; padding:18px; text-align:center; transition:all 0.35s; background:#e8f5e9; border:2px solid #a5d6a7;">
+            <div id="ec-sign-icon" style="font-size:2rem; line-height:1.2;">🟢</div>
+            <div id="ec-sign-name" style="font-weight:800; font-size:0.95rem; margin-top:4px; color:#1b5e20;">NO LOCK</div>
+            <div id="ec-sign-sub" style="font-size:0.8rem; color:#666; margin-top:2px;">Shop is open, business as usual</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+            <div id="ec-reads" style="border-radius:8px; padding:10px; text-align:center; font-size:0.82rem; font-weight:700; transition:all 0.35s; background:#e8f5e9; color:#1b5e20;">📖 Reads ✅</div>
+            <div id="ec-writes" style="border-radius:8px; padding:10px; text-align:center; font-size:0.82rem; font-weight:700; transition:all 0.35s; background:#e8f5e9; color:#1b5e20;">✍️ Writes ✅</div>
+          </div>
+
+          <div style="margin-top:10px; background:#f8f4ec; border:1px solid var(--border); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center;">
+            <span style="font-size:0.82rem; color:#666; font-weight:700;">⏱️ Total downtime</span>
+            <span id="ec-downtime" style="font-family:'Consolas',monospace; font-weight:800; font-size:1.05rem; color:#1b5e20;">0s</span>
+          </div>
+        </div>
+
+        <!-- THE TABLE -->
+        <div>
+          <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:#999; margin-bottom:8px;">🗄️ orders table <span style="text-transform:none; letter-spacing:0; font-weight:400;">(8 rows shown of 50M)</span></div>
+          <div id="ec-table" style="background:#1e293b; border-radius:12px; padding:14px 16px; font-family:'Consolas',monospace; font-size:0.8rem; line-height:1.85; color:#e2e8f0; min-height:212px;"></div>
+          <div id="ec-progress-wrap" style="margin-top:8px; display:none;">
+            <div style="background:#f0ebe0; border-radius:20px; height:10px; overflow:hidden;">
+              <div id="ec-progress" style="height:100%; width:0%; background:linear-gradient(90deg,#f39c12,#27ae60); transition:width 0.4s;"></div>
+            </div>
+            <div id="ec-progress-label" style="font-size:0.75rem; color:#888; margin-top:4px; text-align:right;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NARRATION -->
+      <div id="ec-narration" style="border-radius:10px; padding:16px 18px; font-size:0.9rem; line-height:1.7; min-height:92px; transition:all 0.3s;"></div>
+
+      <!-- CONTROLS -->
+      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center;">
+        <button id="ec-next" style="background:var(--primary); color:#fff; border:none; border-radius:8px; padding:11px 22px; font-size:0.9rem; font-weight:800; cursor:pointer; font-family:inherit;">▶ Next step</button>
+        <button id="ec-reset" style="background:#fff; color:#666; border:1px solid var(--border); border-radius:8px; padding:11px 18px; font-size:0.9rem; font-weight:700; cursor:pointer; font-family:inherit;">↺ Reset</button>
+        <span id="ec-stepcount" style="font-size:0.82rem; color:#999; margin-left:auto;"></span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const SIGNS = {
+      none:  {icon:'🟢', name:'NO LOCK',                bg:'#e8f5e9', bd:'#a5d6a7', col:'#1b5e20', sub:'Shop is open, business as usual'},
+      green: {icon:'🟢', name:'ROW EXCLUSIVE',          bg:'#e8f5e9', bd:'#a5d6a7', col:'#1b5e20', sub:'"This table is taken" — 5,000 rows only'},
+      yellow:{icon:'🟡', name:'SHARE UPDATE EXCLUSIVE', bg:'#fff8e1', bd:'#ffd54f', col:'#e65100', sub:'"Painter at work" — customers keep eating'},
+      red:   {icon:'🔴', name:'ACCESS EXCLUSIVE',       bg:'#ffebee', bd:'#ef9a9a', col:'#c62828', sub:'"SHOP CLOSED. EVERYONE OUT."'}
+    };
+    const NAMES = ['An','Bình','Cường','Dũng','Én','Phúc','Giang','Hà'];
+
+    // filled: -1 = column does not exist yet | 0..8 = how many rows have a value
+    const NAIVE = [
+      {sign:'none', r:1,w:1, dt:0, filled:-1, prog:null,
+       title:'🎬 Before anything', color:'#f8f4ec', bd:'#c9bfa8',
+       text:'The <code>orders</code> table has no <code>status</code> column yet. Customers are eating. Your boss wants a <code>status</code> column that <strong>can never be empty</strong>.'},
+      {sign:'red', r:0,w:0, dt:0, filled:0, prog:0,
+       title:'💥 ALTER TABLE ... ADD COLUMN status NOT NULL', color:'#ffebee', bd:'#c62828',
+       text:'Postgres: <em>"Empty is banned, but I have 50M empty rows?! I must fill every single one first."</em><br>It hangs the 🔴 <strong>CLOSED</strong> sign — <strong>and keeps it up while it works.</strong> Reads dead. Writes dead.'},
+      {sign:'red', r:0,w:0, dt:65, filled:3, prog:38,
+       title:'⏳ Still rewriting the table…', color:'#ffebee', bd:'#c62828',
+       text:'Rows are being filled, one by one. <strong>The red sign never comes down.</strong> Your website has now been unreachable for over a minute. Customers are refreshing and rage-tweeting. 😱'},
+      {sign:'red', r:0,w:0, dt:140, filled:6, prog:75,
+       title:'⏳ …still going…', color:'#ffebee', bd:'#c62828',
+       text:'50 million rows takes a while. Your phone is ringing. It is your boss.'},
+      {sign:'none', r:1,w:1, dt:183, filled:8, prog:100,
+       title:'☠️ Done — at the cost of 3 minutes of total outage', color:'#ffebee', bd:'#c62828',
+       text:'The column exists and is NOT NULL. <strong>But you took the whole site down for 3 minutes to get here.</strong><br>❌ <strong>This is the Disaster Pattern.</strong> Now click the green tab and do it properly.'}
+    ];
+
+    const EC = [
+      {sign:'none', r:1,w:1, dt:0, filled:-1, prog:null,
+       title:'🎬 Before anything', color:'#f8f4ec', bd:'#c9bfa8',
+       text:'Same starting point. Same goal. But we will <strong>never let a slow job hold the red sign.</strong>'},
+      {sign:'red', r:0,w:0, dt:0, filled:0, prog:null,
+       title:'🔵 Deploy 1 — EXPAND: add the column, allow empty', color:'#e3f2fd', bd:'#1976d2',
+       text:'<code>ADD COLUMN status VARCHAR(20)</code> — <strong>nullable.</strong><br>Postgres: <em>"Empty is allowed? Then I touch zero rows — I just note it in the catalog."</em> The red sign flashes up and is <strong>gone in milliseconds.</strong> ⚡ Nobody notices.'},
+      {sign:'none', r:1,w:1, dt:0, filled:0, prog:0,
+       title:'🤝 The bridge — old and new both work', color:'#e3f2fd', bd:'#1976d2',
+       text:'The column exists but is empty everywhere. <strong>Old code ignores it. New code writes it.</strong> Both are valid, because empty is allowed. <strong>This coexistence is what makes zero-downtime possible.</strong>'},
+      {sign:'green', r:1,w:1, dt:0, filled:2, prog:25,
+       title:'🟡 Deploy 2 — BACKFILL: batch 1 of 10,000', color:'#fff3e0', bd:'#e65100',
+       text:'<code>UPDATE 5,000 rows → RELEASE LOCK → breathe</code><br>Only a 🟢 row-level sign, for about a second. 🧱 <em>10,000 small bricks, not one 1-ton boulder.</em> The road is never blocked.'},
+      {sign:'green', r:1,w:1, dt:0, filled:5, prog:62,
+       title:'🟡 BACKFILL: still going, still zero downtime', color:'#fff3e0', bd:'#e65100',
+       text:'Slow overall — but each batch is its own transaction, so <strong>the lock is truly released between batches.</strong><br>🔑 That is why the backfill must live in a <strong>management command</strong>, not a migration file: Django would fuse all 10,000 batches into one giant lock.'},
+      {sign:'none', r:1,w:1, dt:0, filled:8, prog:100,
+       title:'✔️ Verify: zero empty rows left', color:'#fff3e0', bd:'#e65100',
+       text:'Count the empties. Still some? Keep running — <strong>do not proceed.</strong> Zero left? Safe to tighten. (Any leftover empty row would make the next step explode. 💥)'},
+      {sign:'red', r:0,w:0, dt:0, filled:8, prog:100,
+       title:'🟢 Deploy 3, beat 1 — NOT VALID: post the rule', color:'#e8f5e9', bd:'#27ae60',
+       text:'<code>ADD CONSTRAINT ... CHECK (status IS NOT NULL) NOT VALID</code><br>😷 Job A only: <strong>post the rule on the door.</strong> It does <strong>not</strong> inspect the old rows yet. Red sign blinks for milliseconds. ⚡<br>⚠️ <code>NOT VALID</code> ≠ "the rule is invalid." It means <strong>"I haven\'t checked the old rows yet."</strong> The gate is <strong>already shut for new rows.</strong>'},
+      {sign:'yellow', r:1,w:1, dt:0, filled:8, prog:100,
+       title:'🟢 Deploy 3, beat 2 — VALIDATE: now go inspect', color:'#e8f5e9', bd:'#27ae60',
+       text:'<code>VALIDATE CONSTRAINT status_not_null</code> — the slow 50M-row scan. But look at the sign: <strong>🟡 yellow.</strong> Customers keep eating!<br>🚪 Why? <strong>The gate is already shut</strong> — nobody can sneak an empty row in behind the scan. Nothing can ruin the result, so <strong>nothing needs to be blocked.</strong>'},
+      {sign:'none', r:1,w:1, dt:0, filled:8, prog:100,
+       title:'🏆 Done — 50M rows migrated, ZERO downtime', color:'#e8f5e9', bd:'#27ae60',
+       text:'Same column. Same constraint. Same data. <strong>0 seconds of outage.</strong><br>🧵 <strong>The whole trick:</strong> a <em>fast</em> job may hold the red sign. A <em>slow</em> job must run under yellow or green. <strong>They never stand together.</strong> 🔥'}
+    ];
+
+    let mode = 'naive', step = 0;
+    const $ = id => document.getElementById(id);
+    const tabs = document.querySelectorAll('.ec-tab');
+
+    function steps(){ return mode === 'naive' ? NAIVE : EC; }
+
+    function renderTable(filled){
+      if (filled < 0){
+        let h = 'orders  <span style="color:#64748b;">(no status column yet)</span>\n';
+        h += '┌────┬──────────┐\n│ id │ customer │\n├────┼──────────┤\n';
+        NAMES.slice(0,5).forEach((n,i)=>{ h += '│  '+(i+1)+' │ '+n.padEnd(8)+' │\n'; });
+        h += '│ .. │ ...      │\n└────┴──────────┘';
+        return h;
+      }
+      let h = 'orders\n┌────┬──────────┬───────────┐\n│ id │ customer │  status   │\n├────┼──────────┼───────────┤\n';
+      NAMES.slice(0,6).forEach((n,i)=>{
+        const done = i < filled;
+        const cell = done
+          ? '<span style="color:#86efac;">\'pending\'</span>'
+          : '<span style="color:#fca5a5;">  NULL   </span>';
+        h += '│  '+(i+1)+' │ '+n.padEnd(8)+' │ '+cell+' │\n';
+      });
+      h += '│ .. │ ...      │ '+(filled>=8
+          ? '<span style="color:#86efac;">\'pending\'</span>'
+          : '<span style="color:#fca5a5;">  NULL   </span>')+' │\n└────┴──────────┴───────────┘';
+      return h;
+    }
+
+    function render(){
+      const s = steps()[step];
+      const sg = SIGNS[s.sign];
+
+      $('ec-sign').style.background = sg.bg;
+      $('ec-sign').style.borderColor = sg.bd;
+      $('ec-sign-icon').textContent = sg.icon;
+      $('ec-sign-name').textContent = sg.name;
+      $('ec-sign-name').style.color = sg.col;
+      $('ec-sign-sub').textContent = sg.sub;
+
+      const ok = {bg:'#e8f5e9', col:'#1b5e20'}, no = {bg:'#ffebee', col:'#c62828'};
+      const rs = s.r ? ok : no, ws = s.w ? ok : no;
+      $('ec-reads').style.background = rs.bg;  $('ec-reads').style.color = rs.col;
+      $('ec-reads').textContent = s.r ? '📖 Reads ✅' : '📖 Reads ❌ BLOCKED';
+      $('ec-writes').style.background = ws.bg; $('ec-writes').style.color = ws.col;
+      $('ec-writes').textContent = s.w ? '✍️ Writes ✅' : '✍️ Writes ❌ BLOCKED';
+
+      $('ec-downtime').textContent = s.dt + 's';
+      $('ec-downtime').style.color = s.dt > 0 ? '#c62828' : '#1b5e20';
+
+      $('ec-table').innerHTML = renderTable(s.filled);
+
+      if (s.prog === null){ $('ec-progress-wrap').style.display = 'none'; }
+      else {
+        $('ec-progress-wrap').style.display = 'block';
+        $('ec-progress').style.width = s.prog + '%';
+        $('ec-progress-label').textContent = s.prog + '% of 50M rows filled';
+      }
+
+      $('ec-narration').style.background = s.color;
+      $('ec-narration').style.borderLeft = '4px solid ' + s.bd;
+      $('ec-narration').innerHTML = '<strong>' + s.title + '</strong><div style="margin-top:6px; color:#555;">' + s.text + '</div>';
+
+      $('ec-stepcount').textContent = 'Step ' + (step+1) + ' / ' + steps().length;
+      const last = step === steps().length - 1;
+      $('ec-next').textContent = last ? '✓ Finished' : '▶ Next step';
+      $('ec-next').style.opacity = last ? '0.45' : '1';
+      $('ec-next').style.cursor = last ? 'default' : 'pointer';
+
+      tabs.forEach(t=>{
+        const on = t.dataset.mode === mode;
+        t.style.borderBottomColor = on ? (mode==='naive' ? '#c62828' : '#1b5e20') : 'transparent';
+        t.style.background = on ? '#fff' : 'none';
+        t.style.opacity = on ? '1' : '0.55';
+      });
+    }
+
+    $('ec-next').onclick = ()=>{ if (step < steps().length - 1){ step++; render(); } };
+    $('ec-reset').onclick = ()=>{ step = 0; render(); };
+    tabs.forEach(t=> t.onclick = ()=>{ mode = t.dataset.mode; step = 0; render(); });
+    render();
+  })();
+  </script>
+
+  <!-- ═══ THE THREAD ═══ -->
+  <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59); border-radius:12px; padding:22px 24px; color:white; margin-bottom:18px;">
+    <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:12px;">🧵 The single thread running through all 3 deploys</div>
+    <p style="font-size:1rem; line-height:1.8; margin-bottom:14px;"><strong>A FAST job may hold the 🔴 red sign. A SLOW job must run under 🟡 yellow or 🟢 green.</strong></p>
+    <ul style="margin-left:20px; line-height:2; opacity:0.95; font-size:0.92rem;">
+      <li><strong>Deploy 1:</strong> changes shape (red) — but it's <strong>fast</strong> ✅</li>
+      <li><strong>Deploy 2:</strong> fills data (<strong>slow</strong>) — so it's batched down to green 🟢 ✅</li>
+      <li><strong>Deploy 3:</strong> scans rows (<strong>slow</strong>) — so <code>NOT VALID</code> pushes it onto yellow 🟡 ✅</li>
+    </ul>
+    <p style="margin-top:14px; font-size:0.95rem; opacity:0.95;"><strong>At no point do "red sign" and "slow job" ever stand together.</strong> That's the whole pattern. 🔥</p>
+  </div>
+
+  <!-- SUMMARY TABLE -->
+  <table class="lock-table" style="margin-bottom:18px;">
+    <thead><tr><th>Deploy</th><th>Name</th><th>What it does</th><th>Sign hung</th><th>Duration</th></tr></thead>
+    <tbody>
+      <tr><td><strong>1</strong></td><td>🔵 EXPAND</td><td>Add column, <strong>empty allowed</strong></td><td>🔴 but instantaneous</td><td>milliseconds</td></tr>
+      <tr><td><strong>2</strong></td><td>🟡 BACKFILL</td><td>Fill data, <strong>small batches</strong></td><td>🟢 per batch</td><td>slow but harmless</td></tr>
+      <tr><td><strong>3</strong></td><td>🟢 CONTRACT</td><td><strong>Tighten</strong> the NOT NULL rule</td><td>🟡 (thanks to NOT VALID)</td><td>seconds of red, rest yellow</td></tr>
+    </tbody>
+  </table>
+  <p style="text-align:center; font-size:1rem; color:var(--dark); font-weight:700; margin-bottom:20px;">Expand → Fill → Contract. Three gentle beats instead of one lethal one. 🎯</p>
+
   <div style="background:#fff3e0;border-radius:10px;padding:18px;margin-top:16px;border-left:4px solid #e74c3c;">
     <strong>🚫 The Disaster Pattern (what NOT to do):</strong> Adding a non-nullable column + RunPython backfill in the SAME migration file. Django wraps the migration in a transaction. The ACCESS EXCLUSIVE lock from ALTER TABLE is held for the entire duration of the RunPython. On 50M rows, that's multiple minutes of zero reads + zero writes.
+    <div style="margin-top:10px; font-size:0.9rem; line-height:1.7; color:#6b4a00;">In shop terms: you hang the 🔴 <strong>CLOSED</strong> sign to change the shape, then — <em>still holding it</em> — start filling 50 million rows. The sign stays up the entire time. <strong>This exact mistake is what the whole Expand–Contract pattern exists to prevent.</strong></div>
   </div>
 </div>
 

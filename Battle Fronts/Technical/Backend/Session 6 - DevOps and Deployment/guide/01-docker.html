@@ -254,6 +254,30 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="concept-card">
     <p style="margin-bottom:20px; color:#666;">This is the most common Dockerfile mistake. The interviewer is explicitly testing if you understand this:</p>
 
+    <!-- MINI PRIMER: what cache HIT/MISS even means + the cascade rule -->
+    <div style="background:#f8f4ec; border:1px solid var(--border); border-radius:12px; padding:20px 24px; margin-bottom:22px;">
+      <div style="font-weight:800; color:var(--dark); margin-bottom:10px; font-size:1rem;">🧠 First — what do CACHE HIT / MISS even mean?</div>
+
+      <!-- HOMEWORK ANALOGY -->
+      <div style="background:#fff; border:1px dashed #c9bfa8; border-radius:10px; padding:14px 18px; margin-bottom:16px; font-size:0.9rem; line-height:1.7; color:#555;">
+        📚 <strong>Think of a hard homework problem.</strong> The first time, you grind for 30 minutes to solve it, then <strong>write the answer on a sticky note</strong>. Next time the <em>exact same</em> problem shows up → you just copy the sticky note (5 seconds). But if the numbers changed → the old note is useless → you solve from scratch again.
+      </div>
+
+      <p style="font-size:0.9rem; line-height:1.7; color:#555; margin-bottom:14px;">A Dockerfile is exactly this: <strong>a chain of problems solved top-to-bottom</strong>, and Docker keeps a sticky note (a cached layer) for each one. On every rebuild it asks one question per line: <em>"are this step's inputs identical to last time?"</em></p>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px; padding:12px 16px; font-size:0.88rem; line-height:1.6;">
+          <span style="color:#1b5e20; font-weight:800;">✅ CACHE HIT</span> — identical → <strong>copy the sticky note.</strong> Instant.
+        </div>
+        <div style="background:#ffebee; border:1px solid #ef9a9a; border-radius:8px; padding:12px 16px; font-size:0.88rem; line-height:1.6;">
+          <span style="color:#b71c1c; font-weight:800;">❌ CACHE MISS</span> — changed → <strong>solve from scratch.</strong> Slow.
+        </div>
+      </div>
+      <div style="background:#fff8e1; border-left:4px solid #f39c12; border-radius:0 8px 8px 0; padding:12px 16px; font-size:0.9rem; line-height:1.65;">
+        💥 <strong>The killer rule — a MISS cascades downward.</strong> The problems are chained: <strong>problem 3 uses problem 2's answer to solve itself</strong>. So if problem 2 has to be re-solved (MISS), its answer is now different → problem 3 can't trust its old sticky note either → <strong>problem 3 misses too</strong>, and 4, 5… all the way down. One miss up top forces every layer below it to rebuild — even ones that didn't change. That single fact is the entire reason order matters below.
+      </div>
+    </div>
+
     <div class="two-col">
       <div>
         <h3 style="color:var(--danger); margin-bottom:12px;">❌ WRONG — Cache busted every time</h3>
@@ -313,17 +337,41 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="section-header" id="part3"><span>🏗️</span> Part 3: Multi-Stage Builds</div>
 
   <div class="concept-card">
-    <!-- ONE-SENTENCE IDEA -->
-    <p style="margin-bottom:20px; color:#444; font-size:1rem; line-height:1.7;"><strong>The whole idea in one sentence:</strong> a multi-stage build puts <strong>two images inside one Dockerfile</strong> — a heavy <span style="color:#c62828;font-weight:700;">builder</span> that owns the compilers, and a lean <span style="color:#1b5e20;font-weight:700;">runtime</span> that ships. You <strong>compile in the builder, then copy ONLY the finished packages into the runtime.</strong> The builder — <code>gcc</code> and all — is thrown in the trash. <strong>The image you ship never contained a compiler.</strong></p>
+    <!-- THE ONE IDEA -->
+    <p style="margin-bottom:20px; color:#444; font-size:1rem; line-height:1.7;"><strong>The whole idea in one line:</strong> some tools are needed to <strong>BUILD</strong> your app but are useless to <strong>RUN</strong> it. A multi-stage build lets you build with those heavy tools, then <strong>ship a clean image that never contained them</strong> — so it stays tiny.</p>
 
-    <!-- METAPHOR -->
-    <div style="background:#fff8e1; border-left:4px solid #f39c12; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:24px; font-size:0.92rem; line-height:1.65;">
-      🪚 <strong>The workshop metaphor:</strong> You build a chair in a <em>workshop</em> full of saws, drills and sawdust. You don't mail the whole <em>workshop</em> to the customer — you ship <em>only the finished chair</em>. Multi-stage = <strong>"build in the messy workshop (builder stage), deliver only the clean product (runtime stage)."</strong> The workshop stays behind.
+    <!-- 4 BRICKS PRIMER -->
+    <div style="background:#f8f4ec; border:1px solid var(--border); border-radius:12px; padding:22px 24px; margin-bottom:24px;">
+      <div style="font-weight:800; color:var(--dark); margin-bottom:16px; font-size:1rem;">🧱 Build the intuition in 4 tiny bricks</div>
+
+      <div style="display:flex; gap:12px; margin-bottom:15px;">
+        <div style="flex-shrink:0; width:26px; height:26px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem;">1</div>
+        <div style="font-size:0.9rem; line-height:1.65; color:#555;"><strong>An image is a box you ship.</strong> It holds a mini-OS + Python + your libraries + your code, and you upload/download it on every deploy. A <strong>900 MB</strong> box deploys slowly; an <strong>85 MB</strong> box flies. <em>Lighter = better.</em></div>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-bottom:15px;">
+        <div style="flex-shrink:0; width:26px; height:26px; background:var(--primary); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem;">2</div>
+        <div style="font-size:0.9rem; line-height:1.65; color:#555;"><strong>Some libraries need a heavy tool to install.</strong> Packages like <code>psycopg2</code> and <code>Pillow</code> are partly written in <strong>C</strong>, and C can't run until it's <strong>compiled</strong> (translated into machine code). Translating needs <code>gcc</code> — a ~200 MB "translator". But once it's compiled into a finished <code>.so</code> file, <strong>that file runs on its own — gcc is no longer needed.</strong></div>
+      </div>
+
+      <div style="display:flex; gap:12px; margin-bottom:15px;">
+        <div style="flex-shrink:0; width:26px; height:26px; background:var(--warning); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem;">3</div>
+        <div style="font-size:0.9rem; line-height:1.65; color:#555;"><strong>The paradox that bloats the box.</strong> In a normal single-stage build you install gcc, compile the libs… then gcc just <strong>stays in the box forever</strong>, even though running the app never touches it again. It's like renting a crane to build a house, then <strong>leaving the crane parked in the living room.</strong> Result: a 900 MB box carrying 200 MB of dead weight.</div>
+      </div>
+
+      <div style="display:flex; gap:12px;">
+        <div style="flex-shrink:0; width:26px; height:26px; background:var(--success); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:0.8rem;">4</div>
+        <div style="font-size:0.9rem; line-height:1.65; color:#555;"><strong>The trick — use two boxes.</strong> <span style="color:#c62828;font-weight:700;">Box A (builder)</span> has gcc and does the compiling. <span style="color:#1b5e20;font-weight:700;">Box B (runtime)</span> starts clean, <strong>copies only the finished <code>.so</code> files</strong> from Box A, adds your code — then <strong>Box A is thrown away.</strong> You ship Box B: same libraries, <strong>zero gcc.</strong></div>
+      </div>
     </div>
 
-    <!-- WHY TWO STAGES -->
-    <h3 style="color:var(--dark); margin-bottom:10px; font-size:1.05rem;">① Why you even need two stages</h3>
-    <p style="margin-bottom:20px; color:#666; line-height:1.7;">Python packages like <code>psycopg2</code>, <code>cryptography</code> and <code>Pillow</code> ship <strong>C code that must be compiled</strong>. Compiling needs <code>gcc</code> + dev headers — roughly <strong>200&nbsp;MB of tools</strong>. You need those tools to <strong>build</strong> the package… but once it's compiled into a <code>.so</code> file, that file runs <strong>on its own at runtime</strong>. Keeping the compiler around after the build is pure dead weight: <strong>bigger image → slower pulls → larger attack surface.</strong></p>
+    <!-- THE AHA -->
+    <div style="background:#f3e8ff; border-left:4px solid #8e44ad; border-radius:0 8px 8px 0; padding:14px 18px; margin-bottom:24px; font-size:0.92rem; line-height:1.65;">
+      💡 <strong>The key realization:</strong> Box B isn't lighter because its libraries are smaller — they're <em>identical</em> to the single-stage ones. It's lighter for exactly one reason: <strong>it has the same <code>.so</code> files but NO gcc.</strong> That single ~200 MB difference is the entire point of multi-stage.
+    </div>
+
+    <!-- SIZE COMPARISON -->
+    <h3 style="color:var(--dark); margin-bottom:10px; font-size:1.05rem;">① See the payoff: 900 MB → 85 MB</h3>
 
     <div class="two-col">
       <div>
@@ -353,7 +401,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
           <span style="font-size:1.6rem;">🏭</span>
           <div>
-            <div style="font-weight:800; color:#c62828;">STAGE 1 — <code>builder</code></div>
+            <div style="font-weight:800; color:#c62828;">STAGE 1 — <code>builder</code> <span style="font-weight:600;">(= Box A)</span></div>
             <div style="font-size:0.78rem; color:#888;">FROM python:3.12-slim <strong>AS builder</strong></div>
           </div>
           <span style="margin-left:auto; background:#ffcdd2; color:#b71c1c; font-size:0.72rem; font-weight:800; padding:4px 10px; border-radius:20px;">HAS gcc + headers</span>
@@ -374,7 +422,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
           <span style="font-size:1.6rem;">🚀</span>
           <div>
-            <div style="font-weight:800; color:#1b5e20;">STAGE 2 — <code>runtime</code> (this is what ships)</div>
+            <div style="font-weight:800; color:#1b5e20;">STAGE 2 — <code>runtime</code> <span style="font-weight:600;">(= Box B, this is what ships)</span></div>
             <div style="font-size:0.78rem; color:#888;">FROM python:3.12-slim <strong>AS runtime</strong> — a brand-new, clean image</div>
           </div>
           <span style="margin-left:auto; background:#c8e6c9; color:#1b5e20; font-size:0.72rem; font-weight:800; padding:4px 10px; border-radius:20px;">NO compilers</span>
@@ -388,35 +436,43 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
       </div>
     </div>
 
-    <!-- ANNOTATED CODE -->
-    <h3 style="color:var(--dark); margin:28px 0 14px; font-size:1.05rem;">③ The full Dockerfile, annotated</h3>
-<div class="code-block"><span class="c"># ═══ STAGE 1: builder — the messy workshop (compilers live here) ═══</span>
-<span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS builder</span>   <span class="c"># ← name this stage "builder"</span>
+    <!-- ANNOTATED CODE — SPLIT INTO TWO BOXES -->
+    <h3 style="color:var(--dark); margin:28px 0 14px; font-size:1.05rem;">③ The full Dockerfile — now split into the two boxes</h3>
 
-<span class="k">RUN</span> <span class="s">apt-get update && apt-get install -y \
-    gcc libpq-dev python3-dev \
-    && rm -rf /var/lib/apt/lists/*</span>       <span class="c"># the compilers — needed ONLY to build</span>
+    <!-- BOX A -->
+    <div style="border:2px solid #e74c3c; border-radius:12px; overflow:hidden; margin-bottom:6px;">
+      <div style="background:#fff5f5; color:#c62828; font-weight:800; padding:10px 16px; font-size:0.84rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">📦 BOX A — <code>builder</code> · has gcc, does the compiling <span style="margin-left:auto; background:#ffcdd2; color:#b71c1c; font-size:0.68rem; padding:2px 9px; border-radius:12px;">🗑️ deleted at the end</span></div>
+<div class="code-block" style="margin:0; border-radius:0;"><span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS builder</span>   <span class="c"># name this box "builder"</span>
+
+<span class="k">RUN</span> <span class="s">apt-get install -y gcc libpq-dev python3-dev</span>
+<span class="c">#                    ▲ the ~200MB "translator" — needed ONLY to compile</span>
 
 <span class="k">COPY</span> requirements.txt .
-<span class="k">RUN</span> <span class="s">pip install --no-cache-dir --prefix=/install -r requirements.txt</span>
-<span class="c">#                                    ▲ --prefix=/install collects every</span>
-<span class="c">#                                      compiled package into ONE folder we can copy</span>
+<span class="k">RUN</span> <span class="s">pip install --prefix=/install -r requirements.txt</span>
+<span class="c">#                 ▲ compile everything, then dump the finished .so files</span>
+<span class="c">#                   into ONE tidy folder we can grab later:  /install</span></div>
+    </div>
 
-<span class="c"># ═══ STAGE 2: runtime — the delivery truck (starts clean, ships) ═══</span>
-<span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS runtime</span>   <span class="c"># ← a FRESH image. gcc is NOT here.</span>
+    <!-- BRIDGE -->
+    <div style="text-align:center; padding:12px 0; font-size:0.85rem; color:#6a1b9a; line-height:1.7;">⬇&nbsp; <code style="background:#f3e8ff; padding:2px 6px; border-radius:4px;">COPY --from=builder</code> carries <strong>only</strong> the finished <code>/install</code> folder across — gcc stays behind &nbsp;⬇</div>
 
-<span class="h">COPY --from=builder /install /usr/local</span>  <span class="c"># ← THE MAGIC LINE: pull compiled</span>
-<span class="c">#                                         packages across, leave gcc behind</span>
+    <!-- BOX B -->
+    <div style="border:2px solid #27ae60; border-radius:12px; overflow:hidden; margin-top:6px;">
+      <div style="background:#f0faf4; color:#1b5e20; font-weight:800; padding:10px 16px; font-size:0.84rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap;">📦 BOX B — <code>runtime</code> · clean, no gcc <span style="margin-left:auto; background:#c8e6c9; color:#1b5e20; font-size:0.68rem; padding:2px 9px; border-radius:12px;">🚀 this is what ships</span></div>
+<div class="code-block" style="margin:0; border-radius:0;"><span class="k">FROM</span> <span class="v">python:3.12-slim</span> <span class="h">AS runtime</span>   <span class="c"># a BRAND-NEW clean box. NO gcc.</span>
+
+<span class="h">COPY --from=builder /install /usr/local</span>
+<span class="c">#    ▲ reach into Box A, take ONLY the finished .so files</span>
 
 <span class="k">WORKDIR</span> /app
-<span class="k">COPY</span> . .
+<span class="k">COPY</span> . .                          <span class="c"># your app code</span>
 
-<span class="k">RUN</span> <span class="s">useradd --create-home appuser</span>       <span class="c"># non-root — smaller blast radius</span>
+<span class="k">RUN</span> <span class="s">useradd --create-home appuser</span>  <span class="c"># non-root = safer</span>
 <span class="k">USER</span> appuser
 
 <span class="k">CMD</span> [<span class="s">"gunicorn"</span>, <span class="s">"config.wsgi"</span>, <span class="s">"--bind"</span>, <span class="s">"0.0.0.0:8000"</span>]
-<span class="c"># Final image = compiled packages + runtime + your code. ZERO build tools.</span>
-</div>
+<span class="c"># Box B = .so + Python + your code.   ZERO gcc.   →   ~85MB 🪶</span></div>
+    </div>
 
     <div style="background:#f3e8ff; border-left:4px solid #8e44ad; border-radius:0 8px 8px 0; padding:14px 18px; margin-top:16px; font-size:0.9rem; line-height:1.65;">
       🔑 <strong>The one line that makes it work: <code>COPY --from=builder</code>.</strong> Normal <code>COPY</code> pulls from your build context (your source folder). <code>COPY --from=builder</code> pulls from <em>another stage's filesystem</em>. That's the entire trick — it lets the clean runtime reach into the dirty builder and take <strong>only the finished goods.</strong>
@@ -425,7 +481,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
     <!-- SAY THIS -->
     <div style="background:linear-gradient(135deg,#2c3e50,#4a7c59); border-radius:12px; padding:22px; color:white; margin-top:20px;">
       <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; opacity:0.7; margin-bottom:10px;">🔥 SAY THIS IN THE INTERVIEW (60-second answer)</div>
-      <p style="font-style:italic; line-height:1.8; opacity:0.95;">"Multi-stage builds use two <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">FROM</code> statements in one Dockerfile. The first stage — I name it <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">builder</code> — installs gcc and the dev headers and compiles the C-extension packages like psycopg2 into a prefix folder. The second stage starts fresh from a slim image and uses <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> to pull in <em>only</em> the compiled packages. The builder stage is discarded, so the final image has no compilers — that's how we go from ~900&nbsp;MB down to ~85&nbsp;MB, with a smaller attack surface. The key line is <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> — it copies from another stage's filesystem instead of the build context."</p>
+      <p style="font-style:italic; line-height:1.8; opacity:0.95;">"Multi-stage builds put <strong>two boxes in one Dockerfile</strong>. <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">Box A</code> — the builder — installs gcc and compiles the C-extension packages like psycopg2 into an <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">/install</code> folder. <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">Box B</code> — the runtime — starts from a fresh slim image with no compilers, and uses <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> to pull in <em>only</em> the finished packages. Box A is then thrown away, so the shipped image never contained gcc — same libraries, but we drop ~200&nbsp;MB of build tools. That's how we go from ~900&nbsp;MB down to ~85&nbsp;MB, with a smaller attack surface. The one line that makes it work is <code style="background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">COPY --from=builder</code> — it copies from another stage's filesystem instead of from my source folder."</p>
     </div>
   </div>
 
@@ -497,6 +553,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
   <div class="section-header" id="part5"><span>🎛️</span> Part 5: CMD vs ENTRYPOINT</div>
 
   <div class="concept-card">
+    <!-- PIZZA METAPHOR: the mental model -->
+    <div style="background:#fff8e1; border-left:4px solid #f39c12; border-radius:0 10px 10px 0; padding:16px 20px; margin-bottom:20px; font-size:0.92rem; line-height:1.7;">
+      🍕 <strong>The one-line mental model:</strong> the container's command = <strong>ENTRYPOINT + CMD</strong>. Think of ordering at a shop — <strong>ENTRYPOINT is the fixed dish</strong> (the shop only makes pizza, can't change it), <strong>CMD is the default topping</strong> (margherita, but swappable). Whatever you type after <code>docker run image …</code> <strong>replaces the CMD part</strong>, but only <strong>gets appended after ENTRYPOINT</strong>.
+      <div style="margin-top:10px; font-size:0.88rem; color:#555;">➡️ <strong>CMD alone</strong> = a default that's <strong>thrown away &amp; fully replaced</strong> when you pass args. &nbsp;·&nbsp; <strong>ENTRYPOINT</strong> = <strong>locked in</strong>; your args just tack on <em>after</em> it.</div>
+    </div>
     <div class="two-col">
       <div style="background:#e3f2fd;border-radius:12px;padding:20px;">
         <h3 style="color:#1565c0;margin-bottom:12px;">CMD — Default command</h3>
