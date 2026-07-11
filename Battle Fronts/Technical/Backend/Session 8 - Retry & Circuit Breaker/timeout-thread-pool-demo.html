@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Timeout & Thread Pool — Demo động</title>
+<style>
+  :root{
+    --paper:#f6f1e6; --paper2:#fbf8f0; --ink:#4a4137; --ink-soft:#7a6f60;
+    --line:#e4dcc9; --idle:#7fae76; --idle-bg:#e5efdd; --stuck:#d5836a;
+    --stuck-bg:#f6e0d7; --serve:#6f9bd9; --serve-bg:#dfe9f6; --amber:#c98a3a;
+    --shadow:0 6px 18px rgba(74,65,55,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:'Segoe UI',-apple-system,system-ui,sans-serif;
+    background:radial-gradient(circle at 30% 10%, #fdfaf3, #f1ead9);
+    color:var(--ink); line-height:1.6; padding:28px 18px; min-height:100vh;
+  }
+  .wrap{max-width:960px; margin:0 auto;}
+  h1{font-size:1.7rem; letter-spacing:-.02em; margin-bottom:4px;}
+  h1 .em{color:var(--amber);}
+  .sub{color:var(--ink-soft); margin-bottom:22px; font-size:.98rem;}
+
+  .panel{
+    background:var(--paper2); border:1px solid var(--line); border-radius:16px;
+    padding:20px 22px; box-shadow:var(--shadow); margin-bottom:20px;
+  }
+
+  /* ── controls ── */
+  .controls{display:flex; flex-wrap:wrap; gap:14px; align-items:center;}
+  .btn{
+    border:none; border-radius:10px; padding:10px 18px; font-size:.95rem;
+    font-weight:600; cursor:pointer; transition:transform .1s, box-shadow .2s;
+    box-shadow:var(--shadow); color:#fff;
+  }
+  .btn:active{transform:translateY(1px);}
+  .btn-start{background:var(--idle);}
+  .btn-reset{background:var(--ink-soft);}
+  .toggle-wrap{display:flex; align-items:center; gap:10px; margin-left:auto;
+    background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:8px 14px;}
+  .switch{position:relative; width:52px; height:28px; flex-shrink:0;}
+  .switch input{opacity:0; width:0; height:0;}
+  .slider{position:absolute; inset:0; background:#cfc6b4; border-radius:28px; transition:.3s; cursor:pointer;}
+  .slider:before{content:""; position:absolute; height:22px; width:22px; left:3px; top:3px;
+    background:#fff; border-radius:50%; transition:.3s; box-shadow:0 1px 3px rgba(0,0,0,.2);}
+  input:checked + .slider{background:var(--idle);}
+  input:checked + .slider:before{transform:translateX(24px);}
+  .toggle-label{font-weight:600; font-size:.92rem;}
+  .toggle-label small{display:block; color:var(--ink-soft); font-weight:400; font-size:.78rem;}
+  .timeout-ctl{display:flex; align-items:center; gap:10px; font-size:.9rem; color:var(--ink-soft);}
+  .timeout-ctl input[type=range]{accent-color:var(--amber);}
+
+  /* ── stage ── */
+  .stage{display:grid; grid-template-columns:1fr 150px; gap:18px; align-items:stretch;}
+  @media(max-width:640px){.stage{grid-template-columns:1fr;}}
+
+  .pool-title{font-weight:700; font-size:.9rem; margin-bottom:10px; display:flex; justify-content:space-between;}
+  .pool-title span{color:var(--ink-soft); font-weight:500;}
+  .grid{display:grid; grid-template-columns:repeat(6,1fr); gap:9px;}
+  .worker{
+    aspect-ratio:1; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    font-size:1.35rem; transition:background .3s, transform .3s, box-shadow .3s;
+    background:var(--idle-bg); border:2px solid var(--idle); position:relative;
+  }
+  .worker.idle{background:var(--idle-bg); border-color:var(--idle);}
+  .worker.serving{background:var(--serve-bg); border-color:var(--serve); transform:scale(1.04);}
+  .worker.stuck{background:var(--stuck-bg); border-color:var(--stuck); animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(213,131,106,.5);}50%{box-shadow:0 0 0 6px rgba(213,131,106,0);}}
+  .worker .bar{position:absolute; bottom:3px; left:6px; right:6px; height:3px; border-radius:3px;
+    background:var(--stuck); transform-origin:left; transform:scaleX(0);}
+
+  /* downstream box */
+  .downstream{
+    background:var(--stuck-bg); border:2px dashed var(--stuck); border-radius:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;
+    padding:14px 8px; gap:6px;
+  }
+  .downstream .big{font-size:2rem;}
+  .downstream .lbl{font-weight:700; font-size:.85rem;}
+  .downstream .st{font-size:.75rem; color:var(--stuck); font-weight:600;}
+
+  /* ── incoming ── */
+  .incoming{margin-top:16px; min-height:44px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+  .incoming .lab{font-size:.8rem; color:var(--ink-soft); margin-right:4px;}
+  .req{padding:5px 11px; border-radius:20px; font-size:.8rem; font-weight:600; white-space:nowrap;
+    animation:pop .3s ease;}
+  .req.payment{background:var(--stuck-bg); color:#a8543a; border:1px solid var(--stuck);}
+  .req.info{background:var(--serve-bg); color:#3a6aa8; border:1px solid var(--serve);}
+  .req.fail{background:#efe4e0; color:#a8543a; border:1px dashed var(--stuck); text-decoration:line-through; opacity:.7;}
+  @keyframes pop{from{transform:scale(.6); opacity:0;}to{transform:scale(1); opacity:1;}}
+
+  /* ── stats ── */
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px; margin-top:6px;}
+  .stat{background:var(--paper); border:1px solid var(--line); border-radius:12px; padding:12px 14px; text-align:center;}
+  .stat .n{font-size:1.6rem; font-weight:800; line-height:1;}
+  .stat .k{font-size:.75rem; color:var(--ink-soft); margin-top:4px; font-weight:600;}
+  .stat.free .n{color:var(--idle);} .stat.stuck .n{color:var(--stuck);}
+  .stat.served .n{color:var(--serve);} .stat.rejected .n{color:#c0392b;}
+  .stat.freed .n{color:var(--amber);}
+
+  .verdict{margin-top:16px; padding:14px 18px; border-radius:12px; font-weight:600; font-size:.95rem;
+    border-left:4px solid; display:none;}
+  .verdict.bad{display:block; background:var(--stuck-bg); border-color:var(--stuck); color:#a8543a;}
+  .verdict.good{display:block; background:var(--idle-bg); border-color:var(--idle); color:#3e7a34;}
+
+  .legend{display:flex; gap:18px; flex-wrap:wrap; font-size:.82rem; color:var(--ink-soft); margin-top:14px;}
+  .legend b{display:inline-block; width:13px; height:13px; border-radius:4px; vertical-align:middle; margin-right:5px;}
+  .note{font-size:.85rem; color:var(--ink-soft); margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🍽️ Timeout & <span class="em">Thread Pool</span> — Demo động</h1>
+  <p class="sub">12 nhân viên tổng đài (thu nhỏ từ 100 thread). Nhà cung cấp <b>💳 Payment</b> đang bị treo. Bật/tắt Timeout để thấy sự khác biệt.</p>
+
+  <div class="panel">
+    <div class="controls">
+      <button class="btn btn-start" id="startBtn">▶ Bắt đầu dòng khách</button>
+      <button class="btn btn-reset" id="resetBtn">↻ Reset</button>
+      <div class="toggle-wrap">
+        <label class="switch"><input type="checkbox" id="timeoutToggle"><span class="slider"></span></label>
+        <div class="toggle-label">Timeout <small id="toggleState">ĐANG TẮT — nguy hiểm</small></div>
+      </div>
+    </div>
+    <div class="timeout-ctl" id="timeoutCtl" style="margin-top:14px; display:none;">
+      ⏱️ Cúp máy sau: <input type="range" id="timeoutRange" min="1" max="5" value="2" step="1">
+      <b id="timeoutVal">2 giây</b>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="stage">
+      <div>
+        <div class="pool-title">👥 Thread Pool (nhân viên) <span id="poolSub">rảnh 12 / kẹt 0</span></div>
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="downstream">
+        <div class="big">💳</div>
+        <div class="lbl">Payment Service</div>
+        <div class="st">⚠️ TREO<br>(không trả lời)</div>
+      </div>
+    </div>
+
+    <div class="incoming" id="incoming"><span class="lab">Khách gọi vào:</span></div>
+
+    <div class="legend">
+      <span><b style="background:var(--idle)"></b>Rảnh (idle)</span>
+      <span><b style="background:var(--stuck)"></b>Kẹt — cầm máy chờ Payment</span>
+      <span><b style="background:var(--serve)"></b>Đang phục vụ khách nhanh</span>
+    </div>
+
+    <div class="stats">
+      <div class="stat free"><div class="n" id="sFree">12</div><div class="k">🟢 Rảnh</div></div>
+      <div class="stat stuck"><div class="n" id="sStuck">0</div><div class="k">🔴 Kẹt</div></div>
+      <div class="stat served"><div class="n" id="sServed">0</div><div class="k">✅ Khách nhanh được phục vụ</div></div>
+      <div class="stat rejected"><div class="n" id="sRejected">0</div><div class="k">❌ Bị từ chối (hết nhân viên)</div></div>
+      <div class="stat freed"><div class="n" id="sFreed">0</div><div class="k">⏱️ Được timeout thả</div></div>
+    </div>
+
+    <div class="verdict" id="verdict"></div>
+    <p class="note" id="note">💡 Mẹo: để Timeout <b>TẮT</b>, bấm Bắt đầu, ngồi xem ~10 giây → cả 12 nhân viên đỏ rực, khách nhanh (xanh) bắt đầu bị từ chối. Rồi bật Timeout lên, xem lại.</p>
+  </div>
+</div>
+
+<script>
+const N = 12;
+const grid = document.getElementById('grid');
+const incoming = document.getElementById('incoming');
+const workers = [];
+let spawnTimer = null, tickTimer = null;
+let timeoutOn = false, timeoutMs = 2000;
+let stats = {served:0, rejected:0, freed:0};
+
+// build workers
+for(let i=0;i<N;i++){
+  const w = document.createElement('div');
+  w.className = 'worker idle'; w.textContent = '🧑‍💼';
+  const bar = document.createElement('div'); bar.className='bar'; w.appendChild(bar);
+  grid.appendChild(w);
+  workers.push({el:w, bar:bar, state:'idle', releaseAt:0, timer:null});
+}
+
+function setState(w, s){
+  w.state = s;
+  w.el.className = 'worker ' + s;
+  w.el.firstChild.nodeValue = s==='stuck' ? '📞' : (s==='serving' ? '🗣️' : '🧑‍💼');
+}
+
+function freeWorker(){ return workers.find(w=>w.state==='idle'); }
+
+function assign(type){
+  const w = freeWorker();
+  if(!w){ // no free worker → request rejected
+    stats.rejected++;
+    flashReq(type, true);
+    return;
+  }
+  flashReq(type, false);
+  if(type==='info'){
+    // fast request that does NOT need Payment — served quickly
+    setState(w,'serving');
+    clearTimeout(w.timer);
+    w.timer = setTimeout(()=>{ setState(w,'idle'); stats.served++; render(); }, 700);
+  } else {
+    // payment request → calls the hung downstream → STUCK
+    setState(w,'stuck');
+    animateBar(w, timeoutOn ? timeoutMs : 99999);
+    clearTimeout(w.timer);
+    if(timeoutOn){
+      w.timer = setTimeout(()=>{ setState(w,'idle'); stats.freed++; render(); }, timeoutMs);
+    }
+    // if timeout OFF → stuck forever (no timer)
+  }
+  render();
+}
+
+function animateBar(w, dur){
+  w.bar.style.transition='none'; w.bar.style.transform='scaleX(0)';
+  void w.bar.offsetWidth;
+  if(dur>90000){ w.bar.style.transition='transform 3s linear'; w.bar.style.transform='scaleX(1)'; }
+  else { w.bar.style.transition='transform '+(dur/1000)+'s linear'; w.bar.style.transform='scaleX(1)'; }
+}
+
+function flashReq(type, failed){
+  const pill = document.createElement('span');
+  pill.className = 'req ' + type + (failed?' fail':'');
+  pill.textContent = (type==='payment'? '💳 Thanh toán' : '🕐 Hỏi giờ đóng cửa') + (failed?' ✖':'');
+  incoming.appendChild(pill);
+  const pills = incoming.querySelectorAll('.req');
+  if(pills.length>7) pills[0].remove();
+}
+
+function render(){
+  const free = workers.filter(w=>w.state==='idle').length;
+  const stuck = workers.filter(w=>w.state==='stuck').length;
+  document.getElementById('sFree').textContent = free;
+  document.getElementById('sStuck').textContent = stuck;
+  document.getElementById('sServed').textContent = stats.served;
+  document.getElementById('sRejected').textContent = stats.rejected;
+  document.getElementById('sFreed').textContent = stats.freed;
+  document.getElementById('poolSub').textContent = `rảnh ${free} / kẹt ${stuck}`;
+
+  const v = document.getElementById('verdict');
+  if(!timeoutOn && free===0){
+    v.className='verdict bad';
+    v.innerHTML='🔴 <b>THREAD POOL EXHAUSTION!</b> Cả 12 nhân viên kẹt cứng chờ Payment. Khách chỉ muốn hỏi giờ đóng cửa cũng bị từ chối — dù việc đó chẳng cần Payment. Cả service "sập".';
+  } else if(timeoutOn && stats.freed>0){
+    v.className='verdict good';
+    v.innerHTML='🟢 <b>TIMEOUT CỨU!</b> Nhân viên cầm máy chờ Payment tối đa '+(timeoutMs/1000)+'s rồi CÚP → được thả ra → vẫn còn người phục vụ khách nhanh. Pool không cạn, service sống.';
+  } else { v.className='verdict'; }
+}
+
+function start(){
+  if(spawnTimer) return;
+  document.getElementById('note').style.display='none';
+  spawnTimer = setInterval(()=>{
+    // ~65% payment (to the hung service), 35% info (simple/fast)
+    assign(Math.random()<0.65 ? 'payment' : 'info');
+  }, 650);
+}
+
+function reset(){
+  clearInterval(spawnTimer); spawnTimer=null;
+  workers.forEach(w=>{ clearTimeout(w.timer); setState(w,'idle'); w.bar.style.transform='scaleX(0)'; });
+  stats={served:0,rejected:0,freed:0};
+  incoming.querySelectorAll('.req').forEach(p=>p.remove());
+  document.getElementById('verdict').className='verdict';
+  render();
+}
+
+document.getElementById('startBtn').onclick = start;
+document.getElementById('resetBtn').onclick = reset;
+document.getElementById('timeoutToggle').onchange = e=>{
+  timeoutOn = e.target.checked;
+  document.getElementById('toggleState').textContent = timeoutOn ? 'ĐANG BẬT — an toàn' : 'ĐANG TẮT — nguy hiểm';
+  document.getElementById('timeoutCtl').style.display = timeoutOn ? 'flex' : 'none';
+  // free currently-stuck workers if timeout just turned on
+  if(timeoutOn){
+    workers.filter(w=>w.state==='stuck').forEach(w=>{
+      clearTimeout(w.timer);
+      w.timer=setTimeout(()=>{ setState(w,'idle'); stats.freed++; render(); }, timeoutMs);
+      animateBar(w, timeoutMs);
+    });
+  }
+};
+document.getElementById('timeoutRange').oninput = e=>{
+  timeoutMs = parseInt(e.target.value)*1000;
+  document.getElementById('timeoutVal').textContent = e.target.value+' giây';
+};
+render();
+</script>
+</body>
+</html>
