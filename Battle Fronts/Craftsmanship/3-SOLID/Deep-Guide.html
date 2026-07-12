@@ -253,42 +253,92 @@
         <summary>O · Open–Closed <span class="ess">— thêm code mới, không sửa code cũ</span></summary>
         <div class="smellbody">
           <div class="reframe">
-            <div class="rk">⚡ Cú lật — không phải "không bao giờ sửa code"</div>
-            <p>OCP: module nên <b>MỞ để mở rộng</b> (thêm hành vi mới) nhưng <b>ĐÓNG để sửa đổi</b> (không phải đụng dao vào code đã chạy ổn). Nghĩa thật: <b>thêm một loại/tính năng mới = viết THÊM class/file mới, KHÔNG mở file cũ ra sửa.</b> (Sửa bug thì vẫn sửa — OCP nói về mở rộng hành vi, không cấm sửa lỗi.)</p>
+            <div class="rk">⚡ Cú lật — OCP KHÔNG phải "cấm sửa code"</div>
+            <p>Một câu duy nhất: <b>Thêm tính năng mới thì ĐỪNG ĐỤNG code cũ.</b> Module <b>MỞ để thêm hành vi mới</b> (gõ thêm class/file mới) nhưng <b>ĐÓNG với việc mổ code đã chạy ổn</b>. (Sửa <i>bug</i> thì vẫn sửa thoải mái — OCP nói về <i>mở rộng hành vi</i>, không cấm vá lỗi.)</p>
           </div>
 
           <div class="brick" data-n="1">
-            <div class="bt">Vì sao "sửa code cũ" nguy hiểm</div>
-            <p>Code cũ đang chạy = đã được test, đã tin. Mỗi lần mở nó ra thêm <code>if</code> cho loại mới, anh <b>rủi ro làm vỡ cái đang chạy</b> (regression) và phải test lại toàn bộ. Thêm file mới thì cái cũ không bị đụng.</p>
+            <div class="bt">"Thêm code mới" vs "sửa code cũ" — nhìn cái FILE khi ông thêm <code>Triangle</code></div>
+            <p><b>Sửa code cũ</b> = chèn dòng vào <i>giữa</i> khối đã có → đụng tay vào cục đang chạy → dễ làm vỡ cái cũ (regression), phải test lại hết. <b>Thêm code mới</b> = gõ thêm <i>một khối mới ở dưới</i>, khối cũ y nguyên. <b>OCP = ráng làm theo kiểu thứ hai.</b></p>
           </div>
-          <div class="brick" data-n="2">
-            <div class="bt">Điểm mở rộng = một ABSTRACTION</div>
-            <p>Để "thêm mà không sửa", anh cần một chỗ cắm: một <code>interface</code>. Code gọi chỉ biết interface; mỗi loại mới là một class implement interface đó. Code gọi không bao giờ phải đổi.</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">Polymorphism biến <code>if theo type</code> thành class cắm-rời</div>
-            <p>Thay vì <code>if (type==='circle')</code>, mỗi shape tự biết <code>area()</code> của nó. Thêm Triangle = thêm 1 class. Đây chính là pattern <b>Strategy</b> (gốc 5).</p>
-          </div>
-
-          <p>🧭 <b>Metaphor — ổ cắm điện:</b> thêm thiết bị mới, anh CẮM vào ổ có sẵn — không đục tường nối lại dây điện. Ổ cắm (interface) đóng; số thiết bị cắm vào (implementation) mở vô hạn.</p>
-
-          <h4>Đau ở đâu</h4>
-          <p>Mỗi loại mới phải mở & sửa hàm cũ → dễ vỡ (regression) · cùng logic phân loại lặp ở nhiều nơi (nối Shotgun Surgery, gốc 2) · switch phình vô tận, khó đọc.</p>
 
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Mỗi loại mới phải sửa hàm</div><pre>area(shape) {
-  <span class="kw">if</span> (shape.type===<span class="str">'circle'</span>) ...
-  <span class="kw">if</span> (shape.type===<span class="str">'square'</span>) ...
-  <span class="cmt">// thêm 'triangle' → sửa ở đây 😱</span>
-}</pre></div>
-            <div class="code good"><div class="hd">✅ Polymorphism (mở rộng qua abstraction)</div><pre><span class="kw">interface</span> <span class="goodt">Shape</span> { area(): number }
-<span class="kw">class</span> Circle <span class="kw">implements</span> Shape {...}
-<span class="kw">class</span> Triangle <span class="kw">implements</span> Shape {...}
-<span class="cmt">// thêm loại = thêm class, KHÔNG sửa code cũ</span></pre></div>
+            <div class="code bad"><div class="hd">❌ SỬA code cũ — chèn if vào GIỮA hàm đang chạy</div><pre><span class="kw">def</span> area(shape):
+    <span class="kw">if</span> shape.type == <span class="str">"circle"</span>: <span class="kw">return</span> 3.14*shape.r**2   <span class="cmt"># dòng cũ</span>
+    <span class="kw">if</span> shape.type == <span class="str">"square"</span>: <span class="kw">return</span> shape.side**2     <span class="cmt"># dòng cũ</span>
+    <span class="kw">if</span> shape.type == <span class="str">"triangle"</span>: ...   <span class="cmt"># 👈 mở hàm cũ ra chèn = nguy hiểm</span></pre></div>
+            <div class="code good"><div class="hd">✅ THÊM code mới — mỗi hình 1 class, code cũ không đụng</div><pre><span class="kw">class</span> <span class="goodt">Circle</span>:   <span class="kw">def</span> area(self): <span class="kw">return</span> 3.14*self.r**2
+<span class="kw">class</span> <span class="goodt">Square</span>:   <span class="kw">def</span> area(self): <span class="kw">return</span> self.side**2
+<span class="kw">class</span> <span class="goodt">Triangle</span>: <span class="kw">def</span> area(self): <span class="kw">return</span> 0.5*self.b*self.h  <span class="cmt"># 👈 chỉ THÊM</span></pre></div>
+          </div>
+
+          <div class="brick" data-n="2">
+            <div class="bt">Polymorphism = "cùng 1 lời gọi, mỗi object làm kiểu riêng"</div>
+            <p>Ông xài mỗi ngày mà chưa biết tên: <code>len("hi")</code> ra 2, <code>len([1,2,3])</code> ra 3 — cùng <code>len()</code>, mỗi kiểu tự đo theo cách của nó. Y hệt: gọi <code>s.area()</code>, Circle tính kiểu tròn, Square kiểu vuông. <b>Code gọi không cần biết <code>s</code> là hình gì</b> — object tự lo.</p>
+          </div>
+          <div class="code good" style="margin:10px 0"><div class="hd">Nhờ polymorphism, hàm gọi khỏi hỏi "mày là ai"</div><pre><span class="kw">def</span> total(shapes):
+    <span class="kw">return</span> sum(s.area() <span class="kw">for</span> s <span class="kw">in</span> shapes)   <span class="cmt"># cùng gọi .area(), khỏi if, khỏi hỏi loại</span></pre></div>
+
+          <div class="brick" data-n="3">
+            <div class="bt">Interface = bản HỢP ĐỒNG ghi "phải có hàm nào"</div>
+            <p>Hàm <code>total()</code> DÁM gọi <code>s.area()</code> nhờ một <b>lời hứa</b>: "ai là Shape thì BẮT BUỘC có <code>area()</code>". <b>Interface chính là lời hứa đó viết thành code.</b> Class nào muốn vào nhóm Shape phải làm đủ hàm ghi trong hợp đồng.</p>
+          </div>
+          <div class="code good" style="margin:10px 0"><div class="hd">Hợp đồng Shape — "đã là Shape thì phải có area()"</div><pre><span class="kw">from</span> abc <span class="kw">import</span> ABC, abstractmethod
+
+<span class="kw">class</span> <span class="goodt">Shape</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> area(self): ...        <span class="cmt"># LUẬT: đã là Shape thì BẮT BUỘC có area()</span>
+
+<span class="kw">class</span> Circle(Shape):   <span class="kw">def</span> area(self): <span class="kw">return</span> 3.14*self.r**2   <span class="cmt"># ký hợp đồng</span>
+<span class="kw">class</span> Triangle(Shape): <span class="kw">def</span> area(self): <span class="kw">return</span> 0.5*self.b*self.h</pre></div>
+
+          <div class="seniortip">
+            <div class="sk">🎯 Nói cho đúng chữ — "implement" chứ không phải "kế thừa"</div>
+            <p>Interviewer hay soi: Circle/Triangle <b>implement (ký hợp đồng)</b> Shape, KHÔNG phải "kế thừa" Shape. Khác nhau: <b>kế thừa (extends)</b> = class lấy luôn <i>code</i> của cha. <b>Implement</b> = class chỉ hứa "tui sẽ có đủ mấy hàm này" rồi <b>tự viết ruột</b>. Circle với Triangle không mượn code của nhau — chúng chỉ <b>cùng ký một hợp đồng <code>area()</code></b> rồi mỗi đứa tự tính. Nói "implement" = interviewer biết ông chắc gốc.</p>
+          </div>
+
+          <h4>Vì sao interface làm OCP chạy được</h4>
+          <div class="signals">
+            <div class="sig"><span class="sn">②</span><div><div class="st">Không interface → phải check type</div><div class="sd">Code gọi buộc phải <code>if isinstance(s, Circle)…</code> — biết từng class, thêm loại là sửa. Dính chặt, dễ vỡ.</div></div></div>
+            <div class="sig"><span class="sn">③</span><div><div class="st">Có interface → cứ gọi .area(), khỏi hỏi</div><div class="sd">Hợp đồng đảm bảo thằng nào cũng có <code>area()</code> → gọi thẳng, hết <code>isinstance</code>, hết <code>if</code>.</div></div></div>
+            <div class="sig"><span class="sn">④</span><div><div class="st">→ Thêm hình khỏi sửa code gọi</div><div class="sd"><code>total()</code> dựa vào <b>hợp đồng</b> <code>area()</code>, không dựa <b>tên class</b> → thêm <code>Triangle</code>, <code>total()</code> nguyên si. Đó là OCP.</div></div></div>
+          </div>
+
+          <p>🧭 <b>Metaphor — ổ cắm điện:</b> interface = hình dạng cái LỖ cắm (cố định). Mọi hình phải đúng hình đó (có <code>area()</code>) mới cắm vừa. Lỗ cố định → cắm thêm bao nhiêu hình mới cũng được mà <code>total()</code> khỏi sửa. Ổ cắm (interface) đóng; thiết bị cắm vào (class mới) mở vô hạn.</p>
+
+          <div class="reframe" style="margin-top:12px">
+            <div class="rk">🔌 Ổ cắm KHÁC cái quạt chỗ nào — interface vs class (giải thích lớp 5)</div>
+            <p>Chốt cho hết mơ hồ: <b>interface = ổ cắm, một lời hứa</b> — và nó <b>KHÔNG tự làm gì cả</b>. Ổ cắm trên tường đâu có tự quay ra gió 😅 Nó chỉ ghi: "đúng hình 2 chấu này thì cắm vừa". <b>Class mới là cái quạt THẬT</b> — cắm điện vào là quay, vì bên trong nó ghi rõ <i>quay CÁCH NÀO</i>.</p>
+            <div class="signals" style="margin-top:8px">
+              <div class="sig"><span class="sn">🔌</span><div><div class="st">Interface = tờ hợp đồng / ổ cắm</div><div class="sd">Chỉ HỨA "phải có <code>area()</code>". Một mình thì vô dụng, không chạy được — chưa sờ được đồ thật.</div></div></div>
+              <div class="sig"><span class="sn">⚙️</span><div><div class="st">Class = người ký rồi làm thật / cái quạt</div><div class="sd">Ghi rõ <i>làm KIỂU NÀO</i> (<code>Circle</code> tính tròn, <code>Square</code> tính vuông). Bấm là chạy — đồ thật, sờ được.</div></div></div>
+            </div>
+            <p style="margin-top:8px">👉 Một câu: <b>Interface hứa "sẽ có gì" · Class làm "và làm KIỂU NÀY".</b> Một ổ cắm → cắm được vô số quạt khác nhau — đó là chỗ <b>OCP gặp Polymorphism</b>: cùng một lỗ (hợp đồng <code>area()</code>), mỗi hình tự tính theo cách riêng.</p>
+          </div>
+
+          <h4>Đau ở đâu (khi phạm OCP)</h4>
+          <p>Mỗi loại mới phải mở & sửa hàm cũ → dễ vỡ (regression) · cùng logic phân loại lặp ở nhiều nơi (nối Shotgun Surgery, gốc 2) · <code>switch</code> phình vô tận, khó đọc.</p>
+
+          <div class="seniortip">
+            <div class="sk">🧵 Cùng một sợi dây → chữ D (DIP/DI)</div>
+            <p>Cái interface ổn định mà OCP dựa vào cũng chính là móng của <b>DIP</b> và <b>DI</b> — ba cái là một hành động: <b>đẩy phần hay-đổi ra sau một interface ổn định.</b> Phần DIP/DI (gọi-theo-vai-trò, đảo-chiều-mũi-tên, đầu-bếp-nhận-nguyên-liệu, ai-sở-hữu-interface) nằm đầy đủ ở <b>chữ D · Dependency Inversion</b> bên dưới — bấm mở nó để đọc trọn.</p>
+          </div>
+
+          <h4 id="say-ocp">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Mọi câu SOLID đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b></p>
+
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 OCP — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Open-Closed means my code is open to add new behavior, but closed to modifying existing, tested code."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"If I have an area() function with if-else on shape type, every new shape forces me to open it and add a branch — risking the shapes that already work."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Instead I define a Shape interface requiring area(), and each shape implements it. Adding a Triangle is just a new class — the loop calling .area() never changes."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So I extend by adding files, not editing old ones — no risk of breaking what already works."</i></div></div></div>
+            </div>
           </div>
 
           <h4>Chữa</h4>
-          <p><b>Polymorphism / Strategy pattern</b> (gốc 5). Chữa gốc bệnh vì điểm-hay-thay-đổi (loại shape) được đẩy ra sau một interface ổn định — phần biến thiên tách khỏi phần cố định.</p>
+          <p><b>Polymorphism / Strategy pattern</b> (gốc 5): điểm-hay-thay-đổi (loại shape) được đẩy ra sau một interface ổn định — phần biến thiên tách khỏi phần cố định, nên thêm loại mới chỉ là thêm class.</p>
 
           <h4>👃 Mũi ngửi</h4>
           <div class="signals">
@@ -301,6 +351,7 @@
             <div class="drow"><div class="dq">"OCP nghĩa là không được sửa code nữa à?"</div><div class="da">Không. Sửa bug vẫn sửa. OCP nói: khi thêm HÀNH VI mới (loại mới, luật mới), lý tưởng là thêm code chứ đừng mổ code đang chạy đúng.</div></div>
             <div class="drow"><div class="dq">"Làm sao biết chỗ nào cần 'mở'?"</div><div class="da">Ở "trục biến thiên đã biết" — chỗ anh đoán chắc sẽ có thêm loại (payment method, shape, notification channel). Đừng mở CHỖ chưa có dấu hiệu biến thiên.</div></div>
             <div class="drow"><div class="dq">"OCP có mâu thuẫn YAGNI không?"</div><div class="da">Có thể. Abstraction sớm cho biến thiên KHÔNG tới = over-engineering. Cân: chỉ áp OCP khi đã thấy ≥2-3 loại thật (Rule of Three, gốc 2), không phải phòng xa mù quáng.</div></div>
+            <div class="drow"><div class="dq">"Interface là gì, giải thích ngắn?"</div><div class="da">Một bản hợp đồng ghi các hàm bắt buộc phải có. Class nào ký hợp đồng thì buộc làm đủ hàm đó → code gọi tin hợp đồng, gọi thẳng, khỏi check type.</div></div>
           </div>
 
           <div class="seniortip">
@@ -315,54 +366,82 @@
         <summary>L · Liskov Substitution <span class="ess">— con phải THAY được cha, giữ hành vi</span></summary>
         <div class="smellbody">
           <div class="reframe">
-            <div class="rk">⚡ Cú lật — kế thừa cú pháp KHÔNG đủ</div>
-            <p>Compiler cho <code>class B extends A</code> chạy ngon — nhưng đó chỉ là <b>kế thừa cú pháp</b>. LSP đòi hơn: <b>ở BẤT KỲ chỗ nào code đang dùng cha, thay bằng con mà chương trình vẫn đúng, không ai phải biết.</b> Con phải tôn trọng <b>hợp đồng hành vi</b> của cha, không chỉ có cùng tên method.</p>
+            <div class="rk">⚡ Nói MỘT CÂU cho dễ nhớ</div>
+            <p><b>"Chỗ nào code đang xài CHA, tui lén thay bằng CON — chương trình vẫn phải chạy đúng y như cũ."</b> Đó là toàn bộ LSP. Con phải <b>thay được cha mà không ai biết, không gì vỡ</b>.</p>
           </div>
 
           <div class="brick" data-n="1">
-            <div class="bt">Subtype nghĩa là "thay ngầm mà không vỡ"</div>
-            <p>Nếu hàm <code>f(Rectangle r)</code> chạy đúng với mọi Rectangle, thì đưa một Square vào (Square extends Rectangle) nó PHẢI vẫn đúng. Client của <code>f</code> không được phép "vỡ" vì anh lén đưa con vào.</p>
+            <div class="bt">Vì sao kế thừa rồi mà con vẫn làm vỡ được?</div>
+            <p>Khi viết <code>class Con(Cha)</code>, máy chỉ kiểm <b>một</b> thứ: "Con có ĐỦ hàm của Cha không?" → đủ → cho chạy. Máy <b>KHÔNG bao giờ</b> kiểm "mấy hàm đó có LÀM ĐÚNG như Cha không". → Con đủ tên hàm nhưng làm bậy bên trong, máy không biết. <b>Đó chính là chỗ LSP bị phá.</b></p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Square is-a Rectangle? Toán đúng, hành vi SAI</div>
-            <p>Hình vuông là hình chữ nhật đặc biệt (toán học). Nhưng Rectangle có hợp đồng: <code>setWidth(5)</code> KHÔNG đổi height. Square buộc phải phá hợp đồng đó (đặt width thì height đổi theo) → hàm nào tin "đổi width giữ nguyên height" sẽ tính sai diện tích.</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">LSP gãy = abstraction (cây kế thừa) đặt sai</div>
-            <p>Bệnh không ở Square, ở việc bắt Square KẾ THỪA Rectangle. Sửa: đừng ép is-a giả — cho cả hai implement một abstraction đúng (<code>Shape { area() }</code>), hoặc dùng composition.</p>
+            <div class="bt">Kế thừa cho HÌNH THỨC — LSP đòi thêm HÀNH VI</div>
+            <p>Kế thừa cho con <b>cùng tên hàm</b> (hình thức) — compiler lo. Nhưng con phải làm <b>đúng lời hứa</b> của cha (hành vi) — <b>chỉ mình lo</b>. LSP = luật nhắc giữ vế hành vi này. Con chỉ giống hình thức mà phá hành vi = phá LSP.</p>
           </div>
 
-          <p>🧭 <b>Metaphor — hàng giả y hệt:</b> cái remote giả có đủ nút như remote thật, cắm vào TV nhưng bấm "tăng âm" lại đổi kênh. Nó "là" remote về hình dạng, nhưng phá kỳ vọng hành vi → người dùng mất lòng tin. Subtype phá LSP y vậy.</p>
-
-          <h4>Đau ở đâu</h4>
-          <p>Client buộc phải <code>if (x instanceof Square)</code> để né → abstraction trở nên vô dụng · bug ẩn, khó tìm (chỉ lộ khi đúng loại con đó chạy qua) · polymorphism/OCP sụp (không thay thế an toàn được nữa).</p>
+          <h4>🔢 Ví dụ kinh điển — Rectangle & Square, trace bằng SỐ</h4>
+          <p><b>Rectangle</b> (chữ nhật): rộng <code>w</code> và cao <code>h</code> <b>độc lập</b>. Nó <b>hứa</b>: 🤝 <i>"Đổi RỘNG thì CAO giữ nguyên."</i> — <b>Square</b> (vuông) bắt buộc 4 cạnh bằng nhau, nên <code>set_width</code> phải đổi luôn chiều cao → <b>nuốt lời hứa của cha</b>.</p>
 
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Square phá hợp đồng Rectangle</div><pre><span class="kw">class</span> <span class="badt">Rectangle</span> {
-  setWidth(w) { this.w = w; }
-  setHeight(h) { this.h = h; }
-  area() { <span class="kw">return</span> this.w * this.h; }
-}
-<span class="kw">class</span> <span class="badt">Square</span> <span class="kw">extends</span> Rectangle {
-  setWidth(w) { this.w = this.h = w; }  <span class="cmt">// đổi cả 2!</span>
-  setHeight(h) { this.w = this.h = h; }
-}
-<span class="cmt">// f(r){ r.setWidth(5); r.setHeight(4);</span>
-<span class="cmt">//       assert r.area()===20 } → Square: 16 😱</span></pre></div>
-            <div class="code good"><div class="hd">✅ Đừng ép is-a giả — tách abstraction</div><pre><span class="kw">interface</span> <span class="goodt">Shape</span> { area(): number }
-<span class="kw">class</span> <span class="goodt">Rectangle</span> <span class="kw">implements</span> Shape {
-  constructor(w, h) {...}
-  area() { <span class="kw">return</span> this.w * this.h; }
-}
-<span class="kw">class</span> <span class="goodt">Square</span> <span class="kw">implements</span> Shape {
-  constructor(side) {...}
-  area() { <span class="kw">return</span> this.side ** 2; }
-}
-<span class="cmt">// không ai kế thừa ai → không hợp đồng bị phá</span></pre></div>
+            <div class="code bad"><div class="hd">❌ Square phá lời hứa của Rectangle (Python)</div><pre><span class="kw">class</span> <span class="badt">Rectangle</span>:
+    <span class="kw">def</span> set_width(self, w):  self.w = w      <span class="cmt"># đổi rộng</span>
+    <span class="kw">def</span> set_height(self, h): self.h = h      <span class="cmt"># đổi cao</span>
+    <span class="kw">def</span> area(self):          <span class="kw">return</span> self.w * self.h
+
+<span class="kw">class</span> <span class="badt">Square</span>(Rectangle):
+    <span class="kw">def</span> set_width(self, w):  self.w = self.h = w   <span class="cmt"># 👈 ÉP cao bằng luôn!</span>
+    <span class="kw">def</span> set_height(self, h): self.w = self.h = h   <span class="cmt"># 👈 phá lời hứa</span>
+
+<span class="kw">def</span> test(r):
+    r.set_width(<span class="str">5</span>); r.set_height(<span class="str">4</span>)   <span class="cmt"># ai cũng nghĩ area = 5×4 = 20</span>
+    <span class="kw">print</span>(r.area())
+<span class="cmt"># Rectangle → 20 ✅   |   Square → 16 ❌ 😱</span></pre></div>
+            <div class="code good"><div class="hd">✅ Đừng ép "là" giả — cho cả hai là Shape (Python)</div><pre><span class="kw">class</span> <span class="goodt">Rectangle</span>(Shape):
+    <span class="kw">def</span> area(self): <span class="kw">return</span> self.w * self.h
+
+<span class="kw">class</span> <span class="goodt">Square</span>(Shape):
+    <span class="kw">def</span> area(self): <span class="kw">return</span> self.side ** <span class="str">2</span>
+
+<span class="cmt"># không ai kế thừa ai → không có lời hứa nào bị phá → không vỡ</span></pre></div>
           </div>
 
+          <div class="signals">
+            <div class="sig"><span class="sn">🔴</span><div><div class="st">Thả Rectangle thật</div><div class="sd">rộng=5, cao=4 (độc lập) → <code>area = 20</code> ✅ đúng như hàm <code>test</code> tin.</div></div></div>
+            <div class="sig"><span class="sn">🔴</span><div><div class="st">Thả Square vào</div><div class="sd"><code>set_width(5)</code>→ cả 2 =5; rồi <code>set_height(4)</code>→ cả 2 =4 → <code>area = 16</code> ❌ hàm <code>test</code> tính SAI mà không hề biết.</div></div></div>
+          </div>
+
+          <div class="seniortip">
+            <div class="sk">💡 Bài học giật mình — bug KHÔNG nằm ở Square</div>
+            <p><code>Square</code> viết không sai. Cái sai là <b>quyết định bắt Square kế thừa Rectangle</b>. Toán học "vuông là chữ nhật" đúng, nhưng <b>hành vi</b> khác nhau (một đứa giữ chiều cao, một đứa không). Mô hình hóa theo <b>danh từ</b> ("là") mà quên <b>hành vi</b> → dính bẫy.</p>
+          </div>
+
+          <h4>Đau ở đâu</h4>
+          <p>Client buộc phải <code>if isinstance(x, Square)</code> để né → abstraction thành vô dụng · bug ẩn khó tìm (chỉ lộ khi đúng loại con đó chạy qua) · polymorphism/OCP sụp (không thay thế an toàn được nữa).</p>
+
           <h4>Chữa</h4>
-          <p>Đừng mô hình hóa "is-a" chỉ vì toán học/từ vựng giống. Cho các loại cùng implement một <b>abstraction đúng hành vi</b>, hoặc dùng <b>composition</b>. Chữa gốc vì ta không còn hứa một hợp đồng mà con không giữ nổi.</p>
+          <p>Đừng mô hình hóa "is-a" chỉ vì toán học/từ vựng giống. Cho các loại cùng implement một <b>abstraction đúng hành vi</b> (<code>Shape</code> với <code>area()</code>), hoặc dùng <b>composition</b>. Chữa gốc vì ta không còn hứa một hợp đồng mà con không giữ nổi.</p>
+
+          <div class="reframe" style="margin-top:12px">
+            <div class="rk">🎯 LSP KHÔNG chỉ cho kế thừa class — áp cho cả implement interface</div>
+            <p>Hiểu lầm phổ biến: "LSP chỉ về class-với-class". Sai. Chữ chìa khóa là <b>subtype</b> (kiểu con) = <b>bất cứ thứ gì đứng thay được cho một kiểu</b>. Có <b>HAI</b> cách tạo subtype — <b>cả hai đều dính LSP:</b></p>
+            <div class="signals" style="margin-top:8px">
+              <div class="sig"><span class="sn">🧬</span><div><div class="st">Kế thừa class (extends)</div><div class="sd"><code>Square(Rectangle)</code> — Square là subtype của Rectangle.</div></div></div>
+              <div class="sig"><span class="sn">📝</span><div><div class="st">Implement interface</div><div class="sd"><code>OldPrinter(Machine)</code> — OldPrinter <b>cũng LÀ</b> subtype của Machine.</div></div></div>
+            </div>
+            <p style="margin-top:8px">"Interface không có code nên miễn nhiễm" — <b>sai.</b> Interface không có <i>code</i>, nhưng có <b>lời hứa hành vi</b>: code gọi <code>m.fax()</code> tin "đã là Machine thì <code>fax()</code> fax được, không nổ". <code>OldPrinter</code> cho <code>fax()</code> <code>raise</code> → phá lời hứa → thả nó vào chỗ tin Machine = <b>nổ = phá LSP</b>, dù chẳng kế thừa dòng code nào. <b>Hợp đồng ≠ code; hợp đồng = kỳ vọng hành vi.</b></p>
+          </div>
+
+          <h4 id="say-lsp">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 LSP — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Liskov Substitution means: wherever my code uses a base type, I can pass a subtype instead and everything still works correctly — the caller never needs to know."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"The compiler only checks the subtype HAS the same methods. It never checks they BEHAVE the same. That gap is where LSP breaks."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Classic example: Square extends Rectangle. A function sets width to 5 and height to 4, expecting area 20. A real Rectangle returns 20 — but a Square forces both sides equal, so it returns 16. The subtype silently breaks the caller."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So I model by behavior, not by noun categories. If the child can't honor the parent's contract, I don't use inheritance — I use a shared abstraction like Shape, or composition."</i></div></div></div>
+            </div>
+          </div>
+          <p>Interviewer đào sâu → thả câu <b>senior</b> (nói đơn giản): <i>"A subtype must not demand stricter input than the parent, and must not return weaker results than the parent promised."</i> (Con không đòi hỏi khắt khe hơn cha, không trả về ít hơn cha hứa.)</p>
 
           <h4>👃 Mũi ngửi</h4>
           <div class="signals">
@@ -397,46 +476,75 @@
         <summary>I · Interface Segregation <span class="ess">— đừng ép ai làm method họ không cần</span></summary>
         <div class="smellbody">
           <div class="reframe">
-            <div class="rk">⚡ Cú lật — interface béo bắt client trả giá cho thứ nó không dùng</div>
-            <p>ISP: <b>"client không nên bị buộc phụ thuộc vào method nó không dùng."</b> Một interface to nhồi đủ thứ (fat interface) ép MỌI class implement nó phải "khai" hết — kể cả method vô nghĩa với chúng.</p>
+            <div class="rk">⚡ Nói MỘT CÂU cho dễ nhớ</div>
+            <p><b>"Đừng bắt một class ký cái hợp đồng có hàm mà nó KHÔNG dùng."</b> Interface béo (fat interface) nhồi đủ thứ → MỌI class ký nó phải "khai" hết, kể cả hàm vô nghĩa với nó. ISP = <b>giữ hợp đồng NHỎ, đúng nhu cầu.</b></p>
           </div>
 
+          <p style="font-size:.9em;opacity:.8">💡 Chưa rõ <b>interface là gì</b>? Nó được định nghĩa kỹ (ổ cắm vs quạt, giải thích lớp 5) ở chữ <b>O · Open–Closed</b> bên trên — vì đó là nơi interface xuất hiện lần đầu. ISP dưới đây giả định anh đã nắm khái niệm đó.</p>
+
           <div class="brick" data-n="1">
-            <div class="bt">Implement một interface = ký hợp đồng làm HẾT</div>
-            <p>Khi <code>class X implements IMachine</code>, X hứa cung cấp mọi method của <code>IMachine</code>. Nếu <code>IMachine</code> có <code>print, scan, fax</code> mà X là máy in thường → X buộc phải "có" <code>fax()</code>.</p>
+            <div class="bt">Ký một interface = hứa làm ĐỦ HẾT hàm trong đó</div>
+            <p>Nhớ gốc: interface là <b>hợp đồng "phải có đủ mấy hàm này"</b>. Nên nếu ai viết một hợp đồng <b>to đùng</b>, class nào ký cũng phải làm <b>hết</b> — kể cả hàm nó chẳng làm được.</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Hậu quả: implementation giả (throw / rỗng)</div>
-            <p>Máy in thường đành viết <code>fax(){ throw NotSupported }</code>. Đây là mùi: code tồn tại chỉ để thỏa interface, không có ý nghĩa thật (và lén phá LSP luôn).</p>
+            <div class="bt">Hậu quả: hàm GIẢ (<code>raise NotImplementedError</code>)</div>
+            <p>Máy in cùi bị ép ký hợp đồng có <code>scan</code>, <code>fax</code> → đành viết hàm giả <code>raise NotImplementedError</code>. Code tồn tại chỉ để thỏa interface, không có ý nghĩa thật. <b>Đó là mùi ISP bị phá.</b> 👃</p>
           </div>
           <div class="brick" data-n="3">
-            <div class="bt">Tách theo NHU CẦU của client</div>
-            <p>Chẻ <code>IMachine</code> thành <code>IPrinter</code>, <code>IScanner</code>, <code>IFax</code>. Máy in thường chỉ implement <code>IPrinter</code>. Máy đa năng implement cả ba. Không ai bị ép làm thừa.</p>
+            <div class="bt">🔗 Cú nối giật mình — interface béo đá thẳng qua LSP</div>
+            <p>Ai gọi <code>machine.fax()</code> tin nó fax được (hợp đồng hứa vậy) → gặp hàm giả <code>raise</code> → <b>nổ</b>. Con không giữ nổi hợp đồng cha → <b>phá luôn LSP.</b> Interface béo là cỗ máy đẻ ra vi phạm LSP — đó là chỗ chữ <b>I</b> và chữ <b>L</b> gặp nhau.</p>
+          </div>
+
+          <div class="pair">
+            <div class="code bad"><div class="hd">❌ Interface béo ép hàm giả (Python)</div><pre><span class="kw">class</span> <span class="badt">Machine</span>(ABC):        <span class="cmt"># 👈 hợp đồng TO: nhồi 3 việc</span>
+    @abstractmethod
+    <span class="kw">def</span> print(self): ...
+    @abstractmethod
+    <span class="kw">def</span> scan(self): ...
+    @abstractmethod
+    <span class="kw">def</span> fax(self): ...
+
+<span class="kw">class</span> <span class="badt">OldPrinter</span>(Machine):     <span class="cmt"># máy in cùi, chỉ IN được</span>
+    <span class="kw">def</span> print(self): ...           <span class="cmt"># ok, làm được</span>
+    <span class="kw">def</span> scan(self): <span class="kw">raise</span> NotImplementedError   <span class="cmt"># 👈 bịa cho có</span>
+    <span class="kw">def</span> fax(self):  <span class="kw">raise</span> NotImplementedError   <span class="cmt"># 👈 phá LSP 😱</span></pre></div>
+            <div class="code good"><div class="hd">✅ Chẻ hợp đồng to thành nhiều hợp đồng nhỏ</div><pre><span class="kw">class</span> <span class="goodt">Printer</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> print(self): ...
+<span class="kw">class</span> <span class="goodt">Scanner</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> scan(self): ...
+
+<span class="kw">class</span> <span class="goodt">OldPrinter</span>(Printer):        <span class="cmt"># chỉ ký cái nó CẦN → hết hàm giả</span>
+    <span class="kw">def</span> print(self): ...
+<span class="kw">class</span> <span class="goodt">AllInOne</span>(Printer, Scanner):  <span class="cmt"># máy xịn ký nhiều hợp đồng nhỏ</span>
+    <span class="kw">def</span> print(self): ...
+    <span class="kw">def</span> scan(self): ...</pre></div>
+          </div>
+
+          <div class="seniortip">
+            <div class="sk">🐍 Note Python — interface viết bằng ABC</div>
+            <p>Python <b>không có từ khóa <code>interface</code></b> (khác Java/TypeScript). Cách viết interface trong Python = <code>class ...(ABC)</code> với <b>MỌI hàm</b> đều <code>@abstractmethod</code> (toàn lời hứa, không ruột). Nếu nó có vài hàm ruột thật + vài hàm abstract → thành <b>abstract class</b> (nửa nạc nửa mỡ). <code>Printer</code>/<code>Scanner</code> ở trên toàn abstract → nên gọi là "interface" là đúng bài.</p>
           </div>
 
           <p>🧭 <b>Metaphor — menu nhà hàng:</b> menu nhồi 200 món ép mọi đầu bếp phải biết nấu hết. Menu chuyên (quán phở chỉ bán phở) để mỗi bếp giỏi đúng phần mình. Interface nhỏ = menu chuyên.</p>
 
           <h4>Đau ở đâu</h4>
-          <p>Implementation giả rải khắp (throw/empty) · đổi một method mà cả đám class không dùng nó cũng phải build/deploy lại (coupling thừa) · đọc class không biết method nào thật sự dùng.</p>
-
-          <div class="pair">
-            <div class="code bad"><div class="hd">❌ Fat interface ép làm thừa</div><pre><span class="kw">interface</span> <span class="badt">IMachine</span> {
-  print(); scan(); fax();
-}
-<span class="kw">class</span> <span class="badt">OldPrinter</span> <span class="kw">implements</span> IMachine {
-  print() {...}
-  scan() { <span class="kw">throw</span> <span class="str">'not supported'</span>; } <span class="cmt">// giả</span>
-  fax()  { <span class="kw">throw</span> <span class="str">'not supported'</span>; } <span class="cmt">// giả 😱</span>
-}</pre></div>
-            <div class="code good"><div class="hd">✅ Tách interface theo vai trò</div><pre><span class="kw">interface</span> <span class="goodt">IPrinter</span> { print(); }
-<span class="kw">interface</span> <span class="goodt">IScanner</span> { scan(); }
-<span class="kw">interface</span> <span class="goodt">IFax</span>     { fax(); }
-<span class="kw">class</span> <span class="goodt">OldPrinter</span> <span class="kw">implements</span> IPrinter {...}
-<span class="kw">class</span> <span class="goodt">AllInOne</span> <span class="kw">implements</span> IPrinter, IScanner, IFax {...}</pre></div>
-          </div>
+          <p>Hàm giả rải khắp (<code>raise</code>/rỗng) · đổi một method mà cả đám class không dùng nó cũng phải build/deploy lại (coupling thừa) · đọc class không biết method nào thật sự dùng · lén phá LSP.</p>
 
           <h4>Chữa</h4>
-          <p><b>Tách fat interface thành nhiều role interface nhỏ.</b> Chữa gốc vì mỗi client chỉ phụ thuộc đúng cái nó cần — không còn method giả, không còn coupling thừa.</p>
+          <p><b>Tách fat interface thành nhiều role interface nhỏ theo NHU CẦU client.</b> Chữa gốc vì mỗi client chỉ phụ thuộc đúng cái nó cần — không còn hàm giả, không còn coupling thừa, không còn lén phá LSP.</p>
+
+          <h4 id="say-isp">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 ISP — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Interface Segregation means a client shouldn't be forced to depend on methods it doesn't use."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"If I have one fat interface — say Machine with print, scan, and fax — a simple printer is forced to implement scan and fax too, usually by throwing 'not supported'."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Those fake methods are a smell, and they secretly break Liskov — anyone calling fax() on that printer crashes."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So I split the fat interface into small, role-based ones — Printer, Scanner, Fax — and each class implements only what it actually does. No fake methods, no surprises."</i></div></div></div>
+            </div>
+          </div>
 
           <h4>👃 Mũi ngửi</h4>
           <div class="signals">
@@ -463,43 +571,73 @@
         <summary>D · Dependency Inversion <span class="ess">— phụ thuộc abstraction, không implementation</span></summary>
         <div class="smellbody">
           <div class="reframe">
-            <div class="rk">⚡ Cú lật — "inversion" là ĐẢO CHIỀU SỞ HỮU, không chỉ "dùng interface"</div>
-            <p>DIP: <b>module cấp cao KHÔNG phụ thuộc module cấp thấp; CẢ HAI phụ thuộc abstraction.</b> Và cú lật sâu nhất: <b>abstraction (interface) thuộc về module CẤP CAO, không thuộc về implementer.</b> Đó là chữ "inversion" — bình thường logic phụ thuộc hạ tầng; ta đảo lại để hạ tầng phụ thuộc interface do logic định nghĩa. <b>DIP ≠ DI</b> (xem gạch 3).</p>
+            <div class="rk">⚡ Nói MỘT CÂU cho dễ nhớ</div>
+            <p><b>"Code logic quan trọng đừng gọi thẳng TÊN hãng cụ thể — gọi qua VAI TRÒ (interface)."</b> <code>OrderService</code> đừng dính cứng <code>GmailSender</code>; nó chỉ cần "một thứ biết <code>.send()</code>". Nhưng cú lật SÂU nhất nằm ở chữ <b>"Inversion" = ĐẢO CHIỀU MŨI TÊN</b> (xem dưới).</p>
           </div>
 
           <div class="brick" data-n="1">
-            <div class="bt">Bệnh: logic đơn giản dính cứng hạ tầng cụ thể</div>
-            <p><code>OrderService</code> (cấp cao — luật đặt hàng) <code>new SendGridMailer()</code> (cấp thấp — hạ tầng). Giờ logic đặt hàng dính chặt SendGrid. Đổi SendGrid → SES phải mở <code>OrderService</code> ra sửa. Muốn unit-test <code>OrderService</code> phải gửi mail thật.</p>
-          </div>
-          <div class="brick" data-n="2">
-            <div class="bt">Đảo chiều: high-level định nghĩa interface, low-level tuân theo</div>
-            <p><code>OrderService</code> tuyên bố: "tôi cần một thứ biết <code>send()</code>" → interface <code>IMailer</code> (thuộc về domain). <code>SendGridMailer implements IMailer</code>. Giờ mũi tên phụ thuộc đảo: hạ tầng phụ thuộc domain, không ngược lại.</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">DI / IoC container = CƠ CHẾ thực hiện DIP</div>
-            <p>DIP là NGUYÊN TẮC (phụ thuộc abstraction). <b>Dependency Injection</b> là KỸ THUẬT tiêm implementation qua constructor. NestJS IoC container tự tiêm <code>SendGridMailer</code> vào chỗ cần <code>IMailer</code>. DI phục vụ DIP — đừng lẫn hai khái niệm.</p>
+            <div class="bt">Bệnh: logic dính cứng hạ tầng cụ thể</div>
+            <p><code>OrderService</code> (cấp cao — luật đặt hàng) tự <code>GmailSender()</code> bên trong (cấp thấp — hạ tầng). Đổi Gmail→SendGrid phải <b>mở <code>OrderService</code> ra sửa</b>. Muốn unit-test phải <b>gửi mail thật</b>. Kẹt.</p>
           </div>
 
-          <p>🧭 <b>Metaphor — ổ cắm điện chuẩn:</b> cái đèn không hàn cứng dây vào nhà máy điện. Đèn phụ thuộc "chuẩn ổ cắm" (abstraction); nhà máy cũng theo chuẩn đó. Đổi nhà cung cấp điện, cái đèn không cần biết. Đèn = high-level, điện = low-level, ổ cắm = interface.</p>
+          <div class="reframe" style="margin-top:12px">
+            <div class="rk">🔌 Linh hồn của DIP — chữ "Inversion" = đảo chiều MŨI TÊN (ai sở hữu interface?)</div>
+            <p>Hỏi vàng: <b>cái ổ cắm trên tường — AI định hình dạng nó?</b> → <b>CĂN NHÀ</b>, không phải hãng quạt. Nhà bảo "ổ tao 2 chấu", mọi thiết bị phải chế phích cho vừa. Nhà <b>SỞ HỮU</b> chuẩn ổ; thiết bị <b>TUÂN THEO</b>. Map qua code: <code>OrderService</code> (nhà) định ra "<code>IMailer</code> phải có <code>send()</code>"; Gmail (quạt) làm cho khớp.</p>
+            <p style="margin-top:6px">Mũi tên = "<b>ai phải BIẾT tới / <code>import</code> ai</b>":</p>
+            <div class="pair" style="margin-top:6px">
+              <div class="code bad"><div class="hd">❌ Trước DIP — mũi tên SAI hướng</div><pre>OrderService  ──import──►  GmailSender
+  (logic xịn)                (đồ vặt)
+
+<span class="cmt"># logic cúi đầu phụ thuộc đồ vặt hay thay</span></pre></div>
+              <div class="code good"><div class="hd">✅ Sau DIP — mũi tên ĐẢO lại 🔄</div><pre>OrderService ──► IMailer ◄──import── GmailSender
+ (logic xịn)   (nhà SỞ HỮU)            (đồ vặt)
+
+<span class="cmt"># giờ Gmail cúi đầu import IMailer của logic</span></pre></div>
+            </div>
+            <p style="margin-top:6px">👉 Nhiều người dùng interface nhưng để nó nằm <b>chung folder với Gmail</b> → Gmail vẫn làm chủ, <b>chưa đảo được gì</b>. Interface phải thuộc lãnh thổ <b>logic cấp cao</b> mới là "inversion" thật.</p>
+          </div>
+
+          <div class="brick" data-n="2">
+            <div class="bt">DI = CƠ CHẾ thực hiện DIP (hình đầu bếp 🍳)</div>
+            <p><b>❌ Tự đẻ bên trong</b> — <code>mailer = GmailSender()</code>: giống đầu bếp <b>tự đi nuôi gà, trồng rau, xay bột</b> rồi mới nấu — ôm hết vào người. Đổi Gmail→SendGrid phải <b>mổ bụng đầu bếp ra sửa</b>; muốn test phải <b>giết gà thật</b> (gửi mail thật).</p>
+            <p><b>✅ Nhận từ ngoài</b> — <code>def __init__(self, mailer)</code>: đầu bếp nói <i>"đưa nguyên liệu đây, tao nấu — gà ở đâu ra kệ"</i>. Đổi provider = đưa nguyên liệu khác lúc gọi; test = đưa <b>đồ giả</b> (<code>FakeSender</code>) vào. Không đụng <code>OrderService</code>.</p>
+            <p>👉 Phân biệt: <b>DIP là NGUYÊN TẮC</b> (gọi theo vai trò + đảo chiều sở hữu interface) — <i>thế cờ</i>. <b>DI là KỸ THUẬT</b> (tiêm qua constructor) — <i>nước đi</i>. Đi nước DI để đạt thế DIP.</p>
+          </div>
 
           <h4>Đau ở đâu</h4>
-          <p>Đổi provider (SendGrid→SES) = sửa class logic · KHÔNG unit-test được (không mock nổi cái <code>new</code> bên trong) — nối thẳng Testing (gốc 6) · tái dùng logic ở ngữ cảnh khác rất khó vì nó kéo theo cả hạ tầng.</p>
+          <p>Đổi provider (Gmail→SendGrid) = sửa class logic · KHÔNG unit-test được (không mock nổi cái tự-<code>new</code> bên trong) — nối thẳng Testing (gốc 6) · tái dùng logic ở ngữ cảnh khác rất khó vì nó kéo theo cả hạ tầng.</p>
 
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Bám implementation cụ thể</div><pre><span class="kw">class</span> <span class="badt">OrderService</span> {
-  mailer = <span class="kw">new</span> SendGridMailer(); <span class="cmt">// cứng</span>
-}
-<span class="cmt">// đổi sang SES = sửa class, khó test</span></pre></div>
-            <div class="code good"><div class="hd">✅ Inject abstraction</div><pre><span class="kw">interface</span> <span class="goodt">IMailer</span> { send(to, body): void }
-<span class="kw">class</span> <span class="goodt">OrderService</span> {
-  <span class="kw">constructor</span>(<span class="kw">private</span> mailer: IMailer) {}
-}
-<span class="cmt">// đổi provider = đổi binding,</span>
-<span class="cmt">// test = inject mock (gốc 6)</span></pre></div>
+            <div class="code bad"><div class="hd">❌ Tự đẻ hạ tầng bên trong (Python)</div><pre><span class="kw">class</span> <span class="badt">OrderService</span>:
+    <span class="kw">def</span> __init__(self):
+        self.mailer = GmailSender()   <span class="cmt"># 👈 dính cứng Gmail</span>
+<span class="cmt"># đổi sang SendGrid = sửa class, khó test</span></pre></div>
+            <div class="code good"><div class="hd">✅ Inject abstraction do domain sở hữu</div><pre><span class="kw">class</span> <span class="goodt">IMailer</span>(ABC):          <span class="cmt"># domain SỞ HỮU hợp đồng này</span>
+    @abstractmethod
+    <span class="kw">def</span> send(self, to, body): ...
+
+<span class="kw">class</span> <span class="goodt">OrderService</span>:
+    <span class="kw">def</span> __init__(self, mailer: IMailer):   <span class="cmt"># nhận từ ngoài</span>
+        self.mailer = mailer
+
+OrderService(GmailSender())   <span class="cmt"># 🏭 production</span>
+OrderService(FakeSender())    <span class="cmt"># 🧪 test — inject mock (gốc 6)</span></pre></div>
           </div>
 
           <h4>Chữa</h4>
-          <p>Định nghĩa interface do domain sở hữu, <b>inject</b> implementation qua constructor. Chữa gốc vì phần dễ-thay-đổi (hạ tầng) nằm sau một ranh giới ổn định, và logic trở nên test được (mock-able).</p>
+          <p>Định nghĩa interface <b>do domain sở hữu</b>, <b>inject</b> implementation qua constructor. Chữa gốc vì phần dễ-thay-đổi (hạ tầng) nằm sau một ranh giới ổn định, và logic trở nên test được (mock-able).</p>
+
+          <h4 id="say-dip">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 DIP — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Dependency Inversion means high-level business logic shouldn't depend on low-level details — both depend on an abstraction."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"If OrderService creates a GmailSender inside it, the logic is chained to Gmail — switching providers means editing it, and I can't test without sending real email."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"So OrderService depends on an IMailer interface it owns, and GmailSender implements it. The dependency arrow is inverted — infrastructure now depends on the domain's abstraction, not the other way around."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"This lets me swap providers or inject a mock in tests without ever touching the logic. It's the foundation of Clean and Hexagonal architecture."</i></div></div></div>
+            </div>
+          </div>
+          <p>Câu <b>senior</b> đóng đinh: <i>"The key isn't just using an interface — it's WHO owns it. The high-level module owns the abstraction; the low-level module conforms to it."</i> (Mấu chốt không phải "có xài interface" — mà là AI sở hữu nó. Module cấp cao sở hữu abstraction; cấp thấp tuân theo.)</p>
 
           <h4>👃 Mũi ngửi</h4>
           <div class="signals">
@@ -580,6 +718,12 @@
     <a href="#p-isp">I · Interface Segregation</a>
     <a href="#p-dip">D · Dependency Inversion</a>
     <div class="div"></div>
+    <div class="fk">🎤 Trả lời interview (4 nhịp)</div>
+    <a href="#say-ocp">O · script Open–Closed</a>
+    <a href="#say-lsp">L · script Liskov</a>
+    <a href="#say-isp">I · script Interface Seg.</a>
+    <a href="#say-dip">D · script Dependency Inv.</a>
+    <div class="div"></div>
     <a href="#in-your-code">③ Trong code của anh</a>
     <a href="#why-ladder">④ Why-Ladder</a>
   </div>
@@ -590,6 +734,7 @@
       const el = document.getElementById(id);
       if(!el) return;
       if(el.tagName === 'DETAILS') el.open = true;
+      const parent = el.closest('details'); if(parent) parent.open = true;  // mục con → bung details cha
       el.scrollIntoView({behavior:'smooth', block:'start'});
     }
     document.querySelectorAll('.smellmap a, .fnav a, .secnav a').forEach(a=>{

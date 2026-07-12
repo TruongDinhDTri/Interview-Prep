@@ -193,37 +193,63 @@
             <div class="rk">⚡ Cú lật — mục tiêu là bảo vệ BẤT BIẾN, không phải "ẩn field cho sang"</div>
             <p>Ai cũng nói "encapsulation = để private". Nhưng <code>private</code> chỉ là PHƯƠNG TIỆN. Mục tiêu thật: <b>đối tượng tự giữ trạng thái LUÔN HỢP LỆ (invariant)</b> — không cho thế giới ngoài đặt nó vào trạng thái vô nghĩa (balance âm, order đã ship mà đổi địa chỉ).</p>
           </div>
+
+          <h4>🧸 Nền trước bậc 0 — Object là gì (gốc của cả 4 trụ cột)</h4>
+          <p>Trước khi giấu hay bảo vệ được gì, phải rõ <b>object</b> là gì. Một câu khắc vào đầu:</p>
+          <blockquote>Object = một <b>unit</b> gói chung <b>STATE</b> (dữ liệu) + <b>BEHAVIOR</b> (hành vi) vào một chỗ, và là một <b>thể CỤ THỂ</b> đúc ra từ class.</blockquote>
+          <table class="vs">
+            <tr><th>Tầng</th><th>Là gì</th><th>Ví dụ (con chó máy 🐕)</th></tr>
+            <tr><td>📜 Class</td><td>cái KHUÔN / bản thiết kế (trên giấy)</td><td>khuôn <code>Dog</code></td></tr>
+            <tr><td>🐕 Object</td><td>THỂ THẬT đúc từ khuôn, dữ liệu riêng</td><td><code>rex = Dog()</code>, pin 80%</td></tr>
+            <tr><td>🧬 State + Behavior</td><td>trong object có: data + method</td><td><code>name="Rex"</code> + <code>bark()</code></td></tr>
+          </table>
+          <p>Một class → đúc ra N object; mỗi object <b>dữ liệu riêng</b> (Rex pin 80%, Max pin 20%) nhưng <b>chung hành vi</b>. Code chạy là chạy trên <b>object</b>, không chạy trên class.</p>
+          <div class="seniortip">
+            <div class="sk">🎤 Trả lời interview — "What is an object?"</div>
+            <p><b>①</b> <i>"An object is a self-contained unit that bundles <b>state</b> (its data) and <b>behavior</b> (the methods acting on that data) together."</i> · <b>②</b> <i>"A class is the blueprint; an object is a concrete <b>instance</b> of it, living in memory with its own state."</i> · <b>③</b> <i>"e.g. a <code>BankAccount</code> class defines the shape; <code>acc = BankAccount()</code> is one real object holding its own balance."</i> · <b>④ (ăn điểm)</b> <i>"So instead of scattering data one place and logic another, an object keeps them together — it owns its data <b>and</b> the operations on it."</i></p>
+            <p style="font-size:.84rem;opacity:.85">💡 Junior chỉ nói <i>"object là instance của class"</i> (đúng nhưng nhạt). Câu <b>"bundles its own state and behavior"</b> mới có mùi hiểu thật — và nhịp ④ nối thẳng sang Encapsulation ngay bên dưới.</p>
+          </div>
+
+          <h4>🪜 Xây Encapsulation từ số 0 — 4 bậc</h4>
+          <div class="brick" data-n="0">
+            <div class="bt">Object ÔM dữ liệu sống bên trong nó (STATE)</div>
+            <p><code>self.balance = 100</code> — con số này không trôi nổi đâu đó, nó <b>sống bên trong</b> cục <code>acc</code>. Object đang <b>giữ</b> nó. (đây chính là chữ STATE ở trên.)</p>
+          </div>
           <div class="brick" data-n="1">
-            <div class="bt">Object sở hữu dữ liệu + LUẬT của dữ liệu đó</div>
-            <p><code>Account</code> không chỉ giữ <code>balance</code> — nó giữ luật "balance không âm". Dữ liệu và luật bảo vệ nó phải sống chung một chỗ.</p>
+            <div class="bt">Để TRẦN (public) = ai đi ngang cũng phá</div>
+            <p><code>acc.balance = -9999</code> — Python cho chạy, không ai cản. Số dư ÂM 9999 = trạng thái vô nghĩa. Tệ hơn: dòng bậy đó có thể nằm ở file cách xa 10 tầng → bug hiện ở <b>nơi XA nguồn gây</b>, truy mù mắt. 🐛</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Để public = ai cũng set bậy = luật vô nghĩa</div>
-            <p><code>acc.balance = -9999</code> — luật "không âm" bị phá từ bên ngoài. Trạng thái vô lệ lan ra hệ thống, bug lộ ở nơi XA nguồn gây (khó truy).</p>
+            <div class="bt">Khóa két + mở đúng MỘT cổng có nhân viên gác</div>
+            <p>Khóa <code>__balance</code> lại (ngoài không sờ thẳng), rồi bắt mọi thay đổi đi qua <code>withdraw()</code> — bên trong có ông lính <code>if</code> kiểm trước khi cho trừ. Trước có <b>ngàn cửa</b>; giờ chỉ còn <b>một cửa có gác</b>.</p>
           </div>
           <div class="brick" data-n="3">
-            <div class="bt">Chỉ cho đổi qua method có KIỂM → object tự bảo vệ</div>
-            <p><code>withdraw(amt)</code> kiểm trước khi trừ. Mọi đường vào trạng thái đều qua cổng có gác → invariant luôn giữ.</p>
+            <div class="bt">Đặt tên = Encapsulation · mục tiêu thật = giữ INVARIANT</div>
+            <p><b>Invariant</b> = một LUẬT luôn đúng của object, không giây phút nào được sai. Với <code>Account</code>: <b>"balance không bao giờ âm"</b>. Ta khóa <code>__balance</code> KHÔNG PHẢI "cho kín" — mà để <b>cái luật đó không thể bị phá từ ngoài</b>.</p>
           </div>
-          <p>🧭 <b>Metaphor — máy ATM:</b> anh không thò tay vào ngăn tiền của ngân hàng. Mọi giao dịch qua KHE có kiểm soát (đủ số dư? đúng PIN?). Ngăn tiền = private; khe giao dịch = method công khai có gác.</p>
+
+          <p>🧭 <b>Metaphor — máy ATM / nhân viên ngân hàng:</b> anh không thò tay vào ngăn tiền của ngân hàng. Mọi giao dịch qua KHE có kiểm soát (đủ số dư? đúng PIN?). Ngăn tiền = <code>private</code>; khe giao dịch có nhân viên = method công khai có gác.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Trạng thái phơi ra</div><pre><span class="kw">class</span> <span class="badt">Account</span> {
-  <span class="kw">public</span> balance = <span class="str">0</span>;
-}
-acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá được</span></pre></div>
-            <div class="code good"><div class="hd">✅ Giấu + bảo vệ invariant</div><pre><span class="kw">class</span> <span class="goodt">Account</span> {
-  <span class="kw">private</span> _balance = <span class="str">0</span>;
-  withdraw(amt) {
-    <span class="kw">if</span> (amt &gt; this._balance) <span class="kw">throw</span> ...
-    this._balance -= amt;
-  }
-}</pre></div>
+            <div class="code bad"><div class="hd">❌ Trạng thái phơi trần (Python)</div><pre><span class="kw">class</span> <span class="badt">Account</span>:
+    <span class="kw">def</span> __init__(self):
+        self.balance = <span class="str">100</span>   <span class="cmt"># public — để trần</span>
+
+acc = Account()
+acc.balance = -<span class="str">9999</span>   <span class="cmt"># 😱 ai cũng phá được</span></pre></div>
+            <div class="code good"><div class="hd">✅ Giấu + bảo vệ invariant (Python)</div><pre><span class="kw">class</span> <span class="goodt">Account</span>:
+    <span class="kw">def</span> __init__(self):
+        self.__balance = <span class="str">100</span>   <span class="cmt"># 🔒 khóa lại</span>
+
+    <span class="kw">def</span> withdraw(self, amount):        <span class="cmt"># 🚪 cổng có gác</span>
+        <span class="kw">if</span> amount &gt; self.__balance:     <span class="cmt"># 👮 kiểm</span>
+            <span class="kw">raise</span> ValueError(<span class="str">"Không đủ tiền!"</span>)
+        self.__balance -= amount</pre></div>
           </div>
           <h4>👃 Mũi ngửi vỡ encapsulation</h4>
           <div class="signals">
             <div class="sig"><span class="sn">1</span><div><div class="st">Public field mutable</div><div class="sd">Ai cũng đặt trạng thái trực tiếp → không có gác invariant.</div></div></div>
             <div class="sig"><span class="sn">2</span><div><div class="st">Getter/setter cho MỌI field (anemic)</div><div class="sd">Bọc <code>private</code> rồi mở toang bằng get/set = private giả. Object thành túi dữ liệu, luật nằm ở nơi khác.</div></div></div>
-            <div class="sig"><span class="sn">3</span><div><div class="st">Logic thao tác field của object nằm NGOÀI object</div><div class="sd">Code khác lấy field ra rồi tự tính/tự sửa (nối Feature Envy gốc 2).</div></div></div>
+            <div class="sig"><span class="sn">3</span><div><div class="st">Logic thao tác field của object nằm NGOÀI object</div><div class="sd">Code khác lấy field ra rồi tự tính/tự sửa — đó chính là <a href="../2-Code-Smells/Deep-Guide.html#smell-envy" style="color:var(--clay);font-weight:700">💘 Feature Envy (gốc 2)</a>. Encapsulation tốt kéo hành vi về sống cạnh dữ liệu.</div></div></div>
           </div>
           <div class="drill">
             <div class="dh">↓ Interviewer đào tiếp</div>
@@ -231,9 +257,24 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="drow"><div class="dq">"Encapsulation khác information hiding chỗ nào?"</div><div class="da">Information hiding (Parnas) là nguyên tắc rộng: giấu quyết định thiết kế dễ đổi. Encapsulation là cơ chế OOP thực hiện nó ở cấp object: gói data + hành vi + luật, lộ interface tối thiểu.</div></div>
             <div class="drow"><div class="dq">"Immutability liên quan sao?"</div><div class="da">Immutable là encapsulation cực đoan: không cho đổi trạng thái sau khi tạo → invariant được đảm bảo lúc tạo là giữ mãi. Tránh cả một lớp bug về trạng thái thay đổi bất ngờ.</div></div>
           </div>
+          <h4 id="say-encap">🎤 Trả lời interview — "What is Encapsulation?" (4 nhịp)</h4>
+          <div class="seniortip">
+            <div class="sk">🎯 Khung 4 nhịp — học NHỊP, đừng học chữ</div>
+            <p><b>① Định nghĩa:</b> <i>"Encapsulation is bundling an object's data together with the rules that protect it, and hiding that data so it can only change through controlled methods."</i></p>
+            <p><b>② Vấn đề nó cứu:</b> <i>"Without it the data is public — anyone can push the object into an invalid state, like a bank balance of -9999, and that bad line can live far away, so the bug shows up far from its cause."</i></p>
+            <p><b>③ Ví dụ:</b> <i>"So I make <code>balance</code> private and force every change through a <code>withdraw()</code> that checks first — one guarded gate into the state."</i></p>
+            <p><b>④ Câu chốt (senior):</b> <i>"The real goal isn't 'private for tidiness' — it's protecting the object's <b>invariant</b>: a rule that must always hold, like 'balance can never go negative'. The object owns its data <b>and</b> the rules, and guards them itself."</i></p>
+            <p style="font-size:.84rem;opacity:.85">🔑 Chữ vàng phải bật ra: <b>invariant · controlled method · guarded gate</b>. Bí thì thả mỗi nhịp ①; đủ giờ thì ①→②→③; muốn ăn điểm thì đóng bằng ④.</p>
+          </div>
+
           <div class="seniortip">
             <div class="sk">🎓 Bedrock — Tell, Don't Ask</div>
             <p>Câu chốt: "encapsulation không phải giấu field cho kín — mà là để object TỰ GIỮ được invariant của nó." Nguyên tắc kèm theo: <b>Tell, Don't Ask</b> — đừng hỏi lấy data ra ngoài rồi tự xử; hãy BẢO object tự làm (<code>account.withdraw(x)</code> thay vì đọc balance rồi tự trừ). Nói được vế 'invariant' = anh vượt tầng 'private cho đẹp'.</p>
+          </div>
+
+          <div class="seniortip">
+            <div class="sk">🔗 Nối sang các gốc khác</div>
+            <p>Encapsulation là bản lề của cả Craftsmanship: nó thực thi <a href="../3-SOLID/Deep-Guide.html#p-srp" style="color:var(--clay);font-weight:700">SRP</a> (data + luật của nó ở chung một class = một lý do để đổi), và chữa <a href="../2-Code-Smells/Deep-Guide.html#smell-envy" style="color:var(--clay);font-weight:700">💘 Feature Envy</a> (kéo hành vi về cạnh dữ liệu). Object giấu ruột đi cũng là nền để <b>Abstraction</b> (ngay dưới) lộ ra "làm GÌ" mà không lộ "làm THẾ NÀO".</p>
           </div>
         </div>
       </details>
@@ -246,26 +287,55 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="rk">⚡ Cú lật — Abstraction giấu CÁCH LÀM; Encapsulation giấu DỮ LIỆU</div>
             <p>Hai chữ hay bị nhầm. <b>Encapsulation</b> giấu TRẠNG THÁI để bảo vệ. <b>Abstraction</b> giấu ĐỘ PHỨC TẠP của cách làm để người dùng chỉ cần biết "làm GÌ", không cần biết "làm THẾ NÀO". Abstraction giảm tải nhận thức — cho anh làm việc ở đúng một tầng.</p>
           </div>
+
+          <h4>🪜 Xây Abstraction từ số 0 — 3 bậc</h4>
+          <div class="brick" data-n="0">
+            <div class="bt">Lộ "làm GÌ", giấu "làm THẾ NÀO"</div>
+            <p>Đạp ga 🚗 → xe tiến. Ông <b>không cần biết</b> xăng bơm bao nhiêu ml, bugi đánh lửa lúc nào, piston nén ra sao. Chỉ cần biết <i>output = "tiến về trước"</i>. Đó là abstraction: giảm tải cho cái đầu, làm việc ở đúng một tầng.</p>
+          </div>
           <div class="brick" data-n="1">
-            <div class="bt">Người dùng chỉ cần biết LÀM GÌ</div>
-            <p><code>mailer.send(to, body)</code> — anh không cần biết SMTP handshake, retry, TLS. Cái tên + chữ ký là tất cả những gì anh cần.</p>
+            <div class="bt">Tầng thấp — MỘT method giấu thân của nó</div>
+            <p><code>car.accelerate()</code> giấu <code>__inject_fuel()</code>, <code>__ignite_spark()</code>, <code>__move_pistons()</code>. Caller gọi 1 dòng, kệ 3 bước bên trong. Cái tên + chữ ký là tất cả những gì caller cần biết.</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Abstraction là một HỢP ĐỒNG che implementation</div>
-            <p>Interface <code>IMailer</code> nói "tôi biết send" — che mọi chi tiết SendGrid/SES bên dưới. Đổi ruột không đụng người dùng.</p>
+            <div class="bt">Tầng cao — NHIỀU class làm chung 1 kiểu việc → giấu sau MỘT tấm màn (interface)</div>
+            <p>Nếu có nhiều cách khác nhau làm cùng một việc (gửi thông báo: Email/SMS/Slack), ta gom tụi nó sau <b>một chuẩn chung = interface</b>. Người gọi <b>chỉ nói chuyện với cái interface</b> — "thứ nào thuộc kiểu này thì gọi được" — kệ mỗi class implement thế nào. Giấu luôn cả CLASS sau tấm màn, không chỉ giấu method.</p>
           </div>
-          <div class="brick" data-n="3">
-            <div class="bt">Giảm tải nhận thức = làm việc ở đúng MỘT tầng</div>
-            <p>Đọc code nghiệp vụ ở tầng "gửi mail chào mừng", không bị kéo xuống tầng "byte của giao thức". Mỗi tầng một mức trừu tượng (nối Long Method gốc 2).</p>
+
+          <p>🎸 <b>Metaphor — ban nhạc:</b> ông là <b>trưởng ban</b>, vung tay hô <b>"cả ban — PLAY!"</b>. Guitarist gảy dây, pianist gõ phím, drummer đập trống — mỗi người <code>play()</code> một kiểu. Ông <b>không cần biết</b> ai chơi ra sao; ông chỉ cần: "thứ nào là <code>Musician</code> thì gọi <code>play()</code> được." Cái vai <b>Musician</b> = tấm màn/interface; guitarist, pianist = các class thật đứng sau màn.</p>
+          <div class="pair">
+            <div class="code bad"><div class="hd">❌ Caller phải biết từng class (dính cứng)</div><pre><span class="kw">def</span> conduct(player, kind):
+    <span class="kw">if</span> kind == <span class="str">"guitar"</span>:
+        player.strum_strings()      <span class="cmt"># biết ruột guitar</span>
+    <span class="kw">elif</span> kind == <span class="str">"piano"</span>:
+        player.press_keys()         <span class="cmt"># biết ruột piano</span>
+    <span class="cmt"># thêm nhạc cụ mới → sửa hàm này 😩</span></pre></div>
+            <div class="code good"><div class="hd">✅ Giấu sau interface (Python: ABC)</div><pre><span class="kw">class</span> <span class="goodt">Musician</span>(ABC):        <span class="cmt"># 🎭 tấm màn / cái "vai"</span>
+    @abstractmethod
+    <span class="kw">def</span> play(self): ...           <span class="cmt"># hứa "làm GÌ", không nói sao</span>
+
+<span class="kw">class</span> <span class="goodt">Guitarist</span>(Musician):
+    <span class="kw">def</span> play(self): ...           <span class="cmt"># gảy dây</span>
+<span class="kw">class</span> <span class="goodt">Pianist</span>(Musician):
+    <span class="kw">def</span> play(self): ...           <span class="cmt"># gõ phím</span>
+
+<span class="kw">def</span> conduct(m: Musician):        <span class="cmt"># 👈 chỉ biết "Musician"</span>
+    m.play()                       <span class="cmt"># kệ guitar hay piano</span></pre></div>
           </div>
-          <p>🧭 <b>Metaphor — vô lăng + chân ga:</b> lái xe anh chỉ cần vô lăng, ga, phanh (interface). Không cần biết động cơ đốt trong, ECU, hộp số hoạt động ra sao. Đó là abstraction: lộ điều khiển, giấu cơ chế.</p>
-          <h4>Encapsulation vs Abstraction — bảng phân biệt (hay bị hỏi)</h4>
+
+          <h4>🔒 Encapsulation vs 🎭 Abstraction — bảng phân biệt (hay bị hỏi)</h4>
           <table class="vs">
-            <tr><th>&nbsp;</th><th>Encapsulation</th><th>Abstraction</th></tr>
+            <tr><th>&nbsp;</th><th>🔒 Encapsulation</th><th>🎭 Abstraction</th></tr>
             <tr><td>Giấu gì</td><td>DỮ LIỆU / trạng thái nội bộ</td><td>ĐỘ PHỨC TẠP của cách làm</td></tr>
-            <tr><td>Mục tiêu</td><td>Bảo vệ invariant</td><td>Đơn giản hóa cho người dùng</td></tr>
+            <tr><td>Mục tiêu</td><td>Bảo vệ invariant (khỏi bị set bậy)</td><td>Đơn giản hóa cho người gọi</td></tr>
+            <tr><td>Che cho AI</td><td>che <b>OBJECT</b> khỏi người gọi ("đồ của tao, đừng đụng" 🛡️)</td><td>che <b>NGƯỜI GỌI</b> khỏi object ("cách tao làm, đừng bận tâm" ✨)</td></tr>
             <tr><td>Cấp</td><td>Cấp implementation (bundling)</td><td>Cấp thiết kế (interface/hợp đồng)</td></tr>
           </table>
+          <div class="seniortip">
+            <div class="sk">💎 Câu ăn điểm — cái đối xứng</div>
+            <p>"Encapsulation <b>bảo vệ OBJECT</b> khỏi người gọi; Abstraction <b>bảo vệ NGƯỜI GỌI</b> khỏi object. Ngược chiều nhau — một cái che cho mình, một cái che cho người khác." Nói được câu này = interviewer biết anh không học vẹt.</p>
+          </div>
+
           <h4>👃 Mũi ngửi abstraction tệ</h4>
           <div class="signals">
             <div class="sig"><span class="sn">1</span><div><div class="st">Caller phải biết chi tiết nội bộ mới dùng được</div><div class="sd">Phải gọi <code>init()</code> rồi <code>configure()</code> theo đúng thứ tự bí ẩn → abstraction chưa che gì.</div></div></div>
@@ -277,6 +347,24 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="drow"><div class="dq">"Abstraction có phải là interface không?"</div><div class="da">Interface là MỘT cách biểu diễn abstraction, không phải bản thân abstraction. Abstract class, một hàm đặt tên tốt, một module cũng là abstraction. Abstraction là ý tưởng; interface là công cụ ngôn ngữ.</div></div>
             <div class="drow"><div class="dq">"Leaky abstraction là gì?"</div><div class="da">Khi chi tiết bên dưới 'rò' lên khiến người dùng vẫn phải biết ruột (Law of Leaky Abstractions — Spolsky). Vd ORM che SQL nhưng khi tối ưu performance anh vẫn phải hiểu SQL sinh ra. Không abstraction nào kín 100%.</div></div>
           </div>
+          <div class="seniortip">
+            <div class="sk">🔗 Chỗ Abstraction bắt tay SOLID — viên gạch nền của 3 thứ</div>
+            <p>Vì <code>conduct(m: Musician)</code> chỉ nói chuyện với <b>tấm màn Musician</b>, thêm 🎺 <code>Trumpeter</code> mới → <code>conduct</code> không đổi một dòng. Đúng một cái interface đó làm nền cho 3 thứ:</p>
+            <p>🔀 <b><a href="#p-poly" style="color:var(--clay);font-weight:700">Polymorphism</a></b> — cùng lời gọi <code>m.play()</code>, mỗi object làm kiểu riêng (động cơ bên dưới). ·
+            🔓 <b><a href="../3-SOLID/Deep-Guide.html#p-ocp" style="color:var(--clay);font-weight:700">OCP</a></b> — thêm nhạc cụ mới không sửa code cũ. ·
+            🔌 <b><a href="../3-SOLID/Deep-Guide.html#p-dip" style="color:var(--clay);font-weight:700">DIP</a></b> — và đây là chỗ sâu nhất: <b>logic của anh (trưởng ban) tự ĐỊNH NGHĨA abstraction <code>Musician</code></b>, rồi các class cụ thể (Guitarist, Pianist) phải <b>phụ thuộc NGƯỢC lên</b> cái abstraction đó. Mũi tên <b>đảo chiều</b>: chi tiết phụ thuộc vào abstraction mà logic cấp cao sở hữu — không phải logic phụ thuộc vào chi tiết.</p>
+          </div>
+
+          <h4 id="say-abstract">🎤 Trả lời interview — "What is Abstraction?" (4 nhịp)</h4>
+          <div class="seniortip">
+            <div class="sk">🎯 Khung 4 nhịp — học NHỊP, đừng học chữ</div>
+            <p><b>① Định nghĩa:</b> <i>"Abstraction means exposing WHAT something does while hiding HOW it does it — so the caller works at one level without being dragged into the details."</i></p>
+            <p><b>② Phân biệt Encapsulation (ăn điểm):</b> <i>"Encapsulation hides DATA to protect the object's invariant; abstraction hides COMPLEXITY to simplify life for the caller. One protects the object, the other protects the caller."</i></p>
+            <p><b>③ Ví dụ:</b> <i>"A <code>Musician</code> interface exposes <code>play()</code>. A guitarist and a pianist implement it differently, but the bandleader just calls <code>play()</code> — it never knows or cares which."</i></p>
+            <p><b>④ Chốt (nối kiến trúc):</b> <i>"That abstract type is what lets me add a new implementation without touching the caller — it's the foundation polymorphism, OCP and DIP all stand on."</i></p>
+            <p style="font-size:.84rem;opacity:.85">🔑 Chữ vàng: <b>WHAT vs HOW · protect the caller · abstract type</b>. Bí thì thả nhịp ①; muốn ăn điểm senior thì đóng bằng ② (đối xứng) và ④ (nối SOLID).</p>
+          </div>
+
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
             <p>Câu chốt: "abstraction tốt = ỔN ĐỊNH + che được biến thiên bên dưới; caller làm việc ở một mức, không bị kéo xuống chi tiết." Nói được cặp phân biệt Encapsulation(data)/Abstraction(complexity) mạch lạc = anh gỡ đúng câu hỏi kinh điển hay làm junior lúng túng.</p>
@@ -292,31 +380,48 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="rk">⚡ Cú lật — inheritance là quan hệ CHẶT NHẤT trong OOP</div>
             <p>Kế thừa nghe "tái dùng code miễn phí" nên bị lạm dụng. Sự thật: nó tạo <b>coupling chặt nhất</b> — con phụ thuộc vào CHI TIẾT của cha (white-box). Chỉ dùng khi có quan hệ <b>is-a THẬT</b> + LSP giữ (gốc 3) + muốn ĐA HÌNH. Kế thừa chỉ để "xài lại vài method" = bẫy.</p>
           </div>
+          <h4>🪜 Xây Inheritance từ số 0 — 3 bậc</h4>
+          <div class="brick" data-n="0">
+            <div class="bt">Cơ chế — con thừa hưởng đồ cha FREE + thêm/override của riêng</div>
+            <p><code>class Dog(Animal)</code> → Dog có sẵn <code>eat()</code>, <code>sleep()</code> của cha mà không viết dòng nào, rồi thêm <code>bark()</code>. Quan hệ đọc là <b>"is-a"</b> (Dog <b>là một</b> Animal). Con còn <b>override</b> được: ngủ kiểu riêng thì viết đè <code>sleep()</code>. Sức hút số 1: <b>tái dùng code.</b></p>
+          </div>
           <div class="brick" data-n="1">
-            <div class="bt">Con thừa hưởng + PHỤ THUỘC chi tiết của cha</div>
-            <p>Con thấy được protected member, dựa vào cách cha làm việc. Đây là "white-box reuse" — con biết ruột cha, nên dính chặt.</p>
+            <div class="bt">Mặt tối #1 — "sửa cha, con đi luôn" (Fragile Base Class)</div>
+            <p>Con <b>dính cứng ruột cha</b> (white-box). Cha đổi <code>eat()</code> đụng tới <code>self.energy</code> → mọi đứa con không có energy (vd <code>Robot(Animal)</code>) <b>nổ theo</b>, mà người viết cha đâu biết có đứa con đó ở file nào. Đây là <b>coupling chặt nhất OOP</b>.</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Đổi cha → có thể phá MỌI con (fragile base class)</div>
-            <p>Sửa một method ở cha, mọi con kế thừa có thể vỡ theo cách không lường được. Cây càng sâu, rủi ro càng lan rộng.</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">Inheritance cho ĐA HÌNH: tốt · cho TÁI DÙNG code: thường là bẫy</div>
-            <p>Dùng để nhiều loại chia sẻ một interface (polymorphism) = đúng mục đích. Dùng chỉ để "khỏi viết lại 2 method" = kéo theo cả đống ràng buộc không cần → nên composition.</p>
+            <div class="bt">Mặt tối #2 — kế thừa để "xài ké code" → phá LSP</div>
+            <p><b>Cây thử vàng — "is-a test":</b> trước khi <code>class B(A)</code>, hỏi <i>"B có THẬT SỰ là một A?"</i>. Robot is-a Animal? ❌ → đừng kế thừa dù cha có code ngon. Ép is-a giả để giật code = tạo đứa con <b>không thay được cha</b> → phá <a href="../3-SOLID/Deep-Guide.html#p-lsp" style="color:var(--clay);font-weight:700">LSP</a>. Chỉ cần xài lại code mà không phải is-a → dùng <b>composition (has-a)</b>.</p>
           </div>
           <p>🧭 <b>Metaphor — gia phả di truyền:</b> con thừa hưởng gen cha. Sửa "gen" ở ông tổ (base class), cả dòng họ đột biến theo — có khi theo cách không ai lường. Quan hệ huyết thống không tháo ra được (cứng).</p>
+
+          <h4>🐧 Ví dụ phá LSP — con kế thừa "hình thức" nhưng sai "hành vi"</h4>
+          <div class="code bad"><div class="hd">❌ Penguin is-a Bird? nghe hợp lý — nhưng cánh cụt không bay</div><pre><span class="kw">class</span> <span class="badt">Bird</span>:
+    <span class="kw">def</span> fly(self): ...              <span class="cmt"># cha hứa: chim thì bay</span>
+
+<span class="kw">class</span> <span class="badt">Penguin</span>(Bird):
+    <span class="kw">def</span> fly(self):
+        <span class="kw">raise</span> Error(<span class="str">"Tui không bay được!"</span>)   <span class="cmt"># 💥 phá lời hứa cha</span>
+
+<span class="kw">def</span> make_it_fly(b: Bird):        <span class="cmt"># code tin: Bird nào cũng bay</span>
+    b.fly()
+make_it_fly(Penguin())            <span class="cmt"># 💥 NỔ — Penguin không thay được Bird</span></pre></div>
+          <div class="warn">Bug <b>KHÔNG</b> nằm ở Penguin — nó nằm ở <b>quyết định cho Penguin kế thừa Bird</b>. Kế thừa cho HÌNH THỨC (có method <code>fly</code>), nhưng LSP đòi cả HÀNH VI (fly phải chạy được).</div>
+
+          <h4>🧱 Nếu chỉ cần xài lại code → Composition (has-a), đừng kế thừa</h4>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Kế thừa để tái dùng → kéo theo thứ không cần</div><pre><span class="kw">class</span> Stack <span class="kw">extends</span> <span class="badt">ArrayList</span> {
-  <span class="cmt">// muốn dùng lại add/remove...</span>
-  <span class="cmt">// nhưng NAY Stack lỡ có cả get(i),</span>
-  <span class="cmt">// insert(i) — phá tính LIFO 😱</span>
-}</pre></div>
-            <div class="code good"><div class="hd">✅ Composition — chỉ lộ thứ cần</div><pre><span class="kw">class</span> <span class="goodt">Stack</span> {
-  <span class="kw">private</span> items: ArrayList;  <span class="cmt">// HAS-A</span>
-  push(x) { this.items.add(x); }
-  pop()   { <span class="kw">return</span> this.items.removeLast(); }
-}
-<span class="cmt">// chỉ push/pop lộ ra — LIFO được bảo vệ</span></pre></div>
+            <div class="code bad"><div class="hd">❌ Kế thừa để xài ké → kéo theo thứ không cần (Python)</div><pre><span class="kw">class</span> <span class="badt">Stack</span>(list):        <span class="cmt"># kế thừa list cho tiện</span>
+    <span class="kw">def</span> push(self, x): self.append(x)
+    <span class="kw">def</span> pop_top(self): <span class="kw">return</span> self.pop()
+
+s = Stack(); s.push(<span class="str">1</span>)
+s.insert(<span class="str">0</span>, <span class="str">99</span>)   <span class="cmt"># 😱 Stack lỡ có luôn insert — hết LIFO</span></pre></div>
+            <div class="code good"><div class="hd">✅ Composition — HAS-A, chỉ lộ thứ cần</div><pre><span class="kw">class</span> <span class="goodt">Stack</span>:
+    <span class="kw">def</span> __init__(self):
+        self.__items = []          <span class="cmt"># HAS-A: có-một list bên trong</span>
+    <span class="kw">def</span> push(self, x): self.__items.append(x)
+    <span class="kw">def</span> pop(self):     <span class="kw">return</span> self.__items.pop()
+<span class="cmt"># chỉ push/pop lộ ra — LIFO được bảo vệ</span></pre></div>
           </div>
           <h4>👃 Mũi ngửi lạm dụng inheritance</h4>
           <div class="signals">
@@ -330,6 +435,16 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="drow"><div class="dq">"Inheritance for reuse vs for polymorphism?"</div><div class="da">For polymorphism: nhiều loại chia sẻ interface để thay thế nhau (tốt, đúng mục đích). For reuse: kế thừa chỉ để xài lại code (bẫy — kéo theo coupling; dùng composition/delegation thay thế).</div></div>
             <div class="drow"><div class="dq">"Khi nào inheritance THỰC SỰ đáng?"</div><div class="da">Khi is-a đúng cả hành vi (LSP giữ) + anh muốn đa hình + cha là abstraction ổn định. Ngoài ra: favor composition.</div></div>
           </div>
+          <h4 id="say-inherit">🎤 Trả lời interview — "Tell me about Inheritance" (4 nhịp)</h4>
+          <div class="seniortip">
+            <div class="sk">🎯 Khung 4 nhịp — học NHỊP, đừng học chữ</div>
+            <p><b>① Định nghĩa:</b> <i>"Inheritance lets a subclass reuse and extend a base class — it models an <b>is-a</b> relationship, like Dog is-a Animal."</i></p>
+            <p><b>② Mặt tối (ăn điểm):</b> <i>"It's the tightest coupling in OOP — the child depends on the parent's internals, so changing the base can silently break every subclass (fragile base class). And it's often abused just to reuse code when there's no real is-a."</i></p>
+            <p><b>③ Cây thử + ví dụ:</b> <i>"My test is the <b>is-a test</b>: before extending I ask 'is B really an A?'. Penguin is-a Bird sounds right, but if Bird promises <code>fly()</code>, Penguin breaks it — that violates LSP."</i></p>
+            <p><b>④ Chốt (nối kiến trúc):</b> <i>"So I inherit only for genuine is-a with substitutability (LSP). If I just want to reuse code, I favor <b>composition</b> — has-a instead of is-a."</i></p>
+            <p style="font-size:.84rem;opacity:.85">🔑 Chữ vàng: <b>is-a · fragile base class · tightest coupling · substitutability (<a href="../3-SOLID/Deep-Guide.html#p-lsp" style="color:var(--clay);font-weight:700">LSP</a>) · favor <a href="#p-composition" style="color:var(--clay);font-weight:700">composition</a></b>.</p>
+          </div>
+
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
             <p>Câu chốt: "inheritance là quan hệ chặt nhất OOP — con dính vào chi tiết cha. Tôi chỉ dùng khi is-a thật + LSP giữ + cần đa hình; muốn tái dùng code thuần thì delegation/composition, vì nó là black-box (chỉ dựa interface), coupling lỏng hơn."</p>
@@ -345,29 +460,43 @@ acc.balance = -<span class="str">9999</span>; <span class="cmt">// ai cũng phá
             <div class="rk">⚡ Cú lật — polymorphism là cái THAY THẾ được if/else theo type</div>
             <p>Polymorphism = cùng một "message" (lời gọi method), nhiều object phản hồi theo cách RIÊNG của nó. Đây chính là <b>động cơ làm OCP (gốc 3) chạy được</b>: không có polymorphism, mọi phân loại phải viết bằng <code>if/switch theo type</code> — thêm loại là sửa code cũ.</p>
           </div>
+          <h4>🪜 Xây Polymorphism từ số 0 — 3 bậc</h4>
+          <div class="brick" data-n="0">
+            <div class="bt">Cái tên tự khai nghĩa: poly (nhiều) + morph (hình dạng)</div>
+            <p><b>"Nhiều hình dạng"</b> 🎭 — <b>cùng MỘT lời gọi, mỗi object làm một kiểu riêng.</b> <code>m.play()</code>: guitar gảy dây, piano gõ phím. Ông đã gặp nó 2 lần mà chưa gọi tên: <code>len()</code> chạy trên list/string/dict, và <code>m.play()</code> trên ban nhạc. Polymorphism là cái làm mấy thứ đó chạy được.</p>
+          </div>
           <div class="brick" data-n="1">
-            <div class="bt">Code gọi chỉ biết ABSTRACTION</div>
-            <p><code>shapes.forEach(s =&gt; s.area())</code> — code này không biết Circle hay Square, chỉ biết "mọi Shape có area()".</p>
+            <div class="bt">Code gọi chỉ biết ABSTRACTION — mỗi loại tự giữ hành vi</div>
+            <p><code>make_sound(animal)</code> chỉ gọi <code>animal.sound()</code> — không biết Dog hay Cat. Mỗi class giữ công thức của mình (Dog "gâu", Cat "meo"). Lúc chạy, runtime tự nhìn object THẬT rồi gọi đúng bản — gọi là <b>dynamic dispatch</b> (điều phối động).</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Mỗi loại tự quyết HÀNH VI của nó</div>
-            <p>Circle tính <code>πr²</code>, Square tính <code>a²</code> — mỗi class giữ công thức của mình. Runtime tự chọn đúng cái (dynamic dispatch).</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">Thêm loại = thêm class, code gọi KHÔNG đổi (OCP)</div>
-            <p>Thêm Triangle = thêm một class có <code>area()</code>. Vòng lặp <code>forEach</code> không đụng tới. Đó là Open/Closed hiện hình.</p>
+            <div class="bt">Thêm loại = thêm class, code gọi KHÔNG đổi → đạt OCP</div>
+            <p>Thêm <code>Cow</code> = viết một class mới có <code>sound()</code>. Hàm <code>make_sound</code> <b>không đụng một dòng</b>. Đó là <a href="../3-SOLID/Deep-Guide.html#p-ocp" style="color:var(--clay);font-weight:700">Open/Closed</a> hiện hình — polymorphism chính là "động cơ" làm OCP chạy.</p>
           </div>
           <p>🧭 <b>Metaphor — nút "play":</b> cùng một nút play trên máy CD, Spotify, YouTube. Anh bấm cùng một "message" (play), mỗi thiết bị phát theo cách riêng. Người bấm không cần biết bên trong khác nhau.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ if/else theo type (không polymorphism)</div><pre>area(shape) {
-  <span class="kw">if</span> (shape.type===<span class="str">'circle'</span>) ...
-  <span class="kw">if</span> (shape.type===<span class="str">'square'</span>) ...
-  <span class="cmt">// thêm loại = sửa hàm này</span>
-}</pre></div>
-            <div class="code good"><div class="hd">✅ Polymorphism</div><pre><span class="kw">interface</span> <span class="goodt">Shape</span> { area(): number }
-<span class="kw">class</span> Circle <span class="kw">implements</span> Shape { area(){...} }
-<span class="kw">class</span> Square <span class="kw">implements</span> Shape { area(){...} }
-shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre></div>
+            <div class="code bad"><div class="hd">❌ if/elif theo type — thêm loại phải sửa hàm cũ</div><pre><span class="kw">def</span> make_sound(animal, kind):
+    <span class="kw">if</span> kind == <span class="str">"dog"</span>:
+        print(<span class="str">"Gâu gâu"</span>)
+    <span class="kw">elif</span> kind == <span class="str">"cat"</span>:
+        print(<span class="str">"Meo meo"</span>)
+    <span class="cmt"># 😩 thêm con vật = đục thêm elif → vi phạm OCP</span></pre></div>
+            <div class="code good"><div class="hd">✅ Polymorphism — mỗi loại tự lo tiếng của nó</div><pre><span class="kw">class</span> <span class="goodt">Animal</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> sound(self): ...
+
+<span class="kw">class</span> <span class="goodt">Dog</span>(Animal):
+    <span class="kw">def</span> sound(self): print(<span class="str">"Gâu gâu"</span>)
+<span class="kw">class</span> <span class="goodt">Cat</span>(Animal):
+    <span class="kw">def</span> sound(self): print(<span class="str">"Meo meo"</span>)
+
+<span class="kw">def</span> make_sound(animal: Animal):    <span class="cmt"># KHÔNG còn if/elif</span>
+    animal.sound()
+<span class="cmt"># 🆕 thêm Cow? viết class Cow — make_sound không đổi</span></pre></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🕸️ Sợi dây — ba trụ một mạch</div>
+            <p><b><a href="#p-abstract" style="color:var(--clay);font-weight:700">Abstraction</a> dựng sân khấu</b> (tấm màn interface) → <b>Polymorphism là màn diễn</b> (cùng gọi, khác hành vi) → <b><a href="../3-SOLID/Deep-Guide.html#p-ocp" style="color:var(--clay);font-weight:700">OCP</a> đạt được</b> (thêm class, không sửa code cũ). Việc bỏ đống <code>if/elif</code> để mỗi loại tự xử có tên riêng: <b>"replace conditional with polymorphism"</b> — một refactoring kinh điển (gốc 7). Và <a href="../3-SOLID/Deep-Guide.html#p-lsp" style="color:var(--clay);font-weight:700">LSP</a> là ĐIỀU KIỆN để nó an toàn (con phải thay được cha, giữ hành vi).</p>
           </div>
           <a class="demolink" href="polymorphism-demo.html">
             <span class="di">🎮</span>
@@ -386,6 +515,16 @@ shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre
             <div class="drow"><div class="dq">"Dynamic dispatch là gì?"</div><div class="da">Cơ chế runtime chọn đúng implementation của method dựa trên kiểu THẬT của object (không phải kiểu khai báo). Đó là thứ khiến <code>s.area()</code> gọi đúng Circle.area hay Square.area.</div></div>
             <div class="drow"><div class="dq">"Polymorphism nối OCP và LSP thế nào?"</div><div class="da">OCP DÙNG polymorphism để mở rộng không sửa code cũ. LSP là ĐIỀU KIỆN để polymorphism an toàn (con phải thay được cha giữ hành vi). Ba thứ khớp thành một bộ.</div></div>
           </div>
+          <h4 id="say-poly">🎤 Trả lời interview — "What is Polymorphism?" (4 nhịp)</h4>
+          <div class="seniortip">
+            <div class="sk">🎯 Khung 4 nhịp — học NHỊP, đừng học chữ</div>
+            <p><b>① Định nghĩa:</b> <i>"Polymorphism means the same call behaves differently depending on the actual object — one interface, many implementations."</i></p>
+            <p><b>② Vấn đề nó cứu (ăn điểm):</b> <i>"It replaces long type-checking if/elif/switch chains. Instead of the caller branching on type, each type owns its own behavior."</i></p>
+            <p><b>③ Ví dụ:</b> <i>"<code>make_sound(animal)</code> just calls <code>animal.sound()</code>. Dog and Cat each implement it; the caller never checks which one it is."</i></p>
+            <p><b>④ Chốt (nối kiến trúc):</b> <i>"This is the engine behind <b>OCP</b> — adding a Cow means writing a new class, never touching the caller. Runtime picks the right method via <b>dynamic dispatch</b>."</i></p>
+            <p style="font-size:.84rem;opacity:.85">🔑 Chữ vàng: <b>one interface many implementations · replace conditional · dynamic dispatch · engine of OCP</b>.</p>
+          </div>
+
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
             <p>Câu chốt: "polymorphism = gửi cùng một message, mỗi object phản hồi theo kiểu nó (dynamic dispatch). Nó là cơ chế then chốt để THAY if/else theo type bằng thiết kế mở rộng — nền của OCP và Strategy pattern." Nói được vế 'thay điều kiện bằng đa hình' = anh nối được OOP↔SOLID↔Patterns.</p>
@@ -401,31 +540,89 @@ shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre
             <div class="rk">⚡ Cú lật — "HAS-A" linh hoạt hơn "IS-A"</div>
             <p>"Favor composition over inheritance" (GoF) — vì <b>composition (HAS-A: object CHỨA/ghép khả năng) linh hoạt hơn inheritance (IS-A: kế thừa cứng)</b>. Ghép được lúc runtime, tránh coupling white-box, tránh bùng nổ số class, tránh bẫy LSP.</p>
           </div>
-          <div class="brick" data-n="1">
-            <div class="bt">Inheritance nói "Penguin LÀ Bird" — cứng</div>
-            <p>Kẹt ngay khi Penguin không bay được: buộc override <code>fly()</code> throw → phá LSP. Cây phân loại cứng không chịu được ngoại lệ.</p>
+
+          <h4>🪜 Bậc 0 — "CÓ-một" thay vì "LÀ-một"</h4>
+          <p>Nhớ Inheritance: <code>class B(A)</code> = <b>B is-a A</b> (kế thừa). Composition lật lại: <b>một object CHỨA object khác bên trong (has-a)</b>.</p>
+          <div class="code good"><div class="hd">✅ Car CÓ một Engine (Python)</div><pre><span class="kw">class</span> <span class="goodt">Engine</span>:
+    <span class="kw">def</span> start(self): print(<span class="str">"Brừm brừm"</span>)
+
+<span class="kw">class</span> <span class="goodt">Car</span>:
+    <span class="kw">def</span> __init__(self):
+        self.engine = Engine()      <span class="cmt"># 🧱 Car HAS-A Engine (chứa, không kế thừa)</span>
+    <span class="kw">def</span> drive(self):
+        self.engine.start()          <span class="cmt"># nhờ bộ phận bên trong làm việc</span></pre></div>
+          <p>Car <b>không kế thừa</b> Engine (xe đâu <b>là một</b> động cơ — vô lý). Xe <b>CÓ một</b> động cơ bên trong. Đó là composition: lắp ghép từ các bộ phận nhỏ.</p>
+          <div class="seniortip">
+            <div class="sk">🔑 Test nhanh is-a / has-a</div>
+            <p>"<b>is-a</b>" → inheritance · "<b>has-a</b>" → composition. Car has-a Engine ✅ · Car is-a Engine ❌. Sức mạnh: <code>self.engine = ElectricEngine()</code> → xe chạy điện, <b>không đục</b> class Car. Bộ phận <b>tháo lắp được</b>; huyết thống kế thừa thì không.</p>
           </div>
-          <div class="brick" data-n="2">
-            <div class="bt">Composition nói "Penguin CÓ khả năng bơi" — mềm</div>
-            <p>Ghép các interface khả năng (<code>CanSwim</code>, <code>CanFly</code>) vào từng loài theo đúng cái nó có. Penguin implements CanSwim; không phải bay.</p>
-          </div>
-          <div class="brick" data-n="3">
-            <div class="bt">Ghép linh hoạt, không cần cây đa tầng</div>
-            <p>Duck có CanFly + CanSwim. Không cần <code>FlyingSwimmingBird extends...</code> lồng nhau. Muốn thêm khả năng = ghép thêm một khối, không đục cây kế thừa.</p>
-          </div>
-          <p>🧭 <b>Metaphor — Lego vs tượng đúc:</b> composition = xếp Lego (ghép/tháo khối khả năng tùy ý). Inheritance = tượng đúc liền khối (muốn đổi một tay phải đúc lại cả tượng). Cùng "tái dùng", nhưng một cái mềm, một cái cứng.</p>
+
+          <h4>🔑 Cốt lõi — cùng "xài lại code", nhưng NUỐT (take) vs MƯỢN (borrow)</h4>
+          <p>Cả hai đều reuse <code>start()</code>. Khác ở <b>kiểu reuse</b> — soi bằng cùng một class Engine:</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Cây kế thừa cứng</div><pre><span class="kw">class</span> Animal { move() }
-<span class="kw">class</span> Bird <span class="kw">extends</span> Animal { fly() }
-<span class="kw">class</span> <span class="badt">Penguin</span> <span class="kw">extends</span> Bird {
-  fly() { <span class="kw">throw</span> <span class="str">"can't fly!"</span> } <span class="cmt">// LSP gãy 😱</span>
-}</pre></div>
-            <div class="code good"><div class="hd">✅ Ghép khả năng (composition)</div><pre><span class="kw">interface</span> <span class="goodt">CanFly</span> { fly() }
-<span class="kw">interface</span> <span class="goodt">CanSwim</span> { swim() }
-<span class="kw">class</span> Penguin <span class="kw">implements</span> CanSwim {...}
-<span class="kw">class</span> Duck <span class="kw">implements</span> CanFly, CanSwim {...}</pre></div>
+            <div class="code bad"><div class="hd">🌳 Inheritance — NUỐT hết đồ cha</div><pre><span class="kw">class</span> <span class="badt">Car</span>(Engine):     <span class="cmt"># Car IS-A Engine</span>
+    <span class="kw">def</span> drive(self): print(<span class="str">"chạy"</span>)
+
+c = Car()
+c.start()    <span class="cmt"># ✅ chạy — start NUNG vào Car</span>
+<span class="cmt"># ⚠️ nhưng nghĩa SAI: xe LÀ động cơ? vô lý (is-a test fail)</span></pre></div>
+            <div class="code good"><div class="hd">🧱 Composition — MƯỢN, gọi nhờ</div><pre><span class="kw">class</span> <span class="goodt">Car</span>:               <span class="cmt"># Car KHÔNG kế thừa</span>
+    <span class="kw">def</span> __init__(self):
+        self.engine = Engine()  <span class="cmt"># CÓ một Engine</span>
+    <span class="kw">def</span> drive(self):
+        self.engine.start()      <span class="cmt"># nhờ engine nổ máy</span>
+
+c = Car()
+c.engine.start()   <span class="cmt"># ✅ chạy — nhưng phải QUA .engine</span>
+c.start()          <span class="cmt"># ❌ LỖI! Car làm gì có start()</span></pre></div>
           </div>
-          <p>Kế thừa nói "Penguin LÀ Bird" → kẹt khi Penguin không bay. Composition nói "Penguin CÓ khả năng bơi" → linh hoạt, không gãy LSP.</p>
+          <table class="vs">
+            <tr><th>&nbsp;</th><th>🌳 Inheritance</th><th>🧱 Composition</th></tr>
+            <tr><td>Có xài lại <code>start()</code>?</td><td>✅ có</td><td>✅ có</td></tr>
+            <tr><td>Gọi bằng</td><td><code>c.start()</code></td><td><code>c.engine.start()</code></td></tr>
+            <tr><td><code>c.start()</code> chạy thẳng?</td><td>✅ được</td><td>❌ lỗi</td></tr>
+            <tr><td><code>start()</code> giờ là của ai?</td><td><b>của Car luôn</b> (nung vào)</td><td><b>vẫn của Engine</b> (Car nhờ)</td></tr>
+            <tr><td>Nghĩa có tự nhiên?</td><td>❌ Car is-a Engine (vô lý)</td><td>✅ Car has-a Engine (đúng đời)</td></tr>
+          </table>
+          <div class="seniortip">
+            <div class="sk">💎 Câu chốt — nuốt vs mượn + delegation</div>
+            <p><b>Inheritance:</b> <i>"you take EVERYTHING of the father"</i> — <code>start()</code> nung thành của Car, gọi <code>c.start()</code> như thể Car tự viết. Car <b>LÀ</b> Engine.<br>
+            <b>Composition:</b> <i>"you didn't take anything, you just BORROW — you call it, you ASK it, you DELEGATE"</i> — <code>start()</code> vẫn của Engine; Car giữ một Engine và <b>ủy thác (delegation)</b> việc nổ máy cho nó (<code>self.engine.start()</code>). Car <b>CÓ</b> Engine.<br>
+            🔧 Chính xác 1 chữ: Car <b>GIỮ con thợ</b> (object Engine trong <code>self.engine</code>) nhưng <b>KHÔNG nuốt tay nghề</b> (method <code>start</code>). <b>Giữ thợ, mượn tay nghề.</b> Bằng chứng sờ được: <code>c.start()</code> — inheritance chạy, composition lỗi.</p>
+          </div>
+
+          <h4>🪜 Bậc 1 — Vì sao "favor composition over inheritance" (3 lý do)</h4>
+          <table class="vs">
+            <tr><th>&nbsp;</th><th>🌳 Inheritance (is-a)</th><th>🧱 Composition (has-a)</th></tr>
+            <tr><td>Dính vào</td><td>ruột cha (white-box) — chặt</td><td>chỉ cái vỏ interface (black-box) — lỏng</td></tr>
+            <tr><td>Đổi lúc chạy</td><td>không (huyết thống cố định)</td><td>có — swap bộ phận runtime</td></tr>
+            <tr><td>Fragile base class</td><td>dính 💥</td><td>miễn nhiễm</td></tr>
+          </table>
+
+          <h4>🐧 Ghép KHẢ NĂNG — Penguin không còn nổ (nối LSP)</h4>
+          <p>Nhớ thảm họa <code>Penguin(Bird)</code>: cánh cụt kế thừa Bird nên bị ép có <code>fly()</code> → nổ, phá <a href="../3-SOLID/Deep-Guide.html#p-lsp" style="color:var(--clay);font-weight:700">LSP</a>. Sửa: cho mỗi loài <b>CÓ khả năng rời</b>, ghép đúng cái nó có.</p>
+          <div class="pair">
+            <div class="code bad"><div class="hd">❌ Cây kế thừa cứng (Python)</div><pre><span class="kw">class</span> Bird:
+    <span class="kw">def</span> fly(self): ...
+
+<span class="kw">class</span> <span class="badt">Penguin</span>(Bird):
+    <span class="kw">def</span> fly(self):
+        <span class="kw">raise</span> Error(<span class="str">"can't fly!"</span>)  <span class="cmt"># 😱 LSP gãy</span></pre></div>
+            <div class="code good"><div class="hd">✅ Ghép khả năng (composition)</div><pre><span class="kw">class</span> <span class="goodt">CanFly</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> fly(self): ...
+<span class="kw">class</span> <span class="goodt">CanSwim</span>(ABC):
+    @abstractmethod
+    <span class="kw">def</span> swim(self): ...
+
+<span class="kw">class</span> Penguin(CanSwim):        <span class="cmt"># chỉ ghép cái nó CÓ</span>
+    <span class="kw">def</span> swim(self): ...
+<span class="kw">class</span> Duck(CanFly, CanSwim):   <span class="cmt"># ghép 2 khả năng</span>
+    <span class="kw">def</span> fly(self): ...
+    <span class="kw">def</span> swim(self): ...</pre></div>
+          </div>
+          <p>Kế thừa nói "Penguin LÀ Bird" → kẹt khi Penguin không bay. Composition nói "Penguin CÓ khả năng bơi" → ghép đúng cái nó có, <b>không gãy LSP</b>. Duck ghép cả 2 khả năng mà không cần cây <code>FlyingSwimmingBird</code> lồng nhau.</p>
+          <p>🧭 <b>Metaphor — Lego vs tượng đúc:</b> composition = xếp Lego (ghép/tháo khối khả năng tùy ý). Inheritance = tượng đúc liền khối (muốn đổi một tay phải đúc lại cả tượng). Cùng "tái dùng", nhưng một cái mềm, một cái cứng.</p>
 
           <a class="demolink" href="composition-demo.html">
             <span class="di">🎮</span>
@@ -444,6 +641,16 @@ shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre
             <div class="drow"><div class="dq">"Composition + inject = pattern nào?"</div><div class="da">Chính là Strategy (gốc 5): object CHỨA một behavior qua interface, đổi behavior lúc runtime bằng cách inject implementation khác. Composition là nền của rất nhiều pattern.</div></div>
             <div class="drow"><div class="dq">"Composition tránh được vấn đề gì của inheritance?"</div><div class="da">Fragile base class (con không dính chi tiết cha), diamond problem (đa kế thừa mơ hồ), bùng nổ class cho tổ hợp khả năng, và bẫy LSP do is-a giả.</div></div>
           </div>
+          <h4 id="say-composition">🎤 Trả lời interview — "Composition over Inheritance?" (4 nhịp)</h4>
+          <div class="seniortip">
+            <div class="sk">🎯 Khung 4 nhịp — học NHỊP, đừng học chữ</div>
+            <p><b>① Định nghĩa:</b> <i>"Composition builds an object by <b>holding</b> other objects (has-a) and <b>delegating</b> work to them, instead of inheriting from them (is-a)."</i></p>
+            <p><b>② Vì sao favor (ăn điểm):</b> <i>"Inheritance is the tightest coupling — you absorb the parent's internals, so a base change can break you (fragile base class). Composition only depends on the inner object's <b>public interface</b> (black-box), so it's looser, swappable at runtime, and exposes only what you choose."</i></p>
+            <p><b>③ Ví dụ:</b> <i>"A Car doesn't inherit Engine — it <b>has</b> one and calls <code>self.engine.start()</code> inside <code>drive()</code>. I can swap in an ElectricEngine without touching any caller."</i></p>
+            <p><b>④ Chốt:</b> <i>"So I inherit only for a true is-a that respects <b>LSP</b>; otherwise I <b>favor composition over inheritance</b> — the GoF rule."</i></p>
+            <p style="font-size:.84rem;opacity:.85">🔑 Chữ vàng: <b>has-a · delegation · black-box · swap at runtime · favor composition (GoF)</b>.</p>
+          </div>
+
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
             <p>Câu chốt: "prefer HAS-A; dùng IS-A chỉ khi is-a thật + LSP giữ. Composition cho tôi ghép/đổi hành vi lúc runtime (nền của Strategy), tránh coupling white-box và bùng nổ class." Đây đúng là câu interviewer thả để đo chiều sâu — trả lời được cả 'vì sao' + 'khi nào vẫn inheritance' = đậu.</p>
@@ -508,6 +715,13 @@ shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre
     <a href="#p-poly">🔀 Polymorphism</a>
     <a href="#p-composition">🧱 Composition &gt; Inheritance</a>
     <div class="div"></div>
+    <div class="fk">🎤 Trả lời interview (4 nhịp)</div>
+    <a href="#say-encap">🔒 script Encapsulation</a>
+    <a href="#say-abstract">🎭 script Abstraction</a>
+    <a href="#say-inherit">🌳 script Inheritance</a>
+    <a href="#say-poly">🔀 script Polymorphism</a>
+    <a href="#say-composition">🧱 script Composition</a>
+    <div class="div"></div>
     <a href="#in-your-code">③ Trong code của anh</a>
     <a href="#why-ladder">④ Why-Ladder</a>
   </div>
@@ -518,6 +732,7 @@ shapes.forEach(s =&gt; s.area()); <span class="cmt">// tự dispatch</span></pre
       const el = document.getElementById(id);
       if(!el) return;
       if(el.tagName === 'DETAILS') el.open = true;
+      const parent = el.closest('details'); if(parent) parent.open = true;
       el.scrollIntoView({behavior:'smooth', block:'start'});
     }
     document.querySelectorAll('.smellmap a, .fnav a, .secnav a').forEach(a=>{
