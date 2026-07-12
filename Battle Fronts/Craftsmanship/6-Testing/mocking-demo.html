@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mocking · thật vs giả · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;--bad:#cf6a4a;--good:#5e8a63;--r:14px;--s2:16px;--s3:24px;--s4:40px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;min-height:100vh;padding:var(--s4) clamp(16px,4vw,40px) 80px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit}
+  .back{display:inline-block;font-family:'Klee One',cursive;font-size:.84rem;background:rgba(253,250,242,.92);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);margin-bottom:var(--s3)}
+  .wrap{max-width:880px;margin:0 auto}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;color:var(--clay);text-align:center}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.7rem,4vw,2.4rem);text-align:center;margin-top:var(--s2)}
+  h1 em{font-style:italic;color:var(--moss)}
+  .sub{text-align:center;color:#6b7d6e;margin-top:var(--s2);max-width:660px;margin-left:auto;margin-right:auto;font-size:.95rem}
+  .toggle{display:flex;gap:0;justify-content:center;margin:var(--s4) auto 0;max-width:420px;border:2px solid var(--moss);border-radius:24px;overflow:hidden}
+  .toggle button{flex:1;border:none;background:#fff;color:#5a6f5d;font-weight:700;font-size:.86rem;padding:11px;cursor:pointer;transition:all .18s}
+  .toggle button.on{background:var(--moss);color:#fff}
+  .run{display:block;margin:16px auto 0;background:var(--clay);color:#fff;border:none;border-radius:22px;padding:12px 26px;font-weight:700;font-size:.92rem;cursor:pointer;box-shadow:0 6px 16px rgba(207,138,99,.4)}
+  .deps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;max-width:640px;margin:var(--s3) auto 0}
+  .dep{background:#fffdf7;border:1.5px solid rgba(36,48,38,.12);border-radius:12px;padding:12px;text-align:center;font-size:.84rem;transition:all .3s}
+  .dep .di{font-size:1.5rem}.dep .dn{font-weight:700;margin-top:2px}
+  .dep .ds{font-size:.74rem;color:#8a9a8c;margin-top:2px}
+  .dep.hit{border-color:rgba(207,106,74,.5);background:#fbeae4}
+  .dep.mock{border-color:rgba(94,138,99,.5);background:#eef3ea}
+  .meters{max-width:640px;margin:var(--s3) auto 0}
+  .m{margin-top:12px}.m .top{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700}
+  .m .track{height:12px;border-radius:8px;background:#efe7d4;margin-top:5px;overflow:hidden}
+  .m .fill{height:100%;border-radius:8px;transition:width .5s ease,background .3s;width:0}
+  .verdict{max-width:640px;margin:var(--s3) auto 0;border-radius:12px;padding:14px 18px;font-family:'Klee One',cursive;text-align:center;font-size:.95rem}
+  .verdict.good{background:#e7f0e4;color:#3d5a41}.verdict.bad{background:#fbeae4;color:#a6402a}.verdict.idle{background:#efe7d4;color:#8a7a52}
+  .note{max-width:640px;margin:var(--s4) auto 0;background:#eef3ea;border-left:4px solid var(--moss);border-radius:0 12px 12px 0;padding:14px 20px;font-size:.9rem;color:#3f4a41}
+  .foot{text-align:center;margin-top:var(--s4);color:#8a9a8c;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Deep-Guide.html">← Testing Deep-Guide</a>
+  <div class="eyebrow">Craftsmanship · Gốc 6 — Mocking</div>
+  <h1>Mock đúng ranh giới: <em>thật</em> vs <em>giả</em></h1>
+  <p class="sub">Cùng một unit test cho <code>UserService.register()</code>. Chọn dùng phụ thuộc THẬT (DB + mailer) hay MOCK, bấm chạy — xem tốc độ, độ giòn (flaky), và nó có chạm thế giới ngoài không.</p>
+
+  <div class="toggle">
+    <button id="tReal" class="on">🔌 Phụ thuộc THẬT</button>
+    <button id="tMock">🎭 MOCK phụ thuộc</button>
+  </div>
+  <button class="run" id="run">▶ Chạy unit test</button>
+
+  <div class="deps" id="deps"></div>
+
+  <div class="meters">
+    <div class="m"><div class="top"><span>⏱️ Thời gian chạy</span><span id="tTxt">—</span></div><div class="track"><div class="fill" id="tFill"></div></div></div>
+    <div class="m"><div class="top"><span>💥 Nguy cơ flaky (đỏ vu vơ)</span><span id="fTxt">—</span></div><div class="track"><div class="fill" id="fFill"></div></div></div>
+  </div>
+  <div class="verdict idle" id="verdict">Chọn chế độ rồi bấm chạy…</div>
+
+  <div class="note">
+    <b>Vì sao mock ở ranh giới:</b> DB, mailer, HTTP là thứ RA NGOÀI process — chậm, không xác định (flaky), có thể gửi mail thật. Mock chúng để test <b>cô lập</b>: nhanh (ms), lặp lại được, không tác dụng phụ. Nhưng mock được dễ = <code>UserService</code> phải NHẬN chúng qua constructor — đó là <b>DIP (gốc 3)</b>. Code khó mock = tín hiệu thiết kế dính chặt.
+  </div>
+  <div class="foot">🎭 Mock ĐÚNG ranh giới (I/O, external). Mock quá tay (cả logic mình) = test dính implementation, dễ vỡ.</div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  let mode='real';
+  const DEPS=[
+    { id:'db',   ic:'🗄️', nm:'Database',  real:'Postgres thật',  mock:'repo = { save: jest.fn() }' },
+    { id:'mail', ic:'📧', nm:'Mailer',     real:'SendGrid thật',  mock:'mailer = { send: jest.fn() }' },
+    { id:'svc',  ic:'⚙️', nm:'UserService',real:'đơn vị đang test', mock:'đơn vị đang test' },
+  ];
+  function renderDeps(hit=false){
+    const box=$('deps'); box.innerHTML='';
+    DEPS.forEach(d=>{
+      const isExt = d.id!=='svc';
+      const cls = !isExt ? '' : (mode==='real' ? (hit?'hit':'') : 'mock');
+      const state = !isExt ? '(cô lập)' : (mode==='real' ? d.real : d.mock);
+      const el=document.createElement('div');
+      el.className='dep '+cls;
+      el.innerHTML=`<div class="di">${d.ic}</div><div class="dn">${d.nm}</div><div class="ds">${state}</div>`;
+      box.appendChild(el);
+    });
+  }
+  function setMode(m){ mode=m; $('tReal').classList.toggle('on',m==='real'); $('tMock').classList.toggle('on',m==='mock'); renderDeps(); resetMeters(); }
+  function resetMeters(){ $('tFill').style.width='0'; $('fFill').style.width='0'; $('tTxt').textContent='—'; $('fTxt').textContent='—'; $('verdict').className='verdict idle'; $('verdict').textContent='Bấm chạy…'; }
+  $('tReal').onclick=()=>setMode('real');
+  $('tMock').onclick=()=>setMode('mock');
+
+  $('run').onclick=()=>{
+    renderDeps(true);
+    if(mode==='real'){
+      const t=850+Math.floor(Math.random()*900);      // 0.85–1.75s
+      const flake=62;
+      $('tTxt').textContent=t+' ms'; $('tFill').style.width=Math.min(100,t/20)+'%'; $('tFill').style.background='var(--bad)';
+      $('fTxt').textContent=flake+'%'; $('fFill').style.width=flake+'%'; $('fFill').style.background='var(--bad)';
+      const flaked = Math.random()<0.4;
+      $('verdict').className='verdict bad';
+      $('verdict').textContent = flaked
+        ? '❌ FLAKY — mạng chập chờn / mail timeout → test đỏ dù code ĐÚNG. Chạy lại thử.'
+        : '🐌 PASS nhưng chậm + chạm Postgres & SendGrid thật (có thể gửi mail thật!). Không phải unit test.';
+    } else {
+      const t=3+Math.floor(Math.random()*5);           // 3–8ms
+      $('tTxt').textContent=t+' ms'; $('tFill').style.width='4%'; $('tFill').style.background='var(--moss)';
+      $('fTxt').textContent='0%'; $('fFill').style.width='2%'; $('fFill').style.background='var(--moss)';
+      $('verdict').className='verdict good';
+      $('verdict').textContent='✅ PASS — nhanh (ms), cô lập, lặp lại được. Không chạm mạng/DB. Đây là unit test thật.';
+    }
+  };
+  renderDeps(); resetMeters();
+</script>
+</body>
+</html>

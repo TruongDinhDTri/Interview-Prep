@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Composition vs Inheritance · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;--bad:#cf6a4a;--good:#5e8a63;--r:14px;--s2:16px;--s3:24px;--s4:40px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;min-height:100vh;padding:var(--s4) clamp(16px,4vw,40px) 80px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit}
+  .back{display:inline-block;font-family:'Klee One',cursive;font-size:.84rem;background:rgba(253,250,242,.92);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);margin-bottom:var(--s3)}
+  .wrap{max-width:920px;margin:0 auto}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;color:var(--clay);text-align:center}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.7rem,4vw,2.4rem);text-align:center;margin-top:var(--s2)}
+  h1 em{font-style:italic;color:var(--moss)}
+  .sub{text-align:center;color:#6b7d6e;margin-top:var(--s2);max-width:660px;margin-left:auto;margin-right:auto;font-size:.95rem}
+
+  .two{display:grid;grid-template-columns:1fr;gap:22px;margin:var(--s4) auto 0;max-width:900px}
+  @media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
+  .panel{background:#fffdf7;border:1px solid rgba(36,48,38,.1);border-radius:var(--r);padding:20px;box-shadow:0 6px 16px rgba(36,48,38,.06)}
+  .panel h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem}
+  .panel .tag{font-size:.76rem;font-weight:700;padding:3px 10px;border-radius:12px;display:inline-block;margin-top:4px}
+  .tag.bad{background:#fbeae4;color:#a6402a}.tag.good{background:#e7f0e4;color:#3d5a41}
+
+  /* inheritance tree */
+  .tree{margin-top:16px;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:'JetBrains Mono',monospace;font-size:.82rem}
+  .node{background:#eef3ea;border:1px solid rgba(94,138,99,.3);border-radius:8px;padding:6px 14px}
+  .edge{color:var(--clay)}
+  .leaf{background:#fbeae4;border-color:rgba(207,106,74,.4)}
+  .btnrow{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:'Nunito Sans';font-weight:700;font-size:.82rem;cursor:pointer;border:none;border-radius:18px;padding:8px 14px;transition:transform .15s}
+  button:active{transform:translateY(1px)}
+  .try{background:var(--clay);color:#fff}
+  .out{margin-top:14px;min-height:52px;border-radius:10px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#2a2420;color:#e7e0d0;transition:background .3s}
+  .out.err{background:#3a2420;color:#e6a48a}
+  .out.ok{background:#22301f;color:#a8cdac}
+
+  /* composition */
+  .caps{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .cap{cursor:pointer;user-select:none;padding:8px 14px;border-radius:18px;font-size:.84rem;font-weight:700;border:2px solid rgba(94,138,99,.4);background:#fff;color:#5a6f5d;transition:all .18s}
+  .cap.on{background:var(--moss);color:#fff;border-color:var(--moss);box-shadow:0 4px 12px rgba(94,138,99,.35)}
+  .animal{margin-top:16px;text-align:center}
+  .animal .face{font-size:3rem;transition:transform .3s}
+  .animal .nm{font-weight:700;margin-top:4px}
+  .abilities{margin-top:10px;min-height:44px;display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+  .abadge{background:#eef3ea;border:1px solid rgba(94,138,99,.3);border-radius:10px;padding:5px 10px;font-size:.78rem;font-family:'JetBrains Mono',monospace}
+  .picker{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+  .picker button{background:#efe7d4;color:#5a5238}
+  .picker button.sel{background:var(--gold);color:#3a2f14}
+
+  .note{max-width:900px;margin:var(--s4) auto 0;background:#eef3ea;border-left:4px solid var(--moss);border-radius:0 12px 12px 0;padding:14px 20px;font-size:.9rem;color:#3f4a41}
+  .foot{text-align:center;margin-top:var(--s4);color:#8a9a8c;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Deep-Guide.html">← OOP Deep-Guide</a>
+  <div class="eyebrow">Craftsmanship · Gốc 4 — Composition over Inheritance</div>
+  <h1>Cây kế thừa <em>gãy</em> · Lego khả năng <em>ghép</em></h1>
+  <p class="sub">Bên trái: kế thừa cứng "Penguin LÀ Bird" — bấm cho Penguin bay thử. Bên phải: ghép/tháo khối khả năng lên từng loài như Lego.</p>
+
+  <div class="two">
+    <!-- INHERITANCE -->
+    <div class="panel">
+      <h3>🌳 Inheritance (IS-A)</h3>
+      <span class="tag bad">cứng · dễ gãy LSP</span>
+      <div class="tree">
+        <div class="node">Animal · move()</div>
+        <div class="edge">▲ extends</div>
+        <div class="node">Bird · move(), fly()</div>
+        <div class="edge">▲ extends</div>
+        <div class="node leaf">Penguin · "LÀ Bird" 🐧</div>
+      </div>
+      <div class="btnrow">
+        <button class="try" id="flyBird">🦅 Bird.fly()</button>
+        <button class="try" id="flyPenguin">🐧 Penguin.fly()</button>
+      </div>
+      <div class="out" id="inhOut">Penguin buộc kế thừa fly() từ Bird — dù nó không bay được. Bấm thử.</div>
+    </div>
+
+    <!-- COMPOSITION -->
+    <div class="panel">
+      <h3>🧱 Composition (HAS-A)</h3>
+      <span class="tag good">mềm · ghép tùy ý</span>
+      <div class="picker" id="picker">
+        <button data-a="duck" class="sel">🦆 Duck</button>
+        <button data-a="penguin">🐧 Penguin</button>
+        <button data-a="ostrich">🦤 Ostrich</button>
+      </div>
+      <div class="animal">
+        <div class="face" id="face">🦆</div>
+        <div class="nm" id="aname">Duck</div>
+      </div>
+      <div class="caps" id="caps">
+        <div class="cap" data-c="CanFly">CanFly</div>
+        <div class="cap" data-c="CanSwim">CanSwim</div>
+        <div class="cap" data-c="CanWalk">CanWalk</div>
+      </div>
+      <div class="abilities" id="abilities"></div>
+      <div class="out ok" id="compOut">Ghép đúng khả năng loài đó CÓ — không loài nào bị ép "bay" nếu nó không bay.</div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>Điểm mấu chốt:</b> kế thừa ép Penguin phải "là Bird" nên phải có <code>fly()</code> → chỉ còn cách <code>throw</code> (phá LSP, gốc 3). Composition cho anh <b>ghép đúng khả năng loài đó thật sự có</b>: Duck = CanFly + CanSwim, Penguin = CanSwim + CanWalk, Ostrich = CanWalk. Thêm khả năng mới = thêm một khối interface, không đục lại cây phân loại.
+  </div>
+  <div class="foot">🧱 HAS-A: đổi hành vi = ghép/tháo khối. 🌳 IS-A: đổi hành vi = đúc lại cả cây. </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  // inheritance side
+  $('flyBird').addEventListener('click', ()=>{
+    const o = $('inhOut'); o.className='out ok'; o.textContent='🦅 Bird.fly() → ✅ "bay lên trời!" (Bird thật sự bay được)';
+  });
+  $('flyPenguin').addEventListener('click', ()=>{
+    const o = $('inhOut'); o.className='out err'; o.textContent='🐧 Penguin.fly() → ❌ throw "can\'t fly!" — kế thừa ép có fly() nhưng Penguin không bay → LSP GÃY 😱';
+  });
+
+  // composition side
+  const REAL = {
+    duck:    { face:'🦆', name:'Duck',    has:['CanFly','CanSwim','CanWalk'] },
+    penguin: { face:'🐧', name:'Penguin', has:['CanSwim','CanWalk'] },
+    ostrich: { face:'🦤', name:'Ostrich', has:['CanWalk'] },
+  };
+  let current = 'duck';
+  let attached = new Set(REAL.duck.has);
+
+  function renderComp(){
+    const r = REAL[current];
+    $('face').textContent = r.face;
+    $('aname').textContent = r.name;
+    // caps on/off
+    document.querySelectorAll('.cap').forEach(c=>{
+      c.classList.toggle('on', attached.has(c.dataset.c));
+    });
+    // abilities badges
+    const ab = $('abilities'); ab.innerHTML='';
+    if(attached.size===0){ ab.innerHTML='<span style="color:#8a9a8c;font-size:.84rem">chưa ghép khả năng nào</span>'; }
+    [...attached].forEach(a=>{
+      const b=document.createElement('div'); b.className='abadge'; b.textContent='+ '+a; ab.appendChild(b);
+    });
+    // verdict: có ghép khả năng loài KHÔNG có (vd Penguin + CanFly)?
+    const wrong = [...attached].filter(a=> !r.has.includes(a));
+    const o=$('compOut');
+    if(wrong.length){
+      o.className='out err';
+      o.textContent=`⚠️ ${r.name} được ghép ${wrong.join(', ')} — nhưng loài này đâu có khả năng đó. Composition cho anh TỰ DO, nhưng hãy ghép đúng cái loài đó thật sự có.`;
+    } else {
+      o.className='out ok';
+      o.textContent=`✅ ${r.name} = ${[...attached].join(' + ') || '(trống)'} — ghép đúng khả năng THẬT. Không ép "bay" nếu không bay.`;
+    }
+  }
+  document.querySelectorAll('.cap').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      const k=c.dataset.c;
+      attached.has(k) ? attached.delete(k) : attached.add(k);
+      renderComp();
+    });
+  });
+  document.querySelectorAll('#picker button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('#picker button').forEach(x=>x.classList.remove('sel'));
+      b.classList.add('sel');
+      current=b.dataset.a;
+      attached=new Set(REAL[current].has);  // reset về khả năng thật của loài
+      renderComp();
+    });
+  });
+  renderComp();
+</script>
+</body>
+</html>

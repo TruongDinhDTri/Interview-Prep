@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Pyramid vs Ice-cream-cone · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;--bad:#cf6a4a;--good:#5e8a63;--r:14px;--s2:16px;--s3:24px;--s4:40px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;min-height:100vh;padding:var(--s4) clamp(16px,4vw,40px) 80px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit}
+  .back{display:inline-block;font-family:'Klee One',cursive;font-size:.84rem;background:rgba(253,250,242,.92);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);margin-bottom:var(--s3)}
+  .wrap{max-width:900px;margin:0 auto}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;color:var(--clay);text-align:center}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.7rem,4vw,2.5rem);text-align:center;margin-top:var(--s2)}
+  h1 em{font-style:italic;color:var(--moss)}
+  .sub{text-align:center;color:#6b7d6e;margin-top:var(--s2);max-width:640px;margin-left:auto;margin-right:auto;font-size:.95rem}
+
+  .layout{display:grid;grid-template-columns:1fr;gap:22px;max-width:820px;margin:var(--s4) auto 0}
+  @media(min-width:720px){.layout{grid-template-columns:1fr 1fr}}
+
+  .panel{background:#fffdf7;border:1px solid rgba(36,48,38,.1);border-radius:var(--r);padding:20px 22px;box-shadow:0 6px 16px rgba(36,48,38,.06)}
+  .panel h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.1rem;margin-bottom:6px}
+
+  .ctl{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed rgba(36,48,38,.14)}
+  .ctl:last-child{border-bottom:none}
+  .ctl .nm{font-weight:700}.ctl .nm small{display:block;font-weight:400;font-size:.74rem;color:#8a9a8c}
+  .stepper{display:flex;align-items:center;gap:8px}
+  .stepper button{width:32px;height:32px;border:none;border-radius:8px;background:#efe7d4;color:var(--ink);font-size:1.1rem;font-weight:700;cursor:pointer;transition:background .15s}
+  .stepper button:hover{background:var(--gold)}
+  .stepper .count{font-family:'JetBrains Mono',monospace;font-weight:700;min-width:34px;text-align:center}
+  .presets{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .presets button{font-family:'Nunito Sans';font-weight:700;font-size:.8rem;cursor:pointer;border:none;border-radius:18px;padding:8px 14px}
+  .p-good{background:var(--moss);color:#fff}.p-bad{background:var(--bad);color:#fff}
+
+  /* visual shape */
+  .shape{margin-top:8px;display:flex;flex-direction:column;align-items:center;gap:5px;min-height:150px;justify-content:flex-end}
+  .bar{color:#fff;border-radius:7px;padding:9px 10px;text-align:center;font-size:.78rem;transition:width .4s ease;white-space:nowrap;overflow:hidden;box-shadow:0 4px 10px rgba(36,48,38,.14)}
+  .bar b{font-size:.9rem}
+  .b-e2e{background:linear-gradient(100deg,#b06a4a,#cf8a63)}
+  .b-int{background:linear-gradient(100deg,#c89a3e,#d8b25e)}
+  .b-unit{background:linear-gradient(100deg,#5e8a63,#74a17a)}
+
+  .meters{margin-top:var(--s3)}
+  .meter{margin-top:12px}
+  .meter .top{display:flex;justify-content:space-between;font-size:.85rem;font-weight:700}
+  .meter .track{margin-top:5px;height:12px;border-radius:8px;background:#efe7d4;overflow:hidden}
+  .meter .fill{height:100%;border-radius:8px;transition:width .4s ease,background .3s}
+
+  .verdict{margin-top:var(--s3);border-radius:var(--r);padding:14px 18px;font-family:'Klee One',cursive;font-size:.95rem;text-align:center;transition:background .3s}
+  .verdict.good{background:#e7f0e4;color:#3d5a41}
+  .verdict.warn{background:#fbf1dd;color:#8a6d24}
+  .verdict.bad{background:#fbeae4;color:#a6402a}
+
+  .note{max-width:820px;margin:var(--s4) auto 0;background:#eef3ea;border-left:4px solid var(--moss);border-radius:0 12px 12px 0;padding:14px 20px;font-size:.9rem;color:#3f4a41}
+  .foot{text-align:center;margin-top:var(--s4);color:#8a9a8c;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Deep-Guide.html">← Testing Deep-Guide</a>
+  <div class="eyebrow">Craftsmanship · Gốc 6 — Test Pyramid</div>
+  <h1>Pyramid hay <em>Ice-cream-cone</em>?</h1>
+  <p class="sub">Chỉnh số test mỗi tầng. Xem tổng thời gian chạy và độ giòn (flakiness) đổi theo. Bấm 2 preset để cảm cái khác biệt.</p>
+
+  <div class="layout">
+    <div class="panel">
+      <h3>🎛️ Số lượng test mỗi tầng</h3>
+      <div class="ctl">
+        <div class="nm">🌐 E2E <small>3000ms/test · rất giòn</small></div>
+        <div class="stepper"><button data-k="e2e" data-d="-1">−</button><span class="count" id="c-e2e">5</span><button data-k="e2e" data-d="1">+</button></div>
+      </div>
+      <div class="ctl">
+        <div class="nm">🔗 Integration <small>200ms/test · giòn vừa</small></div>
+        <div class="stepper"><button data-k="int" data-d="-1">−</button><span class="count" id="c-int">20</span><button data-k="int" data-d="1">+</button></div>
+      </div>
+      <div class="ctl">
+        <div class="nm">🧩 Unit <small>5ms/test · ổn định</small></div>
+        <div class="stepper"><button data-k="unit" data-d="-1">−</button><span class="count" id="c-unit">200</span><button data-k="unit" data-d="1">+</button></div>
+      </div>
+      <div class="presets">
+        <button class="p-good" id="preGood">🔺 Pyramid chuẩn</button>
+        <button class="p-bad" id="preBad">🍦 Ice-cream-cone</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>📐 Hình dạng suite</h3>
+      <div class="shape">
+        <div class="bar b-e2e" id="bar-e2e"><b>E2E</b> <span id="n-e2e">5</span></div>
+        <div class="bar b-int" id="bar-int"><b>Int</b> <span id="n-int">20</span></div>
+        <div class="bar b-unit" id="bar-unit"><b>Unit</b> <span id="n-unit">200</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel meters" style="max-width:820px;margin:22px auto 0">
+    <h3>📊 Hệ quả</h3>
+    <div class="meter">
+      <div class="top"><span>⏱️ Tổng thời gian chạy suite</span><span id="timeTxt">—</span></div>
+      <div class="track"><div class="fill" id="timeFill" style="background:var(--moss)"></div></div>
+    </div>
+    <div class="meter">
+      <div class="top"><span>💥 Độ giòn (flakiness risk)</span><span id="flakeTxt">—</span></div>
+      <div class="track"><div class="fill" id="flakeFill" style="background:var(--moss)"></div></div>
+    </div>
+    <div class="verdict good" id="verdict">—</div>
+  </div>
+
+  <div class="note" id="note">
+    <b>Đọc số:</b> thời gian ≈ đổi tuyến tính theo số test mỗi tầng nhân chi phí tầng đó. Nhưng độ giòn tăng <b>phi tuyến</b> theo tỉ lệ E2E — vài E2E thì ổn, nhiều E2E thì suite "đỏ vu vơ" và dev mất niềm tin. Đó là lý do pyramid đặt đáy unit rộng.
+  </div>
+
+  <div class="foot">Kéo E2E lên cao + unit xuống thấp = nón kem = tai họa CI. 🍦</div>
+</div>
+
+<script>
+  const COST = { unit: 5, int: 200, e2e: 3000 };   // ms mỗi test
+  const state = { unit: 200, int: 20, e2e: 5 };
+  const $ = id => document.getElementById(id);
+
+  function render(){
+    // counts
+    $('c-unit').textContent = state.unit; $('c-int').textContent = state.int; $('c-e2e').textContent = state.e2e;
+    $('n-unit').textContent = state.unit; $('n-int').textContent = state.int; $('n-e2e').textContent = state.e2e;
+
+    // shape widths (relative to max count so bar length ~ số lượng)
+    const max = Math.max(state.unit, state.int, state.e2e, 1);
+    $('bar-unit').style.width = (18 + 82*state.unit/max) + '%';
+    $('bar-int').style.width  = (18 + 82*state.int/max)  + '%';
+    $('bar-e2e').style.width  = (18 + 82*state.e2e/max)  + '%';
+
+    // total time (ms → s)
+    const ms = state.unit*COST.unit + state.int*COST.int + state.e2e*COST.e2e;
+    const sec = ms/1000;
+    $('timeTxt').textContent = sec < 60 ? sec.toFixed(1)+'s' : (sec/60).toFixed(1)+' phút';
+    const timePct = Math.min(100, sec/600*100);   // 10 phút = full bar
+    $('timeFill').style.width = timePct + '%';
+    $('timeFill').style.background = timePct>60 ? 'var(--bad)' : timePct>30 ? 'var(--gold)' : 'var(--moss)';
+
+    // flakiness: phi tuyến theo tỉ lệ test đắt (e2e nặng nhất, int nhẹ hơn)
+    const total = state.unit + state.int + state.e2e || 1;
+    const e2eRatio = state.e2e/total;
+    const intRatio = state.int/total;
+    const flake = Math.min(100, Math.round((e2eRatio*100)*1.6 + (intRatio*100)*0.4));
+    $('flakeTxt').textContent = flake + '%';
+    $('flakeFill').style.width = flake + '%';
+    $('flakeFill').style.background = flake>50 ? 'var(--bad)' : flake>25 ? 'var(--gold)' : 'var(--moss)';
+
+    // verdict
+    const v = $('verdict');
+    const unitRatio = state.unit/total;
+    if(unitRatio >= 0.7 && e2eRatio <= 0.1){
+      v.className='verdict good'; v.textContent='🔺 Pyramid chuẩn — nhanh, ổn định, dev tin tưởng chạy thường xuyên.';
+    } else if(e2eRatio >= 0.35 || unitRatio < 0.4){
+      v.className='verdict bad'; v.textContent='🍦 Ice-cream-cone — suite chậm + đỏ vu vơ, dev bỏ chạy test. Tai họa.';
+    } else {
+      v.className='verdict warn'; v.textContent='⚖️ Đang lệch — đẩy thêm kiểm chứng xuống tầng unit rẻ hơn.';
+    }
+  }
+
+  document.querySelectorAll('.stepper button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const k = b.dataset.k, d = +b.dataset.d;
+      const step = k==='unit'?10 : k==='int'?5 : 1;
+      state[k] = Math.max(0, state[k] + d*step);
+      render();
+    });
+  });
+  $('preGood').addEventListener('click', ()=>{ state.unit=200; state.int=20; state.e2e=5; render(); });
+  $('preBad').addEventListener('click', ()=>{ state.unit=30; state.int=25; state.e2e=60; render(); });
+  render();
+</script>
+</body>
+</html>

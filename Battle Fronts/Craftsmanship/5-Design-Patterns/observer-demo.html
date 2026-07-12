@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Observer pub-sub · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;--bad:#cf6a4a;--good:#5e8a63;--r:14px;--s2:16px;--s3:24px;--s4:40px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;min-height:100vh;padding:var(--s4) clamp(16px,4vw,40px) 80px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit}
+  .back{display:inline-block;font-family:'Klee One',cursive;font-size:.84rem;background:rgba(253,250,242,.92);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);margin-bottom:var(--s3)}
+  .wrap{max-width:920px;margin:0 auto}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;color:var(--clay);text-align:center}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.7rem,4vw,2.4rem);text-align:center;margin-top:var(--s2)}
+  h1 em{font-style:italic;color:var(--moss)}
+  .sub{text-align:center;color:#6b7d6e;margin-top:var(--s2);max-width:660px;margin-left:auto;margin-right:auto;font-size:.95rem}
+
+  .subject{max-width:520px;margin:var(--s4) auto 0;background:linear-gradient(120deg,#2a3a30,#1c2820);color:#f1ece0;border-radius:var(--r);padding:22px;text-align:center;box-shadow:0 12px 30px rgba(28,40,32,.28)}
+  .subject .sk{font-family:'Klee One',cursive;letter-spacing:.14em;text-transform:uppercase;font-size:.72rem;color:var(--gold)}
+  .subject .state{font-family:'Fraunces',serif;font-size:1.5rem;margin-top:6px}
+  .emitrow{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+  .emitrow button{font-family:'Nunito Sans';font-weight:700;font-size:.82rem;cursor:pointer;border:none;border-radius:18px;padding:9px 16px;background:var(--gold);color:#3a2f14;transition:transform .15s}
+  .emitrow button:hover{transform:translateY(-1px)}
+
+  .subcount{text-align:center;margin-top:14px;font-size:.86rem;color:#6b7d6e}
+  .subcount b{color:var(--ink)}
+
+  .obs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;max-width:720px;margin:var(--s3) auto 0}
+  .ob{background:#fffdf7;border:1.5px solid rgba(36,48,38,.12);border-radius:var(--r);padding:14px;box-shadow:0 5px 14px rgba(36,48,38,.06);transition:box-shadow .2s,border-color .25s,transform .2s;position:relative}
+  .ob.sub{border-color:rgba(94,138,99,.5)}
+  .ob.flash{animation:fl .7s ease}
+  @keyframes fl{0%,100%{box-shadow:0 5px 14px rgba(36,48,38,.06)}30%{box-shadow:0 0 0 3px rgba(94,138,99,.55),0 8px 20px rgba(94,138,99,.3);transform:translateY(-3px)}}
+  .ob .icon{font-size:1.6rem}.ob .nm{font-weight:700;margin-top:4px}
+  .ob .toggle{margin-top:8px;font-size:.76rem;font-weight:700;cursor:pointer;border:none;border-radius:14px;padding:5px 12px}
+  .ob.sub .toggle{background:#e7f0e4;color:#3d5a41}
+  .ob:not(.sub) .toggle{background:#efe7d4;color:#8a7a52}
+  .ob:not(.sub){opacity:.6}
+  .ob .log{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:#6b7d6e;min-height:16px}
+
+  .note{max-width:720px;margin:var(--s4) auto 0;background:#eef3ea;border-left:4px solid var(--moss);border-radius:0 12px 12px 0;padding:14px 20px;font-size:.9rem;color:#3f4a41}
+  .foot{text-align:center;margin-top:var(--s4);color:#8a9a8c;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Deep-Guide.html">← Design Patterns Deep-Guide</a>
+  <div class="eyebrow">Craftsmanship · Gốc 5 — Observer</div>
+  <h1>Một <em>Subject</em> phát · nhiều <em>Observer</em> nghe</h1>
+  <p class="sub">Đổi trạng thái Order → subject <code>notify()</code> → mọi observer đang subscribe cùng sáng lên. Bật/tắt subscribe để thấy subject KHÔNG hề đổi khi thêm/bớt bên nghe.</p>
+
+  <div class="subject">
+    <div class="sk">📦 Subject: Order #A1</div>
+    <div class="state" id="state">trạng thái: created</div>
+    <div class="emitrow">
+      <button data-e="paid">💳 pay()</button>
+      <button data-e="shipped">🚚 ship()</button>
+      <button data-e="delivered">📬 deliver()</button>
+    </div>
+  </div>
+  <div class="subcount">Subject chỉ biết: có <b id="cnt">4</b> observer đang subscribe. Nó KHÔNG biết chúng là ai cụ thể.</div>
+
+  <div class="obs" id="obs"></div>
+
+  <div class="note">
+    <b>Điểm mấu chốt:</b> nút phát sự kiện (subject) KHÔNG thay đổi dù anh bật/tắt bao nhiêu observer. Subject chỉ gọi <code>notify(event)</code>; mỗi observer tự quyết làm gì với sự kiện. Thêm "Slack notifier" mới = thêm một observer + subscribe, <b>không sửa một dòng nào trong Order</b>. Đó là loose coupling one-to-many.
+  </div>
+  <div class="foot">📡 Subject phát vào "hư không" — ai đăng ký thì nhận. Tắt hết observer, subject vẫn phát bình thường. </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const OBS = [
+    { id:'email', icon:'📧', nm:'Email', act:e=>`gửi mail "${e}"` },
+    { id:'sms',   icon:'📱', nm:'SMS',   act:e=>`nhắn tin "${e}"` },
+    { id:'dash',  icon:'📊', nm:'Dashboard', act:e=>`cập nhật ô "${e}"` },
+    { id:'log',   icon:'📝', nm:'Logger', act:e=>`ghi log [${e}]` },
+  ];
+  const subscribed = new Set(OBS.map(o=>o.id));
+
+  function renderObs(){
+    const box = $('obs'); box.innerHTML='';
+    OBS.forEach(o=>{
+      const on = subscribed.has(o.id);
+      const el = document.createElement('div');
+      el.className = 'ob' + (on?' sub':'');
+      el.id = 'ob-'+o.id;
+      el.innerHTML = `<div class="icon">${o.icon}</div><div class="nm">${o.nm}</div>
+        <button class="toggle" data-id="${o.id}">${on?'✓ subscribed':'✗ unsubscribed'}</button>
+        <div class="log" id="log-${o.id}">—</div>`;
+      box.appendChild(el);
+    });
+    box.querySelectorAll('.toggle').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        const id=b.dataset.id;
+        subscribed.has(id)?subscribed.delete(id):subscribed.add(id);
+        renderObs();
+      });
+    });
+    $('cnt').textContent = subscribed.size;
+  }
+
+  function notify(e){
+    $('state').textContent = 'trạng thái: ' + e;
+    // subject chỉ lặp qua observer đang subscribe — không biết cụ thể là ai
+    OBS.forEach(o=>{
+      if(subscribed.has(o.id)){
+        const card = $('ob-'+o.id);
+        card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+        $('log-'+o.id).textContent = '→ ' + o.act(e);
+      }
+    });
+  }
+
+  document.querySelectorAll('.emitrow button').forEach(b=>{
+    b.addEventListener('click', ()=> notify(b.dataset.e));
+  });
+  renderObs();
+</script>
+</body>
+</html>

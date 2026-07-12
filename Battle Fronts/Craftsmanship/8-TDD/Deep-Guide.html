@@ -10,7 +10,7 @@
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;
-    --red:#cf6a4a;--green:#5e8a63;--r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px}
+    --red:#cf6a4a;--green:#5e8a63;--bad:#cf6a4a;--good:#5e8a63;--r:14px;--s1:8px;--s2:16px;--s3:24px;--s4:40px;--s5:64px;--s6:96px}
   html{scroll-behavior:smooth}
   body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;
     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
@@ -32,8 +32,10 @@
   .label::before{content:"";width:24px;height:1.5px;background:var(--clay)}
   h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.5rem,3.4vw,2.1rem)}
   h3{font-family:'Fraunces',serif;font-weight:600;font-size:1.15rem;margin:var(--s4) 0 var(--s1)}
+  h4{font-family:'Nunito Sans';font-weight:700;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--clay);margin-top:var(--s3)}
   p{margin-top:var(--s2);color:#3f4a41}.desc{color:#6b7d6e;margin-top:var(--s1)}
   ul{margin:var(--s2) 0 0 var(--s3);color:#3f4a41}li{margin-bottom:6px}b{color:var(--ink)}
+  code{font-family:'JetBrains Mono',monospace;font-size:.82em;background:#efe7d4;padding:2px 6px;border-radius:5px;color:#5a5238}
   blockquote{margin:var(--s3) 0;padding:14px 20px;border-left:3px solid var(--gold);background:#fbf4e2;border-radius:0 10px 10px 0;font-style:italic;color:#5a5238}
   /* rgr cycle */
   .cycle{margin-top:var(--s3);display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap}
@@ -46,8 +48,11 @@
   .code{margin-top:var(--s2);border-radius:12px;overflow:hidden;box-shadow:0 6px 16px rgba(28,40,32,.16);font-family:'JetBrains Mono',monospace;font-size:.82rem}
   .code .hd{padding:8px 14px;font-family:'Nunito Sans';font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
   .code.red .hd{background:#3a2420;color:#e6a48a}.code.green .hd{background:#22301f;color:#a8cdac}.code.refac .hd{background:#3a3320;color:#e6cf8a}
+  .code.bad .hd{background:#3a2420;color:#e6a48a}.code.good .hd{background:#22301f;color:#a8cdac}
   .code pre{background:var(--deep);color:#e7e0d0;padding:14px 16px;overflow-x:auto;line-height:1.5}
   .cmt{color:#7d8a72}.kw{color:#d8a86e}.str{color:#9ec78f}.badt{color:#e58a6a}.goodt{color:#9ec78f}
+  .pair{display:grid;grid-template-columns:1fr;gap:14px;margin-top:var(--s2)}
+  @media(min-width:780px){.pair{grid-template-columns:1fr 1fr}}
   .hunt{margin-top:var(--s3);background:#fffdf7;border:1.5px solid rgba(216,178,94,.5);border-radius:var(--r);padding:var(--s3) var(--s4);box-shadow:0 8px 20px rgba(216,178,94,.15)}
   .hunt h3{margin-top:0}.path{font-family:'JetBrains Mono',monospace;font-size:.82rem;background:#efe7d4;padding:3px 8px;border-radius:6px;color:#5a5238}
   .ladder{margin-top:var(--s3);display:flex;flex-direction:column}
@@ -62,6 +67,59 @@
   .capstone .chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:var(--s3)}
   .capstone .chip{background:rgba(216,178,94,.18);color:#e6cf8a;font-size:.76rem;padding:5px 12px;border-radius:14px}
   footer{text-align:center;padding:var(--s5) 24px var(--s6);color:#6b7d6e}footer .verse{font-family:'Klee One',cursive;color:var(--clay);margin-top:var(--s1)}
+
+  /* ===== deep-dive components ===== */
+  .reframe{margin-top:var(--s2);background:#eef3ea;border:1px solid rgba(94,138,99,.3);border-left:4px solid var(--moss);border-radius:var(--r);padding:16px 20px}
+  .reframe .rk{font-family:'Klee One',cursive;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem;color:var(--moss);margin-bottom:4px}
+  .reframe p{margin-top:0}
+  .brick{position:relative;margin-top:var(--s3);background:#fffdf7;border:1px solid rgba(36,48,38,.1);border-radius:12px;padding:16px 20px 16px 60px;box-shadow:0 4px 12px rgba(36,48,38,.05)}
+  .brick::before{content:attr(data-n);position:absolute;left:16px;top:16px;width:30px;height:30px;border-radius:8px;background:var(--moss);color:#fff;font-family:'Fraunces',serif;font-weight:600;display:flex;align-items:center;justify-content:center}
+  .brick .bt{font-family:'Fraunces',serif;font-weight:600;font-size:1.08rem;color:var(--ink)}
+  .brick p{margin-top:6px}
+  .signals{margin-top:var(--s2);display:flex;flex-direction:column;gap:12px}
+  .sig{display:grid;grid-template-columns:auto 1fr;gap:14px;background:#fffdf7;border:1px solid rgba(36,48,38,.08);border-radius:12px;padding:12px 16px;box-shadow:0 4px 12px rgba(36,48,38,.05)}
+  .sig .sn{font-family:'Fraunces',serif;font-weight:600;color:#fff;background:var(--clay);width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem}
+  .sig .st{font-weight:700;color:var(--ink)}.sig .sd{font-size:.86rem;color:#5a6f5d;margin-top:2px}
+  .warn{margin-top:var(--s3);background:#fbeae4;border-left:4px solid var(--bad);border-radius:0 10px 10px 0;padding:12px 18px;font-size:.9rem;color:#8a4a38}
+  .seniortip{margin-top:var(--s3);background:#fbf4e2;border:1px dashed var(--gold);border-radius:var(--r);padding:14px 20px}
+  .seniortip .sk{font-family:'Klee One',cursive;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--clay)}
+  .drill{margin-top:var(--s3);border:1px solid rgba(36,48,38,.1);border-radius:var(--r);overflow:hidden}
+  .drill .dh{background:#2a3a30;color:#e6cf8a;font-family:'Klee One',cursive;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;padding:9px 16px}
+  .drill .drow{padding:12px 16px;border-bottom:1px dashed rgba(36,48,38,.14);background:#fffdf7}
+  .drill .drow:last-child{border-bottom:none}
+  .drill .dq{font-weight:700;color:var(--ink);font-size:.9rem}
+  .drill .dq::before{content:"↳ ";color:var(--clay)}
+  .drill .da{font-size:.86rem;color:#5a6f5d;margin-top:3px}
+  .demolink{display:flex;align-items:center;gap:14px;margin-top:var(--s3);background:linear-gradient(120deg,#22301f,#2f4029);color:#f1ece0;border-radius:var(--r);padding:16px 22px;box-shadow:0 10px 24px rgba(28,40,32,.28);transition:transform .18s,box-shadow .2s}
+  .demolink:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(28,40,32,.36)}
+  .demolink .di{font-size:1.9rem}
+  .demolink .dt{font-family:'Fraunces',serif;font-weight:600;font-size:1.05rem;display:block}
+  .demolink .dd{font-size:.8rem;color:#b9c6b4;margin-top:2px;display:block}
+  .demolink .go{margin-left:auto;font-family:'Klee One',cursive;color:var(--gold);white-space:nowrap}
+  .smellmap{margin-top:var(--s3);background:#fffdf7;border:1px solid rgba(216,178,94,.4);border-radius:var(--r);padding:14px 18px;box-shadow:0 4px 12px rgba(216,178,94,.1)}
+  .smellmap .smk{font-family:'Klee One',cursive;letter-spacing:.1em;text-transform:uppercase;font-size:.72rem;color:var(--clay);margin-bottom:10px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chips a{font-size:.82rem;padding:7px 13px;border-radius:18px;background:#efe7d4;color:#5a5238;transition:background .18s,transform .15s}
+  .chips a:hover{background:var(--gold);color:#3a2f14;transform:translateY(-1px)}
+  details.smell{margin-top:var(--s3);background:#fdfbf5;border:1px solid rgba(36,48,38,.1);border-radius:var(--r);overflow:hidden;scroll-margin-top:70px;box-shadow:0 4px 14px rgba(36,48,38,.05)}
+  details.smell>summary{list-style:none;cursor:pointer;padding:16px 20px;display:flex;align-items:center;gap:10px;font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem;color:var(--ink);transition:background .18s}
+  details.smell>summary::-webkit-details-marker{display:none}
+  details.smell>summary::after{content:"▸";margin-left:auto;color:var(--clay);transition:transform .2s}
+  details.smell[open]>summary::after{transform:rotate(90deg)}
+  details.smell[open]>summary{border-bottom:1px solid rgba(36,48,38,.08)}
+  details.smell>summary:hover{background:#f5efe1}
+  .ess{font-family:'Nunito Sans';font-weight:400;font-size:.84rem;color:#6b7d6e}
+  .smellbody{padding:6px 20px 22px}
+  /* floating nav */
+  .fab{position:fixed;right:20px;bottom:20px;z-index:60;width:56px;height:56px;border-radius:50%;background:var(--clay);color:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 22px rgba(207,138,99,.5);cursor:pointer;transition:transform .2s}
+  .fab:hover{transform:scale(1.08)}
+  .fnav{position:fixed;right:20px;bottom:88px;z-index:60;width:min(290px,calc(100vw - 40px));background:rgba(253,250,242,.98);backdrop-filter:blur(10px);border:1px solid rgba(36,48,38,.14);border-radius:16px;box-shadow:0 16px 40px rgba(36,48,38,.24);padding:14px 12px;transform:translateY(12px) scale(.96);opacity:0;pointer-events:none;transition:transform .22s,opacity .22s;max-height:70vh;overflow-y:auto}
+  .fnav.open{transform:translateY(0) scale(1);opacity:1;pointer-events:auto}
+  .fnav .fk{font-family:'Klee One',cursive;letter-spacing:.1em;text-transform:uppercase;font-size:.68rem;color:var(--clay);padding:4px 10px 8px}
+  .fnav a{display:block;padding:9px 12px;border-radius:10px;font-size:.86rem;color:#3f4a41;transition:background .15s,color .15s}
+  .fnav a:hover{background:#efe7d4;color:var(--ink)}
+  .fnav a.active{background:var(--moss);color:#fff}
+  .fnav .div{height:1px;background:rgba(36,48,38,.1);margin:6px 8px}
 </style>
 </head>
 <body>
@@ -75,15 +133,51 @@
   </header>
 
   <nav class="secnav">
-    <a href="#concept">① Khái niệm</a><a href="#smell-to-fix">② Vòng lặp</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
+    <a href="#concept">① Khái niệm</a><a href="#deep">② Deep-dive</a><a href="#in-your-code">③ Trong code của anh</a><a href="#why-ladder">④ Why-Ladder</a>
   </nav>
 
   <div class="wrap">
 
+    <details class="smell" id="glossary" style="margin-top:var(--s4)">
+      <summary>📖 Viết tắt — bấm để tra đầy đủ</summary>
+      <div class="smellbody">
+        <p class="desc">Mọi từ viết tắt dùng trong bộ Craftsmanship, kèm nghĩa gọn.</p>
+        <div class="signals">
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">SOLID</span><div><div class="st">5 nguyên tắc thiết kế OOP</div><div class="sd">S·O·L·I·D — cùng phục vụ: quản lý phụ thuộc & sự thay đổi</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">SRP</span><div><div class="st">Single Responsibility Principle</div><div class="sd">Một class chỉ có MỘT lý do để thay đổi</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">OCP</span><div><div class="st">Open–Closed Principle</div><div class="sd">Mở để mở rộng, đóng để sửa đổi (thêm code, không sửa code cũ)</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">LSP</span><div><div class="st">Liskov Substitution Principle</div><div class="sd">Class con phải thay được cha mà không phá hành vi</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">ISP</span><div><div class="st">Interface Segregation Principle</div><div class="sd">Interface nhỏ, đừng ép ai implement method họ không cần</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">DIP</span><div><div class="st">Dependency Inversion Principle</div><div class="sd">Phụ thuộc ABSTRACTION, không implementation cụ thể</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">DI</span><div><div class="st">Dependency Injection</div><div class="sd">Tiêm phụ thuộc qua constructor — cách THỰC HIỆN của DIP</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">IoC</span><div><div class="st">Inversion of Control</div><div class="sd">Container quản lý & tự tiêm phụ thuộc (vd NestJS)</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">OOP</span><div><div class="st">Object-Oriented Programming</div><div class="sd">Lập trình hướng đối tượng (dữ liệu + hành vi đi cùng)</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">GoF</span><div><div class="st">Gang of Four</div><div class="sd">4 tác giả sách Design Patterns (1994), 23 pattern</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">TDD</span><div><div class="st">Test-Driven Development</div><div class="sd">Viết test TRƯỚC code — kỹ thuật thiết kế</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">RGR</span><div><div class="st">Red → Green → Refactor</div><div class="sd">Vòng lặp 3 nhịp của TDD</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">AAA</span><div><div class="st">Arrange–Act–Assert</div><div class="sd">Cấu trúc 3 khối của một test tốt</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">FIRST</span><div><div class="st">Fast·Isolated·Repeatable·Self-validating·Timely</div><div class="sd">5 dấu hiệu của một unit test tốt</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">E2E</span><div><div class="st">End-to-End</div><div class="sd">Test qua cả hệ thống như user thật (đỉnh pyramid)</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">YAGNI</span><div><div class="st">You Aren't Gonna Need It</div><div class="sd">Đừng làm thứ chưa cần — chống over-engineering</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">DRY</span><div><div class="st">Don't Repeat Yourself</div><div class="sd">Đừng lặp một mẩu kiến thức ở nhiều nơi</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">KISS</span><div><div class="st">Keep It Simple</div><div class="sd">Giữ đơn giản, đừng phức tạp hóa</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">DDD</span><div><div class="st">Domain-Driven Design</div><div class="sd">Thiết kế theo miền nghiệp vụ</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">DTO</span><div><div class="st">Data Transfer Object</div><div class="sd">Object gói dữ liệu để truyền đi (vd Parameter Object)</div></div></div>
+          <div class="sig"><span class="sn" style="width:auto;height:auto;min-width:30px;padding:5px 11px;border-radius:12px;font-size:.72rem">LIFO</span><div><div class="st">Last In First Out</div><div class="sd">Vào sau ra trước — nguyên tắc của Stack</div></div></div>
+        </div>
+      </div>
+    </details>
+
+    <!-- ① CONCEPT -->
     <section id="concept">
       <div class="label">① Khái niệm (framework-agnostic)</div>
       <h2>Viết test TRƯỚC — để thiết kế, không phải để kiểm tra</h2>
       <p>TDD đảo ngược thứ tự: <b>test trước, code sau</b>. Nhưng bí mật lớn nhất — và là điều interview muốn nghe — là: <b>TDD không phải kỹ thuật testing, nó là kỹ thuật THIẾT KẾ.</b> Viết test trước ép anh nghĩ về interface, về cách dùng, trước khi nghĩ về implementation.</p>
+
+      <div class="reframe">
+        <div class="rk">⚡ Cú lật lớn — vì sao anh từng fail gốc này</div>
+        <p>Người ta học TDD như "quy trình viết test" và trả lời phỏng vấn bằng định nghĩa Red-Green-Refactor thuộc lòng → interviewer đào tầng 3 ("kể MỘT vòng cụ thể anh làm") là lộ ngay. TDD thật là một <b>cảm giác thiết kế</b>: viết test trước = dùng code từ phía client trước khi có ruột → nếu khó viết test, anh CẢM được thiết kế đang tệ NGAY LẬP TỨC. Gốc này dạy anh kể được một vòng thật, có số, và giải thích vì sao mỗi nhịp tồn tại.</p>
+      </div>
 
       <h3>Red → Green → Refactor</h3>
       <div class="cycle">
@@ -95,65 +189,320 @@
       </div>
       <p style="text-align:center;color:var(--clay);font-family:'Klee One',cursive;margin-top:var(--s2)">↻ lặp lại cho hành vi tiếp theo</p>
       <blockquote>🧠 Vì sao mỗi bước quan trọng: <b>RED</b> chứng minh test thật sự test cái gì đó (test luôn pass = test vô dụng). <b>GREEN</b> tối thiểu = không viết code thừa (YAGNI). <b>REFACTOR</b> = giờ có lưới rồi, dọn an toàn.</blockquote>
+
+      <a class="demolink" href="rgr-demo.html">
+        <span class="di">🎮</span>
+        <span><span class="dt">Demo trực quan: chạy một vòng Red → Green → Refactor</span><span class="dd">Bấm từng nhịp — xem test đỏ trước, code tối thiểu làm nó xanh, rồi dọn mà vẫn xanh. Cảm cái nhịp.</span></span>
+        <span class="go">Mở ↗</span>
+      </a>
     </section>
 
-    <section id="smell-to-fix">
-      <div class="label">② Vòng lặp (thấy tận mắt)</div>
-      <h2>Một vòng RGR đầy đủ</h2>
-      <p class="desc">Ví dụ: hàm tính phí có giảm giá. Theo đúng 3 nhịp.</p>
+    <!-- ② DEEP DIVE -->
+    <section id="deep">
+      <div class="label">② Deep-dive từng nhịp & bẫy</div>
+      <h2>Mổ tới xương — để kể được một vòng THẬT</h2>
+      <p class="desc">Mỗi mục: cú lật → xây từ số 0 → code → interviewer đào tiếp → câu chốt senior. Bấm để mở.</p>
 
-      <div class="code red"><div class="hd">🔴 RED — test trước, chạy → FAIL (chưa có hàm)</div><pre>it(<span class="str">'giảm 10% khi total &gt; 1tr'</span>, () => {
+      <div class="smellmap">
+        <div class="smk">🗺️ Bản đồ — bấm để nhảy & mở</div>
+        <div class="chips">
+          <a href="#p-red">🔴 RED</a>
+          <a href="#p-green">🟢 GREEN</a>
+          <a href="#p-refactor">🟡 REFACTOR</a>
+          <a href="#p-design">🎯 TDD là THIẾT KẾ</a>
+          <a href="#p-fakeit">🎣 Fake it / Triangulation</a>
+          <a href="#p-whennot">🚫 Khi KHÔNG dùng TDD</a>
+          <a href="#p-mistakes">⚠️ Lỗi hay gặp (TDD giả)</a>
+        </div>
+      </div>
+
+      <!-- RED -->
+      <details class="smell" id="p-red" open>
+        <summary>🔴 RED <span class="ess">— viết test FAIL trước, và thiết kế interface tại đây</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — RED không phải "viết test", mà là "chứng minh test CÓ THỂ đỏ" + thiết kế</div>
+            <p>Nếu một test mới viết mà XANH ngay → nó vô dụng (không test gì, hoặc test sai). RED bắt anh <b>thấy nó đỏ vì đúng lý do</b> trước. Và bí mật: chính lúc viết test này, anh đang <b>THIẾT KẾ interface</b> — quyết tên hàm, tham số, kiểu trả về, từ phía người DÙNG, trước khi có ruột.</p>
+          </div>
+          <div class="brick" data-n="1">
+            <div class="bt">Viết test cho hành vi CHƯA có → phải đỏ</div>
+            <p>Hàm chưa tồn tại → test gọi nó sẽ fail. Đó là điều đúng. Đỏ = "tôi đã mô tả một hành vi mà hệ thống chưa làm được."</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">Đỏ vì ĐÚNG lý do (assertion), không phải typo</div>
+            <p>Lý tưởng: test chạy tới assert rồi fail vì giá trị sai — không phải fail vì lỗi cú pháp/tên sai. Beck: "hãy tiên đoán nó sẽ đỏ THẾ NÀO" — đoán đúng = anh hiểu mình đang test gì.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">RED = viết CALL-SITE trước = thiết kế outside-in</div>
+            <p>Viết <code>applyDiscount(1_200_000)</code> trong test TRƯỚC khi có hàm → anh vừa quyết: nó nhận một số, trả một số. Anh thiết kế API từ nhu cầu dùng, không từ implementation.</p>
+          </div>
+          <div class="code red"><div class="hd">🔴 RED — test trước, chạy → FAIL (chưa có hàm)</div><pre>it(<span class="str">'giảm 10% khi total &gt; 1tr'</span>, () => {
   expect(applyDiscount(<span class="str">1_200_000</span>)).toBe(<span class="str">1_080_000</span>);
 });
 <span class="cmt">// ❌ FAIL: applyDiscount is not defined — TỐT, test có ý nghĩa</span></pre></div>
+          <h4>Đau nếu bỏ RED</h4>
+          <p>Test không bao giờ thấy đỏ → có thể nó không test gì (false safety) · viết test SAU code → test uốn theo implementation đã có, mất giá trị thiết kế.</p>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"Vì sao phải THẤY đỏ trước? Tôi tin test tôi đúng mà."</div><div class="da">Vì test xanh-ngay có thể do: assert sai, test không chạy nhánh đó, hoặc code đã vô tình đúng. Thấy đỏ → xanh chứng minh CHÍNH test này phát hiện được sự khác biệt. Không thấy đỏ = an toàn giả.</div></div>
+            <div class="drow"><div class="dq">"Đỏ vì compile error có tính là RED không?"</div><div class="da">Tạm được ở bước đầu (hàm chưa tồn tại), nhưng lý tưởng là đỏ ở ASSERTION. Compile error chỉ nói 'chưa có gì', assertion fail nói 'hành vi chưa đúng' — cái sau mới xác nhận test đo đúng thứ.</div></div>
+            <div class="drow"><div class="dq">"RED giúp thiết kế bằng cách nào?"</div><div class="da">Anh viết cách DÙNG (call-site) trước → quyết interface từ góc client → API tự nhiên hơn. Nếu để dựng test phải setup 10 thứ → anh cảm ngay coupling xấu, sửa thiết kế trước khi viết ruột.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock (Kent Beck)</div>
+            <p>"Chạy test và TIÊN ĐOÁN nó fail thế nào." Test đỏ đúng như anh dự đoán = anh thật sự hiểu mình đang làm gì. RED không phải thủ tục — nó là một dự đoán được xác nhận.</p>
+          </div>
+        </div>
+      </details>
 
-      <div class="code green"><div class="hd">🟢 GREEN — code tối thiểu để pass</div><pre><span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+      <!-- GREEN -->
+      <details class="smell" id="p-green">
+        <summary>🟢 GREEN <span class="ess">— code TỐI THIỂU cho xanh, kể cả xấu</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — mục tiêu GREEN KHÔNG phải code đẹp, mà là XANH nhanh nhất</div>
+            <p>Ở GREEN anh đội mũ "make it work" — viết ít code NHẤT có thể để test xanh, kể cả xấu, kể cả hardcode. Đẹp để dành cho REFACTOR. Trộn hai việc = mất nhịp. Và: <b>đừng viết code cho case chưa có test</b> (YAGNI).</p>
+          </div>
+          <div class="brick" data-n="1">
+            <div class="bt">Chỉ viết đủ để pass test HIỆN TẠI</div>
+            <p>Không thêm nhánh "phòng xa", không tổng quát hóa sớm. Test đòi gì, đáp đúng thứ đó.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">Được phép "fake it" — trả hằng số</div>
+            <p>Test đầu chỉ đòi <code>applyDiscount(1_200_000) === 1_080_000</code>? Có thể <code>return 1_080_000</code> cứng cho xanh, rồi test thứ 2 sẽ ép anh tổng quát (triangulation — xem toggle riêng).</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">Code xấu ở đây KHÔNG sao</div>
+            <p>Vì bước REFACTOR ngay sau sẽ dọn, và test xanh làm lưới. "Make it work" trước, "make it right" sau — hai mũ, không đội cùng lúc.</p>
+          </div>
+          <div class="code green"><div class="hd">🟢 GREEN — code tối thiểu để pass</div><pre><span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
   <span class="kw">if</span> (total &gt; <span class="str">1_000_000</span>) <span class="kw">return</span> total * <span class="str">0.9</span>;
   <span class="kw">return</span> total;
 }
 <span class="cmt">// ✅ PASS. Không thêm gì thừa.</span></pre></div>
+          <h4>Đau nếu vi phạm</h4>
+          <p>Viết quá nhiều (gold-plating) → code không có test bảo vệ, phình rủi ro · nhảy thẳng sang tối ưu → mất bước nhỏ, khó truy khi đỏ.</p>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"Code xấu ở GREEN có sao không?"</div><div class="da">Không — miễn test xanh. REFACTOR ngay sau sẽ dọn với lưới an toàn. Ép đẹp ngay ở GREEN là trộn hai việc, dễ vừa sai vừa bẩn.</div></div>
+            <div class="drow"><div class="dq">"Vì sao phải TỐI THIỂU?"</div><div class="da">YAGNI: code cho case chưa có test = code không được bảo vệ + có thể không bao giờ cần. Giữ bước nhỏ để mỗi lúc chỉ một thứ có thể sai.</div></div>
+            <div class="drow"><div class="dq">"Return hằng số (fake) có phải gian lận?"</div><div class="da">Không — đó là kỹ thuật hợp lệ ('fake it till you make it'). Nó giữ vòng lặp cực nhỏ; test tiếp theo (input khác) sẽ buộc anh thay hằng số bằng logic thật.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock</div>
+            <p>"Make it work, make it right, make it fast" — theo THỨ TỰ. GREEN chỉ lo 'work'. Câu chốt: "tôi không tối ưu/đẹp hóa ở GREEN; tôi để REFACTOR làm 'right' với lưới test đã xanh." Nói được vế 'tách make-it-work khỏi make-it-right' = anh hiểu nhịp.</p>
+          </div>
+        </div>
+      </details>
 
-      <div class="code refac"><div class="hd">🟡 REFACTOR — dọn, test vẫn xanh</div><pre><span class="kw">const</span> DISCOUNT_THRESHOLD = <span class="str">1_000_000</span>;
+      <!-- REFACTOR -->
+      <details class="smell" id="p-refactor">
+        <summary>🟡 REFACTOR <span class="ess">— dọn với lưới, KHÔNG đổi hành vi</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — bước hay bị BỎ, và bỏ nó thì TDD thoái hóa</div>
+            <p>Giờ test đã xanh = anh có LƯỚI. REFACTOR = dọn cấu trúc (đổi tên, tách hàm, bỏ lặp) mà KHÔNG đổi hành vi — test phải vẫn xanh suốt. Nhiều người bỏ bước này → code "green nhưng bẩn dần" → TDD thoái hóa thành test-first spaghetti.</p>
+          </div>
+          <div class="brick" data-n="1">
+            <div class="bt">Chỉ refactor khi ĐANG xanh</div>
+            <p>Refactor trên nền đỏ = không biết mình vừa sửa cấu trúc hay vừa sửa bug. Xanh trước, dọn sau.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">Đổi cấu trúc, KHÔNG đổi hành vi (nối gốc 7)</div>
+            <p>Đặt tên hằng số (<code>DISCOUNT_RATE</code>), tách biểu thức — input→output giữ nguyên. Test xanh suốt = bằng chứng hành vi không đổi.</p>
+          </div>
+          <div class="code refac"><div class="hd">🟡 REFACTOR — dọn, test vẫn xanh</div><pre><span class="kw">const</span> DISCOUNT_THRESHOLD = <span class="str">1_000_000</span>;
 <span class="kw">const</span> DISCOUNT_RATE = <span class="str">0.1</span>;
 <span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
   <span class="kw">const</span> eligible = total &gt; DISCOUNT_THRESHOLD;
   <span class="kw">return</span> eligible ? total * (<span class="str">1</span> - DISCOUNT_RATE) : total;
 }
 <span class="cmt">// ✅ vẫn PASS — tên rõ (gốc 1), an toàn (gốc 6-7)</span></pre></div>
+          <h4>Đau nếu bỏ REFACTOR</h4>
+          <p>Nợ kỹ thuật tích tụ dưới lớp "toàn xanh" · code ngày càng khó đọc/đổi · vòng sau chậm dần vì phải bơi trong code bẩn.</p>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"Refactor có được sửa cả test không?"</div><div class="da">Có, nhưng cẩn thận: đừng sửa code VÀ test cùng lúc mất kiểm soát. Nếu refactor test, giữ code cố định (và ngược lại) để luôn có một phía làm mốc.</div></div>
+            <div class="drow"><div class="dq">"Khi nào DỪNG refactor?"</div><div class="da">Khi đủ sạch cho bước tiếp theo — không gold-plate. Refactor phục vụ khả năng thay đổi, không phải để hoàn mỹ vô hạn.</div></div>
+            <div class="drow"><div class="dq">"Refactor ở TDD khác refactor thường không?"</div><div class="da">Cùng bản chất (gốc 7: đổi cấu trúc không đổi hành vi), nhưng ở TDD nó là một NHỊP bắt buộc trong vòng lặp — làm liên tục, từng bước nhỏ, ngay khi vừa xanh.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock</div>
+            <p>RGR là một NHỊP ba thì; REFACTOR là thì không được bỏ. Câu chốt: "test xanh cho tôi giấy phép dọn dẹp không sợ hãi; bỏ REFACTOR thì tôi chỉ còn test-first chứ không còn TDD." Nói được vế 'refactor là bước bắt buộc, không phải tùy hứng' = anh nắm nhịp thật.</p>
+          </div>
+        </div>
+      </details>
 
-      <p>Thấy không brother? Một vòng TDD <b>dùng cả Clean Code (tên), Testing (lưới), Refactoring (dọn)</b>. Đây là lý do nó là capstone.</p>
+      <!-- DESIGN -->
+      <details class="smell" id="p-design">
+        <summary>🎯 TDD là kỹ thuật THIẾT KẾ <span class="ess">— câu chốt interview muốn nghe</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật LỚN NHẤT — TDD không phải hoạt động QA/testing</div>
+            <p>Nếu anh coi TDD là "cách viết test cho nhiều/đúng hơn" → anh trả lời sai trọng tâm. TDD là <b>kỹ thuật THIẾT KẾ</b>: test chỉ là sản phẩm PHỤ; sản phẩm CHÍNH là một thiết kế decoupled, dễ dùng. Cơ chế: viết test trước = dùng API trước khi có ruột + code khó test làm anh đau NGAY → buộc thiết kế tốt.</p>
+          </div>
+          <div class="brick" data-n="1">
+            <div class="bt">Viết test trước = viết CALL-SITE trước = quyết interface theo nhu cầu</div>
+            <p>Anh mô tả "tôi muốn dùng thứ này thế nào" trước khi xây ruột → API sinh ra từ góc người dùng, tự nhiên và tối giản hơn.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">Code khó test → anh CẢM đau ngay → buộc decouple (nối DIP)</div>
+            <p>Muốn test <code>OrderService</code> mà nó <code>new SendGridMailer()</code> bên trong → không mock nổi → đau NGAY ở bước viết test → anh sửa thành inject (DIP, gốc 3). TDD biến "thiết kế xấu" thành nỗi đau tức thì, không để nó ẩn.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">Test là sản phẩm phụ; thiết kế tốt là sản phẩm chính</div>
+            <p>Cuối vòng anh có cả hai: một bộ test hồi quy + một thiết kế đã được "ép" phải decoupled để test được. Cái sau mới là giá trị lớn.</p>
+          </div>
+          <p>🧭 <b>Metaphor:</b> thiết kế cái REMOTE (nút bấm, cách cầm — trải nghiệm dùng) TRƯỚC khi thiết kế mạch điện bên trong. Test-first = bắt đầu từ trải nghiệm dùng.</p>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"TDD cải thiện chất lượng TEST hay chất lượng THIẾT KẾ?"</div><div class="da">Chủ yếu THIẾT KẾ. Test hồi quy là bonus. Giá trị lớn: nó ép code phải decoupled/testable, tức là thiết kế tốt. Đây là câu phân biệt hiểu-thật với học-vẹt.</div></div>
+            <div class="drow"><div class="dq">"Vì sao test-first ra API tốt hơn test-after?"</div><div class="da">Test-after: anh đã có code, test uốn theo cái đã xây (kể cả xấu). Test-first: chưa có gì, anh tự do quyết API từ nhu cầu dùng → tối giản, ít coupling.</div></div>
+            <div class="drow"><div class="dq">"TDD với legacy code (đã có, không test) thì sao?"</div><div class="da">Khó — không thể 'test trước' cho code đã tồn tại. Cần characterization test bọc hành vi hiện tại trước (gốc 7 Feathers), tìm seam, rồi mới TDD phần thay đổi mới.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock — câu chốt phỏng vấn</div>
+            <p>"TDD is a design technique, not a testing technique." Nhưng ĐỪNG dừng ở câu đó — giải thích CƠ CHẾ: "vì độ khó viết test cho tôi feedback tức thì về độ coupling của thiết kế; test-first buộc tôi thiết kế từ phía client và giữ mọi thứ decoupled để test được." Giải thích được cơ chế = anh vượt hẳn tầng học vẹt (đúng chỗ anh từng fail).</p>
+          </div>
+        </div>
+      </details>
+
+      <!-- FAKE IT -->
+      <details class="smell" id="p-fakeit">
+        <summary>🎣 Fake it & Triangulation <span class="ess">— hai chiến thuật đi từ đỏ sang xanh</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — có KỸ THUẬT để giữ bước cực nhỏ, không phải "nghĩ ra cả hàm"</div>
+            <p>Beck cho 3 cách đi từ RED sang GREEN: <b>Fake it</b> (trả hằng số rồi dần thay bằng logic), <b>Triangulation</b> (thêm test case thứ 2 ép tổng quát hóa), và <b>Obvious implementation</b> (nếu rõ ràng thì viết thẳng). Mục tiêu: giữ bước nhỏ đến mức luôn kiểm soát được.</p>
+          </div>
+          <div class="brick" data-n="1">
+            <div class="bt">Fake it — pass test đầu bằng hằng số</div>
+            <p>Test đòi <code>sum(2,3)===5</code>? Cứ <code>return 5</code>. Nghe ngớ ngẩn, nhưng nó giữ vòng lặp XANH và cực nhỏ.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">Triangulation — test thứ 2 ép generalize</div>
+            <p>Thêm <code>sum(4,7)===11</code> → hằng số <code>5</code> không đủ → anh BUỘC phải viết <code>return a+b</code>. Hai điểm xác định một đường thẳng — hai test "tam giác hóa" ra logic thật.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">Obvious implementation — rõ thì viết thẳng</div>
+            <p>Không phải lúc nào cũng fake. Nếu logic hiển nhiên (<code>a+b</code>) và anh tự tin → viết thẳng. Fake it dành cho lúc chưa chắc/muốn bước nhỏ.</p>
+          </div>
+          <div class="pair">
+            <div class="code bad"><div class="hd">1️⃣ Fake it (pass test đầu)</div><pre><span class="kw">function</span> <span class="goodt">sum</span>(a, b) {
+  <span class="kw">return</span> <span class="str">5</span>;   <span class="cmt">// đủ pass sum(2,3)</span>
+}</pre></div>
+            <div class="code good"><div class="hd">2️⃣ Triangulate → logic thật</div><pre><span class="cmt">// thêm test: sum(4,7) === 11</span>
+<span class="kw">function</span> <span class="goodt">sum</span>(a, b) {
+  <span class="kw">return</span> a + b;  <span class="cmt">// hằng số hết đủ → generalize</span>
+}</pre></div>
+          </div>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"Trả hằng số nghe như gian lận — điểm gì?"</div><div class="da">Nó giữ bước CỰC nhỏ: luôn có test xanh làm mốc, giảm rủi ro viết sai một mạch dài. Đây là kỷ luật 'baby steps', không phải lười.</div></div>
+            <div class="drow"><div class="dq">"Khi nào fake, khi nào viết thẳng?"</div><div class="da">Fake khi chưa chắc hoặc muốn từng bước an toàn. Obvious implementation khi logic hiển nhiên và anh tự tin. Kinh nghiệm điều chỉnh kích thước bước.</div></div>
+            <div class="drow"><div class="dq">"Triangulation lúc nào cần?"</div><div class="da">Khi một ví dụ chưa đủ ràng buộc để suy ra logic tổng quát. Thêm ca thứ 2 (thứ 3) buộc code phải tổng quát thay vì khớp cứng một ca.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock — baby steps</div>
+            <p>Bản chất TDD là <b>bước nhỏ + luôn xanh</b>. Câu chốt: "fake it và triangulation cho tôi điều chỉnh KÍCH THƯỚC BƯỚC — khi rủi ro cao tôi đi bước tí hon (fake→triangulate), khi rõ tôi đi bước lớn (obvious). Kiểm soát kích thước bước là kỹ năng TDD thật."</p>
+          </div>
+        </div>
+      </details>
+
+      <!-- WHEN NOT -->
+      <details class="smell" id="p-whennot">
+        <summary>🚫 Khi KHÔNG nên TDD <span class="ess">— công cụ, không phải tôn giáo</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — biết KHI NÀO KHÔNG dùng mới là senior</div>
+            <p>TDD toả sáng ở logic có hợp đồng rõ (business rules, thuật toán, bug fix). Nó vụng ở chỗ anh CHƯA biết mình muốn gì, hoặc hành vi khó assert. Trả lời "TDD cho mọi thứ, luôn luôn" = dấu hiệu học vẹt, không có kinh nghiệm thật.</p>
+          </div>
+          <h4>Chỗ TDD KHÔNG hợp (hoặc phải điều chỉnh)</h4>
+          <div class="signals">
+            <div class="sig"><span class="sn">1</span><div><div class="st">Spike / prototype khám phá</div><div class="sd">Chưa biết muốn gì → viết test trước là vô nghĩa. Explore tự do, rồi VỨT prototype và TDD lại phần giữ.</div></div></div>
+            <div class="sig"><span class="sn">2</span><div><div class="st">UI thuần visual / animation</div><div class="sd">"Trông đẹp" khó assert bằng test tự động. Dùng review mắt / snapshot có chọn lọc, không TDD từng pixel.</div></div></div>
+            <div class="sig"><span class="sn">3</span><div><div class="st">Code throwaway / script một lần</div><div class="sd">Chi phí test > lợi ích. Không phải mọi dòng đều đáng bọc test.</div></div></div>
+          </div>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp</div>
+            <div class="drow"><div class="dq">"Vậy TDD vô dụng à?"</div><div class="da">Không — nó cực mạnh cho logic rõ ràng: business rules, thuật toán, bug fix (viết test tái hiện bug trước). Chỉ là không phải búa cho mọi cái đinh.</div></div>
+            <div class="drow"><div class="dq">"Spike xong thì làm gì?"</div><div class="da">Vứt code spike (nó chỉ để học), rồi build lại phần cần giữ BẰNG TDD. 'Spike and stabilize'. Đừng để code thăm dò lọt thẳng vào production không test.</div></div>
+            <div class="drow"><div class="dq">"Bug fix nên TDD thế nào?"</div><div class="da">Viết test TÁI HIỆN bug trước (đỏ) → sửa cho xanh → test đó chặn bug tái phát mãi mãi (regression test). Đây là chỗ TDD gần như luôn đáng.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock</div>
+            <p>Câu chốt: "TDD là công cụ, không phải tôn giáo. Tôi TDD chỗ có hợp đồng rõ (logic/rules/bug), explore tự do chỗ mơ hồ rồi hardening bằng test sau. Biết CHỌN chỗ dùng mới là kỹ sư, không phải người đọc sách." Nói vầy tránh được cả hai bẫy: chê TDD lẫn sùng TDD mù quáng.</p>
+          </div>
+        </div>
+      </details>
+
+      <!-- MISTAKES -->
+      <details class="smell" id="p-mistakes">
+        <summary>⚠️ Lỗi hay gặp — "TDD giả" <span class="ess">— chính là chỗ anh vừa fail</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — interviewer đào tầng sâu để phân biệt TDD THẬT với TDD GIẢ</div>
+            <p>Rất nhiều người nói "tôi làm TDD" nhưng thực ra làm "test-after" hoặc bỏ nhịp. Interviewer giỏi sẽ hỏi <b>"kể MỘT vòng cụ thể gần đây"</b> — người làm giả sẽ mô tả chung chung, không kể được thứ tự/cảm giác đỏ→xanh/số cụ thể. Đây là chỗ dễ trượt nhất.</p>
+          </div>
+          <h4>6 lỗi làm TDD "giả"</h4>
+          <div class="signals">
+            <div class="sig"><span class="sn">1</span><div><div class="st">Test-after gọi là TDD</div><div class="sd">Viết code trước, test sau, rồi nói "tôi TDD". Mất TOÀN BỘ giá trị thiết kế (test uốn theo code có sẵn).</div></div></div>
+            <div class="sig"><span class="sn">2</span><div><div class="st">Bỏ bước RED</div><div class="sd">Không bao giờ thấy test đỏ → không biết test có thật sự bắt lỗi không → an toàn giả.</div></div></div>
+            <div class="sig"><span class="sn">3</span><div><div class="st">Bỏ bước REFACTOR</div><div class="sd">Chỉ RED→GREEN mãi → code bẩn dần dưới lớp "toàn xanh".</div></div></div>
+            <div class="sig"><span class="sn">4</span><div><div class="st">Test dính implementation</div><div class="sd">Assert vào nội tạng (thứ tự lời gọi nội bộ) → vỡ mỗi lần refactor dù hành vi không đổi → người ta bỏ TDD vì "test phiền".</div></div></div>
+            <div class="sig"><span class="sn">5</span><div><div class="st">Bước quá to</div><div class="sd">Viết cả hàm phức tạp rồi mới test → mất baby-steps, khó truy khi đỏ.</div></div></div>
+            <div class="sig"><span class="sn">6</span><div><div class="st">Mock quá nhiều</div><div class="sd">Mock cả logic của mình → test giòn + không phản ánh hành vi thật (nối Mocking gốc 6).</div></div></div>
+          </div>
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp — chỗ anh phải kể được VÒNG THẬT</div>
+            <div class="drow"><div class="dq">"Làm sao tôi biết anh TDD thật hay chỉ đọc lý thuyết?"</div><div class="da">Kể MỘT vòng cụ thể: hành vi gì, test đầu viết ra sao, thấy đỏ với message gì, code tối thiểu nào làm xanh, refactor gì. Có SỐ, có thứ tự, có cảm giác. Người làm giả chỉ nói 'red green refactor' chung chung.</div></div>
+            <div class="drow"><div class="dq">"Test-after có phải TDD không?"</div><div class="da">Không. TDD = test DRIVES design (test trước, lái thiết kế). Test-after chỉ là 'có test' — hữu ích nhưng mất phần thiết kế cốt lõi của TDD.</div></div>
+            <div class="drow"><div class="dq">"Dấu hiệu một codebase 'TDD giả'?"</div><div class="da">Test bám sát implementation (vỡ khi refactor), không có test nào từng đỏ trong lịch sử, thiếu hẳn bước refactor (code bẩn nhưng xanh), hoặc test viết cùng commit sau code lớn.</div></div>
+          </div>
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock — vá đúng chỗ anh fail</div>
+            <p>TDD thật để lại một DẤU VẾT anh CẢM được: anh nhớ được thiết kế đã đổi thế nào khi viết test trước. Câu chốt cho phỏng vấn: <b>đừng chỉ đọc định nghĩa — kể một vòng RGR CỤ THỂ anh từng làm (hàm gì, input/output, đỏ ra sao, xanh bằng code nào, dọn gì).</b> Đó là bằng chứng không thể fake. Làm bài tập ③ để có sẵn một câu chuyện thật.</p>
+          </div>
+        </div>
+      </details>
     </section>
 
+    <!-- ③ IN YOUR CODE -->
     <section id="in-your-code">
       <div class="label">③ Trong code THẬT của anh</div>
       <h2>Build một feature bằng TDD trong Asset_Platform</h2>
+      <p class="desc">Đây là bài tập QUAN TRỌNG NHẤT — nó cho anh câu chuyện thật để kể ở tầng 3 & toggle "Lỗi hay gặp".</p>
       <div class="hunt">
         <h3>🔨 Vết sẹo capstone — build MỚI bằng TDD (40 phút)</h3>
         <p>Mấy gốc trước anh đào sẹo trong code CŨ. Gốc này tạo sẹo MỚI: chọn một hàm thuần nhỏ cần thêm vào Asset_Platform (vd: tính phí, validate một rule, format một giá trị) và làm <b>đúng TDD</b>:</p>
         <ul>
-          <li><b>🔴</b> Viết test cho 1 hành vi → chạy → thấy nó FAIL (đỏ thật).</li>
-          <li><b>🟢</b> Viết code tối thiểu → test PASS (xanh).</li>
+          <li><b>🔴</b> Viết test cho 1 hành vi → chạy → thấy nó FAIL (đỏ thật, đọc message).</li>
+          <li><b>🟢</b> Viết code tối thiểu (fake it nếu muốn) → test PASS (xanh).</li>
           <li><b>🟡</b> Refactor → test vẫn xanh.</li>
-          <li>↻ Lặp cho hành vi/edge-case tiếp theo (total = đúng ngưỡng? số âm? 0?).</li>
+          <li>↻ Lặp cho hành vi/edge-case tiếp theo (đúng ngưỡng? số âm? 0? — triangulate).</li>
         </ul>
-        <p>→ Cảm cái khác biệt: viết test trước ép anh nghĩ "hàm này NÊN dùng thế nào" trước khi viết ruột. Ghi Scar-Journal: TDD đổi cách anh thiết kế thế nào?</p>
+        <p>→ <b>Ghi lại vòng đó như một câu chuyện có SỐ</b> (hàm gì, input/output, đỏ message gì, xanh bằng code nào, dọn gì). Đây chính xác là câu interviewer hỏi ở tầng 3 — và là thứ đã làm anh fail. Có sẵn một vòng thật = không fail lại.</p>
       </div>
       <blockquote>⚠️ Sân tập: nhánh riêng. Nếu Asset_Platform khó áp TDD (code dính chặt) → đó cũng là một bài học: code khó test = thiếu DIP (gốc 3).</blockquote>
     </section>
 
+    <!-- ④ WHY-LADDER -->
     <section id="why-ladder">
       <div class="label">④ Why-Ladder (cho Mock)</div>
       <h2>Interviewer đào sâu thế nào</h2>
+      <p class="desc">7 bậc — đây là gốc anh MỚI fail. Leo tới đỉnh, đặc biệt tầng 3 (kể vòng thật) và tầng 7 (TDD giả).</p>
       <div class="ladder">
         <div class="step"><div class="lv">1</div><div><div class="q">"TDD là gì? Red-Green-Refactor?"</div><div class="a">→ Viết test trước (red/fail), code tối thiểu cho pass (green), rồi dọn (refactor). (định nghĩa)</div></div></div>
-        <div class="step"><div class="lv">2</div><div><div class="q">"Tại sao viết test TRƯỚC? Có vẻ ngược."</div><div class="a">→ Vì TDD là kỹ thuật THIẾT KẾ, không phải testing. Test trước ép nghĩ về interface/cách dùng trước implementation. (lý do — câu chốt)</div></div></div>
-        <div class="step"><div class="lv">3</div><div><div class="q">"Anh từng làm TDD thật chưa? Kể đi."</div><div class="a">→ DẪN SẸO Asset_Platform: build hàm phí/validate bằng RGR, cảm giác test-first đổi thiết kế ra sao. (kinh nghiệm — chỗ nhiều người fake bị lộ)</div></div></div>
-        <div class="step"><div class="lv">4</div><div><div class="q">"Tại sao bước RED quan trọng — sao không viết code luôn?"</div><div class="a">→ RED chứng minh test thật sự fail được. Test không bao giờ đỏ = có thể test sai/vô dụng, cho cảm giác an toàn giả. (áp dụng)</div></div></div>
-        <div class="step"><div class="lv">5</div><div><div class="q">"TDD có hợp MỌI tình huống không?"</div><div class="a">→ Không. Hợp với logic rõ ràng (business rules, thuật toán). Khó hơn với UI khám phá, prototype, code spike. TDD là công cụ, không phải tôn giáo — biết khi nào dùng mới là senior. (bedrock)</div></div></div>
+        <div class="step"><div class="lv">2</div><div><div class="q">"Tại sao viết test TRƯỚC? Có vẻ ngược."</div><div class="a">→ Vì TDD là kỹ thuật THIẾT KẾ, không phải testing. Test trước ép nghĩ về interface/cách dùng trước implementation; code khó test → cảm đau ngay → buộc decouple. (lý do — câu chốt)</div></div></div>
+        <div class="step"><div class="lv">3</div><div><div class="q">"Anh từng làm TDD thật chưa? Kể MỘT vòng cụ thể."</div><div class="a">→ DẪN SẸO Asset_Platform CÓ SỐ: "hàm applyDiscount — test <code>1_200_000 → 1_080_000</code> đỏ vì chưa có hàm; viết <code>if &gt; 1tr return *0.9</code> cho xanh; refactor tách hằng số..." (kinh nghiệm — CHỖ ANH TỪNG FAIL, phải kể được cụ thể)</div></div></div>
+        <div class="step"><div class="lv">4</div><div><div class="q">"Tại sao bước RED quan trọng — sao không viết code luôn?"</div><div class="a">→ RED chứng minh test thật sự fail được. Test không bao giờ đỏ = có thể test sai/vô dụng, cho an toàn giả. Đỏ vì đúng lý do (assertion). (áp dụng)</div></div></div>
+        <div class="step"><div class="lv">5</div><div><div class="q">"Fake it / triangulation là gì? Code xấu ở GREEN có sao?"</div><div class="a">→ Fake it = pass test đầu bằng hằng số; triangulation = thêm ca thứ 2 ép generalize; code xấu ở GREEN OK vì REFACTOR dọn với lưới. Kiểm soát kích thước bước. (chiều sâu kỹ thuật)</div></div></div>
+        <div class="step"><div class="lv">6</div><div><div class="q">"Một vòng TDD dùng lại các gốc khác thế nào?"</div><div class="a">→ Capstone: tên test rõ = Clean Code (g1); code tối thiểu = YAGNI/SOLID (g3); mock được = DIP (g3); test = Testing (g6); dọn = Refactoring (g7); kết quả không smell (g2). (synthesis)</div></div></div>
+        <div class="step"><div class="lv">7</div><div><div class="q">"TDD hợp mọi chỗ không? Làm sao biết ai TDD giả?"</div><div class="a">→ Không hợp spike/UI-visual/throwaway (công cụ, không tôn giáo). TDD giả = test-after, bỏ RED/REFACTOR, test dính implementation. Người làm thật kể được vòng cụ thể có số. (bedrock)</div></div></div>
       </div>
       <div class="mockbox">
         <div class="k">Đậu gốc này khi</div>
-        <p>Anh nói được "TDD là thiết kế, không phải testing" (tầng 2), dẫn được một lần làm RGR thật trong Asset_Platform (tầng 3), giải thích vì sao RED quan trọng (tầng 4), và biết TDD không hợp mọi chỗ (tầng 5).</p>
+        <p>Anh nói "TDD là thiết kế, không phải testing" VÀ giải thích được cơ chế (tầng 2), <b>kể được MỘT vòng RGR cụ thể có số từ Asset_Platform (tầng 3 — chỗ anh từng fail)</b>, giải thích RED + fake-it/triangulation (tầng 4-5), nối capstone về 7 gốc (tầng 6), và phân biệt TDD thật/giả (tầng 7). Leo hết = vá xong vết fail.</p>
       </div>
     </section>
 
@@ -178,5 +527,65 @@
     <div>Gốc 8 / 8 — HOÀN TẤT. Craft của anh giờ là một vòng lặp sống. 🔴🟢🟡</div>
     <div class="verse">"Whatever you do, work at it with all your heart, as working for the Lord." — Colossians 3:23</div>
   </footer>
+
+  <!-- floating navigation -->
+  <div class="fnav" id="fnav">
+    <div class="fk">① Khái niệm</div>
+    <a href="#concept">RGR · tổng quan</a>
+    <div class="div"></div>
+    <div class="fk">② Deep-dive — bấm để mở</div>
+    <a href="#p-red">🔴 RED</a>
+    <a href="#p-green">🟢 GREEN</a>
+    <a href="#p-refactor">🟡 REFACTOR</a>
+    <a href="#p-design">🎯 TDD là THIẾT KẾ</a>
+    <a href="#p-fakeit">🎣 Fake it / Triangulation</a>
+    <a href="#p-whennot">🚫 Khi KHÔNG dùng</a>
+    <a href="#p-mistakes">⚠️ Lỗi hay gặp (TDD giả)</a>
+    <div class="div"></div>
+    <a href="#in-your-code">③ Trong code của anh</a>
+    <a href="#why-ladder">④ Why-Ladder</a>
+  </div>
+  <div class="fab" id="fab" title="Mục lục nhanh">🧭</div>
+
+  <script>
+    function openTarget(id){
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(el.tagName === 'DETAILS') el.open = true;
+      el.scrollIntoView({behavior:'smooth', block:'start'});
+    }
+    document.querySelectorAll('.smellmap a, .fnav a, .secnav a').forEach(a=>{
+      a.addEventListener('click', e=>{
+        const href = a.getAttribute('href') || '';
+        if(!href.startsWith('#')) return;
+        const id = href.slice(1);
+        if(document.getElementById(id)){
+          e.preventDefault();
+          history.replaceState(null,'','#'+id);
+          openTarget(id);
+          fnav.classList.remove('open');
+        }
+      });
+    });
+    const fab = document.getElementById('fab'), fnav = document.getElementById('fnav');
+    fab.addEventListener('click', ()=> fnav.classList.toggle('open'));
+    document.addEventListener('click', e=>{
+      if(!fnav.contains(e.target) && e.target !== fab) fnav.classList.remove('open');
+    });
+    const links = [...document.querySelectorAll('.fnav a')];
+    const byId = Object.fromEntries(links.map(a=>[a.getAttribute('href').slice(1),a]));
+    const spy = new IntersectionObserver(es=>{
+      es.forEach(en=>{
+        if(en.isIntersecting){
+          links.forEach(l=>l.classList.remove('active'));
+          const a = byId[en.target.id]; if(a) a.classList.add('active');
+        }
+      });
+    },{rootMargin:'-40% 0px -55% 0px'});
+    ['concept','p-red','p-green','p-refactor','p-design','p-fakeit','p-whennot','p-mistakes','in-your-code','why-ladder']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) spy.observe(el); });
+    window.addEventListener('load', ()=>{ if(location.hash) openTarget(location.hash.slice(1)); });
+    window.addEventListener('hashchange', ()=> openTarget(location.hash.slice(1)));
+  </script>
 </body>
 </html>

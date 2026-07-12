@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Red → Green → Refactor · Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600&family=Klee+One:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--ink:#243026;--moss:#5e8a63;--gold:#d8b25e;--clay:#cf8a63;--paper:#f5efe1;--deep:#1c2820;--red:#cf6a4a;--green:#5e8a63;--refac:#d8b25e;--r:14px;--s2:16px;--s3:24px;--s4:40px}
+  html{scroll-behavior:smooth}
+  body{font-family:'Nunito Sans',sans-serif;color:var(--ink);background:var(--paper);line-height:1.6;min-height:100vh;padding:var(--s4) clamp(16px,4vw,40px) 80px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E")}
+  a{color:inherit}
+  .back{display:inline-block;font-family:'Klee One',cursive;font-size:.84rem;background:rgba(253,250,242,.92);padding:8px 16px;border-radius:20px;border:1px solid rgba(36,48,38,.1);box-shadow:0 4px 12px rgba(36,48,38,.12);margin-bottom:var(--s3)}
+  .wrap{max-width:920px;margin:0 auto}
+  .eyebrow{font-family:'Klee One',cursive;letter-spacing:.24em;text-transform:uppercase;font-size:.74rem;color:var(--clay);text-align:center}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(1.7rem,4vw,2.5rem);text-align:center;margin-top:var(--s2)}
+  h1 em{font-style:italic;color:var(--moss)}
+  .sub{text-align:center;color:#6b7d6e;margin-top:var(--s2);max-width:640px;margin-left:auto;margin-right:auto;font-size:.95rem}
+
+  .steps{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:var(--s4) auto 0;max-width:640px}
+  .stepdot{flex:1;min-width:120px;text-align:center;padding:10px;border-radius:12px;font-weight:700;font-size:.85rem;background:#efe7d4;color:#8a7a52;opacity:.55;transition:all .3s}
+  .stepdot.on{opacity:1;color:#fff}
+  .stepdot.on.s-red{background:linear-gradient(120deg,#c2543a,#cf6a4a)}
+  .stepdot.on.s-green{background:linear-gradient(120deg,#4d7a52,#5e8a63)}
+  .stepdot.on.s-refac{background:linear-gradient(120deg,#c89a3e,#d8b25e)}
+
+  .btnrow{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:var(--s3)}
+  button{font-family:'Nunito Sans';font-weight:700;font-size:.9rem;cursor:pointer;border:none;border-radius:22px;padding:11px 22px;transition:transform .15s,box-shadow .2s}
+  button:active{transform:translateY(1px)}
+  .next{background:var(--moss);color:#fff;box-shadow:0 6px 16px rgba(94,138,99,.35)}
+  .next:hover{transform:translateY(-1px)}
+  .reset{background:#efe7d4;color:#5a5238}
+  .next:disabled{opacity:.4;cursor:not-allowed}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:18px;max-width:860px;margin:var(--s4) auto 0}
+  @media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+  .panel{border-radius:var(--r);overflow:hidden;box-shadow:0 8px 20px rgba(28,40,32,.16)}
+  .panel .ph{padding:10px 16px;font-family:'Nunito Sans';font-size:.76rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700;color:#e7e0d0;background:#2a3a30}
+  .panel pre{background:var(--deep);color:#e7e0d0;padding:16px;font-family:'JetBrains Mono',monospace;font-size:.82rem;line-height:1.55;overflow-x:auto;min-height:170px;transition:background .3s}
+  .kw{color:#d8a86e}.str{color:#9ec78f}.cmt{color:#7d8a72}.goodt{color:#9ec78f}
+
+  .status{max-width:860px;margin:var(--s3) auto 0;border-radius:var(--r);padding:14px 20px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;transition:all .3s}
+  .status.idle{background:#efe7d4;color:#8a7a52}
+  .status.fail{background:#fbeae4;color:#a6402a}
+  .status.pass{background:#e7f0e4;color:#3d5a41}
+
+  .explain{max-width:860px;margin:var(--s3) auto 0;background:#eef3ea;border-left:4px solid var(--moss);border-radius:0 12px 12px 0;padding:14px 20px;font-size:.9rem;color:#3f4a41;min-height:64px}
+  .explain b{color:var(--ink)}
+  .foot{text-align:center;margin-top:var(--s4);color:#8a9a8c;font-size:.82rem;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="Deep-Guide.html">← TDD Deep-Guide</a>
+  <div class="eyebrow">Craftsmanship · Gốc 8 — Red / Green / Refactor</div>
+  <h1>Chạy một vòng <em>RGR</em></h1>
+  <p class="sub">Ví dụ: <code>applyDiscount</code> — giảm 10% khi total &gt; 1 triệu. Bấm "Nhịp tiếp" để đi qua từng thì và cảm cái nhịp test-first.</p>
+
+  <div class="steps">
+    <div class="stepdot s-red" id="d-red">🔴 RED</div>
+    <div class="stepdot s-green" id="d-green">🟢 GREEN</div>
+    <div class="stepdot s-refac" id="d-refac">🟡 REFACTOR</div>
+  </div>
+  <div class="btnrow">
+    <button class="next" id="next">▶ Nhịp tiếp</button>
+    <button class="reset" id="reset">↺ Làm lại</button>
+  </div>
+
+  <div class="grid">
+    <div class="panel">
+      <div class="ph">📝 Test (viết TRƯỚC)</div>
+      <pre id="testCode"></pre>
+    </div>
+    <div class="panel">
+      <div class="ph">⚙️ Implementation</div>
+      <pre id="implCode"></pre>
+    </div>
+  </div>
+
+  <div class="status idle" id="status">Bấm "Nhịp tiếp" để bắt đầu ở bước RED…</div>
+  <div class="explain" id="explain">Ở TDD, ta luôn bắt đầu bằng <b>test</b> cho một hành vi CHƯA tồn tại — nên panel bên phải còn trống. Nhấn tiếp để thấy nó FAIL.</div>
+
+  <div class="foot">🔴 đỏ trước (chứng minh test có ý nghĩa) → 🟢 code tối thiểu → 🟡 dọn mà vẫn xanh → ↻ lặp. </div>
+</div>
+
+<script>
+  const $ = id => document.getElementById(id);
+  const TEST = `<span class="kw">it</span>(<span class="str">'giảm 10% khi total > 1tr'</span>, () => {
+  <span class="kw">expect</span>(applyDiscount(<span class="str">1_200_000</span>))
+    .<span class="kw">toBe</span>(<span class="str">1_080_000</span>);
+});`;
+
+  const IMPL = {
+    red: `<span class="cmt">// (chưa có applyDiscount)</span>`,
+    green: `<span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+  <span class="kw">if</span> (total > <span class="str">1_000_000</span>)
+    <span class="kw">return</span> total * <span class="str">0.9</span>;
+  <span class="kw">return</span> total;
+}`,
+    refac: `<span class="kw">const</span> THRESHOLD = <span class="str">1_000_000</span>;
+<span class="kw">const</span> RATE = <span class="str">0.1</span>;
+<span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+  <span class="kw">const</span> eligible = total > THRESHOLD;
+  <span class="kw">return</span> eligible
+    ? total * (<span class="str">1</span> - RATE) : total;
+}`
+  };
+
+  const STEPS = [
+    { key:'red', dot:'d-red', status:['fail','❌ FAIL — applyDiscount is not defined'],
+      impl: IMPL.red,
+      explain:'<b>🔴 RED:</b> test viết trước, chạy → ĐỎ vì hàm chưa tồn tại. Đây là điều TỐT: nó chứng minh test thật sự kiểm một hành vi chưa có. Đồng thời ta vừa THIẾT KẾ interface: <code>applyDiscount(số) → số</code>.' },
+    { key:'green', dot:'d-green', status:['pass','✅ PASS — 1 test xanh'],
+      impl: IMPL.green,
+      explain:'<b>🟢 GREEN:</b> viết code TỐI THIỂU để test xanh — không thêm gì thừa (YAGNI). Xấu cũng được, miễn xanh. Giờ ta có lưới an toàn.' },
+    { key:'refac', dot:'d-refac', status:['pass','✅ PASS — vẫn xanh sau khi dọn'],
+      impl: IMPL.refac,
+      explain:'<b>🟡 REFACTOR:</b> đặt tên hằng số, tách biểu thức — đổi CẤU TRÚC, không đổi HÀNH VI. Test vẫn xanh = bằng chứng an toàn. Tên rõ = Clean Code (gốc 1).' },
+  ];
+
+  let i = -1;
+  function render(){
+    $('testCode').innerHTML = i >= 0 ? TEST : `<span class="cmt">// test sẽ xuất hiện ở bước RED</span>`;
+    ['d-red','d-green','d-refac'].forEach(id=>$(id).classList.remove('on'));
+    const st = $('status'), ex = $('explain'), impl = $('implCode');
+    if(i < 0){
+      impl.innerHTML = `<span class="cmt">// (chưa bắt đầu)</span>`;
+      st.className='status idle'; st.textContent='Bấm "Nhịp tiếp" để bắt đầu ở bước RED…';
+      ex.innerHTML='Ở TDD, ta luôn bắt đầu bằng <b>test</b> cho một hành vi CHƯA tồn tại — nên panel bên phải còn trống. Nhấn tiếp để thấy nó FAIL.';
+      impl.style.background='var(--deep)';
+      return;
+    }
+    const s = STEPS[i];
+    $(s.dot).classList.add('on');
+    impl.innerHTML = s.impl;
+    st.className = 'status ' + s.status[0];
+    st.textContent = s.status[1];
+    ex.innerHTML = s.explain;
+    impl.style.background = s.key==='red' ? '#2a1f1c' : 'var(--deep)';
+    $('next').disabled = (i >= STEPS.length-1);
+    $('next').textContent = i >= STEPS.length-1 ? '✓ Hết vòng (↻ làm lại)' : '▶ Nhịp tiếp';
+  }
+  $('next').addEventListener('click', ()=>{ if(i < STEPS.length-1){ i++; render(); } });
+  $('reset').addEventListener('click', ()=>{ i=-1; $('next').disabled=false; $('next').textContent='▶ Nhịp tiếp'; render(); });
+  render();
+</script>
+</body>
+</html>
