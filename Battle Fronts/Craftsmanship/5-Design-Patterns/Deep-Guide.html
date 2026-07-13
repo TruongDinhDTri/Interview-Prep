@@ -162,12 +162,19 @@
       <blockquote>⚠️ Bẫy interview lớn nhất: <b>nhồi pattern vào mọi chỗ.</b> Pattern là để GIẢI một vấn đề có thật, không phải để khoe. Dùng sai chỗ = over-engineering = một code smell mới.</blockquote>
 
       <h3>3 nhóm (GoF)</h3>
+      <p>23 pattern nghe khủng, nhưng chúng chỉ rơi vào <b>3 ngăn</b>. Tưởng tượng anh đang dựng một <b>ban nhạc jazz</b> 🎷 — cả ba nhóm trả lời ba câu hỏi khác nhau của việc dựng ban nhạc đó:</p>
       <table class="cat">
-        <tr><th>Nhóm</th><th>Giải quyết</th><th>Hay gặp</th></tr>
-        <tr><td>Creational</td><td>Tạo đối tượng thế nào</td><td>Factory, Builder, Singleton</td></tr>
-        <tr><td>Structural</td><td>Lắp ghép đối tượng/class</td><td>Adapter, Decorator, Facade</td></tr>
-        <tr><td>Behavioral</td><td>Đối tượng giao tiếp/chia việc</td><td>Strategy, Observer, Template Method</td></tr>
+        <tr><th>Nhóm</th><th>Lo chuyện gì</th><th>Ẩn dụ ban nhạc 🎷</th><th>Pattern trụ</th></tr>
+        <tr><td>🏗️ Creational</td><td>Đối tượng được <b>SINH ra</b> thế nào</td><td>Tuyển nhạc công — thuê ở đâu, thuê kiểu gì</td><td>Factory · Builder · Singleton</td></tr>
+        <tr><td>🧩 Structural</td><td>Đối tượng <b>LẮP GHÉP / nối</b> ra sao</td><td>Xếp sân khấu — ai đứng đâu, nối dây loa nào vào đâu</td><td>Adapter · Decorator · Facade</td></tr>
+        <tr><td>🎭 Behavioral</td><td>Đối tượng <b>GIAO TIẾP / chia việc</b></td><td>Chơi nhạc — ai solo, ai đệm, ra hiệu cho nhau lúc nào</td><td>Strategy · Observer · Template Method</td></tr>
       </table>
+
+      <div class="reframe">
+        <div class="rk">🧭 La bàn 3 chữ — soi vấn đề vào đúng ngăn</div>
+        <p><b>SINH · LẮP · NÓI.</b> Bí trong phỏng vấn thì hỏi lại chính mình: vấn đề là <b>"tạo object sao cho gọn"</b> → Creational (SINH). <b>"ghép 2 thứ không khớp / bọc thêm"</b> → Structural (LẮP). <b>"đổi hành vi lúc chạy / báo tin cho nhiều bên"</b> → Behavioral (NÓI). Không cần thuộc 23 tên — chỉ cần biết soi đúng ngăn.</p>
+      </div>
+
       <blockquote>🧠 Học sâu 3-4 cái HAY DÙNG còn hơn thuộc tên 23 cái: <b>Strategy, Factory, Observer, Adapter.</b></blockquote>
     </section>
 
@@ -197,6 +204,29 @@
             <div class="rk">⚡ Cú lật — đóng gói MỖI thuật toán vào một class, đổi được lúc runtime</div>
             <p>Strategy = lấy một "họ thuật toán/hành vi" (mỗi nhánh <code>if theo type</code>), đóng mỗi cái vào một class cùng interface, để <b>đổi hành vi lúc runtime + thêm loại mới không sửa code cũ</b>. Đây là OCP (gốc 3) + composition (gốc 4) hiện hình.</p>
           </div>
+          <h4>🧗 Con đường tự đẻ ra Strategy — đi lại con đường, đừng học thuộc</h4>
+          <p>Đừng nhớ định nghĩa. Nhớ <b>cái đau</b> rồi tự bò ra pattern — 5 bước dưới đây là đúng hành trình đã dẫn tới nó. Đọc lại 100000 ngày sau vẫn tự dựng lại được.</p>
+          <div class="brick" data-n="1">
+            <div class="bt">😰 Cái đau bắt đầu: một hàm, một đống <code>if</code></div>
+            <p>Tính phí cổng thanh toán: <code>fee(type, amount)</code> với <code>if vnpay… if momo… if stripe…</code>. Chạy ngon 6 tháng, đã test kỹ, tin được. Rồi sếp chạy vào bàn: <i>"tháng sau thêm ZaloPay 2%, PayPal 3.5%, Apple Pay 2.2%…"</i></p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">💣 Vì sao thêm loại mới = NGUY HIỂM (không chỉ "phiền")</div>
+            <p>Thêm mỗi cổng = phải <b>MỞ cái hàm đang chạy đúng ra</b> nhét thêm một <code>if</code>. Mà mở code cũ ra sửa = <b>đặt cược lại toàn bộ thứ đã test</b>: lỡ tay sửa nhầm số phí Momo lúc 11h đêm → sập cái <i>chẳng liên quan</i> gì tới ZaloPay. Đây chính là vi phạm <b>Open–Closed</b>: thêm hành vi lẽ ra phải <b>THÊM</b> code, không phải <b>MỔ</b> code đang sống.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">📦 Thuốc: mỗi hành vi một "hộp" riêng, độc lập</div>
+            <p>Thay vì nhốt 3 công thức chung một hàm, cho mỗi cổng một class-hộp riêng: <code>VnpayFee</code>, <code>MomoFee</code>, <code>StripeFee</code>. Hộp Momo <i>không biết</i> hộp Vnpay tồn tại. Thêm ZaloPay = <b>ĐẺ một hộp mới</b> 📦🆕, <b>KHÔNG mở hộp cũ</b> → code cũ ngủ yên, hết đánh cược.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🔌 Lỗ hổng → interface: bắt mọi hộp cùng MỘT cái nút</div>
+            <p>Nếu mỗi hộp có nút tên khác nhau (<code>calc()</code> / <code>layPhiMomo()</code> / <code>calcStripeFee()</code>) → <code>checkout</code> lại phải <code>if/else</code> để bấm đúng nút → <b>if/else quay về ám</b> 👻. Chữa: <b>BẮT mọi hộp cùng một nút <code>calc(amount)</code></b>. Cái "luật ngầm: hộp nào cũng phải có <code>calc()</code>" đó CHÍNH LÀ <b>interface</b> — <code>FeeStrategy</code>. Cùng hình dạng ⟹ tráo đổi được (<i>interchangeable</i>).</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">🔄 Kết: <code>checkout</code> mù loại — tráo hộp nào cũng chạy</div>
+            <p><code>checkout</code> chỉ gọi <code>strategy.calc(500000)</code> — <b>không cần biết đang cầm hộp nào</b>: Vnpay→5000, Momo→7500, Stripe→14500. Khách đổi cổng lúc chạy = truyền hộp khác vào (<b>runtime</b>). Thêm cổng = thêm hộp, <code>checkout</code> <b>BẤT ĐỘNG</b>. Đó là <b>OCP + composition</b> mang một cái tên: <b>Strategy</b>.</p>
+          </div>
+          <h4>🎯 Gói lại 3 ý chính</h4>
           <div class="brick" data-n="1">
             <div class="bt">Mỗi nhánh <code>if theo type</code> là một HÀNH VI riêng</div>
             <p><code>if vnpay... if momo... if stripe...</code> — mỗi nhánh là một cách tính phí. Chúng cùng "hình dạng" (nhận amount, trả phí) nhưng khác ruột.</p>
@@ -217,11 +247,15 @@
   <span class="kw">if</span> (type===<span class="str">'stripe'</span>) <span class="kw">return</span> amount*.029;
   <span class="cmt">// thêm cổng = sửa hàm (vi phạm O)</span>
 }</pre></div>
-            <div class="code good"><div class="hd">✅ Strategy</div><pre><span class="kw">interface</span> <span class="goodt">FeeStrategy</span> { calc(a): number }
-<span class="kw">class</span> VnpayFee <span class="kw">implements</span> FeeStrategy {...}
-<span class="kw">class</span> MomoFee  <span class="kw">implements</span> FeeStrategy {...}
-<span class="cmt">// thêm cổng = thêm class, không sửa cũ</span>
-checkout(strategy: FeeStrategy) {...}</pre></div>
+            <div class="code good"><div class="hd">✅ Strategy</div><pre><span class="kw">interface</span> <span class="goodt">FeeStrategy</span> { calc(a): number }   <span class="cmt">// luật ngầm = interface</span>
+<span class="kw">class</span> VnpayFee  <span class="kw">implements</span> FeeStrategy { calc(a){ <span class="kw">return</span> a*.01;  } }
+<span class="kw">class</span> MomoFee   <span class="kw">implements</span> FeeStrategy { calc(a){ <span class="kw">return</span> a*.015; } }
+<span class="kw">class</span> StripeFee <span class="kw">implements</span> FeeStrategy { calc(a){ <span class="kw">return</span> a*.029; } }
+
+<span class="kw">function</span> checkout(s: FeeStrategy, amount) { <span class="kw">return</span> s.calc(amount); }
+checkout(<span class="kw">new</span> MomoFee(), 500000);   <span class="cmt">// → 7500 · checkout mù loại, hộp nào cũng bấm calc()</span>
+<span class="cmt">// thêm cổng = thêm 1 class, checkout & class cũ KHÔNG đụng ↓</span>
+<span class="kw">class</span> ZalopayFee <span class="kw">implements</span> FeeStrategy { calc(a){ <span class="kw">return</span> a*.02; } }</pre></div>
           </div>
           <p>Strategy biến if/else thành các class cắm-rời. Nối thẳng Open/Closed (gốc 3). Đây là pattern interview hỏi nhiều nhất.</p>
 
@@ -242,9 +276,22 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="drow"><div class="dq">"Strategy khác State pattern chỗ nào?"</div><div class="da">Cấu trúc giống nhau (đều delegate qua interface), khác Ý ĐỊNH: Strategy do CLIENT chọn thuật toán; State đổi theo TRẠNG THÁI nội bộ và các state tự chuyển lẫn nhau.</div></div>
             <div class="drow"><div class="dq">"Ai quyết định chọn strategy nào?"</div><div class="da">Thường là client, một Factory (theo type), hoặc DI container. Việc CHỌN tách khỏi việc DÙNG — bản thân đó cũng là tách trách nhiệm.</div></div>
           </div>
+          <h4 id="say-strategy">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Strategy — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"The Strategy pattern is a family of interchangeable behaviors, each separated into its own class but implementing the same interface — so the client can swap the behavior at runtime."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"Without it, one function branches with if-else on a type — like a payment gateway — so every new gateway forces me to open that tested function and add a branch, risking the ones that already work."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Instead I define a FeeStrategy interface with calc(amount); VnpayFee, MomoFee, StripeFee each implement it. checkout() just calls strategy.calc() — adding ZaloPay is just one new class, and checkout never changes."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So I extend by adding classes, not editing old ones — new behavior with zero risk to what already works, and I can switch the algorithm at runtime."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① = mỗi cổng một hộp cùng nút <code>calc()</code> · ② = <code>if vnpay… if momo…</code> → lỡ tay sửa nhầm Momo · ③ = 📦🆕 <code>ZalopayFee</code>, <code>checkout</code> không đụng · ④ = thêm hộp = an toàn = OCP 🔒</p>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt: "Strategy đóng gói một họ thuật toán biến thiên sau một interface, để đổi lúc runtime và mở rộng không sửa code cũ. Nó là OCP + composition mang tên." Nói được nó = OCP-hiện-hình + biết khi nào KHÔNG cần = anh hiểu gốc, không nhồi pattern.</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Strategy = một họ <i>hành vi tráo-đổi-được</i> (interchangeable behaviors), mỗi cái tách thành một class riêng nhưng cùng một interface, để đổi lúc runtime và thêm loại mới không sửa code cũ."</p>
+            <p>Câu chốt: "Nó là <b>OCP + composition</b> mang tên." Nói được nó = OCP-hiện-hình + biết khi nào KHÔNG cần (2 case ổn định thì một <code>if/else</code> còn tốt hơn 5 file Strategy — YAGNI) = anh hiểu gốc, không nhồi pattern.</p>
           </div>
         </div>
       </details>
@@ -257,6 +304,32 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="rk">⚡ Cú lật — tách "quyết định TẠO cái gì" khỏi "DÙNG nó"</div>
             <p>Factory gom LOGIC TẠO đối tượng vào một chỗ. <code>new ConcreteClass()</code> rải khắp = mọi nơi biết class cụ thể + đổi cách tạo phải sửa N chỗ. Factory để client xin "cho tôi một FeeStrategy loại X" mà không tự <code>new</code>.</p>
           </div>
+          <p>🍜 <b>Metaphor — nhà hàng (tách bạch Factory ↔ Strategy):</b> khách nói "cho món NƯỚNG". <b>🏭 Factory = anh phục vụ</b>: nghe chữ "nướng" → chạy vào bếp <b>kêu đúng ĐẦU BẾP NƯỚNG</b> ra (dịch chữ → đúng người), chứ phục vụ không nấu. <b>🎯 Strategy = ông đầu bếp</b>: được kêu ra rồi thì <b>NẤU theo kiểu của mình</b> (cùng nút <code>nấuMón()</code>). Factory <b>TÌM</b> đúng người → Strategy <b>DÙNG</b> người đó. Hai khâu nối tiếp, không giẫm chân nhau.</p>
+
+          <h4>🧗 Con đường tự đẻ ra Factory — đi lại con đường, đừng học thuộc</h4>
+          <p>Factory sinh ra ĐÚNG chỗ Strategy để hở. Đi lại 5 bước này là tự dựng lại được nó 100000 ngày sau.</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🕳️ Lỗ hổng Strategy để lại: có CHỮ, cần HỘP</div>
+            <p>Strategy lo "tính phí NHƯ THẾ NÀO" (mỗi hộp một <code>calc()</code>). Nhưng khách chọn cổng lúc runtime → tay mình chỉ cầm một <b>chữ</b> <code>type="momo"</code>. Ai biến chữ <code>"momo"</code> → một <b>hộp</b> <code>new MomoFee()</code>? Strategy KHÔNG trả lời câu đó.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">🩹 Cách ngây thơ: nhét <code>if/else</code> chọn hộp ngay tại checkout</div>
+            <p><code>if type==="momo" hop=new MomoFee()</code>… Chạy được. Cục "dịch chữ → hộp" nằm ngay trong <code>checkout</code>. Ừ thì ổn… cho tới bước sau.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">💥 Hộp còn cần ở nơi khác → cục chọn bị COPY 3 nơi</div>
+            <p><code>xuatHoaDon</code>, <code>ghiLog</code> cũng cần đúng hộp theo <code>type</code> → cùng cục <code>if/else</code>-chọn-hộp bị <b>dán lại 3 nơi</b>. Thêm ZaloPay = sửa 3 chỗ, <b>quên 1 = bug âm thầm</b> (hóa đơn đúng, log sai). Tên bệnh: <b>Shotgun Surgery</b> — y hệt cái nguy hiểm đầu buổi, nhưng nhân bản.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🏭 Thuốc: gom cục chọn-hộp vào MỘT chỗ, ai cần thì gọi</div>
+            <p><code>taoFee(type)</code> — <b>một chỗ duy nhất</b> biết "chữ → hộp nào". <code>checkout</code>/hóa đơn/log chỉ gọi <code>taoFee()</code>. Thêm ZaloPay = thêm <b>1 dòng ở 1 chỗ</b>, phần còn lại bất động. Cái "xưởng chuyên đẻ hộp theo đơn" đó = <b>Factory</b>.</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">⚖️ Sự thật thẳng: Factory VẪN phải sửa — nhưng gom về 1 ô an toàn</div>
+            <p>Thêm ZaloPay vẫn mở <code>taoFee</code> thêm 1 dòng → <b>KHÔNG</b> OCP-hoàn-hảo. Nhưng OCP-hoàn-hảo là <b>bất khả thi</b> ở biên giới nơi loại-mới xuất hiện (phải có <b>một</b> chỗ "học" được nó tồn tại). Factory không <b>xoá</b> thay đổi — nó <b>DỒN</b> thay đổi vào 1 ô nhỏ, an toàn (chỉ đẻ hộp), còn <code>checkout</code>/hóa đơn/log thì <b>đóng tuyệt đối</b>. Đổi "OCP hoàn hảo" (với không tới) lấy "thiệt hại gom về 1 dòng".</p>
+          </div>
+
+          <h4>🎯 Gói lại 3 ý chính</h4>
           <div class="brick" data-n="1">
             <div class="bt"><code>new ConcreteX()</code> rải khắp = coupling khắp nơi</div>
             <p>Mỗi nơi <code>new VnpayFee()</code> đều dính vào class cụ thể. Đổi constructor / thêm cấu hình khởi tạo = sửa mọi chỗ.</p>
@@ -269,17 +342,25 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="bt">Client xin factory, không biết class cụ thể (nối DIP)</div>
             <p>Client chỉ thấy interface <code>FeeStrategy</code> + factory. Nó không import class cụ thể → phụ thuộc abstraction.</p>
           </div>
-          <p>🧭 <b>Metaphor — quầy pha chế:</b> anh gọi "cho americano", quầy lo pha và đưa ra. Anh không tự vào bếp lắp máy. Factory = cái quầy: anh nói cần gì, nó lo tạo.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ new rải khắp nơi</div><pre><span class="cmt">// chỗ này chỗ kia đều:</span>
-<span class="kw">new</span> VnpayFee(); <span class="kw">new</span> MomoFee();
-<span class="cmt">// đổi cách tạo = sửa N chỗ</span></pre></div>
-            <div class="code good"><div class="hd">✅ Factory</div><pre><span class="kw">class</span> <span class="goodt">FeeFactory</span> {
-  create(type): FeeStrategy {
-    <span class="kw">return</span> this.registry[type];
-  }
+            <div class="code bad"><div class="hd">❌ cục chọn-hộp copy khắp nơi</div><pre><span class="kw">function</span> checkout(type, amount) {
+  <span class="kw">let</span> hop;
+  <span class="kw">if</span>(type==<span class="str">"momo"</span>)  hop=<span class="kw">new</span> MomoFee();
+  <span class="kw">if</span>(type==<span class="str">"vnpay"</span>) hop=<span class="kw">new</span> VnpayFee();
+  <span class="kw">return</span> hop.calc(amount);
 }
-<span class="cmt">// một chỗ duy nhất biết cách tạo</span></pre></div>
+<span class="cmt">// xuatHoaDon(), ghiLog() LẶP y chang</span>
+<span class="cmt">// → thêm ZaloPay = sửa 3 chỗ (Shotgun)</span></pre></div>
+            <div class="code good"><div class="hd">✅ Factory</div><pre><span class="cmt">// 🏭 MỘT chỗ biết "chữ → hộp". Ai cần thì gọi.</span>
+<span class="kw">function</span> <span class="goodt">taoFee</span>(type): FeeStrategy {
+  <span class="kw">if</span>(type==<span class="str">"momo"</span>)  <span class="kw">return</span> <span class="kw">new</span> MomoFee();
+  <span class="kw">if</span>(type==<span class="str">"vnpay"</span>) <span class="kw">return</span> <span class="kw">new</span> VnpayFee();
+  <span class="kw">throw</span> <span class="kw">new</span> Error(<span class="str">"Cổng lạ: "</span>+type);
+}
+checkout(type, amount){ <span class="kw">return</span> taoFee(type).calc(amount); }
+<span class="cmt">// hóa đơn & log cũng chỉ gọi taoFee() — hết copy</span>
+<span class="cmt">// thêm ZaloPay = thêm 1 dòng TRONG taoFee ↓ (1 chỗ)</span>
+<span class="kw">if</span>(type==<span class="str">"zalopay"</span>) <span class="kw">return</span> <span class="kw">new</span> ZalopayFee();</pre></div>
           </div>
           <h4>👃 Khi nào dùng</h4>
           <div class="signals">
@@ -291,10 +372,28 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="drow"><div class="dq">"Factory Method vs Abstract Factory vs simple factory?"</div><div class="da">Simple factory = một hàm/class create(type). Factory Method = subclass quyết định tạo gì (override một method tạo). Abstract Factory = tạo cả một HỌ sản phẩm liên quan (vd UI theme: button+checkbox cùng phong cách).</div></div>
             <div class="drow"><div class="dq">"Vì sao không <code>new</code> khắp nơi?"</div><div class="da">Vì <code>new ConcreteX</code> là coupling cứng tới class cụ thể (vi phạm DIP), khó đổi cách tạo, khó test (không thay được bằng mock). Factory cô lập điểm tạo.</div></div>
             <div class="drow"><div class="dq">"Factory nối Strategy thế nào?"</div><div class="da">Rất hay đi cùng: Factory TẠO ra đúng Strategy theo type, rồi client DÙNG strategy đó. Factory lo 'tạo cái nào', Strategy lo 'làm thế nào'.</div></div>
+            <div class="drow"><div class="dq">"Factory vẫn có <code>if/else</code> / vẫn sửa khi thêm loại — chẳng phải vẫn vi phạm OCP à?"</div><div class="da">Đúng, technically có. Nhưng OCP-hoàn-hảo (không bao giờ sửa) là bất khả thi ở biên giới nơi loại-mới bước vào: phải có MỘT chỗ "học" được nó tồn tại. Factory không XOÁ thay đổi, nó CONTAIN thay đổi vào 1 ô nhỏ an toàn (chỉ đẻ hộp); toàn bộ phần còn lại (checkout, hóa đơn, log) vẫn đóng tuyệt đối. Đổi "OCP hoàn hảo" (với không tới) lấy "thiệt hại gom về 1 dòng".</div></div>
+          </div>
+          <h4 id="say-factory">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Factory — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"A Factory puts the logic of creating objects in one place — you give it a type, it returns the right concrete instance behind a shared interface."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"Without it, `new ConcreteClass()` and the type-selection if-else get copied everywhere — checkout, invoicing, logging — so adding a new type means editing every one of those tested places."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Instead I have one createFee(type) that maps the type to the right FeeStrategy, and everyone calls it. Adding ZaloPay is one line in the factory — checkout, invoicing, logging never change."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So the whole system depends only on the interface, never on concrete classes, and a new type touches exactly one small, isolated place instead of scattering edits."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① = <code>taoFee("momo")</code> trả về hộp <code>MomoFee</code> · ② = cục chọn-hộp copy ở checkout + hóa đơn + log · ③ = thêm 1 dòng trong <code>taoFee</code>, chỗ khác bất động · ④ = sửa 1 chỗ nhỏ vô hại thay vì mổ N chỗ 🔒</p>
+          <div class="reframe">
+            <div class="rk">🔫 Đòn thủ sẵn khi bị đào: "Factory vẫn sửa — vẫn phá OCP mà?"</div>
+            <p>Đọc thẳng: <i>"It does, technically — but a perfectly closed system is impossible where a brand-new type enters: something must learn it exists. The factory doesn't remove that change, it <b>contains</b> it to one small, isolated spot. The rest of the app — checkout, invoicing, logging — stays fully closed. I trade unreachable 'perfect OCP' for damage contained to a single line."</i></p>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt: "Factory cô lập ĐIỂM QUYẾT ĐỊNH TẠO — thêm loại chỉ sửa factory, phần còn lại phụ thuộc interface (DIP). NestJS Provider/DI container thực chất là một factory tổng quát." Nối được Factory↔DIP↔NestJS = anh cho thấy hiểu xuyên suốt.</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Factory tập trung LOGIC TẠO đối tượng vào một chỗ — đưa nó một <code>type</code>, nó trả về đúng object cụ thể sau một interface chung, để phần còn lại phụ thuộc INTERFACE chứ không phải class cụ thể."</p>
+            <p>Nhớ cặp đôi: <b>🏭 Factory lo "TẠO cái nào" (create) · 🎯 Strategy lo "làm NHƯ THẾ NÀO" (behave).</b> Câu chốt: "Factory cô lập ĐIỂM QUYẾT ĐỊNH TẠO — thêm loại chỉ sửa factory, phần còn lại phụ thuộc interface (DIP). NestJS Provider/DI container thực chất là một factory tổng quát." Nối được Factory↔DIP↔NestJS = anh cho thấy hiểu xuyên suốt.</p>
           </div>
         </div>
       </details>
@@ -307,6 +406,30 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="rk">⚡ Cú lật — Subject KHÔNG biết ai đang nghe</div>
             <p>Observer: một <b>Subject</b> phát sự kiện khi state đổi; nhiều <b>Observer</b> tự đăng ký nhận. Điểm cốt: <b>subject không gọi thẳng từng observer</b> (coupling), nó chỉ "notify" — ai subscribe thì nhận. Loose coupling one-to-many.</p>
           </div>
+          <h4>🧗 Con đường tự đẻ ra Observer — đi lại con đường, đừng học thuộc</h4>
+          <p>Cùng máu OCP với Strategy/Factory, nhưng lật ở trục <b>"AI GỌI AI"</b>. Đi lại 5 bước là tự dựng lại được nó.</p>
+          <div class="brick" data-n="1">
+            <div class="bt">😰 Cái đau: một sự kiện, một đống việc phải làm theo</div>
+            <p>Thanh toán xong → phải: 📧 gửi email · 📱 SMS · 📦 trừ kho · 🎁 cộng loyalty · 📊 analytics · 🚚 báo shipping… <code>thanhToanXong</code> gọi <b>đích danh</b> từng đứa. Sếp thêm việc = lại mở hàm ra sửa (quen chưa 😏).</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">📇 "BIẾT" trong code = viết tên nó ra để gọi</div>
+            <p>Thân <code>thanhToanXong</code> có viết tên <code>guiEmail()</code>, <code>guiSMS()</code>, <code>baoShipping()</code> → nó <b>BIẾT</b> cả tá module. Ngược lại mở <code>guiEmail</code> ra, chẳng có chữ <code>thanhToanXong</code> nào → email <b>KHÔNG biết</b> ai gọi mình. Chiều "biết" đi MỘT hướng: <b>subject → biết → tất cả listener.</b></p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">🧨 Vì sao đau: ông sếp ôm danh sách, thêm việc = phình sếp</div>
+            <p><code>thanhToanXong</code> là <b>ông sếp phải tự nhớ tên + gọi từng nhân viên</b>. Thêm loyalty = mở sếp ra thêm 1 cú gọi. Một hàm <b>cốt lõi</b> (thanh toán) bị dính chặt vào cả tá module <b>lặt vặt</b> (email/SMS/shipping) — biết quá nhiều thứ không phải việc nó.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🔄 Cú lật: đảo chiều "ai biết ai" — sếp chỉ HÉT một tiếng</div>
+            <p>Sếp mệt: <i>"sao TAO phải biết tên từng đứa? Tao hét 📣 'XONG RỒI!', đứa nào quan tâm tự lo."</i> Đảo chiều: nhân viên tự <b>GIƠ TAY đăng ký</b> (<code>subscribe</code>), sếp chỉ <b>phát</b> (<code>notify</code>) rồi kệ. Sếp giữ một danh sách — ai muốn nghe thì tự push tên mình vào.</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">🔒 Kết: thêm việc mới = tự subscribe, subject BẤT ĐỘNG</div>
+            <p><code>tt.subscribe(congDiemLoyalty)</code> — thêm 1 dòng ở <b>NGOÀI</b>, class <code>ThanhToan</code> không mở ra. Subject <b>mù tịt</b> về ai đang nghe, chỉ lặp một danh sách nó <i>không hardcode</i>. Đó = <b>Observer</b> — nền của event-driven (nút Subscribe YouTube, event listener JS, message queue).</p>
+          </div>
+
+          <h4>🎯 Gói lại 3 ý chính</h4>
           <div class="brick" data-n="1">
             <div class="bt">Khi state đổi, NHIỀU thứ cần phản ứng</div>
             <p>Order chuyển "đã thanh toán" → cần: gửi mail, cập nhật dashboard, ghi log, trừ kho. Nhiều bên quan tâm một sự kiện.</p>
@@ -321,20 +444,22 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
           </div>
           <p>🧭 <b>Metaphor — kênh YouTube:</b> anh bấm subscribe; kênh ra video mới thì hệ thống báo cho MỌI subscriber. Kênh không cần giữ danh sách tên từng người hay gọi từng người — nó chỉ "phát", ai đăng ký thì nhận.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Subject gọi thẳng từng bên (coupling)</div><pre><span class="kw">class</span> <span class="badt">Order</span> {
-  pay() {
-    mailer.send(...);      <span class="cmt">// Order phải biết mailer</span>
-    dashboard.update(...); <span class="cmt">// ...và dashboard</span>
-    logger.log(...);       <span class="cmt">// thêm bên = sửa Order</span>
-  }
+            <div class="code bad"><div class="hd">❌ Sếp gọi đích danh từng đứa (coupling)</div><pre><span class="kw">function</span> <span class="badt">thanhToanXong</span>(order) {
+  guiEmail(order);      <span class="cmt">// phải BIẾT email</span>
+  guiSMS(order);        <span class="cmt">// ...và SMS</span>
+  baoShipping(order);   <span class="cmt">// ...và shipping</span>
+  <span class="cmt">// thêm loyalty = mở hàm này ra sửa 😰</span>
 }</pre></div>
-            <div class="code good"><div class="hd">✅ Observer</div><pre><span class="kw">class</span> <span class="goodt">Order</span> {
-  <span class="kw">private</span> obs: Observer[] = [];
-  subscribe(o) { this.obs.push(o); }
-  pay() { this.notify(<span class="str">'paid'</span>); }
-  notify(e){ this.obs.forEach(o =&gt; o.update(e)); }
+            <div class="code good"><div class="hd">✅ Observer</div><pre><span class="kw">class</span> <span class="goodt">ThanhToan</span> {
+  nguoiNghe = [];                       <span class="cmt">// danh sách subscriber</span>
+  subscribe(fn){ this.nguoiNghe.push(fn); }  <span class="cmt">// ai muốn nghe tự đăng ký</span>
+  xong(order){ this.nguoiNghe.forEach(fn =&gt; fn(order)); } <span class="cmt">// 📣 hét 1 tiếng</span>
 }
-<span class="cmt">// thêm bên nghe = subscribe, KHÔNG sửa Order</span></pre></div>
+<span class="kw">const</span> tt = <span class="kw">new</span> ThanhToan();
+tt.subscribe(guiEmail); tt.subscribe(guiSMS);   <span class="cmt">// tự giơ tay</span>
+tt.xong(order);   <span class="cmt">// sếp mù loại → cả đám tự chạy</span>
+<span class="cmt">// thêm loyalty = 1 dòng ở NGOÀI, class KHÔNG đụng ↓</span>
+tt.subscribe(congDiemLoyalty);</pre></div>
           </div>
 
           <a class="demolink" href="observer-demo.html">
@@ -354,9 +479,27 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="drow"><div class="dq">"Push vs pull model?"</div><div class="da">Push: subject gửi kèm dữ liệu trong notify. Pull: subject chỉ báo 'có đổi', observer tự hỏi lại data cần. Push tiện, pull linh hoạt/ít coupling dữ liệu.</div></div>
             <div class="drow"><div class="dq">"Rủi ro lớn nhất của Observer?"</div><div class="da">Memory leak: quên unsubscribe → subject giữ tham chiếu observer mãi (lapsed listener). Và thứ tự notify / cascade update khó lường. Luôn có đường unsubscribe.</div></div>
           </div>
+          <h4 id="say-observer">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Observer — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Observer lets one subject notify a list of subscribers when something happens; the subscribers register themselves, and the subject never hardcodes who they are."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"Without it, the source of the event calls every reaction by name — email, SMS, shipping — so every new reaction forces me to open and edit that core function, coupling it to a dozen modules."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"Instead the payment object keeps a subscribers list and just emits 'done'; email, SMS, loyalty each subscribe. Adding analytics is one subscribe call — the payment class never changes."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So the subject is decoupled from its listeners, new reactions plug in without editing the source — it's the basis of event-driven systems."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① = 📣 sếp giữ danh sách, hét "xong!" · ② = <code>thanhToanXong</code> ôm danh sách dài, sửa mãi · ③ = <code>tt.subscribe(congDiemLoyalty)</code>, subject bất động · ④ = thêm tính năng = tự đăng ký 🔒</p>
+          <div class="reframe">
+            <div class="rk">🔫 Đòn thủ sẵn khi bị đào: "What's the danger with Observer?"</div>
+            <p>Đọc thẳng: <i>"Lapsed listener / memory leak: if a subscriber never unsubscribes, the subject keeps a reference to it forever — it can't be garbage-collected, and a dead object may still get notified. So I always pair <code>subscribe</code> with an <code>unsubscribe</code>, especially for long-lived subjects."</i> (Ẩn dụ: nhân viên nghỉ việc mà không xoá tên khỏi danh sách → sếp vẫn gọi hoài 🕳️.)</p>
+          </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt: "Observer đảo chiều phụ thuộc thời gian — subject không gọi observer trực tiếp, nó phát sự kiện; bên nghe tự đăng ký. Đó là nền của event-driven và reactive." Biết thêm rủi ro (unsubscribe/leak) = anh cho thấy đã DÙNG thật, không chỉ đọc.</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Observer để một <b>subject</b> phát sự kiện tới một danh sách <b>subscriber</b> đã tự đăng ký — nên subject không cần biết ai đang nghe, và thêm phản ứng mới thì subscribe chứ không đụng subject."</p>
+            <p>Câu chốt: "Observer <b>đảo chiều phụ thuộc</b> — subject không gọi observer trực tiếp, nó phát sự kiện; bên nghe tự đăng ký. Đó là nền của event-driven và reactive." Biết thêm rủi ro (unsubscribe/leak) = anh cho thấy đã DÙNG thật, không chỉ đọc.</p>
+            <p>🧭 <b>Bộ 3 cùng máu OCP, lật 3 trục khác nhau:</b> 🎯 Strategy lật <i>"tính NHƯ THẾ NÀO"</i> · 🏭 Factory lật <i>"TẠO cái nào"</i> · 📡 Observer lật <i>"AI GỌI AI"</i>. Cả ba đều cho cùng một chiến thắng: thêm cái mới = thêm code, không mổ code cũ.</p>
           </div>
         </div>
       </details>
@@ -369,32 +512,77 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="rk">⚡ Cú lật — dịch giữa hai interface không khớp</div>
             <p>Adapter đứng GIỮA: client mong interface A, thư viện/legacy cho interface B. Adapter implement A, bên trong gọi B — <b>không sửa class gốc, không sửa client</b>. Thường dùng để bọc 3rd-party / legacy cho khớp domain của mình.</p>
           </div>
+          <h4>🧗 Con đường tự đẻ ra Adapter — đi lại con đường, đừng học thuộc</h4>
+          <p>Đừng nhớ định nghĩa. Nhớ <b>cái đau</b> rồi tự bò ra pattern — 5 bước dưới đây là đúng hành trình đã dẫn tới nó. Đọc lại 100000 ngày sau vẫn tự dựng lại được.</p>
+          <div class="brick" data-n="1">
+            <div class="bt">😰 Cái đau: app quen một hình dạng, vendor cho hình dạng khác</div>
+            <p>Cả app anh (nối tiếp buổi Strategy) gọi phí qua <code>strategy.calc(amount)</code> — đó là <b>hình dạng app đã quen</b>. Sếp bảo: <i>"tích hợp Stripe SDK thật vào."</i> Nhưng Stripe chỉ hiểu <code>stripe.createCharge({amount, currency})</code>. Hai tên khác, hai hình dạng khác — <b>không khớp.</b></p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">💣 Nước ngu #1 — bẻ cong CẢ APP theo Stripe</div>
+            <p>Sửa hết <code>.calc()</code> → <code>.createCharge()</code> khắp app: codebase to = <b>1000 chỗ</b>. Đây là <b>Shotgun Surgery</b> (sửa 1 thứ, đụng dao ngàn nơi) + tệ hơn: app anh thành <b>nô lệ của vendor</b>. Mai đổi Adyen → 1000 chỗ nữa. ❌</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">🚫 Nước ngu #2 — bẻ cong Stripe theo app</div>
+            <p>"Vậy sửa tên <code>createCharge</code> → <code>calc</code> trong SDK Stripe cho khớp?" — <b>KHÔNG được: code của người ta, thư viện của người ta.</b> Mà lỡ fork sửa được thì <code>npm update</code> phát → bay sạch. Kẹt cứng hai đầu: app sửa được nhưng <i>quá đắt</i>, Stripe thì <i>cấm sửa</i>.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🔌 Chỗ thứ ba: nhét một "cục chuyển" vào KHE GIỮA</div>
+            <p>Không đụng app, không đụng Stripe → chỉ còn khoảng trống <b>ở giữa</b>. Một class-cục-chuyển: (a) có method <code>calc()</code> đúng hình dạng app quen → app gọi được, <b>khỏi sửa 1000 chỗ</b>; (b) bên trong nó <b>gọi thẳng</b> <code>stripe.createCharge()</code>. Nó không tự tính gì — nó <b>chuyền</b> việc cho Stripe.</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">🎭 Kết: đội lốt interface app quen — đổi vendor = 1 cục chuyển mới</div>
+            <p><code>StripeAdapter implements FeeStrategy</code> → với <code>checkout()</code> nó nhìn <b>y hệt</b> <code>MomoFee</code>, không biết Stripe nấp bên trong. Đổi qua Adyen = viết <code>AdyenAdapter</code> mới; app (1000 chỗ) <b>bất động</b>, vendor cũ <b>bất động</b>. Cái class-cục-chuyển đó mang một cái tên: <b>Adapter</b>.</p>
+          </div>
+          <h4>🎯 Gói lại 3 ý chính</h4>
           <div class="brick" data-n="1">
             <div class="bt">Client mong một interface; thứ có sẵn cho interface khác</div>
-            <p>App của anh gọi <code>IPayment.charge()</code>; nhưng StripeSDK cho <code>stripe.createCharge()</code> hình dạng khác. Không khớp.</p>
+            <p>App gọi <code>.calc(amount)</code>; Stripe SDK cho <code>createCharge({amount, currency})</code> — hình dạng khác. Không khớp.</p>
           </div>
           <div class="brick" data-n="2">
             <div class="bt">Adapter implement interface client cần, gọi B bên trong</div>
-            <p><code>StripeAdapter implements IPayment { charge(){ this.stripe.createCharge(...) } }</code>. Nó "dịch" lời gọi.</p>
+            <p><code>StripeAdapter implements FeeStrategy { calc(a){ this.stripe.createCharge(...) } }</code>. Vào bằng <code>calc()</code>, ra bằng <code>createCharge()</code> — nó "dịch" lời gọi.</p>
           </div>
           <div class="brick" data-n="3">
             <div class="bt">Client dùng A, không biết B tồn tại</div>
-            <p>Đổi Stripe → Adyen = viết adapter mới cho <code>IPayment</code>. Domain code (dùng <code>IPayment</code>) không đụng.</p>
+            <p>Đổi Stripe → Adyen = viết adapter mới cho <code>FeeStrategy</code>. Domain code (dùng <code>.calc()</code>) không đụng một dòng.</p>
           </div>
           <p>🧭 <b>Metaphor — ổ chuyển phích cắm:</b> phích dẹt (VN) cắm ổ tròn (EU) — không đổi ổ tường, không đổi phích, chỉ thêm cục chuyển ở giữa. Adapter đúng là "cục chuyển" giữa hai interface.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Domain gọi thẳng SDK (dính vendor)</div><pre><span class="kw">class</span> <span class="badt">Checkout</span> {
-  pay() {
-    stripe.createCharge({amt, cur}); <span class="cmt">// SDK rò vào domain</span>
+            <div class="code bad"><div class="hd">❌ Nước ngu: domain gọi thẳng SDK (1000 chỗ dính vendor)</div><pre><span class="kw">function</span> checkout(amount) {
+  stripe.createCharge({amount, currency:<span class="str">'vnd'</span>}); <span class="cmt">// SDK rò vào domain</span>
+}
+<span class="cmt">// đổi Stripe→Adyen = sửa .createCharge khắp 1000 chỗ 😱</span></pre></div>
+            <div class="code good"><div class="hd">✅ Adapter — cục chuyển ở giữa</div><pre><span class="kw">interface</span> <span class="goodt">FeeStrategy</span> { calc(amount): number }  <span class="cmt">// hình dạng app QUEN</span>
+<span class="kw">class</span> <span class="goodt">StripeAdapter</span> <span class="kw">implements</span> FeeStrategy {
+  <span class="kw">constructor</span>(<span class="kw">private</span> stripe) {}          <span class="cmt">// ôm Stripe bên trong</span>
+  calc(amount) {                           <span class="cmt">// CỬA VÀO: hình dạng A (app gọi)</span>
+    <span class="kw">return</span> this.stripe.createCharge({      <span class="cmt">// CỬA RA: hình dạng B (Stripe hiểu)</span>
+      amount, currency: <span class="str">'vnd'</span>
+    });                                    <span class="cmt">// ↑ thân method NÀY = động tác "convert A→B"</span>
   }
 }
-<span class="cmt">// đổi Stripe→Adyen = sửa domain khắp nơi</span></pre></div>
-            <div class="code good"><div class="hd">✅ Adapter</div><pre><span class="kw">interface</span> <span class="goodt">IPayment</span> { charge(amt): void }
-<span class="kw">class</span> <span class="goodt">StripeAdapter</span> <span class="kw">implements</span> IPayment {
-  charge(amt){ this.stripe.createCharge({amt}); }
-}
-<span class="cmt">// domain dùng IPayment; đổi vendor = adapter mới</span></pre></div>
+<span class="cmt">// app vẫn gọi checkout(new StripeAdapter(stripe), 500000) — mù vendor</span>
+<span class="cmt">// đổi vendor = 1 adapter mới, app & vendor cũ BẤT ĐỘNG ↓</span>
+<span class="kw">class</span> <span class="goodt">AdyenAdapter</span> <span class="kw">implements</span> FeeStrategy {
+  calc(amount){ <span class="kw">return</span> this.adyen.submitPayment(amount); }
+}</pre></div>
           </div>
+
+          <h4>🧠 Ba chỗ dễ tẩu hỏa (đã gỡ trong buổi) — đọc kỹ kẻo lú lại</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">① Adapter khác Strategy chỗ nào? (cả hai đều <code>implements FeeStrategy</code>!)</div>
+            <p>Vỏ ngoài <b>y hệt</b> — bí mật nằm ở <b>TRONG thân method</b>: <code>MomoFee.calc(a){ return a*.015 }</code> — logic <b>đẻ ra ngay tại đây</b>, nó là <b>đầu bếp</b> tự nấu. Còn <code>StripeAdapter.calc(a){ return stripe.createCharge(...) }</code> — <b>không có logic riêng</b>, chỉ <b>chuyền</b> cho Stripe, nó là <b>thông dịch viên</b>. Strategy giải quyết <i>sự đa dạng hành vi CỦA MÌNH</i>; Adapter giải quyết <i>sự lệch hình dạng với một thằng LẠ</i>. Câu hỏi mỗi đứa trả lời: Strategy = <i>"tui có nhiều cách tự-làm X, cho tráo"</i>; Adapter = <i>"có thằng ngoài làm X rồi mà nói sai tiếng, cho tui dịch để nhét vô."</i></p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">② "converts the interface of a class" — <b>convert KHÔNG phải sửa Stripe</b></div>
+            <p>Interface thật của Stripe <b>y nguyên đời đời</b>, không ai đụng. "Convert X into Y" trong tiếng Anh = <i>"trình bày / làm cho X xài được dưới hình dạng Y"</i>, KHÔNG phải "sửa X" — như <i>convert dollars into euros</i> (đô không bị hủy), <i>convert Word to PDF</i> (file Word không đổi). Chữ "convert" xảy ra <b>tại cục chuyển</b>: nhận cú gọi <code>.calc()</code> rồi <i>trình lại</i> thành <code>createCharge()</code>. Không phẫu thuật ai hết.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">③ "interface of a class" — <code>createCharge</code> là method mà, sao gọi interface?</div>
+            <p>Chữ <b>interface có 2 nghĩa</b>: ① từ khóa TS/Java (<code>interface FeeStrategy {…}</code>); ② nghĩa gốc = <b>"mặt tiếp xúc"</b> = cách anh nói chuyện với một thứ (nó có method tên gì, nhận gì, trả gì). GoF dùng <b>nghĩa ②</b>. <code>createCharge</code> là một <i>method</i> — nhưng hình dạng của nó là <b>một phần "mặt tiếp xúc" của Stripe</b>. Như: <i>method = một cái nút bấm; interface (②) = toàn bộ mặt điều khiển gồm các nút.</i> Nên "interface của Stripe" = cách phải gọi nó, <b>không cần</b> Stripe viết từ khóa <code>interface</code>.</p>
+          </div>
+
           <h4>👃 Khi nào dùng</h4>
           <div class="signals">
             <div class="sig"><span class="sn">1</span><div><div class="st">Tích hợp thư viện 3rd-party / legacy</div><div class="sd">Interface của nó không khớp cái domain anh muốn.</div></div></div>
@@ -406,9 +594,26 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="drow"><div class="dq">"Adapter khác Decorator?"</div><div class="da">Decorator giữ NGUYÊN interface, thêm hành vi. Adapter ĐỔI interface (từ B sang A), không thêm hành vi. Cùng 'bọc' nhưng mục đích khác.</div></div>
             <div class="drow"><div class="dq">"Adapter liên quan gì tới testing (gốc 6)?"</div><div class="da">'Don't mock what you don't own': bọc 3rd-party bằng adapter (interface của mình), rồi test bằng cách mock adapter/interface — không mock SDK ngoài. Adapter tạo ranh giới mock được (nối DIP).</div></div>
           </div>
+          <h4 id="say-adapter">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Adapter — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"An Adapter converts the interface of a class into another interface the client expects — so two things that otherwise couldn't work together, because their shapes don't match, now can. Put simply: it wraps a class whose interface doesn't fit and re-exposes it through the interface the client already expects, translating each call."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"When I integrate a third-party SDK or legacy code whose method shape doesn't match what my app expects, I'm stuck: either I rewrite every call site to match the vendor — shotgun surgery, and it chains my whole app to that vendor — or I edit the library itself, which I can't, it's not my code."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"My app calls calc(amount) everywhere; Stripe's SDK only offers createCharge({amount, currency}). I write a StripeAdapter that implements my own FeeStrategy interface — its calc() just translates the call into Stripe's createCharge(). The app keeps calling calc(), unaware Stripe is behind it."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"My domain depends on my own interface, not the vendor. Swapping Stripe for Adyen means writing one new adapter — the thousand call sites and the old vendor stay untouched. This is the ports-and-adapters / Hexagonal boundary, a direct application of the Dependency Inversion Principle."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① dịch interface lạ → interface app quen · ② kẹt hai đầu (sửa app = shotgun 1000 chỗ / sửa lib = cấm) · ③ <code>StripeAdapter.calc()</code> gọi <code>createCharge()</code> · ④ đổi vendor = 1 adapter mới, domain bất động = DIP / Hexagonal 🔒</p>
+          <div class="reframe">
+            <div class="rk">🔫 Đòn thủ — khi interviewer vặn "vậy Adapter có thừa không, sao không gọi thẳng SDK?"</div>
+            <p>Đọc verbatim: <i>"Calling the SDK directly is fine for a throwaway script. But in a real app the vendor's shape leaks into every call site — so a version bump or a vendor swap becomes shotgun surgery across the whole codebase, and my domain logic can't be tested without the real SDK. The adapter is one small, isolated seam that absorbs all of that: the vendor changes on one side, my domain stays still on the other."</i></p>
+          </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt: "Adapter là ranh giới chống 3rd-party rò vào domain — domain phụ thuộc interface của MÌNH, adapter dịch sang API vendor. Đổi vendor = viết adapter mới, domain bất động." Đây là ports-and-adapters (Hexagonal), nối thẳng DIP (gốc 3).</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Adapter <i>converts the interface of a class into another interface the client expects</i> — bọc một thứ có hình dạng lạ và trình lại nó dưới hình dạng client đã quen, dịch từng lời gọi. <i>Convert</i> = trình-bày-lại chứ KHÔNG sửa cái gốc; <i>interface</i> ở đây = 'mặt tiếp xúc' (nghĩa ②), không cần từ khóa."</p>
+            <p>Câu chốt: "Adapter là ranh giới chống 3rd-party rò vào domain — domain phụ thuộc interface của MÌNH, adapter dịch sang API vendor. Đổi vendor = viết adapter mới, domain bất động." Đây là ports-and-adapters (Hexagonal), nối thẳng DIP (gốc 3). <b>Phân biệt sắc với Strategy</b> (cùng <code>implements</code> một interface): Strategy = đầu bếp <i>tự nấu</i> (logic trong class); Adapter = thông dịch viên <i>chuyền việc</i> (logic ở thằng khác). Nói được cặp này = anh nắm structural vs behavioral pattern rõ ràng.</p>
           </div>
         </div>
       </details>
@@ -421,31 +626,77 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="rk">⚡ Cú lật — thêm tính năng bằng BỌC, không bằng subclass</div>
             <p>Decorator bọc một object bằng một object khác CÙNG interface, thêm hành vi trước/sau. Mục tiêu: <b>thêm tính năng lúc runtime, tùy tổ hợp, không đẻ subclass bùng nổ</b> (nếu dùng kế thừa cho mọi tổ hợp thì số class nổ theo cấp số nhân).</p>
           </div>
+          <h4>🧗 Con đường tự đẻ ra Decorator — đi lại con đường, đừng học thuộc</h4>
+          <p>Đừng nhớ định nghĩa. Nhớ <b>cái đau</b> rồi tự bò ra pattern — 5 bước dưới đây là đúng hành trình đã dẫn tới nó. Đây là ý <b>khó nhất</b> trong cả bộ pattern; đọc lại 100000 ngày sau vẫn tự dựng lại được.</p>
           <div class="brick" data-n="1">
-            <div class="bt">Nhiều tính năng tùy chọn → subclass bùng nổ</div>
-            <p>Coffee + sữa? + đường? + kem? Nếu mỗi tổ hợp một subclass → <code>MilkSugarCoffee</code>, <code>MilkKemCoffee</code>... nổ tung.</p>
+            <div class="bt">😰 Cái đau: quán cà phê + topping tùy chọn</div>
+            <p>Espresso 20k. Topping thêm: <b>Sữa +5k, Đường +2k, Kem +8k</b>. Khách phối tự do. Cách <i>ngây thơ</i>: coi mỗi món khách gọi là <b>một khối liền</b> → đẻ một class cho mỗi combo: <code>MilkEspresso</code> (cost = 25k), <code>MilkKemEspresso</code> (cost = 33k)…</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">💥 Đếm ra → "subclass bùng nổ"</div>
+            <p>3 topping, mỗi cái có/không = <b>2×2×2 = 8 class</b>. Thêm <b>1</b> topping (trân châu) → <b>16</b>. Rồi 32, 64… <b>2ⁿ — gấp đôi mỗi lần thêm topping</b>. Chưa kể: đổi giá sữa 5k→6k phải mở <b>nửa số class</b> (mọi class có sữa) ra sửa. Bài toán sai từ gốc: <i>cố đúc sẵn mọi tổ hợp, mà tổ hợp là vô hạn.</i></p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">💡 Đổi lối: khách đâu nghĩ "khối liền" — họ nghĩ "THÊM từng lớp"</div>
+            <p>Khách nghĩ: <i>"cho ly espresso… rồi <b>thêm</b> sữa… rồi <b>thêm</b> kem."</i> Từng lớp chồng lên. Vậy làm mỗi topping thành <b>một cục biết: ôm ly đang có, rồi cộng thêm giá của mình.</b> Cục <code>Sua</code> nhận một ly → trả <b>giá ly đó + 5k</b>.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🪆 Chỗ lú nhất: "Sua vừa LÀ ly, vừa ÔM ly" — như búp bê Nga</div>
+            <p>Nghe như ma trơi ("ly chứa ly"?), nhưng giống <b>búp bê Nga</b>: mỗi con vừa LÀ búp bê, vừa CHỨA búp bê — chả lạ. Tách 2 mẩu: <b>(ÔM)</b> <code>Sua</code> giữ ly bên trong để cộng giá. <b>(LÀ)</b> — mấu chốt: <i>"LÀ một ly" KHÔNG nghĩa "là espresso thật", mà chỉ nghĩa <b>"bấm <code>.cost()</code> ra được giá"</b></i>. <code>new Sua(new Espresso()).cost()</code> → 25000 → bấm ra giá → <code>Sua</code> đủ tư cách "là một ly".</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">🎁 Kết: vì Sua CŨNG "là ly" → bọc chồng vô hạn, thu ngân bấm 1 nút</div>
+            <p>Vì <code>Sua</code> tự nó cũng là ly → <code>Kem</code> bọc <code>Sua</code> y hệt bọc ly thường: <code>new Kem(new Sua(new Espresso()))</code>. Thu ngân bấm <b>đúng một</b> <code>.cost()</code> ở ngoài → dội vào trong cộng dồn = 33000, <b>chẳng cần biết 1 lớp hay 10 lớp</b>. 4 cục (Espresso, Sua, Duong, Kem) phối ra <b>vô hạn combo</b> — thêm topping = thêm 1 cục, không gấp đôi class. Cái cục vừa-là-vừa-bọc đó tên: <b>Decorator</b>.</p>
+          </div>
+          <h4>🎯 Gói lại 3 ý chính</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">Nhiều tính năng tùy chọn → subclass bùng nổ (2ⁿ)</div>
+            <p>Đúc sẵn mỗi combo một class → mỗi topping mới gấp đôi số class. Sai từ gốc.</p>
           </div>
           <div class="brick" data-n="2">
             <div class="bt">Decorator bọc object gốc, giữ CÙNG interface</div>
-            <p><code>MilkDecorator</code> cũng là <code>Coffee</code>, nó GIỮ một Coffee bên trong + thêm giá/mô tả sữa. Client vẫn thấy một <code>Coffee</code>.</p>
+            <p><code>Sua implements Coffee</code>: nó vừa <b>LÀ</b> Coffee (bấm <code>.cost()</code> ra giá), vừa <b>ÔM</b> một Coffee bên trong + cộng giá của mình. Thu ngân vẫn chỉ thấy "một Coffee".</p>
           </div>
           <div class="brick" data-n="3">
-            <div class="bt">Bọc CHỒNG nhiều lớp tùy ý</div>
-            <p><code>new Sugar(new Milk(new Espresso()))</code> — mỗi lớp thêm một hành vi. Muốn thêm topping = thêm một decorator, ghép runtime.</p>
+            <div class="bt">Bọc CHỒNG nhiều lớp tùy ý (runtime)</div>
+            <p><code>new Kem(new Sua(new Espresso()))</code> — mỗi lớp thêm một hành vi. Thêm topping = thêm một decorator, ghép lúc chạy. Thêm bằng CODE MỚI, không mổ class cũ (OCP).</p>
           </div>
-          <p>🧭 <b>Metaphor — topping pizza / mặc thêm áo:</b> cùng "cái pizza", anh thêm từng topping tùy ý; cùng "một người", mặc thêm áo khoác/khăn tùy trời. Bọc thêm lớp, không đúc một loại người mới cho mỗi kiểu ăn mặc.</p>
+          <p>🧭 <b>Metaphor — búp bê Nga / topping / mặc thêm áo:</b> cùng "một ly", anh bọc thêm từng lớp tùy ý; cùng "một người", mặc thêm áo khoác/khăn tùy trời. Bọc thêm lớp, KHÔNG đúc một loại người mới cho mỗi kiểu ăn mặc.</p>
           <div class="pair">
-            <div class="code bad"><div class="hd">❌ Subclass cho mọi tổ hợp</div><pre><span class="kw">class</span> Espresso {}
-<span class="kw">class</span> <span class="badt">MilkEspresso</span> {}
-<span class="kw">class</span> <span class="badt">MilkSugarEspresso</span> {}
-<span class="cmt">// mỗi tổ hợp = 1 class → nổ tung 😱</span></pre></div>
-            <div class="code good"><div class="hd">✅ Decorator (bọc chồng)</div><pre><span class="kw">interface</span> <span class="goodt">Coffee</span> { cost(): number }
-<span class="kw">class</span> Milk <span class="kw">implements</span> Coffee {
-  constructor(<span class="kw">private</span> inner: Coffee) {}
-  cost(){ <span class="kw">return</span> this.inner.cost() + <span class="str">5</span>; }
+            <div class="code bad"><div class="hd">❌ Subclass cho mọi tổ hợp (2ⁿ class)</div><pre><span class="kw">class</span> Espresso        { cost(){ <span class="kw">return</span> <span class="str">20000</span>; } }
+<span class="kw">class</span> <span class="badt">MilkEspresso</span>    { cost(){ <span class="kw">return</span> <span class="str">25000</span>; } }
+<span class="kw">class</span> <span class="badt">MilkKemEspresso</span> { cost(){ <span class="kw">return</span> <span class="str">33000</span>; } }
+<span class="cmt">// mỗi combo = 1 class → 3 topping = 8, 4 = 16… 2ⁿ 😱</span>
+<span class="cmt">// đổi giá sữa = mở NỬA số class ra sửa</span></pre></div>
+            <div class="code good"><div class="hd">✅ Decorator (bọc chồng)</div><pre><span class="kw">interface</span> <span class="goodt">Coffee</span> { cost(): number }  <span class="cmt">// luật: phải bấm .cost() ra số</span>
+<span class="kw">class</span> Espresso <span class="kw">implements</span> Coffee { cost(){ <span class="kw">return</span> <span class="str">20000</span>; } }
+<span class="kw">class</span> Sua <span class="kw">implements</span> Coffee {         <span class="cmt">// Sua CŨNG là Coffee</span>
+  <span class="kw">constructor</span>(<span class="kw">private</span> inner: Coffee) {}  <span class="cmt">// ÔM một Coffee bất kỳ</span>
+  cost(){ <span class="kw">return</span> this.inner.cost() + <span class="str">5000</span>; }
 }
-<span class="kw">new</span> Milk(<span class="kw">new</span> Sugar(<span class="kw">new</span> Espresso()));</pre></div>
+<span class="kw">class</span> Kem <span class="kw">implements</span> Coffee {
+  <span class="kw">constructor</span>(<span class="kw">private</span> inner: Coffee) {}
+  cost(){ <span class="kw">return</span> this.inner.cost() + <span class="str">8000</span>; }
+}
+<span class="kw">new</span> Kem(<span class="kw">new</span> Sua(<span class="kw">new</span> Espresso())).cost();  <span class="cmt">// → 33000 · bấm 1 nút, dội vào trong</span>
+<span class="cmt">// thêm topping = thêm 1 cục, KHÔNG gấp đôi class</span></pre></div>
           </div>
+
+          <h4>🧠 Mấy chỗ dễ tẩu hỏa (đã gỡ trong buổi) — đọc kỹ kẻo lú lại</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">① "mỗi combo = 1 class" nghĩa là gì?</div>
+            <p>Cách ngây thơ coi <i>mỗi món khách-có-thể-gọi</i> là một class có sẵn phép cộng riêng: <code>MilkKemEspresso.cost(){ return 20000+5000+8000 }</code>. Khách phối topping tự do → số món khả dĩ = số tổ hợp → mỗi tổ hợp phải ngồi viết tay một class. Đó là lý do nó nổ 2ⁿ.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">② <code>new Espresso()</code> trả về VẬT THỂ, không phải con số</div>
+            <p><code>new Espresso()</code> = làm ra một <b>ly (object)</b> — thứ CÓ nút <code>.cost()</code>; muốn ra giá phải <b>bấm nút</b>: <code>new Espresso().cost()</code> → 20000. Vì vậy khi bọc phải chuyền <b>VẬT THỂ</b> (thứ có <code>.cost()</code>), không chuyền con số: <code>new Sua(20000)</code> ❌ — số trơn <b>không có <code>.cost()</code></b> → <code>Kem</code> bọc lên gọi <code>.cost()</code> sẽ gãy, hết bọc chồng. Chuyền object → bọc vô hạn ✅.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">③ "vừa LÀ vừa CHỨA" hết lạ — và "LÀ một Coffee" nghĩa là gì</div>
+            <p>Búp bê Nga: vừa LÀ búp bê vừa CHỨA búp bê — bình thường. <b>"LÀ một Coffee" KHÔNG nghĩa "là espresso thật"</b>, chỉ nghĩa <b>"trả lời được câu <code>.cost()</code>"</b>. Với thu ngân, "một ly cà phê" = "thứ nào bấm <code>.cost()</code> ra giá". <code>Sua</code> bấm ra 25000 → đủ tư cách là ly → nên <code>Kem</code> bọc được <code>Sua</code> hệt bọc ly thường. Số <code>20000</code> không có <code>.cost()</code> → không phải "ly".</p>
+          </div>
+          <p>🏷️ <b>Ba chữ "sang chảnh" chỉ là nhãn dán:</b> <code>interface Coffee</code> = luật thu ngân ("phải bấm <code>.cost()</code> ra số") · <code>implements Coffee</code> = "cục này thề tuân luật" (nên nó <i>là</i> một ly) · <code>private inner: Coffee</code> = "ôm một ly bên trong" (ly bất kỳ, miễn tuân luật).</p>
+
           <h4>👃 Khi nào dùng</h4>
           <div class="signals">
             <div class="sig"><span class="sn">1</span><div><div class="st">Tính năng tùy chọn ghép tự do</div><div class="sd">Log, cache, nén, mã hóa thêm quanh một hành vi cốt lõi.</div></div></div>
@@ -456,10 +707,29 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="drow"><div class="dq">"Decorator khác Inheritance chỗ nào?"</div><div class="da">Inheritance quyết lúc COMPILE, cứng, mỗi tổ hợp một class. Decorator quyết lúc RUNTIME, ghép chồng tùy ý, tránh bùng nổ class. Decorator = composition thay cho inheritance để thêm hành vi.</div></div>
             <div class="drow"><div class="dq">"Middleware/Interceptor (Express/Nest) có phải Decorator?"</div><div class="da">Rất gần: chuỗi middleware bọc quanh request/handler, mỗi lớp thêm hành vi (auth, log, cache) trước/sau — đúng tinh thần decorator/chain. (Lưu ý: @Decorator syntax của TS là metadata, khác pattern này.)</div></div>
             <div class="drow"><div class="dq">"Thứ tự bọc có quan trọng không?"</div><div class="da">Có. <code>Cache(Log(x))</code> khác <code>Log(Cache(x))</code> — cái nào chạy trước ảnh hưởng hành vi (vd log có thấy cache hit không). Thứ tự là một quyết định thiết kế.</div></div>
+            <div class="drow"><div class="dq">"Decorator khác Adapter chỗ nào? (cả hai đều 'bọc')"</div><div class="da">Khác ở <b>interface trước/sau khi bọc</b>. <b>Decorator</b>: interface GIỮ NGUYÊN — bọc xong vẫn là <code>Coffee</code>, chỉ THÊM hành vi (cộng giá). <b>Adapter</b>: interface ĐỔI — vào bằng B (<code>createCharge</code>) ra bằng A (<code>calc</code>), mục tiêu là tương thích chứ không thêm gì. Cùng "bọc", khác mục đích: Decorator <i>thêm</i>, Adapter <i>dịch</i>.</div></div>
+          </div>
+          <h4 id="say-decorator">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề nó cứu → ③ Ví dụ ngắn → ④ Lợi ích.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Decorator — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"The Decorator pattern wraps an object in another object that shares the same interface, adding behavior before or after — so I can add features at runtime, in any combination, without a subclass explosion."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"Without it, optional features that combine freely force one subclass per combination — three toppings is already eight classes, a fourth doubles it to sixteen, it grows as 2 to the n. And changing one feature means editing half of those classes."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"A coffee example: Espresso, Milk, Cream all implement a Coffee interface with cost(). Milk holds a Coffee inside and returns inner.cost() plus its own. Because Milk is itself a Coffee, I can stack: new Cream(new Milk(new Espresso())) — one cost() call cascades inward."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"So four small classes compose into unlimited combinations; adding a topping is one new class, not doubling the count. It's composition instead of inheritance, and it obeys Open–Closed: I extend by adding, never editing what works."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① mỗi topping một cục cùng nút <code>.cost()</code> · ② 3 topping = 8 class, +1 → 16, 2ⁿ 😱 · ③ 🪆 <code>new Kem(new Sua(new Espresso()))</code> = 33000, bấm 1 nút · ④ thêm topping = thêm 1 cục = OCP 🔒</p>
+          <div class="reframe">
+            <div class="rk">🔫 Đòn thủ — khi interviewer vặn "sao không dùng kế thừa cho gọn?"</div>
+            <p>Đọc verbatim: <i>"Inheritance fixes the combination at compile time — one class per combination — so it explodes as 2 to the n and can't be recomposed at runtime. Decorator uses composition: each layer wraps the next through the same interface, so combinations are built dynamically and each feature lives in exactly one class. That's why real frameworks model cross-cutting concerns — logging, caching, auth — as a middleware chain, which is Decorator in practice."</i></p>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt: "Decorator giữ interface + thêm hành vi bằng cách bọc — tuân OCP (thêm không sửa) và dùng composition thay inheritance để tránh bùng nổ class. Middleware chain là hiện thân thực tế." Phân biệt được với Adapter (đổi interface) = anh nắm structural patterns rõ.</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Decorator bọc một object bằng một object khác <i>cùng interface</i>, thêm hành vi trước/sau — để thêm tính năng lúc runtime, phối tự do, mà không đẻ subclass bùng nổ (2ⁿ)."</p>
+            <p><b>Chốt hiểu-gốc (khỏi lú lại):</b> mấu chốt là <i>"LÀ một Coffee" = "bấm được <code>.cost()</code>"</i>, không phải "là espresso thật" — nhờ vậy cục bọc tự nó cũng là Coffee → bọc chồng vô hạn, client bấm 1 nút. Phải chuyền <b>object</b> (có <code>.cost()</code>), không chuyền số.</p>
+            <p>Câu chốt: "Decorator giữ interface + thêm hành vi bằng cách bọc — tuân OCP và dùng composition thay inheritance để tránh bùng nổ class. Middleware chain là hiện thân thực tế." <b>Phân biệt sắc với Adapter:</b> cùng "bọc", nhưng Decorator <i>giữ nguyên</i> interface + THÊM hành vi; Adapter <i>đổi</i> interface để tương thích. Nói được cặp này = anh nắm structural patterns rõ.</p>
           </div>
         </div>
       </details>
@@ -472,6 +742,29 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="rk">⚡ Cú lật — Singleton thường bị coi là ANTI-PATTERN</div>
             <p>Singleton đảm bảo một class chỉ có MỘT instance + một điểm truy cập toàn cục. Nghe tiện — nhưng interview thường hỏi để xem anh có biết <b>mặt trái</b>: nó là <b>global mutable state trá hình</b> (coupling ẩn + khó test + vấn đề đa luồng). Biết mặt trái mới là điểm cộng.</p>
           </div>
+          <h4>🧗 Con đường tự đẻ ra Singleton (và tự chê nó) — đi lại con đường</h4>
+          <p>Singleton đặc biệt: đây là pattern <b>duy nhất</b> interview hỏi để nghe anh <b>CHÊ</b> nó. Nên hành trình có <b>hai</b> cái đau — một cái nó cứu, một cái nó tự gây ra. Đọc lại 100000 ngày sau vẫn tự dựng lại được.</p>
+          <div class="brick" data-n="1">
+            <div class="bt">😌 Cái đau lành: cả app cần dùng CHUNG một cục Config</div>
+            <p>Config (API key, URL DB, setting) — cả app đọc nó. Anh muốn mọi nơi xài <b>đúng MỘT bản</b>, không <code>new Config()</code> rải rác (50 bản → mỗi bản một giá trị → loạn). Anh cần một cách gọi "đưa tao cục Config CHUNG" — gọi đâu cũng ra đúng nó.</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">🔑 Chiêu Singleton: khoá cửa + giữ một bản + một cửa lấy</div>
+            <p><code>private constructor()</code> <b>khoá</b> — cấm ngoài <code>new</code> (ép chỉ một bản). <code>private static instance</code> = ô cất bản duy nhất <b>trên chính class</b>. <code>static getInstance()</code> = cửa duy nhất: lần đầu tạo, lần sau trả bản cũ. → "một instance + gọi được KHẮP NƠI". Nghe <b>tiện dã man</b> 😏.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">🤥 Độc #1 — phụ thuộc ẨN (chữ ký nói dối)</div>
+            <p><code>function tinhGia(order){ Config.getInstance().taxRate … }</code> — nhìn chữ ký tưởng chỉ cần <code>order</code>, thực ra <b>lén</b> xài Config. Đọc chữ ký KHÔNG biết nó phụ thuộc gì → coupling <b>ẩn</b> rải khắp app. So với <code>tinhGia(order, config)</code> — khai tường minh, nhìn là biết.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">🔒 Độc #2 — kẹt test (không thay được đồ giả)</div>
+            <p>Muốn test <code>taxRate=0</code>? Hàm <b>tự</b> gọi <code>getInstance()</code> lấy Config <b>thật</b> bên trong → anh đứng ngoài (file test) <b>không nhét được</b> Config giả vào. Kẹt cứng với bản thật. Singleton = "kẻ giết unit test".</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">💉 Thuốc + sự thật senior: tách "một bản" khỏi "toàn cục"</div>
+            <p>Thay vì để hàm <b>tự đi lấy</b>, <b>ĐƯA</b> Config vào qua tham số (<b>Dependency Injection</b>): <code>tinhGia(order, config)</code>. Hết ẩn (chữ ký khai thật) + test được (nhét đồ giả). Mấu chốt: <b>"một instance" ≠ "điểm truy cập toàn cục"</b>. Muốn một bản chung? Để <b>DI container</b> giữ một bản (singleton scope) rồi <b>inject</b> — giữ cái tốt, bỏ cái độc.</p>
+          </div>
+          <h4>🎯 Gói lại 3 ý chính</h4>
           <div class="brick" data-n="1">
             <div class="bt"><code>getInstance()</code> trả về một instance duy nhất</div>
             <p>Lần đầu tạo, các lần sau trả lại cùng object. Ai gọi ở đâu cũng lấy được — đó là "điểm truy cập toàn cục".</p>
@@ -484,7 +777,7 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
             <div class="bt">Global state = khó test + đa luồng + coupling ẩn</div>
             <p>Test không thay được nó bằng mock (nó tự tạo mình). State dùng chung giữa các test → rò rỉ giữa test. Đa luồng → race khi khởi tạo.</p>
           </div>
-          <p>🧭 <b>Metaphor — công tắc tổng của cả tòa nhà:</b> tiện vì ai cũng với tới, nhưng một người gạt là CẢ tòa nhà ảnh hưởng, và không ai biết ai vừa gạt. Trạng thái toàn cục là vậy: tiện truy cập, khó truy trách nhiệm.</p>
+          <p>🎭 <b>Metaphor — thanh kiếm đạo cụ sân khấu (cùng MỘT kiếm, hai cách tới tay):</b> vở kịch có 1 thanh kiếm thật (một instance — đúng). <b>Cách độc (Singleton):</b> kiếm treo hậu đài, diễn viên <b>tự lén chạy ra vớ</b> — <i>bảng kê đạo cụ đầu cảnh</i> (= chữ ký hàm) KHÔNG ghi → nói dối; muốn tập bằng <i>kiếm xốp</i> (= mock) cũng không được vì họ luôn vớ kiếm thật. <b>Cách lành (DI):</b> vẫn đúng kiếm đó, nhưng quản đạo cụ <b>trao tận tay</b> — bảng kê ghi đủ (tường minh), tập thì đưa kiếm xốp (test được). "Một bản" = tốt; "ai cũng tự với tới lấy" = độc.</p>
           <div class="code bad"><div class="hd">☝️ Singleton cổ điển</div><pre><span class="kw">class</span> <span class="badt">Config</span> {
   <span class="kw">private static</span> instance: Config;
   <span class="kw">static</span> getInstance() {
@@ -493,18 +786,64 @@ checkout(strategy: FeeStrategy) {...}</pre></div>
   }
 }
 Config.getInstance().set(...); <span class="cmt">// gọi được KHẮP NƠI</span></pre></div>
+          <h4>🧠 Mấy chỗ dễ tẩu hỏa (đã gỡ trong buổi) — đọc từng dòng code trên</h4>
+          <div class="brick" data-n="1">
+            <div class="bt">① <code>private</code> vs <code>static</code> — hai gạch nền</div>
+            <p><b><code>private</code></b> = "chỉ code BÊN TRONG class được sờ, ngoài cấm" (như cái khoá 🔒). <b><code>static</code></b> = thuộc tính/hàm thuộc về <b>chính class</b> (một bản chung, gọi qua tên class), KHÔNG thuộc từng object. Ẩn dụ: class là <b>khuôn bánh</b>, mỗi <code>new</code> là <b>một cái bánh</b>. Thứ thường viết lên <i>từng bánh</i> (mỗi cái một giá trị); thứ <code>static</code> viết lên <i>chính cái khuôn</i> (một bản chung). Singleton cần đúng MỘT bản dùng chung → nên viết lên khuôn = <code>static</code>. 🍪</p>
+          </div>
+          <div class="brick" data-n="2">
+            <div class="bt">② <code>private static instance: Config</code> — bóc từng chữ</div>
+            <p><code>instance</code> = TÊN cái ô (tự đặt). <code>: Config</code> = KIỂU — dán nhãn "ô này chỉ chứa vật loại Config" (như <code>tuoi: number</code>, <code>ten: string</code>). Ghép cả dòng: "một ô tên <i>instance</i>, nằm <b>trên khuôn</b> (static), <b>người ngoài cấm sờ</b> (private), chỉ chứa được một Config." Lúc đầu ô rỗng.</p>
+          </div>
+          <div class="brick" data-n="3">
+            <div class="bt">③ <code>private constructor()</code> — khoá cửa tạo mới</div>
+            <p>Bình thường <code>new Config()</code> chạy <code>constructor</code>. Đặt nó <code>private</code> = <b>khoá</b>: ngoài gõ <code>new Config()</code> → LỖI. Chỉ code <b>bên trong</b> class (tức <code>getInstance()</code>) mới được <code>new</code>. Đây là cách <b>ép chỉ một bản</b>, không ai lén đẻ bản thứ hai.</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">④ Tách "một bản" (①) khỏi "điểm truy cập toàn cục" (②)</div>
+            <p>Singleton dán chặt 2 thứ: <b>① bao nhiêu bản</b> (một — TỐT) + <b>② cách lấy</b> (ai cũng tự <code>getInstance()</code> — ĐỘC). Bỏ ② giữ ①: vẫn một bản, nhưng <b>trao tận tay</b> (inject) thay vì để tự lén lấy. Đó là toàn bộ câu "senior".</p>
+          </div>
           <div class="warn">⚠️ <b>Vì sao bị coi anti-pattern:</b> (1) global mutable state — ai cũng đổi, khó truy; (2) phụ thuộc ẨN — không khai qua constructor nên test/đọc code không thấy; (3) không mock được → khó unit test (nối gốc 6); (4) race condition khi khởi tạo đa luồng.</div>
-          <h4>✅ Cách làm đúng thời nay</h4>
-          <p>Cần "một instance dùng chung"? Để <b>DI container</b> quản (singleton scope) và <b>inject</b> qua constructor. Vẫn một instance, nhưng phụ thuộc TƯỜNG MINH + test thay được bằng mock. Vấn đề không phải "một instance" — mà là "điểm truy cập toàn cục + tự quản".</p>
+          <h4>✅ Cách làm đúng thời nay — inject thay vì tự lấy</h4>
+          <p>Cần "một instance dùng chung"? Để <b>DI container</b> quản (singleton scope) và <b>inject</b> qua constructor/tham số. Vẫn một instance, nhưng phụ thuộc TƯỜNG MINH + test thay được bằng mock. Vấn đề không phải "một instance" — mà là "điểm truy cập toàn cục + tự quản".</p>
+          <div class="pair">
+            <div class="code bad"><div class="hd">❌ Tự lén lấy (hidden dependency)</div><pre><span class="kw">function</span> tinhGia(order) {
+  <span class="kw">const</span> thue = Config.getInstance().taxRate; <span class="cmt">// lén, chữ ký nói dối</span>
+  <span class="kw">return</span> order.total * (<span class="str">1</span> + thue);
+}
+tinhGia(order); <span class="cmt">// test taxRate=0? KẸT — luôn lấy Config thật 🔒</span></pre></div>
+            <div class="code good"><div class="hd">✅ Inject (tường minh + test được)</div><pre><span class="kw">function</span> tinhGia(order, config) {   <span class="cmt">// chữ ký NÓI THẬT: cần config</span>
+  <span class="kw">return</span> order.total * (<span class="str">1</span> + config.taxRate);
+}
+tinhGia(order, realConfig);       <span class="cmt">// code thật: 1 bản dùng chung (DI)</span>
+tinhGia(order, { taxRate: <span class="str">0</span> }); <span class="cmt">// test: nhét đồ giả ✅</span></pre></div>
+          </div>
           <div class="drill">
             <div class="dh">↓ Interviewer đào tiếp</div>
             <div class="drow"><div class="dq">"Vì sao Singleton bị coi anti-pattern?"</div><div class="da">Global mutable state (khó suy luận), hidden dependency (không qua constructor → test/đọc khó), không mock được (khó test), coupling ẩn khắp code, và race lúc khởi tạo đa luồng.</div></div>
             <div class="drow"><div class="dq">"DI thay Singleton thế nào?"</div><div class="da">Container tạo & giữ MỘT instance (singleton scope) rồi INJECT vào nơi cần qua constructor. Vẫn một instance dùng chung, nhưng phụ thuộc tường minh + test thay được. Tách 'một instance' khỏi 'truy cập toàn cục'.</div></div>
             <div class="drow"><div class="dq">"Khi nào Singleton CHẤP NHẬN được?"</div><div class="da">Khi stateless hoặc chỉ đọc (logger, config immutable), phạm vi nhỏ, không cần thay trong test. Ngay cả vậy, inject vẫn tốt hơn truy cập toàn cục cứng.</div></div>
           </div>
+          <h4 id="say-singleton">🎤 Trả lời trong interview — khung 4 nhịp</h4>
+          <p>Đi theo: <b>① Định nghĩa 1 câu → ② Vấn đề (mặt trái) → ③ Ví dụ ngắn → ④ Cách làm đúng.</b> Đọc verbatim (English):</p>
+          <div class="brick" data-n="1">
+            <div class="bt">🎤 Singleton — đọc y như vầy (English)</div>
+            <div class="signals">
+              <div class="sig"><span class="sn">①</span><div><div class="sd"><i>"Singleton guarantees a class has exactly one instance plus a global access point to it — a private constructor locks out new, a static field holds the one instance, and getInstance() hands it back."</i></div></div></div>
+              <div class="sig"><span class="sn">②</span><div><div class="sd"><i>"But interviewers usually ask it to hear the downside: it's global mutable state in disguise. Any function can reach in with getInstance(), so the dependency is hidden — the signature doesn't declare it — and you can't swap it for a mock in a test. Plus lazy init races across threads."</i></div></div></div>
+              <div class="sig"><span class="sn">③</span><div><div class="sd"><i>"If tinhGia(order) grabs Config.getInstance() inside, its signature lies and I can't test it with taxRate=0. If instead I write tinhGia(order, config), the dependency is explicit and I just pass a fake config in the test."</i></div></div></div>
+              <div class="sig"><span class="sn">④</span><div><div class="sd"><i>"The real problem isn't 'one instance' — it's the global access point plus self-managed lifecycle. If I need one shared instance, I let a DI container own it as a singleton scope and inject it — one instance, but explicit and testable."</i></div></div></div>
+            </div>
+          </div>
+          <p>🔎 <b>Chiếu về ví dụ của mình:</b> ① khoá cửa + ô static + getInstance · ② hàm lén <code>getInstance()</code> → chữ ký nói dối + kẹt test · ③ 🎭 tự vớ kiếm thật vs được trao (thay kiếm xốp lúc tập) · ④ tách "một bản" (tốt) khỏi "toàn cục" (độc) → inject</p>
+          <div class="reframe">
+            <div class="rk">🔫 Đòn thủ — khi interviewer vặn "nhưng đôi khi cần một bản dùng chung mà?"</div>
+            <p>Đọc verbatim: <i>"Absolutely — needing one shared instance is legitimate. What I avoid is the global access point, not the single instance. The classic Singleton fuses two separate things: 'how many' (one) and 'how you get it' (a global door everyone reaches into). I keep the first and drop the second — a DI container holds the single instance and injects it, so the dependency stays explicit and I can substitute a fake in tests. Same one instance, none of the global-state pain."</i></p>
+          </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
-            <p>Câu chốt phân biệt senior: "vấn đề của Singleton KHÔNG phải 'một instance' — mà là ĐIỂM TRUY CẬP TOÀN CỤC + tự quản vòng đời. Tôi muốn một instance thì để DI container quản và inject, giữ phụ thuộc tường minh và test được." Trả lời được mặt trái + giải pháp thay thế = đúng thứ interviewer săn.</p>
+            <p><b>Định nghĩa 1 câu (thủ sẵn):</b> "Singleton = một class chỉ có đúng MỘT instance + một điểm truy cập toàn cục; nhưng nó là <i>global mutable state trá hình</i> nên thường bị coi anti-pattern."</p>
+            <p>Câu chốt phân biệt senior: "vấn đề của Singleton KHÔNG phải 'một instance' — mà là ĐIỂM TRUY CẬP TOÀN CỤC + tự quản vòng đời. Tôi muốn một instance thì để DI container quản và inject, giữ phụ thuộc tường minh và test được." Nhớ tách rõ: <b>"một bản" = TỐT · "ai cũng tự với tới lấy" = ĐỘC.</b> Trả lời được mặt trái + giải pháp thay thế = đúng thứ interviewer săn — đây là pattern duy nhất họ hỏi để nghe anh CHÊ.</p>
           </div>
         </div>
       </details>
