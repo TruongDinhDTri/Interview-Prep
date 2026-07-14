@@ -1402,7 +1402,9 @@ cùng lúc
     <div class="callout callout-blue">
         <span class="callout-emoji">&#127919;</span>
         <div class="callout-content">
-            <p><strong>Idempotency nói 1 câu:</strong> Một thao tác là <em>idempotent</em> nếu làm nó <strong>1 LẦN hay N LẦN</strong> đều cho <span class="key-phrase">KẾT QUẢ CUỐI GIỐNG HỆT nhau</span>. Lặp lại không thay đổi gì thêm.</p>
+            <p><strong>Idempotency nói 1 câu:</strong> Một thao tác là <em>idempotent</em> nếu làm nó <strong>1 LẦN hay N LẦN</strong> thì <span class="key-phrase">TRẠNG THÁI HỆ THỐNG cuối cùng vẫn Y HỆT nhau</span>. Từ lần thứ 2 trở đi, nó không thêm tác động nào nữa.</p>
+            <p style="margin-top:8px;"><strong>Kiểu toán</strong> (nếu anh thích gọn): <code>f(f(x)) = f(x)</code> — bôi thêm lần nữa cũng không đi xa hơn được.<br>
+            <code>abs(abs(-5)) = abs(-5) = 5</code> <span class="tag tag-green">✅ idempotent</span> &nbsp;·&nbsp; <code>(x+1)+1 &ne; x+1</code> <span class="tag tag-red">❌ không</span></p>
         </div>
     </div>
 
@@ -1431,6 +1433,31 @@ cùng lúc
         <span class="callout-emoji">&#129504;</span>
         <div class="callout-content">
             <p><strong>Điểm cốt:</strong> idempotent KHÔNG có nghĩa "chạy 1 lần duy nhất". Nó nghĩa là <span class="key-phrase">"chạy bao nhiêu lần cũng CHỊU, vì kết quả không đổi sau lần đầu"</span>. Nút tắt đèn vẫn nhận cú bấm thứ 6 — nó chỉ không làm gì thêm. Chính tính chất này khiến việc <strong>lặp lại trở nên AN TOÀN</strong>.</p>
+        </div>
+    </div>
+
+    <h3>&#128269; Soi kỹ định nghĩa — 3 chữ dễ trượt</h3>
+    <p>Ẩn dụ giúp anh <em>cảm</em> được. Nhưng interviewer sẽ vặn vào đúng 3 chỗ này — nên phải <em>hiểu</em> chính xác:</p>
+
+    <div class="step-card">
+        <div class="step-num">1</div>
+        <div class="step-content">
+            <p><strong>&#127919; "TRẠNG THÁI" — KHÔNG phải "RESPONSE"</strong><br>
+            Idempotency chỉ xét <span class="key-phrase">hệ thống bị ĐỔI thành gì</span>. Nó hoàn toàn <strong>không</strong> xét cái server trả về cho anh. Hai lần gọi trả về <em>khác nhau</em> vẫn có thể idempotent như thường. (Bẫy <code>DELETE</code> ngay bên dưới sống nhờ chỗ này.)</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">2</div>
+        <div class="step-content">
+            <p><strong>&#9888;&#65039; "TỪ LẦN 2 TRỞ ĐI" — lần ĐẦU vẫn đổi bình thường</strong><br>
+            Idempotent <strong>không</strong> nghĩa là "vô hại". Nút tắt đèn: cú bấm <em>đầu tiên</em> LÀM đèn tắt — đổi thật, đổi hẳn. Cú thứ 2→6 mới không đổi thêm. Idempotent nói về <span class="key-phrase">sự LẶP LẠI</span>, không nói về sự an toàn. (→ xem "Idempotent &ne; Safe".)</p>
+        </div>
+    </div>
+    <div class="step-card">
+        <div class="step-num">3</div>
+        <div class="step-content">
+            <p><strong>&#128295; Là tính chất của HÀNH ĐỘNG — không phải của cái tên verb</strong><br>
+            <code>PUT</code> không <em>bảo đảm</em> idempotent. <code>POST</code> không <em>vĩnh viễn</em> mất nết. Verb chỉ là <strong>quy ước</strong>; cái quyết định là <span class="key-phrase">thứ anh viết bên trong</span>. (→ xem "Verb nói dối".)</p>
         </div>
     </div>
 
@@ -1470,6 +1497,62 @@ Anh (tưởng fail) → RETRY "Chuyển 100k cho Nam"
         </div>
     </div>
 
+    <div class="callout callout-red">
+        <span class="callout-emoji">&#129691;</span>
+        <div class="callout-content">
+            <p><strong>BẪY SỐ 1 — interviewer RẤT hay móc chỗ này:</strong></p>
+            <blockquote style="margin-top:8px;">"Anh nói <code>DELETE</code> idempotent. Nhưng gọi lần đầu trả <code>200 OK</code>, gọi lần hai trả <code>404 Not Found</code> — <strong>response khác nhau rành rành</strong>. Vậy nó còn idempotent không?"</blockquote>
+            <p style="margin-top:8px;"><strong>Đáp: CÒN. Idempotent như thường.</strong> Vì định nghĩa xét <span class="key-phrase">TRẠNG THÁI</span>, không xét <span class="key-phrase">RESPONSE</span>:</p>
+<pre style="margin-top:8px;"><code>DELETE /file/abc  lần 1 → 200 OK        → state: file KHÔNG còn
+DELETE /file/abc  lần 2 → 404 Not Found → state: file KHÔNG còn  ← Y HỆT ✅
+                          ↑                        ↑
+                    response KHÁC              state GIỐNG
+                    (không xét)                (cái được xét)</code></pre>
+            <p style="margin-top:8px;">Ai trả lời "không idempotent vì response khác" là <strong>lộ ngay</strong> mình học thuộc bảng verb chứ chưa hiểu định nghĩa. 🎯</p>
+        </div>
+    </div>
+
+    <h3>&#129326; "Verb nói dối" — vì sao học theo bảng trên là GÃY</h3>
+    <p>Bảng verb chỉ là <strong>quy ước lịch sự</strong>, không phải <em>bảo đảm</em>. Anh viết gì bên trong mới là thứ quyết định. Cùng một <code>PUT</code>, hai cách viết, hai số phận:</p>
+<pre><code>PUT /account/123/balance
+├─ balance = 500            ← TUYỆT ĐỐI: "ĐẶT thành 500"
+│                              chạy N lần vẫn 500      ✅ idempotent
+└─ balance = balance + 100  ← TƯƠNG ĐỐI: "CỘNG thêm 100"
+                               chạy 2 lần = +200 💀    ❌ KHÔNG idempotent
+                               (dù verb là PUT!)</code></pre>
+
+    <div class="callout callout-purple">
+        <span class="callout-emoji">&#129504;</span>
+        <div class="callout-content">
+            <p><strong>Đây mới là luật gốc, sâu hơn cả bảng verb:</strong></p>
+            <p style="margin-top:6px;"><span class="key-phrase">Thao tác TUYỆT ĐỐI ("đặt thành X") → idempotent. Thao tác TƯƠNG ĐỐI ("cộng thêm / thêm một cái nữa") → không.</span></p>
+            <p style="margin-top:8px;">Đối chiếu lại 3 ẩn dụ ở trên và anh sẽ thấy nó khớp từng cái: 🔦 tắt đèn = "ĐẶT trạng thái = tắt" (tuyệt đối ✅) &nbsp;·&nbsp; ☕ thêm 1 ly = "CỘNG thêm 1" (tương đối ❌). Ẩn dụ và luật là <strong>một</strong>.</p>
+            <p style="margin-top:8px;">Chiều ngược cũng đúng: <code>POST</code> + Idempotency Key → <strong>cư xử idempotent</strong>. Nên đừng hỏi <em>"verb gì?"</em> — hãy hỏi <span class="key-phrase">"làm lại lần nữa có đổi thêm gì không?"</span></p>
+        </div>
+    </div>
+
+    <h3>&#9878;&#65039; Idempotent &ne; Safe — HAI trục khác nhau (đừng gộp)</h3>
+    <p>Bảng trên tô xanh cả <code>GET</code> lẫn <code>DELETE</code> — dễ khiến anh tưởng chúng cùng loại. <strong>Không hề.</strong> Có <em>hai</em> câu hỏi độc lập:</p>
+    <div class="table-wrap">
+        <table>
+            <thead><tr><th>Method</th><th>Safe?<br><span style="font-weight:400;font-size:.85em;">"lần ĐẦU có đổi gì không?"</span></th><th>Idempotent?<br><span style="font-weight:400;font-size:.85em;">"lần 2+ có đổi THÊM không?"</span></th></tr></thead>
+            <tbody>
+                <tr><td><code>GET</code></td><td><span class="tag tag-green">✅ Safe</span> — chỉ đọc</td><td><span class="tag tag-green">✅ Yes</span></td></tr>
+                <tr><td><code>DELETE</code></td><td><span class="tag tag-red">❌ KHÔNG safe</span> — xoá sạch! 💀</td><td><span class="tag tag-green">✅ Yes</span></td></tr>
+                <tr><td><code>PUT</code></td><td><span class="tag tag-red">❌ KHÔNG safe</span> — ghi đè</td><td><span class="tag tag-green">✅ Yes</span></td></tr>
+                <tr><td><code>POST</code></td><td><span class="tag tag-red">❌ KHÔNG safe</span></td><td><span class="tag tag-red">❌ No</span></td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="callout callout-yellow">
+        <span class="callout-emoji">&#128161;</span>
+        <div class="callout-content">
+            <p><strong>Nhớ gọn:</strong> <span class="key-phrase">Safe = "không đụng gì cả". Idempotent = "đụng bao nhiêu lần cũng chỉ đụng một lần".</span></p>
+            <p style="margin-top:6px;"><code>DELETE</code> là ví dụ đắt nhất: <strong>idempotent nhưng cực kỳ không safe</strong> — xoá 10 lần thì file cũng chỉ mất 1 lần, nhưng nó <em>đã mất</em> rồi. 😅 <strong>Safe ⟹ Idempotent</strong> (không đổi gì thì lặp lại cũng chả đổi gì), nhưng <strong>chiều ngược lại thì SAI.</strong></p>
+            <p style="margin-top:6px;">Liên quan gì tới Retry? → <strong>Retry chỉ cần Idempotent</strong>, không cần Safe. Retry <code>DELETE</code> thoải mái. 👍</p>
+        </div>
+    </div>
+
     <h3>&#128273; Thuốc cho POST — "Idempotency Key" (khoá chống trùng)</h3>
     <p>Có những POST <strong>buộc phải retry cho an toàn</strong> (thanh toán). Làm sao retry mà không nhân đôi? → Dán cho nó một <strong>chìa khoá độc nhất</strong>:</p>
 <pre><code>① Client tạo 1 chìa khoá độc nhất (UUID) cho thao tác — 1 lần
@@ -1488,6 +1571,38 @@ Anh (tưởng fail) → RETRY "Chuyển 100k cho Nam"
         <span class="callout-emoji">&#127919;</span>
         <div class="callout-content">
             <p><span class="key-phrase">Idempotency Key = biến một thao tác vốn KHÔNG idempotent thành CƯ XỬ như idempotent.</span> Server "nhớ" cú nào đã làm rồi, gặp lại thì trả kết quả cũ thay vì làm lại.</p>
+        </div>
+    </div>
+
+    <div class="callout callout-red">
+        <span class="callout-emoji">&#128165;</span>
+        <div class="callout-content">
+            <p><strong>BẪY SỐ 2 — bước ③ ở trên là LỜI HỨA, chưa phải code.</strong> Đọc lại nó:</p>
+            <blockquote style="margin-top:8px;">"Lần đầu thấy chìa → CHUYỂN + lưu. Lần sau thấy lại → trả kết quả đã lưu."</blockquote>
+            <p style="margin-top:8px;">Nghe kín kẽ. Nhưng "thấy" và "lưu" là <strong>HAI bước riêng</strong> — và giữa hai bước đó có một khe hở. Hai request cùng chìa <strong>tới CÙNG LÚC</strong> (retry bắn khi request đầu chưa xong — chuyện xảy ra suốt):</p>
+<pre style="margin-top:8px;"><code>T=0ms   Request A: chìa "abc" có chưa? → CHƯA
+T=1ms   Request B: chìa "abc" có chưa? → CHƯA   ← A chưa kịp lưu!
+T=2ms   Request A: CHUYỂN 100k → lưu chìa
+T=3ms   Request B: CHUYỂN 100k → lưu chìa
+        → 💸 Nam nhận 200k.</code></pre>
+            <p style="margin-top:8px;"><strong>Idempotency Key vừa bị chính cái bug nó sinh ra để chặn — đâm thủng.</strong> 🩸</p>
+        </div>
+    </div>
+
+    <div class="callout callout-green">
+        <span class="callout-emoji">&#128274;</span>
+        <div class="callout-content">
+            <p><strong>Thuốc: ĐỪNG "hỏi rồi làm". Hãy GIÀNH CHÌA TRƯỚC — và để DB làm trọng tài.</strong></p>
+<pre style="margin-top:8px;"><code>UNIQUE constraint trên cột idempotency_key
+        ↓
+① INSERT chìa TRƯỚC (chưa chuyển tiền gì cả)
+   • INSERT thành công → mình GIÀNH được chìa → tiến hành chuyển
+   • INSERT nổ IntegrityError → thằng khác giành rồi
+                              → mình là bản sao → KHÔNG chuyển,
+                                trả lại kết quả đã lưu
+② Chỉ MỘT thằng INSERT được. DB bảo đảm. Không khe hở.</code></pre>
+            <p style="margin-top:8px;"><span class="key-phrase">Mấu chốt: biến "kiểm tra rồi hành động" (2 bước, có khe) thành "giành chỗ" (1 bước nguyên tử).</span> Cái <code>UNIQUE</code> constraint không phải để "cho sạch data" — nó chính là <strong>cơ chế khoá</strong>.</p>
+            <p style="margin-top:8px;">🔍 Ngửi thấy mùi quen chưa? Đây đúng là <strong>race condition kinh điển kiểu check-then-act</strong> — cùng họ với <code>if not exists: create()</code> ở mọi nơi khác. Thuốc luôn giống nhau: <em>để tầng dưới cùng (DB) phân xử, đừng tự phân xử ở tầng app.</em></p>
         </div>
     </div>
 
@@ -1524,6 +1639,14 @@ requests.<span class="fn">post</span>(<span class="str">'/payments'</span>, json
             <blockquote>Chuyển 100k. Làm 2 lần = Nam nhận 200k (kết quả đổi). Xoá file (xoá lại vẫn "đã xoá") và đọc số dư (không đổi gì) đều idempotent.</blockquote>
             <p><strong>Q3.</strong> POST tạo đơn không idempotent — Idempotency Key cứu bằng cách nào?</p>
             <blockquote>Client gắn 1 chìa UUID, dùng lại chìa đó cho mọi retry. Server lưu (chìa → kết quả); gặp lại cùng chìa thì KHÔNG tạo đơn mới mà trả kết quả đã lưu → chỉ 1 đơn dù retry nhiều lần.</blockquote>
+            <p><strong>Q4.</strong> 🩻 <code>DELETE /file/abc</code> lần 1 trả <code>200</code>, lần 2 trả <code>404</code>. Response khác nhau — còn idempotent không?</p>
+            <blockquote>CÒN. Idempotency xét <strong>TRẠNG THÁI</strong>, không xét <strong>RESPONSE</strong>. Cả hai lần đều để lại đúng một state: file không còn. Response khác nhau hoàn toàn không liên quan tới định nghĩa.</blockquote>
+            <p><strong>Q5.</strong> 🤥 <code>PUT /account/123/balance</code> mà bên trong chạy <code>balance = balance + 100</code>. PUT vốn idempotent — thao tác này có idempotent không?</p>
+            <blockquote>KHÔNG. Verb chỉ là quy ước, hành động mới quyết định. "Cộng thêm 100" là thao tác <strong>tương đối</strong> → chạy 2 lần = +200. Muốn idempotent thì phải viết <strong>tuyệt đối</strong>: <code>balance = 500</code>.</blockquote>
+            <p><strong>Q6.</strong> ⚖️ <code>DELETE</code> có safe không? Có idempotent không? Hai câu này khác nhau chỗ nào?</p>
+            <blockquote>KHÔNG safe (xoá mất file — lần đầu đã đổi state, mất là mất) nhưng CÓ idempotent (xoá 10 lần cũng chỉ mất 1 lần). <strong>Safe</strong> hỏi "lần đầu có đổi gì không". <strong>Idempotent</strong> hỏi "lần 2+ có đổi THÊM không". Safe ⟹ Idempotent, nhưng ngược lại thì sai. Retry chỉ đòi Idempotent.</blockquote>
+            <p><strong>Q7.</strong> 💥 Server làm đúng như mô tả: "thấy chìa chưa có → chuyển tiền → lưu chìa". Hai retry cùng chìa tới cùng lúc. Chuyện gì xảy ra, và chữa sao?</p>
+            <blockquote>Cả hai cùng đọc "chìa chưa có" trước khi đứa nào kịp lưu → cả hai cùng chuyển → <strong>double charge</strong>, đúng cái bug mà key sinh ra để chặn (race condition kiểu check-then-act). Chữa: đặt <code>UNIQUE</code> lên cột key và <strong>INSERT chìa TRƯỚC khi chuyển</strong> — đứa INSERT được thì làm, đứa nổ IntegrityError thì biết mình là bản sao. Để DB phân xử, đừng phân xử ở tầng app.</blockquote>
         </div>
     </details>
       </div>
