@@ -563,6 +563,25 @@
             <p>Một E2E test: user bấm "Đặt hàng" trên web → lưu vào <b>database</b> → gửi <b>email</b> xác nhận → hiện màn hình cảm ơn. Nó đi qua UI + server + DB + mailer — độ tin cao nhất. Nhưng nếu đỏ, anh phải <b>"đào cả luồng sâu mới biết hư ở tầng nào"</b>: web? API? DB? mailer? Dùng E2E để bắt một bug "2 con ốc lệch id" = <b>búa tạ đập con muỗi</b> — được, nhưng phí và khó truy. Bug đó để integration bắt.</p>
           </div>
 
+          <div class="reframe">
+            <div class="rk">🤖 Ví dụ THẬT của anh — con QA <code>threease_qa</code> là E2E "sống"</div>
+            <p><code>threease_qa</code> (con QA tự động anh đang xây) là một ca E2E chuẩn sách giáo khoa —
+            soi nó là hiểu ngay E2E là gì. Đưa nó 1 file spec, nó <b>lái app dev THẬT bằng Playwright</b>
+            như user: một test chạy xuyên <b>màn Pro (Nuxt) → API hub (Rails) → service vé (Django) → DB →
+            quay lại màn hình</b>, <b>không mock tầng nào</b>, rồi chấm PASS/FAIL bằng <b>cái thấy trên màn
+            + response API</b> (không nhìn ruột code) — thậm chí soi <b>2 phía</b> (app Pro + app Vé) để chắc
+            cả hệ nhất quán.</p>
+          </div>
+          <div class="mapgrid">
+            <div class="mh">3 dấu hiệu ĐỊNH NGHĨA E2E</div><div class="mh">threease_qa làm đúng cái đó</div>
+            <div>① Lái CẢ hệ thật, không phải mảnh cô lập</div><div>Playwright mở app dev thật, bấm nút thật</div>
+            <div>② Đi hết chuỗi tầng, KHÔNG stub/mock</div><div>Pro→Rails→Django→DB→màn — mọi tầng đều thật</div>
+            <div>③ Chấm từ NGOÀI như user (không nhìn code)</div><div>đối chiếu màn hình + API, "mù code", 2 phía</div>
+          </div>
+          <p>👉 Chính vì <b>nhìn từ ngoài + mù code</b> mà nó <b>không thể</b> là unit/integration — hai tầng
+          đó bắt buộc đọc/đụng code từ bên trong. "Mù code" ⇒ ép nó nằm đúng <b>đỉnh pyramid</b>. Và nó dính
+          đúng cái đau E2E ở dưới: một test chạm 4 service, đỏ thì phải đào cả luồng mới biết gãy ở đâu.</p>
+
           <h4>Đau ở đâu</h4>
           <p>Chậm (phút) → feedback loop dài · flaky (timing, môi trường, dữ liệu bẩn) · khi đỏ phải đào cả luồng mới biết lỗi ở tầng nào · chi phí bảo trì cao (UI đổi là vỡ selector).</p>
           <h4>Khi nào dùng</h4>
