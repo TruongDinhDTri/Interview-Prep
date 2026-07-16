@@ -246,6 +246,7 @@
         <div class="smk">🗺️ Bản đồ — bấm để nhảy & mở</div>
         <div class="chips">
           <a href="#p-pyramid">🔺 Test Pyramid</a>
+          <a href="#p-levels-types">🧭 Levels × Types</a>
           <a href="#p-unit">🧩 Unit</a>
           <a href="#p-integration">🔗 Integration</a>
           <a href="#p-e2e">🌐 E2E</a>
@@ -320,6 +321,126 @@
             <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Nguyên tắc phân bổ</div><div class="bq">"Nên tôi đẩy mỗi phép kiểm xuống tầng RẺ NHẤT mà vẫn đủ tin: logic thì unit, mối nối thì integration, chỉ vài luồng sống-còn (login, thanh toán) mới E2E."</div></div></div>
             <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"Lật ngược thành 'ice-cream cone' (nhiều E2E) thì suite chạy 20 phút, đỏ vu vơ, cả team mất niềm tin và bỏ chạy test — nên hình dạng pyramid là kết luận kinh tế, không phải thẩm mỹ."</div></div></div>
             <div class="ivsay">💬 <b>Nói gọn 1 câu:</b> "Pyramid = phân bổ test theo ROI, không theo tỉ lệ đẹp — kiểm gì thì đẩy xuống tầng rẻ nhất còn đủ tin."</div>
+          </div>
+        </div>
+      </details>
+
+      <!-- Levels vs Types -->
+      <details class="smell" id="p-levels-types">
+        <summary>🧭 Test Levels vs Test Types <span class="ess">— hai TRỤC vuông góc, không phải một danh sách phẳng</span></summary>
+        <div class="smellbody">
+          <div class="reframe">
+            <div class="rk">⚡ Cú lật — "loại test" là chữ NHẬP NHÈM, nó trộn 2 câu hỏi khác nhau</div>
+            <p>Junior gom hết vào MỘT danh sách phẳng: <i>unit, integration, E2E, performance, security…</i> — như thể cùng một loại. Sai. Có <b>HAI câu hỏi độc lập</b>: ① <b>"tôi soi BAO NHIÊU phần hệ thống?"</b> (zoom gần/xa) và ② <b>"tôi kiểm THUỘC TÍNH gì?"</b> (nó chạy đúng, hay nhanh, hay an toàn). Câu ① = <b>Test Levels</b>. Câu ② = <b>Test Types</b>. Chúng <b>vuông góc</b> — pyramid (unit/integration/E2E) chỉ là trục ①, và người ta tưởng đó là "tất cả các loại test" vì chưa thấy trục ②.</p>
+          </div>
+
+          <div class="brick" data-n="1">
+            <div class="bt">Trục ① — LEVELS = zoom (soi BAO NHIÊU phần)</div>
+            <p>Cùng một câu hỏi duy nhất: <i>"tôi đang nhìn bao nhiêu phần của hệ thống?"</i> Trả lời khác nhau → tầng khác nhau:</p>
+            <ul>
+              <li><b>Unit</b> — 1 mảnh cô lập (một hàm/class).</li>
+              <li><b>Integration</b> — vài mảnh RÁP nhau (mối nối, DB, contract giữa 2 service).</li>
+              <li><b>System</b> — CẢ hệ thống ráp lại, môi trường giống thật.</li>
+              <li><b>Acceptance</b> — cả hệ thống, nhưng nhìn dưới góc <b>khách hàng/nghiệp vụ</b> (UAT).</li>
+            </ul>
+            <p>🔺 <b>Pyramid = phiên bản rút gọn của trục này</b> (Cohn): nó gộp System + Acceptance thành một đỉnh gọi "E2E". Nên "pyramid" và "levels" là <b>cùng một trục</b>, chỉ khác độ chi tiết.</p>
+            <div class="mapgrid">
+              <div class="mh">System test</div><div class="mh">Acceptance test</div>
+              <div>"Ta có build ĐÚNG hệ thống không?" — khớp <b>spec</b> (verification)</div><div>"Ta có build ĐÚNG thứ KHÁCH CẦN không?" — khớp <b>nhu cầu</b> (validation)</div>
+            </div>
+          </div>
+
+          <div class="brick" data-n="2">
+            <div class="bt">Trục ② — TYPES = phẩm chất (kiểm THUỘC TÍNH gì)</div>
+            <p>Câu hỏi khác hẳn: <i>"tôi đang kiểm PHẨM CHẤT nào của phần mềm?"</i></p>
+            <ul>
+              <li><b>Functional</b> — nó có LÀM ĐÚNG việc không? (login ra đúng kết quả, tính giá đúng số) — kiểm theo <b>spec hành vi</b>.</li>
+              <li><b>Non-functional</b> — nó làm việc TỐT tới đâu:
+                <ul>
+                  <li><b>Performance</b> — nhanh / chịu tải cỡ nào (load, stress, spike).</li>
+                  <li><b>Security</b> — chống tấn công, có lộ dữ liệu không.</li>
+                  <li><b>Accessibility</b> — người khuyết tật dùng được không (WCAG).</li>
+                  <li><b>Usability</b> — người thường có thấy dễ dùng không (UX).</li>
+                  <li><b>Compatibility</b> — chạy trên nhiều browser/OS/device không.</li>
+                </ul>
+              </li>
+            </ul>
+            <blockquote>📌 Mẹo nhớ: <b>Functional = "nó có làm việc không"; Non-functional = "nó làm việc TỐT tới đâu".</b></blockquote>
+          </div>
+
+          <div class="brick" data-n="3">
+            <div class="bt">🔑 Bằng chứng chúng VUÔNG GÓC — câu test 1 dòng lật ngã mọi nhầm lẫn</div>
+            <p>Nếu Levels và Types là MỘT trục, câu này phải vô nghĩa. Nhưng nó có nghĩa hoàn hảo:</p>
+            <blockquote>Một <b>performance test</b> chạy được ở tầng <b>unit</b> (micro-benchmark một hàm sort &lt; 5ms) HAY ở tầng <b>E2E</b> (load test 1000 user đồng thời).</blockquote>
+            <p>"Performance" (một Type) tự do trượt dọc mọi tầng (Levels). → Chúng là <b>hai trục khác nhau</b>. Kết luận: <b>mỗi test THẬT là một Ô = (1 Level) × (1 Type).</b> "Unit test" mới chỉ nói NỬA toạ độ (trục Level); Type ngầm định là <i>functional</i> — nên đầy đủ phải là "functional unit test".</p>
+          </div>
+
+          <div class="reframe">
+            <div class="rk">🗺️ Metaphor — vĩ độ × kinh độ (đúng nghĩa "vuông góc")</div>
+            <p><b>Level = vĩ độ</b> (bắc–nam: ở TẦNG nào) · <b>Type = kinh độ</b> (đông–tây: kiểm PHẨM CHẤT gì). Muốn định vị một địa điểm phải có CẢ HAI số. Nói "unit test" giống như đưa mỗi vĩ độ — biết ở tầng đáy, nhưng kiểm functional hay security thì chưa nói. Junior đọc testing như một <b>danh sách 1 chiều</b>; senior đọc nó như một <b>lưới 2 chiều</b>.</p>
+          </div>
+
+          <h4>🔲 Lưới Level × Type — mỗi ô là một test thật</h4>
+          <table class="dtable">
+            <tr>
+              <th>Level ↓ \ Type →</th>
+              <th>Functional<br><small>làm ĐÚNG?</small></th>
+              <th>Performance<br><small>NHANH/chịu tải?</small></th>
+              <th>Security<br><small>AN TOÀN?</small></th>
+            </tr>
+            <tr>
+              <td>Unit</td>
+              <td><code>tinh_gia(2,100)==200</code></td>
+              <td>micro-benchmark: <code>sort()</code> &lt; 5ms</td>
+              <td><code>escape_html</code> chặn <code>&lt;script&gt;</code></td>
+            </tr>
+            <tr>
+              <td>Integration</td>
+              <td>save_user → đọc lại từ DB khớp</td>
+              <td>1 query không N+1, &lt; 50ms</td>
+              <td>lớp repo chặn SQL injection</td>
+            </tr>
+            <tr>
+              <td>E2E / System</td>
+              <td>đặt hàng → nhận email xác nhận</td>
+              <td>load test 1000 user đồng thời</td>
+              <td>pentest: có bypass login được không</td>
+            </tr>
+          </table>
+          <p>Đọc lưới này là thấy ngay: cột "Performance" trải khắp 3 tầng — nó KHÔNG phải một tầng riêng, nó là một <b>Type</b> cắt ngang mọi <b>Level</b>. Đó là toàn bộ ý "vuông góc".</p>
+
+          <div class="seniortip">
+            <div class="sk">🧪 Que thử — một chữ thuộc trục nào?</div>
+            <p>Gặp một chữ ("smoke", "load", "acceptance", "visual"…), hỏi: <b>nó tả "soi BAO NHIÊU" (zoom) hay "kiểm PHẨM CHẤT gì"?</b> · Zoom → <b>Level</b> · Phẩm chất → <b>Type</b>. Nếu KHÔNG phải cả hai → nó là thứ khác: <b>TECHNIQUE</b> (exploratory, visual regression = <i>CÁCH làm</i>) hoặc <b>ĐIỀU KIỆN</b> (cross-browser = <i>môi trường chạy</i>). Đừng cố nhét mọi chữ vào 2 trục — ép bừa chính là chỗ hồi nãy dễ sai.</p>
+          </div>
+
+          <h4>👃 Mũi ngửi lẫn 2 trục</h4>
+          <div class="signals">
+            <div class="sig"><span class="sn">1</span><div><div class="st">So sánh "E2E test vs performance test" như hai thứ ngang hàng</div><div class="sd">Sai trục: một cái là Level (zoom), một cái là Type (phẩm chất). Một load test CŨNG chạy ở E2E → không so trực tiếp được.</div></div></div>
+            <div class="sig"><span class="sn">2</span><div><div class="st">Tưởng "security" là một TẦNG riêng trong pyramid</div><div class="sd">Không — security là một Type, kiểm được ở MỌI tầng (unit: escape input · integration: SQLi · E2E: auth bypass).</div></div></div>
+            <div class="sig"><span class="sn">3</span><div><div class="st">Nói "unit test" rồi tưởng đã mô tả xong bài test</div><div class="sd">Mới cho nửa toạ độ (Level). Type ngầm định là functional — nói rõ khi khác đi ("performance unit test").</div></div></div>
+          </div>
+
+          <div class="drill">
+            <div class="dh">↓ Interviewer đào tiếp — thủ sẵn</div>
+            <div class="drow"><div class="dq">"E2E test với performance test khác gì?"</div><div class="da">Bẫy: chúng không cùng trục nên không so trực tiếp được. E2E = LEVEL (zoom cả hệ thống); performance = TYPE (thuộc tính). Một load test chính là "performance test chạy ở tầng E2E". Muốn so thì so trong cùng một trục.</div></div>
+            <div class="drow"><div class="dq">"System test khác Acceptance test chỗ nào — cùng chạy cả hệ thống mà?"</div><div class="da">Cùng tầng cao (cùng zoom), khác GÓC HỎI: System = verification, "ta build ĐÚNG hệ thống không" (khớp spec kỹ thuật); Acceptance = validation, "ta build ĐÚNG thứ KHÁCH cần không" (khớp nhu cầu nghiệp vụ). Verification vs Validation.</div></div>
+            <div class="drow"><div class="dq">"Vậy regression test nằm ở trục nào?"</div><div class="da">Không nằm Level cũng chẳng nằm Type — nó là trục thứ 3 (change-related): "chạy lại để chắc thay đổi mới không phá cái cũ". Có thể là regression ở BẤT KỲ level nào, kiểm BẤT KỲ type nào. Đó là lý do đừng gom mọi thứ vào 1 danh sách.</div></div>
+            <div class="drow"><div class="dq">"Rốt cuộc có mấy trục phân loại?"</div><div class="da">ISTQB tách: LEVELS (component/integration/system/acceptance) và TYPES (functional · non-functional · white-box/structural · change-related). Ngoài ra "exploratory/scripted" là CÁCH tiếp cận, không phải một loại test. Nhiều trục — mỗi trục trả lời một câu hỏi khác nhau.</div></div>
+          </div>
+
+          <div class="seniortip">
+            <div class="sk">🎓 Bedrock</div>
+            <p>Câu chốt: "<b>Levels và Types là hai trục vuông góc, không phải một danh sách.</b> Levels hỏi <i>soi bao nhiêu phần</i> (zoom: unit→acceptance) — pyramid chính là trục này. Types hỏi <i>kiểm phẩm chất gì</i> (functional / performance / security / a11y…). Bằng chứng chúng khác trục: một performance test chạy được ở cả tầng unit lẫn E2E. Nên mỗi test thật là một Ô = Level × Type; nói 'unit test' mới là nửa toạ độ." Nói được chữ "vuông góc" + ví dụ performance trượt tầng = hiểu gốc, không học vẹt danh sách.</p>
+          </div>
+
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "Phân biệt Test Levels và Test Types?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái gộp</div><div class="bq">"Nhiều người gộp làm một danh sách — unit/integration/E2E tưởng là 'các loại test'. Thật ra đó là Test LEVELS, phân theo PHẠM VI (zoom), chỉ MỘT trục."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Trục thứ hai</div><div class="bq">"Test TYPES phân theo THUỘC TÍNH đang kiểm — functional (làm đúng không) và non-functional (performance, security, accessibility, usability). Nó vuông góc với levels."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Bằng chứng vuông góc (chỗ ăn điểm)</div><div class="bq">"Chứng minh chúng khác trục: một performance test chạy được ở tầng unit — micro-benchmark một hàm — HAY ở tầng E2E — load test cả hệ thống. Nếu là một trục thì câu đó vô nghĩa."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"Nên mỗi test thật là một Ô của lưới Level × Type. 'Unit test' chỉ mới cho toạ độ Level, Type mặc định là functional. Tôi nghĩ testing theo LƯỚI 2 chiều, không theo danh sách phẳng — và regression thì là trục thứ 3 (change-related), không nhét vào hai trục kia."</div></div></div>
+            <div class="ivsay">💬 <b>Nói gọn 1 câu:</b> "Levels = kiểm ở PHẠM VI nào (zoom: unit→acceptance); Types = kiểm THUỘC TÍNH gì (functional/performance/security…) — hai trục vuông góc, mỗi test là một ô của lưới."</div>
           </div>
         </div>
       </details>
@@ -1080,6 +1201,7 @@ mock_calc.assert_called_once_with(cart)  <span class="cmt"># soi CÁCH LÀM</spa
     <div class="div"></div>
     <div class="fk">② Deep-dive — bấm để mở</div>
     <a href="#p-pyramid">🔺 Test Pyramid</a>
+    <a href="#p-levels-types">🧭 Levels × Types</a>
     <a href="#p-unit">🧩 Unit</a>
     <a href="#p-integration">🔗 Integration</a>
     <a href="#p-e2e">🌐 E2E</a>
@@ -1129,7 +1251,7 @@ mock_calc.assert_called_once_with(cart)  <span class="cmt"># soi CÁCH LÀM</spa
         }
       });
     },{rootMargin:'-40% 0px -55% 0px'});
-    ['concept','p-pyramid','p-unit','p-integration','p-e2e','p-aaa','p-mocking','p-doubles','p-first','p-coverage','in-your-code','why-ladder']
+    ['concept','p-pyramid','p-levels-types','p-unit','p-integration','p-e2e','p-aaa','p-mocking','p-doubles','p-first','p-coverage','in-your-code','why-ladder']
       .forEach(id=>{ const el=document.getElementById(id); if(el) spy.observe(el); });
     window.addEventListener('load', ()=>{ if(location.hash) openTarget(location.hash.slice(1)); });
     window.addEventListener('hashchange', ()=> openTarget(location.hash.slice(1)));
