@@ -83,6 +83,14 @@
   .warn{margin-top:var(--s3);background:#fbeae4;border-left:4px solid var(--bad);border-radius:0 10px 10px 0;padding:12px 18px;font-size:.9rem;color:#8a4a38}
   .seniortip{margin-top:var(--s3);background:#fbf4e2;border:1px dashed var(--gold);border-radius:var(--r);padding:14px 20px}
   .seniortip .sk{font-family:'Klee One',cursive;text-transform:uppercase;letter-spacing:.1em;font-size:.7rem;color:var(--clay)}
+  /* 🎤 interview 4-beat framework */
+  .ivframe{margin-top:var(--s3);background:linear-gradient(180deg,#eef3ea,#f3efe4);border:1px solid rgba(94,138,99,.32);border-radius:var(--r);padding:16px 20px 18px;box-shadow:0 6px 16px rgba(94,138,99,.1)}
+  .ivframe .ivk{font-family:'Klee One',cursive;letter-spacing:.1em;text-transform:uppercase;font-size:.74rem;color:var(--moss);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+  .ivbeat{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:9px 0;border-bottom:1px dashed rgba(36,48,38,.12)}
+  .ivbeat:last-of-type{border-bottom:none}
+  .ivbeat .bn{font-family:'Fraunces',serif;font-weight:600;color:#fff;background:var(--moss);width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem}
+  .ivbeat .bt{font-weight:700;color:var(--ink);font-size:.86rem}
+  .ivbeat .bq{font-size:.88rem;color:#3f4a41;font-style:italic;margin-top:3px}
   .drill{margin-top:var(--s3);border:1px solid rgba(36,48,38,.1);border-radius:var(--r);overflow:hidden}
   .drill .dh{background:#2a3a30;color:#e6cf8a;font-family:'Klee One',cursive;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;padding:9px 16px}
   .drill .drow{padding:12px 16px;border-bottom:1px dashed rgba(36,48,38,.14);background:#fffdf7}
@@ -166,6 +174,25 @@
         <p>Người ta học TDD như "quy trình viết test" và trả lời phỏng vấn bằng định nghĩa Red-Green-Refactor thuộc lòng → interviewer đào tầng 3 ("kể MỘT vòng cụ thể anh làm") là lộ ngay. TDD thật là một <b>cảm giác thiết kế</b>: viết test trước = dùng code từ phía client trước khi có ruột → nếu khó viết test, anh CẢM được thiết kế đang tệ NGAY LẬP TỨC. Gốc này dạy anh kể được một vòng thật, có số, và giải thích vì sao mỗi nhịp tồn tại.</p>
       </div>
 
+      <h3>Cụ thể trong 30 giây — vì sao "test trước" LÀ thiết kế</h3>
+      <p>Bỏ chữ "interface", "client" sang một bên. Xem code thật. Giả sử anh cần một hàm cộng — anh viết <b>test TRƯỚC</b>, lúc hàm còn chưa tồn tại:</p>
+      <div class="code green">
+        <div class="hd">test_cong — viết khi ruột chưa có</div>
+        <pre><span class="kw">def</span> test_cong():
+    <span class="kw">assert</span> cong(<span class="str">2</span>, <span class="str">3</span>) == <span class="str">5</span>   <span class="cmt"># "Ê cong, đưa 2 và 3 → mày PHẢI trả 5"</span></pre>
+      </div>
+      <p>Chỉ để <b>gõ được đúng dòng này</b> — dù ruột chưa có — anh đã buộc phải quyết định 3 điều, <b>trước khi</b> nghĩ tới chuyện bên trong cộng kiểu gì:</p>
+      <ul>
+        <li>Hàm tên <code>cong</code> (không phải <code>tinh_tong</code>, <code>add</code>, <code>plus</code>…)</li>
+        <li>Nó nhận <b>2 số</b>, theo thứ tự <code>(2, 3)</code></li>
+        <li>Nó <b>trả về</b> kết quả (nên mới <code>== 5</code> được) — không phải in ra màn hình, không sửa biến ngoài</li>
+      </ul>
+      <p>Ba quyết định đó = <b>thiết kế CÁCH DÙNG trước CÁCH LÀM.</b> Test chỉ là cái cớ ép anh làm điều đó. Chữ <b>"client"</b> trong sách = "kẻ gọi hàm", và test chính là kẻ gọi đầu tiên → nên test-first ép code phải dễ gọi.</p>
+      <div class="reframe">
+        <div class="rk">🎯 Chỗ vàng — thiết-kế-xấu thành đau-tay tức thì</div>
+        <p>Nếu để test được <code>cong(2,3)==5</code> mà anh phải dựng cả database + user session + load config… anh sẽ thấy <b>đau tay NGAY lúc gõ test</b> → "sao tính cái đơn giản mà cần đống rác này?". Đó là lúc TDD hét vào mặt anh: <b>thiết kế đang tệ.</b> TDD biến thiết-kế-xấu từ thứ vô hình thành thứ đau tay tức thì — đó là vì sao nó là kỹ thuật thiết kế.</p>
+      </div>
+
       <h3>Red → Green → Refactor</h3>
       <div class="cycle">
         <div class="cs red"><b>🔴 RED</b><small>Viết test cho hành vi chưa có → nó FAIL</small></div>
@@ -208,20 +235,30 @@
         <summary>🔴 RED <span class="ess">— viết test FAIL trước, và thiết kế interface tại đây</span></summary>
         <div class="smellbody">
           <div class="reframe">
-            <div class="rk">⚡ Cú lật — RED không phải "viết test", mà là "chứng minh test CÓ THỂ đỏ" + thiết kế</div>
+            <div class="rk">⚡ Cú lật — RED không phải "viết test", mà là "chứng minh test CÓ THỂ đỏ vì đúng lý do" + thiết kế</div>
             <p>Nếu một test mới viết mà XANH ngay → nó vô dụng (không test gì, hoặc test sai). RED bắt anh <b>thấy nó đỏ vì đúng lý do</b> trước. Và bí mật: chính lúc viết test này, anh đang <b>THIẾT KẾ interface</b> — quyết tên hàm, tham số, kiểu trả về, từ phía người DÙNG, trước khi có ruột.</p>
           </div>
+
+          <div class="reframe" style="border-left-color:var(--clay);background:#fbf4e2">
+            <div class="rk" style="color:var(--clay)">🔔 Đỏ để LÀM GÌ? — như bấm thử cái báo khói</div>
+            <p>Một test có một việc duy nhất: <b>gào lên khi code sai.</b> Nhưng làm sao biết nó BIẾT gào? Lắp báo khói lên trần xong, anh <b>bấm nút test để nghe tiếng "bíp"</b> — bằng chứng nó còn sống, thật sự phát hiện được. <b>RED chính là tiếng "bíp" đó.</b> Thấy test đỏ = chứng minh cái bẫy CÒN HOẠT ĐỘNG. Bỏ qua RED (viết test → xanh luôn) = lắp báo khói mà không bấm thử: nó xanh đó, nhưng anh không bao giờ biết xanh vì code đúng hay vì nó <b>hỏng, chả kiểm tra gì</b> → <b>an toàn giả</b> 🪤.</p>
+          </div>
+
           <div class="brick" data-n="1">
             <div class="bt">Viết test cho hành vi CHƯA có → phải đỏ</div>
             <p>Hàm chưa tồn tại → test gọi nó sẽ fail. Đó là điều đúng. Đỏ = "tôi đã mô tả một hành vi mà hệ thống chưa làm được."</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Đỏ vì ĐÚNG lý do (assertion), không phải typo</div>
-            <p>Lý tưởng: test chạy tới assert rồi fail vì giá trị sai — không phải fail vì lỗi cú pháp/tên sai. Beck: "hãy tiên đoán nó sẽ đỏ THẾ NÀO" — đoán đúng = anh hiểu mình đang test gì.</p>
+            <div class="bt">"Đỏ vì đúng lý do" = đỏ vì GIÁ TRỊ TRẢ VỀ SAI, không phải typo</div>
+            <p>"Lý do" = nguyên nhân khiến nó đỏ. Ta muốn đỏ vì đúng MỘT nguyên nhân: <b>"hành vi chưa đúng — kết quả trả về sai với cái tôi mong"</b> (dòng <code>assert</code> bắt được). KHÔNG phải đỏ vì gõ sai tên, quên import, lỗi cú pháp — mấy cái đó cũng đỏ, nhưng đỏ <b>nhầm lý do</b> → vô nghĩa.</p>
           </div>
           <div class="brick" data-n="3">
+            <div class="bt">2 loại đỏ — loại nào mới chứng minh được "thước đo"</div>
+            <p><b>Đỏ kiểu 1</b> (<code>cong is not defined</code>): test té NGAY khi gọi hàm, <b>chưa chạy tới <code>assert</code></b> → mới nói được "chưa có gì để đo". <b>Đỏ kiểu 2</b> (<code>expected 5 but got 4</code>): test chạy tới tận <code>assert</code>, và <b>chính assert bắt được cái sai</b> → chứng minh thước đo hoạt động. Kiểu 1 tạm ok ở bước đầu (hàm chưa đẻ), nhưng người giỏi đẩy nhanh tới kiểu 2.</p>
+          </div>
+          <div class="brick" data-n="4">
             <div class="bt">RED = viết CALL-SITE trước = thiết kế outside-in</div>
-            <p>Viết <code>applyDiscount(1_200_000)</code> trong test TRƯỚC khi có hàm → anh vừa quyết: nó nhận một số, trả một số. Anh thiết kế API từ nhu cầu dùng, không từ implementation.</p>
+            <p>Viết <code>applyDiscount(1_200_000)</code> trong test TRƯỚC khi có hàm → anh vừa quyết: nó nhận một số, trả một số. Anh thiết kế API từ nhu cầu dùng, không từ implementation. Nếu để dựng được test phải setup 10 thứ → cảm ngay coupling xấu, sửa thiết kế trước khi viết ruột.</p>
           </div>
           <div class="code red"><div class="hd">🔴 RED — test trước, chạy → FAIL (chưa có hàm)</div><pre>it(<span class="str">'giảm 10% khi total &gt; 1tr'</span>, () => {
   expect(applyDiscount(<span class="str">1_200_000</span>)).toBe(<span class="str">1_080_000</span>);
@@ -234,6 +271,13 @@
             <div class="drow"><div class="dq">"Vì sao phải THẤY đỏ trước? Tôi tin test tôi đúng mà."</div><div class="da">Vì test xanh-ngay có thể do: assert sai, test không chạy nhánh đó, hoặc code đã vô tình đúng. Thấy đỏ → xanh chứng minh CHÍNH test này phát hiện được sự khác biệt. Không thấy đỏ = an toàn giả.</div></div>
             <div class="drow"><div class="dq">"Đỏ vì compile error có tính là RED không?"</div><div class="da">Tạm được ở bước đầu (hàm chưa tồn tại), nhưng lý tưởng là đỏ ở ASSERTION. Compile error chỉ nói 'chưa có gì', assertion fail nói 'hành vi chưa đúng' — cái sau mới xác nhận test đo đúng thứ.</div></div>
             <div class="drow"><div class="dq">"RED giúp thiết kế bằng cách nào?"</div><div class="da">Anh viết cách DÙNG (call-site) trước → quyết interface từ góc client → API tự nhiên hơn. Nếu để dựng test phải setup 10 thứ → anh cảm ngay coupling xấu, sửa thiết kế trước khi viết ruột.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "RED để làm gì? Vì sao phải thấy đỏ trước?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"RED không phải thủ tục 'viết test cho có'. Mục đích của nó là chứng minh cái test CÓ THỂ bắt lỗi — như bấm nút thử cái báo khói để nghe tiếng bíp TRƯỚC khi tin nó giữ nhà."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Vì sao phải thấy đỏ trước</div><div class="bq">"Test xanh-ngay có thể do assert sai, không chạy nhánh đó, hoặc code vô tình đúng — đó là an toàn giả. Thấy nó đỏ rồi mới xanh = chứng minh CHÍNH test này phát hiện được sự khác biệt. Xanh sau khi đã đỏ mới là xanh đáng tin."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cái bẫy phải nhắc — đỏ vì ĐÚNG lý do</div><div class="bq">"Tôi phân biệt 2 loại đỏ: đỏ 'chưa có hàm' (té trước khi tới assert) và đỏ ở assertion ('got 4, expected 5'). Chỉ đỏ-ở-assertion mới chứng minh thước đo hoạt động; compile-error chỉ nói 'chưa có gì', chưa xác nhận test đo đúng thứ."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"Kent Beck: 'chạy test và TIÊN ĐOÁN nó fail thế nào'. Đỏ đúng như tôi đoán = tôi thật sự hiểu mình đang test gì. Và RED cũng là lúc tôi thiết kế — viết call-site trước ép tôi quyết interface từ góc người dùng, cảm được coupling xấu ngay nếu test khó dựng."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock (Kent Beck)</div>
@@ -250,13 +294,19 @@
             <div class="rk">⚡ Cú lật — mục tiêu GREEN KHÔNG phải code đẹp, mà là XANH nhanh nhất</div>
             <p>Ở GREEN anh đội mũ "make it work" — viết ít code NHẤT có thể để test xanh, kể cả xấu, kể cả hardcode. Đẹp để dành cho REFACTOR. Trộn hai việc = mất nhịp. Và: <b>đừng viết code cho case chưa có test</b> (YAGNI).</p>
           </div>
+
+          <div class="reframe" style="border-left-color:var(--clay);background:#fbf4e2">
+            <div class="rk" style="color:var(--clay)">📝 Nền tảng — 1 test = 1 CÂU HỎI kiểm tra = 1 ví dụ</div>
+            <p>Một test chỉ soi MỘT tình huống cụ thể: <code>assert cong(2,3)==5</code> nói đúng một câu — "đưa 2 và 3 → phải ra 5". Nó KHÔNG kiểm tra quy luật chung. Như chấm một học sinh bằng đúng một câu "2+3=?": nó trả "5" — anh vẫn chưa dám chắc nó BIẾT cộng (có thể học vẹt, đoán bừa, hay câu nào cũng phang 5). Muốn chắc → ra thêm câu khác. <b>Mỗi test = một câu hỏi. Một câu chưa ghim chặt hành vi — như đóng 1 cây ghim, tấm poster vẫn xoay được; đóng cây ghim thứ 2 mới khoá cứng.</b></p>
+          </div>
+
           <div class="brick" data-n="1">
             <div class="bt">Chỉ viết đủ để pass test HIỆN TẠI</div>
             <p>Không thêm nhánh "phòng xa", không tổng quát hóa sớm. Test đòi gì, đáp đúng thứ đó.</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Được phép "fake it" — trả hằng số</div>
-            <p>Test đầu chỉ đòi <code>applyDiscount(1_200_000) === 1_080_000</code>? Có thể <code>return 1_080_000</code> cứng cho xanh, rồi test thứ 2 sẽ ép anh tổng quát (triangulation — xem toggle riêng).</p>
+            <div class="bt">Được phép "fake it" — viết code GIẢ VỜ, trả hằng số</div>
+            <p><b>Fake it = viết code trả về sẵn đúng kết quả test đang đòi, KHÔNG thật sự làm logic</b> — như thằng học sinh chép đáp án "5" chứ không cộng. Test đầu đòi <code>applyDiscount(1_200_000)===1_080_000</code>? Cứ <code>return 1_080_000</code> cứng cho XANH. Rồi <b>test thứ 2 (input khác) ra "đề lệch tủ"</b> → cái fake trả sai → đỏ → buộc anh thay hằng số bằng logic thật. Lấy nhiều điểm để định vị lời giải = <b>triangulation</b> (toggle riêng).</p>
           </div>
           <div class="brick" data-n="3">
             <div class="bt">Code xấu ở đây KHÔNG sao</div>
@@ -275,6 +325,13 @@
             <div class="drow"><div class="dq">"Vì sao phải TỐI THIỂU?"</div><div class="da">YAGNI: code cho case chưa có test = code không được bảo vệ + có thể không bao giờ cần. Giữ bước nhỏ để mỗi lúc chỉ một thứ có thể sai.</div></div>
             <div class="drow"><div class="dq">"Return hằng số (fake) có phải gian lận?"</div><div class="da">Không — đó là kỹ thuật hợp lệ ('fake it till you make it'). Nó giữ vòng lặp cực nhỏ; test tiếp theo (input khác) sẽ buộc anh thay hằng số bằng logic thật.</div></div>
           </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "GREEN để làm gì? Sao lại cho phép code xấu?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"GREEN không phải lúc viết code đẹp hay xong xuôi. Mục tiêu duy nhất là làm test XANH nhanh nhất — tôi đội đúng một mũ 'make it work', cái đẹp để dành nhịp sau."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Cơ chế — tối thiểu & được fake</div><div class="bq">"Tôi chỉ viết đủ cho test HIỆN TẠI (YAGNI), không thêm nhánh phòng xa. Bí thì 'fake it' — trả thẳng hằng số cho xanh, lấy một điểm tựa chắc, rồi để test kế tiếp (input khác) ép nó thành logic thật. Nhiều điểm định vị lời giải = triangulation."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cái bẫy phải nhắc — hai mũ không đội cùng lúc</div><div class="bq">"Không trộn 'make it work' với 'make it right'. Ép code đẹp ngay ở GREEN = vừa lo logic vừa lo thẩm mỹ → dễ vừa sai vừa bẩn. Và code cho case CHƯA có test = code không có lưới bảo vệ, có thể không bao giờ cần."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"Kent Beck: 'make it work → make it right → make it fast', đúng thứ tự. GREEN chỉ lo 'work'; 'right' là việc của REFACTOR với lưới test đã xanh. Nói được vế TÁCH make-it-work khỏi make-it-right = hiểu vì sao GREEN cho phép code xấu: không phải ẩu, mà cố ý hoãn cái đẹp để giữ nhịp."</div></div></div>
+          </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
             <p>"Make it work, make it right, make it fast" — theo THỨ TỰ. GREEN chỉ lo 'work'. Câu chốt: "tôi không tối ưu/đẹp hóa ở GREEN; tôi để REFACTOR làm 'right' với lưới test đã xanh." Nói được vế 'tách make-it-work khỏi make-it-right' = anh hiểu nhịp.</p>
@@ -290,21 +347,57 @@
             <div class="rk">⚡ Cú lật — bước hay bị BỎ, và bỏ nó thì TDD thoái hóa</div>
             <p>Giờ test đã xanh = anh có LƯỚI. REFACTOR = dọn cấu trúc (đổi tên, tách hàm, bỏ lặp) mà KHÔNG đổi hành vi — test phải vẫn xanh suốt. Nhiều người bỏ bước này → code "green nhưng bẩn dần" → TDD thoái hóa thành test-first spaghetti.</p>
           </div>
+          <div class="reframe" style="border-left-color:var(--clay);background:#fbf4e2">
+            <div class="rk" style="color:var(--clay)">📐 Định nghĩa NGHIÊM — "cấu trúc" vs "hành vi"</div>
+            <p><b>Hành vi</b> = "đưa input gì → ra output gì", nhìn từ BÊN NGOÀI. <b>Cấu trúc</b> = cách code tổ chức BÊN TRONG (tên biến, tách hàm, bỏ lặp). <b>Refactor = giữ nguyên hành vi, CHỈ đổi cấu trúc.</b> Chữ "refactor" bị lạm dụng khủng khiếp ngoài đời — người ta gọi cả việc thêm tính năng / sửa hành vi là "refactor". SAI. Hành vi phải ĐÓNG BĂNG, chỉ hình dạng được đổi.</p>
+          </div>
+
           <div class="brick" data-n="1">
-            <div class="bt">Chỉ refactor khi ĐANG xanh</div>
-            <p>Refactor trên nền đỏ = không biết mình vừa sửa cấu trúc hay vừa sửa bug. Xanh trước, dọn sau.</p>
+            <div class="bt">Đổi CẤU TRÚC, KHÔNG đổi HÀNH VI (nối gốc 7)</div>
+            <p>Đặt tên cho số ma (<code>DISCOUNT_RATE</code>), tách biểu thức, bỏ lặp — nhưng input→output giữ NGUYÊN. Đưa <code>1_200_000</code> vào, trước và sau đều ra <code>1_080_000</code>. Các nước đi Extract Function / Rename / Extract Class… chính là công cụ của gốc 7.</p>
           </div>
           <div class="brick" data-n="2">
-            <div class="bt">Đổi cấu trúc, KHÔNG đổi hành vi (nối gốc 7)</div>
-            <p>Đặt tên hằng số (<code>DISCOUNT_RATE</code>), tách biểu thức — input→output giữ nguyên. Test xanh suốt = bằng chứng hành vi không đổi.</p>
+            <div class="bt">Phép thử VÀNG — chạy lại bộ test cũ</div>
+            <p>Dọn xong, chạy lại ĐÚNG bộ test cũ: <b>vẫn xanh hết → anh chỉ đổi cấu trúc, hành vi còn nguyên.</b> Nếu một test <b>đỏ → anh đã lỡ đổi hành vi → đó KHÔNG phải refactor, đó là gây bug.</b></p>
           </div>
-          <div class="code refac"><div class="hd">🟡 REFACTOR — dọn, test vẫn xanh</div><pre><span class="kw">const</span> DISCOUNT_THRESHOLD = <span class="str">1_000_000</span>;
+          <div class="brick" data-n="3">
+            <div class="bt">Dám dọn không sợ nhờ cái LƯỚI 🍳</div>
+            <p>Test xanh = lưới an toàn. Chỉnh một tí → chạy test ngay → xanh thì chỉnh tiếp, đỏ thì undo liền. Không có lưới thì mỗi lần dọn là một lần nhắm mắt cầu may. Như dọn bếp NGAY khi vừa nấu xong (còn nhớ đồ ở đâu): nếm thấy ngon rồi (xanh) thì lau bếp không làm đổi vị món (không đổi hành vi).</p>
+          </div>
+          <div class="brick" data-n="4">
+            <div class="bt">Chỉ refactor khi ĐANG XANH — không bao giờ trên nền đỏ</div>
+            <p>Đây là bẫy tinh nhất của cả nhịp — xem box đỏ "Vì sao KHÔNG refactor trên nền đỏ" ngay dưới.</p>
+          </div>
+          <div class="brick" data-n="5">
+            <div class="bt">Nhịp HAY BỊ BỎ nhất → bỏ là TDD chết</div>
+            <p>Nhiều người làm RED→GREEN→(bỏ qua)→RED→GREEN… code lúc nào cũng xanh nhưng bẩn dần đều → đống "test-first spaghetti". Bỏ REFACTOR = không còn TDD, chỉ còn "test-first".</p>
+          </div>
+          <div class="brick" data-n="6">
+            <div class="bt">Khi nào DỪNG — đừng gold-plate</div>
+            <p>Dọn ĐỦ sạch cho bước kế tiếp là dừng, không đánh bóng tới hoàn mỹ vô hạn (gold-plating). Refactor phục vụ khả năng thay đổi tiếp theo, không phải để đẹp mắt.</p>
+          </div>
+
+          <div class="code refac"><div class="hd">🟡 REFACTOR — dọn, test vẫn xanh</div><pre><span class="cmt">// TRƯỚC (xanh nhưng xấu — 1000000 &amp; 0.9 là số ma)</span>
+<span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
+  <span class="kw">if</span> (total &gt; <span class="str">1000000</span>) <span class="kw">return</span> total * <span class="str">0.9</span>;
+  <span class="kw">return</span> total;
+}
+<span class="cmt">// SAU (hành vi Y HỆT, chỉ sạch hơn)</span>
+<span class="kw">const</span> DISCOUNT_THRESHOLD = <span class="str">1_000_000</span>;
 <span class="kw">const</span> DISCOUNT_RATE = <span class="str">0.1</span>;
 <span class="kw">function</span> <span class="goodt">applyDiscount</span>(total) {
   <span class="kw">const</span> eligible = total &gt; DISCOUNT_THRESHOLD;
   <span class="kw">return</span> eligible ? total * (<span class="str">1</span> - DISCOUNT_RATE) : total;
 }
-<span class="cmt">// ✅ vẫn PASS — tên rõ (gốc 1), an toàn (gốc 6-7)</span></pre></div>
+<span class="cmt">// ✅ 1_200_000 → 1_080_000 cả hai. Tên rõ (gốc 1), an toàn (gốc 6-7)</span></pre></div>
+
+          <div class="warn">
+            <b>🔴 Vì sao KHÔNG refactor trên nền ĐỎ — bẫy tinh nhất</b><br><br>
+            Màu của test là <b>TÍN HIỆU</b>: anh cần nó ĐỔI MÀU để biết mình vừa làm gì. Đang xanh → dọn một tí → chạy test: vẫn xanh = an toàn; <b>chuyển đỏ = 🚨 "động tác vừa rồi làm gãy hành vi" → undo.</b> Chính cái xanh→đỏ đó là chuông báo.<br><br>
+            Nhưng nếu BẮT ĐẦU trên nền đỏ — giả sử code đang bug <code>total * 0.8</code> nên test đỏ (ra 960k, mong 1.080k) — anh nhảy vào dọn, lỡ tay đổi <code>&gt;</code> thành <code>&gt;=</code>, chạy lại → <b>vẫn đỏ</b>. Nó đỏ vì bug 0.8 cũ? Vì động tác dọn vừa rồi đẻ bug mới? Hay vừa sửa được 0.8 nhưng gãy chỗ khác? <b>Anh KHÔNG phân biệt được — màu không đổi, chuông đã kêu sẵn nên tiếng mới chìm vào tiếng cũ.</b> Bug-có-sẵn và bug-mới trộn chung một màu đỏ = mất khả năng truy nguyên.<br><br>
+            🔔 Nối metaphor báo khói (nhịp RED): refactor trên XANH = sửa nhà lúc báo khói đang IM → gây cháy là "BÍP" liền, biết ngay. Refactor trên ĐỎ = sửa nhà lúc báo khói đang hú sẵn → đám cháy mới chìm trong tiếng hú cũ. <b>Cần sự im lặng (xanh) làm nền thì một tiếng bíp mới có nghĩa → đỏ thì làm XANH trước (việc của GREEN) rồi mới dọn. Đừng dọn khi đang chảy máu.</b>
+          </div>
+
           <h4>Đau nếu bỏ REFACTOR</h4>
           <p>Nợ kỹ thuật tích tụ dưới lớp "toàn xanh" · code ngày càng khó đọc/đổi · vòng sau chậm dần vì phải bơi trong code bẩn.</p>
           <div class="drill">
@@ -312,6 +405,13 @@
             <div class="drow"><div class="dq">"Refactor có được sửa cả test không?"</div><div class="da">Có, nhưng cẩn thận: đừng sửa code VÀ test cùng lúc mất kiểm soát. Nếu refactor test, giữ code cố định (và ngược lại) để luôn có một phía làm mốc.</div></div>
             <div class="drow"><div class="dq">"Khi nào DỪNG refactor?"</div><div class="da">Khi đủ sạch cho bước tiếp theo — không gold-plate. Refactor phục vụ khả năng thay đổi, không phải để hoàn mỹ vô hạn.</div></div>
             <div class="drow"><div class="dq">"Refactor ở TDD khác refactor thường không?"</div><div class="da">Cùng bản chất (gốc 7: đổi cấu trúc không đổi hành vi), nhưng ở TDD nó là một NHỊP bắt buộc trong vòng lặp — làm liên tục, từng bước nhỏ, ngay khi vừa xanh.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "REFACTOR để làm gì? Sao không được bỏ?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"REFACTOR không phải 'viết lại' hay 'sửa lung tung'. Định nghĩa nghiêm: đổi CẤU TRÚC bên trong mà ĐÓNG BĂNG hành vi bên ngoài — cùng input vẫn ra cùng output, chỉ hình dạng code sạch hơn."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Cơ chế — lưới & phép thử vàng</div><div class="bq">"Test đang xanh làm lưới. Tôi dọn từng bước nhỏ, chạy lại test sau mỗi bước. Phép thử vàng: chạy lại đúng bộ test cũ mà vẫn xanh hết = bằng chứng hành vi không đổi; một test đỏ = tôi đã lỡ đổi hành vi → undo."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cái bẫy phải nhắc — không dọn trên nền đỏ</div><div class="bq">"Chỉ refactor khi ĐANG xanh. Trên nền đỏ, màu test không đổi được nên tôi không phân biệt nổi bug cũ với bug mới mình vừa gây — tín hiệu chết. Cần im lặng (xanh) làm nền thì một tiếng đỏ mới có nghĩa: làm xanh trước (GREEN) rồi mới dọn."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"REFACTOR là nhịp BẮT BUỘC của vòng lặp, không phải tùy hứng: test xanh cho tôi giấy phép dọn không sợ hãi; bỏ nó thì code xanh nhưng bẩn dần → test-first spaghetti, không còn là TDD. Và tôi dừng khi đủ sạch cho bước kế, không gold-plate."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
@@ -336,6 +436,22 @@
             <div class="bt">Code khó test → anh CẢM đau ngay → buộc decouple (nối DIP)</div>
             <p>Muốn test <code>OrderService</code> mà nó <code>new SendGridMailer()</code> bên trong → không mock nổi → đau NGAY ở bước viết test → anh sửa thành inject (DIP, gốc 3). TDD biến "thiết kế xấu" thành nỗi đau tức thì, không để nó ẩn.</p>
           </div>
+          <div class="pair">
+            <div class="code bad"><div class="hd">😖 Khó test → thiết kế đang tệ</div><pre><span class="kw">class</span> <span class="goodt">OrderService</span>:
+    <span class="kw">def</span> place(self, order):
+        mailer = <span class="badt">SendGridMailer()</span>  <span class="cmt"># tạo CỨNG bên trong</span>
+        mailer.send(order.email)
+<span class="cmt"># test? không thay SendGrid bằng bản giả được</span>
+<span class="cmt"># → chạy test là GỬI MAIL THẬT 😱</span></pre></div>
+            <div class="code good"><div class="hd">😌 Dễ test → thiết kế tốt (DIP)</div><pre><span class="kw">class</span> <span class="goodt">OrderService</span>:
+    <span class="kw">def</span> __init__(self, mailer):  <span class="cmt"># TIÊM từ ngoài</span>
+        self.mailer = mailer
+    <span class="kw">def</span> place(self, order):
+        self.mailer.send(order.email)
+<span class="cmt"># test: đưa FakeMailer vào → kiểm tra</span>
+<span class="cmt"># mà KHÔNG gửi mail thật ✅</span></pre></div>
+          </div>
+          <p class="desc">👆 Nỗi đau "không test được" ở bản trái <b>chính là feedback</b> — nó chỉ đúng vào chỗ coupling xấu, ép anh lật sang bản phải. Không TDD thì cái coupling này ẩn tới lúc bảo trì mới lộ.</p>
           <div class="brick" data-n="3">
             <div class="bt">Test là sản phẩm phụ; thiết kế tốt là sản phẩm chính</div>
             <p>Cuối vòng anh có cả hai: một bộ test hồi quy + một thiết kế đã được "ép" phải decoupled để test được. Cái sau mới là giá trị lớn.</p>
@@ -346,6 +462,13 @@
             <div class="drow"><div class="dq">"TDD cải thiện chất lượng TEST hay chất lượng THIẾT KẾ?"</div><div class="da">Chủ yếu THIẾT KẾ. Test hồi quy là bonus. Giá trị lớn: nó ép code phải decoupled/testable, tức là thiết kế tốt. Đây là câu phân biệt hiểu-thật với học-vẹt.</div></div>
             <div class="drow"><div class="dq">"Vì sao test-first ra API tốt hơn test-after?"</div><div class="da">Test-after: anh đã có code, test uốn theo cái đã xây (kể cả xấu). Test-first: chưa có gì, anh tự do quyết API từ nhu cầu dùng → tối giản, ít coupling.</div></div>
             <div class="drow"><div class="dq">"TDD với legacy code (đã có, không test) thì sao?"</div><div class="da">Khó — không thể 'test trước' cho code đã tồn tại. Cần characterization test bọc hành vi hiện tại trước (gốc 7 Feathers), tìm seam, rồi mới TDD phần thay đổi mới.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "Vì sao nói TDD là THIẾT KẾ chứ không phải testing?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"TDD không phải để 'viết test nhiều hơn / đúng hơn'. Test chỉ là sản phẩm PHỤ; sản phẩm CHÍNH là một thiết kế decoupled, dễ dùng. Nó là kỹ thuật thiết kế, dùng test làm công cụ."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Cơ chế 1 — thiết kế từ góc người dùng</div><div class="bq">"Viết test trước = viết call-site trước = tôi quyết interface từ NHU CẦU DÙNG, trước khi có ruột (outside-in) → API tối giản, ít coupling. Test-after thì ngược: code đã xây rồi, test chỉ uốn theo cái đã có kể cả xấu."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cơ chế 2 — khó test = feedback về coupling</div><div class="bq">"Độ khó-viết-test cho tôi feedback tức thì về độ coupling. Ví dụ OrderService tự new SendGridMailer bên trong → không thay bản giả được → đau ngay lúc viết test → tôi chuyển sang inject (DIP). TDD lôi thiết kế xấu ra ánh sáng ngay, thay vì để nó ẩn tới lúc bảo trì."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"'TDD is a design technique, not a testing technique' — nhưng tôi không dừng ở slogan: tôi giải thích cơ chế (khó-test = tín hiệu coupling, test-first ép thiết kế từ phía client). Giải thích được cơ chế mới là hiểu thật, không phải học vẹt."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock — câu chốt phỏng vấn</div>
@@ -383,11 +506,29 @@
   <span class="kw">return</span> a + b;  <span class="cmt">// hằng số hết đủ → generalize</span>
 }</pre></div>
           </div>
+
+          <div class="warn" style="border-left-color:var(--clay);background:#fbf4e2;color:#5a5238">
+            <b>🪤 Vì sao 1 test CHƯA ĐỦ — test thứ 2 là cái BẪY bắt code gian lận</b><br><br>
+            Với CHỈ test <code>sum(2,3)==5</code>, hàng loạt code RÁC vẫn XANH — bộ test không phân biệt nổi hàng thật với hàng giả:<br>
+            • <code>return a + b</code> → ✅ (đúng thật)<br>
+            • <code>return 5</code> → ✅ (rác)<br>
+            • <code>return a * b - 1</code> → ✅ vì 2×3−1=5 (rác)<br>
+            • <code>return 2 + 3</code> → ✅ (rác)<br><br>
+            Thêm test <code>sum(4,7)==11</code> → ba thằng rác chết sạch (5≠11 · 27≠11 · 5≠11), chỉ <code>a+b</code> sống sót. <b>Đó là toàn bộ tác dụng của test thứ 2: mỗi test thêm vào = một cái BẪY nữa; càng nhiều bẫy, càng ít chỗ cho code gian lận trốn.</b> "Triangulation" chỉ là cái TÊN cho việc này — không phải phép thuật gì.
+          </div>
+
           <div class="drill">
             <div class="dh">↓ Interviewer đào tiếp</div>
             <div class="drow"><div class="dq">"Trả hằng số nghe như gian lận — điểm gì?"</div><div class="da">Nó giữ bước CỰC nhỏ: luôn có test xanh làm mốc, giảm rủi ro viết sai một mạch dài. Đây là kỷ luật 'baby steps', không phải lười.</div></div>
             <div class="drow"><div class="dq">"Khi nào fake, khi nào viết thẳng?"</div><div class="da">Fake khi chưa chắc hoặc muốn từng bước an toàn. Obvious implementation khi logic hiển nhiên và anh tự tin. Kinh nghiệm điều chỉnh kích thước bước.</div></div>
             <div class="drow"><div class="dq">"Triangulation lúc nào cần?"</div><div class="da">Khi một ví dụ chưa đủ ràng buộc để suy ra logic tổng quát. Thêm ca thứ 2 (thứ 3) buộc code phải tổng quát thay vì khớp cứng một ca.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "Fake it / Triangulation là gì? Trả hằng số có phải gian lận?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"Trả hằng số ('fake it') nghe như gian lận, nhưng không phải lười — nó là kỷ luật 'baby steps': luôn giữ một test xanh làm mốc, để mỗi lúc chỉ một thứ có thể sai."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Cơ chế — 3 cách đi RED→GREEN</div><div class="bq">"Beck cho 3 cách: fake it (trả hằng số rồi dần thay bằng logic), triangulation (thêm test case ép tổng quát hóa), và obvious implementation (rõ thì viết thẳng). Chọn theo độ chắc của mình."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cái mấu chốt — vì sao cần test thứ 2</div><div class="bq">"Một test chưa ghim chặt hành vi: code rác như 'return 5' hay 'a*b-1' vẫn pass sum(2,3)==5. Test thứ 2 (sum(4,7)==11) là cái bẫy giết mấy thằng rác đó, ép code thành logic thật. Đó là triangulation."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"Bản chất TDD là kiểm soát KÍCH THƯỚC BƯỚC: rủi ro cao / chưa chắc thì đi bước tí hon (fake → triangulate), logic rõ thì đi bước lớn (obvious implementation). Điều tiết được kích thước bước mới là kỹ năng TDD thật, không phải 'luôn luôn fake'."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock — baby steps</div>
@@ -406,15 +547,34 @@
           </div>
           <h4>Chỗ TDD KHÔNG hợp (hoặc phải điều chỉnh)</h4>
           <div class="signals">
-            <div class="sig"><span class="sn">1</span><div><div class="st">Spike / prototype khám phá</div><div class="sd">Chưa biết muốn gì → viết test trước là vô nghĩa. Explore tự do, rồi VỨT prototype và TDD lại phần giữ.</div></div></div>
+            <div class="sig"><span class="sn">1</span><div><div class="st">Spike / prototype khám phá — "chưa biết mình muốn gì"</div><div class="sd">Gọi một API lạ chưa biết nó trả về gì, hay chưa chọn được cách làm (thư viện A hay B? nổi không?). Đích còn di chuyển → viết test trước là vô nghĩa. Vọc tự do để HỌC, rồi VỨT prototype và TDD lại phần giữ.</div></div></div>
             <div class="sig"><span class="sn">2</span><div><div class="st">UI thuần visual / animation</div><div class="sd">"Trông đẹp" khó assert bằng test tự động. Dùng review mắt / snapshot có chọn lọc, không TDD từng pixel.</div></div></div>
-            <div class="sig"><span class="sn">3</span><div><div class="st">Code throwaway / script một lần</div><div class="sd">Chi phí test > lợi ích. Không phải mọi dòng đều đáng bọc test.</div></div></div>
+            <div class="sig"><span class="sn">3</span><div><div class="st">Code throwaway / script một lần</div><div class="sd">Ví dụ: script đổi format 1000 file CSV, chạy đúng MỘT lần rồi xoá. Không có "về sau" để bảo vệ → chi phí test > lợi ích. Không phải mọi dòng đều đáng bọc test.</div></div></div>
           </div>
+
+          <div class="reframe" style="border-left-color:var(--clay);background:#fbf4e2">
+            <div class="rk" style="color:var(--clay)">🎯 Thước đo 1 câu — spike hay TDD?</div>
+            <p>Tự hỏi: <b>"Ngay lúc này tôi viết được dòng <code>assert … == …</code> mà TỰ TIN nó đúng không?"</b> — KHÔNG (chưa biết đáp án) → đang spike, đừng TDD. CÓ (biết chắc đích) → TDD ngay. Dấu hiệu nhìn code: spike đầy <code>print</code> (đang HỎI), code TDD đầy <code>assert</code> (đang KHẲNG ĐỊNH).</p>
+          </div>
+
+          <div class="code refac"><div class="hd">🔍 SPIKE — vọc để HỌC (print, KHÔNG assert), rồi VỨT</div><pre>r = requests.get(<span class="str">"...openweather.../weather?q=Hanoi"</span>)
+<span class="badt">print</span>(r.json())   <span class="cmt"># chỉ để XEM nó trả gì — chưa biết đáp án nên KHÔNG assert được</span>
+<span class="cmt"># → thấy {"main":{"temp":298.15}} — À, temp ở main.temp, đơn vị KELVIN!</span>
+<span class="cmt"># "chưa biết" đã thành "đã biết" → vứt spike, giờ mới TDD được:</span>
+<span class="kw">def</span> test_doi_kelvin():
+    <span class="kw">assert</span> to_celsius(<span class="str">298.15</span>) == <span class="str">25</span>   <span class="cmt"># giờ viết assert được vì đã biết đích</span></pre></div>
           <div class="drill">
             <div class="dh">↓ Interviewer đào tiếp</div>
             <div class="drow"><div class="dq">"Vậy TDD vô dụng à?"</div><div class="da">Không — nó cực mạnh cho logic rõ ràng: business rules, thuật toán, bug fix (viết test tái hiện bug trước). Chỉ là không phải búa cho mọi cái đinh.</div></div>
             <div class="drow"><div class="dq">"Spike xong thì làm gì?"</div><div class="da">Vứt code spike (nó chỉ để học), rồi build lại phần cần giữ BẰNG TDD. 'Spike and stabilize'. Đừng để code thăm dò lọt thẳng vào production không test.</div></div>
             <div class="drow"><div class="dq">"Bug fix nên TDD thế nào?"</div><div class="da">Viết test TÁI HIỆN bug trước (đỏ) → sửa cho xanh → test đó chặn bug tái phát mãi mãi (regression test). Đây là chỗ TDD gần như luôn đáng.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "Khi nào anh KHÔNG dùng TDD?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"Trả lời 'TDD cho mọi thứ, luôn luôn' là dấu hiệu học vẹt. TDD là công cụ, không phải tôn giáo — biết KHI NÀO không dùng mới cho thấy kinh nghiệm thật."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Chỗ TDD tỏa sáng</div><div class="bq">"TDD cực mạnh ở logic có hợp đồng rõ: business rules, thuật toán, và nhất là bug fix — tôi viết test TÁI HIỆN bug (đỏ) trước, sửa cho xanh, thế là có regression test chặn bug tái phát mãi mãi."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Chỗ KHÔNG hợp — và thước đo</div><div class="bq">"Ba chỗ né: spike (chưa biết mình muốn gì, đích còn di chuyển), UI thuần visual (khó assert), và code throwaway (không có tương lai để bảo vệ). Thước đo nhanh: 'tôi viết được dòng assert tự tin ngay bây giờ không?' — không thì đang spike."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"'Spike then stabilize': vọc tự do chỗ mơ hồ để học, rồi VỨT code thăm dò và harden bằng test — đừng để nó lọt thẳng vào production không test. Và cảnh giác 'nothing is more permanent than a temporary solution': code throwaway mà sống dai thì phải bọc test lại."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock</div>
@@ -440,11 +600,36 @@
             <div class="sig"><span class="sn">5</span><div><div class="st">Bước quá to</div><div class="sd">Viết cả hàm phức tạp rồi mới test → mất baby-steps, khó truy khi đỏ.</div></div></div>
             <div class="sig"><span class="sn">6</span><div><div class="st">Mock quá nhiều</div><div class="sd">Mock cả logic của mình → test giòn + không phản ánh hành vi thật (nối Mocking gốc 6).</div></div></div>
           </div>
+
+          <div class="warn" style="border-left-color:var(--clay);background:#fbf4e2;color:#5a5238">
+            <b>⭐ Đào lỗi #4 — test HÀNH VI (WHAT), đừng test CÁCH LÀM (HOW)</b><br><br>
+            Đây là lỗi tinh nhất, và là lý do nhiều team "làm TDD" xong GHÉT TDD. Test bám vào NỘI TẠNG (code gọi hàm nào bên trong) → mỗi lần refactor là test vỡ oan dù hành vi y hệt → người ta chửi "test phiền" → bỏ luôn REFACTOR → TDD chết. Lưới đáng lẽ đỡ anh lại RÁCH mỗi lần anh dọn.
+          </div>
+          <div class="pair">
+            <div class="code bad"><div class="hd">❌ Test dính CÁCH LÀM — vỡ khi refactor</div><pre><span class="kw">def</span> test_apply_discount():
+    service.apply_discount(order)
+    <span class="badt">assert</span> service._rate_calc.called_once()
+<span class="cmt"># soi hàm nội bộ nào được gọi → đổi tên</span>
+<span class="cmt"># helper là test đỏ oan, dù kết quả đúng</span></pre></div>
+            <div class="code good"><div class="hd">✅ Test HÀNH VI — refactor thoải mái</div><pre><span class="kw">def</span> test_apply_discount():
+    <span class="goodt">assert</span> apply_discount(<span class="str">1_200_000</span>) == <span class="str">1_080_000</span>
+<span class="cmt"># chỉ quan tâm ĐẦU VÀO → ĐẦU RA</span>
+<span class="cmt"># bên trong đổi kiểu gì cũng kệ → lưới bền</span></pre></div>
+          </div>
+          <p class="desc">👆 Luật: test cái <b>WHAT</b> (input này → output kia), đừng test cái <b>HOW</b> (bên trong gọi gì, thứ tự nào). Test hành vi thì refactor tự do; test nội tạng thì tự trói tay mình. Lỗi #4 và #6 (mock quá nhiều) là anh em — cả hai làm test dính cách-làm → giòn.</p>
+
           <div class="drill">
             <div class="dh">↓ Interviewer đào tiếp — chỗ anh phải kể được VÒNG THẬT</div>
             <div class="drow"><div class="dq">"Làm sao tôi biết anh TDD thật hay chỉ đọc lý thuyết?"</div><div class="da">Kể MỘT vòng cụ thể: hành vi gì, test đầu viết ra sao, thấy đỏ với message gì, code tối thiểu nào làm xanh, refactor gì. Có SỐ, có thứ tự, có cảm giác. Người làm giả chỉ nói 'red green refactor' chung chung.</div></div>
             <div class="drow"><div class="dq">"Test-after có phải TDD không?"</div><div class="da">Không. TDD = test DRIVES design (test trước, lái thiết kế). Test-after chỉ là 'có test' — hữu ích nhưng mất phần thiết kế cốt lõi của TDD.</div></div>
             <div class="drow"><div class="dq">"Dấu hiệu một codebase 'TDD giả'?"</div><div class="da">Test bám sát implementation (vỡ khi refactor), không có test nào từng đỏ trong lịch sử, thiếu hẳn bước refactor (code bẩn nhưng xanh), hoặc test viết cùng commit sau code lớn.</div></div>
+          </div>
+          <div class="ivframe">
+            <div class="ivk">🎤 4 nhịp trả lời interview — "Làm sao tôi biết anh TDD thật hay chỉ đọc lý thuyết?"</div>
+            <div class="ivbeat"><span class="bn">1</span><div><div class="bt">Lật cái hiểu lầm</div><div class="bq">"Ai cũng đọc được định nghĩa 'red-green-refactor'. Cái đó fake được. Bằng chứng TDD thật không nằm ở định nghĩa — nằm ở việc tôi kể được MỘT vòng cụ thể có số, có thứ tự, có message đỏ."</div></div></div>
+            <div class="ivbeat"><span class="bn">2</span><div><div class="bt">Kể một vòng THẬT</div><div class="bq">"Ví dụ tôi thêm hàm tính phí trễ hạn: test đầu assert tính_phí(trễ 5 ngày)==50k → chạy đỏ, message 'not defined' → viết tối thiểu return 50000 cho xanh → thêm test trễ 10 ngày==100k, return cứng chết → generalize thành số_ngày*10000 → refactor rút hằng số. Test xanh suốt."</div></div></div>
+            <div class="ivbeat"><span class="bn">3</span><div><div class="bt">Cái bẫy phải nhắc — TDD giả</div><div class="bq">"Tôi tránh mấy dấu hiệu giả: test-after gọi là TDD (mất giá trị thiết kế), bỏ RED (an toàn giả), bỏ REFACTOR (bẩn dần), và nhất là test dính implementation — assert vào nội tạng thì vỡ mỗi lần refactor, nên tôi test HÀNH VI chứ không test cách-làm."</div></div></div>
+            <div class="ivbeat"><span class="bn">4</span><div><div class="bt">Câu chốt senior</div><div class="bq">"TDD thật để lại một dấu vết tôi CẢM được: tôi nhớ thiết kế đã đổi thế nào khi viết test trước. Đó là bằng chứng không thể fake — và là lý do tôi luôn có sẵn một vòng thật để kể, không chỉ đọc định nghĩa."</div></div></div>
           </div>
           <div class="seniortip">
             <div class="sk">🎓 Bedrock — vá đúng chỗ anh fail</div>
