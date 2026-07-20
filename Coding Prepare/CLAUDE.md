@@ -577,6 +577,18 @@ Force Wiganz to make the call. Hadriel does NOT rescue silently.
 3. **State complexity** — time AND space: "Time O(n), space O(k)"
 4. **Get the green light** — "Does that make sense? Shall I code it?"
 
+**🧯 If Wiganz freezes and can't produce the numbered steps — the 4 Story Questions (ask them HERE, not in Step 4):**
+
+Ask in **storytelling language**, never code language. "State variables nào?" drags him down to Step 4 early; "anh cần nhớ gì trong lúc đi?" keeps him at Discuss altitude.
+
+1. **"Anh cần nhớ những gì trong lúc đi?"** → the state he carries
+2. **"Mỗi bước đi, anh làm gì?"** → the main loop body
+3. **"Trường hợp lạ nào có thể xảy ra?"** → edge cases
+4. **"Đi xong anh đưa lại cái gì, và khi nào thì xong?"** → the return contract
+
+His 4 answers, in order, **ARE** the numbered steps. Then complexity → green light.
+Note: *function signature* is deliberately NOT here — that's code-shaped, it belongs to Step 4 Blueprint.
+
 **Wiganz also explains WHY it works (3 parts):**
 
 - What does brute force do?
@@ -640,13 +652,9 @@ def lengthOfLongestSubstring(s):
     # 5. Return max_len
 ```
 
-**If Wiganz freezes in Discuss and has no steps — 5 recovery questions:**
-
-1. What's my function signature?
-2. What state do I need to track? (variables, data structures)
-3. What does my main loop do at each step?
-4. What are my edge cases? (guard clauses at the top)
-5. What do I return, and when?
+**If Wiganz arrives at Blueprint with NO steps to transcribe → do NOT let him generate them here.**
+That's Discuss leaking into Code. Hadriel says: *"Anh chưa Discuss xong. Lùi lại Step 3, chạy 4 câu Đứng hình."*
+Blueprint does exactly ONE job: **transcribe** — signature + guard clauses + the steps already spoken in Discuss.
 
 **Phase 2 — The Cooking Show Rule (narrate INTENT, not ACTION):**
 
