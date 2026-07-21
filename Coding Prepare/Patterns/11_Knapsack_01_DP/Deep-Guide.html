@@ -550,18 +550,19 @@
             transition: width 0.3s;
         }
 
+        /* Sidebar collapse/expand — one state class drives desktop + mobile */
+        .sidebar { transition: transform 0.3s ease; }
+        .main-content { transition: margin-left 0.3s ease; }
+
+        body.sidebar-hidden .sidebar { transform: translateX(-100%); }
+        body.sidebar-hidden .main-content { margin-left: 0; }
+
         /* Responsive */
         @media (max-width: 900px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s;
-            }
-            .sidebar.open {
-                transform: translateX(0);
-            }
-            .main-content {
-                margin-left: 0;
-            }
+            /* On mobile the sidebar is an overlay: hidden by default, shown when body lacks .sidebar-hidden */
+            .sidebar { transform: translateX(-100%); }
+            body:not(.sidebar-hidden) .sidebar { transform: translateX(0); }
+            .main-content { margin-left: 0; }
             .comparison, .item-cards {
                 grid-template-columns: 1fr;
             }
@@ -606,30 +607,97 @@
             margin-top: 0.25rem;
         }
 
-        /* Mobile menu button */
-        .mobile-menu-btn {
-            display: none;
+        /* Sidebar toggle button — always visible, rides the sidebar edge */
+        .sidebar-toggle {
             position: fixed;
-            bottom: 1.5rem;
-            right: 1.5rem;
-            width: 50px;
-            height: 50px;
+            top: 1rem;
+            left: 296px;
+            width: 42px;
+            height: 42px;
             background: var(--pink-500);
             color: white;
             border: none;
-            border-radius: 50%;
-            font-size: 1.25rem;
+            border-radius: 10px;
+            font-size: 1.15rem;
             cursor: pointer;
-            z-index: 200;
+            z-index: 150;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: left 0.3s ease, background 0.2s;
+        }
+
+        .sidebar-toggle:hover { background: var(--pink-600); }
+
+        /* When the sidebar is hidden, the button slides back to the corner */
+        body.sidebar-hidden .sidebar-toggle { left: 1rem; }
+
+        /* Prev / Next section navigation */
+        .section-nav {
+            max-width: 1100px;
+            margin: 0 auto 3rem;
+            padding: 1.5rem 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .section-nav-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.9rem 1.25rem;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            transition: all 0.2s;
+            color: var(--text-medium);
+            max-width: 48%;
+            font-family: inherit;
+        }
+
+        .section-nav-btn:hover:not(:disabled) {
+            border-color: var(--pink-300);
+            background: var(--pink-50);
+            transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
         }
 
-        @media (max-width: 900px) {
-            .mobile-menu-btn {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+        .section-nav-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .section-nav-btn .arrow {
+            font-size: 1.35rem;
+            color: var(--pink-500);
+            line-height: 1;
+        }
+
+        .section-nav-btn .labels {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #nextBtn { margin-left: auto; text-align: right; }
+        #nextBtn .labels { align-items: flex-end; }
+        #prevBtn { text-align: left; }
+
+        .section-nav-btn .dir {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .section-nav-btn .sec-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
         }
     </style>
 </head>
@@ -2196,45 +2264,104 @@ currentW = W
                     </div>
                 </div>
             </div>
+            <!-- Prev / Next section navigation -->
+            <div class="section-nav">
+                <button class="section-nav-btn" id="prevBtn">
+                    <span class="arrow">←</span>
+                    <span class="labels">
+                        <span class="dir">Previous</span>
+                        <span class="sec-title" id="prevTitle"></span>
+                    </span>
+                </button>
+                <button class="section-nav-btn" id="nextBtn">
+                    <span class="labels">
+                        <span class="dir">Next</span>
+                        <span class="sec-title" id="nextTitle"></span>
+                    </span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
         </main>
     </div>
 
-    <button class="mobile-menu-btn" id="menuBtn">☰</button>
+    <button class="sidebar-toggle" id="menuBtn" aria-label="Toggle sidebar">☰</button>
 
     <script>
-        // Navigation
         const navItems = document.querySelectorAll('.nav-item');
         const modules = document.querySelectorAll('.module');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const toggleBtn = document.getElementById('menuBtn');
 
+        // Single source of truth for section order = the sidebar's DOM order
+        const order = [...navItems].map(n => n.dataset.module);
+        const titleFor = id => {
+            const item = [...navItems].find(n => n.dataset.module === id);
+            return item ? item.querySelector('span:not(.nav-icon):not(.nav-badge)').textContent.trim() : '';
+        };
+
+        let currentIndex = 0;
+        const isMobile = () => window.innerWidth <= 900;
+
+        function showModule(index) {
+            currentIndex = Math.max(0, Math.min(order.length - 1, index));
+            const moduleId = order[currentIndex];
+
+            navItems.forEach(n => n.classList.toggle('active', n.dataset.module === moduleId));
+            modules.forEach(m => m.classList.toggle('active', m.id === moduleId));
+
+            // Prev/Next state + labels
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.disabled = currentIndex === order.length - 1;
+            document.getElementById('prevTitle').textContent =
+                currentIndex > 0 ? titleFor(order[currentIndex - 1]) : '—';
+            document.getElementById('nextTitle').textContent =
+                currentIndex < order.length - 1 ? titleFor(order[currentIndex + 1]) : '—';
+
+            // On mobile, picking a section auto-collapses the overlay sidebar
+            if (isMobile()) document.body.classList.add('sidebar-hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Sidebar nav clicks
         navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                const moduleId = item.dataset.module;
-
-                // Update nav
-                navItems.forEach(n => n.classList.remove('active'));
-                item.classList.add('active');
-
-                // Update modules
-                modules.forEach(m => m.classList.remove('active'));
-                document.getElementById(moduleId).classList.add('active');
-
-                // Close mobile menu
-                document.getElementById('sidebar').classList.remove('open');
-
-                // Scroll to top
-                document.querySelector('.main-content').scrollTop = 0;
-            });
+            item.addEventListener('click', () => showModule(order.indexOf(item.dataset.module)));
         });
 
-        // Mobile menu
-        document.getElementById('menuBtn').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.toggle('open');
+        // Prev / Next
+        prevBtn.addEventListener('click', () => showModule(currentIndex - 1));
+        nextBtn.addEventListener('click', () => showModule(currentIndex + 1));
+
+        // Arrow-key navigation (skip when typing in a field — none here, but safe)
+        document.addEventListener('keydown', e => {
+            const tag = (e.target.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea') return;
+            if (e.key === 'ArrowRight') showModule(currentIndex + 1);
+            if (e.key === 'ArrowLeft') showModule(currentIndex - 1);
         });
 
-        // Close sidebar when clicking outside on mobile
+        // Sidebar toggle (works on desktop AND mobile)
+        function syncToggleIcon() {
+            toggleBtn.textContent = document.body.classList.contains('sidebar-hidden') ? '☰' : '✕';
+        }
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('sidebar-hidden');
+            syncToggleIcon();
+        });
+
+        // On mobile, tapping the content closes the open overlay sidebar
         document.querySelector('.main-content').addEventListener('click', () => {
-            document.getElementById('sidebar').classList.remove('open');
+            if (isMobile() && !document.body.classList.contains('sidebar-hidden')) {
+                document.body.classList.add('sidebar-hidden');
+                syncToggleIcon();
+            }
         });
+
+        // Initial state: sidebar open on desktop, collapsed on mobile
+        if (isMobile()) document.body.classList.add('sidebar-hidden');
+        syncToggleIcon();
+        showModule(0);
     </script>
 </body>
 </html>
