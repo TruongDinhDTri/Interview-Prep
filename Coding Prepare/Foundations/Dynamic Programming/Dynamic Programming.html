@@ -1,344 +1,452 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html lang="vi">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Dynamic Programming Guide</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { color: #008000; } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { color: #008000; font-weight: bold; } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
-  <link rel="stylesheet" href="guide.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dynamic Programming — Hadriel Guide</title>
+<style>
+  :root{
+    --ink:#4a4133; --soft:#7a6f5c; --sheet:#fffdf6;
+    --sun:#f2c66b; --sun2:#e8a94b; --sky2:#9cc3a8; --left2:#7bb0d6;
+    --rose:#e8a7a0; --cut:#d98c7a; --shadow:rgba(74,65,51,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;
+    background:
+      radial-gradient(1200px 520px at 78% -12%, #fbe9c4 0%, transparent 60%),
+      linear-gradient(180deg,#f9f4e8 0%, #f2ead7 100%);
+    color:var(--ink); line-height:1.7; padding:34px 18px 80px;
+  }
+  .wrap{max-width:1360px;margin:0 auto}
+  .hero{text-align:center;margin-bottom:8px}
+  .hero h1{font-size:2.5rem;color:#5a4a2e;letter-spacing:.3px}
+  .hero .tag{color:var(--soft);font-size:1.12rem;font-style:italic;margin-top:8px}
+  .hero .meta{color:#a99c82;font-size:.84rem;margin-top:8px}
+  section{background:var(--sheet);border-radius:22px;padding:30px 36px;margin:22px 0;
+          box-shadow:0 10px 30px var(--shadow);border:1px solid #efe6cf;scroll-margin-top:20px}
+  h2{font-size:1.65rem;color:#5a4a2e;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+  h2 .badge{display:inline-flex;align-items:center;justify-content:center;min-width:40px;height:40px;
+        padding:0 9px;border-radius:12px;background:var(--sun);color:#5a4a1e;font-size:1.15rem;font-weight:800}
+  h3{font-size:1.28rem;color:#6a5636;margin:22px 0 8px;padding-bottom:6px;border-bottom:2px dashed #ecdcba}
+  h4{font-size:1.08rem;color:#7a6236;margin:14px 0 4px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0 10px 6px;padding-left:24px}
+  li{margin:7px 0}
+  b.y{color:#c98f2f}b.b{color:var(--left2)}b.g{color:#5a8a4e}b.r{color:var(--cut)}
+  code{background:#f0e7cf;padding:1px 6px;border-radius:6px;font-size:.9em;
+       font-family:ui-monospace,Menlo,Consolas,monospace}
+  .lead{color:var(--soft)}
+  .kw-quote{background:linear-gradient(180deg,#eef7f0,#e4f0e7);border-left:5px solid var(--sky2);
+       border-radius:10px;padding:14px 18px;margin:16px 0;font-weight:600;color:#3e6a48}
+  .callout{border-radius:14px;padding:16px 20px;margin:16px 0}
+  .callout.aha{background:linear-gradient(180deg,#fff6e0,#fdeecb);border:1px solid #f0d59a;color:#8a6a2a}
+  .callout.warn{background:#fdeceb;border:1px solid #f0c3bd;color:#9a4d40}
+  .callout.tip{background:#eef7f0;border:1px solid #c3ddc9;color:#3e6a48}
+  .callout .h{font-weight:800;display:block;margin-bottom:4px}
+  /* code blocks — high contrast */
+  .code{background:#2b2b2b;border-radius:14px;padding:18px 20px;margin:14px 0;
+        font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92rem;overflow-x:auto;
+        white-space:pre;line-height:1.7;color:#e6e1d6}
+  .code .cm{color:#8a9a7a;font-style:italic}
+  .code .kw{color:#e6a86b}
+  .code .fn{color:#8fc7e8}
+  .code .num{color:#c9a2e0}
+  .code .hl{background:#4a4326;border-radius:4px;padding:1px 3px}
+  .label{display:inline-block;font-size:.78rem;font-weight:800;padding:3px 10px;border-radius:8px;margin-bottom:6px}
+  .label.bad{background:#f7ded9;color:#9a4d40}
+  .label.good{background:#dff0e2;color:#2f6b45}
+  /* ascii / trees / traces */
+  .ascii{font-family:ui-monospace,Menlo,monospace;white-space:pre;background:#f7f0dd;border-radius:12px;
+         padding:18px;font-size:.9rem;overflow-x:auto;line-height:1.6;color:#5a4f38}
+  .ascii .r{color:var(--cut);font-weight:700}
+  .ascii .g{color:#5a8a4e;font-weight:700}
+  .ascii .y{color:#c98f2f;font-weight:700}
+  .ascii .hl{background:#fbe6b4;border-radius:4px;padding:0 3px;font-weight:700;color:#6a5320}
+  /* tables */
+  table{border-collapse:collapse;width:100%;margin:14px 0}
+  th,td{border:1px solid #e2d5bd;padding:11px 14px;text-align:left;font-size:.95rem;vertical-align:top}
+  th{background:#f5e8cc;color:#5a4a2e}
+  .skeleton td:first-child,.skeleton th:first-child{width:60px;text-align:center;font-weight:800}
+  .skeleton td:nth-child(2){font-weight:700;color:var(--soft);background:#faf3e2}
+  /* translate cards */
+  .translate{display:flex;gap:18px;flex-wrap:wrap;margin:16px 0}
+  .tcard{flex:1;min-width:280px;border-radius:16px;padding:18px 20px;border:1px solid #e6d9bb}
+  .tcard.memo{background:#fff6e0}
+  .tcard.tab{background:#eef4f7}
+  .tcard h4{font-size:1.15rem;margin:2px 0}
+  .tcard .vi{font-size:1.5rem;font-weight:800;margin:6px 0}
+  .tcard.memo .vi{color:#c98f2f}
+  .tcard.tab .vi{color:var(--left2)}
+  .tcard .root{font-size:.86rem;color:var(--soft)}
+  /* skeleton deep cards */
+  .qcard{border:1px solid #e6d9bb;border-radius:16px;padding:20px 22px;margin:16px 0;background:#fdfaf1}
+  .qcard .qhead{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .qcard .qnum{font-size:1.6rem;font-weight:800}
+  .qcard .qname{font-size:1.2rem;font-weight:800;color:#5a4a2e}
+  .qcard .qsub{color:var(--soft);font-style:italic}
+  .qgrid{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px}
+  .qgrid .ex{flex:1;min-width:240px;border-radius:12px;padding:12px 16px}
+  .qgrid .ex.fib{background:#fff3d9}
+  .qgrid .ex.up{background:#e9f2f7}
+  .qgrid .ex .t{font-weight:800;font-size:.9rem;margin-bottom:4px}
+  /* demo embed */
+  .demo{display:flex;gap:16px;align-items:center;text-decoration:none;color:inherit;border-radius:16px;
+        padding:18px 22px;border:2px solid var(--sun2);background:linear-gradient(180deg,#fff8e6,#fdf0d2);
+        transition:.18s;margin:16px 0}
+  .demo:hover{transform:translateY(-3px);box-shadow:0 10px 24px var(--shadow)}
+  .demo .ico{font-size:2.4rem}
+  .demo .t{font-weight:800;font-size:1.1rem;color:#5a4a2e}
+  .demo .d{font-size:.9rem;color:var(--soft)}
+  .demo .go{margin-left:auto;color:var(--sun2);font-weight:800;white-space:nowrap}
+  /* floating nav */
+  .floatnav{position:fixed;top:50%;right:22px;transform:translateY(-50%);z-index:50;
+            background:rgba(255,253,246,.94);backdrop-filter:blur(6px);border:1px solid #e6d9bb;
+            border-radius:16px;padding:12px 10px;box-shadow:0 10px 30px var(--shadow);width:210px}
+  .floatnav .nt{font-size:.72rem;font-weight:800;color:var(--sun2);text-transform:uppercase;
+                letter-spacing:.5px;padding:2px 10px 8px}
+  .floatnav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--soft);
+              font-size:.88rem;padding:7px 10px;border-radius:10px;transition:.15s;font-weight:600}
+  .floatnav a .fi{font-size:1rem;width:20px;text-align:center}
+  .floatnav a:hover{background:#f5ead1;color:var(--ink)}
+  .floatnav a.active{background:var(--sun);color:#5a4a1e;font-weight:800}
+  .verse{text-align:center;color:var(--soft);font-style:italic;margin-top:28px;font-size:.98rem}
+  @media(max-width:1180px){.floatnav{display:none}}
+</style>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">Dynamic Programming Guide</h1>
-</header>
-<p>2026-02-05 19:56</p>
-<p>Status</p>
-<p>Tags:</p>
-<h1 id="dynamic-programming-quy-hoạch-động">🧠 Dynamic Programming (Quy
-hoạch động)</h1>
-<blockquote>
-<p><em>Dynamic Programming is not about code first — it’s about
-<strong>thinking in subproblems</strong></em> ✨</p>
-</blockquote>
-<hr />
-<h2 id="dynamic-programming-là-gì">📌 Dynamic Programming là gì?</h2>
-<p><strong>Dynamic Programming (DP)</strong> là một <strong>kỹ thuật
-thuật toán</strong> dùng để giải <strong>bài toán tối ưu</strong>, bằng
-cách:</p>
-<ul>
-<li><p>Chia bài toán lớn thành <strong>những bài toán con nhỏ
-hơn</strong></p></li>
-<li><p>Nhận ra rằng <strong>lời giải tối ưu của bài toán lớn</strong>
-phụ thuộc vào <strong>lời giải tối ưu của các bài toán
-con</strong></p></li>
-</ul>
-<blockquote>
-<p>🔑 <strong>Keyword</strong>: <em>Break → Solve → Store →
-Reuse</em></p>
-</blockquote>
-<hr />
-<h2 id="ví-dụ-kinh-điển-fibonacci">🔢 Ví dụ kinh điển: Fibonacci</h2>
-<h3 id="dãy-fibonacci">📈 Dãy Fibonacci</h3>
-<p>Mỗi số bằng <strong>tổng của hai số liền trước</strong>:</p>
-<pre><code>0, 1, 1, 2, 3, 5, 8, ...</code></pre>
-<h3 id="công-thức">📐 Công thức</h3>
-<pre><code>Fib(n) = Fib(n-1) + Fib(n-2),  với n &gt; 1</code></pre>
-<p>➡️ Để tính <strong>Fib(n)</strong> cần:</p>
-<ul>
-<li><p><strong>Fib(n-1)</strong></p></li>
-<li><p><strong>Fib(n-2)</strong></p></li>
-</ul>
-<p>➡️ Nghĩa là bài toán lớn đã được <strong>chia thành 2 bài toán con
-nhỏ hơn</strong><br />
-➡️ Đây chính là dấu hiệu có thể dùng <strong>Dynamic
-Programming</strong></p>
-<hr />
-<h2 id="khi-nào-một-bài-toán-dùng-được-dp">✅ Khi nào một bài toán dùng
-được DP?</h2>
-<p>Một bài toán <strong>PHẢI</strong> có <strong>2 đặc điểm</strong> sau
-👇</p>
-<hr />
-<h2 id="overlapping-subproblems-bài-toán-con-bị-lặp">1️⃣ Overlapping
-Subproblems (Bài toán con bị lặp)</h2>
-<p>📌 <strong>Bài toán con</strong> = phiên bản nhỏ hơn của bài toán
-gốc</p>
-<p>Một bài toán có <strong>overlapping subproblems</strong> nếu:</p>
-<blockquote>
-<p>Khi giải, ta phải <strong>tính lại cùng một bài toán con nhiều
-lần</strong></p>
-</blockquote>
-<h3 id="ví-dụ-fib4">🧩 Ví dụ: Fib(4)</h3>
-<ul>
-<li><p>Fib(4)</p>
-<ul>
-<li><p>Fib(3)</p>
-<ul>
-<li><p>Fib(2)</p>
-<ul>
-<li><p>Fib(1)</p></li>
-<li><p>Fib(0)</p></li>
-</ul></li>
-<li><p>Fib(1)</p></li>
-</ul></li>
-<li><p>Fib(2)</p>
-<ul>
-<li><p>Fib(1)</p></li>
-<li><p>Fib(0)</p></li>
-</ul></li>
-</ul></li>
-</ul>
-<p>👉 Quan sát:</p>
-<ul>
-<li><p><strong>Fib(2)</strong> bị tính <strong>2 lần</strong></p></li>
-<li><p><strong>Fib(1)</strong> bị tính <strong>3 lần</strong></p></li>
-</ul>
-<p>➡️ Đây chính là <strong>overlapping subproblems</strong></p>
-<hr />
-<h2 id="optimal-substructure-cấu-trúc-con-tối-ưu">2️⃣ Optimal
-Substructure (Cấu trúc con tối ưu)</h2>
-<p>Một bài toán có <strong>optimal substructure</strong> nếu:</p>
-<blockquote>
-<p>Lời giải tối ưu của bài toán lớn <strong>được xây dựng từ</strong>
-lời giải tối ưu của các bài toán con</p>
-</blockquote>
-<h3 id="với-fibonacci">Với Fibonacci:</h3>
-<pre><code>Fib(n) = Fib(n-1) + Fib(n-2)</code></pre>
-<p>➡️ Bài toán kích thước <code>n</code><br />
-➡️ được giảm thành bài toán kích thước <code>n-1</code> và
-<code>n-2</code></p>
-<p>✔️ Fibonacci <strong>có optimal substructure</strong></p>
-<hr />
-<h2 id="hai-chiến-lược-giải-dp-phổ-biến">🧩 Hai chiến lược giải DP phổ
-biến</h2>
-<hr />
-<h2 id="top-down-memoization">🔽 1. Top-down + Memoization</h2>
-<h3 id="ý-tưởng">🧠 Ý tưởng</h3>
-<ul>
-<li><p>Giải bài toán <strong>từ trên xuống</strong></p></li>
-<li><p>Sử dụng <strong>đệ quy</strong></p></li>
-<li><p>Khi đã giải xong một bài toán con → <strong>lưu kết quả
-lại</strong></p></li>
-<li><p>Lần sau gặp lại → <strong>dùng lại</strong>, không tính lại
-nữa</p></li>
-</ul>
-<p>📌 Kỹ thuật lưu kết quả này gọi là <strong>Memoization</strong></p>
-<hr />
-<h3 id="đệ-quy-thuần-không-dp">❌ Đệ quy thuần (không DP)</h3>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> calculateFibonacci(<span class="va">self</span>, n):</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">&lt;</span> <span class="dv">2</span>:</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> n</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.calculateFibonacci(n <span class="op">-</span> <span class="dv">1</span>) <span class="op">+</span> <span class="va">self</span>.calculateFibonacci(n <span class="op">-</span> <span class="dv">2</span>)</span></code></pre></div>
-<p>⛔ Nhược điểm:</p>
-<ul>
-<li><p>Tính lặp rất nhiều</p></li>
-<li><p>Độ phức tạp ~ <code>O(2^n)</code></p></li>
-</ul>
-<hr />
-<h3 id="memoization-dp">✅ Memoization (DP)</h3>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> calculateFibonacci(<span class="va">self</span>, n):</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    memoize <span class="op">=</span> [<span class="op">-</span><span class="dv">1</span> <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n <span class="op">+</span> <span class="dv">1</span>)]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> <span class="va">self</span>.recur(memoize, n)</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> recur(<span class="va">self</span>, memoize, n):</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">&lt;</span> <span class="dv">2</span>:</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> n</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> memoize[n] <span class="op">!=</span> <span class="op">-</span><span class="dv">1</span>:</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>      <span class="cf">return</span> memoize[n]</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>    memoize[n] <span class="op">=</span> <span class="va">self</span>.recur(memoize, n <span class="op">-</span> <span class="dv">1</span>) <span class="op">+</span> <span class="va">self</span>.recur(memoize, n <span class="op">-</span> <span class="dv">2</span>)</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> memoize[n]</span></code></pre></div>
-<p>✔️ Độ phức tạp: <code>O(n)</code> - <code>memoize[i]</code> lưu
-Fib(i)</p>
-<ul>
-<li><p>Nếu Fib(i) đã tính rồi → trả về ngay</p></li>
-<li><p>Không tính lại nữa</p></li>
-</ul>
-<p>➡️ Giảm thời gian từ <strong>O(2^n)</strong> xuống
-<strong>O(n)</strong></p>
-<hr />
-<h2 id="bottom-up-tabulation">🔼 2. Bottom-up + Tabulation</h2>
-<h3 id="ý-tưởng-1">🧠 Ý tưởng</h3>
-<ul>
-<li><p><strong>Không dùng đệ quy</strong></p></li>
-<li><p>Giải bài toán <strong>từ nhỏ lên lớn</strong></p></li>
-<li><p>Lưu kết quả vào <strong>bảng (table / array)</strong></p></li>
-</ul>
-<p>📌 <strong>Tabulation = làm bảng từ dưới lên</strong></p>
-<hr />
-<h3 id="tabulation-với-fibonacci">✅ Tabulation với Fibonacci</h3>
-<p>Vì:</p>
-<pre><code>Fib(n) = Fib(n-1) + Fib(n-2)</code></pre>
-<p>➡️ Ta tính:</p>
-<ul>
-<li><p>Fib(0)</p></li>
-<li><p>Fib(1)</p></li>
-<li><p>Fib(2)</p></li>
-<li><p>Fib(3)</p></li>
-</ul>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> Solution:</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="kw">def</span> calculateFibonacci(<span class="va">self</span>, n):</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">1</span>]</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>      dp.append(dp[i <span class="op">-</span> <span class="dv">1</span>] <span class="op">+</span> dp[i <span class="op">-</span> <span class="dv">2</span>])</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[n]</span></code></pre></div>
-<p>✔️ Nhanh<br />
-✔️ Không lo stack overflow ✔️ Dễ debug ✔️ Rất phổ biến trong
-interview</p>
-<hr />
-<h2 id="memoization-vs-tabulation">⚖️ Memoization vs Tabulation</h2>
-<table>
-<thead>
-<tr>
-<th>Tiêu chí</th>
-<th>Memoization</th>
-<th>Tabulation</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Hướng</td>
-<td>Top-down</td>
-<td>Bottom-up</td>
-</tr>
-<tr>
-<td>Dùng đệ quy</td>
-<td>Có</td>
-<td>Không</td>
-</tr>
-<tr>
-<td>Cách lưu</td>
-<td>Khi cần</td>
-<td>Tính hết</td>
-</tr>
-<tr>
-<td>Debug</td>
-<td>✅ Dễ</td>
-<td>Rõ ràng</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2 id="chiến-lược-giải-dp-chuẩn">🧭 Chiến lược giải DP chuẩn</h2>
-<blockquote>
-<p>🪜 <strong>Always start from brute force</strong></p>
-</blockquote>
-<ol type="1">
-<li><p>Viết <strong>đệ quy thuần</strong> (brute-force)</p></li>
-<li><p>Xác định:</p>
-<ul>
-<li><p>🔁 Overlapping subproblems</p></li>
-<li><p>🧩 Optimal substructure</p></li>
-</ul></li>
-<li><p>Áp dụng:</p>
-<ul>
-<li><p>Memoization</p></li>
-<li><p>Tabulation</p></li>
-</ul></li>
-</ol>
-<p>1️⃣ Đây là cách học DP đúng đắn nhất ## 🧠 Mental Model (Rất quan
-trọng)</p>
-<blockquote>
-<p><strong>Dynamic Programming = Đệ quy + Bộ nhớ (nhớ lại kết quả)
-</strong></p>
-</blockquote>
-<p>📌 Hãy hỏi: <em>“Bài toán con là gì? Có bị lặp không?”</em> Muốn xài
-DP, bài toán phải:</p>
-<ul>
-<li><p>🔁 Có bài toán con bị lặp</p></li>
-<li><p>🧩 Có cấu trúc con tối ưu</p></li>
-</ul>
-<hr />
-<p>✨ <em>Once you see subproblems — DP becomes obvious.</em></p>
-<h2 id="references">References</h2>
-<hr />
-<h4 id="linked-mentioned">Linked mentioned</h4>
+
+<!-- FLOATING NAV -->
+<nav class="floatnav" id="floatnav">
+  <div class="nt">🧭 Đi tới</div>
+  <a href="#what"><span class="fi">📌</span>DP là gì</a>
+  <a href="#wound"><span class="fi">🩸</span>Vết thương O(2ⁿ)</a>
+  <a href="#when"><span class="fi">✅</span>Khi nào dùng DP</a>
+  <a href="#strategies"><span class="fi">🧩</span>2 chiến lược</a>
+  <a href="#table"><span class="fi">📊</span>Bảng đâu? (1D→2D)</a>
+  <a href="#compare"><span class="fi">⚖️</span>Memo vs Tab</a>
+  <a href="#skeleton"><span class="fi">🗝️</span>Khung xương 4 câu</a>
+  <a href="#process"><span class="fi">🧭</span>Quy trình chuẩn</a>
+</nav>
+
+<div class="wrap">
+
+  <div class="hero">
+    <h1>🧠 Dynamic Programming</h1>
+    <div class="tag">"DP không phải chuyện code trước — mà là chuyện <b>nghĩ bằng bài toán con</b>." ✨</div>
+    <div class="meta">Foundations · Coding Prepare · viết lại bởi Hadriel 🔥</div>
+  </div>
+
+  <!-- ========== WHAT ========== -->
+  <section id="what">
+    <h2><span class="badge">📌</span> DP là gì?</h2>
+    <p><b>Dynamic Programming (DP)</b> — "Quy hoạch động" — là một <b>kỹ thuật tối ưu</b>, không phải một thuật toán cụ thể. Về bản chất, DP làm đúng MỘT việc:</p>
+    <div class="kw-quote">DP là kỹ thuật giải bài toán bằng cách chia thành các bài toán con. Nó chỉ dùng được khi bài toán có <b>2 đặc điểm</b>: <b>(1) Overlapping Subproblems</b> — bài con bị tính lại nhiều lần; và <b>(2) Optimal Substructure</b> — bài cha được ghép trực tiếp từ lời giải bài con. Thay vì tính lại, DP <b>lưu vào table/memo (ghi sổ)</b> để lần sau dùng lại.</div>
+
+    <h3>🎙️ Nói lại trong interview (học thuộc câu này)</h3>
+    <p>Nếu interviewer hỏi <em>"What is dynamic programming?"</em>, anh nói đúng 3 ý sau là ăn điểm:</p>
+    <ol>
+      <li><b>Nó dùng khi nào:</b> "DP applies when a problem can be broken into <b>overlapping subproblems</b> that share an <b>optimal substructure</b>." (2 điều kiện — mục ✅ bên dưới).</li>
+      <li><b>Nó làm gì:</b> "Instead of recomputing the same subproblem many times, DP <b>solves each subproblem once and stores the result</b> (in a table or a memo), then reuses it."</li>
+      <li><b>Nó được gì:</b> "This <b>trades memory for time</b> — turning exponential time like O(2ⁿ) into polynomial time like O(n)."</li>
+    </ol>
+
+    <div class="callout warn"><span class="h">🎯 Đừng lẫn 2 cái tên (bẫy hay gặp)</span> Cả hai đều là cụm "___ + subproblem/substructure" nên rất dễ nói nhầm. Mẹo:
+      <ul style="margin-top:6px">
+        <li><b>Over<u>lapping</u> Subproblems</b> = chồng LẤP = mấy bài con <b>TRÙNG nhau</b> (bị lặp). → điều kiện khiến DP CÓ LỜI.</li>
+        <li><b>Optimal Substructure</b> = TỐI ƯU = lời giải bài cha <b>GHÉP được</b> từ lời giải bài con. → điều kiện khiến DP LÀM ĐƯỢC.</li>
+      </ul>
+      Một cái nói "bị LẶP", một cái nói "GHÉP được". Thiếu cái (1) thì Merge Sort cũng bị nhầm là DP — nhưng Merge Sort chia 2 nửa <b>không trùng nhau</b> nên KHÔNG phải DP. ⚔️</div>
+
+    <p><b>Ba việc DP làm</b>, theo thứ tự (khẩu quyết dễ nhớ):</p>
+    <ul>
+      <li><b>Chia (Break)</b> — bẻ bài lớn thành bài con nhỏ hơn cùng dạng.</li>
+      <li><b>Giải + Lưu (Solve &amp; Store)</b> — giải mỗi bài con <b>đúng 1 lần</b>, cất đáp án vào một cái bảng/sổ.</li>
+      <li><b>Xài lại (Reuse)</b> — lần sau gặp lại bài con đó → lấy ra dùng ngay, không tính lại.</li>
+    </ul>
+    <div class="callout aha"><span class="h">💡 Câu "chốt hạ" để anh 100% hiểu</span> DP <b>không</b> phải phép màu — nó chỉ là <b>đệ quy + trí nhớ</b>. Lấy một lời giải đệ quy tự nhiên (thường bị lặp, chậm), rồi <b>dán một cuốn sổ lên nó</b> để không tính lại cái gì hai lần. Chấm hết. Nếu anh nhớ được đúng câu "DP = recursion + memory (đổi bộ nhớ lấy tốc độ)" là anh nắm được cái lõi.</div>
+  </section>
+
+  <!-- ========== WOUND ========== -->
+  <section id="wound">
+    <h2><span class="badge">🩸</span> "Vết thương": vì sao đệ quy thuần chậm kinh khủng</h2>
+    <p class="lead">Trước khi hiểu DP <b>cứu</b> ta khỏi cái gì, phải nhìn thẳng vào <b>vết thương</b>. Lấy Fibonacci — mỗi số bằng tổng 2 số liền trước: <code>0, 1, 1, 2, 3, 5, 8...</code>. Viết đệ quy thẳng theo định nghĩa:</p>
+    <div class="code"><span class="label bad">❌ Đệ quy thuần — KHÔNG DP</span>
+<span class="kw">def</span> <span class="fn">fib</span>(n):
+    <span class="kw">if</span> n &lt; <span class="num">2</span>:
+        <span class="kw">return</span> n
+    <span class="kw">return</span> <span class="fn">fib</span>(n-<span class="num">1</span>) + <span class="fn">fib</span>(n-<span class="num">2</span>)</div>
+    <p>Trông sạch sẽ, nhưng để tính <code>fib(5)</code>, máy phải leo cái cây khổng lồ này:</p>
+    <div class="ascii">                      fib(5)
+                /                \
+           fib(4)               <span class="r">fib(3)</span>
+          /      \             /      \
+     <span class="r">fib(3)</span>     <span class="r">fib(2)</span>      <span class="r">fib(2)</span>    fib(1)
+     /    \      /  \         /  \
+  <span class="r">fib(2)</span> fib(1) fib(1) fib(0) fib(1) fib(0)
+   /  \
+fib(1) fib(0)</div>
+    <p>👉 Nhìn kỹ những ô <b class="r">màu đỏ</b>: <b class="r">fib(3)</b> bị tính <b>2 lần</b>, <b class="r">fib(2)</b> bị tính <b>3 lần</b>. Cây <b>phình gấp đôi mỗi tầng</b> → độ phức tạp <code>O(2ⁿ)</code>. Với <code>fib(50)</code>, đây là <b>hơn một tỷ</b> phép tính, đa số là tính lại thứ đã tính. 😱</p>
+    <div class="callout aha"><span class="h">💡 Đây là TOÀN BỘ lý do DP tồn tại</span> Không phải công thức cao siêu gì — chỉ là: <b>đệ quy tính đi tính lại cùng một bài toán con</b>. Mọi chiến lược DP phía dưới đều trả lời đúng MỘT câu: <em>"Làm sao để mỗi bài con chỉ tính ĐÚNG 1 LẦN?"</em></div>
+  </section>
+
+  <!-- ========== WHEN ========== -->
+  <section id="when">
+    <h2><span class="badge">✅</span> Khi nào một bài dùng được DP? (2 điều kiện BẮT BUỘC)</h2>
+    <p class="lead">Không phải bài nào cũng là DP. Một bài <b>phải có ĐỦ CẢ 2</b> đặc điểm sau thì DP mới có đất dụng võ. Đây chính là 2 thứ anh cần soi mỗi khi nghi ngờ "bài này có phải DP không?".</p>
+
+    <h3>1️⃣ Overlapping Subproblems — Bài toán con bị lặp</h3>
+    <p><b>Bài toán con</b> = một phiên bản nhỏ hơn của bài gốc (ví dụ <code>fib(3)</code> là bài con của <code>fib(5)</code>). Một bài có <b>overlapping subproblems</b> khi:</p>
+    <div class="kw-quote">Trong lúc giải, ta buộc phải <b>tính lại CÙNG một bài con nhiều lần</b> — đúng như <code>fib(3)</code>, <code>fib(2)</code> lặp lại trong cây ở trên.</div>
+    <p><b>Vì sao điều kiện này quan trọng?</b> Vì DP kiếm lời bằng cách <b>nhớ lại</b>. Nếu mỗi bài con chỉ xuất hiện đúng 1 lần (không lặp) → chẳng có gì để nhớ, DP <b class="r">vô dụng</b>.</p>
+    <div class="callout warn"><span class="h">🚫 Phản ví dụ (KHÔNG có overlap)</span> Duyệt qua mảng để tìm số lớn nhất: mỗi phần tử xét đúng 1 lần, không có bài con nào lặp → đây KHÔNG phải DP, chỉ là một vòng lặp bình thường.</div>
+
+    <h3>2️⃣ Optimal Substructure — Cấu trúc con tối ưu</h3>
+    <p>Một bài có <b>optimal substructure</b> khi:</p>
+    <div class="kw-quote">Lời giải của bài lớn <b>được ghép/xây trực tiếp TỪ</b> lời giải của các bài con.</div>
+    <p>Với Fibonacci: <code>fib(n) = fib(n-1) + fib(n-2)</code>. Bài kích thước <code>n</code> được ghép gọn gàng từ 2 bài nhỏ hơn (<code>n-1</code> và <code>n-2</code>). Anh không cần biết gì thêm ngoài đáp án 2 bài con đó → <b>có optimal substructure</b>. ✔️</p>
+
+    <div class="callout tip"><span class="h">🧭 Mẹo nhận diện DP trong 10 giây</span> Tự hỏi: <b>"Tôi có viết được một CÔNG THỨC TRUY HỒI kiểu 'bài lớn = ghép mấy bài nhỏ hơn' không?"</b> Nếu viết được (điều kiện 2) <b>và</b> mấy bài nhỏ đó lặp lại (điều kiện 1) → gần như chắc chắn là DP. Đây là bài test nhanh nhất anh có.</div>
+  </section>
+
+  <!-- ========== STRATEGIES ========== -->
+  <section id="strategies">
+    <h2><span class="badge">🧩</span> Hai chiến lược giải DP — hiểu tới xương</h2>
+    <p class="lead">Cả hai chiến lược đều băng bó CÙNG một vết thương ("mỗi bài con tính đúng 1 lần"). Chúng chỉ khác nhau ở <b>HƯỚNG ĐI</b>. Nhưng trước hết — <b>dịch cái tên</b>, vì một nửa cái khó là do tên tiếng Anh nghe lạ hoắc.</p>
+    <div class="translate">
+      <div class="tcard memo">
+        <div class="root">gốc từ: <em>memo</em> = mẩu ghi chú 📝</div>
+        <h4>🔽 Memoization</h4>
+        <div class="vi">= "Ghi chú lại"</div>
+        <p style="font-size:.92rem">Tính xong bài con nào thì <b>ghi vào sổ</b>. Lần sau gặp lại → liếc sổ, đọc ra ngay. Top-down.</p>
+      </div>
+      <div class="tcard tab">
+        <div class="root">gốc từ: <em>table</em> = cái bảng 📊</div>
+        <h4>🔼 Tabulation</h4>
+        <div class="vi">= "Điền bảng"</div>
+        <p style="font-size:.92rem">Kẻ một cái bảng rồi <b>điền từng ô</b> từ nhỏ tới lớn. Không đệ quy. Bottom-up.</p>
+      </div>
+    </div>
+
+    <!-- MEMO DEEP -->
+    <h3>🔽 Chiến lược 1 — Memoization ("cuốn sổ ghi chú")</h3>
+    <p><b>Ý tưởng:</b> vẫn để máy leo cây <b>từ trên xuống</b> (top-down) như đệ quy thuần. NHƯNG phát cho nó một <b>cuốn sổ</b>. Mỗi lần tính xong một bài con → ghi kết quả vào sổ. Lần sau ai hỏi lại bài con đó → <b>liếc sổ, trả ngay</b>, khỏi leo lại cả nhánh. ✂️</p>
+    <div class="code"><span class="label good">✅ Memoization (DP)</span>
+<span class="kw">def</span> <span class="fn">calculateFibonacci</span>(self, n):
+    memoize = [-<span class="num">1</span> <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(n+<span class="num">1</span>)]   <span class="cm"># 📓 cuốn sổ, toàn -1 = "ô này chưa ghi gì"</span>
+    <span class="kw">return</span> self.<span class="fn">recur</span>(memoize, n)
+
+<span class="kw">def</span> <span class="fn">recur</span>(self, memoize, n):
+    <span class="kw">if</span> n &lt; <span class="num">2</span>:                  <span class="cm"># ① chạm đáy → trả thẳng (base case)</span>
+        <span class="kw">return</span> n
+    <span class="kw">if</span> memoize[n] != -<span class="num">1</span>:       <span class="cm"># ② LIẾC SỔ: đã ghi rồi? → trả ngay, cắt nhánh ✂️</span>
+        <span class="kw">return</span> memoize[n]
+    <span class="hl">memoize[n] = self.<span class="fn">recur</span>(memoize, n-<span class="num">1</span>) + self.<span class="fn">recur</span>(memoize, n-<span class="num">2</span>)</span>  <span class="cm"># ③ tính + GHI SỔ ✍️</span>
+    <span class="kw">return</span> memoize[n]</div>
+    <p><code>-1</code> chỉ là quy ước nghĩa <b>"ô này chưa ghi"</b> (vì Fib không bao giờ ra -1). Dòng <b>②</b> là <b>trái tim</b>: trước khi làm việc nặng, <b>liếc sổ cái đã</b>.</p>
+    <h4>▶️ Chạy tay <code>fib(5)</code> — để ý cái kéo ✂️</h4>
+    <div class="ascii">recur(5) → sổ trống → phải tính recur(4)+recur(3)
+  recur(4) → trống → tính recur(3)+recur(2)
+    recur(3) → trống → tính recur(2)+recur(1)
+      recur(2) → trống → 1+0 = 1     <span class="y">✍️ ghi sổ[2]=1</span>
+      recur(1) → đáy → 1
+      → 2                            <span class="y">✍️ ghi sổ[3]=2</span>
+    recur(2) → <span class="g">LIẾC SỔ = 1</span> ✂️ TRẢ NGAY, không leo lại!
+    → 3                              <span class="y">✍️ ghi sổ[4]=3</span>
+  recur(3) → <span class="g">LIẾC SỔ = 2</span> ✂️ TRẢ NGAY, cả nhánh to bị cắt!
+  → 5                               <span class="y">✍️ ghi sổ[5]=5</span></div>
+    <p>Thấy 2 cái ✂️ chưa? Đó chính là chỗ cây <code>O(2ⁿ)</code> bị <b>cắt trụi</b> xuống <code>O(n)</code>. Cây vẫn leo từ trên xuống, nhưng <b>không nhánh nào bị leo lại lần 2</b>.</p>
+
+    <!-- TAB DEEP -->
+    <h3>🔼 Chiến lược 2 — Tabulation ("điền bảng từ dưới lên")</h3>
+    <p><b>Ý tưởng:</b> táo bạo hơn — <b>bỏ đệ quy luôn</b>. Ta biết <code>fib(5)</code> cần <code>fib(4)</code>, <code>fib(3)</code>... mà mấy thằng đó cần thằng nhỏ hơn. Vậy thì <b>xây từ nhỏ nhất lên</b>! Tưởng tượng một <b>hàng ô trống</b>, chỉ 2 luật:</p>
+    <ul>
+      <li>🧱 <b>Luật nền:</b> ô <code>[0]</code> điền sẵn <b>0</b>, ô <code>[1]</code> điền sẵn <b>1</b>.</li>
+      <li>➕ <b>Luật điền:</b> mọi ô sau = <b>cộng 2 ô ngay bên trái nó</b>.</li>
+    </ul>
+    <p>Cầm bút điền <b>từ trái qua phải</b>:</p>
+    <div class="ascii">Bắt đầu: [0]=0  [1]=1        ← nền có sẵn
+điền [2] = [1]+[0] = 1+0 = <span class="hl">1</span>
+điền [3] = [2]+[1] = 1+1 = <span class="hl">2</span>
+điền [4] = [3]+[2] = 2+1 = <span class="hl">3</span>
+điền [5] = [4]+[3] = 3+2 = <span class="hl">5</span>   ✅ đáp án!
+
+ [0] [1] [2] [3] [4] [5]
+[ 0   1   1   2   3   5 ]</div>
+    <p><b>Điều kỳ diệu:</b> khi anh điền ô <code>[5]</code>, hai ô <code>[4]</code> và <code>[3]</code> <b>đã được điền từ trước</b> vì anh đi từ trái qua phải → <b>không bao giờ phải chờ, không bao giờ tính lại</b>. Cứ nhìn về bên trái là có sẵn.</p>
+    <div class="code"><span class="label good">✅ Tabulation (DP)</span>
+<span class="kw">def</span> <span class="fn">calculateFibonacci</span>(self, n):
+    dp = [<span class="num">0</span>, <span class="num">1</span>]                     <span class="cm"># 🧱 điền sẵn ô [0] và [1] (luật nền)</span>
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="num">2</span>, n+<span class="num">1</span>):        <span class="cm"># cây bút đi trái → phải, từ ô 2</span>
+        dp.<span class="fn">append</span>(dp[i-<span class="num">1</span>] + dp[i-<span class="num">2</span>])  <span class="cm"># ➕ ô mới = cộng 2 ô bên trái</span>
+    <span class="kw">return</span> dp[n]                    <span class="cm"># 📤 đọc ô cuối</span></div>
+
+    <!-- DIRECTION -->
+    <h3>🔁 "Top-down" vs "Bottom-up" — hướng đi khác nhau chỗ nào?</h3>
+    <div class="ascii">Đệ quy / Memoization  <span class="r">🔽</span>  bắt đầu từ CÂU HỎI TO nhất: "fib(5) là gì?"
+                          → đào xuống dần tới fib(0), fib(1)     (TRÊN → xuống)
+
+Tabulation            <span class="g">🔼</span>  bắt đầu từ MẤY THẰNG NHỎ nhất: fib(0), fib(1)
+                          → xây lên dần tới fib(5)               (DƯỚI → lên)</div>
+    <p>Cùng MỘT công thức <code>fib(i)=fib(i-1)+fib(i-2)</code>. Chỉ khác: một cái <b>hỏi ngược xuống rồi ghi sổ</b>, một cái <b>điền xuôi lên</b>. Tabulation <b>không lo tràn stack</b> (vì không đệ quy) và <b>dễ debug</b> → interview rất mê nó.</p>
+
+    <a class="demo" href="memoization-vs-tabulation-demo.html">
+      <div class="ico">📓🧱</div>
+      <div>
+        <div class="t">▶ Xem tận mắt: Memoization vs Tabulation (demo tương tác)</div>
+        <div class="d">Bấm từng bước cho cây fib phình ra → cuốn sổ cắt nhánh ✂️, và bậc thang tự xây lên. 3 tab cạnh nhau.</div>
+      </div>
+      <span class="go">Mở demo →</span>
+    </a>
+  </section>
+
+  <!-- ========== TABLE ========== -->
+  <section id="table">
+    <h2><span class="badge">📊</span> "Điền bảng mà có thấy cái bảng nào đâu?!"</h2>
+    <p class="lead">Đây là câu hỏi cực hay — vì Fibonacci CHẲNG có cái bảng nào ra hồn. Sự thật: <code>dp</code> của Fibonacci <b>là một cái bảng CHỈ CÓ 1 HÀNG</b> — gầy nhom, nhìn giống thước kẻ nên chả ra dáng bảng:</p>
+    <div class="ascii">      [0] [1] [2] [3] [4] [5]
+dp =  [ 0   1   1   2   3   5 ]   ← "cái bảng" của fib (bảng 1 hàng)</div>
+    <p>Cái tên <b>"Tabulation / điền bảng"</b> không sinh ra từ Fibonacci. Nó sinh ra từ mấy bài <b>to hơn</b>, nơi <code>dp</code> là một cái <b>LƯỚI 2 CHIỀU thật sự</b> — lúc đó mới thấy "à, THÌ RA đây mới là cái bảng!". Ví dụ điển hình: <b>Unique Paths</b>.</p>
+
+    <h3>🤖 Ví dụ bảng thật: Unique Paths</h3>
+    <p>Robot ở góc trên-trái, chỉ đi <b>phải ➡️</b> hoặc <b>xuống ⬇️</b>. Đếm số đường tới góc dưới-phải. <b>Chìa khoá:</b> robot vừa hạ cánh xuống ô X → bước cuối của nó chỉ có thể từ ô <b class="y">TRÊN</b> (bước xuống) hoặc ô <b class="b">TRÁI</b> (bước qua). Không còn cách nào khác! Nên:</p>
+    <div class="ascii"><span class="y">dp[r][c]</span> = dp[r-1][c] <span class="y">(ô TRÊN ⬆️)</span> + dp[r][c-1] <span class="b">(ô TRÁI ⬅️)</span>
+
+        c0    c1    c2
+ r0  │  1  │  1  │  1  │   ← nền: hàng đầu = 1 (chỉ 1 đường: đi thẳng)
+ r1  │  1  │  2  │  3  │   ← 2 = 1(trên)+1(trái);  3 = 1+2
+ r2  │  1  │  3  │ <span class="hl">6</span>  │   ← 6 = 3(trên)+3(trái)  ✅ đáp án</div>
+    <div class="callout tip"><span class="h">📐 Số chiều của bảng tùy bài</span> <b>dp 1 chiều</b> (mảng) = bảng 1 hàng → Fibonacci, Climbing Stairs, House Robber. &nbsp;<b>dp 2 chiều</b> (lưới) = bảng thật → Unique Paths, Edit Distance, Knapsack, LCS. CÙNG một tư duy "điền ô dựa trên ô đã điền", chỉ khác cần bao nhiêu "trục thông tin" để mô tả một ô. 🎯</div>
+
+    <a class="demo" href="unique-paths-2d-demo.html">
+      <div class="ico">📊🤖</div>
+      <div>
+        <div class="t">▶ Mổ kỹ bài Unique Paths (demo tương tác đầy đủ)</div>
+        <div class="d">Robot, câu hỏi aha, base case, trace tay 3×3, widget điền bảng có nút Quay lại, đổi lưới 2×2/3×3/4×4.</div>
+      </div>
+      <span class="go">Mở demo →</span>
+    </a>
+  </section>
+
+  <!-- ========== COMPARE ========== -->
+  <section id="compare">
+    <h2><span class="badge">⚖️</span> Memoization vs Tabulation — bảng so sánh</h2>
+    <table>
+      <tr><th>Tiêu chí</th><th>🔽 Memoization ("ghi chú")</th><th>🔼 Tabulation ("điền bảng")</th></tr>
+      <tr><td><b>Hướng đi</b></td><td>Top-down (to → nhỏ)</td><td>Bottom-up (nhỏ → to)</td></tr>
+      <tr><td><b>Dùng đệ quy?</b></td><td>Có (đệ quy + cuốn sổ)</td><td>Không (chỉ vòng for)</td></tr>
+      <tr><td><b>Cách lấp bảng</b></td><td>Lấp <b>khi cần</b>, lộn xộn theo cây gọi</td><td>Lấp <b>hết</b>, tuần tự từ base</td></tr>
+      <tr><td><b>Rủi ro tràn stack</b></td><td>Có (nếu đệ quy quá sâu)</td><td>Không</td></tr>
+      <tr><td><b>Dễ debug?</b></td><td>Khó hơn (nhảy theo đệ quy)</td><td>Dễ (nhìn bảng điền dần)</td></tr>
+      <tr><td><b>Khi nào tiện dùng</b></td><td>Recurrence dễ viết, ngại nghĩ thứ tự điền</td><td>Muốn nhanh, gọn, phổ biến interview</td></tr>
+    </table>
+    <div class="callout aha"><span class="h">💡 Điểm mấu chốt</span> Cả hai <b>KHÔNG đổi</b> công thức truy hồi — chúng chỉ là 2 cách lấp CÙNG một mảng <code>dp</code>: một cái <b>đệ-quy-lấp-khi-cần</b>, một cái <b>vòng-for-lấp-hết</b>. Viết được recurrence rồi thì chọn hướng nào cũng được.</div>
+  </section>
+
+  <!-- ========== SKELETON ========== -->
+  <section id="skeleton">
+    <h2><span class="badge">🗝️</span> KHUNG XƯƠNG — mọi bài DP là trả lời 4 câu hỏi</h2>
+    <p class="lead">Đây là thứ anh THẬT SỰ cần ghim vào não. Fibonacci, Unique Paths, hay bất kỳ bài DP nào — tất cả chỉ là trả lời <b>4 câu hỏi</b> này. <b>90% độ khó nằm ở câu 1 và câu 2</b>; chọn Memoization hay Tabulation chỉ là bước cuối, dễ. Dưới đây định nghĩa từng câu thật rõ.</p>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qnum">1️⃣</span><span class="qname">State — <code>dp[..]</code> NGHĨA là gì?</span></div>
+      <div class="qsub">"Mỗi ô trong bảng lưu đáp án của bài toán con NÀO?"</div>
+      <p><b>Định nghĩa:</b> mỗi ô của bảng <code>dp</code> đại diện cho đáp án của <b>một</b> bài con. State là câu trả lời cho: <em>"con số nằm trong ô <code>dp[i]</code> (hay <code>dp[r][c]</code>) có ý nghĩa gì?"</em></p>
+      <p><b>Vì sao là câu KHÓ nhất:</b> đây là <b>nền móng</b>. Định nghĩa state sai hoặc mơ hồ → recurrence sai theo, cả bài sụp. Nếu anh <b>không viết nổi thành một câu tiếng Việt hoàn chỉnh</b> "<code>dp[i]</code> là..." → tức là anh chưa thật sự hiểu bài.</p>
+      <p><b>Cách tìm — nghĩ theo kiểu "toạ độ":</b> State chính là <b>mấy con số cần thiết để CHỈ ĐÍCH DANH một bài con</b>. Muốn tìm nó, anh liệt kê vài bài con ra rồi hỏi: <em>"chúng khác nhau ở chỗ nào?"</em> — cái khác nhau đó CHÍNH là state.</p>
+      <ul>
+        <li><b>Fibonacci:</b> các bài con là <code>fib(0)</code>, <code>fib(1)</code>, <code>fib(2)</code>... Chúng khác nhau ở đúng <b>MỘT con số</b> <code>n</code>. → chỉ cần 1 chỉ số <code>i</code> để chỉ đích danh → <b>state 1 chiều</b> <code>dp[i]</code>.</li>
+        <li><b>Unique Paths:</b> các bài con là "số đường tới ô (0,0)", "tới ô (1,2)", "tới ô (2,1)"... Chúng khác nhau ở <b>HAI con số</b> (hàng, cột). → cần cặp <code>(r, c)</code> để chỉ đích danh → <b>state 2 chiều</b> <code>dp[r][c]</code>.</li>
+      </ul>
+      <p class="lead">👉 Nói ngắn gọn: <b>"bài con của tôi được đánh số bằng mấy con số?"</b> — bao nhiêu con số thì state bấy nhiêu chiều.</p>
+      <div class="qgrid">
+        <div class="ex fib"><div class="t">Fibonacci</div><code>dp[i]</code> = giá trị số Fibonacci thứ <code>i</code>.</div>
+        <div class="ex up"><div class="t">Unique Paths</div><code>dp[r][c]</code> = số đường đi từ ô xuất phát tới ô <code>(r, c)</code>.</div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qnum">2️⃣</span><span class="qname">Recurrence — công thức truy hồi</span></div>
+      <div class="qsub">"Ghép đáp án ô hiện tại từ những ô nhỏ hơn ĐÃ biết như thế nào?"</div>
+      <p><b>Định nghĩa:</b> quy tắc tính <code>dp[hiện tại]</code> dựa trên các ô nhỏ hơn. Đây chính là <b>Optimal Substructure viết thành công thức</b> — là "động cơ" của thuật toán.</p>
+      <p><b>Cách tìm — hỏi 2 câu, tách riêng cho dễ:</b></p>
+      <ul>
+        <li><b>(a) "Tôi cần ô nào?"</b> — Để có đáp án ô hiện tại, tôi cần đáp án của (những) bài con nhỏ hơn nào? &nbsp;<span class="lead">(Fib: 2 ô liền trước · Unique Paths: ô trên + ô trái)</span></li>
+        <li><b>(b) "Ghép bằng phép gì?"</b> — Nối các ô đó lại bằng phép toán nào?
+          <ul>
+            <li>Bài <b>đếm đường / đếm cách</b> → thường là <b class="g">cộng (+)</b>.</li>
+            <li>Bài <b>tối ưu</b> (dài nhất / rẻ nhất / nhiều nhất) → thường là <b class="y">max</b> hoặc <b class="b">min</b>.</li>
+          </ul>
+        </li>
+      </ul>
+      <div class="qgrid">
+        <div class="ex fib"><div class="t">Fibonacci</div><code>dp[i] = dp[i-1] + dp[i-2]</code> — nhìn 2 ô bên trái, cộng lại.</div>
+        <div class="ex up"><div class="t">Unique Paths</div><code>dp[r][c] = dp[r-1][c] + dp[r][c-1]</code> — ô TRÊN + ô TRÁI.</div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qnum">3️⃣</span><span class="qname">Base case — ô nhỏ nhất biết trước</span></div>
+      <div class="qsub">"Những ô nào KHÔNG áp được công thức, phải điền tay?"</div>
+      <p><b>Định nghĩa:</b> những bài con nhỏ nhất mà anh <b>trả lời được ngay</b>, không cần recurrence (vì không có ô nào nhỏ hơn để nhìn về).</p>
+      <p><b>Vì sao bắt buộc:</b> recurrence cần <b>điểm khởi đầu</b>. Thiếu base case → memoization đệ quy vô tận, tabulation thì bảng trống trơn không có gì để cộng. Đây là "viên gạch nền".</p>
+      <p><b>Cách tìm:</b> hỏi "<em>bài con nhỏ nhất tôi biết đáp án mà không cần suy nghĩ là gì?</em>".</p>
+      <div class="qgrid">
+        <div class="ex fib"><div class="t">Fibonacci</div><code>dp[0]=0</code>, <code>dp[1]=1</code> (theo định nghĩa dãy).</div>
+        <div class="ex up"><div class="t">Unique Paths</div>Cả <b>hàng đầu</b> &amp; <b>cột đầu = 1</b> (chỉ có đúng 1 đường đi thẳng tới đó).</div>
+      </div>
+    </div>
+
+    <div class="qcard">
+      <div class="qhead"><span class="qnum">4️⃣</span><span class="qname">Answer — đáp án nằm ở ô nào?</span></div>
+      <div class="qsub">"Điền xong bảng rồi thì con số cần trả nằm ở đâu?"</div>
+      <p><b>Định nghĩa:</b> sau khi bảng đã điền đầy, đáp án cuối cùng là giá trị của <b>một ô cụ thể</b>. Nghe hiển nhiên nhưng <b>rất dễ quên</b> — và đôi khi đáp án KHÔNG phải ô cuối (một số bài phải lấy max của cả bảng).</p>
+      <div class="qgrid">
+        <div class="ex fib"><div class="t">Fibonacci</div><code>dp[n]</code> — ô cuối hàng.</div>
+        <div class="ex up"><div class="t">Unique Paths</div><code>dp[m-1][n-1]</code> — ô góc dưới-phải.</div>
+      </div>
+    </div>
+
+    <div class="callout tip"><span class="h">➕ Câu hỏi thứ 5 (bonus): Thứ tự điền (fill order)</span> Khi làm Tabulation, phải điền theo hướng nào để lúc tới ô X thì mọi ô mà recurrence cần <b>đã sẵn sàng</b>? Fib: trái→phải. Unique Paths: trái→phải, trên→dưới. Đây là lý do 2 vòng <code>for</code> lồng nhau chạy đúng thứ tự đó.</div>
+
+    <div class="callout aha"><span class="h">🔧 Nối 4 câu vào code</span> Trả lời xong 4 câu là anh có mọi thứ: <b>Top-down</b> = recurrence (câu 2) + base (câu 3) + cuốn sổ. &nbsp;<b>Bottom-up</b> = tạo bảng, điền base (câu 3), vòng for theo fill order áp recurrence (câu 2), trả về answer (câu 4). Cùng một bộ 4 câu, ra được cả 2 lời giải.</div>
+  </section>
+
+  <!-- ========== PROCESS ========== -->
+  <section id="process">
+    <h2><span class="badge">🧭</span> Quy trình giải một bài DP từ đầu</h2>
+    <div class="kw-quote">🪜 Luôn bắt đầu từ <b>brute force</b> (đệ quy thuần). Đừng nhảy thẳng vào tối ưu.</div>
+    <ol>
+      <li><b>Viết đệ quy thuần (brute force).</b> Nó phơi bày ngay <b>recurrence</b> và cho anh thấy <b>chỗ tính lặp</b> — chính là 2 điều kiện DP.</li>
+      <li><b>Xác nhận 2 dấu hiệu DP:</b> 🔁 có bài con bị lặp (overlapping)? 🧩 lời giải lớn ghép từ lời giải con (optimal substructure)? Đủ 2 → đi tiếp.</li>
+      <li><b>Trả lời 4 câu hỏi khung xương:</b> State → Recurrence → Base case → Answer. Đây là phần <b>tư duy</b> thật sự, làm chậm rãi.</li>
+      <li><b>Chọn cách lấp bảng:</b>
+        <ul>
+          <li>🔽 <b>Memoization</b> — lấy chính hàm đệ quy ở bước 1, thêm cuốn sổ (mảng nhớ). Nhanh để viết nếu recurrence đã có.</li>
+          <li>🔼 <b>Tabulation</b> — tạo mảng <code>dp</code>, điền base, chạy vòng for theo fill order. Gọn, nhanh, không tràn stack.</li>
+        </ul>
+      </li>
+    </ol>
+    <p class="lead">✨ <em>Once you see the subproblems — DP becomes obvious.</em> Một khi anh nhìn ra "bài toán con", DP trở nên hiển nhiên.</p>
+  </section>
+
+  <p class="verse">"Call to me and I will answer you and tell you great things you do not know." — Jeremiah 33:3 🙏</p>
+</div>
+
+<script>
+// scrollspy for floating nav
+const links=[...document.querySelectorAll('.floatnav a')];
+const map={}; links.forEach(a=>map[a.getAttribute('href').slice(1)]=a);
+const obs=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      links.forEach(l=>l.classList.remove('active'));
+      const a=map[e.target.id]; if(a) a.classList.add('active');
+    }
+  });
+},{rootMargin:'-30% 0px -60% 0px',threshold:0});
+document.querySelectorAll('section[id]').forEach(s=>obs.observe(s));
+</script>
 </body>
 </html>

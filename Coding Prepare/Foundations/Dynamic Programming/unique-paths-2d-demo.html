@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Điền Bảng 2 Chiều — Unique Paths — Hadriel</title>
+<style>
+  :root{
+    --paper:#f6f1e4; --ink:#4a4133; --soft:#7a6f5c;
+    --sky:#bcd8c1; --sky2:#9cc3a8; --sun:#f2c66b; --sun2:#e8a94b;
+    --rose:#e8a7a0; --top:#f2c66b; --left:#a9cfe8; --left2:#7bb0d6;
+    --sheet:#fffdf6; --shadow:rgba(74,65,51,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:"Segoe UI",-apple-system,sans-serif;
+    background:
+      radial-gradient(1100px 480px at 72% -10%, #fbe9c4 0%, transparent 60%),
+      linear-gradient(180deg,#f9f4e8 0%, #f2ead7 100%);
+    color:var(--ink); min-height:100vh; padding:26px 16px; line-height:1.6;
+  }
+  .wrap{max-width:1300px;margin:0 auto}
+  .card{scroll-margin-top:18px}
+  /* floating nav */
+  .floatnav{position:fixed;top:50%;right:22px;transform:translateY(-50%);z-index:50;
+            background:rgba(255,253,246,.94);backdrop-filter:blur(6px);border:1px solid #e6d9bb;
+            border-radius:16px;padding:12px 10px;box-shadow:0 10px 30px var(--shadow);width:196px}
+  .floatnav .nt{font-size:.72rem;font-weight:800;color:var(--sun2);text-transform:uppercase;
+                letter-spacing:.5px;padding:2px 10px 8px}
+  .floatnav a{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--soft);
+              font-size:.86rem;padding:7px 10px;border-radius:10px;transition:.15s;font-weight:600}
+  .floatnav a .fi{font-size:1rem;width:20px;text-align:center}
+  .floatnav a:hover{background:#f5ead1;color:var(--ink)}
+  .floatnav a.active{background:var(--sun);color:#5a4a1e;font-weight:800}
+  @media(max-width:1160px){.floatnav{display:none}}
+  /* robot grid visual */
+  .robotviz{display:flex;justify-content:center;padding:10px 0 4px}
+  .rgrid{display:grid;grid-template-columns:repeat(4,58px);grid-template-rows:repeat(3,58px);gap:7px;
+         background:#eef4e9;padding:16px;border-radius:16px;border:1px solid #d5e3cc}
+  .rcell{border-radius:10px;background:#fbf7ec;border:2px solid #e2ddca;display:flex;align-items:center;
+         justify-content:center;font-size:1.5rem;position:relative}
+  .rcell.start{background:#fdeecb;border-color:var(--sun2)}
+  .rcell.goal{background:#dff0e2;border-color:var(--sky2)}
+  .rcell.path{background:#eaf3f9;border-color:var(--left2)}
+  .rlabel{text-align:center;color:var(--soft);font-size:.85rem;margin-top:8px}
+  .rlabel b.y{color:#c98f2f}.rlabel b.b{color:var(--left2)}
+  h1{font-size:1.75rem;text-align:center}
+  .sub{text-align:center;color:var(--soft);margin:6px 0 18px}
+  .back{display:inline-flex;align-items:center;gap:6px;color:var(--soft);text-decoration:none;
+        font-weight:600;font-size:.92rem;margin-bottom:14px}
+  .back:hover{color:var(--sun2)}
+  .card{background:var(--sheet);border-radius:20px;padding:24px;margin-bottom:20px;
+        box-shadow:0 10px 30px var(--shadow);border:1px solid #efe6cf}
+  .card h2{font-size:1.3rem;margin-bottom:10px;color:#5a4a2e}
+  .card h2 .n{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;
+        border-radius:9px;background:var(--sun);color:#5a4a1e;font-size:.95rem;margin-right:8px}
+  .card p{margin:8px 0}
+  .lead{color:var(--soft)}
+  b.y{color:#c98f2f}b.b{color:var(--left2)}b.g{color:#5a8a4e}
+  .aha{background:linear-gradient(180deg,#fff6e0,#fdeecb);border:1px solid #f0d59a;border-radius:14px;
+       padding:16px 18px;margin:14px 0}
+  .aha .q{font-style:italic;color:#8a6a2a;font-weight:600;font-size:1.05rem;
+          border-left:4px solid var(--sun2);padding-left:12px;margin:8px 0}
+  .formula{font-family:ui-monospace,Menlo,monospace;background:#2f2a20;color:#fbe6b4;
+           border-radius:12px;padding:14px 16px;text-align:center;font-size:1.05rem;margin:12px 0;overflow-x:auto}
+  .formula .y{color:#f2c66b}.formula .b{color:#a9cfe8}.formula .dim{color:#9a8f76}
+  .robot{font-family:ui-monospace,Menlo,monospace;white-space:pre;background:#eef4e9;border-radius:12px;
+         padding:14px;color:#4a5a3a;font-size:.95rem;overflow-x:auto;text-align:center;line-height:1.5}
+  .trace{font-family:ui-monospace,Menlo,monospace;white-space:pre;background:#f7f0dd;border-radius:12px;
+         padding:16px;font-size:.9rem;overflow-x:auto;line-height:1.6;color:#5a4f38}
+  .trace .hl{background:#fbe6b4;border-radius:4px;padding:0 3px;font-weight:700;color:#6a5320}
+  .insight{background:#eef7f0;border:1px solid #c3ddc9;border-radius:12px;padding:12px 16px;margin:12px 0;font-size:.95rem}
+  .insight b{color:#4a7a52}
+  /* grid interactive */
+  .row{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+  .gridbox{flex:1;min-width:300px}
+  .side{flex:1;min-width:280px}
+  table.grid{border-collapse:separate;border-spacing:8px;margin:0 auto}
+  table.grid td{width:60px;height:60px;text-align:center;vertical-align:middle;border-radius:14px;
+    background:#efe6cf;border:2px solid #e0d3b3;font-weight:800;font-size:1.2rem;color:#c9bfa6;
+    transition:.3s;position:relative}
+  td.filled{background:#dff0e2;border-color:var(--sky2);color:#274531}
+  td.base{background:#e8f0dc;border-color:#b9cf94;color:#4a5a2e}
+  td.cur{background:var(--sun);border-color:var(--sun2);color:#5a4a1e;transform:scale(1.1);
+         box-shadow:0 6px 16px rgba(232,169,75,.4);z-index:2}
+  td.fromTop{background:#fbe6b4;border-color:var(--sun2);color:#6a5320}
+  td.fromLeft{background:#cfe6f5;border-color:var(--left2);color:#264a63}
+  td.goal{box-shadow:0 0 0 3px var(--rose)}
+  td .tag{position:absolute;top:-11px;left:50%;transform:translateX(-50%);font-size:.58rem;
+          font-weight:700;padding:1px 6px;border-radius:8px;white-space:nowrap;color:#fff}
+  td.fromTop .tag{background:var(--sun2)}
+  td.fromLeft .tag{background:var(--left2)}
+  td.cur .tag{background:#c98f2f}
+  .colhdr{color:var(--soft);font-weight:700;font-size:.8rem;width:60px;height:24px;text-align:center}
+  .rowhdr{width:24px;height:60px;text-align:center;vertical-align:middle;color:var(--soft);font-weight:700;font-size:.8rem}
+  .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:16px 0 6px;justify-content:center}
+  .btn{border:none;cursor:pointer;padding:10px 18px;border-radius:12px;font-weight:700;font-size:.95rem;
+       background:var(--sky2);color:#274531;box-shadow:0 3px 0 #7ba888;transition:.15s}
+  .btn:hover{transform:translateY(-2px)} .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+  .btn.prev{background:#e8d9b8;color:#6a5a34;box-shadow:0 3px 0 #d3c095}
+  .btn.ghost{background:#efe6cf;color:var(--soft);box-shadow:0 3px 0 #dfd3b6}
+  .stepdot{font-weight:700;color:var(--soft);font-size:.9rem}
+  .explain{background:#2f2a20;color:#e9e0c8;border-radius:14px;padding:16px 18px;min-height:150px}
+  .explain h3{color:var(--sun);font-size:1rem;margin-bottom:8px}
+  .explain .math{font-family:ui-monospace,Menlo,monospace;font-size:1rem;background:#3d372a;
+                 padding:8px 12px;border-radius:8px;margin:8px 0;color:#fbe6b4}
+  .explain .g{color:#9cd6a6}.explain .y{color:#f2c66b}.explain .b{color:#a9cfe8}
+  .explain p{font-size:.92rem;margin:6px 0;color:#d8cfb8}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--soft);margin-top:14px;justify-content:center}
+  .dot{display:inline-block;width:13px;height:13px;border-radius:4px;vertical-align:-2px;margin-right:5px}
+  .code{background:#2b2b2b;border-radius:14px;padding:16px 18px;font-family:ui-monospace,Menlo,monospace;
+        font-size:.9rem;overflow-x:auto;white-space:pre;line-height:1.65;color:#e6e1d6}
+  .code .cm{color:#8a9a7a}.code .kw{color:#e6a86b}.code .fn{color:#8fc7e8}.code .num{color:#c9a2e0}
+  .code .hl{background:#4a4326;border-radius:4px;padding:1px 3px}
+  .sizectl{text-align:center;margin-bottom:10px;color:var(--soft);font-size:.9rem}
+  select{padding:5px 10px;border-radius:8px;border:2px solid #e0d3b3;background:var(--sheet);font-weight:700;color:var(--ink)}
+  table.cmp{border-collapse:collapse;width:100%;margin-top:8px}
+  table.cmp th,table.cmp td{border:1px solid #e2d5bd;padding:9px 12px;text-align:left;font-size:.92rem}
+  table.cmp th{background:#f5e8cc;color:#5a4a2e}
+  table.cmp td:first-child{font-weight:700;color:var(--soft);background:#faf3e2}
+  .verse{text-align:center;color:var(--soft);font-style:italic;margin-top:24px;font-size:.9rem}
+  code{background:#f0e7cf;padding:1px 6px;border-radius:6px;font-size:.9em}
+</style>
+</head>
+<body>
+<nav class="floatnav" id="floatnav">
+  <div class="nt">🧭 Đi tới</div>
+  <a href="#context"><span class="fi">🤖</span>Bối cảnh robot</a>
+  <a href="#aha"><span class="fi">🧠</span>Câu hỏi aha</a>
+  <a href="#base"><span class="fi">🧱</span>Base case</a>
+  <a href="#trace"><span class="fi">✏️</span>Trace tay 3×3</a>
+  <a href="#play"><span class="fi">🎮</span>Tự điền bảng</a>
+  <a href="#code"><span class="fi">💻</span>Code</a>
+  <a href="#compare"><span class="fi">🎯</span>Chốt 1D↔2D</a>
+</nav>
+<div class="wrap">
+  <a class="back" href="Dynamic Programming.html">↩︎ Quay lại trang Dynamic Programming</a>
+  <h1>📊 Điền Bảng 2 Chiều — <span style="color:var(--sun2)">Unique Paths</span> 🤖</h1>
+  <p class="sub">Một ví dụ duy nhất, mổ tới xương: từ Fibonacci "bảng 1 hàng" bước lên "bảng thật" 2 chiều.</p>
+
+  <!-- 1. CONTEXT -->
+  <div class="card" id="context">
+    <h2><span class="n">🤖</span>Bối cảnh: con robot đi lưới</h2>
+    <p class="lead">Robot đứng ở <b class="y">góc trên-trái</b>. Nó <b>chỉ được đi 2 hướng: qua PHẢI ➡️ hoặc xuống DƯỚI ⬇️</b> — không lùi, không lên. Câu hỏi: có <b>bao nhiêu con đường khác nhau</b> để tới <b class="b">góc dưới-phải</b> 🏁?</p>
+    <div class="robotviz">
+      <div class="rgrid">
+        <div class="rcell start">🤖</div><div class="rcell path">➡️</div><div class="rcell path">➡️</div><div class="rcell path">⬇️</div>
+        <div class="rcell">·</div><div class="rcell">·</div><div class="rcell">·</div><div class="rcell path">⬇️</div>
+        <div class="rcell">·</div><div class="rcell">·</div><div class="rcell">·</div><div class="rcell goal">🏁</div>
+      </div>
+    </div>
+    <p class="rlabel">Một <b class="b">con đường</b> ví dụ: phải → phải → phải → xuống → xuống. Có bao nhiêu đường như vậy tất cả? Đó là câu hỏi.</p>
+  </div>
+
+  <!-- 2. THE AHA -->
+  <div class="card" id="aha">
+    <h2><span class="n">🧠</span>Câu hỏi cốt lõi: "Có bao nhiêu đường tới MỘT ô bất kỳ?"</h2>
+    <p class="lead">Đây là chỗ <b>aha</b>. Đừng đọc tiếp vội — nghĩ 5 giây 🤔:</p>
+    <div class="aha">
+      <div class="q">Robot vừa đặt chân lên một ô X. Bước CUỐI CÙNG của nó là bước nào? Nó vừa từ đâu bước tới X?</div>
+      <p>Vì robot <b>chỉ đi phải hoặc xuống</b>, nên để đứng được trên X, cú bước cuối chỉ có thể là:</p>
+      <p>🔽 nó đang ở ô ngay <b class="y">TRÊN</b> X, bước <b>xuống</b>, &nbsp;hoặc&nbsp; ▶️ nó đang ở ô ngay <b class="b">TRÁI</b> X, bước <b>qua phải</b>.</p>
+      <p><b>KHÔNG còn cách nào khác</b> để hạ cánh xuống X! Vậy thì:</p>
+    </div>
+    <div class="formula">
+      số đường tới X &nbsp;=&nbsp; số đường tới ô-<span class="y">TRÊN</span> &nbsp;+&nbsp; số đường tới ô-<span class="b">TRÁI</span><br>
+      <span class="dim">dp[r][c]</span> &nbsp;=&nbsp; <span class="y">dp[r-1][c]</span> &nbsp;+&nbsp; <span class="b">dp[r][c-1]</span>
+    </div>
+    <div class="insight">💡 <b>Đây chính là Recurrence</b> (câu 2️⃣ trong khung xương 4-câu-hỏi của DP). Ta KHÔNG đếm đường trực tiếp — ta nói "đường tới X = gộp đường tới 2 ô đã biết ngay cạnh". Bài to (tới X) bẻ thành 2 bài nhỏ hơn (tới ô trên + ô trái). 🎯</div>
+  </div>
+
+  <!-- 3. BASE CASE -->
+  <div class="card" id="base">
+    <h2><span class="n">🧱</span>Base case: hàng đầu &amp; cột đầu đều = 1</h2>
+    <p class="lead">Nghĩ tay xem: để tới bất kỳ ô nào ở <b class="y">hàng trên cùng</b>, robot chỉ có <b>một cách duy nhất</b> — đi thẳng một lèo qua phải ➡️➡️➡️ (không có ô nào ở trên để rẽ xuống). Tương tự <b class="b">cột trái cùng</b> = đi thẳng xuống ⬇️⬇️⬇️.</p>
+    <div class="formula">Cả hàng đầu = 1, &nbsp; cả cột đầu = 1 &nbsp; <span class="dim">← "ô nhỏ nhất biết trước"</span></div>
+  </div>
+
+  <!-- 4. MANUAL TRACE -->
+  <div class="card" id="trace">
+    <h2><span class="n">✏️</span>Điền tay cái bảng 3×3 — từng ô, chậm rãi</h2>
+    <p class="lead">Luật điền: đi <b>trái→phải, trên→dưới</b>, để khi tới ô X thì ô-trên và ô-trái <b>đã điền xong rồi</b>.</p>
+    <div class="trace">Bước 1 — điền nền (hàng đầu + cột đầu = 1):
+        c0    c1    c2
+ r0  │  1  │  1  │  1  │
+ r1  │  1  │  ?  │  ?  │
+ r2  │  1  │  ?  │  ?  │
+
+Bước 2 — ô (r1,c1) = TRÊN + TRÁI = 1 + 1 = <span class="hl">2</span>
+Bước 3 — ô (r1,c2) = TRÊN + TRÁI = 1 + 2 = <span class="hl">3</span>
+Bước 4 — ô (r2,c1) = TRÊN + TRÁI = 2 + 1 = <span class="hl">3</span>
+Bước 5 — ô (r2,c2) = TRÊN + TRÁI = 3 + 3 = <span class="hl">6</span>  ✅ đáp án!
+
+        c0    c1    c2
+ r0  │  1  │  1  │  1  │
+ r1  │  1  │  2  │  3  │
+ r2  │  1  │  3  │ <span class="hl">6</span>  │  ← 6 con đường</div>
+    <p>Mỗi ô mới chỉ <b>nhìn lên trên và nhìn qua trái</b> — hai ô đó luôn đã có sẵn vì mình điền theo thứ tự. Y hệt Fibonacci "nhìn 2 ô bên trái", chỉ khác giờ nhìn theo <b>2 chiều</b>. 😎</p>
+  </div>
+
+  <!-- 5. INTERACTIVE -->
+  <div class="card" id="play">
+    <h2><span class="n">🎮</span>Tự tay điền bảng — bấm từng bước (có nút Quay lại)</h2>
+    <div class="sizectl">
+      Kích thước lưới:
+      <select id="sizeSel">
+        <option value="2">2 × 2</option>
+        <option value="3" selected>3 × 3</option>
+        <option value="4">4 × 4</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="gridbox">
+        <div id="gridHost"></div>
+        <div class="controls">
+          <button class="btn prev" id="prevBtn">◀ Quay lại</button>
+          <span class="stepdot" id="stepDot">Bước 0</span>
+          <button class="btn" id="nextBtn">Bước tiếp ▶</button>
+        </div>
+        <div class="controls" style="margin-top:0">
+          <button class="btn ghost" id="autoBtn">⏩ Tự chạy</button>
+          <button class="btn ghost" id="resetBtn">↻ Reset</button>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:#e8f0dc;border:1px solid #b9cf94"></span>nền = 1</span>
+          <span><span class="dot" style="background:var(--sun)"></span>ô đang điền</span>
+          <span><span class="dot" style="background:#fbe6b4"></span>ô TRÊN ⬆️</span>
+          <span><span class="dot" style="background:#cfe6f5"></span>ô TRÁI ⬅️</span>
+        </div>
+      </div>
+      <div class="side">
+        <div class="explain" id="explain">
+          <h3>👋 Sẵn sàng chưa?</h3>
+          <p>Bấm <b>Bước tiếp ▶</b> để bắt đầu điền bảng. Mỗi bước Hadriel sẽ chỉ rõ ô đang điền lấy giá trị từ đâu.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. CODE -->
+  <div class="card" id="code">
+    <h2><span class="n">💻</span>Cùng một tư duy — bằng code</h2>
+    <p class="lead">Để ý: <b>2 vòng <code>for</code> lồng nhau</b> = "cây bút" quét bảng trái→phải, trên→dưới.</p>
+    <div class="code"><span class="cm"># dp[r][c] = số đường đi tới ô (r, c)</span>
+<span class="kw">def</span> <span class="fn">uniquePaths</span>(m, n):
+    dp = [[<span class="num">1</span>]*n <span class="kw">for</span> _ <span class="kw">in</span> <span class="fn">range</span>(m)]   <span class="cm"># 🧱 nền: cả hàng đầu + cột đầu = 1</span>
+    <span class="kw">for</span> r <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, m):              <span class="cm"># quét từng hàng (bỏ hàng đầu)</span>
+        <span class="kw">for</span> c <span class="kw">in</span> <span class="fn">range</span>(<span class="num">1</span>, n):          <span class="cm"># quét từng cột (bỏ cột đầu)</span>
+            <span class="hl">dp[r][c] = dp[r-<span class="num">1</span>][c] + dp[r][c-<span class="num">1</span>]</span>  <span class="cm"># ⬆️TRÊN + ⬅️TRÁI</span>
+    <span class="kw">return</span> dp[m-<span class="num">1</span>][n-<span class="num">1</span>]              <span class="cm"># 📤 đáp án = ô góc dưới-phải</span></div>
+  </div>
+
+  <!-- 7. COMPARISON -->
+  <div class="card" id="compare">
+    <h2><span class="n">🎯</span>Chốt lại: cùng MỘT tư duy, khác số chiều</h2>
+    <table class="cmp">
+      <tr><th></th><th>Fibonacci (1D)</th><th>Unique Paths (2D)</th></tr>
+      <tr><td>Bảng</td><td>1 hàng <code>dp[i]</code></td><td>Lưới <code>dp[r][c]</code></td></tr>
+      <tr><td>Nhìn về đâu</td><td>2 ô bên trái</td><td>ô TRÊN + ô TRÁI</td></tr>
+      <tr><td>Recurrence</td><td><code>dp[i]=dp[i-1]+dp[i-2]</code></td><td><code>dp[r][c]=dp[r-1][c]+dp[r][c-1]</code></td></tr>
+      <tr><td>Thứ tự điền</td><td>trái → phải</td><td>trái→phải, trên→dưới</td></tr>
+      <tr><td>Số vòng for</td><td>1</td><td>2 (lồng nhau)</td></tr>
+    </table>
+    <div class="insight" style="margin-top:14px">💡 Đó là lý do gọi là "<b>điền bảng / Tabulation</b>" (gốc từ <em>table</em> = bảng). Fibonacci chỉ là cái bảng <b>1 hàng</b> nên nhìn không ra; lên 2D là thấy cái bảng lù lù. Số chiều chỉ tùy bài cần bao nhiêu "trục thông tin" để mô tả một ô. 😎</div>
+  </div>
+
+  <p class="verse">"Call to me and I will answer you and tell you great things you do not know." — Jeremiah 33:3 🙏</p>
+</div>
+
+<script>
+let N=3, steps=[], idx=0, autoT=null;
+function buildSteps(n){
+  const dp=Array.from({length:n},()=>Array(n).fill(1));
+  const s=[{type:'base'}];
+  for(let r=1;r<n;r++) for(let c=1;c<n;c++){
+    const val=dp[r-1][c]+dp[r][c-1]; dp[r][c]=val;
+    s.push({type:'fill',r,c,top:dp[r-1][c],left:dp[r][c-1],val});
+  }
+  s.push({type:'done',val:dp[n-1][n-1]});
+  return s;
+}
+function renderGrid(uptoStep){
+  const host=document.getElementById('gridHost');
+  const shown=Array.from({length:N},()=>Array(N).fill(null));
+  for(let i=0;i<N;i++){shown[0][i]=1;shown[i][0]=1;}
+  let cur=null, topCell=null, leftCell=null;
+  for(let k=1;k<=uptoStep && k<steps.length;k++){
+    const st=steps[k]; if(st.type==='fill') shown[st.r][st.c]=st.val;
+  }
+  const active=steps[uptoStep];
+  if(active && active.type==='fill'){
+    cur={r:active.r,c:active.c}; topCell={r:active.r-1,c:active.c}; leftCell={r:active.r,c:active.c-1};
+    shown[active.r][active.c]=null;
+  }
+  let html='<table class="grid"><tr><td class="colhdr"></td>';
+  for(let c=0;c<N;c++) html+='<td class="colhdr">c'+c+'</td>';
+  html+='</tr>';
+  for(let r=0;r<N;r++){
+    html+='<tr><td class="rowhdr">r'+r+'</td>';
+    for(let c=0;c<N;c++){
+      let cls='', tag='';
+      const isBase=(r===0||c===0);
+      if(cur&&cur.r===r&&cur.c===c){cls='cur';tag='<span class="tag">? = ⬆️+⬅️</span>';}
+      else if(topCell&&topCell.r===r&&topCell.c===c){cls='fromTop';tag='<span class="tag">TRÊN ⬆️</span>';}
+      else if(leftCell&&leftCell.r===r&&leftCell.c===c){cls='fromLeft';tag='<span class="tag">TRÁI ⬅️</span>';}
+      else if(shown[r][c]!==null){cls=isBase?'base':'filled';}
+      if(r===N-1&&c===N-1) cls+=' goal';
+      const v=(cur&&cur.r===r&&cur.c===c)?'?':(shown[r][c]===null?'':shown[r][c]);
+      html+=`<td class="${cls}">${tag}${v}</td>`;
+    }
+    html+='</tr>';
+  }
+  host.innerHTML=html+'</table>';
+}
+function renderExplain(){
+  const e=document.getElementById('explain'), st=steps[idx];
+  if(!st) return;
+  if(st.type==='base'){
+    e.innerHTML=`<h3>🧱 Bước nền: điền hàng đầu &amp; cột đầu = 1</h3>
+    <p>Tới ô nào ở <b class="y">hàng trên cùng</b> chỉ có <b>1 đường</b>: đi thẳng qua phải ➡️➡️. Không có ô ở trên để rẽ xuống.</p>
+    <p>Tương tự <b class="b">cột trái cùng</b>: chỉ đi thẳng xuống ⬇️⬇️ → cũng <b>1 đường</b>.</p>
+    <p class="g">→ Toàn bộ viền trên + trái = 1. Đây là "ô nhỏ nhất biết trước".</p>`;
+  } else if(st.type==='fill'){
+    e.innerHTML=`<h3>✏️ Điền ô (r${st.r}, c${st.c})</h3>
+    <p>Robot vừa hạ cánh xuống ô này. Bước cuối chỉ có thể đến từ:</p>
+    <p>🔽 ô <b class="y">TRÊN</b> (r${st.r-1},c${st.c}) = <b class="y">${st.top}</b> &nbsp;•&nbsp; ▶️ ô <b class="b">TRÁI</b> (r${st.r},c${st.c-1}) = <b class="b">${st.left}</b></p>
+    <div class="math">dp[${st.r}][${st.c}] = ${st.top} <span class="y">(⬆️)</span> + ${st.left} <span class="b">(⬅️)</span> = <b>${st.val}</b></div>
+    <p class="g">Hai ô đó ĐÃ điền từ trước → không chờ, không tính lại. Đó là sức mạnh điền bảng.</p>`;
+  } else {
+    e.innerHTML=`<h3>🎉 Xong! Bảng đã điền đầy</h3>
+    <div class="math">Đáp án = ô góc dưới-phải = <b>${st.val}</b> đường</div>
+    <p class="g">Mỗi ô điền đúng 1 lần, mỗi lần chỉ nhìn ⬆️ và ⬅️ → O(m×n).</p>
+    <p>Y hệt Fibonacci "nhìn 2 ô bên trái" — chỉ khác nhìn theo <b>2 chiều</b>. 💪</p>`;
+  }
+}
+function refresh(){
+  renderGrid(idx); renderExplain();
+  document.getElementById('stepDot').textContent=`Bước ${idx} / ${steps.length-1}`;
+  document.getElementById('prevBtn').disabled=(idx<=0);
+  document.getElementById('nextBtn').disabled=(idx>=steps.length-1);
+}
+function init(n){N=n;steps=buildSteps(n);idx=0;refresh();}
+document.getElementById('nextBtn').onclick=()=>{if(idx<steps.length-1){idx++;refresh();}};
+document.getElementById('prevBtn').onclick=()=>{if(idx>0){idx--;refresh();}};
+document.getElementById('resetBtn').onclick=()=>{clearInterval(autoT);idx=0;refresh();};
+document.getElementById('autoBtn').onclick=()=>{clearInterval(autoT);
+  autoT=setInterval(()=>{if(idx<steps.length-1){idx++;refresh();}else clearInterval(autoT);},1100);};
+document.getElementById('sizeSel').onchange=(e)=>{clearInterval(autoT);init(+e.target.value);};
+init(3);
+
+// scrollspy for floating nav
+const navLinks=[...document.querySelectorAll('.floatnav a')];
+const navMap={}; navLinks.forEach(a=>navMap[a.getAttribute('href').slice(1)]=a);
+const spy=new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){
+    navLinks.forEach(l=>l.classList.remove('active'));
+    const a=navMap[e.target.id]; if(a) a.classList.add('active');
+  }});
+},{rootMargin:'-30% 0px -60% 0px',threshold:0});
+document.querySelectorAll('.card[id]').forEach(c=>spy.observe(c));
+</script>
+</body>
+</html>
