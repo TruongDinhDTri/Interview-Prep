@@ -73,6 +73,18 @@
   .alt{border:1.5px solid var(--clay);border-radius:4px 14px 4px 14px;background:#f7e9e4;padding:14px 18px;margin:16px 0;}
   .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}.alt b{color:var(--clay-deep);}
 
+  /* Vietnamese "tiếng người" layer — Hadriel's plain-language voice */
+  .vi{background:#f6ecd2;border:1.5px dashed var(--gold);border-radius:16px 4px 16px 4px;padding:16px 20px 14px;margin:18px 0;font-size:1.05rem;line-height:1.68;position:relative;box-shadow:3px 4px 0 var(--shadow);}
+  .vi::before{content:"🔥 giải thích · tiếng người";position:absolute;top:-11px;left:16px;background:var(--gold);color:#2f2a22;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.13em;padding:3px 10px;border-radius:3px;}
+  .vi b{color:var(--clay-deep);font-weight:600;}
+  .vi .step{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sage-deep);display:block;margin:14px 0 2px;}
+  .vi .q{display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--sage-deep);font-size:1.12rem;line-height:1.4;margin:12px 0 2px;padding-left:14px;border-left:3px solid var(--sage);}
+  .vi .ask{font-style:italic;color:var(--clay-deep);}
+  .vi code{font-family:'Spline Sans Mono',monospace;font-size:.84em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .vi table{width:100%;border-collapse:collapse;margin:12px 0 4px;font-size:.9rem;}
+  .vi th,.vi td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top;}
+  .vi th{background:#ecdfc2;font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.06em;text-transform:uppercase;color:var(--clay-deep);}
+
   .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
   .stage{display:flex;gap:11px;justify-content:center;flex-wrap:wrap;min-height:96px;margin:34px 0 6px;}
   .cell{width:50px;height:50px;border-radius:12px;border:2px solid var(--line);background:#fbf5e6;display:flex;align-items:center;justify-content:center;font-family:'Fraunces',serif;font-weight:600;font-size:1.28rem;position:relative;transition:transform .45s cubic-bezier(.34,1.56,.64,1),background .45s,border-color .45s,color .45s,opacity .45s;}
@@ -103,6 +115,7 @@
     <p class="kicker">Pattern 04</p>
     <h1 class="title"><span class="l1">Binary</span><span class="l2">Search.</span></h1>
     <p class="lede">One core idea — <b>throw away half</b> every step. Press step and watch the search space collapse.</p>
+    <a href="Recognition.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--clay-deep);border:2px solid var(--clay-deep);padding:10px 18px;border-radius:999px;box-shadow:3px 3px 0 var(--shadow);width:fit-content;opacity:0;animation:fadeUp 1s .7s forwards;">⚡ Recognition — thẻ nhận diện nhanh →</a>
   </header>
 
   <!-- CORE IDEA -->
@@ -115,6 +128,31 @@
     </div>
     <p class="core">Binary search hunts the <b>flip point</b>. Check the middle: if it's on the false side, the flip is to the right — <b>delete the left half</b>. If true, the flip is here or left — <b>delete the right half</b>. <b>One test kills half the candidates.</b></p>
     <div class="pin" data-l="THE ONE LINE"><b>Halve the search space with one comparison.</b> Each step throws away half: n → n/2 → n/4 → … → 1 = <b>O(log n)</b>. The only thing you ever need is a <b>monotonic</b> question — then the middle's answer tells you which half cannot contain what you seek.</div>
+
+    <div class="vi">
+      Ai cũng học: <i>"Binary Search cần <b>mảng đã sort</b>."</i> — đúng nhưng <b>hụt</b>. Sort chỉ là MỘT cách để có được thứ BS thật sự cần. Đây là tầng sâu:
+
+      <span class="step">Bước 1 · BS thật ra "ăn" cái gì vào?</span>
+      Mỗi bước, BS chỉ làm đúng một việc: nhìn ô giữa, hỏi một câu <b>Yes/No</b>, rồi tin câu trả lời để <b>vứt nửa kia</b>. Vậy thứ DUY NHẤT nó cần từ thế giới là một <b>câu hỏi MỘT CHIỀU</b>:
+      <span class="q">một khi câu trả lời đã thành "CÓ", thì từ đó về sau mãi mãi là "CÓ", không bao giờ lật ngược.</span>
+      Đó là <b>mục đích</b> — cái đích thật sự BS đòi hỏi. Không có chữ "sort" nào ở đây. (Chính là dãy <code>F F F T T T</code> phía trên.)
+
+      <span class="step">Bước 2 · Vậy sort đóng vai gì?</span>
+      Sort <b>không phải</b> cái đích — nó là một <b>cái máy ép</b>: sắp lại dữ liệu để khiến câu hỏi <code>arr[i] ≥ target?</code> trở thành một chiều. Thử ngược lại: mảng chưa sort <code>[5, 1, 8, 3]</code>, hỏi <i>"≥ 4?"</i> → <code>CÓ, KHÔNG, CÓ, KHÔNG</code> → <b>nhấp nháy loạn</b> → BS bó tay. Sort thành <code>[1, 3, 5, 8]</code>, hỏi lại → <code>KHÔNG, KHÔNG, CÓ, CÓ</code> → <b>một chiều!</b> → BS chạy. Việc DUY NHẤT sort làm cho BS là <b>biến câu hỏi lộn xộn thành một-chiều</b>.
+
+      <span class="step">Bước 3 · Bằng chứng — nhiều "máy" khác cũng cho ra câu-hỏi-một-chiều, chẳng dính sort</span>
+      <table>
+        <tr><th>Câu hỏi một-chiều</th><th>"Một khi CÓ thì CÓ mãi" là vì…</th><th>Có mảng sort?</th></tr>
+        <tr><td><code>arr[i] ≥ target?</code></td><td>…vì mảng đã được sort</td><td>✅ có (bài quen thuộc)</td></tr>
+        <tr><td><code>build thứ v có bug?</code></td><td>…bug đã lọt thì các bản sau đều dính</td><td>❌ <b>không mảng nào</b></td></tr>
+        <tr><td><code>ăn tốc độ v có kịp?</code></td><td>…ăn nhanh hơn thì luôn vẫn kịp</td><td>❌ chỉ là trục số</td></tr>
+        <tr><td><code>mid × mid ≥ x?</code> (tìm căn)</td><td>…mid càng lớn thì tích càng lớn</td><td>❌ chẳng có mảng gì</td></tr>
+      </table>
+      Nhìn cột cuối 👀: <b>đa số KHÔNG hề có mảng sort.</b> Cái chung của cả 4 dòng không phải "được sắp xếp" — mà là <b>"một khi CÓ thì CÓ mãi"</b>. Đó mới là gia đình thật sự BS phục vụ; sort chỉ là <b>một thành viên</b>.
+
+      <span class="q">"Binary Search không cần mảng sort. Nó cần một CÂU HỎI chỉ-lật-một-lần. Sort chỉ là một cách để có câu hỏi đó." ⚔️</span>
+      <span style="display:block;margin-top:8px;font-size:.96rem;color:var(--ink-soft)">Ví dụ đời thường: anh cần <b>tới sân bay</b> (mục đích). Xe máy là một cách — nhưng taxi, bus, đi bộ cũng tới. Ai bảo "muốn tới sân bay thì BẮT BUỘC đi xe máy" là nhầm <i>phương tiện</i> thành <i>mục đích</i>. Sort với BS y hệt vậy.</span>
+    </div>
   </section>
 
   <!-- =============== SHAPE 1: FIND EXACT =============== -->
@@ -213,8 +251,35 @@
         <p style="margin:.3em 0 0">The predicate doesn't need an array at all — it can run over a <b>range of possible answers</b>. “Min eating speed so Koko finishes in time?” → <code class="inl">ok(speed) = canFinish(speed)</code> is monotonic (faster always finishes), so binary-search the <i>speed</i> from 1…max. Same flip-finder, applied to a number line.</p>
       </div>
 
+      <div class="vi">
+        Anh đã thành thạo trò này từ hồi con nít rồi 🎯 — <b>trò đoán số</b>:
+
+        <span class="step">Trò đoán số — chính là BS</span>
+        <i>"Tao nghĩ một số từ 1 đến 100."</i> Anh đoán <b>50</b> → tao nói <i>"cao hơn"</i>. Anh đoán <b>75</b> → <i>"thấp hơn"</i>… ~7 lần là ra. Để ý điều CỰC LỚN đang ẩn ở đây: <b>chưa hề có một cái mảng nào cả.</b> Chỉ có (1) một <b>dải đáp án</b> (1→100), và (2) một <b>câu hỏi</b> hỏi được về mọi cú đoán (<i>"số bí mật có lớn hơn cú đoán không?"</i>). Mỗi cú đoán + một câu <i>"cao/thấp"</i> trung thực → <b>vứt nửa dải</b>. Đó CHÍNH LÀ Binary Search — anh làm được nó trước cả khi biết code.
+
+        <span class="step">Cú lật tư duy mở khóa tất cả</span>
+        BS thường = <i>"đây là kệ sách, tìm cuốn tao cần"</i> → search <b>xuyên qua đồ vật</b>. Siêu năng lực này = <b>KHÔNG có kệ sách nào.</b> Anh tưởng tượng mọi đáp án có thể xếp thành hàng, rồi <b>đoán-rồi-kiểm</b> tới đúng cái. Anh search <b>xuyên qua ĐÁP ÁN</b>.
+        <span class="q">Đừng đi TÌM đáp án. Hãy ĐẶT CƯỢC một đáp án — rồi để câu trả lời cắt đôi số cược của anh.</span>
+
+        <span class="step">Koko chỉ là trò đoán số mặc áo chuối 🍌</span>
+        <i>"Tốc độ ăn NHỎ NHẤT để Koko ăn kịp giờ?"</i> Dịch ra: <i>"Tao nghĩ một tốc độ từ 1 đến (đống chuối lớn nhất)."</i> Anh đoán một tốc độ → thế giới đáp <i>"ăn kịp không? có / không"</i>. Chưa đủ nhanh → <b>đoán nhanh hơn</b>. Đủ nhanh rồi → <b>thử chậm lại chút</b>. Y hệt trò con nít: con số cần săn = <b>tốc độ</b>, còn <i>"cao/thấp"</i> = <i>"ăn kịp chưa"</i>. Đề <b>không cho mảng tốc độ nào</b> — anh <b>tự dựng</b> dải <code>1…max</code> rồi đoán vô, ~30 cú thay vì thử hàng tỉ. 🤯
+
+        <span class="step">Dấu hiệu nhận ra bài loại này 👀</span>
+        Hễ đề hỏi <b>"X NHỎ NHẤT / LỚN NHẤT mà vẫn thỏa điều kiện?"</b> — và anh thấy <b>kiểm tra một X thì dễ, nhưng tính thẳng X thì khó</b> → đừng tính. <b>Cứ đoán X, để câu trả lời yes/no cắt đôi số lần đoán.</b>
+      </div>
+
       <p class="lbl">The invariant — the promise that makes it correct</p>
       <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The first lit room is ALWAYS still inside <code class="inl">[left, right]</code>.</b> A dark mid is proven worthless (drop it + everything left). A lit mid is never thrown away (keep it). You only ever delete rooms you've <i>proven</i> can't be the border — so when <code class="inl">left</code> and <code class="inl">right</code> finally touch, that one room <b>must</b> be the first lit one.</div>
+
+      <div class="vi">
+        <b>Câu hỏi cuối cùng, quan trọng nhất: tại sao được phép VỨT NỬA?</b> Câu trả lời nằm gọn trong tính một-chiều. Nhìn ô giữa, đúng 2 khả năng:
+        <span style="display:block;margin:8px 0 0">• Giữa = <b>TRUE</b> → vì "một khi true thì sau đó true mãi" → <b>cả nửa phải đều true</b> → điểm-lật (chỗ ĐẦU TIÊN thành true) <b>không thể</b> ở bên phải → <b>vứt nửa phải.</b></span>
+        <span style="display:block;margin:2px 0 0">• Giữa = <b>FALSE</b> → mọi thứ bên trái càng false → điểm-lật chắc chắn ở bên phải → <b>vứt nửa trái.</b></span>
+
+        <span class="step">Bằng chứng: bẻ gãy tính một-chiều là chết liền</span>
+        Nhớ trò đoán số chứ? Giả sử tao <b>gian lận</b> — lúc "cao hơn" lúc "thấp hơn" lung tung, không nhất quán. Anh đoán <code>50</code> → tao nói "cao hơn" → anh bỏ nửa trên. Nhưng tao xạo → <b>biết đâu đáp án nằm ngay trong nửa anh vừa bỏ</b> → vứt nửa = <b>mất đáp án</b> → sập tan tành. Chính cái <b>lời hứa "reply một chiều, không lật lại"</b> mới cho anh dám vứt nửa mà không sợ.
+        <span class="q">Câu phải tự hỏi TRƯỚC mỗi bài BS: "Câu Yes/No của tao có một chiều không? Một khi CÓ, có CÓ mãi không?" — Có → BS được. Không → quên BS đi.</span>
+      </div>
       <p class="muted" style="margin:.4em 0 0"><b>Lives in:</b> first/last occurrence · insert position · min/max value that satisfies a condition (Koko, ship-in-D-days, split array).</p>
     </div>
 

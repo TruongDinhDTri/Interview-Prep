@@ -68,6 +68,11 @@
   footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
   footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
   ::selection{background:var(--gold);color:#2f2a22;}
+  /* Vietnamese "tiếng người" layer */
+  .vi{background:#f6ecd2;border:1.5px dashed var(--gold);border-radius:16px 4px 16px 4px;padding:15px 20px 13px;margin:18px 0;font-size:1.04rem;line-height:1.66;position:relative;box-shadow:3px 4px 0 var(--shadow);}
+  .vi::before{content:"🔥 giải thích · tiếng người";position:absolute;top:-11px;left:16px;background:var(--gold);color:#2f2a22;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.13em;padding:3px 10px;border-radius:3px;}
+  .vi b{color:var(--clay-deep);font-weight:600;}
+  .vi .q{display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--sage-deep);font-size:1.1rem;line-height:1.4;margin:10px 0 2px;padding-left:14px;border-left:3px solid var(--sage);}
 </style>
 </head>
 <body>
@@ -75,15 +80,22 @@
   <header class="hero">
     <p class="kicker">Pattern 06</p>
     <h1 class="title"><span class="l1">Depth-First</span><span class="l2">Search.</span></h1>
-    <p class="lede">One core idea — <b>dive to the bottom, then report back up</b>. The call stack <i>is</i> your memory. Press step and watch the answers bubble up.</p>
+    <p class="lede">One core idea — <b>exhaust one branch, then back up and take the next</b>. The call stack <i>is</i> your memory. Press step and watch the answers bubble up.</p>
+    <a href="Recognition.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--clay-deep);border:2px solid var(--clay-deep);padding:10px 18px;border-radius:999px;box-shadow:3px 3px 0 var(--shadow);width:fit-content;opacity:0;animation:fadeUp 1s .7s forwards;">⚡ Recognition — thẻ nhận diện nhanh →</a>
   </header>
 
   <section class="reveal">
     <p class="eyebrow">The core idea</p>
     <h2>Go <em>deep</em>, then bubble back.</h2>
     <p>Where BFS spreads in rings, DFS picks one branch and <b>follows it all the way down</b> before trying anything else. When it can go no further, it <b>backtracks</b> one step and tries the next branch.</p>
-    <p class="core">The magic is the <b>return trip</b>. A node often can't answer its own question until its <b>children answer first</b> — so DFS solves the children, and each one <b>hands its result up</b> to the parent, who combines them. <b>The call stack remembers where to come back to.</b></p>
-    <div class="pin" data-l="THE ONE LINE"><b>Recurse down to a base case, combine results on the way up.</b> Each node does: solve left, solve right, then <code class="inl">combine(self, left, right)</code>. The recursion stack <i>is</i> the backtracking — no manual bookkeeping. <b>O(V+E)</b> time, <b>O(height)</b> space.</div>
+    <p class="core">That's the whole pattern: <b>exhaust one path completely, then back up and take the next</b>. And because you <i>come back</i>, a node can wait for its <b>neighbours to answer first</b> and then combine what they hand up. <b>The call stack remembers where to return to</b> — that memory is what makes both the diving and the backing-up free.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>Commit fully to one branch; when it dead-ends, back up one step and take the next.</b> Each node: recurse into <i>every unvisited neighbour</i>, then <code class="inl">combine(self, …results)</code>. The recursion stack <i>is</i> the backtracking — no manual bookkeeping. Works on trees, graphs, grids, and choice-trees alike. <b>O(V+E)</b> time, <b>O(depth)</b> space.</div>
+
+    <div class="vi">
+      Đừng đóng khung DFS = "đệ quy trên cây nhị phân, giải trái rồi giải phải". Cây chỉ là <b>một sân chơi</b>.
+      <span class="q">Bản chất DFS: đi CẠN một nhánh tới đáy, kẹt thì lùi một bước rồi thử nhánh kế.</span>
+      Cái quyền năng nằm ở <b>chuyến quay về</b>: vì có lùi lại, một node có thể <b>đợi hàng xóm trả lời trước</b> rồi mới gộp kết quả. Cùng một cơ chế đó chạy cho <b>cây, graph, ma trận (đảo), và cây lựa chọn (backtracking)</b> — chỉ khác "hàng xóm" là con của node, ô kề bên, hay lựa chọn kế tiếp. <b>Call stack</b> tự nhớ đường về, khỏi quản tay.
+    </div>
   </section>
 
   <!-- SHAPE 1 -->

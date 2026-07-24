@@ -56,6 +56,14 @@
   .alt .h{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--clay-deep);}
   .alt b{color:var(--clay-deep);}
 
+  /* Vietnamese "tiếng người" layer — Hadriel's plain-language voice */
+  .vi{background:#f6ecd2;border:1.5px dashed var(--gold);border-radius:16px 4px 16px 4px;padding:16px 20px 14px;margin:16px 0;font-size:1.05rem;line-height:1.68;position:relative;box-shadow:3px 4px 0 var(--shadow);}
+  .vi::before{content:"🔥 giải thích · tiếng người";position:absolute;top:-11px;left:16px;background:var(--gold);color:#2f2a22;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.13em;padding:3px 10px;border-radius:3px;}
+  .vi b{color:var(--clay-deep);font-weight:600;}
+  .vi .q{display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--sage-deep);font-size:1.12rem;line-height:1.4;margin:12px 0 2px;padding-left:14px;border-left:3px solid var(--sage);}
+  .vi .ask{font-style:italic;color:var(--clay-deep);}
+  .vi code{font-family:'Spline Sans Mono',monospace;font-size:.84em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+
   /* animated movement player (one per shape) */
   .player{border:2px solid var(--ink);border-radius:18px;background:#f8f1dd;box-shadow:5px 7px 0 var(--shadow);padding:24px 22px 22px;}
   .stage{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;min-height:96px;margin:30px 0 6px;}
@@ -93,6 +101,7 @@
     <p class="kicker">Pattern 01</p>
     <h1 class="title"><span class="l1">Two</span><span class="l2">Pointers.</span></h1>
     <p class="lede">One core idea — and the <b>two shapes</b> it wears, <b>animated</b> move by move until the movement is yours.</p>
+    <a href="Recognition.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--clay-deep);border:2px solid var(--clay-deep);padding:10px 18px;border-radius:999px;box-shadow:3px 3px 0 var(--shadow);width:fit-content;opacity:0;animation:fadeUp 1s .7s forwards;">⚡ Recognition — thẻ nhận diện nhanh →</a>
   </header>
 
   <!-- CORE IDEA -->
@@ -102,6 +111,12 @@
     <p>Brute force is two loops: an outer <code class="inl">i</code> and an inner <code class="inl">j</code> that <b>restarts from zero every time</b> <code class="inl">i</code> moves. That restart is the entire O(n²) — re-asking questions already answered.</p>
     <p class="core">Two Pointers is the realisation that <b>the second index never has to restart.</b> Each pointer only moves <b>forward in its own direction</b>, so the two of them combined cost one pass.</p>
     <div class="pin" data-l="THE ONE LINE"><b>Two indices that never backtrack.</b> Each step, one local comparison forces which pointer moves — so you never re-scan. <b>O(n²) → O(n), O(1) space.</b> Everything else is just <i>which way</i> the two pointers move.</div>
+
+    <div class="vi">
+      <b>Định nghĩa một câu:</b> Two Pointers = dùng <b>hai chỉ số</b> chạy trên cùng một mảng/chuỗi, mỗi chỉ số <b>chỉ đi tới, KHÔNG BAO GIỜ lùi</b> — nên hai đứa gộp lại chỉ tốn đúng <b>một lượt đi</b> (O(n)).
+      <span class="q">Nó sinh ra để giết cái gì?</span>
+      Brute force có vòng lặp trong <code>j</code> <b>restart về 0</b> mỗi lần <code>i</code> nhích → hỏi lại câu đã có câu trả lời → <i>đó chính là toàn bộ O(n²)</i>. Two Pointers nhận ra con trỏ thứ hai <b>không cần restart</b>: thông tin bước trước không mất, ta xài lại. Vì mỗi con trỏ chỉ tiến một chiều → tổng bước ≤ 2n → <b>O(n²) sụp còn O(n)</b>, tốn <b>O(1) bộ nhớ</b>. Mọi thứ còn lại chỉ là <i>hai con trỏ đi HƯỚNG nào</i>.
+    </div>
   </section>
 
   <!-- =============== SHAPE 1: CONVERGING =============== -->
@@ -130,7 +145,14 @@
       </div>
 
       <p class="lbl">The invariant — why nothing is lost</p>
-      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The answer, if it exists, always lives between <code class="inl">left</code> and <code class="inl">right</code>.</b> We only ever discard an element we have <i>proven</i> cannot pair with anything remaining — so shrinking the gap can never throw the answer away.</div>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>The answer, if it exists, stays trapped between <code class="inl">left</code> and <code class="inl">right</code> the whole time.</b> Each step we throw <i>one</i> element away — but only after it has <b>failed with its best-possible partner</b> (the smallest or largest value still left), which means it fails with everyone. We never toss a <i>maybe</i>, only a <b>proven-dead</b> element — so shrinking the gap can never throw the answer away.</div>
+
+    <div class="vi">
+      <b>Câu hỏi đáng sợ:</b> "Tao dịch con trỏ vô trong → <b>bỏ qua</b> nguyên một ô. Lỡ đâu <b>đáp án nằm ở cái ô tao vừa vứt</b> thì sao??"<br>
+      <b>Trả lời:</b> Không đời nào — vì mỗi lần vứt một ô là vì đã <b>CHỨNG MINH nó chết</b>.
+      Ví dụ tìm cặp cộng <code>= 6</code> trong <code>[1, 2, 3, 4, 6]</code>: <code>1 + 6 = 7</code> quá lớn → vứt số <code>6</code>. Vì số <code>6</code> vừa bắt cặp với <b>thằng NHỎ NHẤT còn lại (1)</b> đã lố rồi → bắt với <code>2, 3, 4</code> chỉ càng lớn → số <code>6</code> <b>không thể nằm trong đáp án với BẤT KỲ ai</b> → chết chắc, vứt = mất số 0.
+      <span class="q">"Tao không đoán mò để bỏ ô nào. Tao chỉ bỏ ô mà tao đã CÓ BẰNG CHỨNG là nó vô dụng."</span>
+    </div>
 
       <p class="lbl">The code</p>
       <pre class="opp"><span class="k">while</span> left &lt; right:
@@ -154,6 +176,13 @@
       <p class="lbl">The idea — two roles</p>
       <p style="margin:0"><code class="inl">slow</code> is the <b>boundary / writer</b>: everything at or behind it is already finished. <code class="inl">fast</code> is the <b>scout</b>: it races ahead reading. <code class="inl">slow</code> only advances when <code class="inl">fast</code> finds something that <i>belongs</i>. Two jobs sharing one array — that's why it needs no extra space.</p>
 
+      <div class="vi">
+        🐢 <b>slow = người viết / ranh giới:</b> mọi thứ <b>từ slow trở về sau</b> đã <b>xong xuôi, chốt sổ</b> — bức tường ngăn "phần đã final" với "phần chưa xử lý".<br>
+        🏃 <b>fast = trinh sát:</b> phóng lên trước, đọc từng ô để <b>dò tìm</b>.<br>
+        <b>Luật:</b> <code>slow</code> chỉ nhích lên <b>một bước KHI</b> <code>fast</code> tìm được thứ <b>xứng đáng</b> được giữ. Một mảng, <b>hai nhiệm vụ</b> (fast đọc, slow ghi) → khỏi cần mảng phụ → <b>O(1) bộ nhớ</b>.
+        <span class="q">"fast đi săn, slow chỉ đứng dậy khi mồi xứng đáng." 🏹</span>
+      </div>
+
       <p class="lbl">The movement — press step, watch it move</p>
       <p class="muted" style="margin:0 0 4px">Dedupe <code class="inl">[1, 1, 2, 2, 3]</code> in place. Watch the cell <i>values rewrite</i> as the prefix grows.</p>
       <div class="player" id="pl">
@@ -164,7 +193,13 @@
       </div>
 
       <p class="lbl">The invariant — what makes it correct</p>
-      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>Everything in <code class="inl">arr[0 .. slow]</code> is already the final answer.</b> <code class="inl">fast</code> can wander through any number of duplicates without disturbing it — the prefix only ever <i>grows</i>, never rewrites a kept value. So when <code class="inl">fast</code> reaches the end, the prefix <i>is</i> the result.</div>
+      <div class="pin" data-l="HOLDS EVERY STEP" style="margin-top:6px"><b>Everything in <code class="inl">arr[0 .. slow]</code> is already the final answer.</b> <code class="inl">fast</code> can wander through any number of duplicates without disturbing it — the prefix only ever <i>grows</i>, never rewrites a kept value. Because <code class="inl">slow</code> only steps forward and appends — never steps back to edit — the finished part is <b>untouchable</b>. So when <code class="inl">fast</code> reaches the end, the prefix <i>is</i> the result — no re-checking needed.</div>
+
+      <div class="vi">
+        <code>arr[0 .. slow]</code> = phần đã <b>CHỐT SỔ</b>, là đáp án cuối cùng luôn rồi. <code>fast</code> có lang thang qua bao nhiêu ô trùng cũng <b>KHÔNG đụng được</b> vào phần đó — cái prefix (đoạn đầu) <b>chỉ có thể DÀI RA, không bao giờ ghi đè</b> lên giá trị đã giữ.
+        <span class="ask">Tại sao "chỉ dài ra, không ghi đè" lại quan trọng?</span> Vì đó là <b>bằng chứng an toàn</b>: nếu prefix bị ghi đè giữa chừng → biết đâu xóa nhầm giá trị đúng. Nhưng <code>slow</code> chỉ <b>tiến tới + ghi thêm</b>, không lùi lại sửa → phần đã final <b>an toàn tuyệt đối</b> → tới cuối, prefix <b>CHÍNH LÀ đáp án</b>, khỏi kiểm tra lại.
+        <span class="q">"Đoạn đầu chỉ nở ra, chưa bao giờ bị viết lại — nên tới cuối, nó CHÍNH LÀ đáp án."</span>
+      </div>
 
       <p class="lbl">Same shape, a faster gap — the “2× speed” twin</p>
       <p style="margin:0">When the gap itself is the goal (linked lists), <code class="inl">fast</code> takes <b>two</b> steps for every <b>one</b> of <code class="inl">slow</code>:</p>
@@ -179,6 +214,13 @@
     </div>
 
     <div class="pin" data-l="THE TWO SHAPES, ONE BREATH" style="margin-top:26px;border-color:var(--clay);background:#f7e9e4;"><b style="color:var(--sky-deep)">Converging</b> pinches a <i>value</i> from both ends — <b>needs sorted</b>. <b style="color:var(--sage-deep)">Parallel</b> drags an <i>invariant prefix</i> forward with two speeds — <b>works unsorted</b>. Same non-backtracking core; the only difference is <b>which way the pointers move</b>.</div>
+
+    <div class="vi">
+      <b>Để ý cái này — đây là LINH HỒN:</b> cả hai dáng đều kết bằng <b>cùng một thứ</b> — một <b>invariant chứng minh "không mất đáp án"</b>.
+      🔵 <b>Converging:</b> đáp án luôn <i>kẹt giữa</i> <code>left</code> – <code>right</code>.
+      🟢 <b>Parallel:</b> đáp án đang <i>lớn dần</i> bên trái <code>slow</code>.
+      Khác nhau đúng một chỗ: <b>hai con trỏ đi HƯỚNG nào</b> (vào giữa, hay cùng chiều). Nắm được cái invariant này là anh <b>nắm cả pattern</b> — không phải học vẹt từng bài. ⚔️
+    </div>
   </section>
 
   <!-- MASTERY -->

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Linear DP — Recognition Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#b07d1f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1.66;overflow-x:hidden;background-image:radial-gradient(circle at 14% 6%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 88% 12%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px 90px;position:relative;z-index:2;}
+
+  /* top cross-link bar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0 0;flex-wrap:wrap;}
+  .home{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+  .xlink{display:inline-flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--sky-deep);border:2px solid var(--sky-deep);padding:9px 16px;border-radius:999px;transition:transform .18s,box-shadow .18s;box-shadow:3px 3px 0 var(--shadow);}
+  .xlink:hover{transform:translateY(-2px);box-shadow:4px 5px 0 var(--shadow);}
+  .xlink .a{font-size:1.05em;}
+
+  header.hero{padding:34px 0 8px;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.36em;text-transform:uppercase;color:var(--clay-deep);margin:0 0 14px;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,9vw,4.6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  .tagline{font-family:'Spline Sans Mono',monospace;font-size:.82rem;letter-spacing:.04em;color:var(--sage-deep);margin:16px 0 0;display:flex;align-items:center;gap:9px;}
+  .tagline .bolt{font-size:1.1rem;}
+
+  section{margin-top:46px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:12px;margin:0 0 4px;}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.08;margin:.2em 0 .5em;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.85em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s;}.reveal.in{opacity:1;transform:none;}
+
+  /* the golden trigger — the fastest tell */
+  .trigger{background:linear-gradient(180deg,#f7edcf,#f3e6bf);border:2px solid var(--gold);border-radius:16px;padding:16px 20px;margin:2px 0 20px;position:relative;box-shadow:4px 5px 0 var(--shadow);}
+  .trigger::before{content:"⚡ tíc-tắc nhận ra";position:absolute;top:-11px;left:16px;background:var(--gold-deep);color:#fff7e8;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.14em;padding:3px 10px;border-radius:3px;}
+  .trigger b{color:var(--clay-deep);}
+  .trigger .en{font-size:1.12rem;font-weight:600;}
+
+  /* signal rows */
+  .sig{display:flex;flex-direction:column;gap:9px;margin:10px 0 4px;}
+  .sig .row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f8f1dd;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .sig .row .s{font-size:1.04rem;}
+  .sig .row .v{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:5px 11px;border-radius:999px;background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .sig .row.no{background:#f7e9e4;border-color:var(--clay);}
+  .sig .row.no .v{background:#f2d9cf;color:var(--clay-deep);border-color:var(--clay);}
+
+  .vi{font-size:.98rem;line-height:1.55;color:var(--ink);background:#f6ecd2;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:9px 15px;margin:12px 0 2px;}
+  .vi::before{content:"🔥 ";}
+  .vi b{color:var(--clay-deep);}
+
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:15px 20px;margin:10px 0;font-size:1.06rem;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:17px 19px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:12px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+  .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
+
+  /* traps */
+  ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
+  ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
+  ol.traps li:last-child{border-bottom:0;}
+  ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
+  footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="home">Patterns · 16</span>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Bản Deep-Guide đầy đủ <span class="a">→</span></a>
+  </div>
+
+  <header class="hero">
+    <p class="kicker">Pattern 16 · Recognition</p>
+    <h1 class="title">Linear DP</h1>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+  </header>
+
+  <!-- SPOT IT -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 Spot it</p>
+    <h2>The signals that scream <em>Linear&nbsp;DP</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0"><b>One sequence</b>, and the answer for <b>n</b> is built from the answer for <b>smaller n</b> (n−1, n−2) — and those smaller answers <b>overlap</b>.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Một dãy, đáp án của <b>n</b> dựa vào đáp án của <b>n nhỏ hơn</b> mà mấy cái nhỏ đó bị tính lại nhiều lần → tái dùng thay vì tính lại. Đó là Linear DP.</div>
+    </div>
+
+    <div class="sig">
+      <div class="row"><span class="s">"how many ways / distinct ways"</span><span class="v">✓ count DP</span></div>
+      <div class="row"><span class="s">"minimum steps / coins / operations"</span><span class="v">✓ optimize DP</span></div>
+      <div class="row"><span class="s">"can you reach / is it possible?"</span><span class="v">✓ reachability DP</span></div>
+      <div class="row"><span class="s">answer for <b>n</b> depends on smaller <b>n</b></span><span class="v">✓ overlapping subproblems</span></div>
+      <div class="row"><span class="s">"climb / jump / tile / decode"</span><span class="v">✓ classic linear DP</span></div>
+      <div class="row no"><span class="s">"generate all" / "list all"</span><span class="v">✗ → backtracking</span></div>
+    </div>
+    <div class="vi"><b>Key:</b> có <b>overlapping subproblems</b> — cùng một sub-answer bị cần đi cần lại nhiều lần. Tái dùng nó thay vì tính lại từ đầu.</div>
+  </section>
+
+  <!-- DP vs BACKTRACKING -->
+  <section class="reveal">
+    <p class="eyebrow">🔀 DP vs Backtracking</p>
+    <h2>Count/optimize, don't enumerate.</h2>
+    <div class="sig">
+      <div class="row no"><span class="s"><b>Backtracking</b> — GENERATES paths. Signal = "generate all", "list all"</span><span class="v">✗ not DP</span></div>
+      <div class="row"><span class="s"><b>DP</b> — COUNTS / OPTIMIZES using stored results. Signal = "how many", "min/max"</span><span class="v">✓ DP</span></div>
+    </div>
+    <div class="vi">Luật của Wiganz: <b>"tái dùng kết quả cũ" = DP</b>. Còn nếu bài đòi <b>liệt kê ra từng lời giải</b> thì đó là Backtracking, đừng nhầm.</div>
+  </section>
+
+  <!-- WHY IT WORKS -->
+  <section class="reveal">
+    <p class="eyebrow">⚙️ Why it works</p>
+    <div class="pin">The recurrence <code class="inl">f(n) = f(n-1) + f(n-2)</code> comes from asking one question: <b>"What was the LAST decision that got me here?"</b> The allowed moves define the recurrence.</div>
+    <div class="sig">
+      <div class="row"><span class="s">"take 1 or 2 steps"</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
+      <div class="row"><span class="s">"take 1, 2, or 3 steps"</span><span class="v">+f(n-3)</span></div>
+      <div class="row"><span class="s">"take 1 or k steps"</span><span class="v">f(n-1)+f(n-k)</span></div>
+    </div>
+    <div class="vi">Đừng giải thẳng bài lớn — hỏi <b>bước cuối cùng nào dẫn tới đây</b>, và những <b>subproblem nào nuôi nó</b>. Các nước đi cho phép chính là công thức truy hồi.</div>
+  </section>
+
+  <!-- THE CORE -->
+  <section class="reveal">
+    <p class="eyebrow">💻 The core</p>
+    <h2>The move, in code.</h2>
+
+    <p class="note"><b>Template 1 — Space-Optimized (O(1) space), preferred:</b></p>
+<pre><span class="k">def</span> <span class="f">climbingStairs</span>(n: int) -&gt; int:
+    <span class="k">if</span> n == <span class="s">1</span>: <span class="k">return</span> <span class="s">1</span>
+    prev1 = <span class="s">1</span>   <span class="c"># f(1)</span>
+    prev2 = <span class="s">2</span>   <span class="c"># f(2)</span>
+    <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="s">3</span>, n + <span class="s">1</span>):   <span class="c"># range(3, n+1) — include n!</span>
+        curr = prev1 + prev2
+        prev1 = prev2
+        prev2 = curr
+    <span class="k">return</span> prev2
+<span class="c"># Time: O(n) | Space: O(1)</span></pre>
+
+    <p class="note"><b>Template 2 — Tabulation with full array (O(n) space):</b></p>
+<pre><span class="k">def</span> <span class="f">climbingStairs</span>(n: int) -&gt; int:
+    <span class="k">if</span> n == <span class="s">1</span>: <span class="k">return</span> <span class="s">1</span>
+    dp = [<span class="s">0</span>] * (n + <span class="s">1</span>)
+    dp[<span class="s">1</span>] = <span class="s">1</span>
+    dp[<span class="s">2</span>] = <span class="s">2</span>
+    <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="s">3</span>, n + <span class="s">1</span>):
+        dp[i] = dp[i-<span class="s">1</span>] + dp[i-<span class="s">2</span>]
+    <span class="k">return</span> dp[n]
+<span class="c"># Time: O(n) | Space: O(n)</span></pre>
+
+    <p class="note"><b>Template 3 — Memoization (Top-Down):</b></p>
+<pre><span class="k">from</span> functools <span class="k">import</span> lru_cache
+
+<span class="c">@lru_cache(maxsize=None)</span>
+<span class="k">def</span> <span class="f">climbingStairs</span>(n: int) -&gt; int:
+    <span class="k">if</span> n == <span class="s">1</span>: <span class="k">return</span> <span class="s">1</span>
+    <span class="k">if</span> n == <span class="s">2</span>: <span class="k">return</span> <span class="s">2</span>
+    <span class="k">return</span> <span class="f">climbingStairs</span>(n-<span class="s">1</span>) + <span class="f">climbingStairs</span>(n-<span class="s">2</span>)
+<span class="c"># Time: O(n) | Space: O(n) for cache + call stack</span></pre>
+    <div class="vi">Ba cách viết, cùng một ý: <b>base case → build lên tới n</b>. Space-optimized chỉ giữ 2 giá trị cuối; top-down là <b>recursion + cache</b>.</div>
+  </section>
+
+  <!-- VOCABULARY -->
+  <section class="reveal">
+    <p class="eyebrow">🗂️ Same thing, different words</p>
+    <h2>Bottom-up vs tabulation vs loop+reuse.</h2>
+    <div class="sig">
+      <div class="row"><span class="s"><b>Bottom-up</b></span><span class="v">start base cases → build to n</span></div>
+      <div class="row"><span class="s"><b>Tabulation</b></span><span class="v">fill a dp table cell by cell</span></div>
+      <div class="row"><span class="s"><b>Loop + reuse</b></span><span class="v">what it looks like in code</span></div>
+      <div class="row"><span class="s"><b>Space-optimized tabulation</b></span><span class="v">tabulation, keep last K only</span></div>
+    </div>
+    <div class="vi">Bốn tên gọi trên đều là <b>cùng một hướng</b>. Còn <b>top-down = recursion + cache</b> (memoization) — hướng ngược lại.</div>
+  </section>
+
+  <!-- TRAPS -->
+  <section class="reveal">
+    <p class="eyebrow">⚠️ Traps</p>
+    <h2>Where it breaks.</h2>
+    <ol class="traps">
+      <li><b>Off-by-one in range:</b> for n=3, <code class="inl">range(3, n)</code> is empty. Must be <code class="inl">range(3, n + 1)</code> to include n.</li>
+      <li><b>Wrong swap order:</b> <code class="inl">prev1 = prev2</code> then <code class="inl">prev2 = curr</code> overwrites prev1 too early. Save the old value first — or keep the first swap and <code class="inl">return prev2</code>. Be consistent.</li>
+      <li><b>Submitting pure recursion as DP:</b> <code class="inl">return f(n-1) + f(n-2)</code> alone is O(2ⁿ), NOT DP. DP needs a cache (memo) OR a loop (tabulation).</li>
+      <li><b>Missing base case guard:</b> n=1 needs a guard (without it <code class="inl">range(3, 2)</code> is empty → returns 2, wrong — should be 1). n=2 does NOT (<code class="inl">range(3, 3)</code> empty → returns 2, correct).</li>
+      <li><b>Confusing DP with Backtracking:</b> about to write "generate all paths" → stop, that's Backtracking. "how many ways" → DP: count, don't enumerate.</li>
+    </ol>
+    <div class="vi">Chết người nhất: (1) quên <b>+1</b> trong range; (2) <b>swap sai thứ tự</b> mất prev1; (3) nộp <b>recursion trần</b> tưởng là DP. DP phải có cache hoặc loop.</div>
+  </section>
+
+  <!-- CLASSIC PROBLEMS -->
+  <section class="reveal">
+    <p class="eyebrow">🏅 Classic problems</p>
+    <h2>The recurrences to know cold.</h2>
+    <div class="sig">
+      <div class="row"><span class="s"><b>Climbing Stairs</b> — base f(1)=1, f(2)=2</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
+      <div class="row"><span class="s"><b>Fibonacci</b> — base f(0)=0, f(1)=1</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
+      <div class="row"><span class="s"><b>House Robber</b> — can't rob adjacent</span><span class="v">max(f(n-1), f(n-2)+nums[n])</span></div>
+      <div class="row"><span class="s"><b>Min Cost Climbing Stairs</b> — take min path</span><span class="v">min(f(n-1)+cost, f(n-2)+cost)</span></div>
+    </div>
+    <div class="vi">Bốn bài này cùng một khung: <b>đáp án của n = tổ hợp của n-1 và n-2</b>. Khác nhau ở phép cộng (đếm) hay max/min (tối ưu).</div>
+  </section>
+
+  <footer>
+    <p class="verse">“Whatever you do, work at it with all your heart, as working for the Lord.” — Colossians 3:23</p>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Học sâu ở Deep-Guide — animation từng bước <span class="a">→</span></a>
+    <p class="sig-line">🔥 HADRIEL × WIGANZ · Linear DP · Recognition</p>
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

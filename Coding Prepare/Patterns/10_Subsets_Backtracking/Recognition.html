@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Subsets / Backtracking — Recognition Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#b07d1f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1.66;overflow-x:hidden;background-image:radial-gradient(circle at 14% 6%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 88% 12%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px 90px;position:relative;z-index:2;}
+
+  /* top cross-link bar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0 0;flex-wrap:wrap;}
+  .home{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+  .xlink{display:inline-flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--sky-deep);border:2px solid var(--sky-deep);padding:9px 16px;border-radius:999px;transition:transform .18s,box-shadow .18s;box-shadow:3px 3px 0 var(--shadow);}
+  .xlink:hover{transform:translateY(-2px);box-shadow:4px 5px 0 var(--shadow);}
+  .xlink .a{font-size:1.05em;}
+
+  header.hero{padding:34px 0 8px;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.36em;text-transform:uppercase;color:var(--clay-deep);margin:0 0 14px;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,9vw,4.6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  .tagline{font-family:'Spline Sans Mono',monospace;font-size:.82rem;letter-spacing:.04em;color:var(--sage-deep);margin:16px 0 0;display:flex;align-items:center;gap:9px;}
+  .tagline .bolt{font-size:1.1rem;}
+
+  section{margin-top:46px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:12px;margin:0 0 4px;}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.08;margin:.2em 0 .5em;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.85em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s;}.reveal.in{opacity:1;transform:none;}
+
+  /* the golden trigger — the fastest tell */
+  .trigger{background:linear-gradient(180deg,#f7edcf,#f3e6bf);border:2px solid var(--gold);border-radius:16px;padding:16px 20px;margin:2px 0 20px;position:relative;box-shadow:4px 5px 0 var(--shadow);}
+  .trigger::before{content:"⚡ tíc-tắc nhận ra";position:absolute;top:-11px;left:16px;background:var(--gold-deep);color:#fff7e8;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.14em;padding:3px 10px;border-radius:3px;}
+  .trigger b{color:var(--clay-deep);}
+  .trigger .en{font-size:1.12rem;font-weight:600;}
+
+  /* signal rows */
+  .sig{display:flex;flex-direction:column;gap:9px;margin:10px 0 4px;}
+  .sig .row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f8f1dd;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .sig .row .s{font-size:1.04rem;}
+  .sig .row .v{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:5px 11px;border-radius:999px;background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .sig .row.no{background:#f7e9e4;border-color:var(--clay);}
+  .sig .row.no .v{background:#f2d9cf;color:var(--clay-deep);border-color:var(--clay);}
+
+  .vi{font-size:.98rem;line-height:1.55;color:var(--ink);background:#f6ecd2;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:9px 15px;margin:12px 0 2px;}
+  .vi::before{content:"🔥 ";}
+  .vi b{color:var(--clay-deep);}
+
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:15px 20px;margin:10px 0;font-size:1.06rem;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:17px 19px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:12px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+  .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
+
+  /* traps */
+  ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
+  ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
+  ol.traps li:last-child{border-bottom:0;}
+  ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
+  footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="home">Patterns · 10</span>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Bản Deep-Guide đầy đủ <span class="a">→</span></a>
+  </div>
+
+  <header class="hero">
+    <p class="kicker">Pattern 10 · Recognition</p>
+    <h1 class="title">Subsets / Backtracking</h1>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+  </header>
+
+  <!-- SPOT IT -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 Spot it</p>
+    <h2>The signals that scream <em>Backtracking</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0">The words <b>"generate ALL ___"</b> — subsets, combinations, permutations, valid configs → <b>walk the whole decision tree</b>.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Nghe <b>"liệt kê TẤT CẢ"</b> (mọi subset / tổ hợp / hoán vị / cấu hình hợp lệ) → đi hết cây quyết định = Backtracking.</div>
+    </div>
+
+    <div class="sig">
+      <div class="row"><span class="s">"generate ALL subsets/combinations/permutations"</span><span class="v">✓ backtracking</span></div>
+      <div class="row"><span class="s">"all valid configurations" (N-Queens, Sudoku)</span><span class="v">✓ backtracking</span></div>
+      <div class="row"><span class="s">"take or not take" each item</span><span class="v">✓ include/exclude</span></div>
+      <div class="row"><span class="s">"partition into two groups"</span><span class="v">✓ include/exclude</span></div>
+      <div class="row"><span class="s">"subset that sums to target"</span><span class="v">✓ include/exclude</span></div>
+      <div class="row"><span class="s">"can you split array into equal halves?"</span><span class="v">✓ include/exclude</span></div>
+      <div class="row"><span class="s">"letter combinations of phone number"</span><span class="v">✓ incl/excl per digit</span></div>
+      <div class="row no"><span class="s">"count ways" / "find optimal (max/min)"</span><span class="v">✗ → DP instead</span></div>
+    </div>
+    <div class="vi">Hễ đề bảo <b>đưa ra TẤT CẢ kết quả</b> thì phải đi hết cây. Nhưng nếu chỉ hỏi <b>"đếm số cách / tìm tối ưu"</b> thì đó là DP, đừng dựng cây.</div>
+  </section>
+
+  <!-- ASK YOURSELF -->
+  <section class="reveal">
+    <p class="eyebrow">🤔 Ask yourself</p>
+    <h2>Which flavor of backtracking?</h2>
+    <div class="pin"><b>"For each element, yes or no?"</b> → <b>Include / Exclude</b>.<br><b>"Which element do I pick next from the remaining?"</b> → <b>Loop-based backtracking</b>.</div>
+    <div class="vi">Hai câu tự hỏi để chọn khung: hỏi <b>"lấy hay không lấy?"</b> thì đi Include/Exclude; hỏi <b>"kế tiếp bốc thằng nào?"</b> thì đi Loop-based.</div>
+  </section>
+
+  <!-- TWO MENTAL MODELS -->
+  <section class="reveal">
+    <p class="eyebrow">🧠 Two mental models</p>
+    <h2>Same tree, two ways to walk it.</h2>
+
+    <p class="note"><b>1. Include / Exclude</b> — at each element: take it or skip it. Two choices → 2ⁿ subsets.</p>
+<pre>nums = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>]
+
+                    []
+               /         \
+          [1]               []           <span class="c">← take 1? yes / no</span>
+         /    \           /    \
+      [1,2]   [1]      [2]     []       <span class="c">← take 2? yes / no</span>
+      / \     / \      / \     / \
+[1,2,3][1,2][1,3][1] [2,3][2] [3] []   <span class="c">← take 3? yes / no</span></pre>
+<pre><span class="k">def</span> <span class="f">subsets</span>(nums):
+    result = []
+
+    <span class="k">def</span> <span class="f">backtrack</span>(i, path):
+        <span class="k">if</span> i == <span class="k">len</span>(nums):
+            result.<span class="f">append</span>(path[:])
+            <span class="k">return</span>
+
+        path.<span class="f">append</span>(nums[i])       <span class="c"># take it</span>
+        <span class="f">backtrack</span>(i + <span class="s">1</span>, path)
+        path.<span class="f">pop</span>()                  <span class="c"># undo</span>
+
+        <span class="f">backtrack</span>(i + <span class="s">1</span>, path)      <span class="c"># skip it</span>
+
+    <span class="f">backtrack</span>(<span class="s">0</span>, [])
+    <span class="k">return</span> result</pre>
+    <p class="note"><b>Best for:</b> whiteboard explanations, partition problems, subset sum.</p>
+
+    <p class="note"><b>2. Loop-based backtracking</b> — save current path as valid, then loop remaining elements to extend it.</p>
+<pre><span class="k">def</span> <span class="f">subsets</span>(nums):
+    result = []
+
+    <span class="k">def</span> <span class="f">backtrack</span>(start, path):
+        result.<span class="f">append</span>(path[:])          <span class="c"># every path is a valid subset</span>
+
+        <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(start, <span class="k">len</span>(nums)):
+            path.<span class="f">append</span>(nums[i])
+            <span class="f">backtrack</span>(i + <span class="s">1</span>, path)
+            path.<span class="f">pop</span>()                  <span class="c"># undo</span>
+
+    <span class="f">backtrack</span>(<span class="s">0</span>, [])
+    <span class="k">return</span> result</pre>
+    <p class="note"><b>Best for:</b> combinations of size k, handling duplicates, permutations.</p>
+    <div class="vi">Cả hai đi cùng một cây. <b>Include/Exclude</b> hỏi lấy-hay-bỏ ở mỗi bước; <b>Loop-based</b> thì mỗi lần dừng đều lưu path rồi lặp phần còn lại để nối tiếp.</div>
+  </section>
+
+  <!-- QUICK PICK -->
+  <section class="reveal">
+    <p class="eyebrow">⚡ Quick pick</p>
+    <h2>Which model for which problem.</h2>
+    <div class="sig">
+      <div class="row"><span class="s">All subsets</span><span class="v">either</span></div>
+      <div class="row"><span class="s">Subset sum / partition</span><span class="v">include/exclude</span></div>
+      <div class="row"><span class="s">Combinations of size k</span><span class="v">loop-based</span></div>
+      <div class="row"><span class="s">Has duplicates <code class="inl">[1,2,2]</code></span><span class="v">loop-based + sort</span></div>
+      <div class="row"><span class="s">Permutations</span><span class="v">loop-based + used[]</span></div>
+    </div>
+    <div class="vi">Bảng chọn nhanh: subset sum thì Include/Exclude; tổ hợp cỡ k, có trùng, hay hoán vị thì Loop-based (thêm sort hoặc <code class="inl">used[]</code>).</div>
+  </section>
+
+  <!-- BACKTRACKING VS DP -->
+  <section class="reveal">
+    <p class="eyebrow">🔀 Backtracking vs DP</p>
+    <h2>Same tree, different question.</h2>
+    <p class="note">Include/Exclude and 0/1 Knapsack DP use the <b>exact same "take or skip" tree</b>. The only difference is <b>what the problem asks you to return</b>.</p>
+<pre>nums = [<span class="s">3</span>, <span class="s">4</span>, <span class="s">5</span>], target = <span class="s">7</span>
+
+                    TAKE 3              SKIP 3
+                   /      \            /      \
+              TAKE 4    SKIP 4    TAKE 4    SKIP 4
+              /    \    /    \    /    \    /    \
+            T5  S5  T5  S5   T5  S5  T5  S5
+
+<span class="c">Same tree. Same decisions. 8 leaves.</span></pre>
+    <p class="note"><b>"Give me ALL subsets that sum to 7"</b> → need the full list → must visit every leaf:</p>
+<pre>[3,4]   sum=7 ✓ → collect
+[3,5]   sum=8   → nope
+[4,5]   sum=9   → nope
+[3,4,5] sum=12  → nope
+...
+
+Answer: [[3,4]]          <span class="c">← a LIST → Backtracking</span></pre>
+    <p class="note"><b>"CAN any subset sum to 7?"</b> → just yes/no → use a table, skip repeated work:</p>
+<pre>dp = [T, F, F, F, F, F, F, F]     <span class="c">← make sum 0? yes. rest? no.</span>
+      0  1  2  3  4  5  6  7
+
+After 3: [T, F, F, T, F, F, F, F]  <span class="c">← can make 0 and 3</span>
+After 4: [T, F, F, T, T, F, F, T]  <span class="c">← can make 7! done.</span>
+
+Answer: True              <span class="c">← ONE value → DP</span></pre>
+    <div class="pin"><b>"give me ALL ___"</b> → walk whole tree → <b>Backtracking</b>.<br><b>"can you / max / min / count"</b> → just one answer → <b>DP table</b>.</div>
+    <div class="vi">Cùng một cây quyết định. Đề bảo <b>liệt kê hết</b> thì đi cả cây (Backtracking); đề chỉ cần <b>một con số / có hay không</b> thì lập bảng DP cho khỏi làm lại việc cũ.</div>
+  </section>
+
+  <!-- PERMUTATIONS -->
+  <section class="reveal">
+    <p class="eyebrow">🔁 Permutations</p>
+    <h2>Order matters.</h2>
+    <p class="note">Start from <code class="inl">0</code> every time, track what's <code class="inl">used</code>.</p>
+<pre><span class="k">def</span> <span class="f">permutations</span>(nums):
+    result = []
+
+    <span class="k">def</span> <span class="f">backtrack</span>(path, used):
+        <span class="k">if</span> <span class="k">len</span>(path) == <span class="k">len</span>(nums):
+            result.<span class="f">append</span>(path[:])
+            <span class="k">return</span>
+
+        <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="k">len</span>(nums)):
+            <span class="k">if</span> used[i]:
+                <span class="k">continue</span>
+            used[i] = <span class="k">True</span>
+            path.<span class="f">append</span>(nums[i])
+            <span class="f">backtrack</span>(path, used)
+            path.<span class="f">pop</span>()
+            used[i] = <span class="k">False</span>
+
+    <span class="f">backtrack</span>([], [<span class="k">False</span>] * <span class="k">len</span>(nums))
+    <span class="k">return</span> result</pre>
+    <div class="vi">Hoán vị = <b>thứ tự có nghĩa</b>: mỗi lần bốc lại quét từ đầu, nhưng dùng mảng <code class="inl">used</code> để không lấy trùng một phần tử.</div>
+  </section>
+
+  <!-- HANDLE DUPLICATES -->
+  <section class="reveal">
+    <p class="eyebrow">👯 Handle duplicates</p>
+    <h2>Skip the same value at the same level.</h2>
+    <p class="note">Sort first, then skip a repeated value at the same decision level:</p>
+<pre>nums.<span class="f">sort</span>()
+<span class="c"># inside the loop:</span>
+<span class="k">if</span> i &gt; start <span class="k">and</span> nums[i] == nums[i - <span class="s">1</span>]:
+    <span class="k">continue</span></pre>
+    <div class="vi">Có phần tử trùng thì <b>sort trước</b>, rồi ở cùng một tầng bỏ qua giá trị đã dùng — nhờ vậy không sinh ra hai nhánh giống hệt.</div>
+  </section>
+
+  <!-- TRAPS -->
+  <section class="reveal">
+    <p class="eyebrow">⚠️ Traps</p>
+    <h2>Where it breaks.</h2>
+    <ol class="traps">
+      <li><b>Copy the path</b> — <code class="inl">result.append(path[:])</code>, not <code class="inl">path</code> (it's a reference, it'll mutate).</li>
+      <li><b>Always undo</b> — <code class="inl">path.pop()</code> after every recursive call, or state leaks across branches.</li>
+      <li><b>Subsets: <code class="inl">i + 1</code></b> to avoid reusing — Permutations: start at <code class="inl">0</code> with <code class="inl">used[]</code>.</li>
+    </ol>
+    <div class="vi">Ba cái chết người: (1) quên <b>copy path</b> nên kết quả bị đè; (2) quên <b>pop() undo</b> nên nhánh này dính nhánh kia; (3) subsets đi <code class="inl">i+1</code>, còn permutations quét từ 0 với <code class="inl">used[]</code>.</div>
+  </section>
+
+  <footer>
+    <p class="verse">“Whatever you do, work at it with all your heart, as working for the Lord.” — Colossians 3:23</p>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Học sâu ở Deep-Guide — animation từng bước <span class="a">→</span></a>
+    <p class="sig-line">🔥 HADRIEL × WIGANZ · Subsets / Backtracking · Recognition</p>
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

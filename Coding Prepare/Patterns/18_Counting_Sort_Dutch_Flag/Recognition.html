@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Counting Sort &amp; Dutch Flag — Recognition Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#b07d1f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1.66;overflow-x:hidden;background-image:radial-gradient(circle at 14% 6%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 88% 12%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px 90px;position:relative;z-index:2;}
+
+  /* top cross-link bar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0 0;flex-wrap:wrap;}
+  .home{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+  .xlink{display:inline-flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--sky-deep);border:2px solid var(--sky-deep);padding:9px 16px;border-radius:999px;transition:transform .18s,box-shadow .18s;box-shadow:3px 3px 0 var(--shadow);}
+  .xlink:hover{transform:translateY(-2px);box-shadow:4px 5px 0 var(--shadow);}
+  .xlink .a{font-size:1.05em;}
+
+  header.hero{padding:34px 0 8px;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.36em;text-transform:uppercase;color:var(--clay-deep);margin:0 0 14px;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,9vw,4.6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  .tagline{font-family:'Spline Sans Mono',monospace;font-size:.82rem;letter-spacing:.04em;color:var(--sage-deep);margin:16px 0 0;display:flex;align-items:center;gap:9px;}
+  .tagline .bolt{font-size:1.1rem;}
+
+  section{margin-top:46px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:12px;margin:0 0 4px;}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.08;margin:.2em 0 .5em;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.85em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s;}.reveal.in{opacity:1;transform:none;}
+
+  /* the golden trigger — the fastest tell */
+  .trigger{background:linear-gradient(180deg,#f7edcf,#f3e6bf);border:2px solid var(--gold);border-radius:16px;padding:16px 20px;margin:2px 0 20px;position:relative;box-shadow:4px 5px 0 var(--shadow);}
+  .trigger::before{content:"⚡ tíc-tắc nhận ra";position:absolute;top:-11px;left:16px;background:var(--gold-deep);color:#fff7e8;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.14em;padding:3px 10px;border-radius:3px;}
+  .trigger b{color:var(--clay-deep);}
+  .trigger .en{font-size:1.12rem;font-weight:600;}
+
+  /* signal rows */
+  .sig{display:flex;flex-direction:column;gap:9px;margin:10px 0 4px;}
+  .sig .row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f8f1dd;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .sig .row .s{font-size:1.04rem;}
+  .sig .row .v{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:5px 11px;border-radius:999px;background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .sig .row.no{background:#f7e9e4;border-color:var(--clay);}
+  .sig .row.no .v{background:#f2d9cf;color:var(--clay-deep);border-color:var(--clay);}
+
+  .vi{font-size:.98rem;line-height:1.55;color:var(--ink);background:#f6ecd2;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:9px 15px;margin:12px 0 2px;}
+  .vi::before{content:"🔥 ";}
+  .vi b{color:var(--clay-deep);}
+
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:15px 20px;margin:10px 0;font-size:1.06rem;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:17px 19px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:12px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+  .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
+
+  /* traps */
+  ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
+  ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
+  ol.traps li:last-child{border-bottom:0;}
+  ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
+  footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="home">Patterns · 18</span>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Bản Deep-Guide đầy đủ <span class="a">→</span></a>
+  </div>
+
+  <header class="hero">
+    <p class="kicker">Pattern 18 · Recognition</p>
+    <h1 class="title">Counting Sort &amp; Dutch Flag</h1>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+  </header>
+
+  <!-- SPOT IT -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 Spot it</p>
+    <h2>The signals that scream <em>tiny&nbsp;fixed&nbsp;range</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0">Sort / partition an array with a <b>small FIXED set of distinct values</b> (e.g. {0,1,2}), <b>in place</b>.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Thấy <b>sắp xếp / phân nhóm</b> một mảng chỉ có <b>vài giá trị cố định</b> (như 0/1/2), làm <b>tại chỗ</b> → khỏi comparison sort, dùng Counting Sort / Dutch Flag.</div>
+    </div>
+
+    <div class="sig">
+      <div class="row"><span class="s">Sort/partition with a <b>small FIXED set</b> of values, in place</span><span class="v">✓</span></div>
+      <div class="row"><span class="s">Values from a tiny known range ({0,1,2}, chars a–z)</span><span class="v">✓</span></div>
+      <div class="row"><span class="s">"Sort colors" / "3 categories" / reds-whites-blues</span><span class="v">✓</span></div>
+      <div class="row"><span class="s">Need <b>one pass + constant space</b></span><span class="v">→ dutch flag</span></div>
+      <div class="row"><span class="s">No library sort allowed</span><span class="v">✓</span></div>
+      <div class="row no"><span class="s">Large/unknown range, stable sort of arbitrary keys, comparison required</span><span class="v">✗ → merge/quick sort</span></div>
+    </div>
+    <div class="vi">Nếu dải giá trị <b>lớn / không biết trước</b>, hoặc cần <b>stable sort key tuỳ ý</b> → đó là merge/quick sort O(n log n), KHÔNG phải bài này.</div>
+  </section>
+
+  <!-- TWO TOOLS -->
+  <section class="reveal">
+    <p class="eyebrow">🧰 Two tools — pick by constraint</p>
+    <h2>Count first, or partition in one pass?</h2>
+    <div class="sig">
+      <div class="row"><span class="s"><b>Counting Sort</b> — value-set tiny → count, then PAINT back in chosen order. 2 passes, O(k) keys</span><span class="v">count &amp; paint</span></div>
+      <div class="row"><span class="s"><b>Dutch National Flag</b> — one pass + strict constant space (the follow-up). 1 pass, O(1)</span><span class="v">one pass, O(1)</span></div>
+    </div>
+    <div class="vi">Chưa bị ép chặt về space → <b>Counting Sort</b> (đếm rồi tô lại) là đơn giản nhất. Khi họ hỏi follow-up <b>"one pass, O(1) space"</b> → chuyển sang <b>Dutch Flag</b>.</div>
+  </section>
+
+  <!-- WHY IT WORKS -->
+  <section class="reveal">
+    <p class="eyebrow">⚙️ Why it works</p>
+    <div class="pin"><b>Counting sort:</b> when values come from a tiny set, you don't compare anything — you tally counts, then overwrite the array in the order YOU choose (0s, then 1s, then 2s). Sorted order is forced by your <b>write-order</b>, not by dict iteration. O(n).</div>
+    <div class="pin"><b>Dutch Flag:</b> carve the array into 3 regions <code class="inl">[ 0s | unknown | 2s ]</code> with three pointers. One scanner (<code class="inl">mid</code>) sweeps the unknown middle, swapping each value into its home region. O(n), one pass, in place.</div>
+    <div class="vi">Counting sort: <b>đếm rồi tô lại theo thứ tự mình chọn</b>. Dutch Flag: <b>chia mảng thành 3 vùng</b>, một con trỏ quét vùng giữa và đẩy mỗi giá trị về đúng nhà.</div>
+  </section>
+
+  <!-- THE CORE -->
+  <section class="reveal">
+    <p class="eyebrow">💻 The core</p>
+    <h2>The move, in code.</h2>
+
+    <p class="note"><b>Counting sort</b> — count then paint (one shared write-index!):</p>
+<pre><span class="k">from</span> collections <span class="k">import</span> Counter
+<span class="k">def</span> <span class="f">sortColors</span>(nums):
+    c = <span class="f">Counter</span>(nums)
+    i = <span class="s">0</span>
+    <span class="k">for</span> v <span class="k">in</span> (<span class="s">0</span>, <span class="s">1</span>, <span class="s">2</span>):          <span class="c"># WE choose the order</span>
+        <span class="k">for</span> _ <span class="k">in</span> <span class="k">range</span>(c[v]):
+            nums[i] = v
+            i += <span class="s">1</span>               <span class="c"># ONE cursor marching, never reset</span></pre>
+
+    <p class="note"><b>Dutch National Flag</b> — one pass, O(1) space:</p>
+<pre><span class="k">def</span> <span class="f">sortColors</span>(nums):
+    left, mid, right = <span class="s">0</span>, <span class="s">0</span>, <span class="k">len</span>(nums) - <span class="s">1</span>
+    <span class="k">while</span> mid &lt;= right:                       <span class="c"># &lt;= NOT &lt; (process the last slot!)</span>
+        <span class="k">if</span> nums[mid] == <span class="s">1</span>:
+            mid += <span class="s">1</span>
+        <span class="k">elif</span> nums[mid] == <span class="s">2</span>:
+            nums[right], nums[mid] = nums[mid], nums[right]
+            right -= <span class="s">1</span>                         <span class="c"># MID STAYS — newcomer unexamined</span>
+        <span class="k">else</span>:  <span class="c"># == 0</span>
+            nums[left], nums[mid] = nums[mid], nums[left]
+            left += <span class="s">1</span>
+            mid += <span class="s">1</span>                           <span class="c"># MID ADVANCES — newcomer already scanned</span></pre>
+    <div class="vi">Counting sort chỉ có <b>MỘT con trỏ ghi</b> chạy suốt. Dutch Flag: nhớ <code class="inl">mid &lt;= right</code> và so sánh <code class="inl">nums[mid]</code> chứ không phải <code class="inl">mid</code>.</div>
+  </section>
+
+  <!-- THE ASYMMETRY -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 The asymmetry</p>
+    <h2>The whole trick.</h2>
+    <div class="sig">
+      <div class="row"><span class="s"><b>Swap a 0</b> → value pulled from BEHIND mid (already-scanned, all 1s) → already checked</span><span class="v">✓ mid++</span></div>
+      <div class="row no"><span class="s"><b>Swap a 2</b> → value pulled from the UNEXPLORED right zone → unchecked</span><span class="v">✗ mid stays</span></div>
+    </div>
+    <div class="pin">Reframe <code class="inl">[2,1]</code>: swap the 2 to the right, the value landing under mid came from the right — <b>never scanned</b>. If mid advanced, you'd skip it. So mid must stay.</div>
+    <div class="vi">Đổi số 0 → cái mới đến từ <b>vùng đã quét</b> nên nhích mid được. Đổi số 2 → cái mới đến từ <b>vùng chưa quét</b> nên mid phải đứng yên để soi lại.</div>
+  </section>
+
+  <!-- TRAPS -->
+  <section class="reveal">
+    <p class="eyebrow">⚠️ Traps</p>
+    <h2>Where it breaks.</h2>
+    <ol class="traps">
+      <li><b>Loop boundary <code class="inl">while mid &lt;= right</code></b> — <code class="inl">&lt;</code> skips the final element. Test <code class="inl">[1,0]</code> → <code class="inl">&lt;</code> leaves it unsorted. (Same off-by-one wound as binary-search boundaries.)</li>
+      <li><b>mid STAYS after a 2-swap</b> — advancing mid here drops an unchecked value.</li>
+      <li><b>Compare <code class="inl">nums[mid]</code>, not <code class="inl">mid</code></b> — <code class="inl">if mid == 2</code> compares the INDEX, not the value.</li>
+      <li><b>Counting sort: order comes from YOUR write-order</b>, not dict iteration. <code class="inl">Counter</code> keeps counts, NOT order.</li>
+      <li><b>One shared write-index</b> in counting sort — a fresh <code class="inl">for i in range(...)</code> per value restarts at 0 and overwrites. Don't clear the array first either — existing slots ARE the canvas (<code class="inl">nums[0]=x</code> on empty list = IndexError).</li>
+      <li><b><code class="inl">Counter[missing_key]</code> returns 0</b> (loop runs 0×, safe). A plain <code class="inl">dict[missing]</code> → KeyError. Cleanest fixed tool: a <code class="inl">[0,0,0]</code> list indexed by value.</li>
+    </ol>
+    <div class="vi">Hai vết chết người của Dutch Flag: <b><code class="inl">&lt;=</code> chứ không phải <code class="inl">&lt;</code></b>, và <b>mid đứng yên sau khi swap số 2</b>. Với counting sort: <b>một write-index duy nhất</b>.</div>
+  </section>
+
+  <!-- CONNECTIONS -->
+  <section class="reveal">
+    <p class="eyebrow">🔗 Connections</p>
+    <h2>Where it lives on the map.</h2>
+    <div class="sig">
+      <div class="row"><span class="s"><b>Cyclic Sort</b> — same "small fixed range → swap into home" spirit</span><span class="v">kin</span></div>
+      <div class="row"><span class="s"><b>Quicksort partition</b> — Dutch Flag is 3-way; Lomuto/Hoare is 2-way around a pivot</span><span class="v">kin</span></div>
+      <div class="row"><span class="s"><b>LeetCode #75 Sort Colors</b> — the canonical problem for both tools</span><span class="v">canonical</span></div>
+    </div>
+    <div class="vi">Cùng gia đình với <b>Cyclic Sort</b> (đẩy về đúng nhà) và <b>quicksort partition</b> (Dutch Flag = phân 3 vùng thay vì 2). Bài mẫu: <b>#75 Sort Colors</b>.</div>
+  </section>
+
+  <footer>
+    <p class="verse">“Whatever you do, work at it with all your heart, as working for the Lord.” — Colossians 3:23</p>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Học sâu ở Deep-Guide — animation từng bước <span class="a">→</span></a>
+    <p class="sig-line">🔥 HADRIEL × WIGANZ · Counting Sort &amp; Dutch Flag · Recognition</p>
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Fast &amp; Slow Pointers — Recognition Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#b07d1f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1.66;overflow-x:hidden;background-image:radial-gradient(circle at 14% 6%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 88% 12%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px 90px;position:relative;z-index:2;}
+
+  /* top cross-link bar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0 0;flex-wrap:wrap;}
+  .home{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+  .xlink{display:inline-flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--sky-deep);border:2px solid var(--sky-deep);padding:9px 16px;border-radius:999px;transition:transform .18s,box-shadow .18s;box-shadow:3px 3px 0 var(--shadow);}
+  .xlink:hover{transform:translateY(-2px);box-shadow:4px 5px 0 var(--shadow);}
+  .xlink .a{font-size:1.05em;}
+
+  header.hero{padding:34px 0 8px;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.36em;text-transform:uppercase;color:var(--clay-deep);margin:0 0 14px;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,9vw,4.6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  .tagline{font-family:'Spline Sans Mono',monospace;font-size:.82rem;letter-spacing:.04em;color:var(--sage-deep);margin:16px 0 0;display:flex;align-items:center;gap:9px;}
+  .tagline .bolt{font-size:1.1rem;}
+
+  section{margin-top:46px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:12px;margin:0 0 4px;}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.08;margin:.2em 0 .5em;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.85em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s;}.reveal.in{opacity:1;transform:none;}
+
+  /* the golden trigger — the fastest tell */
+  .trigger{background:linear-gradient(180deg,#f7edcf,#f3e6bf);border:2px solid var(--gold);border-radius:16px;padding:16px 20px;margin:2px 0 20px;position:relative;box-shadow:4px 5px 0 var(--shadow);}
+  .trigger::before{content:"⚡ tíc-tắc nhận ra";position:absolute;top:-11px;left:16px;background:var(--gold-deep);color:#fff7e8;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.14em;padding:3px 10px;border-radius:3px;}
+  .trigger b{color:var(--clay-deep);}
+  .trigger .en{font-size:1.12rem;font-weight:600;}
+
+  /* signal rows */
+  .sig{display:flex;flex-direction:column;gap:9px;margin:10px 0 4px;}
+  .sig .row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f8f1dd;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .sig .row .s{font-size:1.04rem;}
+  .sig .row .v{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:5px 11px;border-radius:999px;background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .sig .row.no{background:#f7e9e4;border-color:var(--clay);}
+  .sig .row.no .v{background:#f2d9cf;color:var(--clay-deep);border-color:var(--clay);}
+
+  .vi{font-size:.98rem;line-height:1.55;color:var(--ink);background:#f6ecd2;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:9px 15px;margin:12px 0 2px;}
+  .vi::before{content:"🔥 ";}
+  .vi b{color:var(--clay-deep);}
+
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:15px 20px;margin:10px 0;font-size:1.06rem;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:17px 19px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:12px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+  .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
+
+  /* traps */
+  ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
+  ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
+  ol.traps li:last-child{border-bottom:0;}
+  ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
+  footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="home">Patterns · 08</span>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Bản Deep-Guide đầy đủ <span class="a">→</span></a>
+  </div>
+
+  <header class="hero">
+    <p class="kicker">Pattern 08 · Recognition</p>
+    <h1 class="title">Fast &amp; Slow Pointers</h1>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+  </header>
+
+  <!-- SPOT IT -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 Spot it</p>
+    <h2>The signals that scream <em>Fast&nbsp;&amp;&nbsp;Slow</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0">A <b>linked list</b> (or sequence acting like one) — <b>detect a cycle</b> or <b>find the middle</b> in <b>O(1) space</b>.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Thấy <b>linked list</b> mà hỏi <b>có vòng lặp không / phần tử giữa ở đâu</b> mà <b>không được tốn bộ nhớ phụ</b> → hai con trỏ nhanh-chậm.</div>
+    </div>
+
+    <div class="sig">
+      <div class="row"><span class="s">"cycle in linked list"</span><span class="v">✓ fast &amp; slow</span></div>
+      <div class="row"><span class="s">"find middle of linked list"</span><span class="v">✓ fast &amp; slow</span></div>
+      <div class="row"><span class="s">"happy number" (digit cycle)</span><span class="v">✓ fast &amp; slow</span></div>
+      <div class="row"><span class="s">"find duplicate" (array as linked list)</span><span class="v">✓ fast &amp; slow</span></div>
+    </div>
+    <div class="vi">Chìa khoá là chữ <b>chu trình (cycle)</b> hoặc <b>điểm giữa</b> trên một chuỗi liên kết — kể cả khi bài giấu nó dưới dạng "happy number" hay "mảng đóng vai linked list".</div>
+  </section>
+
+  <!-- WHY IT WORKS -->
+  <section class="reveal">
+    <p class="eyebrow">⚙️ Why it works</p>
+    <div class="pin"><b>Fast moves 2x, slow moves 1x.</b> If a cycle exists, fast <b>gains 1 step per move</b> on slow, so it must eventually lap and land on it. If there's no cycle, fast simply runs off the end and hits <code class="inl">null</code>.</div>
+    <div class="vi">Nhanh đi 2 bước, chậm đi 1 bước → mỗi vòng lặp nhanh rút ngắn khoảng cách đúng 1 → nếu có vòng thì <b>chắc chắn đụng nhau</b>; không có vòng thì nhanh chạm <code class="inl">null</code> và dừng.</div>
+  </section>
+
+  <!-- THE CORE -->
+  <section class="reveal">
+    <p class="eyebrow">💻 The core</p>
+    <h2>The move, in code.</h2>
+    <p class="note"><b>Detect a cycle</b> — do they ever collide?</p>
+<pre><span class="k">def</span> <span class="f">hasCycle</span>(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="k">if</span> slow == fast:
+            <span class="k">return</span> <span class="k">True</span>
+    <span class="k">return</span> <span class="k">False</span></pre>
+
+    <p class="note"><b>Find the cycle start</b> — detect, then reset slow to head and walk both at speed 1:</p>
+<pre><span class="k">def</span> <span class="f">cycleStart</span>(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        <span class="k">if</span> slow == fast:
+            <span class="c"># Reset one to head, both move at speed 1</span>
+            slow = head
+            <span class="k">while</span> slow != fast:
+                slow = slow.next
+                fast = fast.next
+            <span class="k">return</span> slow  <span class="c"># cycle start</span>
+    <span class="k">return</span> <span class="k">None</span></pre>
+
+    <p class="note"><b>Find the middle</b> — when fast hits the end, slow sits in the middle:</p>
+<pre><span class="k">def</span> <span class="f">findMiddle</span>(head):
+    slow = fast = head
+    <span class="k">while</span> fast <span class="k">and</span> fast.next:
+        slow = slow.next
+        fast = fast.next.next
+    <span class="k">return</span> slow  <span class="c"># middle (or second middle if even)</span></pre>
+    <div class="vi">Cùng một khung <code class="inl">while fast and fast.next</code>. Đổi bài chỉ đổi cái làm sau khi gặp nhau: <b>cycle start</b> thì reset một con trỏ về head; <b>find middle</b> thì khỏi cần điều kiện gặp nhau.</div>
+  </section>
+
+  <!-- TRAPS -->
+  <section class="reveal">
+    <p class="eyebrow">⚠️ Traps</p>
+    <h2>Where it breaks.</h2>
+    <ol class="traps">
+      <li><b>Check <code class="inl">fast AND fast.next</code></b> before advancing fast — skip it and you dereference <code class="inl">null</code>.</li>
+      <li><b>Cycle start needs TWO phases</b> — first detect the meeting point, THEN find the start.</li>
+      <li><b>Middle of an even-length list:</b> this returns the <i>second</i> middle — adjust if the problem wants the first.</li>
+    </ol>
+    <div class="vi">Ba cái chết người: (1) quên kiểm tra <code class="inl">fast and fast.next</code> → crash vì null; (2) tìm điểm bắt đầu vòng phải <b>hai pha</b>; (3) list chẵn thì hàm trả về <b>giữa thứ hai</b>, cần thì tự chỉnh.</div>
+  </section>
+
+  <footer>
+    <p class="verse">“Let us run with perseverance the race marked out for us.” — Hebrews 12:1</p>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Học sâu ở Deep-Guide — animation từng bước <span class="a">→</span></a>
+    <p class="sig-line">🔥 HADRIEL × WIGANZ · Fast &amp; Slow Pointers · Recognition</p>
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

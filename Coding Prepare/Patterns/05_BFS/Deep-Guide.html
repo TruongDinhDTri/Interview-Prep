@@ -64,6 +64,11 @@
   footer{margin-top:92px;text-align:center;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.12em;color:var(--ink-soft);}
   footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.04rem;letter-spacing:0;color:var(--sage-deep);margin-bottom:14px;}
   ::selection{background:var(--gold);color:#2f2a22;}
+  /* Vietnamese "tiếng người" layer */
+  .vi{background:#f6ecd2;border:1.5px dashed var(--gold);border-radius:16px 4px 16px 4px;padding:15px 20px 13px;margin:18px 0;font-size:1.04rem;line-height:1.66;position:relative;box-shadow:3px 4px 0 var(--shadow);}
+  .vi::before{content:"🔥 giải thích · tiếng người";position:absolute;top:-11px;left:16px;background:var(--gold);color:#2f2a22;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.13em;padding:3px 10px;border-radius:3px;}
+  .vi b{color:var(--clay-deep);font-weight:600;}
+  .vi .q{display:block;font-family:'Fraunces',serif;font-style:italic;font-weight:500;color:var(--sage-deep);font-size:1.1rem;line-height:1.4;margin:10px 0 2px;padding-left:14px;border-left:3px solid var(--sage);}
 </style>
 </head>
 <body>
@@ -71,15 +76,22 @@
   <header class="hero">
     <p class="kicker">Pattern 05</p>
     <h1 class="title"><span class="l1">Breadth-First</span><span class="l2">Search.</span></h1>
-    <p class="lede">One core idea — spread in <b>rings</b>, and the <b>first arrival is the shortest path</b>. Press step and watch the wave.</p>
+    <p class="lede">One core idea — spread in <b>rings</b>, in strict <b>order of distance</b>. Shortest path <i>and</i> level-order both fall out of that order. Press step and watch the wave.</p>
+    <a href="Recognition.html" style="display:inline-flex;align-items:center;gap:8px;margin-top:28px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--clay-deep);border:2px solid var(--clay-deep);padding:10px 18px;border-radius:999px;box-shadow:3px 3px 0 var(--shadow);width:fit-content;opacity:0;animation:fadeUp 1s .7s forwards;">⚡ Recognition — thẻ nhận diện nhanh →</a>
   </header>
 
   <section class="reveal">
     <p class="eyebrow">The core idea</p>
     <h2>Spread in <em>rings</em>, not dives.</h2>
     <p>Drop a stone in water: the ripple reaches everything 1 step away, <i>then</i> everything 2 steps away, and so on — a perfect expanding circle. BFS is that ripple over a graph.</p>
-    <p class="core">Because the wave visits <b>all distance-1 nodes before any distance-2 node</b>, the <b>first time</b> you reach a target is — guaranteed — by the <b>fewest steps</b>. A queue (first-in, first-out) keeps the ring in order.</p>
-    <div class="pin" data-l="THE ONE LINE"><b>A FIFO queue grows the frontier one ring at a time.</b> Mark a node visited the moment you <i>enqueue</i> it (not when you pop) so it's never queued twice. First arrival = shortest path. <b>O(V+E)</b>.</div>
+    <p class="core">Because the wave visits <b>all distance-1 nodes before any distance-2 node</b>, BFS walks the graph in <b>strict order of distance</b> from the source. <b>That ordering IS the pattern</b> — everything BFS is famous for falls out of it. A queue (first-in, first-out) is what keeps the rings in order.</p>
+    <div class="pin" data-l="THE ONE LINE"><b>A FIFO queue grows the frontier one ring at a time — visiting nodes in distance order.</b> That order hands you two gifts for free: <b>first arrival = shortest path</b>, and <b>each ring = one level</b> to process. Mark a node visited the moment you <i>enqueue</i> it (not when you pop) so it's never queued twice. <b>O(V+E)</b>.</div>
+
+    <div class="vi">
+      Đừng đóng đinh BFS = "thuật tìm đường ngắn nhất" — cái đó là <b>hệ quả</b>, không phải bản chất.
+      <span class="q">Bản chất BFS: duyệt theo ĐÚNG THỨ TỰ KHOẢNG CÁCH — nở trọn vòng 1 rồi mới chạm vòng 2.</span>
+      Từ cái thứ-tự đó, MỌI thứ BFS nổi tiếng tự rơi ra: (1) <b>lần đầu chạm = đường ngắn nhất</b> (vì vòng gần luôn tới trước), và (2) <b>mỗi vòng = một "level"</b> để xử lý (level-order, flood fill, multi-source). Giống hệt Binary Search: "shortest path" chỉ là <i>một món quà</i> của thứ-tự — như "sorted" chỉ là <i>một cách</i> có monotonic.
+    </div>
   </section>
 
   <!-- SHAPE 1 -->

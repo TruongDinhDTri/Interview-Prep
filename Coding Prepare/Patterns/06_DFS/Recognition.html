@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>DFS — Recognition Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,900;1,9..144,500;1,9..144,600&family=Newsreader:ital,opsz@0,6..72;1,6..72&family=Spline+Sans+Mono:wght@400;600&display=swap" rel="stylesheet" />
+<style>
+  :root{--paper:#f3e9d2;--paper-deep:#ecdfc2;--ink:#3a2f26;--ink-soft:#6b5d4d;--sage:#6f8765;--sage-deep:#52684a;--clay:#c06848;--clay-deep:#a4502f;--sky:#6d8fa6;--sky-deep:#4f7186;--gold:#d49a3a;--gold-deep:#b07d1f;--line:#cdbb95;--shadow:rgba(74,58,40,.16);}
+  *{box-sizing:border-box;}html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Newsreader',Georgia,serif;font-size:18px;line-height:1.66;overflow-x:hidden;background-image:radial-gradient(circle at 14% 6%,rgba(111,135,101,.10),transparent 38%),radial-gradient(circle at 88% 12%,rgba(192,104,72,.10),transparent 40%);}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:.4;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");mix-blend-mode:multiply;}
+  .wrap{max-width:780px;margin:0 auto;padding:0 24px 90px;position:relative;z-index:2;}
+
+  /* top cross-link bar */
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 0 0;flex-wrap:wrap;}
+  .home{font-family:'Spline Sans Mono',monospace;font-size:.68rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink-soft);}
+  .xlink{display:inline-flex;align-items:center;gap:8px;font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.05em;text-decoration:none;color:var(--paper);background:var(--sky-deep);border:2px solid var(--sky-deep);padding:9px 16px;border-radius:999px;transition:transform .18s,box-shadow .18s;box-shadow:3px 3px 0 var(--shadow);}
+  .xlink:hover{transform:translateY(-2px);box-shadow:4px 5px 0 var(--shadow);}
+  .xlink .a{font-size:1.05em;}
+
+  header.hero{padding:34px 0 8px;}
+  .kicker{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.36em;text-transform:uppercase;color:var(--clay-deep);margin:0 0 14px;}
+  h1.title{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(2.6rem,9vw,4.6rem);line-height:.94;letter-spacing:-.02em;margin:0;}
+  .tagline{font-family:'Spline Sans Mono',monospace;font-size:.82rem;letter-spacing:.04em;color:var(--sage-deep);margin:16px 0 0;display:flex;align-items:center;gap:9px;}
+  .tagline .bolt{font-size:1.1rem;}
+
+  section{margin-top:46px;}
+  .eyebrow{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.28em;text-transform:uppercase;color:var(--clay-deep);display:flex;align-items:center;gap:12px;margin:0 0 4px;}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--clay);}
+  h2{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(1.6rem,4vw,2.1rem);line-height:1.08;margin:.2em 0 .5em;}
+  code.inl{font-family:'Spline Sans Mono',monospace;font-size:.85em;background:#ece0c0;padding:1px 6px;border-radius:4px;}
+  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s,transform .7s;}.reveal.in{opacity:1;transform:none;}
+
+  /* the golden trigger — the fastest tell */
+  .trigger{background:linear-gradient(180deg,#f7edcf,#f3e6bf);border:2px solid var(--gold);border-radius:16px;padding:16px 20px;margin:2px 0 20px;position:relative;box-shadow:4px 5px 0 var(--shadow);}
+  .trigger::before{content:"⚡ tíc-tắc nhận ra";position:absolute;top:-11px;left:16px;background:var(--gold-deep);color:#fff7e8;font-family:'Spline Sans Mono',monospace;font-size:.58rem;letter-spacing:.14em;padding:3px 10px;border-radius:3px;}
+  .trigger b{color:var(--clay-deep);}
+  .trigger .en{font-size:1.12rem;font-weight:600;}
+
+  /* signal rows */
+  .sig{display:flex;flex-direction:column;gap:9px;margin:10px 0 4px;}
+  .sig .row{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#f8f1dd;border:1.5px solid var(--line);border-radius:12px;padding:12px 16px;}
+  .sig .row .s{font-size:1.04rem;}
+  .sig .row .v{font-family:'Spline Sans Mono',monospace;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding:5px 11px;border-radius:999px;background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);}
+  .sig .row.no{background:#f7e9e4;border-color:var(--clay);}
+  .sig .row.no .v{background:#f2d9cf;color:var(--clay-deep);border-color:var(--clay);}
+
+  .vi{font-size:.98rem;line-height:1.55;color:var(--ink);background:#f6ecd2;border-left:3px solid var(--gold);border-radius:0 10px 10px 0;padding:9px 15px;margin:12px 0 2px;}
+  .vi::before{content:"🔥 ";}
+  .vi b{color:var(--clay-deep);}
+
+  .pin{background:#eef3e7;border:1.5px solid var(--sage);border-radius:4px 16px 4px 16px;padding:15px 20px;margin:10px 0;font-size:1.06rem;}
+  .pin b{color:var(--sage-deep);}
+
+  pre{background:#2f2a22;color:#f0e6cf;border-radius:13px;padding:17px 19px;overflow-x:auto;font-family:'Spline Sans Mono',monospace;font-size:.8rem;line-height:1.6;margin:12px 0;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--sky);}
+  pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
+  .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
+
+  /* traps */
+  ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
+  ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
+  ol.traps li:last-child{border-bottom:0;}
+  ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
+
+  footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
+  footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
+  footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
+  ::selection{background:var(--gold);color:#2f2a22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <span class="home">Patterns · 06</span>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Bản Deep-Guide đầy đủ <span class="a">→</span></a>
+  </div>
+
+  <header class="hero">
+    <p class="kicker">Pattern 06 · Recognition</p>
+    <h1 class="title">DFS</h1>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+  </header>
+
+  <!-- SPOT IT -->
+  <section class="reveal">
+    <p class="eyebrow">🎯 Spot it</p>
+    <h2>The signals that scream <em>DFS</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0"><b>Explore EVERYTHING</b> — all paths, all islands, whole tree — and it's <b>NOT</b> asking for the shortest one.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Nghe <b>"tất cả đường / mọi tổ hợp / đếm cụm liên thông"</b>, hoặc <b>"parent cần thông tin của con trước"</b> → DFS. Hễ hỏi <b>ngắn nhất</b> thì đổi sang BFS.</div>
+    </div>
+
+    <div class="sig">
+      <div class="row"><span class="s">"all paths" / "any path exists"</span><span class="v">✓ dfs</span></div>
+      <div class="row"><span class="s">"connected components" / "islands"</span><span class="v">✓ dfs</span></div>
+      <div class="row"><span class="s">"tree traversal" / "validate BST"</span><span class="v">✓ dfs</span></div>
+      <div class="row"><span class="s">"cycle detection" / "topological sort"</span><span class="v">✓ dfs</span></div>
+      <div class="row"><span class="s">"tree height" / "depth" / "balanced"</span><span class="v">✓ post-order</span></div>
+      <div class="row"><span class="s">"every node must satisfy condition"</span><span class="v">✓ check on way up</span></div>
+      <div class="row"><span class="s">"need children's info before the parent"</span><span class="v">✓ post-order</span></div>
+      <div class="row no"><span class="s">"shortest path" / "minimum steps"</span><span class="v">✗ → bfs</span></div>
+    </div>
+    <p class="note"><b>Key sentence (3P Match):</b> "I see <b>tree height / every node</b> which tells me <b>DFS (post-order)</b> because each node needs its children's values FIRST before it can do its own work."</p>
+    <div class="vi">Tất cả đều là <b>đào sâu một nhánh tới đáy rồi quay lui</b>. Ba dòng cuối là dấu hiệu <b>post-order</b>: <b>con xong trước, cha xử lý sau</b>. Chỉ cần nghe "ngắn nhất" là chuyển BFS.</div>
+  </section>
+
+  <!-- WHY IT WORKS -->
+  <section class="reveal">
+    <p class="eyebrow">⚙️ Why it works</p>
+    <div class="pin"><b>DFS explores ONE branch completely, then backtracks.</b> The <b>call stack IS your backtracking</b> — each return pops you back to the last decision point. Time <b>O(V+E)</b>, space <b>O(H)</b> where H is the recursion height.</div>
+    <div class="vi">DFS đi <b>hết một nhánh mới quay lại</b>. Cái <b>call stack chính là bộ nhớ quay lui</b> — không cần tự quản lý stack. Tốn <b>O(V+E)</b> thời gian, <b>O(H)</b> bộ nhớ theo chiều sâu đệ quy.</div>
+  </section>
+
+  <!-- THE CORE -->
+  <section class="reveal">
+    <p class="eyebrow">💻 The core</p>
+    <h2>The move, in code.</h2>
+    <p class="note"><b>Tree DFS</b> — recurse both sides, then combine at the node:</p>
+<pre><span class="k">def</span> <span class="f">dfs</span>(node):
+    <span class="k">if not</span> node: <span class="k">return</span> BASE_VALUE
+
+    left  = <span class="f">dfs</span>(node.left)
+    right = <span class="f">dfs</span>(node.right)
+
+    <span class="k">return</span> <span class="f">COMBINE</span>(node.val, left, right)</pre>
+
+    <table style="width:100%;border-collapse:collapse;margin:12px 0 4px;font-family:'Spline Sans Mono',monospace;font-size:.76rem;">
+      <thead>
+        <tr style="background:#efe4c6;">
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">PROBLEM</th>
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">BASE</th>
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">COMBINE</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Max Depth</td><td style="padding:9px 12px;border:1.5px solid var(--line);">0</td><td style="padding:9px 12px;border:1.5px solid var(--line);">1 + max(L, R)</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Path Sum</td><td style="padding:9px 12px;border:1.5px solid var(--line);">check leaf</td><td style="padding:9px 12px;border:1.5px solid var(--line);">subtract, recurse</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Validate BST</td><td style="padding:9px 12px;border:1.5px solid var(--line);">True</td><td style="padding:9px 12px;border:1.5px solid var(--line);">pass min/max bounds down</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>Balanced Tree</b></td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>0 (None→0)</b></td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>-1 if unbalanced, else 1+max(L,R)</b></td></tr>
+      </tbody>
+    </table>
+    <p class="note"><b>-1 Sentinel trick:</b> when you must return height (int) AND validity (bool), use <code class="inl">-1</code> as the impossible-height signal. Parent checks <code class="inl">if left == -1 or right == -1: return -1</code>. Outer wrapper converts: <code class="inl">return dfs(root) != -1</code>.</p>
+
+    <p class="note"><b>Graph DFS</b> — same idea, but a <code class="inl">visited</code> set stops cycles:</p>
+<pre><span class="k">def</span> <span class="f">dfs</span>(node, visited):
+    <span class="k">if</span> node <span class="k">in</span> visited: <span class="k">return</span>
+    visited.<span class="f">add</span>(node)
+
+    <span class="k">for</span> neighbor <span class="k">in</span> graph[node]:
+        <span class="f">dfs</span>(neighbor, visited)</pre>
+    <p class="note"><b>Cycle in a directed graph:</b> use 3 colors (white / gray / black). Hitting a <b>gray</b> node = cycle.</p>
+    <div class="vi">Tree DFS = <b>hỏi trái, hỏi phải, rồi COMBINE tại node</b> — đổi bài chỉ đổi BASE và COMBINE. Graph thì thêm <code class="inl">visited</code> vì có chu trình. Chiêu <b>sentinel -1</b> gói cả chiều cao lẫn tính hợp lệ vào một số.</div>
+  </section>
+
+  <!-- TRAPS -->
+  <section class="reveal">
+    <p class="eyebrow">⚠️ Traps</p>
+    <h2>Where it breaks.</h2>
+    <ol class="traps">
+      <li><b>Graphs need a <code class="inl">visited</code> set</b> — trees don't (no cycles).</li>
+      <li><b>Copy the path before storing:</b> <code class="inl">result.append(path[:])</code>, not <code class="inl">result.append(path)</code> — otherwise every stored path mutates together.</li>
+      <li><b>DFS finds A path, not THE SHORTEST</b> — if they want shortest, that's BFS.</li>
+    </ol>
+    <div class="vi">Ba cái chết người: (1) quên <code class="inl">visited</code> trên graph → lặp vô tận; (2) quên <b>copy path</b> → mọi kết quả bị sửa chung; (3) tưởng DFS ra đường ngắn nhất — <b>không</b>, đó là việc của BFS.</div>
+  </section>
+
+  <footer>
+    <p class="verse">“Search me, O God, and know my heart; test me and know my anxious thoughts.” — Psalm 139:23</p>
+    <a class="xlink" href="Deep-Guide.html"><span class="a">📖</span> Học sâu ở Deep-Guide — animation từng bước <span class="a">→</span></a>
+    <p class="sig-line">🔥 HADRIEL × WIGANZ · DFS · Recognition</p>
+  </footer>
+</div>
+
+<script>
+  const io=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}})},{threshold:.08});
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
