@@ -59,6 +59,21 @@
   pre .k{color:#e0a35a;}pre .c{color:#8a9a7e;font-style:italic;}pre .s{color:#cdb6e0;}pre .f{color:#9ec7e0;}
   .note{font-size:1rem;color:var(--ink-soft);margin:6px 0 0;}.note b{color:var(--clay-deep);}
 
+  /* multi-source wave frames */
+  .frames{display:flex;flex-direction:column;gap:9px;margin:14px 0 6px;overflow-x:auto;}
+  .frames .fr{display:flex;align-items:center;gap:9px;}
+  .frames .lbl{font-family:'Spline Sans Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);width:66px;flex:none;}
+  .frames .cell{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--line);border-radius:10px;background:#f8f1dd;font-family:'Spline Sans Mono',monospace;font-size:1rem;color:#bcae90;}
+  .frames .cell.src{background:#f2d9cf;border-color:var(--clay);color:var(--clay-deep);font-weight:600;}
+  .frames .cell.w1{background:#e6eddf;border-color:var(--sage);color:var(--sage-deep);font-weight:600;}
+  .frames .cell.w2{background:#f7edcf;border-color:var(--gold);color:var(--gold-deep);font-weight:600;}
+  .frames .cap{font-family:'Spline Sans Mono',monospace;font-size:.64rem;color:var(--ink-soft);letter-spacing:.03em;padding-left:6px;}
+  .diff{font-family:'Spline Sans Mono',monospace;font-size:.82rem;line-height:1.7;background:#2f2a22;border-radius:13px;padding:15px 18px;margin:12px 0;overflow-x:auto;box-shadow:5px 6px 0 var(--shadow);border-left:5px solid var(--gold);}
+  .diff .out{color:#8a7f6d;}
+  .diff .in{color:#a8d08a;}
+  .fam{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 2px;}
+  .fam span{font-family:'Spline Sans Mono',monospace;font-size:.7rem;letter-spacing:.03em;background:#eef3e7;border:1.5px solid var(--sage);color:var(--sage-deep);border-radius:999px;padding:5px 12px;}
+
   /* traps */
   ol.traps{list-style:none;counter-reset:t;padding:0;margin:12px 0 0;}
   ol.traps li{counter-increment:t;position:relative;padding:11px 0 11px 44px;border-bottom:1.5px dashed var(--line);font-size:1.03rem;}
@@ -70,6 +85,28 @@
   footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
   ::selection{background:var(--gold);color:#2f2a22;}
 </style>
+<style id="mobile-safety-net">
+/* ===== MOBILE SAFETY NET — auto-injected, non-destructive ===== */
+html,body{max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
+img,svg,video,canvas,iframe{max-width:100%;height:auto;}
+pre{overflow-x:auto;max-width:100%;}
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;margin:12px 0;}
+.tbl-scroll>table{margin:0;}
+@media (max-width:600px){
+  table{max-width:100%;}
+  h1,h2,h3{overflow-wrap:anywhere;word-break:break-word;}
+}
+</style>
+<script id="mobile-safety-net-js">
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('table').forEach(function(t){
+    var p=t.parentElement;
+    if(p&&p.classList&&p.classList.contains('tbl-scroll'))return;
+    var w=document.createElement('div');w.className='tbl-scroll';
+    t.parentNode.insertBefore(w,t);w.appendChild(t);
+  });
+});
+</script>
 </head>
 <body>
 <div class="wrap">
@@ -99,9 +136,11 @@
       <div class="row"><span class="s">"shortest path" / "minimum steps" (unweighted)</span><span class="v">✓ bfs</span></div>
       <div class="row"><span class="s">"level order traversal"</span><span class="v">✓ bfs</span></div>
       <div class="row"><span class="s">"nearest X" / "minimum transformations"</span><span class="v">✓ bfs</span></div>
+      <div class="row"><span class="s">"nearest / gần nhất" + <b>NHIỀU điểm xuất phát</b></span><span class="v">✓ multi-source bfs</span></div>
+      <div class="row"><span class="s">"bao lâu để lan hết" / "time to spread to all"</span><span class="v">✓ multi-source bfs</span></div>
       <div class="row no"><span class="s">"all paths" / "any path exists"</span><span class="v">✗ → dfs</span></div>
     </div>
-    <div class="vi">Ba dấu hiệu trên đều là <b>lan theo từng lớp</b> (level). Nhưng hễ hỏi <b>"tất cả đường đi"</b> hay <b>"có tồn tại đường nào không"</b> → đó là <b>DFS</b>, đừng nhầm.</div>
+    <div class="vi">Mấy dấu hiệu trên đều là <b>lan theo từng lớp</b> (level). Hễ hỏi <b>"tất cả đường đi"</b> hay <b>"có tồn tại đường nào không"</b> → đó là <b>DFS</b>, đừng nhầm. Còn hễ thấy <b>nhiều điểm xuất phát</b> đi kèm chữ "gần nhất / lan hết" → nhảy xuống mục <a href="#multi" style="color:var(--clay-deep)"><b>Multi-Source</b></a> ở dưới.</div>
   </section>
 
   <!-- WHY IT WORKS -->
@@ -138,8 +177,39 @@
         steps += <span class="s">1</span>
 
     <span class="k">return</span> -<span class="s">1</span>  <span class="c"># not found</span></pre>
-    <p class="note"><b>Multi-Source BFS</b> (e.g., Rotting Oranges): add <b>ALL</b> sources to the queue initially, then run the same loop.</p>
-    <div class="vi">Vòng <code class="inl">for _ in range(len(queue))</code> là để <b>xử lý trọn một lớp</b> rồi mới tăng <code class="inl">steps</code>. Bài nhiều nguồn (Rotting Oranges) thì <b>nạp hết nguồn vào queue từ đầu</b>.</div>
+    <div class="vi">Vòng <code class="inl">for _ in range(len(queue))</code> là để <b>xử lý trọn một lớp</b> rồi mới tăng <code class="inl">steps</code> — mỗi lớp là một "vòng sóng".</div>
+  </section>
+
+  <!-- MULTI-SOURCE -->
+  <section class="reveal" id="multi">
+    <p class="eyebrow">🌊 Biến thể · Multi-Source</p>
+    <h2>Nhiều nguồn — <em>đổi đúng 1 dòng.</em></h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0">Thấy <b>"gần nhất" / "nearest" / "bao lâu để lan hết" / "min distance to ANY of these"</b> — <b>và có nhiều điểm xuất phát</b> → <b>Multi-Source BFS</b>.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Nhét <b>HẾT</b> các nguồn vào queue ngay từ đầu (tất cả ở vòng 0), rồi chạy <b>y hệt</b> engine BFS thường. Không sửa gì trong vòng lặp.</div>
+    </div>
+
+    <div class="diff"><span class="out">- queue = deque([start])          # 1 nguồn</span><br /><span class="in">+ queue = deque(all_sources)      # N nguồn, cùng vòng 0</span><br /><span class="out">- visited = {start}</span><br /><span class="in">+ visited = set(all_sources)</span><br /><span style="color:#8a9a7e;font-style:italic"># …phần while queue phía dưới: KHÔNG ĐỔI MỘT CHỮ.</span></div>
+
+    <div class="pin"><b>Vì sao tự ra "khoảng cách tới nguồn GẦN NHẤT"?</b> Vì các sóng chạy song song theo từng vòng. Ô nào cũng bị <b>sóng của nguồn gần nó nhất chạm TRƯỚC</b> (ít bước hơn = tới sớm hơn). Lần chạm đầu tiên ghi số rồi khoá <code class="inl">visited</code> — sóng tới sau bị từ chối. Nên số ghi vào ô <b>luôn là số nhỏ nhất</b>, không cần <code class="inl">min()</code>, không cần chạy lại.</div>
+
+    <p class="note" style="margin-top:16px">Hàng 5 ô, <b>2 nguồn</b> ở hai đầu. Số trong ô = <code class="inl">dist</code> đã ghi:</p>
+    <div class="frames">
+      <div class="fr"><span class="lbl">vòng 0</span><span class="cell src">0</span><span class="cell">·</span><span class="cell">·</span><span class="cell">·</span><span class="cell src">0</span><span class="cap">2 nguồn cùng nằm queue</span></div>
+      <div class="fr"><span class="lbl">vòng 1</span><span class="cell src">0</span><span class="cell w1">1</span><span class="cell">·</span><span class="cell w1">1</span><span class="cell src">0</span><span class="cap">mỗi sóng lan 1 ô</span></div>
+      <div class="fr"><span class="lbl">vòng 2</span><span class="cell src">0</span><span class="cell w1">1</span><span class="cell w2">2</span><span class="cell w1">1</span><span class="cell src">0</span><span class="cap">2 sóng đụng nhau → xong</span></div>
+    </div>
+    <div class="vi">Soi ô số <b>1</b>: từ nguồn trái mất <b>1 bước</b>, từ nguồn phải mất <b>3 bước</b>. Sóng trái chạm ở vòng 1 và khoá <code class="inl">visited</code> → sóng phải vĩnh viễn không ghi đè được. Ô ghi <b>1</b> = đúng khoảng cách tới nguồn gần nhất. Cơ chế "gần nhất" nằm gọn trong <code class="inl">visited</code>, không nằm ở đâu khác.</div>
+
+    <p class="note" style="margin-top:16px"><b>Ăn tiền ở đâu:</b> BFS riêng từng nguồn rồi lấy <code class="inl">min</code> = <b>O(k×(V+E))</b>. Multi-source = <b>O(V+E)</b>, một lượt quét. Cùng kết quả.</p>
+
+    <div class="pin" style="margin-top:14px"><b>Rotting Oranges qua lăng kính này:</b> mọi cam thối ban đầu = mọi nguồn → nạp hết vào queue. Mỗi <b>vòng</b> = <b>1 phút</b>. Vòng cuối cùng = đáp án. Còn ô fresh nào chưa <code class="inl">visited</code> → trả <code class="inl">-1</code>. "Thời gian lan hết" và "khoảng cách tới nguồn gần nhất" <b>là cùng một con số</b> — đề chỉ đổi tên nó.</div>
+
+    <div class="fam">
+      <span>Rotting Oranges</span><span>01 Matrix</span><span>Walls and Gates</span><span>As Far from Land as Possible</span><span>Shortest Bridge*</span>
+    </div>
+    <p class="note" style="font-size:.9rem">* Shortest Bridge = biến thể: DFS gom 1 hòn đảo trước → dùng cả đảo đó làm nguồn cho multi-source BFS.</p>
   </section>
 
   <!-- TRAPS -->
@@ -150,8 +220,9 @@
       <li><b>Mark visited when ADDING to the queue, not when popping</b> — otherwise the same node gets enqueued many times.</li>
       <li><b>Level separation:</b> snapshot <code class="inl">len(queue)</code> BEFORE the inner loop — don't read it live while you're pushing.</li>
       <li><b>Weighted graphs:</b> plain BFS is wrong → use <b>Dijkstra</b>.</li>
+      <li><b>Multi-source:</b> chạy BFS riêng từng nguồn rồi lấy <code class="inl">min</code> — đúng kết quả nhưng <b>chậm gấp k lần</b>. Nạp hết nguồn vào queue một lượt.</li>
     </ol>
-    <div class="vi">Ba cái chết người: (1) đánh dấu visited <b>lúc thêm vào queue</b>, không phải lúc lấy ra; (2) chốt <code class="inl">len(queue)</code> <b>trước</b> khi vào vòng trong; (3) đồ thị <b>có trọng số</b> thì BFS sai — dùng Dijkstra.</div>
+    <div class="vi">Bốn cái chết người: (1) đánh dấu visited <b>lúc thêm vào queue</b>, không phải lúc lấy ra; (2) chốt <code class="inl">len(queue)</code> <b>trước</b> khi vào vòng trong; (3) đồ thị <b>có trọng số</b> thì BFS sai — dùng Dijkstra; (4) nhiều nguồn thì <b>gộp một lượt</b>, đừng lặp từng nguồn.</div>
   </section>
 
   <footer>
