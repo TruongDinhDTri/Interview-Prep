@@ -65,6 +65,25 @@
   ol.traps li:last-child{border-bottom:0;}
   ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
 
+  /* pretty cross-link cards */
+  .linkcards{display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0 2px;}
+  @media(min-width:640px){.linkcards{grid-template-columns:1fr 1fr;}}
+  .lcard{display:block;text-decoration:none;color:var(--ink);background:#f8f1dd;border:2px solid var(--line);
+         border-radius:4px 16px 4px 16px;padding:15px 18px;box-shadow:4px 5px 0 var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s;}
+  .lcard:hover{transform:translateY(-3px);box-shadow:5px 7px 0 var(--shadow);border-color:var(--clay);}
+  .lcard .lc-tag{font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--clay-deep);display:block;margin-bottom:5px;}
+  .lcard .lc-t{font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem;line-height:1.2;display:block;margin-bottom:4px;}
+  .lcard .lc-d{font-size:.92rem;line-height:1.45;color:var(--ink-soft);}
+  .lcard.up{background:#eef3e7;border-color:var(--sage);}
+  .lcard.up:hover{border-color:var(--sage-deep);}
+  .lcard.side{background:#eef4f7;border-color:var(--sky);}
+  .lcard.side:hover{border-color:var(--sky-deep);}
+
+  /* side-by-side table shapes */
+  .shapecmp{display:grid;grid-template-columns:1fr;gap:14px;margin:14px 0;}
+  @media(min-width:680px){.shapecmp{grid-template-columns:1fr 1fr;}}
+  .shapecmp pre{margin:0;font-size:.72rem;}
+
   footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
   footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
   footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
@@ -107,48 +126,147 @@ document.addEventListener('DOMContentLoaded',function(){
     <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
   </header>
 
+  <!-- WHAT IT IS -->
+  <section class="reveal">
+    <p class="eyebrow">📐 What it actually is</p>
+    <h2>The DP whose table has <em>one row</em>.</h2>
+
+    <div class="trigger">
+      <p class="en" style="margin:0"><b>Linear DP = one index is enough.</b> If <code class="inl">dp[i]</code> — a single number — can name any subproblem, it's Linear. "Linear" means it literally: the table lies along a <b>line</b>, not a grid.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Định nghĩa gọn: <b>bảng chỉ cần MỘT hàng</b>. Một chỉ số <code class="inl">dp[i]</code> là đủ gọi tên một bài con. Chữ "Linear" nghĩa đen — bảng nằm trên một đường thẳng, không phải cái lưới.</div>
+    </div>
+
+    <div class="shapecmp">
+      <div>
+        <p class="note" style="margin-bottom:6px"><b>Linear DP</b> — Climbing Stairs</p>
+<pre style="border-left-color:var(--sage)">      i=1  i=2  i=3  i=4  i=5
+dp = [ <span class="s">1</span>    <span class="s">2</span>    <span class="s">3</span>    <span class="s">5</span>    <span class="s">8</span>  ]
+      <span class="c">↑ ONE index → ONE row</span></pre>
+      </div>
+      <div>
+        <p class="note" style="margin-bottom:6px"><b>2D DP</b> — Unique Paths</p>
+<pre style="border-left-color:var(--clay)">      c0   c1   c2
+ r0 │ <span class="s">1</span> │ <span class="s">1</span> │ <span class="s">1</span> │
+ r1 │ <span class="s">1</span> │ <span class="s">2</span> │ <span class="s">3</span> │
+ r2 │ <span class="s">1</span> │ <span class="s">3</span> │ <span class="s">6</span> │
+      <span class="c">↑ TWO indices → a grid</span></pre>
+      </div>
+    </div>
+
+    <p class="note">Everything else in DP-land needs <b>two</b> numbers to name a subproblem — Unique Paths needs (row, col), Knapsack needs (item, capacity), String DP needs (position in s1, position in s2). All 2D. Linear DP is the one that needs just one.</p>
+    <div class="pin"><b>The test:</b> say the sentence <b>"dp[i] is …"</b> out loud. One index says it completely → <b>Linear DP</b>. Reaching for a second number → different shape.</div>
+    <div class="vi">Cách thử nhanh: nói thành câu <b>"dp[i] là …"</b>. Nói trọn được bằng <b>một</b> chỉ số → Linear DP. Thấy cần thêm con số thứ hai → đó là shape khác (xem thẻ 17 để biết shape nào).</div>
+  </section>
+
+  <!-- WHY GROUPED -->
+  <section class="reveal">
+    <p class="eyebrow">🧷 Why these problems share a folder</p>
+    <h2>Stairs and burglary, same shelf.</h2>
+    <p class="note">Climbing Stairs, Fibonacci, House Robber, Min Cost Climbing Stairs — they look unrelated (bậc thang? trộm nhà?). They're grouped for exactly <b>one</b> reason:</p>
+    <div class="pin"><b>One sequence, and the answer at position <code class="inl">n</code> is built from answers at smaller positions.</b> That's the whole criterion.</div>
+    <p class="note"><b>The formula inside is a separate question</b> — some of these add, some take a max. Don't expect the four problems to look alike; expect them to have the same <em>shape of dependency</em>.</p>
+    <div class="vi">Đây là chỗ dễ thấy vô lý: "leo cầu thang thì liên quan gì trộm nhà?". Liên quan đúng MỘT điểm — <b>một dãy, đáp án ở <code class="inl">n</code> dựng từ đáp án ở vị trí nhỏ hơn</b>. Còn công thức bên trong (cộng hay max) là <b>chuyện khác</b>, tính sau.</div>
+  </section>
+
   <!-- SPOT IT -->
   <section class="reveal">
     <p class="eyebrow">🎯 Spot it</p>
     <h2>The signals that scream <em>Linear&nbsp;DP</em>.</h2>
-
-    <div class="trigger">
-      <p class="en" style="margin:0"><b>One sequence</b>, and the answer for <b>n</b> is built from the answer for <b>smaller n</b> (n−1, n−2) — and those smaller answers <b>overlap</b>.</p>
-      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Một dãy, đáp án của <b>n</b> dựa vào đáp án của <b>n nhỏ hơn</b> mà mấy cái nhỏ đó bị tính lại nhiều lần → tái dùng thay vì tính lại. Đó là Linear DP.</div>
-    </div>
-
     <div class="sig">
-      <div class="row"><span class="s">"how many ways / distinct ways"</span><span class="v">✓ count DP</span></div>
-      <div class="row"><span class="s">"minimum steps / coins / operations"</span><span class="v">✓ optimize DP</span></div>
+      <div class="row"><span class="s">"how many ways / distinct ways"</span><span class="v">✓ counting DP</span></div>
+      <div class="row"><span class="s">"minimum steps / coins / cost to reach"</span><span class="v">✓ optimizing DP</span></div>
       <div class="row"><span class="s">"can you reach / is it possible?"</span><span class="v">✓ reachability DP</span></div>
-      <div class="row"><span class="s">answer for <b>n</b> depends on smaller <b>n</b></span><span class="v">✓ overlapping subproblems</span></div>
-      <div class="row"><span class="s">"climb / jump / tile / decode"</span><span class="v">✓ classic linear DP</span></div>
+      <div class="row"><span class="s">answer at <b>i</b> depends on <b>i-1</b>, <b>i-2</b>, <b>i-k</b></span><span class="v">✓ overlapping subproblems</span></div>
+      <div class="row"><span class="s">"climb / jump / tile / decode / rob"</span><span class="v">✓ classic linear DP</span></div>
+      <div class="row"><span class="s">you can say <code class="inl">"dp[i] is …"</code> with <b>one</b> index</span><span class="v">✓ 1D → linear</span></div>
+      <div class="row no"><span class="s">naming a subproblem needs <b>two</b> numbers</span><span class="v">✗ → 2D shape</span></div>
       <div class="row no"><span class="s">"generate all" / "list all"</span><span class="v">✗ → backtracking</span></div>
     </div>
-    <div class="vi"><b>Key:</b> có <b>overlapping subproblems</b> — cùng một sub-answer bị cần đi cần lại nhiều lần. Tái dùng nó thay vì tính lại từ đầu.</div>
+    <div class="vi"><b>DP vs Backtracking:</b> Backtracking <b>sinh ra</b> từng lời giải ("liệt kê hết"). DP <b>đếm hoặc tối ưu</b> bằng kết quả đã lưu ("bao nhiêu cách", "min/max"). Luật của Wiganz: <b>"tái dùng kết quả cũ" = DP</b>.</div>
   </section>
 
-  <!-- DP vs BACKTRACKING -->
+  <!-- THE ONE QUESTION -->
   <section class="reveal">
-    <p class="eyebrow">🔀 DP vs Backtracking</p>
-    <h2>Count/optimize, don't enumerate.</h2>
-    <div class="sig">
-      <div class="row no"><span class="s"><b>Backtracking</b> — GENERATES paths. Signal = "generate all", "list all"</span><span class="v">✗ not DP</span></div>
-      <div class="row"><span class="s"><b>DP</b> — COUNTS / OPTIMIZES using stored results. Signal = "how many", "min/max"</span><span class="v">✓ DP</span></div>
+    <p class="eyebrow">🗝️ Finding the recurrence</p>
+    <h2>One question, every time.</h2>
+    <div class="trigger">
+      <p class="en" style="margin:0">Don't memorize <code class="inl">f(n) = f(n-1) + f(n-2)</code>. Ask: <b>"What was the LAST move that got me to i?"</b> List every possibility, then join them.</p>
     </div>
-    <div class="vi">Luật của Wiganz: <b>"tái dùng kết quả cũ" = DP</b>. Còn nếu bài đòi <b>liệt kê ra từng lời giải</b> thì đó là Backtracking, đừng nhầm.</div>
+    <div class="sig">
+      <div class="row"><span class="s">Moves of <b>1 or 2</b> → last move came from <code class="inl">i-1</code> or <code class="inl">i-2</code></span><span class="v">dp[i-1]+dp[i-2]</span></div>
+      <div class="row"><span class="s">Moves of <b>1, 2, or 3</b> → three places it could come from</span><span class="v">+dp[i-3]</span></div>
+      <div class="row"><span class="s">Moves of <b>1 or k</b></span><span class="v">dp[i-1]+dp[i-k]</span></div>
+    </div>
+    <div class="pin">The formula changes; the question doesn't. <b>The allowed moves ARE the recurrence.</b></div>
+    <div class="vi">Đừng học thuộc công thức — hỏi <b>"bước CUỐI CÙNG đưa tôi tới i là gì?"</b>, liệt kê hết khả năng rồi nối lại. Đổi luật chơi (1-2 bậc → 1-2-3 bậc) thì công thức tự đổi theo, vì <b>các nước đi cho phép chính là công thức</b>.</div>
   </section>
 
-  <!-- WHY IT WORKS -->
+  <!-- COUNTING VS OPTIMIZING -->
   <section class="reveal">
-    <p class="eyebrow">⚙️ Why it works</p>
-    <div class="pin">The recurrence <code class="inl">f(n) = f(n-1) + f(n-2)</code> comes from asking one question: <b>"What was the LAST decision that got me here?"</b> The allowed moves define the recurrence.</div>
+    <p class="eyebrow">➕ vs 🏆 The contrast</p>
+    <h2>Why some <em>add</em> and some take <em>max</em>.</h2>
+    <p class="note">Both are Linear DP. Both look at <code class="inl">dp[i-1]</code> and <code class="inl">dp[i-2]</code>. But one adds them and the other picks one and throws the rest away — and that's not arbitrary:</p>
+
+    <div class="pin"><b>Counting → <code class="inl">+</code></b><br>The branches are <b>distinct valid paths, and every one of them counts</b>. Reaching step 4 via "…then a 1-step" and via "…then a 2-step" are two <em>different</em> sets of routes, both real. Add them to total them up.<br><span class="note" style="display:block;margin-top:6px">→ Climbing Stairs, Fibonacci, Decode Ways</span></div>
+
+    <div class="pin" style="background:#f7edcf;border-color:var(--gold)"><b style="color:var(--gold-deep)">Optimizing → <code class="inl">max</code> / <code class="inl">min</code></b><br>The branches are <b>competing alternatives for the same single plan</b>. You cannot both rob and not-rob house 3 in one night — those aren't two routes you tally, they're two proposals and you keep the better one.<br><span class="note" style="display:block;margin-top:6px">→ House Robber, Min Cost Climbing Stairs</span></div>
+
+    <p class="note"><b>Walk it</b> — houses <code class="inl">[2, 7, 9, 3, 1]</code>:</p>
+<pre>house 1 (2đ):  only one house         → dp = <span class="s">2</span>
+house 2 (7đ):  can't take both 1 &amp; 2  → max(2, 7)   = <span class="s">7</span>
+house 3 (9đ):  rob  → 9 + dp[1] = 11
+               skip → dp[2] = 7       → max(11, 7)  = <span class="s">11</span>
+house 4 (3đ):  rob  → 3 + dp[2] = 10
+               skip → dp[3] = 11      → max(10, 11) = <span class="s">11</span>
+house 5 (1đ):  rob  → 1 + dp[3] = 12
+               skip → dp[4] = 11      → max(12, 11) = <span class="s">12</span>  <span class="c">✅</span></pre>
+    <p class="note">If you'd <b>added</b> <code class="inl">11 + 7</code> at house 3 you'd get 18 — a number matching no possible night of burglary. That's the tell: <b>in an optimizing problem, adding the branches produces a meaningless number.</b></p>
+
+    <table style="width:100%;border-collapse:collapse;margin:10px 0 4px;font-family:'Spline Sans Mono',monospace;font-size:.74rem;">
+      <thead><tr style="background:#efe4c6;">
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);">QUESTION ASKS</th>
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);">JOIN WITH</th>
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);">BECAUSE</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">"how many ways"</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>+</b></td><td style="padding:9px 12px;border:1.5px solid var(--line);">every branch is a separate valid route; total them</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">"max / min / best"</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>max / min</b></td><td style="padding:9px 12px;border:1.5px solid var(--line);">branches compete for one plan; keep the winner</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">"can you reach it"</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>or</b></td><td style="padding:9px 12px;border:1.5px solid var(--line);">any one working branch is enough</td></tr>
+      </tbody>
+    </table>
+    <div class="vi">Đây là chỗ file cũ chỉ liệt kê công thức <code class="inl">max(...)</code> mà không nói tại sao. Lý do: <b>đếm</b> thì các nhánh là những con đường khác nhau <b>đều được tính</b> → cộng. <b>Tối ưu</b> thì các nhánh là <b>phương án cạnh tranh cho cùng MỘT kế hoạch</b> → chỉ giữ cái tốt hơn. Cộng nhầm ở bài tối ưu sẽ ra con số vô nghĩa (11+7=18 — không đêm trộm nào ra được 18đ).</div>
+  </section>
+
+  <!-- 4 QUESTIONS -->
+  <section class="reveal">
+    <p class="eyebrow">🗂️ The four questions</p>
+    <h2>Every DP is these <em>four answers</em>.</h2>
+    <table style="width:100%;border-collapse:collapse;margin:10px 0 4px;font-size:.86rem;">
+      <thead><tr style="background:#efe4c6;">
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);font-family:'Spline Sans Mono',monospace;font-size:.72rem;">#</th>
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);font-family:'Spline Sans Mono',monospace;font-size:.72rem;">QUESTION</th>
+        <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);font-family:'Spline Sans Mono',monospace;font-size:.72rem;">CLIMBING STAIRS</th>
+      </tr></thead>
+      <tbody>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">1</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>State</b> — what does <code class="inl">dp[i]</code> mean?</td><td style="padding:9px 12px;border:1.5px solid var(--line);">number of ways to reach step <code class="inl">i</code></td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">2</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>Recurrence</b> — how do smaller cells build it?</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><code class="inl">dp[i] = dp[i-1] + dp[i-2]</code></td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">3</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>Base case</b> — which cells are filled by hand?</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><code class="inl">dp[1]=1</code>, <code class="inl">dp[2]=2</code></td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">4</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><b>Answer</b> — which cell do I return?</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><code class="inl">dp[n]</code> — the last one</td></tr>
+      </tbody>
+    </table>
+    <div class="pin">If you can't say <b>#1 as a complete sentence</b>, you don't have the problem yet. Everything downstream fails from a vague state.</div>
+    <div class="vi">Khung 4 câu này là của <b>Foundations</b> — dùng chung cho MỌI bài DP, không riêng Linear. Câu 1 (State) khó nhất: nói không trọn câu <b>"dp[i] là …"</b> nghĩa là chưa thật sự hiểu bài.</div>
+  </section>
+
+  <!-- IS IT REALLY DP -->
+  <section class="reveal">
+    <p class="eyebrow">✅ Is it really DP?</p>
+    <h2>Both must hold.</h2>
     <div class="sig">
-      <div class="row"><span class="s">"take 1 or 2 steps"</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
-      <div class="row"><span class="s">"take 1, 2, or 3 steps"</span><span class="v">+f(n-3)</span></div>
-      <div class="row"><span class="s">"take 1 or k steps"</span><span class="v">f(n-1)+f(n-k)</span></div>
+      <div class="row"><span class="s"><b>Overlapping subproblems</b> — plain recursion recomputes the same <code class="inl">f(k)</code> from several branches. The Climbing Stairs tree is Fibonacci-shaped: <code class="inl">f(3)</code> appears under both <code class="inl">f(5)</code> and <code class="inl">f(4)</code>.</span><span class="v">✓</span></div>
+      <div class="row"><span class="s"><b>Optimal substructure</b> — to build <code class="inl">f(5)</code> you only need the <b>result numbers</b> of <code class="inl">f(4)</code> and <code class="inl">f(3)</code>, not the individual routes inside them.</span><span class="v">✓</span></div>
     </div>
-    <div class="vi">Đừng giải thẳng bài lớn — hỏi <b>bước cuối cùng nào dẫn tới đây</b>, và những <b>subproblem nào nuôi nó</b>. Các nước đi cho phép chính là công thức truy hồi.</div>
+    <div class="vi">Hai điều kiện bắt buộc (học ở Foundations), áp vào Climbing Stairs: cây đệ quy <b>tính lại</b> cùng một <code class="inl">f(k)</code> nhiều lần ✓, và chỉ cần <b>con số kết quả</b> của bài con là ghép được bài cha ✓.</div>
   </section>
 
   <!-- THE CORE -->
@@ -213,9 +331,10 @@ document.addEventListener('DOMContentLoaded',function(){
       <li><b>Wrong swap order:</b> <code class="inl">prev1 = prev2</code> then <code class="inl">prev2 = curr</code> overwrites prev1 too early. Save the old value first — or keep the first swap and <code class="inl">return prev2</code>. Be consistent.</li>
       <li><b>Submitting pure recursion as DP:</b> <code class="inl">return f(n-1) + f(n-2)</code> alone is O(2ⁿ), NOT DP. DP needs a cache (memo) OR a loop (tabulation).</li>
       <li><b>Missing base case guard:</b> n=1 needs a guard (without it <code class="inl">range(3, 2)</code> is empty → returns 2, wrong — should be 1). n=2 does NOT (<code class="inl">range(3, 3)</code> empty → returns 2, correct).</li>
+      <li><b>Adding when you should be maximizing</b> — see the contrast above. If the branches are competing plans, <code class="inl">+</code> gives a number that means nothing.</li>
       <li><b>Confusing DP with Backtracking:</b> about to write "generate all paths" → stop, that's Backtracking. "how many ways" → DP: count, don't enumerate.</li>
     </ol>
-    <div class="vi">Chết người nhất: (1) quên <b>+1</b> trong range; (2) <b>swap sai thứ tự</b> mất prev1; (3) nộp <b>recursion trần</b> tưởng là DP. DP phải có cache hoặc loop.</div>
+    <div class="vi">Chết người nhất: (1) quên <b>+1</b> trong range; (2) <b>swap sai thứ tự</b> mất prev1; (3) nộp <b>recursion trần</b> tưởng là DP; (4) <b>cộng nhầm ở bài tối ưu</b>. DP phải có cache hoặc loop.</div>
   </section>
 
   <!-- CLASSIC PROBLEMS -->
@@ -223,12 +342,40 @@ document.addEventListener('DOMContentLoaded',function(){
     <p class="eyebrow">🏅 Classic problems</p>
     <h2>The recurrences to know cold.</h2>
     <div class="sig">
-      <div class="row"><span class="s"><b>Climbing Stairs</b> — base f(1)=1, f(2)=2</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
-      <div class="row"><span class="s"><b>Fibonacci</b> — base f(0)=0, f(1)=1</span><span class="v">f(n)=f(n-1)+f(n-2)</span></div>
-      <div class="row"><span class="s"><b>House Robber</b> — can't rob adjacent</span><span class="v">max(f(n-1), f(n-2)+nums[n])</span></div>
-      <div class="row"><span class="s"><b>Min Cost Climbing Stairs</b> — take min path</span><span class="v">min(f(n-1)+cost, f(n-2)+cost)</span></div>
+      <div class="row"><span class="s"><b>Climbing Stairs</b> — <em>counting</em> · base f(1)=1, f(2)=2</span><span class="v">f(n-1)+f(n-2)</span></div>
+      <div class="row"><span class="s"><b>Fibonacci</b> — <em>counting</em> · base f(0)=0, f(1)=1</span><span class="v">f(n-1)+f(n-2)</span></div>
+      <div class="row"><span class="s"><b>House Robber</b> — <em>optimizing</em> · can't rob adjacent</span><span class="v">max(f(n-1), f(n-2)+nums[n])</span></div>
+      <div class="row"><span class="s"><b>Min Cost Climbing Stairs</b> — <em>optimizing</em> · cheaper path</span><span class="v">min(f(n-1)+cost, f(n-2)+cost)</span></div>
     </div>
-    <div class="vi">Bốn bài này cùng một khung: <b>đáp án của n = tổ hợp của n-1 và n-2</b>. Khác nhau ở phép cộng (đếm) hay max/min (tối ưu).</div>
+    <div class="vi">Bốn bài cùng một khung — <b>đáp án của n dựng từ n-1 và n-2</b>. Chỉ khác ở chỗ nối bằng <b>cộng (đếm)</b> hay <b>max/min (tối ưu)</b>.</div>
+  </section>
+
+  <!-- WHERE THIS SITS -->
+  <section class="reveal">
+    <p class="eyebrow">🗺️ Where this sits</p>
+    <h2>Linear DP on the <em>bigger map</em>.</h2>
+    <div class="linkcards">
+      <a class="lcard up" href="../../Foundations/Dynamic%20Programming/Dynamic%20Programming.html">
+        <span class="lc-tag">🧠 Tầng nền · Foundations</span>
+        <span class="lc-t">Dynamic Programming</span>
+        <span class="lc-d">DP là gì, 2 điều kiện bắt buộc, memoization vs tabulation, khung 4 câu, và cách quyết định 1D hay 2D.</span>
+      </a>
+      <a class="lcard" href="../17_DP_Recognition/Recognition.html">
+        <span class="lc-tag">🗺️ Bản đồ · Pattern 17</span>
+        <span class="lc-t">DP Recognition</span>
+        <span class="lc-d">Gặp bài lạ: có phải DP không, và là shape nào trong 5 shape? Linear DP là một nhánh của cây đó.</span>
+      </a>
+      <a class="lcard side" href="../11_Knapsack_01_DP/Recognition.html">
+        <span class="lc-tag">🎒 Shape anh em · Pattern 11</span>
+        <span class="lc-t">0/1 Knapsack</span>
+        <span class="lc-d">Khi một chỉ số không đủ — cần cả (item, capacity) để gọi tên bài con. Đó là 2D.</span>
+      </a>
+      <a class="lcard" href="Deep-Guide.html">
+        <span class="lc-tag">📖 Đi sâu · cùng folder</span>
+        <span class="lc-t">Linear DP — Deep-Guide</span>
+        <span class="lc-d">Dẫn từ đầu: định nghĩa → tự leo Climbing Stairs → khung 4 câu → đổi luật chơi → House Robber.</span>
+      </a>
+    </div>
   </section>
 
   <footer>

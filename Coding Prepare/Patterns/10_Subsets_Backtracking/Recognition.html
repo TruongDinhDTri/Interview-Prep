@@ -120,87 +120,87 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="sig">
       <div class="row"><span class="s">"generate ALL subsets/combinations/permutations"</span><span class="v">✓ backtracking</span></div>
       <div class="row"><span class="s">"all valid configurations" (N-Queens, Sudoku)</span><span class="v">✓ backtracking</span></div>
-      <div class="row"><span class="s">"take or not take" each item</span><span class="v">✓ include/exclude</span></div>
-      <div class="row"><span class="s">"partition into two groups"</span><span class="v">✓ include/exclude</span></div>
-      <div class="row"><span class="s">"subset that sums to target"</span><span class="v">✓ include/exclude</span></div>
-      <div class="row"><span class="s">"can you split array into equal halves?"</span><span class="v">✓ include/exclude</span></div>
-      <div class="row"><span class="s">"letter combinations of phone number"</span><span class="v">✓ incl/excl per digit</span></div>
+      <div class="row"><span class="s">"take or not take" each item</span><span class="v">✓ backtracking → subsets</span></div>
+      <div class="row"><span class="s">"partition into two groups"</span><span class="v">✓ backtracking → subsets</span></div>
+      <div class="row"><span class="s">"combinations that sum to target, reuse allowed"</span><span class="v">✓ backtracking → combo sum</span></div>
+      <div class="row"><span class="s">"letter combinations of phone number"</span><span class="v">✓ backtracking → subsets-shaped</span></div>
       <div class="row no"><span class="s">"count ways" / "find optimal (max/min)"</span><span class="v">✗ → DP instead</span></div>
     </div>
     <div class="vi">Hễ đề bảo <b>đưa ra TẤT CẢ kết quả</b> thì phải đi hết cây. Nhưng nếu chỉ hỏi <b>"đếm số cách / tìm tối ưu"</b> thì đó là DP, đừng dựng cây.</div>
   </section>
 
-  <!-- ASK YOURSELF -->
+  <!-- BACKTRACKING IS THE PARENT -->
   <section class="reveal">
-    <p class="eyebrow">🤔 Ask yourself</p>
-    <h2>Which flavor of backtracking?</h2>
-    <div class="pin"><b>"For each element, yes or no?"</b> → <b>Include / Exclude</b>.<br><b>"Which element do I pick next from the remaining?"</b> → <b>Loop-based backtracking</b>.</div>
-    <div class="vi">Hai câu tự hỏi để chọn khung: hỏi <b>"lấy hay không lấy?"</b> thì đi Include/Exclude; hỏi <b>"kế tiếp bốc thằng nào?"</b> thì đi Loop-based.</div>
+    <p class="eyebrow">🧬 The parent skeleton</p>
+    <h2>Backtracking is the <em>cha</em> — not a sibling.</h2>
+    <p class="note">Every problem below runs the exact same 5 steps. <b>Choose</b> an option → <b>recurse</b> deeper → if the <b>GOAL</b> is reached, <b>snapshot</b> the result → <b>undo</b> the choice → try the next option. It's tempting to think "backtracking = yes/no per element" because Subsets looks that way — it doesn't hold up. Trace Combination Sum instead, where CHOICE is "pick 1 of 4 coins," not a binary yes/no:</p>
+<pre>path=[], remaining=<span class="s">7</span>   <span class="c"># candidates = [2,3,6,7], target = 7</span>
+1. CHOOSE coin 2 → path=[2], remaining=5
+2. RECURSE with remaining=5
+   1. CHOOSE coin 2 again (reuse allowed) → path=[2,2], remaining=3
+   2. RECURSE with remaining=3
+      1. CHOOSE coin 3 → path=[2,2,3], remaining=0
+      2. GOAL reached (remaining==0) → SNAPSHOT [2,2,3] ✅
+      3. UNDO coin 3 → path=[2,2], remaining=3
+      4. Try coin 6 → remaining=<span class="s">-3</span> → invalid, no snapshot, no recurse</pre>
+    <div class="pin"><b>The skeleton didn't move.</b> Only CHOICE (which of several candidates) and GOAL (<code class="inl">remaining==0</code>, not "walked every element") changed. Backtracking is the technique; Subsets, Permutations, Combinations, Combo Sum are 4 fill-ins for CHOICE and GOAL — not 4 kinds of backtracking.</div>
+    <div class="vi">Đây là chỗ dễ hiểu lầm nhất: Backtracking KHÔNG PHẢI "yes/no mỗi phần tử" — đó chỉ là dáng vẻ của riêng Subsets. Coin trace ở trên cho thấy CHOICE có thể là "chọn 1 trong nhiều lựa chọn", và khung xương (chọn→đi sâu→lưu nếu đủ điều kiện→undo→thử tiếp) không hề đổi. Backtracking là kỹ thuật cha; 4 bài toán bên dưới chỉ là 4 cách trả lời khác nhau cho CHỌN và LƯU.</div>
   </section>
 
-  <!-- TWO MENTAL MODELS -->
+  <!-- 4 APPLICATIONS -->
   <section class="reveal">
-    <p class="eyebrow">🧠 Two mental models</p>
-    <h2>Same tree, two ways to walk it.</h2>
+    <p class="eyebrow">🧩 4 applications</p>
+    <h2>Same skeleton, different CHOICE + GOAL.</h2>
+    <table style="width:100%;border-collapse:collapse;margin:8px 0 4px;font-family:'Spline Sans Mono',monospace;font-size:.76rem;">
+      <thead>
+        <tr style="background:#efe4c6;">
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">PROBLEM</th>
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">CHOICE</th>
+          <th style="text-align:left;padding:9px 12px;border:1.5px solid var(--line);color:var(--clay-deep);letter-spacing:.06em;">GOAL (when to snapshot)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Subsets</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Forward only, never repeat</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Every node — even <code class="inl">[]</code></td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Permutations</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Rescan all + <code class="inl">used[]</code></td><td style="padding:9px 12px;border:1.5px solid var(--line);">Only when full length</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Combinations</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Forward only, same as Subsets</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Only when size == k</td></tr>
+        <tr><td style="padding:9px 12px;border:1.5px solid var(--line);">Combo Sum</td><td style="padding:9px 12px;border:1.5px solid var(--line);">Forward, but reuse allowed (<code class="inl">i</code>)</td><td style="padding:9px 12px;border:1.5px solid var(--line);"><code class="inl">remaining==0</code>, prune if &lt;0</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Why Permutations can't reuse Subsets' "forward only" rule: build <code class="inl">[3,1,2]</code> from <code class="inl">[1,2,3]</code> — pick index 2, then index 0 (before it), then index 1 (before 2, after 0). No "before/after" rule produces this order. Only marking <b>which index is already used in this path</b> (<code class="inl">used[]</code>) works — position doesn't matter, usage does.</p>
+    <div class="vi">Permutations không dùng được luật "chỉ tiến tới" của Subsets — thử dựng <code class="inl">[3,1,2]</code> sẽ thấy thứ tự index được chọn lộn xộn (2→0→1), không có luật trước/sau nào đúng. Chỉ có đánh dấu <code class="inl">used[]</code> mới work.</div>
+  </section>
 
-    <p class="note"><b>1. Include / Exclude</b> — at each element: take it or skip it. Two choices → 2ⁿ subsets.</p>
-<pre>nums = [<span class="s">1</span>, <span class="s">2</span>, <span class="s">3</span>]
+  <!-- TWO EQUIVALENT CODINGS -->
+  <section class="reveal">
+    <p class="eyebrow">🪞 Not two patterns</p>
+    <h2>Two equivalent codings of <em>Subsets</em>.</h2>
+    <p class="note">For Subsets specifically, two ways to write the code produce the <b>exact same tree</b> — not a decision to make per problem, two ways to draw the same picture.</p>
 
-                    []
-               /         \
-          [1]               []           <span class="c">← take 1? yes / no</span>
-         /    \           /    \
-      [1,2]   [1]      [2]     []       <span class="c">← take 2? yes / no</span>
-      / \     / \      / \     / \
-[1,2,3][1,2][1,3][1] [2,3][2] [3] []   <span class="c">← take 3? yes / no</span></pre>
+    <p class="note"><b>1. Include / Exclude</b> — yes/no per element, fixed order, depth always = n:</p>
 <pre><span class="k">def</span> <span class="f">subsets</span>(nums):
     result = []
-
     <span class="k">def</span> <span class="f">backtrack</span>(i, path):
         <span class="k">if</span> i == <span class="k">len</span>(nums):
             result.<span class="f">append</span>(path[:])
             <span class="k">return</span>
-
-        path.<span class="f">append</span>(nums[i])       <span class="c"># take it</span>
-        <span class="f">backtrack</span>(i + <span class="s">1</span>, path)
-        path.<span class="f">pop</span>()                  <span class="c"># undo</span>
-
-        <span class="f">backtrack</span>(i + <span class="s">1</span>, path)      <span class="c"># skip it</span>
-
+        path.<span class="f">append</span>(nums[i]); <span class="f">backtrack</span>(i + <span class="s">1</span>, path); path.<span class="f">pop</span>()   <span class="c"># take it</span>
+        <span class="f">backtrack</span>(i + <span class="s">1</span>, path)                                     <span class="c"># skip it</span>
     <span class="f">backtrack</span>(<span class="s">0</span>, [])
     <span class="k">return</span> result</pre>
-    <p class="note"><b>Best for:</b> whiteboard explanations, partition problems, subset sum.</p>
 
-    <p class="note"><b>2. Loop-based backtracking</b> — save current path as valid, then loop remaining elements to extend it.</p>
+    <p class="note"><b>2. Loop-based</b> — snapshot at every call, then loop the rest to extend:</p>
 <pre><span class="k">def</span> <span class="f">subsets</span>(nums):
     result = []
-
     <span class="k">def</span> <span class="f">backtrack</span>(start, path):
-        result.<span class="f">append</span>(path[:])          <span class="c"># every path is a valid subset</span>
-
+        result.<span class="f">append</span>(path[:])          <span class="c"># every path is already valid</span>
         <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(start, <span class="k">len</span>(nums)):
             path.<span class="f">append</span>(nums[i])
             <span class="f">backtrack</span>(i + <span class="s">1</span>, path)
-            path.<span class="f">pop</span>()                  <span class="c"># undo</span>
-
+            path.<span class="f">pop</span>()
     <span class="f">backtrack</span>(<span class="s">0</span>, [])
     <span class="k">return</span> result</pre>
-    <p class="note"><b>Best for:</b> combinations of size k, handling duplicates, permutations.</p>
-    <div class="vi">Cả hai đi cùng một cây. <b>Include/Exclude</b> hỏi lấy-hay-bỏ ở mỗi bước; <b>Loop-based</b> thì mỗi lần dừng đều lưu path rồi lặp phần còn lại để nối tiếp.</div>
-  </section>
-
-  <!-- QUICK PICK -->
-  <section class="reveal">
-    <p class="eyebrow">⚡ Quick pick</p>
-    <h2>Which model for which problem.</h2>
-    <div class="sig">
-      <div class="row"><span class="s">All subsets</span><span class="v">either</span></div>
-      <div class="row"><span class="s">Subset sum / partition</span><span class="v">include/exclude</span></div>
-      <div class="row"><span class="s">Combinations of size k</span><span class="v">loop-based</span></div>
-      <div class="row"><span class="s">Has duplicates <code class="inl">[1,2,2]</code></span><span class="v">loop-based + sort</span></div>
-      <div class="row"><span class="s">Permutations</span><span class="v">loop-based + used[]</span></div>
-    </div>
-    <div class="vi">Bảng chọn nhanh: subset sum thì Include/Exclude; tổ hợp cỡ k, có trùng, hay hoán vị thì Loop-based (thêm sort hoặc <code class="inl">used[]</code>).</div>
+    <p class="note">Trace both by hand for <code class="inl">[1, 2]</code> — identical 4 subsets: <code class="inl">[]</code>, <code class="inl">[1]</code>, <code class="inl">[2]</code>, <code class="inl">[1,2]</code>. Loop-based is the one that generalizes to Combinations (<code class="inl">len==k</code>) and Combo Sum (reuse) — Include/Exclude's rigid "one yes/no per fixed position" doesn't stretch that far. That's why the other 3 applications all use Loop-based, not preference — it's the only shape that fits.</p>
+    <div class="vi">Include/Exclude và Loop-based KHÔNG PHẢI 2 pattern khác nhau để "chọn cái nào cho bài nào" — chúng ra CÙNG một cây cho Subsets. Loop-based mới generalize được sang Combinations/Combo Sum vì Include/Exclude không co giãn được cho "dùng lại" hay "thứ tự có nghĩa".</div>
   </section>
 
   <!-- BACKTRACKING VS DP -->
@@ -264,6 +264,15 @@ Answer: True              <span class="c">← ONE value → DP</span></pre>
     <div class="vi">Hoán vị = <b>thứ tự có nghĩa</b>: mỗi lần bốc lại quét từ đầu, nhưng dùng mảng <code class="inl">used</code> để không lấy trùng một phần tử.</div>
   </section>
 
+  <!-- REFERENCE VS SNAPSHOT -->
+  <section class="reveal">
+    <p class="eyebrow">📸 The classic bug</p>
+    <h2>Reference vs <em>snapshot</em>.</h2>
+    <p class="note">Say <code class="inl">current = [1, 2]</code> and at GOAL you do <code class="inl">result.append(current)</code> — no <code class="inl">[:]</code>. You didn't copy anything: <code class="inl">result[0]</code> now just points at the <b>same</b> list object as <code class="inl">current</code>. The moment you <code class="inl">undo</code> afterward (<code class="inl">current.pop()</code> → <code class="inl">[1]</code>), <code class="inl">result[0]</code> changes too — same object, not a separate one. By the end, every "saved" result looks like whatever <code class="inl">current</code> ended up as.</p>
+    <div class="pin">Fix: <code class="inl">result.append(current[:])</code> — an actual copy, frozen at that instant, immune to whatever <code class="inl">current</code> does afterward.</div>
+    <div class="vi">Lưu con trỏ (không có <code class="inl">[:]</code>) chỉ lưu ĐỊA CHỈ của cái túi đang cầm — túi đó bị mutate liên tục (undo/pick), nên kết quả "đã lưu" cũng đổi theo. Phải chụp ảnh (<code class="inl">current[:]</code>) mới đóng băng đúng thời điểm.</div>
+  </section>
+
   <!-- HANDLE DUPLICATES -->
   <section class="reveal">
     <p class="eyebrow">👯 Handle duplicates</p>
@@ -281,11 +290,11 @@ Answer: True              <span class="c">← ONE value → DP</span></pre>
     <p class="eyebrow">⚠️ Traps</p>
     <h2>Where it breaks.</h2>
     <ol class="traps">
-      <li><b>Copy the path</b> — <code class="inl">result.append(path[:])</code>, not <code class="inl">path</code> (it's a reference, it'll mutate).</li>
+      <li><b>Snapshot, don't reference</b> — <code class="inl">result.append(path[:])</code>, not <code class="inl">path</code> (see above).</li>
       <li><b>Always undo</b> — <code class="inl">path.pop()</code> after every recursive call, or state leaks across branches.</li>
-      <li><b>Subsets: <code class="inl">i + 1</code></b> to avoid reusing — Permutations: start at <code class="inl">0</code> with <code class="inl">used[]</code>.</li>
+      <li><b>CHOICE per problem:</b> Subsets/Combinations → <code class="inl">i + 1</code> · Permutations → <code class="inl">0</code> with <code class="inl">used[]</code> · Combo Sum → <code class="inl">i</code> to allow reuse.</li>
     </ol>
-    <div class="vi">Ba cái chết người: (1) quên <b>copy path</b> nên kết quả bị đè; (2) quên <b>pop() undo</b> nên nhánh này dính nhánh kia; (3) subsets đi <code class="inl">i+1</code>, còn permutations quét từ 0 với <code class="inl">used[]</code>.</div>
+    <div class="vi">Ba cái chết người: (1) quên <b>snapshot</b> nên kết quả bị đè; (2) quên <b>pop() undo</b> nên nhánh này dính nhánh kia; (3) nhầm CHOICE giữa 4 bài toán — subsets/combinations đi <code class="inl">i+1</code>, permutations quét từ 0 với <code class="inl">used[]</code>, combo sum đi <code class="inl">i</code> để được dùng lại.</div>
   </section>
 
   <footer>

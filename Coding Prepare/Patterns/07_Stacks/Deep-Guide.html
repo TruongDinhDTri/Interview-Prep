@@ -112,10 +112,10 @@ document.addEventListener('DOMContentLoaded',function(){
   <!-- CORE IDEA -->
   <section class="reveal">
     <p class="eyebrow">The one idea</p>
-    <h2>It holds the <em>unresolved</em>.</h2>
-    <p class="core">A stack keeps the items that <b>haven't been answered yet</b> — newest on top, because the newest is the first that can be resolved.</p>
-    <p class="muted">An open <code class="inl">(</code> waits for its <code class="inl">)</code>. A number waits for its operator. A bar waits for the next taller bar. Every stack problem is the same heartbeat: <strong>push what's pending, pop the moment it's resolved.</strong> Each element is pushed once and popped once → <strong>O(N)</strong>.</p>
-    <div class="pin" data-l="THE HEARTBEAT"><b>Push</b> when an item must wait. <b>Pop</b> when the thing it was waiting for arrives. The top is always the most-recent unresolved item — that's why LIFO is the right tool.</div>
+    <h2>Stack some <em>plates</em>.</h2>
+    <p class="core">Đĩa A xuống trước, B chồng lên, C lên trên cùng. Cần lấy một cái ra dùng ngay — lấy cái nào? <b>C</b> — vì nó nằm trên cùng, dù nó là đĩa mới đặt vào <b>sau cùng</b>.</p>
+    <p class="muted">That's the whole rule, before it even has a name: <strong>the thing placed most recently is the thing resolved first.</strong> Programmers call it LIFO — Last In, First Out. A stack is just this rule, turned into a data structure.</p>
+    <div class="pin" data-l="THE ANCHOR">A stack holds what's still <b>waiting to be resolved</b> — top = the most recently pending thing. Push when something must wait. Pop the moment the thing it was waiting for arrives. Each element is pushed once and popped once → <strong>O(N)</strong>.</div>
   </section>
 
   <!-- THE TWO SHAPES -->
@@ -126,8 +126,10 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="shape a">
       <span class="tag">Shape A · Regular Stack</span>
       <h3>Pending matches</h3>
-      <p class="one">"Things wait in order, and resolve in reverse."</p>
-      <p>Signals: <code class="inl">balanced / valid parentheses</code>, <code class="inl">postfix / RPN / evaluate expression</code>, <code class="inl">operator fires on the previous operands</code>. You push items as they arrive; when a closer/operator shows up, it consumes the top.</p>
+      <p class="one">"Each thing waits for ONE specific partner — and resolves in reverse order."</p>
+      <p>Take <code class="inl">"( [ ) ]"</code>. Valid? No — <code class="inl">[</code> is still waiting for its <code class="inl">]</code>, but <code class="inl">)</code> shows up and can't close it. Now take <code class="inl">"( [ {"</code> — three opens are waiting at once. A <code class="inl">}</code> arrives: which one does it resolve? The <code class="inl">{</code> — because it's the <strong>most recently opened one still waiting</strong>. Same rule as the plates.</p>
+      <p>Turn that into a recipe, and it's the engine behind every Regular Stack problem: <strong>(1)</strong> something must wait → push it. <strong>(2)</strong> something arrives that can resolve the waiting thing → pop it and check the match. <strong>(3)</strong> invalid the moment a pop doesn't match, or something is still waiting at the end. RPN runs on the exact same recipe — a number waits for its operator instead of a bracket waiting for its pair.</p>
+      <p>Signals: <code class="inl">balanced / valid parentheses</code>, <code class="inl">postfix / RPN / evaluate expression</code>, <code class="inl">operator fires on the previous operands</code>.</p>
       <p class="lbl">RPN — operand order is the trap</p>
       <pre class="opp"><span class="k">for</span> token <span class="k">in</span> tokens:
     <span class="k">if</span> token <span class="k">not in</span> ops:        <span class="c"># isdigit() breaks on "-11" — use this</span>
@@ -143,8 +145,11 @@ document.addEventListener('DOMContentLoaded',function(){
     <div class="shape b">
       <span class="tag">Shape B · Monotonic Stack</span>
       <h3>Waiting for an answer</h3>
-      <p class="one">"Each element waits until a bigger (or smaller) one resolves it."</p>
-      <p>Signals: <code class="inl">next greater / smaller</code>, <code class="inl">previous greater / smaller</code>, <code class="inl">days until warmer</code>, <code class="inl">span</code>. The stack holds <strong>indices of unresolved elements</strong>; when a new element beats the top, it <em>answers</em> everyone it's bigger than.</p>
+      <p class="one">"Not one fixed partner this time — ANY future element that beats a condition."</p>
+      <p>This is the one difference that trips people up: in Shape A, <code class="inl">(</code> only waits for <code class="inl">)</code> — a known, fixed partner. Here, an element waits for <strong>whoever shows up first that's bigger (or smaller) than it</strong> — it has no idea in advance who that will be. Temperatures <code class="inl">[73, 74, 75, 71, 69, 72, 76]</code>: day <code class="inl">71</code> isn't waiting for a specific day, it's waiting for whichever day is warmer, whenever that happens.</p>
+      <p>And one arrival can resolve <strong>more than one</strong> waiter at once — unlike Shape A's strict 1-to-1 match. In <code class="inl">[2, 1, 5, 3, 8, 4]</code>, both <code class="inl">2</code> and <code class="inl">1</code> are waiting when <code class="inl">5</code> arrives; <code class="inl">5</code> beats both, so it resolves both.</p>
+      <p>Worth pausing here: does the stack ever need to be <em>told</em> to stay ordered? No — <strong>it can't help but be ordered.</strong> If a bigger number had shown up earlier, it would already have resolved everyone smaller than it. So whatever survives in the stack is already sorted, bottom→top, biggest→smallest. That's the whole "monotonic" invariant — not a rule you enforce, a fact that falls out of the mechanism. Hunting for the next <em>smaller</em> instead? Same logic, mirrored: a smaller arrival is what resolves a waiter now, so the stack ends up increasing bottom→top instead.</p>
+      <p>Signals: <code class="inl">next greater / smaller</code>, <code class="inl">previous greater / smaller</code>, <code class="inl">days until warmer</code>, <code class="inl">span</code>. The stack holds <strong>indices of unresolved elements</strong>.</p>
       <p class="lbl">Next Greater — the core</p>
       <pre><span class="k">def</span> nextGreater(nums):
     res = [-1] * len(nums)
@@ -197,7 +202,8 @@ document.addEventListener('DOMContentLoaded',function(){
     <ul class="check">
       <li>Core idea in one line: <b>a stack holds what's still unresolved; top = newest pending</b>.</li>
       <li>You pick the shape: <b>matching/RPN → regular stack; next-greater/smaller → monotonic</b>.</li>
-      <li>Monotonic: you store <b>indices</b>, you check <code class="inl">stack and …</code> first, and you know <b>greater → decreasing, smaller → increasing</b>.</li>
+      <li>You can say the difference out loud: <b>regular stack waits for one fixed partner; monotonic waits for whoever qualifies first</b>.</li>
+      <li>Monotonic: you store <b>indices</b>, you check <code class="inl">stack and …</code> first, and you know <b>greater → decreasing, smaller → increasing — because the mechanism can't help but stay ordered</b>.</li>
       <li>RPN: <b>LEFT op RIGHT</b> (top is the right operand), and <code class="inl">int(a/b)</code> not <code class="inl">a//b</code>.</li>
       <li>You can say why it's <b>O(N)</b>: each element pushed once, popped once.</li>
     </ul>

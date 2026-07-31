@@ -14,8 +14,11 @@
 
 ## Why It Works
 
-- **Regular**: Stack holds "pending" items waiting for their match. `(` waits for `)`. Numbers wait for their operator (RPN).
-- **Monotonic**: Stack holds unresolved elements. When bigger element arrives, it "answers" all smaller ones waiting. (I need more on this explain)
+Both shapes share one anchor: **a stack holds what's still waiting to be resolved — top = the most recently pending thing.** The difference is *what* it's waiting for.
+
+- **Regular**: waits for ONE fixed, known partner. `(` only waits for `)`. A number waits for its operator (RPN). Push while waiting, pop the moment the exact partner arrives.
+- **Monotonic**: waits for **whoever shows up first that qualifies** — no fixed partner, doesn't know in advance who it'll be. A bigger element "answers" (resolves) every smaller one still waiting — and can resolve more than one at once (`[2,1,5,3,8,4]`: `5` resolves both `2` and `1`).
+  - **Why the stack is automatically ordered:** it's never enforced — it's a fact that falls out of the mechanism. If something bigger had shown up earlier, it would already have resolved everyone smaller than it. So whatever's left in the stack is already sorted, top→bottom, smallest→largest.
 
 **O(N)**: Each element pushed once, popped once.
 

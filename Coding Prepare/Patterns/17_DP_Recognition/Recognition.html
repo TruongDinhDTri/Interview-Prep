@@ -65,6 +65,37 @@
   ol.traps li:last-child{border-bottom:0;}
   ol.traps li::before{content:counter(t);position:absolute;left:6px;top:10px;width:26px;height:26px;background:var(--clay);color:#f7ecd8;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Spline Sans Mono',monospace;font-size:.76rem;}
 
+  /* pretty cross-link cards */
+  .linkcards{display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0 2px;}
+  @media(min-width:640px){.linkcards{grid-template-columns:1fr 1fr;}}
+  .lcard{display:block;text-decoration:none;color:var(--ink);background:#f8f1dd;border:2px solid var(--line);
+         border-radius:4px 16px 4px 16px;padding:15px 18px;box-shadow:4px 5px 0 var(--shadow);transition:transform .18s,box-shadow .18s,border-color .18s;}
+  .lcard:hover{transform:translateY(-3px);box-shadow:5px 7px 0 var(--shadow);border-color:var(--clay);}
+  .lcard .lc-tag{font-family:'Spline Sans Mono',monospace;font-size:.6rem;letter-spacing:.16em;text-transform:uppercase;color:var(--clay-deep);display:block;margin-bottom:5px;}
+  .lcard .lc-t{font-family:'Fraunces',serif;font-weight:600;font-size:1.12rem;line-height:1.2;display:block;margin-bottom:4px;}
+  .lcard .lc-d{font-size:.92rem;line-height:1.45;color:var(--ink-soft);}
+  .lcard.up{background:#eef3e7;border-color:var(--sage);}
+  .lcard.up:hover{border-color:var(--sage-deep);}
+  .lcard.side{background:#eef4f7;border-color:var(--sky);}
+  .lcard.side:hover{border-color:var(--sky-deep);}
+
+  /* inline "go to shape" pill inside signal rows */
+  .goto{display:inline-flex;align-items:center;gap:6px;font-family:'Spline Sans Mono',monospace;font-size:.64rem;letter-spacing:.05em;
+        text-transform:uppercase;text-decoration:none;white-space:nowrap;padding:5px 11px;border-radius:999px;
+        background:#e6eddf;color:var(--sage-deep);border:1.5px solid var(--sage);transition:all .18s;}
+  .goto:hover{background:var(--sage-deep);color:#f4ecd8;}
+  .goto.here{background:#f2e3d6;color:var(--clay-deep);border-color:var(--clay);}
+  .goto.here:hover{background:var(--clay-deep);color:#f7ecd8;}
+
+  /* theory callout */
+  .theory{display:flex;gap:14px;align-items:flex-start;background:#eef3e7;border:2px solid var(--sage);
+          border-radius:4px 16px 4px 16px;padding:15px 18px;margin:16px 0 2px;text-decoration:none;color:var(--ink);
+          box-shadow:4px 5px 0 var(--shadow);transition:transform .18s;}
+  .theory:hover{transform:translateY(-2px);}
+  .theory .th-ico{font-size:1.7rem;line-height:1;flex-shrink:0;}
+  .theory .th-t{font-weight:600;color:var(--sage-deep);display:block;margin-bottom:3px;}
+  .theory .th-d{font-size:.94rem;color:var(--ink-soft);line-height:1.45;}
+
   footer{margin-top:64px;padding-top:26px;border-top:1.5px solid var(--line);text-align:center;}
   footer .verse{font-family:'Newsreader',serif;font-style:italic;font-size:1.02rem;color:var(--sage-deep);margin-bottom:20px;}
   footer .sig-line{font-family:'Spline Sans Mono',monospace;font-size:.72rem;letter-spacing:.12em;color:var(--ink-soft);margin-top:18px;}
@@ -104,7 +135,7 @@ document.addEventListener('DOMContentLoaded',function(){
   <header class="hero">
     <p class="kicker">Pattern 17 · Recognition</p>
     <h1 class="title">DP Recognition</h1>
-    <p class="tagline"><span class="bolt">⚡</span> Thẻ nhận diện nhanh — liếc signal là ra bài.</p>
+    <p class="tagline"><span class="bolt">⚡</span> Thẻ triage — có phải DP không, và là shape nào.</p>
   </header>
 
   <!-- SPOT IT -->
@@ -113,184 +144,89 @@ document.addEventListener('DOMContentLoaded',function(){
     <h2>Is this DP — and which shape?</h2>
 
     <div class="trigger">
-      <p class="en" style="margin:0">The single clearest signal: <b>"answer for n depends on the answer for smaller n — and those smaller n's overlap."</b></p>
-      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Dùng thẻ này TRƯỚC khi chọn sub-type. Nó trả lời 2 câu: <b>"Đây có phải DP?"</b> và <b>"DP dạng nào?"</b>. Tell nhanh nhất: đáp án của n dựa vào n nhỏ hơn, mà mấy cái nhỏ đó <b>lặp lại</b>.</div>
+      <p class="en" style="margin:0">This card answers exactly two questions, fast: <b>"Is this DP?"</b> and <b>"Which shape?"</b> It does not teach theory, and it does not teach any single shape in depth.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0">Thẻ này chỉ làm <b>triage</b> — phân loại. Lý thuyết DP ở <b>Foundations</b>; từng shape học sâu ở folder riêng của shape đó (hoặc ở Deep-Guide của thẻ này).</div>
     </div>
-    <div class="pin"><b>Quick gut-check:</b> Can you write a plain recursion that solves it? → YES → does it recompute the same args? → YES → <b>DP opportunity.</b></div>
-    <div class="vi">Viết được recursion trần mà thấy nó <b>tính đi tính lại cùng tham số</b> → đó chính là cơ hội DP. Tái dùng, đừng tính lại.</div>
+    <div class="pin"><b>Fastest single tell:</b> "the answer for <code class="inl">n</code> depends on the answer for smaller <code class="inl">n</code> — and those smaller <code class="inl">n</code>'s <b>repeat</b>."</div>
   </section>
 
-  <!-- LAYER 1 -->
+  <!-- STEP 1 -->
   <section class="reveal">
-    <p class="eyebrow">🧱 Layer 1 — Is this DP?</p>
-    <h2>Two mandatory properties. Both must be true.</h2>
+    <p class="eyebrow">1️⃣ Step 1 — Is this DP?</p>
+    <h2>Thirty seconds. <em>No theory.</em></h2>
+    <p class="note">Don't re-derive the definitions in the room. Run these three, in order:</p>
+    <ol class="traps">
+      <li><b>Write the plain recursion</b> — the obvious brute force, no storage. Can you? → continue.</li>
+      <li><b>Does it recompute the same argument?</b> Trace two levels: does <code class="inl">f(3)</code> get called from more than one branch? → <b>overlapping subproblems ✓</b></li>
+      <li><b>Do you only need the child's RESULT</b> to build the parent — not the details inside it? → <b>optimal substructure ✓</b></li>
+    </ol>
+    <div class="pin"><b>All three → DP.</b> Any one fails → not DP.</div>
+
+    <a class="theory" href="../../Foundations/Dynamic%20Programming/Dynamic%20Programming.html">
+      <span class="th-ico">🧠</span>
+      <span>
+        <span class="th-t">Fuzzy on WHY those two conditions are the requirement?</span>
+        <span class="th-d">That's theory, not triage — quay về <b>Foundations → Dynamic Programming</b>. Thẻ này giả định anh đã biết rồi, chỉ cần kiểm nhanh một bài thật.</span>
+      </span>
+    </a>
+    <div class="vi">Ba bước để <b>làm</b>, không phải để đọc: viết recursion trần → xem nó có tính lại cùng tham số không → xem có cần chi tiết bên trong bài con không (chỉ cần con số kết quả là đủ). Đủ ba → DP.</div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="reveal">
+    <p class="eyebrow">2️⃣ Step 2 — What kind of DP question?</p>
+    <h2>This picks the <em>operation</em>.</h2>
     <div class="sig">
-      <div class="row"><span class="s"><b>Overlapping Subproblems</b> — same sub-answer needed many times. "f(3) inside f(5) AND inside f(4)"</span><span class="v">✓ reuse</span></div>
-      <div class="row"><span class="s"><b>Optimal Substructure</b> — best of whole = built from best of parts. "min path through N uses min path to reach N"</span><span class="v">✓ build up</span></div>
+      <div class="row"><span class="s">"how many <b>ways</b> / <b>distinct</b> paths"</span><span class="v">count DP · join with +</span></div>
+      <div class="row"><span class="s">"<b>minimum</b> / <b>maximum</b> cost, steps, coins"</span><span class="v">optimize · join with min/max</span></div>
+      <div class="row"><span class="s">"<b>can you reach</b> / is it possible"</span><span class="v">reachability · join with or</span></div>
+      <div class="row no"><span class="s">"<b>generate all</b> / list all"</span><span class="v">✗ not DP → backtracking</span></div>
     </div>
-    <div class="vi">Thiếu MỘT trong hai → <b>không phải DP</b>. Phải vừa có subproblem lặp lại, vừa có "tối ưu tổng = ghép tối ưu các phần".</div>
+    <div class="vi">Câu hỏi của đề quyết định <b>phép nối các nhánh</b>: đếm → cộng; tối ưu → max/min; hỏi có-được-không → or. Lý do đằng sau (tại sao đếm thì cộng mà tối ưu lại max) nằm ở <b>16 — Linear DP</b>, và nó đúng cho mọi shape.</div>
   </section>
 
-  <!-- LAYER 2 -->
+  <!-- STEP 3 -->
   <section class="reveal">
-    <p class="eyebrow">🌍 Layer 2 — The 5 DP question signals</p>
-    <h2>What the problem asks → which DP.</h2>
+    <p class="eyebrow">3️⃣ Step 3 — How many indices?</p>
+    <h2>This picks the <em>shape</em>.</h2>
+    <div class="trigger">
+      <p class="en" style="margin:0">List two or three subproblems. Ask <b>what differs between them</b>. Count how many numbers it takes to name one.</p>
+      <div class="vi" style="border:0;background:transparent;padding:6px 0 0;margin:6px 0 0"><b>MỘT</b> con số → 1D → <code class="inl">dp[i]</code> &nbsp;·&nbsp; <b>HAI</b> con số → 2D → <code class="inl">dp[i][j]</code>. Đây chính là câu hỏi chọn shape.</div>
+    </div>
+
     <div class="sig">
-      <div class="row"><span class="s">"How many <b>ways</b> / <b>distinct</b> paths"</span><span class="v">✓ count DP · linear/2D</span></div>
-      <div class="row"><span class="s">"<b>Minimum</b> / <b>maximum</b> cost, steps, coins"</span><span class="v">✓ optimize · linear/knap/2D</span></div>
-      <div class="row"><span class="s">"<b>Can you reach</b> / is it possible"</span><span class="v">✓ reachability · linear/knap</span></div>
-      <div class="row"><span class="s">"<b>Take or skip</b> each item, limited <b>capacity</b>"</span><span class="v">✓ knapsack · 0/1 or unbounded</span></div>
-      <div class="row"><span class="s">"Compare / align <b>two strings/sequences</b>"</span><span class="v">✓ string DP · LCS/edit</span></div>
-      <div class="row no"><span class="s">"<b>Generate all</b> / list all"</span><span class="v">✗ → backtracking</span></div>
+      <div class="row"><span class="s"><b>One sequence</b>, a decision at each step ("take 1 or 2 steps", "rob or skip")<br><span class="note" style="margin:2px 0 0">1 number — position <code class="inl">i</code></span></span><a class="goto" href="../16_Linear_DP/Recognition.html">📏 Linear DP · 16 →</a></div>
+      <div class="row"><span class="s"><b>Items + capacity</b>, each item used <b>once</b><br><span class="note" style="margin:2px 0 0">2 numbers — (item, capacity)</span></span><a class="goto" href="../11_Knapsack_01_DP/Recognition.html">🎒 0/1 Knapsack · 11 →</a></div>
+      <div class="row"><span class="s"><b>Items reusable</b> without limit (coins, rod cuts, tiles)<br><span class="note" style="margin:2px 0 0">2 numbers — (item, amount)</span></span><a class="goto here" href="Deep-Guide.html#unbounded">🪙 Unbounded →</a></div>
+      <div class="row"><span class="s"><b>Two strings</b> compared, aligned, transformed<br><span class="note" style="margin:2px 0 0">2 numbers — (pos in s1, pos in s2)</span></span><a class="goto here" href="Deep-Guide.html#stringdp">🧵 String DP →</a></div>
+      <div class="row"><span class="s"><b>A grid</b>, moving through cells (right/down)<br><span class="note" style="margin:2px 0 0">2 numbers — (row, col)</span></span><a class="goto here" href="Deep-Guide.html#grid">🟦 2D Grid →</a></div>
     </div>
-    <div class="vi">Câu rõ nhất: <b>"đáp án của n dựa vào n nhỏ hơn — và mấy n nhỏ đó chồng lấn nhau."</b> Còn "liệt kê hết lời giải" thì là Backtracking.</div>
-  </section>
-
-  <!-- LAYER 3 -->
-  <section class="reveal">
-    <p class="eyebrow">🎨 Layer 3 — Which DP shape?</p>
-    <h2>Pick the shape from the structure.</h2>
-<pre><span class="c">One sequence, decisions at each step</span>
-  ├─ "take 1 or 2 steps", "rob or skip", Fibonacci-style
-  └─ → <span class="f">LINEAR DP</span>            (see 16_Linear_DP)
-
-<span class="c">Items with weight + capacity limit, each item once</span>
-  └─ → <span class="f">0/1 KNAPSACK</span>          (see 11_Knapsack_01_DP)
-
-<span class="c">Items can be REUSED (coins, tiles)</span>
-  └─ → <span class="f">UNBOUNDED KNAPSACK</span>    ↓
-
-<span class="c">Two strings or sequences being COMPARED / ALIGNED</span>
-  └─ → <span class="f">STRING DP</span>             (LCS, Edit Distance) ↓
-
-<span class="c">Grid — move through cells (right/down)</span>
-  └─ → <span class="f">2D GRID DP</span>            ↓</pre>
-    <div class="vi">Biết chắc là DP rồi thì <b>nhìn cấu trúc mà chọn dạng</b>: một dãy → Linear; item + sức chứa → Knapsack; hai chuỗi → String DP; lưới → 2D Grid.</div>
-  </section>
-
-  <!-- SHAPE: UNBOUNDED KNAPSACK -->
-  <section class="reveal">
-    <p class="eyebrow">🪙 Shape — Unbounded Knapsack</p>
-    <h2>Items reused indefinitely + capacity/target.</h2>
-    <div class="sig">
-      <div class="row"><span class="s"><b>Coin Change</b> (min coins) — "any denomination, unlimited supply, make amount"</span><span class="v">min coins</span></div>
-      <div class="row"><span class="s"><b>Coin Change II</b> (ways) — "how many ways to make amount"</span><span class="v">count ways</span></div>
-      <div class="row"><span class="s"><b>Cutting Rod</b> — "cut into pieces of any length, maximize value"</span><span class="v">max value</span></div>
-    </div>
-    <div class="pin"><b>Key difference from 0/1:</b> inner loop goes <b>FORWARD</b> (allows reuse), not backward.</div>
-<pre><span class="k">def</span> <span class="f">coinChange</span>(coins, amount):
-    dp = [<span class="k">float</span>(<span class="s">'inf'</span>)] * (amount + <span class="s">1</span>)
-    dp[<span class="s">0</span>] = <span class="s">0</span>
-    <span class="k">for</span> coin <span class="k">in</span> coins:
-        <span class="k">for</span> a <span class="k">in</span> <span class="k">range</span>(coin, amount + <span class="s">1</span>):   <span class="c"># FORWARD → allows reuse</span>
-            dp[a] = <span class="k">min</span>(dp[a], dp[a - coin] + <span class="s">1</span>)
-    <span class="k">return</span> dp[amount] <span class="k">if</span> dp[amount] != <span class="k">float</span>(<span class="s">'inf'</span>) <span class="k">else</span> -<span class="s">1</span>
-<span class="c"># Time: O(amount × coins) | Space: O(amount)</span></pre>
-    <p class="note"><b>Trap:</b> using a backward loop (the 0/1 pattern) on an unbounded problem → each coin used at most once → WRONG.</p>
-    <div class="vi">Item được <b>dùng lại vô hạn</b> + có target → Unbounded Knapsack. Nhớ: <b>inner loop chạy TỚI</b> (forward) để cho phép tái dùng.</div>
-  </section>
-
-  <!-- DEEP DIVE: COIN CHANGE -->
-  <section class="reveal">
-    <p class="eyebrow">🔬 Deep dive — Coin Change (#322)</p>
-    <h2>Read the signals, then the recurrence.</h2>
-    <div class="sig">
-      <div class="row"><span class="s">"minimum number of" + "combinations/selections"</span><span class="v">optimize DP</span></div>
-      <div class="row"><span class="s">Infinite supply of items + reach a target</span><span class="v">unbounded knapsack</span></div>
-      <div class="row"><span class="s">Subproblem inside subproblem of the SAME type — minCoins(15)→minCoins(10)</span><span class="v">classic DP shape</span></div>
-      <div class="row"><span class="s">minCoins(10) called from many paths</span><span class="v">overlapping subproblems</span></div>
-    </div>
-    <p class="note"><b>Why greedy fails</b> — a locally optimal pick blocks the global optimum:</p>
-<pre>coins = [<span class="s">1</span>, <span class="s">3</span>, <span class="s">4</span>], amount = <span class="s">6</span>
-Greedy: <span class="s">4</span> + <span class="s">1</span> + <span class="s">1</span> = <span class="s">3</span> coins  <span class="c">❌</span>
-DP:     <span class="s">3</span> + <span class="s">3</span>     = <span class="s">2</span> coins  <span class="c">✅</span></pre>
-    <p class="note"><b>Recurrence:</b> <code class="inl">dp(amt) = min(1 + dp(amt - coin) for each coin)</code>. Base: <code class="inl">dp(0)=0</code>, <code class="inl">dp(negative)=inf</code> (impossible path).</p>
-    <p class="note"><b>Top-Down</b> (recursion + HashMap memoization):</p>
-<pre><span class="k">def</span> <span class="f">coinChange</span>(coins, amount):
-    memo = {}
-    <span class="k">def</span> <span class="f">dp</span>(amt):
-        <span class="k">if</span> amt == <span class="s">0</span>: <span class="k">return</span> <span class="s">0</span>
-        <span class="k">if</span> amt &lt; <span class="s">0</span>:  <span class="k">return</span> <span class="k">float</span>(<span class="s">'inf'</span>)
-        <span class="k">if</span> amt <span class="k">in</span> memo: <span class="k">return</span> memo[amt]
-        memo[amt] = <span class="k">min</span>(<span class="s">1</span> + <span class="f">dp</span>(amt - c) <span class="k">for</span> c <span class="k">in</span> coins)
-        <span class="k">return</span> memo[amt]
-    result = <span class="f">dp</span>(amount)
-    <span class="k">return</span> result <span class="k">if</span> result != <span class="k">float</span>(<span class="s">'inf'</span>) <span class="k">else</span> -<span class="s">1</span>
-<span class="c"># Time: O(amount × coins) | Space: O(amount)</span></pre>
-    <p class="note"><b>Bottom-Up</b> (tabulation — the interview default): same as the Unbounded Knapsack block above. Time O(amount × coins), space O(amount).</p>
-    <div class="vi">Bất cứ khi nào <b>greedy sai</b> (chọn tốt cục bộ mà hỏng toàn cục) → rút DP ra. Top-Down dễ suy luận; Bottom-Up nhanh hơn, mặc định trong phỏng vấn.</div>
-  </section>
-
-  <!-- SHAPE: STRING DP -->
-  <section class="reveal">
-    <p class="eyebrow">🧵 Shape — String DP (LCS / Edit Distance)</p>
-    <h2>Two strings — compare, align, transform.</h2>
-    <div class="sig">
-      <div class="row"><span class="s"><b>Longest Common Subsequence</b> — "longest subsequence in both"</span><span class="v">dp = LCS of s1[:i], s2[:j]</span></div>
-      <div class="row"><span class="s"><b>Edit Distance</b> — "min operations to transform s1 → s2"</span><span class="v">dp = min edits</span></div>
-      <div class="row"><span class="s"><b>Longest Common Substring</b> — "contiguous common portion"</span><span class="v">dp = len ending at i,j</span></div>
-      <div class="row"><span class="s"><b>Is Subsequence</b> — "can s1 be found in s2 in order?"</span><span class="v">reachability DP</span></div>
-    </div>
-<pre><span class="k">def</span> <span class="f">lcs</span>(s1, s2):
-    m, n = <span class="k">len</span>(s1), <span class="k">len</span>(s2)
-    dp = [[<span class="s">0</span>] * (n + <span class="s">1</span>) <span class="k">for</span> _ <span class="k">in</span> <span class="k">range</span>(m + <span class="s">1</span>)]
-    <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="s">1</span>, m + <span class="s">1</span>):
-        <span class="k">for</span> j <span class="k">in</span> <span class="k">range</span>(<span class="s">1</span>, n + <span class="s">1</span>):
-            <span class="k">if</span> s1[i-<span class="s">1</span>] == s2[j-<span class="s">1</span>]:
-                dp[i][j] = dp[i-<span class="s">1</span>][j-<span class="s">1</span>] + <span class="s">1</span>    <span class="c"># chars match → extend</span>
-            <span class="k">else</span>:
-                dp[i][j] = <span class="k">max</span>(dp[i-<span class="s">1</span>][j], dp[i][j-<span class="s">1</span>])   <span class="c"># skip one char</span>
-    <span class="k">return</span> dp[m][n]
-<span class="c"># Time: O(m×n) | Space: O(m×n)</span></pre>
-    <p class="note"><b>Trap:</b> String DP is almost always 2D — <code class="inl">dp[i][j]</code> where i indexes s1 and j indexes s2. Flatten it to 1D and you lose the cross-string relationship.</p>
-    <div class="vi">Hai chuỗi so/căn/biến đổi → <b>String DP, gần như luôn 2D</b>: một chiều cho mỗi chuỗi. Đừng ép về 1D quá sớm.</div>
-  </section>
-
-  <!-- SHAPE: 2D GRID DP -->
-  <section class="reveal">
-    <p class="eyebrow">🟦 Shape — 2D Grid DP</p>
-    <h2>Grid — top-left to bottom-right.</h2>
-    <div class="sig">
-      <div class="row"><span class="s"><b>Unique Paths</b> — "how many ways to reach bottom-right", right/down only</span><span class="v">count paths</span></div>
-      <div class="row"><span class="s"><b>Min Path Sum</b> — "minimum cost path, right/down only"</span><span class="v">grid = costs</span></div>
-      <div class="row"><span class="s"><b>Triangle Min Path</b> — "min path top to bottom"</span><span class="v">pyramid</span></div>
-      <div class="row"><span class="s"><b>Maximal Square</b> — "largest square of all 1s"</span><span class="v">grid of 0/1</span></div>
-    </div>
-<pre><span class="k">def</span> <span class="f">uniquePaths</span>(m, n):
-    dp = [[<span class="s">1</span>] * n <span class="k">for</span> _ <span class="k">in</span> <span class="k">range</span>(m)]
-    <span class="k">for</span> i <span class="k">in</span> <span class="k">range</span>(<span class="s">1</span>, m):
-        <span class="k">for</span> j <span class="k">in</span> <span class="k">range</span>(<span class="s">1</span>, n):
-            dp[i][j] = dp[i-<span class="s">1</span>][j] + dp[i][j-<span class="s">1</span>]   <span class="c"># from above + from left</span>
-    <span class="k">return</span> dp[m-<span class="s">1</span>][n-<span class="s">1</span>]
-<span class="c"># Time: O(m×n) | Space: O(m×n) → can optimize to O(n)</span></pre>
-    <p class="note"><b>Space optimization:</b> grid DP with only top/left dependency → keep only the previous row.</p>
-    <div class="vi">Đi trong <b>lưới</b> (thường chỉ phải/xuống), đếm đường hoặc tối ưu chi phí → 2D Grid DP. Chỉ phụ thuộc ô trên + trái nên nén được xuống <b>một hàng</b>.</div>
+    <p class="note">Unbounded Knapsack, String DP and 2D Grid DP don't have their own pattern folders yet — they live in <b>this pattern's <a href="Deep-Guide.html" style="color:var(--clay-deep)">Deep-Guide</a></b>, in the Shapes half.</p>
+    <div class="vi">Ba shape cuối chưa có folder riêng (Linear có 16, 0/1 Knapsack có 11) — chúng ở trong <b>Deep-Guide của chính thẻ này</b>, nửa "Shapes".</div>
   </section>
 
   <!-- DECISION FLOWCHART -->
   <section class="reveal">
     <p class="eyebrow">🗺️ Decision flowchart (interview use)</p>
     <h2>From "it's DP" to the shape.</h2>
-<pre>Problem spotted as DP? (overlapping subproblems + optimal substructure)
+<pre>Is it DP?  <span class="c">(Step 1 — recursion repeats + child's result is enough)</span>
               │
-    ┌─────────┴────────────┐
-    │                      │
- 1 sequence            2 sequences
- or 1D                  (strings)
-    │                      │
-    ├─ Fibonacci-style      └─ <span class="f">STRING DP</span>
-    │  (take/skip 1 step)     (LCS/Edit Distance)
-    │  → <span class="f">LINEAR DP</span>
+    ┌─────────┴──────────┐
+ 1 sequence          2 sequences
+   or 1 axis           (strings)
+    │                     │
+    ├─ decision per step  └─→ <span class="f">STRING DP</span>  (LCS, Edit Distance)
+    │  → <span class="f">LINEAR DP · 16</span>
     │
-    ├─ Items + capacity, each once
-    │  → <span class="f">0/1 KNAPSACK</span>
+    ├─ items + capacity, each once
+    │  → <span class="f">0/1 KNAPSACK · 11</span>
     │
-    ├─ Items + capacity, reuse ok
+    ├─ items + capacity, reuse allowed
     │  → <span class="f">UNBOUNDED KNAPSACK</span>
     │
-    └─ Grid movement (right/down)
+    └─ grid movement (right/down)
        → <span class="f">2D GRID DP</span></pre>
-    <div class="vi">Cây quyết định: <b>một dãy hay hai chuỗi?</b> Một dãy tách tiếp theo item/capacity/lưới; hai chuỗi → String DP. Đây là bản đồ rút món trong phòng phỏng vấn.</div>
+    <div class="vi">Cây quyết định: <b>một dãy hay hai chuỗi?</b> Một dãy thì tách tiếp theo item/capacity/lưới; hai chuỗi → String DP. Đây là bản đồ rút món trong phòng phỏng vấn.</div>
   </section>
 
   <!-- MASTER SIGNAL TABLE -->
@@ -298,18 +234,19 @@ DP:     <span class="s">3</span> + <span class="s">3</span>     = <span class="s
     <p class="eyebrow">📇 Master signal table</p>
     <h2>Keyword → DP type.</h2>
     <div class="sig">
-      <div class="row"><span class="s">climb stairs / jump game / decode ways</span><span class="v">linear DP</span></div>
-      <div class="row"><span class="s">rob houses / max profit (skip adjacent)</span><span class="v">linear DP</span></div>
-      <div class="row"><span class="s">coin change / rod cutting (reuse)</span><span class="v">unbounded knapsack</span></div>
-      <div class="row"><span class="s">"minimum number of" + "unlimited supply" + reach target</span><span class="v">unbounded knapsack</span></div>
-      <div class="row"><span class="s">greedy fails (local best ≠ global best)</span><span class="v">DP — check unbounded</span></div>
-      <div class="row"><span class="s">subset sum / partition equal subset</span><span class="v">0/1 knapsack</span></div>
-      <div class="row"><span class="s">LCS / edit distance / align two strings</span><span class="v">string DP</span></div>
-      <div class="row"><span class="s">unique paths / min path sum in grid</span><span class="v">2D grid DP</span></div>
-      <div class="row"><span class="s">largest square / dungeon game</span><span class="v">2D grid DP</span></div>
-      <div class="row"><span class="s">palindrome subsequence / longest palindrome</span><span class="v">string DP</span></div>
+      <div class="row"><span class="s">climb stairs / jump game / decode ways</span><a class="goto" href="../16_Linear_DP/Recognition.html">📏 Linear · 16 →</a></div>
+      <div class="row"><span class="s">rob houses / max profit (skip adjacent)</span><a class="goto" href="../16_Linear_DP/Recognition.html">📏 Linear · 16 →</a></div>
+      <div class="row"><span class="s">subset sum / partition equal subset</span><a class="goto" href="../11_Knapsack_01_DP/Recognition.html">🎒 0/1 · 11 →</a></div>
+      <div class="row"><span class="s">items with weights, pick each at most once</span><a class="goto" href="../11_Knapsack_01_DP/Recognition.html">🎒 0/1 · 11 →</a></div>
+      <div class="row"><span class="s">coin change / rod cutting (reuse allowed)</span><a class="goto here" href="Deep-Guide.html#unbounded">🪙 Unbounded →</a></div>
+      <div class="row"><span class="s">"minimum number of" + "unlimited supply" + hit a target</span><a class="goto here" href="Deep-Guide.html#unbounded">🪙 Unbounded →</a></div>
+      <div class="row"><span class="s">greedy looks right but fails on a counter-example</span><a class="goto here" href="Deep-Guide.html#unbounded">🪙 usually Unbounded →</a></div>
+      <div class="row"><span class="s">LCS / edit distance / align two strings</span><a class="goto here" href="Deep-Guide.html#stringdp">🧵 String DP →</a></div>
+      <div class="row"><span class="s">palindrome subsequence / longest palindrome</span><a class="goto here" href="Deep-Guide.html#stringdp">🧵 String DP →</a></div>
+      <div class="row"><span class="s">unique paths / min path sum in a grid</span><a class="goto here" href="Deep-Guide.html#grid">🟦 2D Grid →</a></div>
+      <div class="row"><span class="s">largest square / dungeon game</span><a class="goto here" href="Deep-Guide.html#grid">🟦 2D Grid →</a></div>
     </div>
-    <div class="vi">Bảng tra nhanh: nghe keyword là bắn ra <b>DP type</b>. Nhớ nhất cặp lừa: <b>reuse → unbounded</b>, <b>each once → 0/1</b>.</div>
+    <div class="vi">Bảng tra nhanh: nghe keyword là bắn ra shape. Cặp dễ lừa nhất: <b>dùng lại được → Unbounded</b>, <b>mỗi món một lần → 0/1</b>.</div>
   </section>
 
   <!-- UNIVERSAL TRAPS -->
@@ -322,9 +259,38 @@ DP:     <span class="s">3</span> + <span class="s">3</span>     = <span class="s
       <li><b>Wrong loop direction for Knapsack</b> — 0/1 = backward, Unbounded = forward.</li>
       <li><b>String DP needs 2D</b> — one dimension per string. Don't flatten prematurely.</li>
       <li><b>Off-by-one on dp size</b> — <code class="inl">dp = [0] * (n + 1)</code> not <code class="inl">n</code>, because dp[0] = base case.</li>
-      <li><b>Greedy feels right but fails</b> — construct a counter-example (<code class="inl">coins=[1,3,4], amount=6</code>) where local best leads to a globally worse result → reach for DP.</li>
+      <li><b>Greedy feels right but fails</b> — construct a counter-example (<code class="inl">coins=[1,3,4], amount=6</code> → greedy 4+1+1=3, DP 3+3=2) where local best leads to a globally worse result → reach for DP.</li>
+      <li><b>Deciding the shape before defining the state</b> — the shape <em>follows</em> from how many indices the state needs. Write <code class="inl">"dp[…] is …"</code> as a full sentence first; the shape falls out of it.</li>
     </ol>
-    <div class="vi">Bẫy top: (1) <b>recursion trần tưởng là DP</b>; (2) <b>sai chiều loop</b> knapsack (0/1 lùi, unbounded tới); (3) <b>lệch +1</b> ở size dp.</div>
+    <div class="vi">Bẫy top: (1) <b>recursion trần tưởng là DP</b>; (2) <b>sai chiều loop</b> knapsack (0/1 lùi, unbounded tới); (3) <b>lệch +1</b> ở size dp; (4) <b>chọn shape trước khi định nghĩa state</b> — phải nói được câu "dp[…] là …" thì shape mới tự lòi ra.</div>
+  </section>
+
+  <!-- WHERE THIS SITS -->
+  <section class="reveal">
+    <p class="eyebrow">🗺️ Where this sits</p>
+    <h2>The three tiers, and what each one <em>does</em>.</h2>
+    <div class="linkcards">
+      <a class="lcard up" href="../../Foundations/Dynamic%20Programming/Dynamic%20Programming.html">
+        <span class="lc-tag">🧠 Tầng 1 · học để HIỂU</span>
+        <span class="lc-t">Foundations — Dynamic Programming</span>
+        <span class="lc-d">Lý thuyết mà thẻ này giả định anh đã biết: DP là gì, 2 điều kiện, memo vs tab, khung 4 câu, 1D hay 2D.</span>
+      </a>
+      <a class="lcard" href="Deep-Guide.html">
+        <span class="lc-tag">🗺️ Tầng 2 · cùng folder</span>
+        <span class="lc-t">DP Recognition — Deep-Guide</span>
+        <span class="lc-d">Triage đi chậm từng bước, cộng nguyên mini-guide cho 3 shape chưa có folder riêng: Unbounded, String DP, 2D Grid.</span>
+      </a>
+      <a class="lcard side" href="../16_Linear_DP/Recognition.html">
+        <span class="lc-tag">📏 Tầng 3 · một shape</span>
+        <span class="lc-t">16 — Linear DP</span>
+        <span class="lc-d">Shape 1D: một dãy, <code class="inl">dp[i]</code>, bảng một hàng. Cũng là nơi giải thích tại sao đếm thì cộng mà tối ưu thì max.</span>
+      </a>
+      <a class="lcard side" href="../11_Knapsack_01_DP/Recognition.html">
+        <span class="lc-tag">🎒 Tầng 3 · một shape</span>
+        <span class="lc-t">11 — 0/1 Knapsack</span>
+        <span class="lc-d">Shape 2D kinh điển: (item, capacity), mỗi món dùng nhiều nhất một lần. Inner loop chạy <b>lùi</b>.</span>
+      </a>
+    </div>
   </section>
 
   <footer>

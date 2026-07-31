@@ -1,93 +1,130 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Linear DP Pattern Recognition</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      {   }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-    code span.at { color: #7d9029; } /* Attribute */
-    code span.bn { color: #40a070; } /* BaseN */
-    code span.bu { color: #008000; } /* BuiltIn */
-    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #4070a0; } /* Char */
-    code span.cn { color: #880000; } /* Constant */
-    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-    code span.dt { color: #902000; } /* DataType */
-    code span.dv { color: #40a070; } /* DecVal */
-    code span.er { color: #ff0000; font-weight: bold; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #40a070; } /* Float */
-    code span.fu { color: #06287e; } /* Function */
-    code span.im { color: #008000; font-weight: bold; } /* Import */
-    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-    code span.op { color: #666666; } /* Operator */
-    code span.ot { color: #007020; } /* Other */
-    code span.pp { color: #bc7a00; } /* Preprocessor */
-    code span.sc { color: #4070a0; } /* SpecialChar */
-    code span.ss { color: #bb6688; } /* SpecialString */
-    code span.st { color: #4070a0; } /* String */
-    code span.va { color: #19177c; } /* Variable */
-    code span.vs { color: #4070a0; } /* VerbatimString */
-    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
-  <link rel="stylesheet" href="../pattern-guide.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linear DP — One Row Is Enough</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#faf6f1;--s1:#ffffff;--s2:#f3ede5;--s3:#e8dfd4;
+  --border:#ddd2c4;--text:#3d3529;--dim:#8c7e6e;
+  --accent:#c2715a;--accent2:#7a9e7e;--green:#5a9e6f;
+  --red:#c75050;--orange:#d4923a;--purple:#8b6fb0;--blue:#5b8db8;
+  --warm:#f0e6d8;
+}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;overflow-x:hidden}
+body::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 20% 0%,rgba(194,113,90,.06),transparent 60%),radial-gradient(ellipse at 80% 100%,rgba(122,158,126,.06),transparent 60%);pointer-events:none;z-index:0}
+
+.topnav{position:sticky;top:0;z-index:100;background:rgba(250,246,241,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:10px 0}
+.topnav-inner{max-width:920px;margin:0 auto;padding:0 20px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.topnav-inner::-webkit-scrollbar{display:none}
+.nav-btn{padding:9px 16px;border-radius:20px;background:transparent;border:1.5px solid transparent;color:var(--dim);cursor:pointer;font-family:'Outfit',sans-serif;font-weight:600;font-size:.82em;white-space:nowrap;text-decoration:none;transition:all .25s;display:inline-block}
+.nav-btn:hover{color:var(--text);background:var(--s2)}
+.nav-btn.out{color:var(--accent2);border-color:rgba(122,158,126,.4)}
+
+.container{max-width:920px;margin:0 auto;padding:28px 20px 80px;position:relative;z-index:1}
+
+.hero{text-align:center;padding:36px 0 32px}
+.hero h1{font-size:2.3em;font-weight:800;color:var(--accent);margin-bottom:4px}
+.hero p{color:var(--dim);font-size:1.05em;font-weight:500;max-width:640px;margin:0 auto}
+.hero .reco{display:inline-flex;align-items:center;gap:8px;margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:.78rem;font-weight:600;letter-spacing:.04em;text-decoration:none;color:#f3e9d2;background:var(--accent);padding:9px 18px;border-radius:999px;box-shadow:0 2px 8px rgba(194,113,90,.3)}
+
+.card{background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:24px 26px;margin-bottom:18px;box-shadow:0 2px 12px rgba(61,53,41,.04);scroll-margin-top:70px}
+.card-title{font-size:1.15em;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.card p{margin-top:8px}
+
+.hl{border-left:3px solid var(--accent);background:linear-gradient(90deg,rgba(194,113,90,.06),transparent);padding:14px 18px;border-radius:0 10px 10px 0;margin:12px 0;line-height:1.75}
+.hl.green{border-color:var(--green);background:linear-gradient(90deg,rgba(90,158,111,.06),transparent)}
+.hl.orange{border-color:var(--orange);background:linear-gradient(90deg,rgba(212,146,58,.06),transparent)}
+.hl.purple{border-color:var(--purple);background:linear-gradient(90deg,rgba(139,111,176,.06),transparent)}
+
+.vi{font-size:.95rem;line-height:1.65;color:var(--text);background:var(--warm);border-left:3px solid var(--orange);border-radius:0 10px 10px 0;padding:12px 16px;margin:12px 0 0}
+.vi::before{content:"🔥 "}
+
+.code-block{background:#2d2a25;border-radius:12px;padding:18px 20px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:.82em;line-height:1.8;overflow-x:auto;color:#d4cfc6;white-space:pre}
+.code-block .kw{color:#d4923a}
+.code-block .fn{color:#7ab88a}
+.code-block .cm{color:#7a7265;font-style:italic}
+.code-block .st{color:#c2715a}
+.code-block .hi{background:#4a4326;border-radius:4px;padding:1px 4px}
+
+.cheat-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.86em}
+.cheat-table th{background:var(--s2);padding:10px 12px;text-align:left;font-weight:700;color:var(--accent);border-bottom:2px solid var(--border)}
+.cheat-table td{padding:10px 12px;border-bottom:1px solid var(--s3);vertical-align:top}
+.cheat-table tr:last-child td{border-bottom:none}
+.cheat-table code{background:var(--s2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.9em;color:var(--accent)}
+
+code{background:var(--s2);padding:2px 6px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.88em;color:var(--accent)}
+
+/* one-row vs grid */
+.shapes{display:grid;grid-template-columns:1fr;gap:16px;margin:14px 0}
+@media(min-width:700px){.shapes{grid-template-columns:1fr 1fr}}
+.shapebox{border:2px solid var(--border);border-radius:14px;padding:16px 18px;background:var(--s2)}
+.shapebox.lin{border-color:var(--green);background:rgba(90,158,111,.05)}
+.shapebox.grid2{border-color:var(--accent);background:rgba(194,113,90,.05)}
+.shapebox .sb-t{font-weight:800;font-size:.95em;margin-bottom:8px}
+.shapebox.lin .sb-t{color:var(--green)}
+.shapebox.grid2 .sb-t{color:var(--accent)}
+.shapebox pre{font-family:'JetBrains Mono',monospace;font-size:.78em;line-height:1.7;white-space:pre;overflow-x:auto;color:var(--text)}
+.shapebox .sb-n{font-size:.84em;color:var(--dim);margin-top:8px;font-style:italic}
+
+/* ===== interactive dp table ===== */
+.lab{border:2px solid var(--border);border-radius:16px;background:var(--s1);padding:22px 20px;margin-top:14px}
+.lab-modes{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:6px}
+.m-btn{padding:9px 18px;border:2px solid;border-radius:22px;font-family:'Outfit',sans-serif;font-weight:700;font-size:.86em;cursor:pointer;background:#fff;transition:all .25s}
+.m-btn.count{border-color:var(--blue);color:var(--blue)}
+.m-btn.opt{border-color:var(--orange);color:var(--orange)}
+.m-btn.count.on{background:var(--blue);color:#fff}
+.m-btn.opt.on{background:var(--orange);color:#fff}
+.lab-sub{text-align:center;color:var(--dim);font-size:.9em;margin-bottom:14px}
+.lab-sub b{color:var(--text)}
+
+.inrow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:10px 0 4px}
+.incell{min-width:46px;padding:7px 6px;border-radius:9px;border:2px solid var(--border);background:var(--s2);text-align:center;font-family:'JetBrains Mono',monospace;font-size:.86em;font-weight:600;color:var(--dim);transition:all .3s}
+.incell .ii{display:block;font-size:.68em;opacity:.65;font-weight:400}
+.incell.cur{border-color:var(--accent);background:rgba(194,113,90,.12);color:var(--accent);transform:translateY(-3px)}
+
+.dprow{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:6px 0 4px}
+.dpcell{min-width:52px;padding:9px 6px;border-radius:9px;border:2px solid var(--border);background:#fff;text-align:center;font-family:'JetBrains Mono',monospace;font-size:1em;font-weight:700;color:var(--dim);transition:all .3s;position:relative}
+.dpcell .di{display:block;font-size:.6em;opacity:.6;font-weight:400;color:var(--dim)}
+.dpcell.empty{color:#ccc4b8;background:var(--s2)}
+.dpcell.base{border-color:var(--purple);background:rgba(139,111,176,.1);color:var(--purple)}
+.dpcell.src{border-color:var(--blue);background:rgba(91,141,184,.14);color:var(--blue)}
+.dpcell.filling{border-color:var(--green);background:rgba(90,158,111,.16);color:var(--green);transform:scale(1.1);box-shadow:0 4px 14px rgba(90,158,111,.22)}
+.dpcell.done{border-color:var(--green);color:var(--green)}
+.dpcell.answer{border-color:var(--orange);background:rgba(212,146,58,.16);color:var(--orange);box-shadow:0 0 0 3px rgba(212,146,58,.15)}
+
+.rowlbl{font-family:'JetBrains Mono',monospace;font-size:.7em;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--dim);text-align:center;margin-top:14px}
+.mathline{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.95em;margin:14px 0 4px;min-height:1.6em;color:var(--text);font-weight:600}
+.explain{background:var(--warm);border-radius:12px;padding:14px 18px;margin-top:12px;min-height:52px;font-size:.95em;line-height:1.7;border-left:3px solid var(--orange)}
+.controls{display:flex;gap:10px;justify-content:center;margin-top:16px;align-items:center;flex-wrap:wrap}
+.btn{padding:10px 22px;border-radius:20px;border:none;font-family:'Outfit',sans-serif;font-weight:700;font-size:.9em;cursor:pointer;transition:all .2s}
+.btn-go{background:var(--accent);color:#fff}
+.btn-go:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(194,113,90,.3)}
+.btn-go:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-rst{background:var(--s2);color:var(--text);border:1.5px solid var(--border)}
+.step-info{color:var(--dim);font-family:'JetBrains Mono',monospace;font-size:.85em}
+
+/* link cards */
+.linkcards{display:grid;grid-template-columns:1fr;gap:14px;margin-top:10px}
+@media(min-width:700px){.linkcards{grid-template-columns:1fr 1fr}}
+.lcard{display:block;text-decoration:none;color:var(--text);background:var(--s2);border:2px solid var(--border);border-radius:14px;padding:16px 18px;transition:all .22s}
+.lcard:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(61,53,41,.1);border-color:var(--accent)}
+.lcard.up{background:rgba(122,158,126,.07);border-color:rgba(122,158,126,.5)}
+.lcard.up:hover{border-color:var(--accent2)}
+.lcard.side{background:rgba(91,141,184,.07);border-color:rgba(91,141,184,.4)}
+.lcard.side:hover{border-color:var(--blue)}
+.lcard .lc-tag{font-family:'JetBrains Mono',monospace;font-size:.66em;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:5px;font-weight:700}
+.lcard.up .lc-tag{color:var(--accent2)}
+.lcard.side .lc-tag{color:var(--blue)}
+.lcard .lc-t{font-weight:800;font-size:1.08em;display:block;margin-bottom:4px}
+.lcard .lc-d{font-size:.9em;line-height:1.5;color:var(--dim)}
+
+footer{margin-top:40px;padding-top:26px;border-top:1.5px solid var(--border);text-align:center;font-size:.85em;color:var(--dim)}
+footer .verse{font-style:italic;color:var(--accent2);margin-bottom:12px;font-size:1.02em}
+</style>
 <style id="mobile-safety-net">
 /* ===== MOBILE SAFETY NET — auto-injected, non-destructive ===== */
 html,body{max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%;}
@@ -112,180 +149,401 @@ document.addEventListener('DOMContentLoaded',function(){
 </script>
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">Linear DP Pattern Recognition</h1>
-<a href="Recognition.html" style="display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:.74rem;font-weight:600;letter-spacing:.04em;text-decoration:none;color:#f3e9d2;background:#a4502f;padding:9px 16px;border-radius:999px;box-shadow:0 2px 8px rgba(164,80,47,.3);width:fit-content;">⚡ Recognition — thẻ nhận diện nhanh →</a>
-</header>
-<h1 id="linear-dp">Linear DP</h1>
-<h2 id="spot-it">Spot It</h2>
-<table>
-<thead>
-<tr>
-<th>Signal</th>
-<th>Linear DP</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>“how many ways / distinct ways”</td>
-<td>✓ count DP</td>
-</tr>
-<tr>
-<td>“minimum steps / coins / operations”</td>
-<td>✓ optimize DP</td>
-</tr>
-<tr>
-<td>“can you reach / is it possible?”</td>
-<td>✓ reachability DP</td>
-</tr>
-<tr>
-<td>answer for n depends on smaller n</td>
-<td>✓ overlapping subproblems</td>
-</tr>
-<tr>
-<td>“climb / jump / tile / decode”</td>
-<td>✓ classic linear DP</td>
-</tr>
-<tr>
-<td>“generate all” / “list all”</td>
-<td>✗ → Backtracking instead</td>
-</tr>
-</tbody>
-</table>
-<p><strong>Key:</strong> You have <strong>overlapping
-subproblems</strong> — the same sub-answer is needed multiple times.
-Reuse it instead of recomputing.</p>
-<p><strong>DP vs Backtracking:</strong> - Backtracking: GENERATES paths.
-Signal = “generate all”, “list all” - DP: COUNTS/OPTIMIZES using stored
-results. Signal = “how many”, “min/max” - Wiganz’s rule: <em>“reuse the
-old result”</em> = DP</p>
-<hr />
-<h2 id="why-it-works">Why It Works</h2>
-<p>The recurrence <code>f(n) = f(n-1) + f(n-2)</code> comes from asking:
-<strong>“What’s the LAST decision that got me here?”</strong></p>
-<p>The allowed moves define the recurrence: - “take 1 or 2 steps” →
-<code>f(n) = f(n-1) + f(n-2)</code> - “take 1, 2, or 3 steps” →
-<code>f(n) = f(n-1) + f(n-2) + f(n-3)</code> - “take 1 or k steps” →
-<code>f(n) = f(n-1) + f(n-k)</code></p>
-<p><strong>This is the core of ALL Linear DP:</strong> don’t solve the
-big problem directly — ask what subproblems feed into it.</p>
-<hr />
-<h2 id="the-core">The Core</h2>
-<p><strong>Template 1: Space-Optimized (O(1) space) —
-preferred</strong></p>
-<div class="sourceCode" id="cb1"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    prev1 <span class="op">=</span> <span class="dv">1</span>   <span class="co"># f(1)</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    prev2 <span class="op">=</span> <span class="dv">2</span>   <span class="co"># f(2)</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):   <span class="co"># range(3, n+1) — include n!</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        prev1 <span class="op">=</span> prev2</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>        prev2 <span class="op">=</span> curr</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> prev2</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(1)</span></span></code></pre></div>
-<p><strong>Template 2: Tabulation with Full Array (O(n)
-space)</strong></p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    dp <span class="op">=</span> [<span class="dv">0</span>] <span class="op">*</span> (n <span class="op">+</span> <span class="dv">1</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">1</span>] <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    dp[<span class="dv">2</span>] <span class="op">=</span> <span class="dv">2</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        dp[i] <span class="op">=</span> dp[i<span class="op">-</span><span class="dv">1</span>] <span class="op">+</span> dp[i<span class="op">-</span><span class="dv">2</span>]</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> dp[n]</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(n)</span></span></code></pre></div>
-<p><strong>Template 3: Memoization (Top-Down)</strong></p>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> functools <span class="im">import</span> lru_cache</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="at">@lru_cache</span>(maxsize<span class="op">=</span><span class="va">None</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> climbingStairs(n: <span class="bu">int</span>) <span class="op">-&gt;</span> <span class="bu">int</span>:</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">1</span>: <span class="cf">return</span> <span class="dv">1</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> n <span class="op">==</span> <span class="dv">2</span>: <span class="cf">return</span> <span class="dv">2</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> climbingStairs(n<span class="op">-</span><span class="dv">1</span>) <span class="op">+</span> climbingStairs(n<span class="op">-</span><span class="dv">2</span>)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Time: O(n) | Space: O(n) for cache + call stack</span></span></code></pre></div>
-<p><strong>Bottom-Up vs Tabulation vs Loop+Reuse — Same Thing, Different
-Words:</strong> | Term | Meaning | |—|—| | Bottom-up | start from base
-cases, build up to n | | Tabulation | fill a table (dp array) cell by
-cell | | Loop + reuse | what it looks like in code | | Space-optimized
-tabulation | tabulation but only keep last K values | All of these refer
-to the same approach. Top-down = recursion + cache (memoization).</p>
-<hr />
-<h2 id="traps">Traps</h2>
-<p><strong>1. Off-by-one in range</strong></p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — for n=3, range(3,3) is empty!</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n):</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ...</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3</span>, n <span class="op">+</span> <span class="dv">1</span>):</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    ...</span></code></pre></div>
-<p><strong>2. Wrong swap order</strong></p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — loses prev1 before using it</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>prev1 <span class="op">=</span> prev2   <span class="co"># ← prev1 overwritten!</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>prev2 <span class="op">=</span> curr</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># CORRECT</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>curr <span class="op">=</span> prev1 <span class="op">+</span> prev2</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>prev2 <span class="op">=</span> prev1   <span class="co"># save old prev1 first</span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>prev1 <span class="op">=</span> curr</span></code></pre></div>
-<p>OR: keep first swap but <code>return prev2</code> (both work — be
-consistent).</p>
-<p><strong>3. Submitting pure recursion as DP</strong></p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># WRONG — this is O(2^n), NOT DP (no memoization)</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="cf">return</span> f(n<span class="op">-</span><span class="dv">1</span>) <span class="op">+</span> f(n<span class="op">-</span><span class="dv">2</span>)</span></code></pre></div>
-<p>DP requires either a cache (memoization) or a loop (tabulation).
-Plain recursion = brute force.</p>
-<p><strong>4. Missing base case guard</strong> - n=1 needs a guard:
-without it, <code>range(3, 2)</code> is empty → returns
-<code>prev2=2</code> (wrong, should be 1) - n=2 does NOT need a guard:
-<code>range(3, 3)</code> is empty → returns <code>prev2=2</code>
-(correct)</p>
-<p><strong>5. Confusing DP with Backtracking</strong> - If you’re about
-to write “generate all paths” → stop. That’s Backtracking. - If the
-question says “how many ways” → DP. Count, don’t enumerate.</p>
-<hr />
-<h2 id="classic-problems">Classic Problems</h2>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Problem</th>
-<th>Recurrence</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Climbing Stairs</td>
-<td><code>f(n) = f(n-1) + f(n-2)</code></td>
-<td>base: f(1)=1, f(2)=2</td>
-</tr>
-<tr>
-<td>Fibonacci Number</td>
-<td><code>f(n) = f(n-1) + f(n-2)</code></td>
-<td>base: f(0)=0, f(1)=1</td>
-</tr>
-<tr>
-<td>House Robber</td>
-<td><code>f(n) = max(f(n-1), f(n-2) + nums[n])</code></td>
-<td>can’t rob adjacent</td>
-</tr>
-<tr>
-<td>Min Cost Climbing Stairs</td>
-<td><code>f(n) = min(f(n-1)+cost[n-1], f(n-2)+cost[n-2])</code></td>
-<td>take min path</td>
-</tr>
-</tbody>
-</table>
+
+<nav class="topnav">
+<div class="topnav-inner">
+  <a class="nav-btn" href="#what">📐 What it is</a>
+  <a class="nav-btn" href="#group">🧷 Why grouped</a>
+  <a class="nav-btn" href="#stairs">🪜 By hand</a>
+  <a class="nav-btn" href="#isdp">✅ Is it DP</a>
+  <a class="nav-btn" href="#four">🗂️ 4 questions</a>
+  <a class="nav-btn" href="#lab">▶️ The lab</a>
+  <a class="nav-btn" href="#contrast">➕/🏆 Contrast</a>
+  <a class="nav-btn" href="#code">💻 Templates</a>
+  <a class="nav-btn out" href="Recognition.html">⚡ Recognition</a>
+</div>
+</nav>
+
+<div class="container">
+
+  <div class="hero">
+    <h1>📏 Linear DP</h1>
+    <p>The DP whose table needs only <b>one row</b>. One index — <code>dp[i]</code> — is enough to name any subproblem. That's the whole definition.</p>
+    <a class="reco" href="Recognition.html">⚡ Recognition — thẻ nhận diện nhanh →</a>
+  </div>
+
+  <!-- WHAT IT IS -->
+  <div id="what" class="card">
+    <div class="card-title">📐 What Linear DP actually is</div>
+    <p>Most guides start with a signal table and never say what the thing <em>is</em>. So, first: <b>Linear DP is the DP whose table has one row.</b> If a single index <code>dp[i]</code> can name any subproblem, it's Linear. "Linear" means it literally — the table lies along a <b>line</b>, not a grid.</p>
+
+    <div class="shapes">
+      <div class="shapebox lin">
+        <div class="sb-t">📏 Linear DP — Climbing Stairs</div>
+<pre>      i=1  i=2  i=3  i=4  i=5
+dp = [ 1    2    3    5    8 ]</pre>
+        <div class="sb-n">ONE index → ONE row</div>
+      </div>
+      <div class="shapebox grid2">
+        <div class="sb-t">🔲 2D DP — Unique Paths</div>
+<pre>      c0   c1   c2
+ r0 │ 1 │ 1 │ 1 │
+ r1 │ 1 │ 2 │ 3 │
+ r2 │ 1 │ 3 │ 6 │</pre>
+        <div class="sb-n">TWO indices → a grid</div>
+      </div>
+    </div>
+
+    <p>Everything else in DP-land needs <b>two</b> numbers to name a subproblem — Unique Paths needs (row, col), Knapsack needs (item, capacity), String DP needs (position in s1, position in s2). All 2D. Linear DP is the one that needs just one.</p>
+    <div class="hl green"><b>The test:</b> say the sentence <b>"dp[i] is …"</b> out loud. If one index says it completely → Linear DP. If you reach for a second number → it's a different shape.</div>
+    <div class="vi">Định nghĩa gọn: <b>bảng chỉ cần MỘT hàng</b>. Chữ "Linear" nghĩa đen — bảng nằm trên một đường thẳng, không phải cái lưới. Cách thử: nói thành câu <b>"dp[i] là …"</b> — trọn câu bằng một chỉ số → Linear DP.</div>
+  </div>
+
+  <!-- WHY GROUPED -->
+  <div id="group" class="card">
+    <div class="card-title">🧷 Why stairs and burglary sit on the same shelf</div>
+    <p>This folder holds Climbing Stairs, Fibonacci, House Robber, Min Cost Climbing Stairs. Read that list and it feels random — what does climbing stairs have to do with robbing houses? Fair reaction. They're grouped for exactly <b>one</b> reason:</p>
+    <div class="hl"><b>One sequence, and the answer at position <code>n</code> is built from answers at smaller positions.</b> That's the entire criterion.</div>
+    <p><b>The formula inside is a separate question.</b> Some of these add their branches, some take a max. Don't expect the four problems to look alike — expect them to share the same <em>shape of dependency</em>. Get that straight up front and the House Robber section later won't feel like a random jump.</p>
+    <div class="vi">Đây là chỗ dễ thấy vô lý nhất: <b>"leo cầu thang thì liên quan gì trộm nhà?"</b> Liên quan đúng MỘT điểm — một dãy, đáp án ở <code>n</code> dựng từ đáp án ở vị trí nhỏ hơn. Còn công thức bên trong (cộng hay max) là <b>chuyện khác</b>, tính riêng.</div>
+  </div>
+
+  <!-- BY HAND -->
+  <div id="stairs" class="card">
+    <div class="card-title">🪜 Climbing Stairs — do it by hand first</div>
+    <p>Stairs with <code>n</code> steps. Each move climbs <b>1 or 2</b> steps. How many distinct ways to reach the top? Count the small cases by hand before touching any formula:</p>
+    <div class="code-block">n = 1 →  (1)                          → <span class="fn">1 way</span>
+n = 2 →  (1,1)  (2)                   → <span class="fn">2 ways</span>
+n = 3 →  (1,1,1)  (1,2)  (2,1)        → <span class="fn">3 ways</span></div>
+    <p>Now stop listing. For <code>n = 4</code>, ask instead:</p>
+    <div class="hl orange"><b>"What was the LAST move that got me to step 4?"</b><br>It was either a 1-step (so I was standing on step 3), or a 2-step (so I was standing on step 2). There is no third option — those are the only legal moves.</div>
+    <p>So every route to step 4 is <em>some route to step 3</em> plus a final 1-step, <b>or</b> <em>some route to step 2</em> plus a final 2-step. Two separate families of routes, no overlap between them, both valid:</p>
+    <div class="code-block">f(4) = f(3) + f(2) = 3 + 2 = <span class="fn">5</span></div>
+    <p>No enumeration needed. That question — <b>"what was the last move?"</b> — is the engine for every problem in this folder.</p>
+    <div class="vi">Đừng học thuộc công thức. Hỏi <b>"bước CUỐI CÙNG đưa tôi tới đây là gì?"</b> — với luật leo 1 hoặc 2 bậc thì bước cuối chỉ có thể đến từ bậc <code>n-1</code> hoặc <code>n-2</code>. Liệt kê hết khả năng rồi nối lại — đó chính là công thức.</div>
+  </div>
+
+  <!-- IS IT DP -->
+  <div id="isdp" class="card">
+    <div class="card-title">✅ Is this really DP? — both conditions</div>
+    <p>Foundations says a problem is DP only when <b>both</b> conditions hold. Check them against Climbing Stairs rather than taking it on faith:</p>
+    <div class="hl"><b>1. Overlapping subproblems</b> — write the recursion plainly, no storage, and trace <code>f(5)</code>. The tree is Fibonacci-shaped: <code>f(3)</code> gets computed under <code>f(5)</code> <em>and</em> again under <code>f(4)</code>. <code>f(2)</code> shows up three times. Same work, done repeatedly. ✓</div>
+    <div class="code-block">                    f(5)
+              /              \
+         f(4)                <span class="st">f(3)</span>        ← computed twice
+        /     \             /     \
+   <span class="st">f(3)</span>      <span class="st">f(2)</span>      <span class="st">f(2)</span>    f(1)
+   /   \     /   \
+<span class="st">f(2)</span>  f(1) f(1)  f(0)</div>
+    <div class="hl green"><b>2. Optimal substructure</b> — to build <code>f(5)</code>, do you need the <em>individual routes</em> inside <code>f(4)</code> and <code>f(3)</code>? No. You only need their <b>result numbers</b>. The parent is assembled straight from the children's answers. ✓</div>
+    <p>Both hold → it's genuinely DP, not just something that resembles it. Now the recursion tree becomes a table, and nothing gets computed twice.</p>
+    <div class="vi">Hai điều kiện bắt buộc: <b>(1)</b> bài con bị tính lại nhiều lần — cây <code>f(5)</code> tính <code>f(3)</code> tới 2 lần, <code>f(2)</code> tới 3 lần ✓ &nbsp;<b>(2)</b> chỉ cần <b>con số kết quả</b> của bài con là ghép được bài cha, không cần biết chi tiết từng đường đi bên trong ✓</div>
+  </div>
+
+  <!-- 4 QUESTIONS -->
+  <div id="four" class="card">
+    <div class="card-title">🗂️ The four questions — Foundations' frame, applied</div>
+    <p>Every DP problem, Linear or not, is four answers. This frame comes from Foundations — using it here is the actual link between the two pages, not just a hyperlink:</p>
+    <table class="cheat-table">
+      <tr><th>#</th><th>Question</th><th>Climbing Stairs</th></tr>
+      <tr><td><b>1</b></td><td><b>State</b> — what does <code>dp[i]</code> mean?</td><td>number of ways to reach step <code>i</code></td></tr>
+      <tr><td><b>2</b></td><td><b>Recurrence</b> — how do smaller cells build it?</td><td><code>dp[i] = dp[i-1] + dp[i-2]</code></td></tr>
+      <tr><td><b>3</b></td><td><b>Base case</b> — which cells are filled by hand?</td><td><code>dp[1] = 1</code>, <code>dp[2] = 2</code></td></tr>
+      <tr><td><b>4</b></td><td><b>Answer</b> — which cell do I return?</td><td><code>dp[n]</code> — the last one</td></tr>
+    </table>
+    <div class="hl purple"><b>Question 1 is the hard one.</b> If you can't say it as a complete sentence — <em>"dp[i] is the number of ways to reach step i"</em> — you don't have the problem yet. Everything downstream fails from a vague state.</div>
+    <p><b>Why <code>dp[1]</code> and <code>dp[2]</code> are filled by hand:</b> the recurrence looks back two cells. At <code>i=1</code> and <code>i=2</code> there aren't two cells behind you to look at — the formula has nothing to stand on. Those get answered directly.</p>
+    <div class="vi">Câu 1 (State) khó nhất và là nền móng — nói không trọn câu <b>"dp[i] là …"</b> nghĩa là chưa nắm bài. Base case tồn tại vì công thức nhìn lùi 2 ô, mà ở <code>i=1, i=2</code> phía sau không đủ 2 ô để nhìn → phải điền tay.</div>
+  </div>
+
+  <!-- THE LAB -->
+  <div id="lab" class="card">
+    <div class="card-title">▶️ The lab — same table, two different joins</div>
+    <p>Here is the point of the whole page. Below is <b>one</b> widget filling <b>one</b> row of cells, left to right. Flip the mode and the <em>structure stays identical</em> — same table, same "look back at two cells" — but the operation joining them changes from <code>+</code> to <code>max</code>. Step through both and watch what differs.</p>
+
+    <div class="lab">
+      <div class="lab-modes">
+        <button class="m-btn count on" id="mb-count" onclick="setMode('count')">➕ Counting — Climbing Stairs</button>
+        <button class="m-btn opt" id="mb-opt" onclick="setMode('opt')">🏆 Optimizing — House Robber</button>
+      </div>
+      <div class="lab-sub" id="lab-sub"></div>
+
+      <div class="rowlbl" id="in-lbl">input</div>
+      <div class="inrow" id="in-row"></div>
+
+      <div class="rowlbl">dp — one row, filled left to right</div>
+      <div class="dprow" id="dp-row"></div>
+
+      <div class="mathline" id="mathline">&nbsp;</div>
+      <div class="explain" id="explain">Press <b>Next →</b> to fill the first cell.</div>
+
+      <div class="controls">
+        <button class="btn btn-rst" onclick="labReset()">↺ Reset</button>
+        <span class="step-info" id="lab-ctr">0 / 0</span>
+        <button class="btn btn-go" id="lab-next" onclick="labNext()">Next →</button>
+      </div>
+    </div>
+    <div class="vi">Cùng MỘT cái bảng một hàng, cùng kiểu "nhìn lùi 2 ô". Chỉ khác <b>phép nối</b>: bên trái cộng lại, bên phải chọn cái lớn hơn. Bấm thử cả 2 mode để thấy cấu trúc giống hệt nhau — cái khác duy nhất là dấu <code>+</code> đổi thành <code>max</code>.</div>
+  </div>
+
+  <!-- CONTRAST -->
+  <div id="contrast" class="card">
+    <div class="card-title">➕ vs 🏆 Why one adds and the other takes max</div>
+    <p>You just watched both. Now the reason — because the current cheat-sheets list <code>max(...)</code> for House Robber without ever saying why it isn't <code>+</code>:</p>
+
+    <div class="hl"><b>Counting → <code>+</code></b><br>The branches are <b>distinct valid paths, and every one of them counts</b>. Reaching step 4 via "…then a 1-step" and reaching it via "…then a 2-step" are two <em>different</em> sets of routes, both real, no overlap. Add them to total them up.<br><span style="color:var(--dim);font-size:.92em">→ Climbing Stairs, Fibonacci, Decode Ways</span></div>
+
+    <div class="hl orange"><b>Optimizing → <code>max</code> / <code>min</code></b><br>The branches are <b>competing alternatives for the same single plan</b>. You cannot both rob and not-rob house 3 on the same night — those aren't two routes you tally, they're two proposals. Keep the better one, discard the loser.<br><span style="color:var(--dim);font-size:.92em">→ House Robber, Min Cost Climbing Stairs</span></div>
+
+    <p><b>The tell, if you're unsure:</b> at house 3 in the walkthrough, the two branches were 11 and 7. Add them and you get 18 — a number that corresponds to <em>no possible night of burglary</em>. When adding the branches produces a meaningless number, you're in an optimizing problem.</p>
+
+    <table class="cheat-table">
+      <tr><th>Question asks</th><th>Join with</th><th>Because</th></tr>
+      <tr><td>"how many ways"</td><td><code>+</code></td><td>every branch is a separate valid route; total them</td></tr>
+      <tr><td>"max / min / best"</td><td><code>max</code> / <code>min</code></td><td>branches compete for one plan; keep the winner</td></tr>
+      <tr><td>"can you reach it"</td><td><code>or</code></td><td>any one working branch is enough</td></tr>
+    </table>
+    <div class="vi"><b>Đếm</b> → các nhánh là những con đường khác nhau <b>đều được tính</b> → cộng. <b>Tối ưu</b> → các nhánh là <b>phương án cạnh tranh cho cùng MỘT kế hoạch</b> → chỉ giữ cái tốt hơn. Dấu hiệu nhận biết: cộng nhầm ở bài tối ưu sẽ ra con số vô nghĩa (11+7=18 — không đêm trộm nào ra được 18đ).</div>
+  </div>
+
+  <!-- GENERALIZE -->
+  <div class="card">
+    <div class="card-title">🔧 Change the rules — proof it's a method, not a formula</div>
+    <p>If you only memorized <code>f(n) = f(n-1) + f(n-2)</code>, changing the rules breaks you. If you internalized the <em>question</em>, it doesn't. Same problem, new move set:</p>
+    <table class="cheat-table">
+      <tr><th>Allowed moves</th><th>Where could the last move have come from?</th><th>Recurrence</th></tr>
+      <tr><td>1 or 2 steps</td><td><code>i-1</code>, <code>i-2</code></td><td><code>dp[i-1] + dp[i-2]</code></td></tr>
+      <tr><td>1, 2, or 3 steps</td><td><code>i-1</code>, <code>i-2</code>, <code>i-3</code></td><td><code>dp[i-1] + dp[i-2] + dp[i-3]</code></td></tr>
+      <tr><td>1 or k steps</td><td><code>i-1</code>, <code>i-k</code></td><td><code>dp[i-1] + dp[i-k]</code></td></tr>
+      <tr><td>any of <code>moves[]</code></td><td>one branch per legal move</td><td><code>sum(dp[i-m] for m in moves)</code></td></tr>
+    </table>
+    <div class="hl green">The formula changes every time. The question never does. <b>The allowed moves ARE the recurrence.</b></div>
+    <div class="vi">Đổi luật chơi thì công thức tự đổi theo — vì <b>các nước đi cho phép chính là công thức truy hồi</b>. Học thuộc công thức thì đổi luật là gãy; nắm được câu hỏi thì không.</div>
+  </div>
+
+  <!-- CODE -->
+  <div id="code" class="card">
+    <div class="card-title">💻 Three templates — same idea, three shapes</div>
+    <p><b>1 — Space-optimized (O(1) space).</b> The default. The recurrence only ever looks back two cells, so keeping the whole row is waste — two variables suffice.</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">climbingStairs</span>(n):
+    <span class="kw">if</span> n == 1: <span class="kw">return</span> 1
+    prev1, prev2 = 1, 2              <span class="cm"># f(1), f(2)</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(3, n + 1):        <span class="cm"># range(3, n+1) — include n!</span>
+        curr = prev1 + prev2
+        prev1, prev2 = prev2, curr
+    <span class="kw">return</span> prev2
+<span class="cm"># Time: O(n) | Space: O(1)</span></div>
+
+    <p><b>2 — Tabulation, full array (O(n) space).</b> Keep the whole row when you must look back further than two cells, or when you want to inspect the table while debugging.</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">climbingStairs</span>(n):
+    <span class="kw">if</span> n == 1: <span class="kw">return</span> 1
+    dp = [0] * (n + 1)
+    dp[1], dp[2] = 1, 2              <span class="cm"># base cases, filled by hand</span>
+    <span class="kw">for</span> i <span class="kw">in</span> range(3, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    <span class="kw">return</span> dp[n]
+<span class="cm"># Time: O(n) | Space: O(n)</span></div>
+
+    <p><b>3 — Memoization (top-down).</b> The recurrence written literally, plus a cache. Easiest to write once you have the recurrence; costs recursion depth.</p>
+    <div class="code-block"><span class="kw">from</span> functools <span class="kw">import</span> lru_cache
+
+<span class="st">@lru_cache</span>(maxsize=<span class="kw">None</span>)
+<span class="kw">def</span> <span class="fn">climbingStairs</span>(n):
+    <span class="kw">if</span> n == 1: <span class="kw">return</span> 1
+    <span class="kw">if</span> n == 2: <span class="kw">return</span> 2
+    <span class="kw">return</span> <span class="fn">climbingStairs</span>(n-1) + <span class="fn">climbingStairs</span>(n-2)
+<span class="cm"># Time: O(n) | Space: O(n) — cache + call stack</span></div>
+
+    <p><b>And House Robber, for comparison</b> — notice how little changes. Same skeleton, <code>max</code> instead of <code>+</code>:</p>
+    <div class="code-block"><span class="kw">def</span> <span class="fn">rob</span>(nums):
+    prev2, prev1 = 0, 0              <span class="cm"># best up to i-2, best up to i-1</span>
+    <span class="kw">for</span> x <span class="kw">in</span> nums:
+        prev2, prev1 = prev1, <span class="hi">max(prev1, prev2 + x)</span>
+    <span class="kw">return</span> prev1
+<span class="cm"># Time: O(n) | Space: O(1)</span></div>
+
+    <table class="cheat-table">
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Bottom-up</td><td>start from base cases, build up to n</td></tr>
+      <tr><td>Tabulation</td><td>fill a table (dp array) cell by cell</td></tr>
+      <tr><td>Loop + reuse</td><td>what it looks like in code</td></tr>
+      <tr><td>Space-optimized tabulation</td><td>tabulation, but only keep the last K values</td></tr>
+    </table>
+    <p>All four name the same approach. <b>Top-down</b> = recursion + cache (memoization) — the other direction.</p>
+    <div class="vi">Ba template, cùng một ý: <b>base case → xây lên tới n</b>. Space-optimized chỉ giữ 2 giá trị cuối vì công thức chỉ nhìn lùi 2 ô. Bốn tên gọi trong bảng đều là <b>cùng một hướng</b> (bottom-up); còn top-down là recursion + cache.</div>
+  </div>
+
+  <!-- TRAPS -->
+  <div class="card">
+    <div class="card-title">⚠️ Traps</div>
+    <div class="hl"><b>1. Off-by-one in range.</b> <code>range(3, n)</code> is empty when n=3 — the loop never runs. It must be <code>range(3, n + 1)</code>.</div>
+    <div class="hl"><b>2. Wrong swap order.</b> <code>prev1 = prev2</code> before <code>prev2 = curr</code> destroys <code>prev1</code> while it's still needed. Use the tuple swap <code>prev1, prev2 = prev2, curr</code>, or save the old value first — and be consistent about which variable you return.</div>
+    <div class="hl"><b>3. Plain recursion submitted as DP.</b> <code>return f(n-1) + f(n-2)</code> with nothing else is O(2ⁿ) brute force. DP needs a cache <em>or</em> a loop — without one, nothing is being reused, which was the entire point.</div>
+    <div class="hl"><b>4. Missing base-case guard.</b> <code>n=1</code> needs one (without it <code>range(3,2)</code> is empty and you return <code>prev2=2</code> — wrong). <code>n=2</code> doesn't (<code>range(3,3)</code> is empty and <code>prev2=2</code> is correct).</div>
+    <div class="hl orange"><b>5. Adding when you should be maximizing.</b> The contrast above. If the branches are competing plans, <code>+</code> produces a number that means nothing.</div>
+    <div class="hl"><b>6. Confusing DP with Backtracking.</b> About to write "generate all paths"? Stop — that's Backtracking. "How many ways" → DP: count, don't enumerate.</div>
+    <div class="vi">Bốn cái chết người nhất: quên <b>+1</b> trong range · <b>swap sai thứ tự</b> làm mất prev1 · nộp <b>recursion trần</b> tưởng là DP · <b>cộng nhầm</b> ở bài tối ưu.</div>
+  </div>
+
+  <!-- WHERE THIS SITS -->
+  <div class="card">
+    <div class="card-title">🗺️ Where this sits on the bigger map</div>
+    <div class="linkcards">
+      <a class="lcard up" href="../../Foundations/Dynamic%20Programming/Dynamic%20Programming.html">
+        <span class="lc-tag">🧠 Tầng nền · Foundations</span>
+        <span class="lc-t">Dynamic Programming</span>
+        <span class="lc-d">DP là gì, 2 điều kiện bắt buộc, memoization vs tabulation, khung 4 câu, và cách quyết định 1D hay 2D.</span>
+      </a>
+      <a class="lcard" href="../17_DP_Recognition/Deep-Guide.html">
+        <span class="lc-tag">🗺️ Bản đồ · Pattern 17</span>
+        <span class="lc-t">DP Recognition</span>
+        <span class="lc-d">Gặp bài lạ: có phải DP không, và là shape nào trong 5 shape? Linear DP là một nhánh của cây đó.</span>
+      </a>
+      <a class="lcard side" href="../11_Knapsack_01_DP/Deep-Guide.html">
+        <span class="lc-tag">🎒 Shape anh em · Pattern 11</span>
+        <span class="lc-t">0/1 Knapsack</span>
+        <span class="lc-d">Khi một chỉ số không đủ — cần cả (item, capacity) để gọi tên bài con. Đó là 2D.</span>
+      </a>
+      <a class="lcard" href="Recognition.html">
+        <span class="lc-tag">⚡ Thẻ nhanh · cùng folder</span>
+        <span class="lc-t">Linear DP — Recognition</span>
+        <span class="lc-d">Bản nén: signal, định nghĩa, contrast đếm-vs-tối-ưu, templates, traps. Liếc là ra.</span>
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <p class="verse">"Call to me and I will answer you and tell you great things you do not know." — Jeremiah 33:3</p>
+    🔥 HADRIEL × WIGANZ · Linear DP · Deep-Guide
+  </footer>
+
+</div>
+
+<script>
+/* ================= THE LAB ================= */
+const LAB = {
+  count: {
+    input: null,
+    n: 6,
+    sub: 'Climbing Stairs — <b>how many ways</b> to reach step i. Moves of 1 or 2.',
+    inLbl: 'steps 1 … 6',
+    base: [1, 2],           // dp[1]=1, dp[2]=2
+    join: '+',
+  },
+  opt: {
+    input: [2, 7, 9, 3, 1],
+    n: 5,
+    sub: 'House Robber — <b>most money</b> robbable up to house i. No two adjacent.',
+    inLbl: 'money in each house',
+    base: null,
+    join: 'max',
+  }
+};
+
+let mode = 'count';
+let steps = [];
+let idx = -1;
+
+function buildSteps() {
+  steps = [];
+  const cfg = LAB[mode];
+
+  if (mode === 'count') {
+    const dp = [null, 1, 2];
+    steps.push({ dp: [null, 1, null], fill: 1, src: [], base: true,
+      math: 'dp[1] = 1',
+      x: '<b>Base case.</b> One step, one way to climb it. The recurrence looks back two cells — at i=1 there aren\'t two cells behind us, so this one is filled by hand.' });
+    steps.push({ dp: [null, 1, 2], fill: 2, src: [], base: true,
+      math: 'dp[2] = 2',
+      x: '<b>Base case.</b> Two steps: (1,1) or (2). Also filled by hand — still not enough cells behind us for the formula.' });
+    for (let i = 3; i <= cfg.n; i++) {
+      dp[i] = dp[i-1] + dp[i-2];
+      steps.push({ dp: dp.slice(0, i+1), fill: i, src: [i-1, i-2], base: false,
+        math: `dp[${i}] = dp[${i-1}] + dp[${i-2}] = ${dp[i-1]} + ${dp[i-2]} = ${dp[i]}`,
+        x: `The last move to step ${i} came from step <b>${i-1}</b> (a 1-step) or step <b>${i-2}</b> (a 2-step). Two <b>separate families of routes</b>, both valid, no overlap — so we <b>add</b> them to get the total.` });
+    }
+    steps.push({ dp: dp.slice(), fill: -1, src: [], base: false, answer: cfg.n,
+      math: `answer = dp[${cfg.n}] = ${dp[cfg.n]}`,
+      x: `<b>Done.</b> ${dp[cfg.n]} distinct ways to climb ${cfg.n} steps. Every cell was computed exactly once — that's the whole win over the O(2ⁿ) recursion tree.` });
+  } else {
+    const v = cfg.input;
+    const dp = [null];
+    // dp[1]
+    dp[1] = v[0];
+    steps.push({ dp: [null, dp[1]], fill: 1, src: [], base: true,
+      math: `dp[1] = ${v[0]}`,
+      x: `<b>Base case.</b> Only one house available — take it. Best so far: <b>${v[0]}đ</b>.` });
+    // dp[2]
+    dp[2] = Math.max(v[0], v[1]);
+    steps.push({ dp: [null, dp[1], dp[2]], fill: 2, src: [1], base: true,
+      math: `dp[2] = max(${v[0]}, ${v[1]}) = ${dp[2]}`,
+      x: `Houses 1 and 2 are <b>adjacent</b> — you can't have both. These are two <b>competing plans</b>, so keep the better one: <b>${dp[2]}đ</b>.` });
+    for (let i = 3; i <= cfg.n; i++) {
+      const rob = dp[i-2] + v[i-1];
+      const skip = dp[i-1];
+      dp[i] = Math.max(rob, skip);
+      steps.push({ dp: dp.slice(0, i+1), fill: i, src: [i-1, i-2], base: false,
+        math: `dp[${i}] = max(dp[${i-1}], dp[${i-2}] + ${v[i-1]}) = max(${skip}, ${rob}) = ${dp[i]}`,
+        x: `Two proposals for house ${i} (${v[i-1]}đ): <b>rob it</b> → ${v[i-1]} + dp[${i-2}] = <b>${rob}</b> (must skip the neighbour), or <b>skip it</b> → keep dp[${i-1}] = <b>${skip}</b>. You can't do both on the same night — keep the winner: <b>${dp[i]}</b>.` +
+           (rob !== skip ? ` <span style="color:var(--red)">Adding them would give ${rob + skip} — a number no burglary can produce.</span>` : '') });
+    }
+    steps.push({ dp: dp.slice(), fill: -1, src: [], base: false, answer: cfg.n,
+      math: `answer = dp[${cfg.n}] = ${dp[cfg.n]}`,
+      x: `<b>Done.</b> Best possible haul: <b>${dp[cfg.n]}đ</b>. Identical table, identical "look back two cells" — the only difference from Counting is <code>max</code> instead of <code>+</code>.` });
+  }
+}
+
+function render() {
+  const cfg = LAB[mode];
+  document.getElementById('lab-sub').innerHTML = cfg.sub;
+  document.getElementById('in-lbl').textContent = cfg.inLbl;
+
+  // input row
+  const inEl = document.getElementById('in-row');
+  const s = idx >= 0 ? steps[idx] : null;
+  let html = '';
+  for (let i = 1; i <= cfg.n; i++) {
+    const val = cfg.input ? cfg.input[i-1] : i;
+    const cur = s && s.fill === i ? ' cur' : '';
+    html += `<div class="incell${cur}">${val}<span class="ii">i=${i}</span></div>`;
+  }
+  inEl.innerHTML = html;
+
+  // dp row
+  const dpEl = document.getElementById('dp-row');
+  html = '';
+  for (let i = 1; i <= cfg.n; i++) {
+    let cls = 'dpcell', txt = '·';
+    if (s && s.dp[i] !== null && s.dp[i] !== undefined) {
+      txt = s.dp[i];
+      cls += ' done';
+      if (s.fill === i) cls += s.base ? ' base' : ' filling';
+      else if (s.src && s.src.includes(i)) cls += ' src';
+      if (s.answer === i) cls += ' answer';
+    } else {
+      cls += ' empty';
+    }
+    html += `<div class="${cls}">${txt}<span class="di">dp[${i}]</span></div>`;
+  }
+  dpEl.innerHTML = html;
+
+  document.getElementById('mathline').innerHTML = s ? s.math : '&nbsp;';
+  document.getElementById('explain').innerHTML = s ? s.x : 'Press <b>Next →</b> to fill the first cell.';
+  document.getElementById('lab-ctr').textContent = `${idx + 1} / ${steps.length}`;
+  document.getElementById('lab-next').disabled = idx >= steps.length - 1;
+}
+
+function labNext() { if (idx < steps.length - 1) { idx++; render(); } }
+function labReset() { idx = -1; buildSteps(); render(); }
+function setMode(m) {
+  mode = m;
+  document.getElementById('mb-count').classList.toggle('on', m === 'count');
+  document.getElementById('mb-opt').classList.toggle('on', m === 'opt');
+  labReset();
+}
+
+buildSteps();
+render();
+</script>
 </body>
 </html>

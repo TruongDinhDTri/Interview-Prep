@@ -100,6 +100,14 @@
   .demo .t{font-weight:800;font-size:1.1rem;color:#5a4a2e}
   .demo .d{font-size:.9rem;color:var(--soft)}
   .demo .go{margin-left:auto;color:var(--sun2);font-weight:800;white-space:nowrap}
+  /* next-step cards (out to the pattern folders) */
+  .demo.nx{border-color:var(--sky2);background:linear-gradient(180deg,#f0f8f2,#e6f1ea)}
+  .demo.nx .go{color:#4e8a63}
+  .demo.nx2{border-color:var(--left2);background:linear-gradient(180deg,#eef5fa,#e2eef7)}
+  .demo.nx2 .go{color:#4a7fa5}
+  .nxgrid{display:grid;grid-template-columns:1fr;gap:14px;margin:16px 0}
+  @media(min-width:820px){.nxgrid{grid-template-columns:1fr 1fr}}
+  .nxgrid .demo{margin:0}
   /* floating nav */
   .floatnav{position:fixed;top:50%;right:22px;transform:translateY(-50%);z-index:50;
             background:rgba(255,253,246,.94);backdrop-filter:blur(6px);border:1px solid #e6d9bb;
@@ -147,9 +155,11 @@ document.addEventListener('DOMContentLoaded',function(){
   <a href="#when"><span class="fi">✅</span>Khi nào dùng DP</a>
   <a href="#strategies"><span class="fi">🧩</span>2 chiến lược</a>
   <a href="#table"><span class="fi">📊</span>Bảng đâu? (1D→2D)</a>
+  <a href="#dims"><span class="fi">🔢</span>1D hay 2D?</a>
   <a href="#compare"><span class="fi">⚖️</span>Memo vs Tab</a>
   <a href="#skeleton"><span class="fi">🗝️</span>Khung xương 4 câu</a>
   <a href="#process"><span class="fi">🧭</span>Quy trình chuẩn</a>
+  <a href="#next"><span class="fi">🚪</span>Đi đâu tiếp</a>
 </nav>
 
 <div class="wrap">
@@ -351,6 +361,65 @@ dp =  [ 0   1   1   2   3   5 ]   ← "cái bảng" của fib (bảng 1 hàng)</
     </a>
   </section>
 
+  <!-- ========== DIMS: 1D or 2D ========== -->
+  <section id="dims">
+    <h2><span class="badge">🔢</span> 1D hay 2D? — quyết định thế nào, và 2D thì vẽ ra sao</h2>
+    <p class="lead">Mục trên cho anh <b>thấy</b> bảng 1 chiều và bảng 2 chiều khác nhau thế nào. Nhưng gặp một bài <b>hoàn toàn mới</b>, làm sao biết mình cần cái nào? Đây là <b>thủ tục chạy được</b>, không phải định nghĩa để đọc.</p>
+
+    <div class="kw-quote">Số chiều của bảng = <b>số con số cần thiết để GỌI TÊN một bài toán con</b>. Không hơn không kém.</div>
+
+    <h3>🪜 Ba bước — chạy đúng thứ tự này</h3>
+    <ol>
+      <li><b>Liệt kê 2-3 bài con ra giấy.</b> Không phải bài gốc — mấy phiên bản <b>nhỏ hơn</b> của nó. Nói thành lời: "bài con của tôi là …".</li>
+      <li><b>Hỏi: chúng KHÁC NHAU ở chỗ nào?</b> Cái khác nhau đó <b>chính là state</b>. Đây là bước hay bị bỏ qua nhất.</li>
+      <li><b>Đếm xem cần MẤY con số để chỉ đích danh một bài con.</b> Một số → <b>1D</b>, <code>dp[i]</code>. Hai số → <b>2D</b>, <code>dp[i][j]</code>.</li>
+    </ol>
+
+    <div class="callout tip"><span class="h">🗣️ Bài test một câu</span> Nói to câu này cho trọn vẹn: <b>"dp[…] là …"</b>. Anh phải nhét <b>bao nhiêu con số</b> vào trong ngoặc vuông để câu đó đúng và không mơ hồ? Đó chính là số chiều. Nếu nói mà thấy lấn cấn kiểu "à mà còn tuỳ vào…" — cái "còn tuỳ vào" đó là con số thứ hai anh đang thiếu.</div>
+
+    <h3>🔍 Chạy thử trên các bài quen</h3>
+    <table>
+      <tr><th>Bài</th><th>Các bài con khác nhau ở…</th><th>Cần mấy số?</th><th>Bảng</th></tr>
+      <tr><td><b>Fibonacci</b></td><td>chỉ số thứ mấy trong dãy</td><td><b class="g">1</b> — <code>n</code></td><td><code>dp[i]</code> · một hàng</td></tr>
+      <tr><td><b>Climbing Stairs</b></td><td>đang đứng ở bậc nào</td><td><b class="g">1</b> — <code>i</code></td><td><code>dp[i]</code> · một hàng</td></tr>
+      <tr><td><b>House Robber</b></td><td>đã xét tới nhà thứ mấy</td><td><b class="g">1</b> — <code>i</code></td><td><code>dp[i]</code> · một hàng</td></tr>
+      <tr><td><b>Unique Paths</b></td><td>hàng nào, <b>và</b> cột nào</td><td><b class="r">2</b> — <code>(r, c)</code></td><td><code>dp[r][c]</code> · lưới</td></tr>
+      <tr><td><b>0/1 Knapsack</b></td><td>xét tới món nào, <b>và</b> còn bao nhiêu sức chứa</td><td><b class="r">2</b> — <code>(i, cap)</code></td><td><code>dp[i][cap]</code> · lưới</td></tr>
+      <tr><td><b>LCS / Edit Distance</b></td><td>tới đâu trên s1, <b>và</b> tới đâu trên s2</td><td><b class="r">2</b> — <code>(i, j)</code></td><td><code>dp[i][j]</code> · lưới</td></tr>
+    </table>
+
+    <div class="callout aha"><span class="h">💡 Dấu hiệu chắc chắn là 2D: hai thứ di chuyển ĐỘC LẬP nhau</span> Nhìn LCS: vị trí trên <code>s1</code> và vị trí trên <code>s2</code> <b>nhích được riêng</b> — tiến trên chuỗi này mà đứng yên trên chuỗi kia hoàn toàn hợp lệ. Hai thứ độc lập → <b>hai trục</b>, không ép về một được. Ngược lại Climbing Stairs chỉ có <b>một</b> thứ nhích (bậc thang) → một trục là đủ. &nbsp;<b>Câu hỏi chốt:</b> <em>"có bao nhiêu thứ trong bài này nhích được độc lập với nhau?"</em></div>
+
+    <div class="callout warn"><span class="h">🚫 Hai lỗi hay gặp</span>
+      <ul style="margin-top:6px">
+        <li><b>Đoán số chiều từ CÂU CHUYỆN của đề.</b> "Bài này có đồng xu → chắc là knapsack → chắc 2D?" Sai hướng. Số chiều đến từ <b>state</b>, không đến từ chủ đề. Định nghĩa state trước, chiều tự lòi ra sau.</li>
+        <li><b>Nhét thêm chiều cho "chắc ăn".</b> Thừa một chiều thì bảng phình lên vô ích và code rối gấp đôi. Chỉ thêm con số thứ hai khi anh <b>chứng minh được</b> một số là không đủ để gọi tên bài con.</li>
+      </ul>
+    </div>
+
+    <h3>✏️ 2D thì vẽ cái bảng ra sao?</h3>
+    <p>Khi đã chốt là 2D, vẽ nó theo đúng 4 bước này — thứ tự quan trọng:</p>
+    <ol>
+      <li><b>Đặt tên hai trục.</b> Mỗi trục là <b>một</b> trong hai con số vừa đếm được. Ghi rõ ra lề giấy: <em>hàng = gì, cột = gì.</em> Ví dụ Knapsack: hàng = "xét tới món thứ i", cột = "sức chứa còn lại".</li>
+      <li><b>Viết ý nghĩa MỘT ô thành câu.</b> <em>"<code>dp[i][c]</code> là giá trị lớn nhất lấy được khi chỉ được chọn trong i món đầu tiên và sức chứa là c."</em> Chưa viết nổi câu này thì đừng điền ô nào cả.</li>
+      <li><b>Tô các ô nền (base case).</b> Thường là <b>hàng đầu và/hoặc cột đầu</b> — chúng là những ô không có ô nào nhỏ hơn để nhìn về. Unique Paths: cả hàng đầu và cột đầu đều bằng 1 (chỉ có đúng một đường đi thẳng tới đó).</li>
+      <li><b>Vẽ MŨI TÊN từ các ô nguồn tới ô đích.</b> Đây là recurrence hiện hình. Unique Paths: mũi tên từ ô <b>TRÊN</b> và ô <b>TRÁI</b> chỉ vào ô hiện tại.</li>
+    </ol>
+
+    <div class="ascii"><span class="y">dp[r][c]</span> = dp[r-1][c] <span class="y">(ô TRÊN ⬆️)</span> + dp[r][c-1] <span class="b">(ô TRÁI ⬅️)</span>
+
+        c0    c1    c2
+ r0  │  1  │  1  │  1  │   ← nền: hàng đầu = 1
+ r1  │  1  │  2  │  3  │
+ r2  │  1  │  3  │ <span class="hl">6</span>  │   ← 6 = 3(trên) + 3(trái)
+
+ ↑ cột đầu = 1 (nền)</div>
+
+    <div class="callout tip"><span class="h">🧭 Hướng điền — suy ra từ mũi tên, không phải học thuộc</span> Nhìn mũi tên: ô hiện tại cần ô <b>trên</b> và ô <b>trái</b>. Vậy khi mình tới ô đó, hai ô kia <b>đã phải được điền rồi</b>. Suy ra: đi <b>trái→phải, trên→dưới</b>. Đó chính là lý do hai vòng <code>for</code> lồng nhau chạy đúng thứ tự đó — không phải quy ước tuỳ tiện. &nbsp;<b>Luật chung:</b> <em>hướng điền phải bảo đảm mọi ô mà recurrence cần đều đã sẵn sàng trước khi mình tới.</em></div>
+
+    <div class="callout aha"><span class="h">🎯 Chốt lại</span> <b>1D hay 2D</b> không phải chuyện cảm giác — nó là <b>hệ quả</b> của việc định nghĩa state. Trả lời được câu 1 của Khung Xương (mục ngay bên dưới) là số chiều tự có. Trả lời mơ hồ thì đoán số chiều kiểu gì cũng sai.</div>
+  </section>
+
   <!-- ========== COMPARE ========== -->
   <section id="compare">
     <h2><span class="badge">⚖️</span> Memoization vs Tabulation — bảng so sánh</h2>
@@ -451,6 +520,46 @@ dp =  [ 0   1   1   2   3   5 ]   ← "cái bảng" của fib (bảng 1 hàng)</
       </li>
     </ol>
     <p class="lead">✨ <em>Once you see the subproblems — DP becomes obvious.</em> Một khi anh nhìn ra "bài toán con", DP trở nên hiển nhiên.</p>
+  </section>
+
+  <!-- ========== NEXT ========== -->
+  <section id="next">
+    <h2><span class="badge">🚪</span> Nắm lý thuyết rồi — đi đâu tiếp?</h2>
+    <p class="lead">Trang này dạy <b>để HIỂU</b>: DP là gì, hai điều kiện, memo vs tab, khung 4 câu, 1D hay 2D. Bước tiếp theo là <b>để LÀM</b> — cầm một bài lạ và phân loại nó.</p>
+    <div class="nxgrid">
+      <a class="demo nx" href="../../Patterns/17_DP_Recognition/Deep-Guide.html">
+        <div class="ico">🗺️</div>
+        <div>
+          <div class="t">DP Recognition — triage một bài thật</div>
+          <div class="d">Có phải DP không (checklist 30 giây) → cần mấy chỉ số → là shape nào trong 5 shape. Kèm mini-guide cho Unbounded Knapsack, String DP, 2D Grid.</div>
+        </div>
+        <span class="go">Mở →</span>
+      </a>
+      <a class="demo nx2" href="../../Patterns/16_Linear_DP/Deep-Guide.html">
+        <div class="ico">📏</div>
+        <div>
+          <div class="t">Linear DP — shape 1D, học cho kỹ</div>
+          <div class="d">Một dãy, <code>dp[i]</code>, bảng một hàng. Cũng là nơi trả lời: tại sao bài đếm thì <b>cộng</b> mà bài tối ưu lại <b>max</b>?</div>
+        </div>
+        <span class="go">Mở →</span>
+      </a>
+      <a class="demo nx2" href="../../Patterns/11_Knapsack_01_DP/Deep-Guide.html">
+        <div class="ico">🎒</div>
+        <div>
+          <div class="t">0/1 Knapsack — shape 2D kinh điển</div>
+          <div class="d">Cần cả (món, sức chứa) mới gọi tên được bài con → đúng cái bảng 2 chiều vừa học vẽ ở mục 1D-hay-2D.</div>
+        </div>
+        <span class="go">Mở →</span>
+      </a>
+      <a class="demo" href="index.html">
+        <div class="ico">🏠</div>
+        <div>
+          <div class="t">Về phòng học DP</div>
+          <div class="d">Trang gom toàn bộ tài liệu DP của Week 4 — guide, hai demo tương tác, và các pattern folder.</div>
+        </div>
+        <span class="go">Mở →</span>
+      </a>
+    </div>
   </section>
 
   <p class="verse">"Call to me and I will answer you and tell you great things you do not know." — Jeremiah 33:3 🙏</p>
